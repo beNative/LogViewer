@@ -1,0 +1,17 @@
+/Library/Win32/Debug/*.dcu
+/__history
+*.dcu
+/Library/Win32/Debug/Highlighters
+/Library/Win32/Debug/Colors
+/Library/Win32/Release/Highlighters
+/Library/Win32/Release/Colors
+/Library/Win32/Release/*.exe
+*.local
+*.dll
+*.7z
+*.exe
+/Library/Win64/Debug/Colors
+/Library/Win64/Debug/Highlighters
+*.rsm
+*.identcache
+*.stat
