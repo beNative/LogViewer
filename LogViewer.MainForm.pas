@@ -120,9 +120,12 @@ type
     actToggleInfo        : TAction;
     actToggleWarning     : TAction;
     actValue             : TAction;
+    actWinIPCChannel     : TAction;
+    actZeroMQChannel     : TAction;
     btnBitmap            : TToolButton;
     btnCallStack         : TToolButton;
     btnCheckPoint        : TToolButton;
+    btnClearMessages     : TToolButton;
     btnConditional       : TToolButton;
     btnCustomData        : TToolButton;
     btnError             : TToolButton;
@@ -132,12 +135,17 @@ type
     btnMemory            : TToolButton;
     btnMethodTraces      : TToolButton;
     btnObject            : TToolButton;
+    btnStop              : TToolButton;
     btnStrings           : TToolButton;
+    btnToggleAlwaysOnTop : TToolButton;
     btnToggleInfo        : TToolButton;
+    btnToggleWarning     : TToolButton;
     btnValue             : TToolButton;
     cbxWatchHistory      : TComboBox;
+    chkAutoFilter        : TCheckBox;
     edtMessageFilter     : TLabeledEdit;
     imgViewer            : TImage;
+    imlMain              : TImageList;
     pgcMessageDetails    : TPageControl;
     pgcWatches           : TPageControl;
     pnlCallStack         : TPanel;
@@ -154,7 +162,9 @@ type
     splLeftHorizontal    : TSplitter;
     splLeftVertical      : TSplitter;
     splVertical          : TSplitter;
+    tlbMain              : TToolBar;
     tlbMessages          : TToolBar;
+    tmrPoll              : TTimer;
     tsHexEditor          : TTabSheet;
     tsHistory            : TTabSheet;
     tsImageViewer        : TTabSheet;
@@ -162,16 +172,13 @@ type
     tsLatest             : TTabSheet;
     tsSelected           : TTabSheet;
     tsTextViewer         : TTabSheet;
-    chkAutoFilter        : TCheckBox;
-    tmrPoll: TTimer;
-    actZeroMQChannel: TAction;
-    actWinIPCChannel: TAction;
-    tlbMain: TToolBar;
-    btnToggleAlwaysOnTop: TToolButton;
-    btnStop: TToolButton;
-    btnClearMessages: TToolButton;
-    btnToggleWarning: TToolButton;
-    imlMain: TImageList;
+    imlMessageTypes      : TImageList;
+    btnSelectAll         : TToolButton;
+    btnSelectNone        : TToolButton;
+    btn1                 : TToolButton;
+    btn2                 : TToolButton;
+    btnWinIPCChannel     : TToolButton;
+    btnZeroMQChannel     : TToolButton;
     {$ENDREGION}
 
     procedure actBitmapExecute(Sender: TObject);
@@ -195,6 +202,8 @@ type
     procedure actToggleWarningExecute(Sender: TObject);
     procedure actValueExecute(Sender: TObject);
     procedure actFilterMessagesExecute(Sender: TObject);
+    procedure actZeroMQChannelExecute(Sender: TObject);
+    procedure actWinIPCChannelExecute(Sender: TObject);
 
     procedure cbxWatchHistorySelect(Sender: TObject);
 
@@ -296,6 +305,7 @@ type
     FWatchHistoryInspector  : TInspector;
 
     function GetEditor: IEditorView;
+    function GetTitleFilter: string;
 
     procedure FilterCallback(
       Sender    : TBaseVirtualTree;
@@ -309,14 +319,6 @@ type
       const AToggle      : Boolean = True
     );
 
-    procedure UpdateMessageDisplay;
-
-    procedure UpdateCallStack(var ANode: PVirtualNode);
-    procedure UpdateWatches;
-    procedure UpdateWatchHistory;
-    procedure ShowBitmapInfo(ABitmap: TBitmap);
-    procedure ClearMessages;
-    function GetTitleFilter: string;
     procedure CreateEditor;
     procedure CreateLogTreeView;
     procedure CreateWatches;
@@ -324,7 +326,15 @@ type
     procedure CreateIPCServer;
     procedure CreateCallStackViewer;
     procedure CreateZMQSubscriber;
+
+    procedure UpdateMessageDisplay;
+    procedure UpdateCallStack(var ANode: PVirtualNode);
+    procedure UpdateWatches;
+    procedure UpdateWatchHistory;
+    procedure ClearMessages;
     procedure ZMQPoll;
+
+    procedure ShowBitmapInfo(ABitmap: TBitmap);
 
   protected
     procedure UpdateActions; override;
@@ -496,7 +506,7 @@ end;
 procedure TfrmMain.CreateIPCServer;
 begin
   FIPCServer := TWinIPCServer.Create;
-  //FIPCServer.OnMessage := FIPCServerMessage;
+  FIPCServer.OnMessage := FIPCServerMessage;
   FIPCServer.Active := True;
 end;
 
@@ -534,79 +544,7 @@ begin
       FZMQStream.Clear;
     end
   );
-end;
-
-procedure TfrmMain.edtMessageFilterChange(Sender: TObject);
-begin
-  if TitleFilter <> '' then
-  begin
-    edtMessageFilter.Font.Style := [fsBold];
-    edtMessageFilter.Color := clYellow;
-  end
-  else
-  begin
-    edtMessageFilter.Font.Style := [];
-    edtMessageFilter.Color := clWhite;
-  end;
-
-  if chkAutoFilter.Checked then
-    UpdateMessageDisplay;
-end;
-
-procedure TfrmMain.edtMessageFilterKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-var
-  A : Boolean;
-  B : Boolean;
-  C : Boolean;
-  D : Boolean;
-  E : Boolean;
-  F : Boolean;
-  G : Boolean;
-  H : Boolean;
-begin
-  // SHIFTED and ALTED keycombinations
-  A := (ssAlt in Shift) or (ssShift in Shift);
-  { Single keys that need to be handled by the edit control like all displayable
-    characters but also HOME and END }
-  B := (Key in VK_EDIT_KEYS) and (Shift = []);
-  { CTRL-keycombinations that need to be handled by the edit control like
-    CTRL-C for clipboard copy. }
-  C := (Key in VK_CTRL_EDIT_KEYS) {and (Shift = [ssCtrlOS])};
-  { SHIFT-keycombinations that need to be handled by the edit control for
-    uppercase characters but also eg. SHIFT-HOME for selections. }
-  D := (Key in VK_SHIFT_EDIT_KEYS) and (Shift = [ssShift]);
-  { Only CTRL key is pressed. }
-  E := (Key = VK_CONTROL) {and (Shift = [ssCtrlOS])};
-  { Only SHIFT key is pressed. }
-  F := (Key = VK_SHIFT) and (Shift = [ssShift]);
-  { Only (left) ALT key is pressed. }
-  G := (Key = VK_MENU) and (Shift = [ssAlt]);
-  { ESCAPE }
-  H := Key = VK_ESCAPE;
-  if not (A or B or C or D or E or F or G or H) then
-  begin
-    FVKPressed := True;
-    Key := 0;
-  end
-  { Prevents jumping to the application's main menu which happens by default
-    if ALT is pressed. }
-  else if G then
-  begin
-    Key := 0;
-  end;
-end;
-
-procedure TfrmMain.edtMessageFilterKeyUp(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-begin
-  if FVKPressed and FLogTreeView.Enabled then
-  begin
-    FLogTreeView.Perform(WM_KEYDOWN, Key, 0);
-    if Visible and FLogTreeView.CanFocus then
-      FLogTreeView.SetFocus;
-  end;
-  FVKPressed := False;
+  tmrPoll.Enabled := True;
 end;
 
 procedure TfrmMain.CreateWatches;
@@ -629,7 +567,7 @@ begin
   FLogTreeView.OnGetImageIndex := FLogTreeViewGetImageIndex;
   FLogTreeView.OnGetText       := FLogTreeViewGetText;
   FLogTreeView.OnKeyPress      := FLogTreeViewKeyPress;
-  FLogTreeView.Images          := imgMessages;
+  FLogTreeView.Images          := imlMessageTypes;
   FLogTreeView.Header.Options  := FLogTreeView.Header.Options - [hoVisible];
 
 //  FTVPMessages := TFactories.CreateTreeViewPresenter(
@@ -770,9 +708,113 @@ procedure TfrmMain.actValueExecute(Sender: TObject);
 begin
   UpdateActiveMessages(lmtValue, Sender);
 end;
+procedure TfrmMain.actWinIPCChannelExecute(Sender: TObject);
+begin
+  FIPCServer.Active := actWinIPCChannel.Checked;
+end;
+
+procedure TfrmMain.actZeroMQChannelExecute(Sender: TObject);
+var
+  N : Integer;
+begin
+  if actZeroMQChannel.Checked then
+  begin
+    if Assigned(FSubscriber) then
+    begin
+      FSubscriber.Close;
+      tmrPoll.Enabled := False;
+    end;
+    FSubscriber := nil;
+    FPoll := nil;
+    FZMQ := nil;
+    CreateZMQSubscriber;
+  end
+  else
+  begin
+    FSubscriber.Close;
+    tmrPoll.Enabled := False;
+    FSubscriber := nil;
+    FPoll := nil;
+    FZMQ := nil;
+  end;
+end;
+
 {$ENDREGION}
 
 {$REGION 'event handlers'}
+procedure TfrmMain.edtMessageFilterChange(Sender: TObject);
+begin
+  if TitleFilter <> '' then
+  begin
+    edtMessageFilter.Font.Style := [fsBold];
+    edtMessageFilter.Color := clYellow;
+  end
+  else
+  begin
+    edtMessageFilter.Font.Style := [];
+    edtMessageFilter.Color := clWhite;
+  end;
+
+  if chkAutoFilter.Checked then
+    UpdateMessageDisplay;
+end;
+
+procedure TfrmMain.edtMessageFilterKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+var
+  A : Boolean;
+  B : Boolean;
+  C : Boolean;
+  D : Boolean;
+  E : Boolean;
+  F : Boolean;
+  G : Boolean;
+  H : Boolean;
+begin
+  // SHIFTED and ALTED keycombinations
+  A := (ssAlt in Shift) or (ssShift in Shift);
+  { Single keys that need to be handled by the edit control like all displayable
+    characters but also HOME and END }
+  B := (Key in VK_EDIT_KEYS) and (Shift = []);
+  { CTRL-keycombinations that need to be handled by the edit control like
+    CTRL-C for clipboard copy. }
+  C := (Key in VK_CTRL_EDIT_KEYS) {and (Shift = [ssCtrlOS])};
+  { SHIFT-keycombinations that need to be handled by the edit control for
+    uppercase characters but also eg. SHIFT-HOME for selections. }
+  D := (Key in VK_SHIFT_EDIT_KEYS) and (Shift = [ssShift]);
+  { Only CTRL key is pressed. }
+  E := (Key = VK_CONTROL) {and (Shift = [ssCtrlOS])};
+  { Only SHIFT key is pressed. }
+  F := (Key = VK_SHIFT) and (Shift = [ssShift]);
+  { Only (left) ALT key is pressed. }
+  G := (Key = VK_MENU) and (Shift = [ssAlt]);
+  { ESCAPE }
+  H := Key = VK_ESCAPE;
+  if not (A or B or C or D or E or F or G or H) then
+  begin
+    FVKPressed := True;
+    Key := 0;
+  end
+  { Prevents jumping to the application's main menu which happens by default
+    if ALT is pressed. }
+  else if G then
+  begin
+    Key := 0;
+  end;
+end;
+
+procedure TfrmMain.edtMessageFilterKeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if FVKPressed and FLogTreeView.Enabled then
+  begin
+    FLogTreeView.Perform(WM_KEYDOWN, Key, 0);
+    if Visible and FLogTreeView.CanFocus then
+      FLogTreeView.SetFocus;
+  end;
+  FVKPressed := False;
+end;
+
 procedure TfrmMain.FWatchesNewVariable(const AVariable: string; AIndex: Integer);
 begin
   cbxWatchHistory.Items.Add(AVariable);
@@ -809,88 +851,9 @@ begin
   UpdateWatches;
 end;
 
-procedure TfrmMain.ProcessMessage(AStream: TStream);
-var
-  LTextSize : Integer;
-  LDataSize : Integer;
+procedure TfrmMain.tmrPollTimer(Sender: TObject);
 begin
-  Guard.CheckNotNull(AStream, 'AStream');
-  LTextSize := 0;
-  LDataSize := 0;
-  FLogTreeView.BeginUpdate;
-  try
-    Inc(FMessageCount);
-    AStream.Seek(0, soFromBeginning);
-    AStream.ReadBuffer(FCurrentMsg.MsgType, SizeOf(Integer));
-    AStream.ReadBuffer(FCurrentMsg.MsgTime, SizeOf(TDateTime));
-    AStream.ReadBuffer(LTextSize, SizeOf(Integer));
-    SetLength(FCurrentMsg.MsgText, LTextSize);
-    AStream.ReadBuffer(FCurrentMsg.MsgText[1], LTextSize);
-    AStream.ReadBuffer(LDataSize, SizeOf(Integer));
-    if LDataSize > 0 then
-    begin
-      FCurrentMsg.Data := TMemoryStream.Create;
-      FCurrentMsg.Data.Size := 0;
-      FCurrentMsg.Data.Position := 0;
-      FCurrentMsg.Data.CopyFrom(AStream, LDataSize);
-    end
-    else
-      FCurrentMsg.Data := nil;
-    case TLogMessageType(FCurrentMsg.MsgType) of
-      lmtEnterMethod:
-      begin
-        FLastNode := FLogTreeView.AddChild(FLastParent, nil);
-        if FExpandParent then
-          FLogTreeView.Expanded[FLastParent] := True
-        else
-          FExpandParent := True;
-        FLastParent := FLastNode;
-        FLogTreeView.ValidateNode(FLastNode, False);
-      end;
-      lmtLeaveMethod:
-      begin
-        if (FLastParent = nil)
-          or (FLastParent^.Parent = FLogTreeView.RootNode) then
-        begin
-          FLastNode := FLogTreeView.AddChild(nil, nil);
-          FLastParent := nil;
-        end
-        else
-        begin
-          FLastNode := FLogTreeView.AddChild(FLastParent^.Parent, nil);
-          FLastParent := FLastNode^.Parent;
-        end;
-        FLogTreeView.ValidateNode(FLastNode, False);
-      end;
-      lmtWatch, lmtCounter:
-      begin
-        FWatches.Add(
-          string(FCurrentMsg.MsgText),
-          FMessageCount,
-          FCurrentMsg.MsgType = Integer(lmtCounter)
-        );
-        UpdateWatches;
-      end;
-      lmtClear:
-      begin
-        ClearMessages;
-      end
-      else
-      begin
-        FLastNode := FLogTreeView.AddChild(FLastParent, nil);
-      end;
-      FLogTreeView.ValidateNode(FLastNode, False);
-      if FExpandParent then
-      begin
-        FLogTreeView.Expanded[FLastParent] := True;
-        FExpandParent := False;
-      end;
-    end;
-  finally
-    FLogTreeView.EndUpdate;
-    FLogTreeView.FocusedNode := FLogTreeView.GetLast;
-    FLogTreeView.Invalidate;
-  end;
+  ZMQPoll;
 end;
 
 procedure TfrmMain.FLatestWatchInspectorGetCellText(Sender: TObject;
@@ -1040,9 +1003,9 @@ begin
   ND.MsgData := FCurrentMsg.Data;
   ND.MsgTime := FCurrentMsg.MsgTime;
   ND.MsgType := TLogMessageType(FCurrentMsg.MsgType);
-  //In fast computers two or more messages can have the same TimeStamp
-  //This leads to conflicts when determining the Watches values
-  //Use an unique index instead
+  // On fast computers two or more messages can have the same TimeStamp
+  // This leads to conflicts when determining the Watches values, so we use a
+  // unique index instead
   ND.Index := FMessageCount;
   //Show only what matches filter criterias
   Sender.IsVisible[Node] := True;
@@ -1090,6 +1053,7 @@ begin
 end;
 {$ENDREGION}
 
+{$REGION 'private methods'}
 procedure TfrmMain.ZMQPoll;
 begin
   if Assigned(FPoll) then
@@ -1227,10 +1191,91 @@ begin
     //Cells[1, 4] := '$' + IntToHex(TransparentColor, 8);
   end;
 end;
+{$ENDREGION}
 
-procedure TfrmMain.tmrPollTimer(Sender: TObject);
+{$REGION 'protected methods'}
+procedure TfrmMain.ProcessMessage(AStream: TStream);
+var
+  LTextSize : Integer;
+  LDataSize : Integer;
 begin
-  ZMQPoll;
+  Guard.CheckNotNull(AStream, 'AStream');
+  LTextSize := 0;
+  LDataSize := 0;
+  FLogTreeView.BeginUpdate;
+  try
+    Inc(FMessageCount);
+    AStream.Seek(0, soFromBeginning);
+    AStream.ReadBuffer(FCurrentMsg.MsgType, SizeOf(Integer));
+    AStream.ReadBuffer(FCurrentMsg.MsgTime, SizeOf(TDateTime));
+    AStream.ReadBuffer(LTextSize, SizeOf(Integer));
+    SetLength(FCurrentMsg.MsgText, LTextSize);
+    AStream.ReadBuffer(FCurrentMsg.MsgText[1], LTextSize);
+    AStream.ReadBuffer(LDataSize, SizeOf(Integer));
+    if LDataSize > 0 then
+    begin
+      FCurrentMsg.Data := TMemoryStream.Create;
+      FCurrentMsg.Data.Size := 0;
+      FCurrentMsg.Data.Position := 0;
+      FCurrentMsg.Data.CopyFrom(AStream, LDataSize);
+    end
+    else
+      FCurrentMsg.Data := nil;
+    case TLogMessageType(FCurrentMsg.MsgType) of
+      lmtEnterMethod:
+      begin
+        FLastNode := FLogTreeView.AddChild(FLastParent, nil);
+        if FExpandParent then
+          FLogTreeView.Expanded[FLastParent] := True
+        else
+          FExpandParent := True;
+        FLastParent := FLastNode;
+        FLogTreeView.ValidateNode(FLastNode, False);
+      end;
+      lmtLeaveMethod:
+      begin
+        if (FLastParent = nil)
+          or (FLastParent^.Parent = FLogTreeView.RootNode) then
+        begin
+          FLastNode := FLogTreeView.AddChild(nil, nil);
+          FLastParent := nil;
+        end
+        else
+        begin
+          FLastNode := FLogTreeView.AddChild(FLastParent^.Parent, nil);
+          FLastParent := FLastNode^.Parent;
+        end;
+        FLogTreeView.ValidateNode(FLastNode, False);
+      end;
+      lmtWatch, lmtCounter:
+      begin
+        FWatches.Add(
+          string(FCurrentMsg.MsgText),
+          FMessageCount,
+          FCurrentMsg.MsgType = Integer(lmtCounter)
+        );
+        UpdateWatches;
+      end;
+      lmtClear:
+      begin
+        ClearMessages;
+      end
+      else
+      begin
+        FLastNode := FLogTreeView.AddChild(FLastParent, nil);
+      end;
+      FLogTreeView.ValidateNode(FLastNode, False);
+      if FExpandParent then
+      begin
+        FLogTreeView.Expanded[FLastParent] := True;
+        FExpandParent := False;
+      end;
+    end;
+  finally
+    FLogTreeView.EndUpdate;
+    FLogTreeView.FocusedNode := FLogTreeView.GetLast;
+    FLogTreeView.Invalidate;
+  end;
 end;
 
 procedure TfrmMain.UpdateActions;
@@ -1274,7 +1319,7 @@ begin
   actFilterMessages.Enabled := not chkAutoFilter.Checked and (TitleFilter <> '');
   inherited UpdateActions;
   sbrMain.SimpleText := Format('%d messages received.', [FMessageCount]);
-  //ZMQPoll;
 end;
+{$ENDREGION}
 
 end.
