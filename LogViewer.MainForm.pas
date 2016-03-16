@@ -137,10 +137,7 @@ type
     btnValue             : TToolButton;
     cbxWatchHistory      : TComboBox;
     edtMessageFilter     : TLabeledEdit;
-    imgMessages          : TImageList;
-    imgToolbar           : TImageList;
     imgViewer            : TImage;
-    imlMain              : TImageList;
     pgcMessageDetails    : TPageControl;
     pgcWatches           : TPageControl;
     pnlCallStack         : TPanel;
@@ -165,14 +162,16 @@ type
     tsLatest             : TTabSheet;
     tsSelected           : TTabSheet;
     tsTextViewer         : TTabSheet;
-    tlbMain              : TToolBar;
-    btnToggleAlwaysOnTop : TSpeedButton;
-    btnClearMessages     : TSpeedButton;
-    btnStop              : TSpeedButton;
-    btnSelectAll         : TSpeedButton;
-    btnSelectNone        : TSpeedButton;
     chkAutoFilter        : TCheckBox;
     tmrPoll: TTimer;
+    actZeroMQChannel: TAction;
+    actWinIPCChannel: TAction;
+    tlbMain: TToolBar;
+    btnToggleAlwaysOnTop: TToolButton;
+    btnStop: TToolButton;
+    btnClearMessages: TToolButton;
+    btnToggleWarning: TToolButton;
+    imlMain: TImageList;
     {$ENDREGION}
 
     procedure actBitmapExecute(Sender: TObject);
@@ -288,9 +287,9 @@ type
     FCallStack       : IList<TCallStackData>;
     FZMQStream       : TStringStream;
 
-    FZMQ       : IZeroMQ;
-    FPair      : IZMQPair;
-    FPoll      : IZMQPoll;
+    FZMQ        : IZeroMQ;
+    FSubscriber : IZMQPair;
+    FPoll       : IZMQPoll;
 
     FLatestWatchInspector   : TInspector;
     FSelectedWatchInspector : TInspector;
@@ -475,7 +474,7 @@ begin
   tmrPoll.Enabled := False;
   FIPCServer.Free;
   FWatches.Free;
-  FPair := nil;
+  FSubscriber := nil;
   FZMQ  := nil;
   FZMQStream := nil;
 
@@ -514,31 +513,25 @@ begin
   FWatchHistoryInspector := TDDuceComponents.CreateInspector(Self, tsHistory);
   FWatchHistoryInspector.OnGetCellText := FWatchHistoryInspectorGetCellText;
   FWatchHistoryInspector.ReadOnly := True;
-
 end;
 
 procedure TfrmMain.CreateZMQSubscriber;
+var
+  N : Integer;
 begin
   FZMQ := TZeroMQ.Create;
-  FPair := FZMQ.Start(Subscriber);
-  //FPair.Connect('tcp://localhost:5555');
-  //FPair.Connect('tcp://192.168.0.107:5555');
-//  FPair.Connect('tcp://GANYMEDES:5555');
-  FPair.Connect('tcp://localhost:5555');
-  //FPair.Subscribe('debug');
-  FPair.Subscribe('');
+  FSubscriber := FZMQ.Start(Subscriber);
+  N :=  FSubscriber.Connect('tcp://GANYMEDES:5555');
+  N := FSubscriber.Connect('tcp://localhost:5555');
+  //N := FSubscriber.Connect('tcp://EUROPA:5555');
+  FSubscriber.Subscribe(''); // required!!
   FPoll := FZMQ.Poller;
-  FPoll.RegisterPair(FPair, [PollEvent.PollIn],
+  FPoll.RegisterPair(FSubscriber, [PollEvent.PollIn],
     procedure(Event: PollEvents)
-    var
-      S : string;
     begin
-      if PollEvent.PollIn in Event then
-      begin
-        FZMQStream.WriteString(FPair.ReceiveString);
-        ProcessMessage(FZMQStream);
-        FZMQStream.Clear;
-      end;
+      FZMQStream.WriteString(FSubscriber.ReceiveString);
+      ProcessMessage(FZMQStream);
+      FZMQStream.Clear;
     end
   );
 end;
@@ -789,7 +782,6 @@ procedure TfrmMain.FWatchesUpdate(const AVariable, AValue: string);
 begin
   FLatestWatchInspector.Rows.Count   := FWatches.Count;
   FSelectedWatchInspector.Rows.Count := FWatches.Count;
-  //FWatchHistoryInspector.Rows.Count := FWatches[cbxWatchHistory.ItemIndex].Count;
   FWatchHistoryInspector.Refresh;
   FSelectedWatchInspector.Refresh;
   FLatestWatchInspector.Refresh;
@@ -1102,9 +1094,6 @@ procedure TfrmMain.ZMQPoll;
 begin
   if Assigned(FPoll) then
   begin
-//    if FPoll.PollOnce(5) > 0 then
-//      FPoll.FireEvents;
-
     while FPoll.PollOnce(50) > 0 do
       FPoll.FireEvents;
   end;
@@ -1284,6 +1273,7 @@ begin
 
   actFilterMessages.Enabled := not chkAutoFilter.Checked and (TitleFilter <> '');
   inherited UpdateActions;
+  sbrMain.SimpleText := Format('%d messages received.', [FMessageCount]);
   //ZMQPoll;
 end;
 
