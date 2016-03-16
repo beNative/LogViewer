@@ -12,7 +12,7 @@ object frmMain: TfrmMain
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = True
-  Position = poScreenCenter
+  Position = poDefault
   ShowHint = True
   PixelsPerInch = 96
   TextHeight = 13
@@ -110,11 +110,8 @@ object frmMain: TfrmMain
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 3
-    ExplicitTop = 60
-    ExplicitWidth = 973
-    ExplicitHeight = 800
     object splLeftVertical: TSplitter
-      Left = 280
+      Left = 286
       Top = 0
       Width = 9
       Height = 814
@@ -125,26 +122,24 @@ object frmMain: TfrmMain
     object pnlCallStackWatch: TPanel
       Left = 0
       Top = 0
-      Width = 280
+      Width = 286
       Height = 814
       Align = alLeft
       BevelOuter = bvNone
       TabOrder = 0
-      ExplicitHeight = 800
       object splLeftHorizontal: TSplitter
         Left = 0
         Top = 386
-        Width = 280
+        Width = 286
         Height = 8
         Cursor = crVSplit
         Align = alBottom
         ExplicitTop = 392
-        ExplicitWidth = 286
       end
       object pnlLeftBottom: TPanel
         Left = 0
         Top = 394
-        Width = 280
+        Width = 286
         Height = 420
         Align = alBottom
         BevelOuter = bvNone
@@ -152,32 +147,38 @@ object frmMain: TfrmMain
         ShowCaption = False
         TabOrder = 1
         ExplicitTop = 380
+        ExplicitWidth = 280
         object pgcWatches: TPageControl
           Left = 0
           Top = 31
-          Width = 280
+          Width = 286
           Height = 389
           ActivePage = tsLatest
           Align = alClient
           TabOrder = 0
           OnChange = pgcWatchesChange
+          ExplicitWidth = 280
           object tsLatest: TTabSheet
             Caption = 'Latest'
+            ExplicitWidth = 272
           end
           object tsSelected: TTabSheet
             Caption = 'Selected'
+            ExplicitWidth = 272
           end
           object tsHistory: TTabSheet
             Caption = 'History'
+            ExplicitWidth = 272
             object cbxWatchHistory: TComboBox
               Left = 0
               Top = 0
-              Width = 272
+              Width = 278
               Height = 21
               Align = alTop
               Style = csDropDownList
               TabOrder = 0
               OnSelect = cbxWatchHistorySelect
+              ExplicitWidth = 272
             end
           end
         end
@@ -185,7 +186,7 @@ object frmMain: TfrmMain
           AlignWithMargins = True
           Left = 3
           Top = 3
-          Width = 274
+          Width = 280
           Height = 25
           Align = alTop
           BevelKind = bkFlat
@@ -200,22 +201,24 @@ object frmMain: TfrmMain
           ParentBackground = False
           ParentFont = False
           TabOrder = 1
+          ExplicitWidth = 274
         end
       end
       object pnlCallStack: TPanel
         Left = 0
         Top = 0
-        Width = 280
+        Width = 286
         Height = 386
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 0
+        ExplicitWidth = 280
         ExplicitHeight = 372
         object pnlCallStackTitle: TPanel
           AlignWithMargins = True
           Left = 3
           Top = 3
-          Width = 274
+          Width = 280
           Height = 25
           Align = alTop
           BevelKind = bkFlat
@@ -230,38 +233,55 @@ object frmMain: TfrmMain
           ParentBackground = False
           ParentFont = False
           TabOrder = 0
+          ExplicitWidth = 274
         end
       end
     end
     object pnlMessages: TPanel
-      Left = 289
+      Left = 295
       Top = 0
-      Width = 716
+      Width = 710
       Height = 814
       Align = alClient
       BevelOuter = bvNone
       BevelWidth = 2
       ParentBackground = False
       TabOrder = 1
-      ExplicitLeft = 286
+      ExplicitLeft = 356
       ExplicitTop = -6
-      ExplicitHeight = 817
+      ExplicitWidth = 584
       object pnlFilter: TPanel
         Left = 0
         Top = 0
-        Width = 716
+        Width = 710
         Height = 30
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 0
         ExplicitWidth = 684
         DesignSize = (
-          716
+          710
           30)
-        object edtMessageFilter: TLabeledEdit
-          Left = 80
+        object btnExpandAll: TSpeedButton
+          Left = 3
           Top = 6
-          Width = 444
+          Width = 23
+          Height = 22
+          Action = actExpandAll
+          Flat = True
+        end
+        object btnCollapseAll: TSpeedButton
+          Left = 24
+          Top = 6
+          Width = 23
+          Height = 22
+          Action = actCollapseAll
+          Flat = True
+        end
+        object edtMessageFilter: TLabeledEdit
+          Left = 126
+          Top = 8
+          Width = 379
           Height = 21
           Alignment = taCenter
           Anchors = [akLeft, akTop, akRight]
@@ -280,11 +300,11 @@ object frmMain: TfrmMain
           OnChange = edtMessageFilterChange
           OnKeyDown = edtMessageFilterKeyDown
           OnKeyUp = edtMessageFilterKeyUp
-          ExplicitWidth = 412
+          ExplicitWidth = 385
         end
         object btnFilterMessages: TButton
-          Left = 608
-          Top = 4
+          Left = 598
+          Top = 6
           Width = 102
           Height = 25
           Action = actFilterMessages
@@ -292,10 +312,11 @@ object frmMain: TfrmMain
           Default = True
           Images = imlMain
           TabOrder = 1
+          ExplicitLeft = 604
         end
         object chkAutoFilter: TCheckBox
-          Left = 535
-          Top = 7
+          Left = 520
+          Top = 10
           Width = 71
           Height = 17
           Anchors = [akTop, akRight]
@@ -303,14 +324,14 @@ object frmMain: TfrmMain
           Checked = True
           State = cbChecked
           TabOrder = 2
-          ExplicitLeft = 503
+          ExplicitLeft = 526
         end
       end
     end
   end
   object tlbMessages: TToolBar
     Left = 0
-    Top = 0
+    Top = 22
     Width = 1443
     Height = 24
     ButtonWidth = 89
@@ -416,7 +437,7 @@ object frmMain: TfrmMain
   end
   object tlbMain: TToolBar
     Left = 0
-    Top = 24
+    Top = 0
     Width = 1443
     Height = 22
     AutoSize = True
@@ -446,11 +467,11 @@ object frmMain: TfrmMain
       Action = actClearMessages
       AutoSize = True
     end
-    object btn2: TToolButton
+    object btnSeperator2: TToolButton
       Left = 306
       Top = 0
       Width = 7
-      Caption = 'btn2'
+      Caption = 'btnSeperator2'
       ImageIndex = 1
       Style = tbsSeparator
     end
@@ -464,11 +485,11 @@ object frmMain: TfrmMain
       Top = 0
       Action = actSelectNone
     end
-    object btn1: TToolButton
+    object btnSeperator1: TToolButton
       Left = 517
       Top = 0
       Width = 8
-      Caption = 'btn1'
+      Caption = 'btnSeperator1'
       ImageIndex = 0
       Style = tbsSeparator
     end
@@ -482,6 +503,11 @@ object frmMain: TfrmMain
       Top = 0
       Action = actZeroMQChannel
     end
+    object btnODSChannel: TToolButton
+      Left = 729
+      Top = 0
+      Action = actODSChannel
+    end
   end
   object aclMain: TActionList
     Images = imlMain
@@ -490,6 +516,7 @@ object frmMain: TfrmMain
     object actClearMessages: TAction
       Caption = 'Clear messages'
       ImageIndex = 3
+      ShortCut = 115
       OnExecute = actClearMessagesExecute
     end
     object actToggleAlwaysOnTop: TAction
@@ -592,6 +619,7 @@ object frmMain: TfrmMain
       AutoCheck = True
       Caption = 'Stop capturing'
       ImageIndex = 9
+      ShortCut = 116
       OnExecute = actStopExecute
     end
     object actFilterMessages: TAction
@@ -610,6 +638,28 @@ object frmMain: TfrmMain
       AutoCheck = True
       Caption = 'WinIPC'
       OnExecute = actWinIPCChannelExecute
+    end
+    object actSetFocusToFilter: TAction
+      Caption = 'Sets focus to filter entry'
+      ShortCut = 113
+      OnExecute = actSetFocusToFilterExecute
+    end
+    object actToggleFullscreen: TAction
+      Caption = 'Toggle full screen'
+      ShortCut = 122
+      OnExecute = actToggleFullscreenExecute
+    end
+    object actODSChannel: TAction
+      AutoCheck = True
+      Caption = 'ODS'
+    end
+    object actCollapseAll: TAction
+      ImageIndex = 18
+      OnExecute = actCollapseAllExecute
+    end
+    object actExpandAll: TAction
+      ImageIndex = 14
+      OnExecute = actExpandAllExecute
     end
   end
   object tmrPoll: TTimer

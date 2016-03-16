@@ -96,7 +96,9 @@ uses
   ZeroMQ.API in 'ZeroMQ.API.pas',
   ZeroMQ in 'ZeroMQ.pas',
   DDuce.Logger.Base in '..\..\libraries\dduce\Source\Modules\Logger\DDuce.Logger.Base.pas',
-  DDuce.Logger.Channels.WinODS in '..\..\libraries\dduce\Source\Modules\Logger\DDuce.Logger.Channels.WinODS.pas';
+  DDuce.Logger.Channels.WinODS in '..\..\libraries\dduce\Source\Modules\Logger\DDuce.Logger.Channels.WinODS.pas',
+  JsonDataObjects in '..\..\libraries\JsonDataObjects\Source\JsonDataObjects.pas',
+  LogViewer.Settings in 'LogViewer.Settings.pas';
 
 {$R *.res}
 

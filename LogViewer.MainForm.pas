@@ -75,7 +75,7 @@ uses
 
   ZeroMQ,
 
-  LogViewer.WatchList;
+  LogViewer.WatchList, LogViewer.Settings;
 
 type
   TMessageSet = set of TLogMessageType;
@@ -92,6 +92,31 @@ type
 
     property Title: string
       read FTitle write FTitle;
+  end;
+
+  TLogMessageData = class
+  private
+    FMsgType : Integer;
+    FMsgTime : TDateTime;
+    FMsgText : AnsiString;
+    FMsgData : TStream;
+
+    property MsgData: TStream
+      read FMsgData;
+
+  public
+    procedure AfterConstruction; override;
+    procedure BeforeDestruction; override;
+
+    property MsgType : Integer
+      read FMsgType write FMsgType;
+
+    property MsgTime: TDateTime
+      read FMsgTime write FMsgTime;
+
+    property MsgText: AnsiString
+      read FMsgText write FMsgText;
+
   end;
 
   TfrmMain = class(TForm)
@@ -114,14 +139,18 @@ type
     actSave              : TAction;
     actSelectAll         : TAction;
     actSelectNone        : TAction;
+    actSetFocusToFilter  : TAction;
     actStop              : TAction;
     actStrings           : TAction;
     actToggleAlwaysOnTop : TAction;
+    actToggleFullscreen  : TAction;
     actToggleInfo        : TAction;
     actToggleWarning     : TAction;
     actValue             : TAction;
     actWinIPCChannel     : TAction;
     actZeroMQChannel     : TAction;
+    btnSeperator1: TToolButton;
+    btnSeperator2: TToolButton;
     btnBitmap            : TToolButton;
     btnCallStack         : TToolButton;
     btnCheckPoint        : TToolButton;
@@ -135,17 +164,22 @@ type
     btnMemory            : TToolButton;
     btnMethodTraces      : TToolButton;
     btnObject            : TToolButton;
+    btnSelectAll         : TToolButton;
+    btnSelectNone        : TToolButton;
     btnStop              : TToolButton;
     btnStrings           : TToolButton;
     btnToggleAlwaysOnTop : TToolButton;
     btnToggleInfo        : TToolButton;
     btnToggleWarning     : TToolButton;
     btnValue             : TToolButton;
+    btnWinIPCChannel     : TToolButton;
+    btnZeroMQChannel     : TToolButton;
     cbxWatchHistory      : TComboBox;
     chkAutoFilter        : TCheckBox;
     edtMessageFilter     : TLabeledEdit;
     imgViewer            : TImage;
     imlMain              : TImageList;
+    imlMessageTypes      : TImageList;
     pgcMessageDetails    : TPageControl;
     pgcWatches           : TPageControl;
     pnlCallStack         : TPanel;
@@ -172,13 +206,12 @@ type
     tsLatest             : TTabSheet;
     tsSelected           : TTabSheet;
     tsTextViewer         : TTabSheet;
-    imlMessageTypes      : TImageList;
-    btnSelectAll         : TToolButton;
-    btnSelectNone        : TToolButton;
-    btn1                 : TToolButton;
-    btn2                 : TToolButton;
-    btnWinIPCChannel     : TToolButton;
-    btnZeroMQChannel     : TToolButton;
+    actODSChannel        : TAction;
+    btnODSChannel        : TToolButton;
+    actCollapseAll: TAction;
+    actExpandAll: TAction;
+    btnExpandAll: TSpeedButton;
+    btnCollapseAll: TSpeedButton;
     {$ENDREGION}
 
     procedure actBitmapExecute(Sender: TObject);
@@ -275,9 +308,15 @@ type
     procedure edtMessageFilterKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure tmrPollTimer(Sender: TObject);
+    procedure actSetFocusToFilterExecute(Sender: TObject);
+    procedure actToggleFullscreenExecute(Sender: TObject);
+    procedure actExpandAllExecute(Sender: TObject);
+    procedure actCollapseAllExecute(Sender: TObject);
 
   private
+    FSettings        : TLogViewerSettings;
     FLogTreeView     : TVirtualStringTree;
+    FLogTreeView2    : TVirtualStringTree;
     FTVPMessages     : TTreeViewPresenter;
     FActiveMessages  : TMessageSet;
     FMessageCount    : Integer;
@@ -288,12 +327,13 @@ type
     FWatches         : TWatchList;
     FExpandParent    : Boolean;
     FManager         : IEditorManager;
-    FSettings        : IEditorSettings;
+    FEditorSettings  : IEditorSettings;
     FEditorView      : IEditorView;
     FVKPressed       : Boolean;
     FTVPCallStack    : TTreeViewPresenter;
     FVSTCallStack    : TVirtualStringTree;
     FCallStack       : IList<TCallStackData>;
+    FMessages        : IList<TLogMessageData>;
     FZMQStream       : TStringStream;
 
     FZMQ        : IZeroMQ;
@@ -339,6 +379,10 @@ type
   protected
     procedure UpdateActions; override;
     procedure ProcessMessage(AStream: TStream);
+    procedure ProcessMessage2(AStream: TStream);
+
+    procedure LoadSettings;
+    procedure SaveSettings;
 
   public
     procedure AfterConstruction; override;
@@ -387,7 +431,7 @@ uses
   Spring,
 
   DDuce.Factories, DDuce.Components.Factories, DDuce.Editor.Factories,
-  DDuce.Logger;
+  DDuce.Logger, DDuce.ScopedReference;
 
 type
   TVKSet = set of Byte;
@@ -462,10 +506,25 @@ type
 //    ('bmDIB',
 //    'bmDDB');
 
+{$REGION 'TLogMessageData'}
+procedure TLogMessageData.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  FMsgData := TMemoryStream.Create;
+end;
+
+procedure TLogMessageData.BeforeDestruction;
+begin
+  FMsgData.Free;
+  inherited BeforeDestruction;
+end;
+{$ENDREGION}
+
 {$REGION 'construction and destruction' /fold}
 procedure TfrmMain.AfterConstruction;
 begin
   inherited AfterConstruction;
+  FSettings := TLogViewerSettings.Create;
   FZMQStream := TStringStream.Create;
 
   CreateEditor;
@@ -476,18 +535,19 @@ begin
   FActiveMessages := ALL_MESSAGES;
   CreateIPCServer;
   CreateZMQSubscriber;
+  LoadSettings;
 end;
 
 procedure TfrmMain.BeforeDestruction;
 begin
-//  FSettings.Save;
+  SaveSettings;
   tmrPoll.Enabled := False;
   FIPCServer.Free;
   FWatches.Free;
   FSubscriber := nil;
   FZMQ  := nil;
   FZMQStream := nil;
-
+  FSettings.Free;
   inherited BeforeDestruction;
 end;
 
@@ -557,6 +617,7 @@ end;
 procedure TfrmMain.CreateLogTreeView;
 var
   C : TVirtualTreeColumn;
+  CV: TColumnDefinition;
 begin
   FLogTreeView := TFactories.CreateVirtualStringTree(Self, pnlMessages);
   FLogTreeView.NodeDataSize    := SizeOf(TNodeData);
@@ -569,12 +630,6 @@ begin
   FLogTreeView.OnKeyPress      := FLogTreeViewKeyPress;
   FLogTreeView.Images          := imlMessageTypes;
   FLogTreeView.Header.Options  := FLogTreeView.Header.Options - [hoVisible];
-
-//  FTVPMessages := TFactories.CreateTreeViewPresenter(
-//    Self,
-//    FLogTreeView
-//  );
-
   C := FLogTreeView.Header.Columns.Add;
   C.Text := STitle;
   C.Width := 500;
@@ -584,12 +639,20 @@ begin
   C.Text := STimestamp;
   C.Width := 150;
   C.MinWidth := 100;
+
+//  FMessages := TCollections.CreateObjectList<TLogMessageData>;
+//  FLogTreeView2 := TFactories.CreateVirtualStringTree(Self, pnlMessages);
+//  FTVPMessages := TFactories.CreateTreeViewPresenter(
+//    Self,
+//    FLogTreeView2,
+//    FMessages as IObjectList
+//  );
 end;
 
 procedure TfrmMain.CreateEditor;
 begin
-  FSettings   := TEditorFactories.CreateSettings(Self, 'settings.xml');
-  FManager    := TEditorFactories.CreateManager(Self, FSettings);
+  FEditorSettings   := TEditorFactories.CreateSettings(Self, 'settings.xml');
+  FManager    := TEditorFactories.CreateManager(Self, FEditorSettings);
   FEditorView := TEditorFactories.CreateView(tsTextViewer, FManager, 'Tool');
 end;
 {$ENDREGION}
@@ -598,6 +661,11 @@ end;
 procedure TfrmMain.actClearMessagesExecute(Sender: TObject);
 begin
   ClearMessages;
+end;
+
+procedure TfrmMain.actCollapseAllExecute(Sender: TObject);
+begin
+  FLogTreeView.FullCollapse;
 end;
 
 procedure TfrmMain.actConditionalExecute(Sender: TObject);
@@ -618,6 +686,11 @@ end;
 procedure TfrmMain.actExceptionExecute(Sender: TObject);
 begin
   UpdateActiveMessages(lmtException, Sender);
+end;
+
+procedure TfrmMain.actExpandAllExecute(Sender: TObject);
+begin
+  FLogTreeView.FullExpand;
 end;
 
 procedure TfrmMain.actFilterMessagesExecute(Sender: TObject);
@@ -673,6 +746,11 @@ begin
   UpdateMessageDisplay;
 end;
 
+procedure TfrmMain.actSetFocusToFilterExecute(Sender: TObject);
+begin
+  edtMessageFilter.SetFocus;
+end;
+
 procedure TfrmMain.actStopExecute(Sender: TObject);
 begin
   if actStop.Checked then
@@ -692,6 +770,14 @@ begin
     FormStyle := fsStayOnTop
   else
     FormStyle := fsNormal;
+end;
+
+procedure TfrmMain.actToggleFullscreenExecute(Sender: TObject);
+begin
+  if WindowState = wsNormal then
+    WindowState := wsMaximized
+  else
+    WindowState := wsNormal;
 end;
 
 procedure TfrmMain.actToggleInfoExecute(Sender: TObject);
@@ -844,6 +930,7 @@ end;
 procedure TfrmMain.FIPCServerMessage(Sender: TObject);
 begin
   ProcessMessage(TWinIPCServer(Sender).MsgData);
+  //ProcessMessage2(TWinIPCServer(Sender).MsgData);
 end;
 
 procedure TfrmMain.pgcWatchesChange(Sender: TObject);
@@ -896,7 +983,7 @@ begin
         LStream.Position := 0;
         S := LStream.DataString;
         Editor.Text := S;
-        Editor.HighlighterName := 'TXT';
+        Editor.HighlighterName := 'INI';
         pgcMessageDetails.ActivePage := tsTextViewer;
       end;
       lmtObject:
@@ -1273,9 +1360,31 @@ begin
     end;
   finally
     FLogTreeView.EndUpdate;
-    FLogTreeView.FocusedNode := FLogTreeView.GetLast;
-    FLogTreeView.Invalidate;
   end;
+end;
+
+procedure TfrmMain.ProcessMessage2(AStream: TStream);
+var
+  LTextSize : Integer;
+  LDataSize : Integer;
+  LMD       : TLogMessageData;
+begin
+  Guard.CheckNotNull(AStream, 'AStream');
+  LMD := TLogMessageData.Create;
+  LTextSize := 0;
+  LDataSize := 0;
+  AStream.Seek(0, soFromBeginning);
+  AStream.ReadBuffer(LMD.FMsgType, SizeOf(Integer));
+  AStream.ReadBuffer(LMD.FMsgTime, SizeOf(TDateTime));
+  AStream.ReadBuffer(LTextSize, SizeOf(Integer));
+  SetLength(LMD.FMsgText, LTextSize);
+  AStream.ReadBuffer(LMD.FMsgText[1], LTextSize);
+  AStream.ReadBuffer(LDataSize, SizeOf(Integer));
+  if LDataSize > 0 then
+  begin
+    LMD.MsgData.CopyFrom(AStream, LDataSize);
+  end;
+  FMessages.Add(LMD);
 end;
 
 procedure TfrmMain.UpdateActions;
@@ -1315,10 +1424,27 @@ begin
   actMemory.Enabled        := B;
   actSelectAll.Enabled  := not (FActiveMessages = ALL_MESSAGES);
   actSelectNone.Enabled := not (FActiveMessages = []);
+  actToggleAlwaysOnTop.Checked := FormStyle = fsStayOnTop;
 
   actFilterMessages.Enabled := not chkAutoFilter.Checked and (TitleFilter <> '');
-  inherited UpdateActions;
   sbrMain.SimpleText := Format('%d messages received.', [FMessageCount]);
+  inherited UpdateActions;
+end;
+
+procedure TfrmMain.LoadSettings;
+begin
+  FSettings.Load;
+  FSettings.FormSettings.AssignTo(Self);
+  pnlCallStackWatch.Width := FSettings.LeftPanelWidth;
+  pnlRight.Width := FSettings.RightPanelWidth;
+end;
+
+procedure TfrmMain.SaveSettings;
+begin
+  FSettings.LeftPanelWidth := pnlCallStackWatch.Width;
+  FSettings.RightPanelWidth := pnlRight.Width;
+  FSettings.FormSettings.Assign(Self);
+  FSettings.Save;
 end;
 {$ENDREGION}
 
