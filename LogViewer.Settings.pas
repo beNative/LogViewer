@@ -26,10 +26,10 @@ uses
 type
   TLogViewerSettings = class(TPersistent)
   private
-    FFormSettings : TFormSettings;
-    FFileName     : string;
-    FLeftPanelWidth: Integer;
-    FRightPanelWidth: Integer;
+    FFormSettings    : TFormSettings;
+    FFileName        : string;
+    FLeftPanelWidth  : Integer;
+    FRightPanelWidth : Integer;
 
   public
     procedure AfterConstruction; override;
@@ -47,9 +47,7 @@ type
 
     property RightPanelWidth: Integer
       read FRightPanelWidth write FRightPanelWidth;
-
   end;
-
 
 implementation
 
@@ -73,8 +71,7 @@ begin
 end;
 {$ENDREGION}
 
-
-
+{$REGION 'public methods'}
 procedure TLogViewerSettings.Load;
 var
   JDO : TJsonDataValueHelper;
@@ -107,5 +104,6 @@ begin
     JO.Free;
   end;
 end;
+{$ENDREGION}
 
 end.

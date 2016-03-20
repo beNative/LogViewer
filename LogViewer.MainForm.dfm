@@ -33,7 +33,6 @@ object frmMain: TfrmMain
     Height = 23
     Panels = <>
     SimplePanel = True
-    ExplicitWidth = 1411
   end
   object pnlRight: TPanel
     Left = 1013
@@ -44,9 +43,6 @@ object frmMain: TfrmMain
     BevelOuter = bvNone
     Caption = 'pnlRight'
     TabOrder = 1
-    ExplicitLeft = 981
-    ExplicitTop = 60
-    ExplicitHeight = 800
     object pgcMessageDetails: TPageControl
       Left = 0
       Top = 31
@@ -55,14 +51,11 @@ object frmMain: TfrmMain
       ActivePage = tsTextViewer
       Align = alClient
       TabOrder = 0
-      ExplicitHeight = 769
       object tsTextViewer: TTabSheet
         Caption = 'Text'
-        ExplicitHeight = 741
       end
       object tsImageViewer: TTabSheet
         Caption = 'Image'
-        ExplicitHeight = 741
         object imgViewer: TImage
           Left = 0
           Top = 0
@@ -74,11 +67,9 @@ object frmMain: TfrmMain
       end
       object tsInspector: TTabSheet
         Caption = 'Inspector'
-        ExplicitHeight = 741
       end
       object tsHexEditor: TTabSheet
         Caption = 'Hex edtor'
-        ExplicitHeight = 741
       end
     end
     object pnlMessageContent: TPanel
@@ -146,8 +137,6 @@ object frmMain: TfrmMain
         Caption = 'pnlLeftBottom'
         ShowCaption = False
         TabOrder = 1
-        ExplicitTop = 380
-        ExplicitWidth = 280
         object pgcWatches: TPageControl
           Left = 0
           Top = 31
@@ -157,18 +146,14 @@ object frmMain: TfrmMain
           Align = alClient
           TabOrder = 0
           OnChange = pgcWatchesChange
-          ExplicitWidth = 280
           object tsLatest: TTabSheet
             Caption = 'Latest'
-            ExplicitWidth = 272
           end
           object tsSelected: TTabSheet
             Caption = 'Selected'
-            ExplicitWidth = 272
           end
           object tsHistory: TTabSheet
             Caption = 'History'
-            ExplicitWidth = 272
             object cbxWatchHistory: TComboBox
               Left = 0
               Top = 0
@@ -178,7 +163,6 @@ object frmMain: TfrmMain
               Style = csDropDownList
               TabOrder = 0
               OnSelect = cbxWatchHistorySelect
-              ExplicitWidth = 272
             end
           end
         end
@@ -201,7 +185,6 @@ object frmMain: TfrmMain
           ParentBackground = False
           ParentFont = False
           TabOrder = 1
-          ExplicitWidth = 274
         end
       end
       object pnlCallStack: TPanel
@@ -212,8 +195,6 @@ object frmMain: TfrmMain
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitWidth = 280
-        ExplicitHeight = 372
         object pnlCallStackTitle: TPanel
           AlignWithMargins = True
           Left = 3
@@ -233,7 +214,6 @@ object frmMain: TfrmMain
           ParentBackground = False
           ParentFont = False
           TabOrder = 0
-          ExplicitWidth = 274
         end
       end
     end
@@ -247,9 +227,8 @@ object frmMain: TfrmMain
       BevelWidth = 2
       ParentBackground = False
       TabOrder = 1
-      ExplicitLeft = 356
-      ExplicitTop = -6
-      ExplicitWidth = 584
+      ExplicitLeft = 292
+      ExplicitTop = 6
       object pnlFilter: TPanel
         Left = 0
         Top = 0
@@ -258,7 +237,6 @@ object frmMain: TfrmMain
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitWidth = 684
         DesignSize = (
           710
           30)
@@ -300,7 +278,6 @@ object frmMain: TfrmMain
           OnChange = edtMessageFilterChange
           OnKeyDown = edtMessageFilterKeyDown
           OnKeyUp = edtMessageFilterKeyUp
-          ExplicitWidth = 385
         end
         object btnFilterMessages: TButton
           Left = 598
@@ -312,7 +289,6 @@ object frmMain: TfrmMain
           Default = True
           Images = imlMain
           TabOrder = 1
-          ExplicitLeft = 604
         end
         object chkAutoFilter: TCheckBox
           Left = 520
@@ -324,7 +300,6 @@ object frmMain: TfrmMain
           Checked = True
           State = cbChecked
           TabOrder = 2
-          ExplicitLeft = 526
         end
       end
     end
@@ -674,7 +649,7 @@ object frmMain: TfrmMain
     Left = 864
     Top = 128
     Bitmap = {
-      494C010118001D00040010001000FFFFFFFF2100FFFFFFFFFFFFFFFF424D3600
+      494C010118001D00040010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000007000000001002000000000000070
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -1602,14 +1577,15 @@ object frmMain: TfrmMain
       0007C003C003C00F0003C003C003800F000380018001800F000100000000C00F
       000000000000E00F000000000000F007000000000000F807000000000000FC07
       000100000000FE07000380018001FE830003C003C003FFC30007C003C003FFC1
-      000FF00FF00FFFE1FFFFF81FF81FFFF1}
+      000FF00FF00FFFE1FFFFF81FF81FFFF100000000000000000000000000000000
+      000000000000}
   end
   object imlMessageTypes: TImageList
     ColorDepth = cd32Bit
     Left = 744
     Top = 128
     Bitmap = {
-      494C010112001500040010001000FFFFFFFF2100FFFFFFFFFFFFFFFF424D3600
+      494C010112001500040010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000005000000001002000000000000050
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -2273,6 +2249,7 @@ object frmMain: TfrmMain
       0000C003C003FFFF0000C0038003FFFF000080018001E0070000000000018001
       0000000000000000000000000000000000000000000000000000000000000000
       000000008000000000008001800180010000C003C001E0070000C003C003FFFF
-      0000F00FE00FFFFF0000F81FF83FFFFF}
+      0000F00FE00FFFFF0000F81FF83FFFFF00000000000000000000000000000000
+      000000000000}
   end
 end
