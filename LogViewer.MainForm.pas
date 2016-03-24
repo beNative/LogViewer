@@ -75,49 +75,12 @@ uses
 
   ZeroMQ,
 
-  LogViewer.WatchList, LogViewer.Settings;
+  LogViewer.WatchList, LogViewer.Settings, LogViewer.LogMessageData,
+  LogViewer.CallStackData;
 
 type
   TMessageSet = set of TLogMessageType;
   TBitmap     = Vcl.Graphics.TBitmap;
-
-  TCallStackData = class
-  private
-    FTitle : string;
-    FLevel : Integer;
-
-  public
-    property Level: Integer
-      read FLevel write FLevel;
-
-    property Title: string
-      read FTitle write FTitle;
-  end;
-
-  TLogMessageData = class
-  private
-    FMsgType : Integer;
-    FMsgTime : TDateTime;
-    FMsgText : AnsiString;
-    FMsgData : TStream;
-
-    property MsgData: TStream
-      read FMsgData;
-
-  public
-    procedure AfterConstruction; override;
-    procedure BeforeDestruction; override;
-
-    property MsgType : Integer
-      read FMsgType write FMsgType;
-
-    property MsgTime: TDateTime
-      read FMsgTime write FMsgTime;
-
-    property MsgText: AnsiString
-      read FMsgText write FMsgText;
-
-  end;
 
   TfrmMain = class(TForm)
     {$REGION 'designer controls'}
@@ -149,8 +112,8 @@ type
     actValue             : TAction;
     actWinIPCChannel     : TAction;
     actZeroMQChannel     : TAction;
-    btnSeperator1: TToolButton;
-    btnSeperator2: TToolButton;
+    btnSeperator1        : TToolButton;
+    btnSeperator2        : TToolButton;
     btnBitmap            : TToolButton;
     btnCallStack         : TToolButton;
     btnCheckPoint        : TToolButton;
@@ -208,10 +171,10 @@ type
     tsTextViewer         : TTabSheet;
     actODSChannel        : TAction;
     btnODSChannel        : TToolButton;
-    actCollapseAll: TAction;
-    actExpandAll: TAction;
-    btnExpandAll: TSpeedButton;
-    btnCollapseAll: TSpeedButton;
+    actCollapseAll       : TAction;
+    actExpandAll         : TAction;
+    btnExpandAll         : TSpeedButton;
+    btnCollapseAll       : TSpeedButton;
     {$ENDREGION}
 
     procedure actBitmapExecute(Sender: TObject);
@@ -298,7 +261,6 @@ type
       Cell      : TGridCell;
       var Value : string
     );
-
     procedure FIPCServerMessage(Sender: TObject);
 
     procedure pgcWatchesChange(Sender: TObject);
@@ -316,8 +278,6 @@ type
   private
     FSettings        : TLogViewerSettings;
     FLogTreeView     : TVirtualStringTree;
-    FLogTreeView2    : TVirtualStringTree;
-    FTVPMessages     : TTreeViewPresenter;
     FActiveMessages  : TMessageSet;
     FMessageCount    : Integer;
     FCurrentMsg      : TLogMessage;
@@ -333,7 +293,6 @@ type
     FTVPCallStack    : TTreeViewPresenter;
     FVSTCallStack    : TVirtualStringTree;
     FCallStack       : IList<TCallStackData>;
-    FMessages        : IList<TLogMessageData>;
     FZMQStream       : TStringStream;
 
     FZMQ        : IZeroMQ;
@@ -379,7 +338,6 @@ type
   protected
     procedure UpdateActions; override;
     procedure ProcessMessage(AStream: TStream);
-    procedure ProcessMessage2(AStream: TStream);
 
     procedure LoadSettings;
     procedure SaveSettings;
@@ -477,6 +435,8 @@ var
 
 resourcestring
   STitle      = 'Title';
+  SName       = 'Name';
+  SValue      = 'Value';
   STimestamp  = 'Timestamp';
 
 type
@@ -486,6 +446,8 @@ type
     MsgData : TStream;
     MsgTime : TDateTime;
     Index   : Integer;
+    Name    : string;
+    Value   : string;
   end;
   PNodeData = ^TNodeData;
 
@@ -505,21 +467,6 @@ type
 //  HandleTypeNames: array [TBitmapHandleType] of string =
 //    ('bmDIB',
 //    'bmDDB');
-
-{$REGION 'TLogMessageData'}
-procedure TLogMessageData.AfterConstruction;
-begin
-  inherited AfterConstruction;
-  FMsgData := TMemoryStream.Create;
-end;
-
-procedure TLogMessageData.BeforeDestruction;
-begin
-  FMsgData.Free;
-  inherited BeforeDestruction;
-end;
-{$ENDREGION}
-
 {$REGION 'construction and destruction' /fold}
 procedure TfrmMain.AfterConstruction;
 begin
@@ -574,15 +521,19 @@ procedure TfrmMain.CreateWatchInspectors;
 begin
   FLatestWatchInspector := TDDuceComponents.CreateInspector(Self, tsLatest);
   FLatestWatchInspector.OnGetCellText := FLatestWatchInspectorGetCellText;
-  FLatestWatchInspector.ReadOnly := True;
+  FLatestWatchInspector.ReadOnly  := True;
+  FLatestWatchInspector.AllowEdit := False;
+  FLatestWatchInspector.ThemingEnabled := True;
 
   FSelectedWatchInspector := TDDuceComponents.CreateInspector(Self, tsSelected);
   FSelectedWatchInspector.OnGetCellText := FSelectedWatchInspectorGetCellText;
   FSelectedWatchInspector.ReadOnly := True;
+  FSelectedWatchInspector.AllowEdit := False;
 
   FWatchHistoryInspector := TDDuceComponents.CreateInspector(Self, tsHistory);
   FWatchHistoryInspector.OnGetCellText := FWatchHistoryInspectorGetCellText;
-  FWatchHistoryInspector.ReadOnly := True;
+  FWatchHistoryInspector.ReadOnly  := True;
+  FWatchHistoryInspector.AllowEdit := False;
 end;
 
 procedure TfrmMain.CreateZMQSubscriber;
@@ -591,7 +542,7 @@ var
 begin
   FZMQ := TZeroMQ.Create;
   FSubscriber := FZMQ.Start(Subscriber);
-  N :=  FSubscriber.Connect('tcp://GANYMEDES:5555');
+  N := FSubscriber.Connect('tcp://GANYMEDES:5555');
   N := FSubscriber.Connect('tcp://localhost:5555');
   //N := FSubscriber.Connect('tcp://EUROPA:5555');
   FSubscriber.Subscribe(''); // required!!
@@ -629,24 +580,32 @@ begin
   FLogTreeView.OnGetText       := FLogTreeViewGetText;
   FLogTreeView.OnKeyPress      := FLogTreeViewKeyPress;
   FLogTreeView.Images          := imlMessageTypes;
-  FLogTreeView.Header.Options  := FLogTreeView.Header.Options - [hoVisible];
+  //FLogTreeView.Header.Options  := FLogTreeView.Header.Options - [hoVisible];
+  FLogTreeView.TreeOptions.AutoOptions := FLogTreeView.TreeOptions.AutoOptions +
+    [toAutoSpanColumns];
+
   C := FLogTreeView.Header.Columns.Add;
   C.Text := STitle;
-  C.Width := 500;
-  C.MinWidth := 300;
+  C.Width := 50;
+  C.MinWidth := 50;
+  C.MaxWidth := 50;
+
+  C := FLogTreeView.Header.Columns.Add;
+  C.Text := SName;
+  C.Alignment := taCenter;
+  C.Width := 100;
+  C.MinWidth := 100;
+
+  C := FLogTreeView.Header.Columns.Add;
+  C.Text := SValue;
+
+  C.Width := 100;
+  C.MinWidth := 100;
 
   C := FLogTreeView.Header.Columns.Add;
   C.Text := STimestamp;
   C.Width := 150;
   C.MinWidth := 100;
-
-//  FMessages := TCollections.CreateObjectList<TLogMessageData>;
-//  FLogTreeView2 := TFactories.CreateVirtualStringTree(Self, pnlMessages);
-//  FTVPMessages := TFactories.CreateTreeViewPresenter(
-//    Self,
-//    FLogTreeView2,
-//    FMessages as IObjectList
-//  );
 end;
 
 procedure TfrmMain.CreateEditor;
@@ -754,9 +713,15 @@ end;
 procedure TfrmMain.actStopExecute(Sender: TObject);
 begin
   if actStop.Checked then
-    FIPCServer.OnMessage := nil
+  begin
+    FIPCServer.OnMessage := nil;
+    tmrPoll.Enabled := False;
+  end
   else
+  begin
     FIPCServer.OnMessage := FIPCServerMessage;
+    tmrPoll.Enabled := True;
+  end;
 end;
 
 procedure TfrmMain.actStringsExecute(Sender: TObject);
@@ -824,10 +789,10 @@ begin
     FZMQ := nil;
   end;
 end;
-
 {$ENDREGION}
 
 {$REGION 'event handlers'}
+{$REGION 'edtMessageFilter'}
 procedure TfrmMain.edtMessageFilterChange(Sender: TObject);
 begin
   if TitleFilter <> '' then
@@ -901,6 +866,9 @@ begin
   FVKPressed := False;
 end;
 
+{$ENDREGION}
+
+{$REGION 'FWatches'}
 procedure TfrmMain.FWatchesNewVariable(const AVariable: string; AIndex: Integer);
 begin
   cbxWatchHistory.Items.Add(AVariable);
@@ -910,50 +878,27 @@ procedure TfrmMain.FWatchesUpdate(const AVariable, AValue: string);
 begin
   FLatestWatchInspector.Rows.Count   := FWatches.Count;
   FSelectedWatchInspector.Rows.Count := FWatches.Count;
-  FWatchHistoryInspector.Refresh;
-  FSelectedWatchInspector.Refresh;
-  FLatestWatchInspector.Refresh;
-  FWatchHistoryInspector.UpdateEditContents(False);
-  FSelectedWatchInspector.UpdateEditContents(False);
-  FLatestWatchInspector.UpdateEditContents(False);
+  FLatestWatchInspector.Invalidate;
+//  FWatchHistoryInspector.Refresh;
+  FSelectedWatchInspector.Invalidate;
+//  FLatestWatchInspector.Refresh;
+//  FWatchHistoryInspector.UpdateEditContents(False);
+//  FSelectedWatchInspector.UpdateEditContents(False);
+//  FLatestWatchInspector.UpdateEditContents(False);
 end;
+{$ENDREGION}
 
-procedure TfrmMain.FWatchHistoryInspectorGetCellText(Sender: TObject;
-  Cell: TGridCell; var Value: string);
+{$REGION 'FLogTreeView'}
+procedure TfrmMain.FLogTreeViewFocusChanging(Sender: TBaseVirtualTree;
+  OldNode: PVirtualNode; NewNode: PVirtualNode; OldColumn: TColumnIndex;
+  NewColumn: TColumnIndex; var Allowed: Boolean);
 begin
-  if Cell.Col = 0 then
-    Value := FWatches.Items[cbxWatchHistory.ItemIndex].Name
-  else
-    Value := FWatches.Items[cbxWatchHistory.ItemIndex].Values[Cell.Row];
-end;
-
-procedure TfrmMain.FIPCServerMessage(Sender: TObject);
-begin
-  ProcessMessage(TWinIPCServer(Sender).MsgData);
-  //ProcessMessage2(TWinIPCServer(Sender).MsgData);
-end;
-
-procedure TfrmMain.pgcWatchesChange(Sender: TObject);
-begin
-  UpdateWatches;
-end;
-
-procedure TfrmMain.tmrPollTimer(Sender: TObject);
-begin
-  ZMQPoll;
-end;
-
-procedure TfrmMain.FLatestWatchInspectorGetCellText(Sender: TObject;
-  Cell: TGridCell; var Value: string);
-begin
-  if Cell.Col = 0 then
-  begin
-    Value := FWatches.Items[Cell.Row].Name;
-  end
-  else
-  begin
-    Value := FWatches.Items[Cell.Row].CurrentValue
-  end;
+  //Todo: merge with Changed?
+  //The CallStack is only updated if the parent changes
+  Allowed := OldNode <> NewNode;
+  if Allowed and ((OldNode = nil) or (NewNode = nil) or
+    (OldNode^.Parent <> NewNode^.Parent)) then
+    UpdateCallStack(NewNode);
 end;
 
 procedure TfrmMain.FLogTreeViewFocusChanged(Sender: TBaseVirtualTree;
@@ -1027,30 +972,6 @@ begin
   end;
 end;
 
-procedure TfrmMain.FLogTreeViewFocusChanging(Sender: TBaseVirtualTree;
-  OldNode: PVirtualNode; NewNode: PVirtualNode; OldColumn: TColumnIndex;
-  NewColumn: TColumnIndex; var Allowed: Boolean);
-begin
-  //Todo: merge with Changed?
-  //The CallStack is only updated if the parent changes
-  Allowed := OldNode <> NewNode;
-  if Allowed and ((OldNode = nil) or (NewNode = nil) or
-    (OldNode^.Parent <> NewNode^.Parent)) then
-    UpdateCallStack(NewNode);
-  //warning NewNode value is not more valid after here
-end;
-
-procedure TfrmMain.FLogTreeViewFreeNode(Sender: TBaseVirtualTree;
-  Node: PVirtualNode);
-var
-  ND: PNodeData;
-begin
-  ND := Sender.GetNodeData(Node);
-  ND.Title := '';
-  if Assigned(ND.MsgData) then
-    FreeAndNil(ND.MsgData);
-end;
-
 procedure TfrmMain.FLogTreeViewGetImageIndex(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
   var Ghosted: Boolean; var ImageIndex: LongInt);
@@ -1067,15 +988,38 @@ procedure TfrmMain.FLogTreeViewGetText(Sender: TBaseVirtualTree;
   var CellText: string);
 var
   ND: PNodeData;
+  NDP : PNodeData;
+  S : string;
 begin
   ND := Sender.GetNodeData(Node);
   if Column = 0 then
   begin
     CellText := ND.Title;
   end
+  else if Column = 1 then
+  begin
+    CellText := ND.Name;
+  end
+  else if Column = 2 then
+  begin
+    CellText := ND.Value;
+  end
   else
   begin
-    CellText := DateTimeToStr(ND.MsgTime);
+    //CellText := DateTimeToStr(ND.MsgTime);
+    NDP := Sender.GetNodeData(Node.PrevSibling);
+    if Assigned(NDP) then
+    begin
+      S := TimeToStr(NDP.MsgTime);
+      if TimeToStr(ND.MsgTime) <> S then
+        CellText := TimeToStr(ND.MsgTime)
+      else
+      begin
+        CellText := '';
+      end;
+    end
+    else
+      CellText := TimeToStr(ND.MsgTime);
   end;
 end;
 
@@ -1084,12 +1028,21 @@ procedure TfrmMain.FLogTreeViewInitNode(Sender: TBaseVirtualTree;
   var InitialStates: TVirtualNodeInitStates);
 var
   ND: PNodeData;
+  I : Integer;
 begin
   ND := Sender.GetNodeData(Node);
   ND.Title   := string(FCurrentMsg.MsgText);
   ND.MsgData := FCurrentMsg.Data;
   ND.MsgTime := FCurrentMsg.MsgTime;
   ND.MsgType := TLogMessageType(FCurrentMsg.MsgType);
+  if (ND.MsgType = lmtValue) and not (ND.Title.Contains(sLineBreak)) then
+  begin
+    I := ND.Title.IndexOf('=');
+    ND.Name := Copy(ND.Title, 1, I - 1);
+    ND.Value := Copy(ND.Title, I + 2, ND.Title.Length);
+    ND.Title := '';
+  end;
+
   // On fast computers two or more messages can have the same TimeStamp
   // This leads to conflicts when determining the Watches values, so we use a
   // unique index instead
@@ -1099,6 +1052,17 @@ begin
   //(MsgType in [lmtEnterMethod, lmtExitMethod]) or
 //      ((MsgType in FActiveMessages);
     //and IsWild(Title, FTitleFilter, True));
+end;
+
+procedure TfrmMain.FLogTreeViewFreeNode(Sender: TBaseVirtualTree;
+  Node: PVirtualNode);
+var
+  ND: PNodeData;
+begin
+  ND := Sender.GetNodeData(Node);
+  ND.Title := '';
+  if Assigned(ND.MsgData) then
+    FreeAndNil(ND.MsgData);
 end;
 
 procedure TfrmMain.FLogTreeViewKeyPress(Sender: TObject; var Key: Char);
@@ -1112,6 +1076,30 @@ begin
     Key := #0;
   end;
 end;
+{$ENDREGION}
+
+{$REGION 'Watch viewers'}
+procedure TfrmMain.FWatchHistoryInspectorGetCellText(Sender: TObject;
+  Cell: TGridCell; var Value: string);
+begin
+  if Cell.Col = 0 then
+    Value := FWatches.Items[cbxWatchHistory.ItemIndex].Name
+  else
+    Value := FWatches.Items[cbxWatchHistory.ItemIndex].Values[Cell.Row];
+end;
+
+procedure TfrmMain.FLatestWatchInspectorGetCellText(Sender: TObject;
+  Cell: TGridCell; var Value: string);
+begin
+  if Cell.Col = 0 then
+  begin
+    Value := FWatches.Items[Cell.Row].Name;
+  end
+  else
+  begin
+    Value := FWatches.Items[Cell.Row].CurrentValue
+  end;
+end;
 
 procedure TfrmMain.FSelectedWatchInspectorGetCellText(Sender: TObject;
   Cell: TGridCell; var Value: string);
@@ -1122,10 +1110,28 @@ begin
     Value := FWatches.Items[Cell.Row].CurrentValue;
 end;
 
+procedure TfrmMain.pgcWatchesChange(Sender: TObject);
+begin
+  UpdateWatches;
+end;
+
 procedure TfrmMain.cbxWatchHistorySelect(Sender: TObject);
 begin
   UpdateWatchHistory;
 end;
+{$ENDREGION}
+
+{$REGION 'Receiver events'}
+procedure TfrmMain.FIPCServerMessage(Sender: TObject);
+begin
+  ProcessMessage(TWinIPCServer(Sender).MsgData);
+end;
+
+procedure TfrmMain.tmrPollTimer(Sender: TObject);
+begin
+  ZMQPoll;
+end;
+{$ENDREGION}
 {$ENDREGION}
 
 {$REGION 'property access methods'}
@@ -1334,6 +1340,10 @@ begin
         end;
         FLogTreeView.ValidateNode(FLastNode, False);
       end;
+//      lmtValue:
+//      begin
+//        FLastNode := FLogTreeView.AddChild(FLastParent, nil);
+//      end;
       lmtWatch, lmtCounter:
       begin
         FWatches.Add(
@@ -1351,40 +1361,16 @@ begin
       begin
         FLastNode := FLogTreeView.AddChild(FLastParent, nil);
       end;
-      FLogTreeView.ValidateNode(FLastNode, False);
-      if FExpandParent then
-      begin
-        FLogTreeView.Expanded[FLastParent] := True;
-        FExpandParent := False;
-      end;
+    end;
+    FLogTreeView.ValidateNode(FLastNode, False);
+    if FExpandParent then
+    begin
+      FLogTreeView.Expanded[FLastParent] := True;
+      FExpandParent := False;
     end;
   finally
     FLogTreeView.EndUpdate;
   end;
-end;
-
-procedure TfrmMain.ProcessMessage2(AStream: TStream);
-var
-  LTextSize : Integer;
-  LDataSize : Integer;
-  LMD       : TLogMessageData;
-begin
-  Guard.CheckNotNull(AStream, 'AStream');
-  LMD := TLogMessageData.Create;
-  LTextSize := 0;
-  LDataSize := 0;
-  AStream.Seek(0, soFromBeginning);
-  AStream.ReadBuffer(LMD.FMsgType, SizeOf(Integer));
-  AStream.ReadBuffer(LMD.FMsgTime, SizeOf(TDateTime));
-  AStream.ReadBuffer(LTextSize, SizeOf(Integer));
-  SetLength(LMD.FMsgText, LTextSize);
-  AStream.ReadBuffer(LMD.FMsgText[1], LTextSize);
-  AStream.ReadBuffer(LDataSize, SizeOf(Integer));
-  if LDataSize > 0 then
-  begin
-    LMD.MsgData.CopyFrom(AStream, LDataSize);
-  end;
-  FMessages.Add(LMD);
 end;
 
 procedure TfrmMain.UpdateActions;

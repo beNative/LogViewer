@@ -98,7 +98,17 @@ uses
   DDuce.Logger.Base in '..\..\libraries\dduce\Source\Modules\Logger\DDuce.Logger.Base.pas',
   DDuce.Logger.Channels.WinODS in '..\..\libraries\dduce\Source\Modules\Logger\DDuce.Logger.Channels.WinODS.pas',
   JsonDataObjects in '..\..\libraries\JsonDataObjects\Source\JsonDataObjects.pas',
-  LogViewer.Settings in 'LogViewer.Settings.pas';
+  LogViewer.Settings in 'LogViewer.Settings.pas',
+  LogViewer.MessageViewer in 'LogViewer.MessageViewer.pas' {frmMessageViewer},
+  LogViewer.LogMessageData in 'LogViewer.LogMessageData.pas',
+  LogViewer.CallStackData in 'LogViewer.CallStackData.pas',
+  LogViewer.Receivers.WinIPC in 'LogViewer.Receivers.WinIPC.pas',
+  LogViewer.Receivers.ZeroMQ in 'LogViewer.Receivers.ZeroMQ.pas',
+  LogViewer.Interfaces in 'LogViewer.Interfaces.pas',
+  LogViewer.Receivers.WinODS in 'LogViewer.Receivers.WinODS.pas',
+  DDuce.Editor.Filter.Data in '..\..\libraries\dduce\Source\Modules\Editor\DDuce.Editor.Filter.Data.pas',
+  DDuce.Editor.Filter.Settings in '..\..\libraries\dduce\Source\Modules\Editor\DDuce.Editor.Filter.Settings.pas',
+  uCustomImageDrawHook in 'uCustomImageDrawHook.pas';
 
 {$R *.res}
 

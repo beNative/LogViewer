@@ -227,8 +227,6 @@ object frmMain: TfrmMain
       BevelWidth = 2
       ParentBackground = False
       TabOrder = 1
-      ExplicitLeft = 292
-      ExplicitTop = 6
       object pnlFilter: TPanel
         Left = 0
         Top = 0
