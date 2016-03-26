@@ -32,6 +32,8 @@ uses
   System.Classes,
   Vcl.ExtCtrls,
 
+  Spring,
+
   ZeroMQ,
 
   LogViewer.Interfaces;
@@ -51,6 +53,7 @@ type
 
     function ConnectSubscriber: Boolean;
     procedure CloseSubscriber;
+    function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
 
   protected
     procedure DoReceiveMessage(AStream : TStream);
@@ -63,6 +66,9 @@ type
 
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
+
+    property OnReceiveMessage: IEvent<TReceiveMessageEvent>
+      read GetOnReceiveMessage;
   end;
 
 implementation
@@ -90,6 +96,11 @@ end;
 function TZeroMQChannelReceiver.GetEnabled: Boolean;
 begin
   Result := FEnabled;
+end;
+
+function TZeroMQChannelReceiver.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
+begin
+//
 end;
 
 procedure TZeroMQChannelReceiver.SetEnabled(const Value: Boolean);

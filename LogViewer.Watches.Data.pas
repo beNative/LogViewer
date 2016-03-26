@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.WatchList;
+unit LogViewer.Watches.Data;
 
 { Copyright (C) 2006 Luiz Américo Pereira Câmara
 

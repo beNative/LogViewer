@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.MainForm;
+unit LogViewer.CallStack.View;
 
 interface
 
@@ -23,39 +23,50 @@ uses
   System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
 
-  LogViewer.Messages.View, LogViewer.Interfaces, LogViewer.Receivers.WinIPC,
-  LogViewer.Factories;
+  VirtualTrees,
+
+  Spring.Collections,
+
+  DSharp.Windows.TreeViewPresenter, DSharp.Windows.ColumnDefinitions,
+  DSharp.Core.DataTemplates,
+
+  LogViewer.CallStack.Data;
 
 type
-  TfrmMain = class(TForm)
+  TfrmCallStackView = class(TForm)
   private
-    FMessageViewer : TfrmMessagesView;
-    FReceiver      : IChannelReceiver;
-  public
-    procedure AfterConstruction; override;
+    FTVPCallStack : TTreeViewPresenter;
+    FVSTCallStack : TVirtualStringTree;
+    FCallStack    : IObjectList;
 
+  public
+    constructor Create(
+      AOwner : TComponent;
+      AData  : IObjectList
+    ); reintroduce; virtual;
   end;
 
-var
-  frmMain: TfrmMain;
 
 implementation
 
 {$R *.dfm}
 
+uses
+  DDuce.Factories;
+
 {$REGION 'construction and destruction'}
-procedure TfrmMain.AfterConstruction;
+constructor TfrmCallStackView.Create(AOwner: TComponent; AData: IObjectList);
 begin
-  inherited AfterConstruction;
-  FReceiver := TWinIPChannelReceiver.Create;
-  FMessageViewer := TLogViewerFactories.CreateMessageView(
+  inherited Create(AOwner);
+  FCallStack := AData;
+  FVSTCallStack := TFactories.CreateVirtualStringTree(Self, Self);
+  FTVPCallStack := TFactories.CreateTreeViewPresenter(
     Self,
-    Self,
-    FReceiver
+    FVSTCallStack,
+    FCallStack as IObjectList
   );
-  FReceiver.Enabled := True;
+  FTVPCallStack.ShowHeader := False;
 end;
 {$ENDREGION}
-
 
 end.

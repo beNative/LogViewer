@@ -1,9 +1,8 @@
-object frmMain: TfrmMain
+object frmCallStackView: TfrmCallStackView
   Left = 0
   Top = 0
-  Caption = 'Logviewer'
-  ClientHeight = 753
-  ClientWidth = 1014
+  ClientHeight = 411
+  ClientWidth = 852
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

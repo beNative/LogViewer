@@ -136,8 +136,8 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="LogViewer.MainForm.pas">
-            <Form>frmMain</Form>
+        <DCCReference Include="LogViewer.MainForm.old.pas">
+            <Form>frmMainOld</Form>
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="..\..\libraries\dduce\Source\Modules\DDuce.Factories.pas"/>
@@ -256,7 +256,7 @@
         <DCCReference Include="..\..\libraries\dduce\Source\Modules\Logger\DDuce.Logger.Channels.pas"/>
         <DCCReference Include="..\..\libraries\dduce\Source\Modules\Logger\DDuce.Logger.Interfaces.pas"/>
         <DCCReference Include="..\..\libraries\dduce\Source\Modules\Logger\DDuce.Logger.Factories.pas"/>
-        <DCCReference Include="LogViewer.WatchList.pas"/>
+        <DCCReference Include="LogViewer.Watches.Data.pas"/>
         <DCCReference Include="..\..\libraries\dduce\Source\DDuce.WinIPC.Server.pas"/>
         <DCCReference Include="ZeroMQ.API.pas"/>
         <DCCReference Include="ZeroMQ.pas"/>
@@ -264,12 +264,12 @@
         <DCCReference Include="..\..\libraries\dduce\Source\Modules\Logger\DDuce.Logger.Channels.WinODS.pas"/>
         <DCCReference Include="..\..\libraries\JsonDataObjects\Source\JsonDataObjects.pas"/>
         <DCCReference Include="LogViewer.Settings.pas"/>
-        <DCCReference Include="LogViewer.MessageViewer.pas">
-            <Form>frmMessageViewer</Form>
+        <DCCReference Include="LogViewer.Messages.View.pas">
+            <Form>frmMessagesView</Form>
             <FormType>dfm</FormType>
         </DCCReference>
-        <DCCReference Include="LogViewer.LogMessageData.pas"/>
-        <DCCReference Include="LogViewer.CallStackData.pas"/>
+        <DCCReference Include="LogViewer.Messages.Data.pas"/>
+        <DCCReference Include="LogViewer.CallStack.Data.pas"/>
         <DCCReference Include="LogViewer.Receivers.WinIPC.pas"/>
         <DCCReference Include="LogViewer.Receivers.ZeroMQ.pas"/>
         <DCCReference Include="LogViewer.Interfaces.pas"/>
@@ -277,6 +277,44 @@
         <DCCReference Include="..\..\libraries\dduce\Source\Modules\Editor\DDuce.Editor.Filter.Data.pas"/>
         <DCCReference Include="..\..\libraries\dduce\Source\Modules\Editor\DDuce.Editor.Filter.Settings.pas"/>
         <DCCReference Include="uCustomImageDrawHook.pas"/>
+        <DCCReference Include="LogViewer.Resources.pas"/>
+        <DCCReference Include="..\..\libraries\dduce\Source\Modules\ObjectInspector\DDuce.ObjectInspector.pas">
+            <Form>frmComponentInspector</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="..\..\libraries\dduce\Source\Dependencies\zControls\zBase.pas"/>
+        <DCCReference Include="..\..\libraries\dduce\Source\Dependencies\zControls\zCanvasStack.pas"/>
+        <DCCReference Include="..\..\libraries\dduce\Source\Dependencies\zControls\zCollectionEditor.pas">
+            <Form>zCollectionEditorDialog</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="..\..\libraries\dduce\Source\Dependencies\zControls\zControlsReg.pas"/>
+        <DCCReference Include="..\..\libraries\dduce\Source\Dependencies\zControls\zGraphicDialog.pas">
+            <Form>GraphicDialog</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="..\..\libraries\dduce\Source\Dependencies\zControls\zObjInspDialogs.pas"/>
+        <DCCReference Include="..\..\libraries\dduce\Source\Dependencies\zControls\zObjInspector.pas"/>
+        <DCCReference Include="..\..\libraries\dduce\Source\Dependencies\zControls\zObjInspList.pas"/>
+        <DCCReference Include="..\..\libraries\dduce\Source\Dependencies\zControls\zRecList.pas"/>
+        <DCCReference Include="..\..\libraries\dduce\Source\Dependencies\zControls\zStringsDialog.pas">
+            <Form>StringsDialog</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="..\..\libraries\dduce\Source\Dependencies\zControls\zUtils.pas"/>
+        <DCCReference Include="LogViewer.MainForm.pas">
+            <Form>frmMain</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="LogViewer.Watches.View.pas">
+            <Form>frmWatchesView</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="LogViewer.CallStack.View.pas">
+            <Form>frmCallStackView</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="LogViewer.Factories.pas"/>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

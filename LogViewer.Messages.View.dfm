@@ -1,4 +1,4 @@
-object frmMessageViewer: TfrmMessageViewer
+object frmMessagesView: TfrmMessagesView
   Left = 0
   Top = 0
   ClientHeight = 806
@@ -53,10 +53,6 @@ object frmMessageViewer: TfrmMessageViewer
       end
       object tsImageViewer: TTabSheet
         Caption = 'Image'
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object imgViewer: TImage
           Left = 0
           Top = 0
@@ -68,17 +64,9 @@ object frmMessageViewer: TfrmMessageViewer
       end
       object tsInspector: TTabSheet
         Caption = 'Inspector'
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
       end
       object tsHexEditor: TTabSheet
         Caption = 'Hex edtor'
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
       end
     end
     object pnlMessageContent: TPanel
@@ -215,41 +203,6 @@ object frmMessageViewer: TfrmMessageViewer
         Caption = 'pnlLeftBottom'
         ShowCaption = False
         TabOrder = 1
-        object pgcWatches: TPageControl
-          Left = 0
-          Top = 31
-          Width = 353
-          Height = 389
-          ActivePage = tsLatest
-          Align = alClient
-          TabOrder = 0
-          object tsLatest: TTabSheet
-            Caption = 'Latest'
-          end
-          object tsSelected: TTabSheet
-            Caption = 'Selected'
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 278
-            ExplicitHeight = 0
-          end
-          object tsHistory: TTabSheet
-            Caption = 'History'
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 278
-            ExplicitHeight = 0
-            object cbxWatchHistory: TComboBox
-              Left = 0
-              Top = 0
-              Width = 345
-              Height = 21
-              Align = alTop
-              Style = csDropDownList
-              TabOrder = 0
-            end
-          end
-        end
         object pnlWatches: TPanel
           AlignWithMargins = True
           Left = 3
@@ -268,7 +221,7 @@ object frmMessageViewer: TfrmMessageViewer
           Font.Style = [fsBold]
           ParentBackground = False
           ParentFont = False
-          TabOrder = 1
+          TabOrder = 0
         end
       end
       object pnlCallStack: TPanel

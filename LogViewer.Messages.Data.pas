@@ -14,36 +14,47 @@
   limitations under the License.
 }
 
-
-unit LogViewer.LogMessageData;
+unit LogViewer.Messages.Data;
 
 interface
 
 uses
-  System.Classes;
+  System.Classes,
+
+  Spring.Collections,
+
+  DDuce.Logger.Interfaces;
 
 type
   TLogMessageData = class
   private
-    FMsgType : Integer;
-    FMsgTime : TDateTime;
-    FMsgText : AnsiString;
-    FMsgData : TStream;
+    FMsgType  : TLogMessageType;
+    FMsgTime  : TDateTime;
+    FMsgText  : string;
+    FMsgData  : TStream;
+    FMsgLevel : Integer;
+    FIndex    : Integer;
 
   public
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 
+    property Index: Integer
+      read FIndex write FIndex;
+
+    property MsgLevel: Integer
+      read FMsgLevel write FMsgLevel;
+
     property MsgData: TStream
       read FMsgData;
 
-    property MsgType : Integer
+    property MsgType : TLogMessageType
       read FMsgType write FMsgType;
 
     property MsgTime: TDateTime
       read FMsgTime write FMsgTime;
 
-    property MsgText: AnsiString
+    property MsgText: string
       read FMsgText write FMsgText;
 
   end;

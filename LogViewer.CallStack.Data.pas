@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.CallStackData;
+unit LogViewer.CallStack.Data;
 
 { Data class holding information shown in the callstack list. }
 

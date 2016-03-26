@@ -24,6 +24,8 @@ uses
   System.Classes,
   Vcl.ExtCtrls,
 
+  Spring,
+
   DDuce.WinIPC.Server,
 
   LogViewer.Interfaces;
@@ -31,8 +33,11 @@ uses
 type
   TWinIPChannelReceiver = class(TInterfacedObject, IChannelReceiver)
   private
-     FEnabled   : Boolean;
-     FIPCServer : TWinIPCServer;
+     FEnabled          : Boolean;
+     FIPCServer        : TWinIPCServer;
+     FOnReceiveMessage : Event<TReceiveMessageEvent>;
+
+    function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
 
   protected
     function GetEnabled: Boolean;
@@ -48,6 +53,9 @@ type
 
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
+
+    property OnReceiveMessage: IEvent<TReceiveMessageEvent>
+      read GetOnReceiveMessage;
 
   end;
 
@@ -75,6 +83,11 @@ begin
   Result := FEnabled;
 end;
 
+function TWinIPChannelReceiver.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
+begin
+  Result := FOnReceiveMessage;
+end;
+
 procedure TWinIPChannelReceiver.SetEnabled(const Value: Boolean);
 begin
   if Value <> Enabled then
@@ -91,7 +104,7 @@ end;
 {$REGION 'event dispatch methods'}
 procedure TWinIPChannelReceiver.DoReceiveMessage(AStream: TStream);
 begin
-//
+  FOnReceiveMessage.Invoke(Self, AStream);
 end;
 {$ENDREGION}
 

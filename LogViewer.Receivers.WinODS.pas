@@ -21,7 +21,9 @@ interface
 { Receives messages posted by the OutputDebugString Windows API routine. }
 
 uses
-  LogViewer.Interfaces;
+  LogViewer.Interfaces,
+
+  Spring;
 
 type
   TWinODShannelReceiver = class(TInterfacedObject, IChannelReceiver)
@@ -31,6 +33,7 @@ type
   protected
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
+    function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
 
   public
     procedure AfterConstruction; override;
@@ -38,6 +41,10 @@ type
 
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
+
+
+    property OnReceiveMessage: IEvent<TReceiveMessageEvent>
+      read GetOnReceiveMessage;
   end;
 
 implementation
@@ -59,6 +66,11 @@ end;
 function TWinODShannelReceiver.GetEnabled: Boolean;
 begin
   Result := FEnabled;
+end;
+
+function TWinODShannelReceiver.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
+begin
+//
 end;
 
 procedure TWinODShannelReceiver.SetEnabled(const Value: Boolean);

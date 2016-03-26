@@ -18,14 +18,29 @@ unit LogViewer.Interfaces;
 
 interface
 
+uses
+  System.Classes,
+
+  Spring;
+
+type
+  TReceiveMessageEvent = procedure(
+    Sender  : TObject;
+    AStream : TStream
+  ) of object;
+
 type
   IChannelReceiver = interface
   ['{7C96D7BD-3D10-4A9A-90AF-43E755859B37}']
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
+    function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
 
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
+
+    property OnReceiveMessage: IEvent<TReceiveMessageEvent>
+      read GetOnReceiveMessage;
   end;
 
 implementation
