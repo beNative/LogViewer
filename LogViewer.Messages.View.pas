@@ -48,13 +48,6 @@ type
     tsHexEditor       : TTabSheet;
     pnlMessageContent : TPanel;
     splVertical       : TSplitter;
-    pnlMessages       : TPanel;
-    pnlFilter         : TPanel;
-    btnExpandAll      : TSpeedButton;
-    btnCollapseAll    : TSpeedButton;
-    edtMessageFilter  : TLabeledEdit;
-    btnFilterMessages : TButton;
-    chkAutoFilter     : TCheckBox;
     splLeftVertical   : TSplitter;
     pnlLeft           : TPanel;
     pnlCallStackWatch : TPanel;
@@ -63,6 +56,13 @@ type
     pnlWatches        : TPanel;
     pnlCallStack      : TPanel;
     pnlCallStackTitle : TPanel;
+    pnlMessages: TPanel;
+    pnlFilter: TPanel;
+    btnExpandAll: TSpeedButton;
+    btnCollapseAll: TSpeedButton;
+    edtMessageFilter: TLabeledEdit;
+    btnFilterMessages: TButton;
+    chkAutoFilter: TCheckBox;
     {$ENDREGION}
 
   private
@@ -75,6 +75,7 @@ type
     FCallStackView   : TfrmCallStackView;
     FWatchesView     : TfrmWatchesView;
     FCurrentMessage  : TLogMessageData; // last received log message
+    FFocusedMessage  : TLogMessageData;
 
     FEditorManager   : IEditorManager;
     FEditorSettings  : IEditorSettings;
@@ -113,7 +114,9 @@ uses
   DDuce.Editor.Factories,
   DDuce.Logger.Interfaces,
 
-  LogViewer.Factories;
+  DSharp.Windows.ColumnDefinitions.ControlTemplate,
+
+  LogViewer.Messages.Templates, LogViewer.Factories;
 
 {$R *.dfm}
 
@@ -164,6 +167,10 @@ begin
     FLogTreeView,
     FMessages as IObjectList
   );
+  FTVPMessages.View.ItemTemplate := TLogTemplate.Create(
+    FTVPMessages.ColumnDefinitions,
+    FMessages
+  );
   FTVPMessages.OnSelectionChanged := FTVPMessagesSelectionChanged;
 end;
 
@@ -188,6 +195,8 @@ end;
 
 procedure TfrmMessagesView.FTVPMessagesSelectionChanged(Sender: TObject);
 begin
+  FFocusedMessage := FTVPMessages.SelectedItem as TLogMessageData;
+  FEditorView.Text := FFocusedMessage.Children.Count.ToString;
   UpdateCallStack;
 end;
 {$ENDREGION}
@@ -209,30 +218,33 @@ begin
   LDataSize := 0;
   AStream.Seek(0, soFromBeginning);
   AStream.ReadBuffer(LType, SizeOf(Integer));
-  LMD.MsgType := TLogMessageType(LType);
+  LMD.MessageType := TLogMessageType(LType);
   AStream.ReadBuffer(LTime, SizeOf(TDateTime));
-  LMD.MsgTime := LTime;
+  LMD.TimeStamp := LTime;
   AStream.ReadBuffer(LTextSize, SizeOf(Integer));
   SetLength(LText, LTextSize);
   AStream.ReadBuffer(LText[1], LTextSize);
-  LMD.MsgText := LText;
+  LMD.Text := LText;
   AStream.ReadBuffer(LDataSize, SizeOf(Integer));
   if LDataSize > 0 then
   begin
-    LMD.MsgData.CopyFrom(AStream, LDataSize);
+    LMD.Data.CopyFrom(AStream, LDataSize);
   end;
-
-  if LMD.MsgType = lmtLeaveMethod then
+  if LMD.MessageType = lmtLeaveMethod then
   begin
-    LMD.MsgLevel := FCurrentMessage.MsgLevel - 1
+    LMD.Level  := FCurrentMessage.Level - 1;
+    if Assigned(FCurrentMessage.Parent) then
+      LMD.Parent := FCurrentMessage.Parent.Parent;
   end
   else
   begin
     if Assigned(FCurrentMessage) then
     begin
-      if FCurrentMessage.MsgType = lmtEnterMethod then
+      if FCurrentMessage.MessageType = lmtEnterMethod then
       begin
-        LMD.MsgLevel := FCurrentMessage.MsgLevel + 1;
+        LMD.Level  := FCurrentMessage.Level + 1;
+        LMD.Parent := FCurrentMessage;
+        LMD.Parent.Children.Add(LMD);
       end
   //    else if LMD.MsgType = lmtLeaveMethod then
   //    begin
@@ -240,41 +252,43 @@ begin
   //    end
       else
       begin
-        LMD.MsgLevel := FCurrentMessage.MsgLevel
+        LMD.Level  := FCurrentMessage.Level;
+        LMD.Parent := FCurrentMessage.Parent;
+        if Assigned(LMD.Parent) then
+          LMD.Parent.Children.Add(LMD);
       end;
     end
     else
     begin
-      LMD.MsgLevel := 0;
+      LMD.Level := 0;
     end;
   end;
   FMessages.Add(LMD);
   FCurrentMessage := LMD;
 end;
 
-
 procedure TfrmMessagesView.UpdateCallStack;
 var
-  I   : Integer;
-  CSD : TCallStackData;
+  I        : Integer;
+  CSD      : TCallStackData;
+  LMessage : TLogMessageData;
 begin
   FCallStack.Clear;
-  if Assigned(FCurrentMessage) then
+  if Assigned(FFocusedMessage) then
   begin
-//    I := FCurrentMessage.MsgLevel;
-//    while I > 0 do
-//    begin
-//      CSD := TCallStackData.Create;
-//      CSD.Title := PNodeData(FLogTreeView.GetNodeData(ANode^.Parent))^.Title;
-//      CSD.Level := I;
-//      FCallStack.Add(CSD);
-//      ANode := ANode^.Parent;
-//      Dec(I);
-//    end;
-    //FTVPCallStack.TreeView.Header.AutoFitColumns;
+    I := FFocusedMessage.Level;
+    LMessage := FFocusedMessage;
+    while I > 0 do
+    begin
+      CSD := TCallStackData.Create;
+      CSD.Title := LMessage.Parent.Text;
+      CSD.Level := I;
+      FCallStack.Add(CSD);
+      LMessage := LMessage.Parent;
+      Dec(I);
+    end;
   end;
 end;
-
 {$ENDREGION}
 
 end.

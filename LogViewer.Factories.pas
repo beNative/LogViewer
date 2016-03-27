@@ -26,7 +26,7 @@ uses
 
   LogViewer.CallStack.View, LogViewer.Watches.View, LogViewer.Messages.View,
   LogViewer.CallStack.Data, LogViewer.Watches.Data, LogViewer.Messages.Data,
-  LogViewer.Interfaces;
+  LogViewer.Interfaces, LogViewer.Manager, LogViewer.Settings;
 
 type
   TLogViewerFactories = class sealed
@@ -48,6 +48,13 @@ type
       AParent   : TWinControl;
       AReceiver : IChannelReceiver
     ): TfrmMessagesView;
+
+    class function CreateManager(
+      AOwner : TComponent
+    ): TdmManager;
+
+    class function CreateSettings(
+    ): TLogViewerSettings;
   end;
 
 implementation
@@ -65,6 +72,12 @@ begin
   Result.Visible     := True;
 end;
 
+class function TLogViewerFactories.CreateManager(
+  AOwner: TComponent): TdmManager;
+begin
+  Result := TdmManager.Create(AOwner);
+end;
+
 class function TLogViewerFactories.CreateMessageView(AOwner: TComponent;
   AParent: TWinControl; AReceiver: IChannelReceiver): TfrmMessagesView;
 begin
@@ -73,6 +86,11 @@ begin
   Result.Align       := alClient;
   Result.BorderStyle := bsNone;
   Result.Visible     := True;
+end;
+
+class function TLogViewerFactories.CreateSettings: TLogViewerSettings;
+begin
+  Result := TLogViewerSettings.Create;
 end;
 
 class function TLogViewerFactories.CreateWatchesView(AOwner: TComponent;

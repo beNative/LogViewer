@@ -24,15 +24,19 @@ uses
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
 
   LogViewer.Messages.View, LogViewer.Interfaces, LogViewer.Receivers.WinIPC,
-  LogViewer.Factories;
+  LogViewer.Factories, LogViewer.Manager, LogViewer.Settings;
 
 type
   TfrmMain = class(TForm)
   private
     FMessageViewer : TfrmMessagesView;
     FReceiver      : IChannelReceiver;
+    FManager       : TdmManager;
+    FSettings      : TLogViewerSettings;
+
   public
     procedure AfterConstruction; override;
+    procedure BeforeDestruction; override;
 
   end;
 
@@ -47,7 +51,9 @@ implementation
 procedure TfrmMain.AfterConstruction;
 begin
   inherited AfterConstruction;
+  FSettings := TLogViewerSettings.Create;
   FReceiver := TWinIPChannelReceiver.Create;
+  FManager := TLogViewerFactories.CreateManager(Self);
   FMessageViewer := TLogViewerFactories.CreateMessageView(
     Self,
     Self,
@@ -55,7 +61,12 @@ begin
   );
   FReceiver.Enabled := True;
 end;
-{$ENDREGION}
 
+procedure TfrmMain.BeforeDestruction;
+begin
+  FSettings.Free;
+  inherited BeforeDestruction;
+end;
+{$ENDREGION}
 
 end.

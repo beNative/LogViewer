@@ -20,13 +20,8 @@ object frmWatchesView: TfrmWatchesView
     ActivePage = tsLatest
     Align = alClient
     TabOrder = 0
-    ExplicitTop = 22
-    ExplicitWidth = 353
-    ExplicitHeight = 389
     object tsLatest: TTabSheet
       Caption = 'Latest'
-      ExplicitWidth = 345
-      ExplicitHeight = 361
     end
     object tsSelected: TTabSheet
       Caption = 'Selected'

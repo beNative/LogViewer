@@ -28,12 +28,15 @@ uses
 type
   TLogMessageData = class
   private
-    FMsgType  : TLogMessageType;
-    FMsgTime  : TDateTime;
-    FMsgText  : string;
-    FMsgData  : TStream;
-    FMsgLevel : Integer;
-    FIndex    : Integer;
+    FMessageType : TLogMessageType;
+    FTimeStamp   : TDateTime;
+    FText        : string;
+    FData        : TStream;
+    FLevel       : Integer;
+    FIndex       : Integer;
+    FParent      : TLogMessageData;
+    FChildren    : IList<TLogMessageData>;
+    function GetChildren: IList<TLogMessageData>;
 
   public
     procedure AfterConstruction; override;
@@ -42,20 +45,26 @@ type
     property Index: Integer
       read FIndex write FIndex;
 
-    property MsgLevel: Integer
-      read FMsgLevel write FMsgLevel;
+    property Parent: TLogMessageData
+      read FParent write FParent;
 
-    property MsgData: TStream
-      read FMsgData;
+    property Level: Integer
+      read FLevel write FLevel;
 
-    property MsgType : TLogMessageType
-      read FMsgType write FMsgType;
+    property Data: TStream
+      read FData;
 
-    property MsgTime: TDateTime
-      read FMsgTime write FMsgTime;
+    property MessageType : TLogMessageType
+      read FMessageType write FMessageType;
 
-    property MsgText: string
-      read FMsgText write FMsgText;
+    property TimeStamp: TDateTime
+      read FTimeStamp write FTimeStamp;
+
+    property Text: string
+      read FText write FText;
+
+    property Children: IList<TLogMessageData>
+      read GetChildren;
 
   end;
 
@@ -65,13 +74,22 @@ implementation
 procedure TLogMessageData.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FMsgData := TMemoryStream.Create;
+  FData := TMemoryStream.Create;
+  FChildren := TCollections.CreateObjectList<TLogMessageData>(False);
 end;
 
 procedure TLogMessageData.BeforeDestruction;
 begin
-  FMsgData.Free;
+  FData.Free;
+  FParent := nil;
   inherited BeforeDestruction;
+end;
+{$ENDREGION}
+
+{$REGION 'property access methods'}
+function TLogMessageData.GetChildren: IList<TLogMessageData>;
+begin
+  Result := FChildren;
 end;
 {$ENDREGION}
 

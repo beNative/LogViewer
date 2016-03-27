@@ -39,13 +39,20 @@ type
     FVSTCallStack : TVirtualStringTree;
     FCallStack    : IObjectList;
 
+    procedure FCallStackChanged(
+      Sender     : TObject;
+      const Item : TObject;
+      Action     : TCollectionChangedAction
+    );
+
   public
     constructor Create(
       AOwner : TComponent;
       AData  : IObjectList
     ); reintroduce; virtual;
-  end;
+    procedure BeforeDestruction; override;
 
+  end;
 
 implementation
 
@@ -59,6 +66,7 @@ constructor TfrmCallStackView.Create(AOwner: TComponent; AData: IObjectList);
 begin
   inherited Create(AOwner);
   FCallStack := AData;
+  FCallStack.OnChanged.Add(FCallStackChanged);
   FVSTCallStack := TFactories.CreateVirtualStringTree(Self, Self);
   FTVPCallStack := TFactories.CreateTreeViewPresenter(
     Self,
@@ -66,6 +74,22 @@ begin
     FCallStack as IObjectList
   );
   FTVPCallStack.ShowHeader := False;
+end;
+
+procedure TfrmCallStackView.BeforeDestruction;
+begin
+  FCallStack.OnChanged.Remove(FCallStackChanged);
+  FCallStack := nil;
+  inherited BeforeDestruction;
+end;
+{$ENDREGION}
+
+{$REGION 'event handlers'}
+procedure TfrmCallStackView.FCallStackChanged(Sender: TObject;
+  const Item: TObject; Action: TCollectionChangedAction);
+begin
+  FTVPCallStack.Refresh;
+  FTVPCallStack.TreeView.Header.AutoFitColumns;
 end;
 {$ENDREGION}
 

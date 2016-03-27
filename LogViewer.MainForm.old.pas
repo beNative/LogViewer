@@ -394,7 +394,6 @@ begin
   inherited AfterConstruction;
   FSettings := TLogViewerSettings.Create;
   FZMQStream := TStringStream.Create;
-
   CreateEditor;
   CreateLogTreeView;
   CreateWatches;
@@ -403,9 +402,8 @@ begin
   FActiveMessages := ALL_MESSAGES;
   CreateIPCServer;
   CreateZMQSubscriber;
-  LoadSettings;
+//  LoadSettings;
   InspectComponent(FLogTreeView);
-
 end;
 
 procedure TfrmMainOld.BeforeDestruction;

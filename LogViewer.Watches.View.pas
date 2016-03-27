@@ -86,7 +86,6 @@ type
     ); reintroduce; virtual;
     procedure BeforeDestruction; override;
 
-
     procedure UpdateView;
 
   end;
@@ -150,12 +149,12 @@ end;
 procedure TfrmWatchesView.FMessagesChanged(Sender: TObject;
   const Item: TLogMessageData; Action: TCollectionChangedAction);
 begin
-  if (Action = caAdded) and (Item.MsgType in [lmtWatch, lmtCounter]) then
+  if (Action = caAdded) and (Item.MessageType in [lmtWatch, lmtCounter]) then
   begin
     FWatches.Add(
-      Item.MsgText,
+      Item.Text,
       FMessages.Count,
-      Item.MsgType = lmtCounter
+      Item.MessageType = lmtCounter
     );
     UpdateView;
   end;
@@ -173,7 +172,7 @@ end;
 procedure TfrmWatchesView.FWatchesNewVariable(const AVariable: string;
   AIndex: Integer);
 begin
-  //cbxWatchHistory.Items.Add(AVariable);
+  cbxWatchHistory.Items.Add(AVariable);
 end;
 
 procedure TfrmWatchesView.FWatchesUpdate(const AVariable, AValue: string);

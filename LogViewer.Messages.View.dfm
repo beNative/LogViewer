@@ -2,7 +2,7 @@ object frmMessagesView: TfrmMessagesView
   Left = 0
   Top = 0
   ClientHeight = 806
-  ClientWidth = 1392
+  ClientWidth = 1389
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -13,7 +13,7 @@ object frmMessagesView: TfrmMessagesView
   PixelsPerInch = 96
   TextHeight = 13
   object splVertical: TSplitter
-    Left = 954
+    Left = 951
     Top = 0
     Width = 8
     Height = 806
@@ -32,7 +32,7 @@ object frmMessagesView: TfrmMessagesView
     ExplicitHeight = 814
   end
   object pnlRight: TPanel
-    Left = 962
+    Left = 959
     Top = 0
     Width = 430
     Height = 806
@@ -53,6 +53,10 @@ object frmMessagesView: TfrmMessagesView
       end
       object tsImageViewer: TTabSheet
         Caption = 'Image'
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object imgViewer: TImage
           Left = 0
           Top = 0
@@ -64,9 +68,17 @@ object frmMessagesView: TfrmMessagesView
       end
       object tsInspector: TTabSheet
         Caption = 'Inspector'
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
       end
       object tsHexEditor: TTabSheet
         Caption = 'Hex edtor'
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
       end
     end
     object pnlMessageContent: TPanel
@@ -90,83 +102,6 @@ object frmMessagesView: TfrmMessagesView
       TabOrder = 1
     end
   end
-  object pnlMessages: TPanel
-    Left = 362
-    Top = 0
-    Width = 592
-    Height = 806
-    Align = alClient
-    BevelOuter = bvNone
-    BevelWidth = 2
-    ParentBackground = False
-    TabOrder = 1
-    object pnlFilter: TPanel
-      Left = 0
-      Top = 0
-      Width = 592
-      Height = 30
-      Align = alTop
-      BevelOuter = bvNone
-      TabOrder = 0
-      DesignSize = (
-        592
-        30)
-      object btnExpandAll: TSpeedButton
-        Left = 3
-        Top = 6
-        Width = 23
-        Height = 22
-        Flat = True
-      end
-      object btnCollapseAll: TSpeedButton
-        Left = 24
-        Top = 6
-        Width = 23
-        Height = 22
-        Flat = True
-      end
-      object edtMessageFilter: TLabeledEdit
-        Left = 126
-        Top = 8
-        Width = 261
-        Height = 21
-        Alignment = taCenter
-        Anchors = [akLeft, akTop, akRight]
-        EditLabel.Width = 71
-        EditLabel.Height = 13
-        EditLabel.Caption = 'Message filter:'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Style = []
-        LabelPosition = lpLeft
-        ParentFont = False
-        TabOrder = 0
-        TextHint = 'filter log messages'
-      end
-      object btnFilterMessages: TButton
-        Left = 480
-        Top = 6
-        Width = 102
-        Height = 25
-        Anchors = [akTop, akRight]
-        Default = True
-        TabOrder = 1
-      end
-      object chkAutoFilter: TCheckBox
-        Left = 402
-        Top = 10
-        Width = 71
-        Height = 17
-        Anchors = [akTop, akRight]
-        Caption = 'Autofilter'
-        Checked = True
-        State = cbChecked
-        TabOrder = 2
-      end
-    end
-  end
   object pnlLeft: TPanel
     Left = 0
     Top = 0
@@ -174,7 +109,7 @@ object frmMessagesView: TfrmMessagesView
     Height = 806
     Align = alLeft
     BevelOuter = bvNone
-    TabOrder = 2
+    TabOrder = 1
     object pnlCallStackWatch: TPanel
       Left = 0
       Top = 0
@@ -252,6 +187,85 @@ object frmMessagesView: TfrmMessagesView
           ParentFont = False
           TabOrder = 0
         end
+      end
+    end
+  end
+  object pnlMessages: TPanel
+    Left = 362
+    Top = 0
+    Width = 589
+    Height = 806
+    Align = alClient
+    BevelOuter = bvNone
+    BevelWidth = 2
+    Constraints.MinHeight = 806
+    Constraints.MinWidth = 589
+    ParentBackground = False
+    TabOrder = 2
+    object pnlFilter: TPanel
+      Left = 0
+      Top = 0
+      Width = 589
+      Height = 30
+      Align = alTop
+      BevelOuter = bvNone
+      TabOrder = 0
+      DesignSize = (
+        589
+        30)
+      object btnExpandAll: TSpeedButton
+        Left = 3
+        Top = 5
+        Width = 23
+        Height = 22
+        Flat = True
+      end
+      object btnCollapseAll: TSpeedButton
+        Left = 24
+        Top = 5
+        Width = 23
+        Height = 22
+        Flat = True
+      end
+      object edtMessageFilter: TLabeledEdit
+        Left = 126
+        Top = 6
+        Width = 272
+        Height = 21
+        Alignment = taCenter
+        Anchors = [akLeft, akTop, akRight]
+        EditLabel.Width = 71
+        EditLabel.Height = 13
+        EditLabel.Caption = 'Message filter:'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        LabelPosition = lpLeft
+        ParentFont = False
+        TabOrder = 0
+        TextHint = 'filter log messages'
+      end
+      object btnFilterMessages: TButton
+        Left = 481
+        Top = 3
+        Width = 102
+        Height = 25
+        Anchors = [akTop, akRight]
+        Default = True
+        TabOrder = 1
+      end
+      object chkAutoFilter: TCheckBox
+        Left = 404
+        Top = 7
+        Width = 71
+        Height = 17
+        Anchors = [akTop, akRight]
+        Caption = 'Autofilter'
+        Checked = True
+        State = cbChecked
+        TabOrder = 2
       end
     end
   end

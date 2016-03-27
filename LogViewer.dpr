@@ -125,14 +125,55 @@ uses
   LogViewer.MainForm in 'LogViewer.MainForm.pas' {frmMain},
   LogViewer.Watches.View in 'LogViewer.Watches.View.pas' {frmWatchesView},
   LogViewer.CallStack.View in 'LogViewer.CallStack.View.pas' {frmCallStackView},
-  LogViewer.Factories in 'LogViewer.Factories.pas';
+  LogViewer.Factories in 'LogViewer.Factories.pas',
+  LogViewer.Manager in 'LogViewer.Manager.pas' {dmManager: TDataModule},
+  LogViewer.Messages.Templates in 'LogViewer.Messages.Templates.pas',
+  Spring.DesignPatterns in '..\..\libraries\spring4d\Source\Base\Spring.DesignPatterns.pas',
+  Spring.Events.Base in '..\..\libraries\spring4d\Source\Base\Spring.Events.Base.pas',
+  Spring.Events in '..\..\libraries\spring4d\Source\Base\Spring.Events.pas',
+  Spring.Helpers in '..\..\libraries\spring4d\Source\Base\Spring.Helpers.pas',
+  Spring.MethodIntercept in '..\..\libraries\spring4d\Source\Base\Spring.MethodIntercept.pas',
+  Spring in '..\..\libraries\spring4d\Source\Base\Spring.pas',
+  Spring.Reflection in '..\..\libraries\spring4d\Source\Base\Spring.Reflection.pas',
+  Spring.ResourceStrings in '..\..\libraries\spring4d\Source\Base\Spring.ResourceStrings.pas',
+  Spring.SystemUtils in '..\..\libraries\spring4d\Source\Base\Spring.SystemUtils.pas',
+  Spring.Times in '..\..\libraries\spring4d\Source\Base\Spring.Times.pas',
+  Spring.ValueConverters in '..\..\libraries\spring4d\Source\Base\Spring.ValueConverters.pas',
+  Spring.VirtualClass in '..\..\libraries\spring4d\Source\Base\Spring.VirtualClass.pas',
+  Spring.VirtualInterface in '..\..\libraries\spring4d\Source\Base\Spring.VirtualInterface.pas',
+  Spring.Collections.Adapters in '..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.Adapters.pas',
+  Spring.Collections.Base in '..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.Base.pas',
+  Spring.Collections.Dictionaries in '..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.Dictionaries.pas',
+  Spring.Collections.Enumerable in '..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.Enumerable.pas',
+  Spring.Collections.Events in '..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.Events.pas',
+  Spring.Collections.Extensions in '..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.Extensions.pas',
+  Spring.Collections.LinkedLists in '..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.LinkedLists.pas',
+  Spring.Collections.Lists in '..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.Lists.pas',
+  Spring.Collections.MultiMaps in '..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.MultiMaps.pas',
+  Spring.Collections in '..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.pas',
+  Spring.Collections.Queues in '..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.Queues.pas',
+  Spring.Collections.Sets in '..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.Sets.pas',
+  Spring.Collections.Stacks in '..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.Stacks.pas',
+  Spring.Logging.Appenders.Base in '..\..\libraries\spring4d\Source\Base\Logging\Spring.Logging.Appenders.Base.pas',
+  Spring.Logging.Appenders in '..\..\libraries\spring4d\Source\Base\Logging\Spring.Logging.Appenders.pas',
+  Spring.Logging.Controller in '..\..\libraries\spring4d\Source\Base\Logging\Spring.Logging.Controller.pas',
+  Spring.Logging.Extensions in '..\..\libraries\spring4d\Source\Base\Logging\Spring.Logging.Extensions.pas',
+  Spring.Logging.Loggers in '..\..\libraries\spring4d\Source\Base\Logging\Spring.Logging.Loggers.pas',
+  Spring.Logging.NullLogger in '..\..\libraries\spring4d\Source\Base\Logging\Spring.Logging.NullLogger.pas',
+  Spring.Logging in '..\..\libraries\spring4d\Source\Base\Logging\Spring.Logging.pas',
+  Spring.Logging.ResourceStrings in '..\..\libraries\spring4d\Source\Base\Logging\Spring.Logging.ResourceStrings.pas',
+  Spring.Logging.Serializers in '..\..\libraries\spring4d\Source\Base\Logging\Spring.Logging.Serializers.pas',
+  Spring.Patches.GetInvokeInfo in '..\..\libraries\spring4d\Source\Base\Patches\Spring.Patches.GetInvokeInfo.pas',
+  Spring.Patches.QC93646 in '..\..\libraries\spring4d\Source\Base\Patches\Spring.Patches.QC93646.pas',
+  Spring.Patches.QC98671 in '..\..\libraries\spring4d\Source\Base\Patches\Spring.Patches.QC98671.pas',
+  Spring.Patches.QC107219 in '..\..\libraries\spring4d\Source\Base\Patches\Spring.Patches.QC107219.pas';
 
 {$R *.res}
 
 begin
   Application.Title := 'Log viewer';
   Application.Initialize;
-  Application.CreateForm(TfrmMain, frmMain);
+  Application.CreateForm(TfrmMainOld, frmMainOld);
   Application.Run;
 end.
 

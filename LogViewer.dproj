@@ -315,6 +315,51 @@
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.Factories.pas"/>
+        <DCCReference Include="LogViewer.Manager.pas">
+            <Form>dmManager</Form>
+            <FormType>dfm</FormType>
+            <DesignClass>TDataModule</DesignClass>
+        </DCCReference>
+        <DCCReference Include="LogViewer.Messages.Templates.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Spring.DesignPatterns.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Spring.Events.Base.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Spring.Events.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Spring.Helpers.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Spring.MethodIntercept.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Spring.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Spring.Reflection.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Spring.ResourceStrings.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Spring.SystemUtils.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Spring.Times.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Spring.ValueConverters.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Spring.VirtualClass.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Spring.VirtualInterface.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.Adapters.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.Base.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.Dictionaries.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.Enumerable.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.Events.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.Extensions.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.LinkedLists.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.Lists.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.MultiMaps.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.Queues.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.Sets.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.Stacks.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Logging\Spring.Logging.Appenders.Base.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Logging\Spring.Logging.Appenders.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Logging\Spring.Logging.Controller.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Logging\Spring.Logging.Extensions.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Logging\Spring.Logging.Loggers.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Logging\Spring.Logging.NullLogger.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Logging\Spring.Logging.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Logging\Spring.Logging.ResourceStrings.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Logging\Spring.Logging.Serializers.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Patches\Spring.Patches.GetInvokeInfo.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Patches\Spring.Patches.QC93646.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Patches\Spring.Patches.QC98671.pas"/>
+        <DCCReference Include="..\..\libraries\spring4d\Source\Base\Patches\Spring.Patches.QC107219.pas"/>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -336,6 +381,9 @@
                     <Source Name="MainSource">LogViewer.dpr</Source>
                 </Source>
                 <Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\17.0\Bpl\dclDataBindings230.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\17.0\Bpl\dclDataBindings230.bpl not found</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\17.0\Bpl\dclDataBindingsVCL230.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\17.0\Bpl\dclDataBindingsVCL230.bpl not found</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\17.0\Bpl\dclTreeViewPresenter230.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\17.0\Bpl\dclTreeViewPresenter230.bpl not found</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\bcboffice2k230.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\bcbofficexp230.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dcloffice2k230.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
