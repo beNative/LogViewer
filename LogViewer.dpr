@@ -166,7 +166,8 @@ uses
   Spring.Patches.GetInvokeInfo in '..\..\libraries\spring4d\Source\Base\Patches\Spring.Patches.GetInvokeInfo.pas',
   Spring.Patches.QC93646 in '..\..\libraries\spring4d\Source\Base\Patches\Spring.Patches.QC93646.pas',
   Spring.Patches.QC98671 in '..\..\libraries\spring4d\Source\Base\Patches\Spring.Patches.QC98671.pas',
-  Spring.Patches.QC107219 in '..\..\libraries\spring4d\Source\Base\Patches\Spring.Patches.QC107219.pas';
+  Spring.Patches.QC107219 in '..\..\libraries\spring4d\Source\Base\Patches\Spring.Patches.QC107219.pas',
+  LogViewer.Settings.Dialog in 'LogViewer.Settings.Dialog.pas' {frmLogViewerSettings};
 
 {$R *.res}
 

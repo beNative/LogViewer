@@ -71,6 +71,7 @@ resourcestring
   SName       = 'Name';
   SValue      = 'Value';
   STimestamp  = 'Timestamp';
+  SProcessName = 'ProcessName';
 
 type
   TNodeData = record

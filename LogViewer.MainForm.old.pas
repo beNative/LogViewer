@@ -76,7 +76,8 @@ uses
   ZeroMQ,
 
   LogViewer.Watches.Data, LogViewer.Settings, LogViewer.Messages.Data,
-  LogViewer.CallStack.Data, LogViewer.Messages.View;
+  LogViewer.CallStack.Data, LogViewer.Messages.View, LogViewer.Interfaces,
+  LogViewer.Factories, System.Win.TaskbarCore, Vcl.Taskbar;
 
 type
   TMessageSet = set of TLogMessageType;
@@ -175,6 +176,8 @@ type
     actExpandAll         : TAction;
     btnExpandAll         : TSpeedButton;
     btnCollapseAll       : TSpeedButton;
+    tbrMain: TTaskbar;
+    actDesktopCenter: TAction;
     {$ENDREGION}
 
     procedure actBitmapExecute(Sender: TObject);
@@ -291,26 +294,29 @@ type
     procedure actToggleFullscreenExecute(Sender: TObject);
     procedure actExpandAllExecute(Sender: TObject);
     procedure actCollapseAllExecute(Sender: TObject);
+    procedure actODSChannelExecute(Sender: TObject);
+    procedure actDesktopCenterExecute(Sender: TObject);
 
   private
-    FSettings        : TLogViewerSettings;
-    FLogTreeView     : TVirtualStringTree;
-    FActiveMessages  : TMessageSet;
-    FMessageCount    : Integer;
-    FCurrentMsg      : TLogMessage;
-    FLastParent      : PVirtualNode;
-    FLastNode        : PVirtualNode;
-    FIPCServer       : TWinIPCServer;
-    FWatches         : TWatchList;
-    FExpandParent    : Boolean;
-    FManager         : IEditorManager;
-    FEditorSettings  : IEditorSettings;
-    FEditorView      : IEditorView;
-    FVKPressed       : Boolean;
-    FTVPCallStack    : TTreeViewPresenter;
-    FVSTCallStack    : TVirtualStringTree;
-    FCallStack       : IList<TCallStackData>;
-    FZMQStream       : TStringStream;
+    FSettings       : TLogViewerSettings;
+    FLogTreeView    : TVirtualStringTree;
+    FActiveMessages : TMessageSet;
+    FMessageCount   : Integer;
+    FCurrentMsg     : TLogMessage;
+    FReceiver       : IChannelReceiver;
+    FLastParent     : PVirtualNode;
+    FLastNode       : PVirtualNode;
+    FIPCServer      : TWinIPCServer;
+    FWatches        : TWatchList;
+    FExpandParent   : Boolean;
+    FManager        : IEditorManager;
+    FEditorSettings : IEditorSettings;
+    FEditorView     : IEditorView;
+    FVKPressed      : Boolean;
+    FTVPCallStack   : TTreeViewPresenter;
+    FVSTCallStack   : TVirtualStringTree;
+    FCallStack      : IList<TCallStackData>;
+    FZMQStream      : TStringStream;
 
     FZMQ        : IZeroMQ;
     FSubscriber : IZMQPair;
@@ -322,6 +328,8 @@ type
 
     function GetEditor: IEditorView;
     function GetTitleFilter: string;
+
+    procedure FReceiverReceiveMessage(Sender: TObject; AStream: TStream);
 
     procedure FilterCallback(
       Sender    : TBaseVirtualTree;
@@ -384,9 +392,9 @@ uses
   Spring,
 
   DDuce.Factories, DDuce.Components.Factories, DDuce.Editor.Factories,
-  DDuce.Logger, DDuce.ScopedReference,
+  DDuce.Logger, DDuce.ScopedReference, DDuce.ObjectInspector,
 
-  LogViewer.Resources, DDuce.ObjectInspector;
+  LogViewer.Resources, LogViewer.Receivers.WinODS;
 
 {$REGION 'construction and destruction' /fold}
 procedure TfrmMainOld.AfterConstruction;
@@ -402,12 +410,16 @@ begin
   FActiveMessages := ALL_MESSAGES;
   CreateIPCServer;
   CreateZMQSubscriber;
+  FReceiver := TWinODSReceiver.Create;
+  FReceiver.OnReceiveMessage.Add(FReceiverReceiveMessage);
 //  LoadSettings;
   InspectComponent(FLogTreeView);
 end;
 
 procedure TfrmMainOld.BeforeDestruction;
 begin
+  FReceiver.OnReceiveMessage.Remove(FReceiverReceiveMessage);
+  FReceiver := nil;
   SaveSettings;
   tmrPoll.Enabled := False;
   FIPCServer.Free;
@@ -559,6 +571,11 @@ begin
   UpdateActiveMessages(lmtCustomData, Sender);
 end;
 
+procedure TfrmMainOld.actDesktopCenterExecute(Sender: TObject);
+begin
+  Position := poDesktopCenter;
+end;
+
 procedure TfrmMainOld.actErrorExecute(Sender: TObject);
 begin
   UpdateActiveMessages(lmtError, Sender);
@@ -598,6 +615,11 @@ end;
 procedure TfrmMainOld.actObjectExecute(Sender: TObject);
 begin
   UpdateActiveMessages(lmtObject, Sender);
+end;
+
+procedure TfrmMainOld.actODSChannelExecute(Sender: TObject);
+begin
+ //FR
 end;
 
 procedure TfrmMainOld.actCallStackExecute(Sender: TObject);
@@ -799,12 +821,7 @@ begin
   FLatestWatchInspector.Rows.Count   := FWatches.Count;
   FSelectedWatchInspector.Rows.Count := FWatches.Count;
   FLatestWatchInspector.Invalidate;
-//  FWatchHistoryInspector.Refresh;
   FSelectedWatchInspector.Invalidate;
-//  FLatestWatchInspector.Refresh;
-//  FWatchHistoryInspector.UpdateEditContents(False);
-//  FSelectedWatchInspector.UpdateEditContents(False);
-//  FLatestWatchInspector.UpdateEditContents(False);
 end;
 {$ENDREGION}
 
@@ -841,11 +858,6 @@ begin
       TargetCanvas.Rectangle(CellRect);
     end;
   end;
-
-
-
-
-//
 end;
 
 procedure TfrmMainOld.FLogTreeViewPaintText(Sender: TBaseVirtualTree;
@@ -878,7 +890,6 @@ begin
   else if Column = 1 then
   begin
     TargetCanvas.Font.Style := TargetCanvas.Font.Style + [fsBold];
-
   end
   else if Column = 2 then
   begin
@@ -888,8 +899,12 @@ begin
   begin
     TargetCanvas.Font.Color := clBlue;
   end;
+end;
 
-
+procedure TfrmMainOld.FReceiverReceiveMessage(Sender: TObject;
+  AStream: TStream);
+begin
+  ProcessMessage(AStream);
 end;
 
 procedure TfrmMainOld.FLogTreeViewFocusChanged(Sender: TBaseVirtualTree;
@@ -1022,9 +1037,9 @@ var
   I : Integer;
 begin
   ND := Sender.GetNodeData(Node);
-  ND.Title   := string(FCurrentMsg.MsgText);
+  ND.Title   := string(FCurrentMsg.Text);
   ND.MsgData := FCurrentMsg.Data;
-  ND.MsgTime := FCurrentMsg.MsgTime;
+  ND.MsgTime := FCurrentMsg.TimeStamp;
   ND.MsgType := TLogMessageType(FCurrentMsg.MsgType);
   if (ND.MsgType = lmtValue) and not (ND.Title.Contains(sLineBreak)) then
   begin
@@ -1287,11 +1302,16 @@ begin
     Inc(FMessageCount);
     AStream.Seek(0, soFromBeginning);
     AStream.ReadBuffer(FCurrentMsg.MsgType, SizeOf(Integer));
-    AStream.ReadBuffer(FCurrentMsg.MsgTime, SizeOf(TDateTime));
+    AStream.ReadBuffer(FCurrentMsg.TimeStamp, SizeOf(TDateTime));
     AStream.ReadBuffer(LTextSize, SizeOf(Integer));
-    SetLength(FCurrentMsg.MsgText, LTextSize);
-    AStream.ReadBuffer(FCurrentMsg.MsgText[1], LTextSize);
+    SetLength(FCurrentMsg.Text, LTextSize);
+    AStream.ReadBuffer(FCurrentMsg.Text[1], LTextSize);
     AStream.ReadBuffer(LDataSize, SizeOf(Integer));
+
+//    AStream.ReadBuffer(LTextSize, SizeOf(Integer));
+//    SetLength(FCurrentMsg.ProcessName, LTextSize);
+//    AStream.ReadBuffer(FCurrentMsg.ProcessName[1], LTextSize);
+
     if LDataSize > 0 then
     begin
       FCurrentMsg.Data := TMemoryStream.Create;
@@ -1334,7 +1354,7 @@ begin
       lmtWatch, lmtCounter:
       begin
         FWatches.Add(
-          string(FCurrentMsg.MsgText),
+          string(FCurrentMsg.Text),
           FMessageCount,
           FCurrentMsg.MsgType = Integer(lmtCounter)
         );

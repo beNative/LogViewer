@@ -24,6 +24,7 @@ uses
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
 
   LogViewer.Messages.View, LogViewer.Interfaces, LogViewer.Receivers.WinIPC,
+  LogViewer.Receivers.WinODS,
   LogViewer.Factories, LogViewer.Manager, LogViewer.Settings;
 
 type
@@ -52,7 +53,9 @@ procedure TfrmMain.AfterConstruction;
 begin
   inherited AfterConstruction;
   FSettings := TLogViewerSettings.Create;
-  FReceiver := TWinIPChannelReceiver.Create;
+  //FReceiver := TWinIPChannelReceiver.Create;
+  FReceiver := TWinODSReceiver.Create;
+
   FManager := TLogViewerFactories.CreateManager(Self);
   FMessageViewer := TLogViewerFactories.CreateMessageView(
     Self,

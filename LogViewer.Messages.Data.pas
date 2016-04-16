@@ -36,6 +36,7 @@ type
     FIndex       : Integer;
     FParent      : TLogMessageData;
     FChildren    : IList<TLogMessageData>;
+
     function GetChildren: IList<TLogMessageData>;
 
   public
