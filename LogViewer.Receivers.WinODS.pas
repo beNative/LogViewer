@@ -17,7 +17,7 @@
 unit LogViewer.Receivers.WinODS;
 
 { Receives messages posted by the OutputDebugString Windows API routine. The
-  OutputDebugString messages are fetched in a thread and queued as TLogMessage
+  OutputDebugString messages are fetched in a thread and queued as a TLogMessage
   compatible stream.  }
 
 interface
@@ -188,17 +188,60 @@ begin
   FBuffer   := TMemoryStream.Create;
   FODSQueue := TCollections.CreateQueue<TODSMessage>;
   FODSQueue.OnChanged.Add(FODSQueueChanged);
-  FODSThread := TODSThread.Create(FODSQueue);
 end;
 
 procedure TWinODSReceiver.BeforeDestruction;
 begin
-  FODSThread.Terminate;
+  if Assigned(FODSThread) then
+  begin
+    FODSThread.Terminate;
+    FODSThread.Free;
+  end;
   FBuffer.Free;
-  FODSThread.Free;
   inherited BeforeDestruction;
 end;
+{$ENDREGION}
 
+{$REGION 'property access methods'}
+function TWinODSReceiver.GetEnabled: Boolean;
+begin
+  Result := FEnabled;
+end;
+
+procedure TWinODSReceiver.SetEnabled(const Value: Boolean);
+begin
+  if Value <> Enabled then
+  begin
+    FEnabled := Value;
+    if Value then
+    begin
+      if Assigned(FODSThread) then
+      begin
+        FODSThread.Terminate;
+        FreeAndNil(FODSThread);
+      end;
+      FODSQueue.Clear;
+      FODSThread := TODSThread.Create(FODSQueue);
+    end
+    else
+    begin
+      if Assigned(FODSThread) then
+      begin
+        FODSThread.Terminate;
+        FreeAndNil(FODSThread);
+      end;
+      FODSQueue.Clear;
+    end;
+  end;
+end;
+
+function TWinODSReceiver.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
+begin
+  Result := FOnReceiveMessage;
+end;
+{$ENDREGION}
+
+{$REGION 'event handlers'}
 procedure TWinODSReceiver.FODSQueueChanged(Sender: TObject;
   const Item: TODSMessage; Action: TCollectionChangedAction);
 const
@@ -227,27 +270,6 @@ begin
     end
   end;
 end;
-
-{$ENDREGION}
-
-{$REGION 'property access methods'}
-function TWinODSReceiver.GetEnabled: Boolean;
-begin
-  Result := FEnabled;
-end;
-
-procedure TWinODSReceiver.SetEnabled(const Value: Boolean);
-begin
-  if Value <> Enabled then
-  begin
-    FEnabled := Value;
-  end;
-end;
-
-function TWinODSReceiver.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
-begin
-  Result := FOnReceiveMessage;
-end;
 {$ENDREGION}
 
 {$REGION 'TODSThread'}
@@ -264,7 +286,7 @@ var
   ReadyEvent       : THandle;
   SharedFile       : THandle;
   SharedMem        : pointer;
-  Ret              : DWORD;
+  ReturnValue      : DWORD;
   SA               : SECURITY_ATTRIBUTES;
   SD               : SECURITY_DESCRIPTOR;
   ODSMessage       : TODSMessage;
@@ -309,14 +331,14 @@ begin
     HandlesToWaitFor[1] := ReadyEvent;
 
     SetEvent(AckEvent); // set ACK event to allow buffer to be used
-    Ret := WaitForMultipleObjects(
+    ReturnValue := WaitForMultipleObjects(
       2,
       @HandlesToWaitFor,
       False { bWaitAll } ,
       3000 { INFINITE }
     );
 
-    case Ret of
+    case ReturnValue of
       WAIT_TIMEOUT :
         Continue;
 

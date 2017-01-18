@@ -167,14 +167,15 @@ uses
   Spring.Patches.QC93646 in '..\..\libraries\spring4d\Source\Base\Patches\Spring.Patches.QC93646.pas',
   Spring.Patches.QC98671 in '..\..\libraries\spring4d\Source\Base\Patches\Spring.Patches.QC98671.pas',
   Spring.Patches.QC107219 in '..\..\libraries\spring4d\Source\Base\Patches\Spring.Patches.QC107219.pas',
-  LogViewer.Settings.Dialog in 'LogViewer.Settings.Dialog.pas' {frmLogViewerSettings};
+  LogViewer.Settings.Dialog in 'LogViewer.Settings.Dialog.pas' {frmLogViewerSettings},
+  LogViewer.Receivers.Serial in 'LogViewer.Receivers.Serial.pas';
 
 {$R *.res}
 
 begin
   Application.Title := 'Log viewer';
   Application.Initialize;
-  Application.CreateForm(TfrmMainOld, frmMainOld);
+  Application.CreateForm(TfrmMain, frmMain);
   Application.Run;
 end.
 

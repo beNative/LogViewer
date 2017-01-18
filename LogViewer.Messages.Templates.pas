@@ -69,15 +69,14 @@ uses
 
   DDuce.Logger.Interfaces, DDuce.Reflect;
 
-{ TLogMessageTemplate }
-
-
+{$REGION 'non-interfaced routines'}
 procedure Debug(const AString: string);
 begin
   OutputDebugString(PWideChar(AString));
 end;
+{$ENDREGION}
 
-
+{$REGION 'TLogTemplate'}
 constructor TLogTemplate.Create(AColumnDefinitions: IColumnDefinitions;
   AMessages: IList<TLogMessageData>);
 begin
@@ -95,15 +94,16 @@ begin
 //  if Item is IList then
 //    Result := (Item as IList).Count
 //  else
-    Result := 1;
+  Result := GetItems(Item).Count;
 end;
 
 function TLogTemplate.GetItems(const Item: TObject): IObjectList;
 begin
   Result := FMessages as IObjectList;
 end;
+{$ENDREGION}
 
-
+{$REGION 'TLogMessageTemplate'}
 {$REGION 'construction and destruction'}
 constructor TLogMessageTemplate.Create(AColumnDefinitions: IColumnDefinitions;
   AMessages: IList<TLogMessageData>);
@@ -126,7 +126,6 @@ begin
     Result := inherited GetItem(Item, Index);
 
   Debug(Reflect.Properties(Result).ToString);
-
 end;
 
 function TLogMessageTemplate.GetItemCount(const Item: TObject): Integer;
@@ -139,13 +138,9 @@ begin
     Result := LMD.Children.Count;
     if Result > 0 then
       Debug(Format('GetItemCount = %d', [Result]));
-
-
   end
   else
     Result := inherited GetItemCount(Item);
-
-
 end;
 
 function TLogMessageTemplate.GetItems(const Item: TObject): IObjectList;
@@ -154,25 +149,22 @@ var
   O   : IList<TLogMessageData>;
   I   : TLogMessageData;
 begin
-  if Item is TLogMessageData then
+//  if Item is TLogMessageData then
+//  begin
+//    LMD := Item as TLogMessageData;
+//    if (LMD.MessageType = lmtEnterMethod) {and (LMD.Level > 0)} then
+//    begin
+//      Result := LMD.Children as IObjectList
+//
+//    end
+//    else
+//      Result := inherited GetItems(Item);
+//  end
+//  else
   begin
-    LMD := Item as TLogMessageData;
-    if (LMD.MessageType = lmtEnterMethod) {and (LMD.Level > 0)} then
-    begin
-      Result := LMD.Children as IObjectList
-
-    end
-    else
-      Result := inherited GetItems(Item);
-  end
-  else
-  begin
-
     Result := inherited GetItems(Item);
   end;
 end;
-
-
-
+{$ENDREGION}
 
 end.

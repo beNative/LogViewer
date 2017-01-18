@@ -43,6 +43,14 @@ type
       read GetOnReceiveMessage;
   end;
 
+  IMessageViewer = interface
+  ['{89AAD6E2-FECF-4E20-B985-8BAA0CB351F2}']
+    function GetReceiver: IChannelReceiver;
+
+    property Receiver: IChannelReceiver
+      read GetReceiver;
+  end;
+
 implementation
 
 end.

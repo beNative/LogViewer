@@ -32,6 +32,10 @@ object frmWatchesView: TfrmWatchesView
     end
     object tsHistory: TTabSheet
       Caption = 'History'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object cbxWatchHistory: TComboBox
         Left = 0
         Top = 0

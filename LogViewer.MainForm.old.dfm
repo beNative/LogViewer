@@ -2260,7 +2260,6 @@ object frmMainOld: TfrmMainOld
     TaskBarButtons = <
       item
         Action = actDesktopCenter
-        Hint = 'Center window on your desktop'
       end
       item
         Action = actToggleAlwaysOnTop
@@ -2303,7 +2302,7 @@ object frmMainOld: TfrmMainOld
           0000E0010000FE010000FF010000FF830000FF870000FF8F0000FFFF0000}
       end>
     TabProperties = [AppThumbAlways, AppPeekAlways]
-    Left = 704
-    Top = 328
+    Left = 920
+    Top = 128
   end
 end

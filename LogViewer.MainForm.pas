@@ -21,7 +21,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls,
 
   LogViewer.Messages.View, LogViewer.Interfaces, LogViewer.Receivers.WinIPC,
   LogViewer.Receivers.WinODS,
@@ -29,9 +29,15 @@ uses
 
 type
   TfrmMain = class(TForm)
+    pgcMain  : TPageControl;
+    tsIPC    : TTabSheet;
+    tsODS    : TTabSheet;
+    tsZeroMQ : TTabSheet;
   private
-    FMessageViewer : TfrmMessagesView;
-    FReceiver      : IChannelReceiver;
+    FMessageViewerIPC : TfrmMessagesView;
+    FReceiverIPC      : IChannelReceiver;
+    FMessageViewerODS : TfrmMessagesView;
+    FReceiverODS      : IChannelReceiver;
     FManager       : TdmManager;
     FSettings      : TLogViewerSettings;
 
@@ -53,16 +59,23 @@ procedure TfrmMain.AfterConstruction;
 begin
   inherited AfterConstruction;
   FSettings := TLogViewerSettings.Create;
-  //FReceiver := TWinIPChannelReceiver.Create;
-  FReceiver := TWinODSReceiver.Create;
+  FReceiverIPC := TWinIPChannelReceiver.Create;
+  FReceiverODS := TWinODSReceiver.Create;
 
   FManager := TLogViewerFactories.CreateManager(Self);
-  FMessageViewer := TLogViewerFactories.CreateMessageView(
+  FMessageViewerIPC := TLogViewerFactories.CreateMessageView(
     Self,
-    Self,
-    FReceiver
+    tsIPC,
+    FReceiverIPC
   );
-  FReceiver.Enabled := True;
+  FMessageViewerODS := TLogViewerFactories.CreateMessageView(
+    Self,
+    tsODS,
+    FReceiverODS
+  );
+
+  FReceiverIPC.Enabled := True;
+  FReceiverODS.Enabled := False;
 end;
 
 procedure TfrmMain.BeforeDestruction;

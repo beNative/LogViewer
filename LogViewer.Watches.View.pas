@@ -18,6 +18,8 @@ unit LogViewer.Watches.View;
 
 interface
 
+{ View showing watch values and history. }
+
 uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes,

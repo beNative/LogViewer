@@ -18,6 +18,8 @@ unit LogViewer.CallStack.View;
 
 interface
 
+{ TVirtualStringTree - TTreeViewPresenter combination to display the callstack }
+
 uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes,
