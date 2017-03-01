@@ -1,5 +1,5 @@
 {
-  Copyright (C) 2013-2016 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2017 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 unit LogViewer.Receivers.WinODS;
 
 { Receives messages posted by the OutputDebugString Windows API routine. The
-  OutputDebugString messages are fetched in a thread and queued as a TLogMessage
+  OutputDebugString messages are fetched in a thread and queued as TLogMessage
   compatible stream.  }
 
 interface
@@ -34,16 +34,14 @@ type
   TODSMessage = class
     Index       : Cardinal;
     Time        : TDateTime; // time of send
-    ProcessName : AnsiString; // optional : the name of the originating process
+    //ProcessName : AnsiString; // optional : the name of the originating process
     MsgText     : AnsiString;
   end;
 
   // the thread that catches OutputDebugString content
   TODSThread = class(TThread)
   private
-    FODSQueue       : IQueue<TODSMessage>;
-    FLastChildOrder : Int64;
-
+    FODSQueue : IQueue<TODSMessage>;
   protected
     hCloseEvent : THandle;
     procedure Execute; override;
@@ -88,6 +86,9 @@ uses
   Winapi.PsAPI, Winapi.TlHelp32,
   System.SyncObjs, System.DateUtils;
 
+var
+  LastChildOrder : Cardinal;
+
 {$REGION 'interfaced routines'}
 function GetExenameForProcessUsingPSAPI(AProcessID: DWORD): string;
 var
@@ -102,8 +103,7 @@ begin
   ProcHandle := OpenProcess(
     PROCESS_QUERY_INFORMATION or PROCESS_VM_READ,
     False,
-    AProcessID
-  );
+    AProcessID);
   if ProcHandle <> 0 then
   begin
     try
@@ -185,63 +185,20 @@ end;
 procedure TWinODSReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FBuffer   := TMemoryStream.Create;
+  FBuffer := TMemoryStream.Create;
   FODSQueue := TCollections.CreateQueue<TODSMessage>;
   FODSQueue.OnChanged.Add(FODSQueueChanged);
+  FODSThread := TODSThread.Create(FODSQueue);
 end;
 
 procedure TWinODSReceiver.BeforeDestruction;
 begin
-  if Assigned(FODSThread) then
-  begin
-    FODSThread.Terminate;
-    FODSThread.Free;
-  end;
+  FODSThread.Terminate;
   FBuffer.Free;
+  FODSThread.Free;
   inherited BeforeDestruction;
 end;
-{$ENDREGION}
 
-{$REGION 'property access methods'}
-function TWinODSReceiver.GetEnabled: Boolean;
-begin
-  Result := FEnabled;
-end;
-
-procedure TWinODSReceiver.SetEnabled(const Value: Boolean);
-begin
-  if Value <> Enabled then
-  begin
-    FEnabled := Value;
-    if Value then
-    begin
-      if Assigned(FODSThread) then
-      begin
-        FODSThread.Terminate;
-        FreeAndNil(FODSThread);
-      end;
-      FODSQueue.Clear;
-      FODSThread := TODSThread.Create(FODSQueue);
-    end
-    else
-    begin
-      if Assigned(FODSThread) then
-      begin
-        FODSThread.Terminate;
-        FreeAndNil(FODSThread);
-      end;
-      FODSQueue.Clear;
-    end;
-  end;
-end;
-
-function TWinODSReceiver.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
-begin
-  Result := FOnReceiveMessage;
-end;
-{$ENDREGION}
-
-{$REGION 'event handlers'}
 procedure TWinODSReceiver.FODSQueueChanged(Sender: TObject;
   const Item: TODSMessage; Action: TCollectionChangedAction);
 const
@@ -270,6 +227,27 @@ begin
     end
   end;
 end;
+
+{$ENDREGION}
+
+{$REGION 'property access methods'}
+function TWinODSReceiver.GetEnabled: Boolean;
+begin
+  Result := FEnabled;
+end;
+
+procedure TWinODSReceiver.SetEnabled(const Value: Boolean);
+begin
+  if Value <> Enabled then
+  begin
+    FEnabled := Value;
+  end;
+end;
+
+function TWinODSReceiver.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
+begin
+  Result := FOnReceiveMessage;
+end;
 {$ENDREGION}
 
 {$REGION 'TODSThread'}
@@ -277,7 +255,7 @@ constructor TODSThread.Create(AODSQueue: IQueue<TODSMessage>);
 begin
   inherited Create;
   FODSQueue := AODSQueue;
-  hCloseEvent := CreateEvent(nil, True, False, nil);  // Create the close event
+  hCloseEvent := CreateEvent( nil, True, False, nil );  // Create the close event
 end;
 
 procedure TODSThread.Execute;
@@ -286,7 +264,7 @@ var
   ReadyEvent       : THandle;
   SharedFile       : THandle;
   SharedMem        : pointer;
-  ReturnValue      : DWORD;
+  Ret              : DWORD;
   SA               : SECURITY_ATTRIBUTES;
   SD               : SECURITY_DESCRIPTOR;
   ODSMessage       : TODSMessage;
@@ -303,10 +281,12 @@ begin
     Exit;
 
   AckEvent := CreateEvent(@SA, False, TRUE, 'DBWIN_BUFFER_READY');
+  // initial state = CLEARED !!!
   if AckEvent = 0 then
     Exit;
 
   ReadyEvent := CreateEvent(@SA, False, False, 'DBWIN_DATA_READY');
+  // initial state = CLEARED
   if ReadyEvent = 0 then
     Exit;
 
@@ -331,14 +311,14 @@ begin
     HandlesToWaitFor[1] := ReadyEvent;
 
     SetEvent(AckEvent); // set ACK event to allow buffer to be used
-    ReturnValue := WaitForMultipleObjects(
+    Ret := WaitForMultipleObjects(
       2,
       @HandlesToWaitFor,
       False { bWaitAll } ,
       3000 { INFINITE }
     );
 
-    case ReturnValue of
+    case Ret of
       WAIT_TIMEOUT :
         Continue;
 
@@ -350,12 +330,12 @@ begin
         begin
           ODSMessage             := TODSMessage.Create;
           ODSMessage.Time        := Now;
-          ODSMessage.ProcessName := GetExenameForProcess(LPDWORD(SharedMem)^);
-          // '$' + inttohex (pThisPid^,2)
+          //ODSMessage.ProcessName := GetExenameForProcess(LPDWORD(SharedMem)^);
+           //'$' + inttohex (pThisPid^,2)
           ODSMessage.MsgText := AnsiString(PAnsiChar(SharedMem) + SizeOf(DWORD));
           // the native version of OutputDebugString is ASCII. result is always AnsiString
-          ODSMessage.Index := FLastChildOrder;
-          Inc(FLastChildOrder);
+          ODSMessage.Index := LastChildOrder;
+          Inc(LastChildOrder);
 
           Queue(procedure
           begin

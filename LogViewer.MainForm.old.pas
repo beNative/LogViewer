@@ -1,5 +1,5 @@
 ﻿{
-  Copyright (C) 2013-2016 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2017 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ uses
 
   LogViewer.Watches.Data, LogViewer.Settings, LogViewer.Messages.Data,
   LogViewer.CallStack.Data, LogViewer.Messages.View, LogViewer.Interfaces,
-  LogViewer.Factories, System.Win.TaskbarCore, Vcl.Taskbar;
+  LogViewer.Factories;
 
 type
   TMessageSet = set of TLogMessageType;
@@ -176,8 +176,8 @@ type
     actExpandAll         : TAction;
     btnExpandAll         : TSpeedButton;
     btnCollapseAll       : TSpeedButton;
-    tbrMain: TTaskbar;
-    actDesktopCenter: TAction;
+    actAutoScroll        : TAction;
+    btnAutoScroll        : TToolButton;
     {$ENDREGION}
 
     procedure actBitmapExecute(Sender: TObject);
@@ -232,11 +232,11 @@ type
       var ImageIndex: LongInt
     );
     procedure FLogTreeViewGetText(
-      Sender      : TBaseVirtualTree;
-      Node        : PVirtualNode;
-      Column      : TColumnIndex;
-      TextType    : TVSTTextType;
-      var CellText: string
+      Sender       : TBaseVirtualTree;
+      Node         : PVirtualNode;
+      Column       : TColumnIndex;
+      TextType     : TVSTTextType;
+      var CellText : string
     );
     procedure FLogTreeViewInitNode(
       Sender            : TBaseVirtualTree;
@@ -246,22 +246,47 @@ type
     );
     procedure FLogTreeViewKeyPress(Sender: TObject; var Key: Char);
     procedure FLogTreeViewBeforeCellPaint(
+      Sender          : TBaseVirtualTree;
+      TargetCanvas    : TCanvas;
+      Node            : PVirtualNode;
+      Column          : TColumnIndex;
+      CellPaintMode   : TVTCellPaintMode;
+      CellRect        : TRect;
+      var ContentRect : TRect
+    );
+    procedure FLogTreeViewBeforeItemPaint(
       Sender         : TBaseVirtualTree;
       TargetCanvas   : TCanvas;
       Node           : PVirtualNode;
-      Column         : TColumnIndex;
-      CellPaintMode  : TVTCellPaintMode;
-      CellRect       : TRect;
-      var ContentRect: TRect
+      ItemRect       : TRect;
+      var CustomDraw : Boolean
     );
-
-   procedure FLogTreeViewPaintText(
-      Sender            : TBaseVirtualTree;
-      const TargetCanvas: TCanvas;
-      Node              : PVirtualNode;
-      Column            : TColumnIndex;
-      TextType          : TVSTTextType
-   );
+    procedure FLogTreeViewAfterItemPaint(
+      Sender       : TBaseVirtualTree;
+      TargetCanvas : TCanvas;
+      Node         : PVirtualNode;
+      ItemRect     : TRect
+    );
+    procedure FLogTreeViewPaintText(
+      Sender             : TBaseVirtualTree;
+      const TargetCanvas : TCanvas;
+      Node               : PVirtualNode;
+      Column             : TColumnIndex;
+      TextType           : TVSTTextType
+    );
+    procedure FLogTreeViewGetHint(
+      Sender             : TBaseVirtualTree;
+      Node               : PVirtualNode;
+      Column             : TColumnIndex;
+      var LineBreakStyle : TVTTooltipLineBreakStyle;
+      var HintText       : string
+    );
+    procedure FLogTreeViewGetHintKind(
+      Sender   : TBaseVirtualTree;
+      Node     : PVirtualNode;
+      Column   : TColumnIndex;
+      var Kind : TVTHintKind
+    );
 
     procedure FWatchesUpdate(const AVariable, AValue: string);
     procedure FWatchesNewVariable(const AVariable: string; AIndex: Integer);
@@ -294,8 +319,7 @@ type
     procedure actToggleFullscreenExecute(Sender: TObject);
     procedure actExpandAllExecute(Sender: TObject);
     procedure actCollapseAllExecute(Sender: TObject);
-    procedure actODSChannelExecute(Sender: TObject);
-    procedure actDesktopCenterExecute(Sender: TObject);
+    procedure actAutoScrollExecute(Sender: TObject);
 
   private
     FSettings       : TLogViewerSettings;
@@ -381,6 +405,12 @@ type
 var
   frmMainOld: TfrmMainOld;
 
+const
+  COLUMN_MAIN      = 0;
+  COLUMN_NAME      = 1;
+  COLUMN_VALUE     = 2;
+  COLUMN_TIMESTAMP = 3;
+
 implementation
 
 {$R *.dfm}
@@ -392,11 +422,11 @@ uses
   Spring,
 
   DDuce.Factories, DDuce.Components.Factories, DDuce.Editor.Factories,
-  DDuce.Logger, DDuce.ScopedReference, DDuce.ObjectInspector,
+  DDuce.Logger, DDuce.ScopedReference, DDuce.ObjectInspector, DDuce.Reflect,
 
   LogViewer.Resources, LogViewer.Receivers.WinODS;
 
-{$REGION 'construction and destruction' /fold}
+{$REGION 'construction and destruction'}
 procedure TfrmMainOld.AfterConstruction;
 begin
   inherited AfterConstruction;
@@ -410,16 +440,16 @@ begin
   FActiveMessages := ALL_MESSAGES;
   CreateIPCServer;
   CreateZMQSubscriber;
-  FReceiver := TWinODSReceiver.Create;
-  FReceiver.OnReceiveMessage.Add(FReceiverReceiveMessage);
+//  FReceiver := TWinODSReceiver.Create;
+//  FReceiver.OnReceiveMessage.Add(FReceiverReceiveMessage);
 //  LoadSettings;
-  InspectComponent(FLogTreeView);
+//  InspectComponent(FLogTreeView);
 end;
 
 procedure TfrmMainOld.BeforeDestruction;
 begin
-  FReceiver.OnReceiveMessage.Remove(FReceiverReceiveMessage);
-  FReceiver := nil;
+//  FReceiver.OnReceiveMessage.Remove(FReceiverReceiveMessage);
+//  FReceiver := nil;
   SaveSettings;
   tmrPoll.Enabled := False;
   FIPCServer.Free;
@@ -503,17 +533,23 @@ var
   C : TVirtualTreeColumn;
 begin
   FLogTreeView := TFactories.CreateVirtualStringTree(Self, pnlMessages);
-  FLogTreeView.NodeDataSize    := SizeOf(TNodeData);
-  FLogTreeView.OnFocusChanged  := FLogTreeViewFocusChanged;
-  FLogTreeView.OnFocusChanging := FLogTreeViewFocusChanging;
-  FLogTreeView.OnFreeNode      := FLogTreeViewFreeNode;
-  FLogTreeView.OnInitNode      := FLogTreeViewInitNode;
-  FLogTreeView.OnGetImageIndex := FLogTreeViewGetImageIndex;
-  FLogTreeView.OnGetText       := FLogTreeViewGetText;
-  FLogTreeView.OnKeyPress      := FLogTreeViewKeyPress;
+  FLogTreeView.NodeDataSize      := SizeOf(TNodeData);
+  FLogTreeView.OnFocusChanged    := FLogTreeViewFocusChanged;
+  FLogTreeView.OnFocusChanging   := FLogTreeViewFocusChanging;
+  FLogTreeView.OnFreeNode        := FLogTreeViewFreeNode;
+  FLogTreeView.OnInitNode        := FLogTreeViewInitNode;
+  FLogTreeView.OnGetImageIndex   := FLogTreeViewGetImageIndex;
+  FLogTreeView.OnGetText         := FLogTreeViewGetText;
+  FLogTreeView.OnKeyPress        := FLogTreeViewKeyPress;
   FLogTreeView.OnBeforeCellPaint := FLogTreeViewBeforeCellPaint;
-  FLogTreeView.OnPaintText     := FLogTreeViewPaintText;
-  FLogTreeView.Images          := imlMessageTypes;
+  FLogTreeView.OnBeforeItemPaint := FLogTreeViewBeforeItemPaint;
+  FLogTreeView.OnAfterItemPaint  := FLogTreeViewAfterItemPaint;
+
+  FLogTreeView.OnPaintText       := FLogTreeViewPaintText;
+  FLogTreeView.OnGetHintKind     := FLogTreeViewGetHintKind;
+  FLogTreeView.OnGetHint         := FLogTreeViewGetHint;
+  FLogTreeView.Images            := imlMessageTypes;
+  FLogTreeView.ShowHint          := True;
   //FLogTreeView.Header.Options  := FLogTreeView.Header.Options - [hoVisible];
   FLogTreeView.TreeOptions.AutoOptions := FLogTreeView.TreeOptions.AutoOptions +
     [toAutoSpanColumns];
@@ -533,8 +569,8 @@ begin
   C := FLogTreeView.Header.Columns.Add;
   C.Text := SValue;
 
-  C.Width := 100;
-  C.MinWidth := 100;
+  C.Width := 300;
+  C.MinWidth := 150;
 
   C := FLogTreeView.Header.Columns.Add;
   C.Text := STimestamp;
@@ -569,11 +605,6 @@ end;
 procedure TfrmMainOld.actCustomDataExecute(Sender: TObject);
 begin
   UpdateActiveMessages(lmtCustomData, Sender);
-end;
-
-procedure TfrmMainOld.actDesktopCenterExecute(Sender: TObject);
-begin
-  Position := poDesktopCenter;
 end;
 
 procedure TfrmMainOld.actErrorExecute(Sender: TObject);
@@ -617,14 +648,14 @@ begin
   UpdateActiveMessages(lmtObject, Sender);
 end;
 
-procedure TfrmMainOld.actODSChannelExecute(Sender: TObject);
-begin
- //FR
-end;
-
 procedure TfrmMainOld.actCallStackExecute(Sender: TObject);
 begin
   UpdateActiveMessages(lmtCallStack, Sender);
+end;
+
+procedure TfrmMainOld.actAutoScrollExecute(Sender: TObject);
+begin
+  //
 end;
 
 procedure TfrmMainOld.actBitmapExecute(Sender: TObject);
@@ -807,7 +838,6 @@ begin
   end;
   FVKPressed := False;
 end;
-
 {$ENDREGION}
 
 {$REGION 'FWatches'}
@@ -838,6 +868,14 @@ begin
     UpdateCallStack(NewNode);
 end;
 
+procedure TfrmMainOld.FLogTreeViewAfterItemPaint(Sender: TBaseVirtualTree;
+  TargetCanvas: TCanvas; Node: PVirtualNode; ItemRect: TRect);
+var
+  ND : PNodeData;
+begin
+  ND := PNodeData(Sender.GetNodeData(Node));
+end;
+
 procedure TfrmMainOld.FLogTreeViewBeforeCellPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
@@ -845,19 +883,20 @@ var
   ND : PNodeData;
 begin
   ND := PNodeData(Sender.GetNodeData(Node));
-  if Column = 0 then
+  if ND.MsgType in [lmtEnterMethod, lmtLeaveMethod] then
   begin
-    if ND.MsgType in [lmtEnterMethod, lmtLeaveMethod] then
-    begin
-      TargetCanvas.Brush.Color := $00EEEEEE;
-      TargetCanvas.FillRect(CellRect);
-    end
-    else if ND.MsgType = lmtError then
-    begin
-      TargetCanvas.Pen.Color := clRed;
-      TargetCanvas.Rectangle(CellRect);
-    end;
-  end;
+    TargetCanvas.Brush.Color := $00EEEEEE;
+    TargetCanvas.FillRect(CellRect);
+  end
+end;
+
+procedure TfrmMainOld.FLogTreeViewBeforeItemPaint(Sender: TBaseVirtualTree;
+  TargetCanvas: TCanvas; Node: PVirtualNode; ItemRect: TRect;
+  var CustomDraw: Boolean);
+var
+  ND : PNodeData;
+begin
+  ND := PNodeData(Sender.GetNodeData(Node));
 end;
 
 procedure TfrmMainOld.FLogTreeViewPaintText(Sender: TBaseVirtualTree;
@@ -867,7 +906,7 @@ var
   ND : PNodeData;
 begin
   ND := PNodeData(Sender.GetNodeData(Node));
-  if Column = 0 then
+  if Column = COLUMN_MAIN then
   begin
     case ND.MsgType of
       lmtInfo:
@@ -887,24 +926,18 @@ begin
       end;
     end;
   end
-  else if Column = 1 then
+  else if Column = COLUMN_NAME then
   begin
     TargetCanvas.Font.Style := TargetCanvas.Font.Style + [fsBold];
   end
-  else if Column = 2 then
+  else if Column = COLUMN_VALUE then
   begin
     TargetCanvas.Font.Color := clNavy;
   end
-  else if Column = 3 then
+  else if Column = COLUMN_TIMESTAMP then
   begin
     TargetCanvas.Font.Color := clBlue;
   end;
-end;
-
-procedure TfrmMainOld.FReceiverReceiveMessage(Sender: TObject;
-  AStream: TStream);
-begin
-  ProcessMessage(AStream);
 end;
 
 procedure TfrmMainOld.FLogTreeViewFocusChanged(Sender: TBaseVirtualTree;
@@ -939,13 +972,23 @@ begin
       end;
       lmtObject:
       begin
-        ND.MsgData.Position := 0;
-        ObjectBinaryToText(ND.MsgData, LStream);
-        LStream.Position := 0;
-        S := LStream.DataString;
-        Editor.Text := S;
-        Editor.HighlighterName := 'DFM';
-        pgcMessageDetails.ActivePage := tsTextViewer;
+        if Assigned(ND.MsgData) then // component
+        begin
+          ND.MsgData.Position := 0;
+          ObjectBinaryToText(ND.MsgData, LStream);
+          LStream.Position := 0;
+          S := LStream.DataString;
+          Editor.Text := S;
+          Editor.HighlighterName := 'DFM';
+          pgcMessageDetails.ActivePage := tsTextViewer;
+        end
+        else
+        begin
+          S := ND.Title;
+          ND.Name := Copy(S, 1, Pos(sLineBreak, S));
+          Editor.Text := Copy(S, Pos(sLineBreak, S) + 2, Length(S));
+          pgcMessageDetails.ActivePageIndex := 0;
+        end;
       end;
       lmtBitmap:
       begin
@@ -967,15 +1010,33 @@ begin
       else
       begin
         S := ND.Title;
-        //S := Copy(S, Pos('=', S) + 1, Length(S));
-        Editor.Text := S;
-        FManager.Commands.GuessHighlighterType;
+        if S.Contains('=') then
+        begin
+          S := Copy(S, Pos('=', S) + 2, Length(S));
+          Editor.Text := S;
+        end;
         pgcMessageDetails.ActivePageIndex := 0;
       end;
     end;
   finally
     LStream.Free;
   end;
+end;
+
+procedure TfrmMainOld.FLogTreeViewGetHint(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; Column: TColumnIndex; var LineBreakStyle:
+  TVTTooltipLineBreakStyle; var HintText: string);
+var
+  ND: PNodeData;
+begin
+  ND := Sender.GetNodeData(Node);
+  HintText := Reflect.Fields(ND).ToString;
+end;
+
+procedure TfrmMainOld.FLogTreeViewGetHintKind(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; Column: TColumnIndex; var Kind: TVTHintKind);
+begin
+  Kind := vhkText;
 end;
 
 procedure TfrmMainOld.FLogTreeViewGetImageIndex(Sender: TBaseVirtualTree;
@@ -985,7 +1046,7 @@ var
   ND: PNodeData;
 begin
   ND := Sender.GetNodeData(Node);
-  if Column = 0 then
+  if Column = COLUMN_MAIN then
     ImageIndex := Integer(ND.MsgType);
 end;
 
@@ -993,24 +1054,24 @@ procedure TfrmMainOld.FLogTreeViewGetText(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
   var CellText: string);
 var
-  ND: PNodeData;
+  ND  : PNodeData;
   NDP : PNodeData;
-  S : string;
+  S   : string;
 begin
   ND := Sender.GetNodeData(Node);
-  if Column = 0 then
+  if Column = COLUMN_MAIN then
   begin
     CellText := ND.Title;
   end
-  else if Column = 1 then
+  else if Column = COLUMN_NAME then
   begin
     CellText := ND.Name;
   end
-  else if Column = 2 then
+  else if Column = COLUMN_VALUE then
   begin
     CellText := ND.Value;
   end
-  else
+  else if Column = COLUMN_TIMESTAMP then
   begin
     //CellText := DateTimeToStr(ND.MsgTime);
 //    NDP := Sender.GetNodeData(Node.PrevSibling);
@@ -1054,6 +1115,8 @@ begin
   //(MsgType in [lmtEnterMethod, lmtExitMethod]) or
 //      ((MsgType in FActiveMessages);
     //and IsWild(Title, FTitleFilter, True));
+
+  UpdateWatches;
 end;
 
 procedure TfrmMainOld.FLogTreeViewFreeNode(Sender: TBaseVirtualTree;
@@ -1066,6 +1129,8 @@ begin
   if Assigned(ND.MsgData) then
     FreeAndNil(ND.MsgData);
 end;
+
+{ Processes keyboard input when treeview has focus. }
 
 procedure TfrmMainOld.FLogTreeViewKeyPress(Sender: TObject; var Key: Char);
 begin
@@ -1124,16 +1189,22 @@ end;
 {$ENDREGION}
 
 {$REGION 'Receiver events'}
+procedure TfrmMainOld.FReceiverReceiveMessage(Sender: TObject;
+  AStream: TStream);
+begin
+  ProcessMessage(AStream);
+end;
+
 procedure TfrmMainOld.FIPCServerMessage(Sender: TObject);
 begin
   ProcessMessage(TWinIPCServer(Sender).MsgData);
 end;
+{$ENDREGION}
 
 procedure TfrmMainOld.tmrPollTimer(Sender: TObject);
 begin
   ZMQPoll;
 end;
-{$ENDREGION}
 {$ENDREGION}
 
 {$REGION 'property access methods'}
@@ -1170,7 +1241,7 @@ begin
   FLastParent   := nil;
   FLatestWatchInspector.Rows.Count   := 0;
   FSelectedWatchInspector.Rows.Count := 0;
-  FWatchHistoryInspector.Rows.Count := 0;
+  FWatchHistoryInspector.Rows.Count  := 0;
 end;
 
 procedure TfrmMainOld.FilterCallback(Sender: TBaseVirtualTree; Node: PVirtualNode;
@@ -1235,27 +1306,27 @@ procedure TfrmMainOld.UpdateWatches;
 var
   LTempIndex: LongWord;
 begin
-  case pgcWatches.ActivePageIndex of
-    0{Latest}, 1{Selected}:
+  if (pgcWatches.ActivePage = tsLatest)
+    or (pgcWatches.ActivePage = tsSelected) then
+  begin
+    if pgcWatches.ActivePage = tsLatest then
     begin
-      if pgcWatches.ActivePageIndex = 0 then
-      begin
-        LTempIndex := FMessageCount;
-      end
+      LTempIndex := FMessageCount;
+    end
+    else
+    begin
+      if FLogTreeView.FocusedNode <> nil then
+        LTempIndex := PNodeData(
+          FLogTreeView.GetNodeData(FLogTreeView.FocusedNode)
+        )^.Index
       else
-      begin
-        if FLogTreeView.FocusedNode <> nil then
-          LTempIndex := PNodeData(FLogTreeView.GetNodeData(
-            FLogTreeView.FocusedNode))^.Index
-        else
-          LTempIndex := 0;
-      end;
-      FWatches.Update(LTempIndex);
+        LTempIndex := 0;
     end;
-    2:
-    begin
-      UpdateWatchHistory;
-    end;
+    FWatches.Update(LTempIndex);
+  end
+  else if pgcWatches.ActivePage = tsHistory then
+  begin
+    UpdateWatchHistory;
   end;
 end;
 
@@ -1263,16 +1334,10 @@ procedure TfrmMainOld.UpdateWatchHistory;
 var
   I: Integer;
 begin
-    if cbxWatchHistory.ItemIndex = -1 then
-      Exit;
-    with FWatches[Integer(cbxWatchHistory.Items.Objects[cbxWatchHistory.ItemIndex])] do
-    begin
-      FWatchHistoryInspector.Rows.Count := Count;
-      //grdWatchHistory.RowCount := Count + 1;
-      //FWatchHistoryInspector.Rows.Count := Count + 1;
-//      for I := 1 to Count do
-//        grdWatchHistory.Cells[0, I] := Values[I - 1];
-    end;
+  if cbxWatchHistory.ItemIndex = -1 then
+    Exit;
+  I := Integer(cbxWatchHistory.Items.Objects[cbxWatchHistory.ItemIndex]);
+  FWatchHistoryInspector.Rows.Count := FWatches[I].Count;
 end;
 
 procedure TfrmMainOld.ShowBitmapInfo(ABitmap: TBitmap);
@@ -1289,6 +1354,8 @@ end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
+{ Decodes message stream and assigns it to FCurrentMsg: TLogMessage. }
+
 procedure TfrmMainOld.ProcessMessage(AStream: TStream);
 var
   LTextSize : Integer;
@@ -1308,10 +1375,6 @@ begin
     AStream.ReadBuffer(FCurrentMsg.Text[1], LTextSize);
     AStream.ReadBuffer(LDataSize, SizeOf(Integer));
 
-//    AStream.ReadBuffer(LTextSize, SizeOf(Integer));
-//    SetLength(FCurrentMsg.ProcessName, LTextSize);
-//    AStream.ReadBuffer(FCurrentMsg.ProcessName[1], LTextSize);
-
     if LDataSize > 0 then
     begin
       FCurrentMsg.Data := TMemoryStream.Create;
@@ -1321,6 +1384,11 @@ begin
     end
     else
       FCurrentMsg.Data := nil;
+
+//    AStream.ReadBuffer(LTextSize, SizeOf(Integer));
+//    SetLength(FCurrentMsg.ProcessName, LTextSize);
+//    AStream.ReadBuffer(FCurrentMsg.ProcessName[1], LTextSize);
+
     case TLogMessageType(FCurrentMsg.MsgType) of
       lmtEnterMethod:
       begin
@@ -1351,7 +1419,7 @@ begin
 //      begin
 //        FLastNode := FLogTreeView.AddChild(FLastParent, nil);
 //      end;
-      lmtWatch, lmtCounter:
+     lmtWatch, lmtCounter:
       begin
         FWatches.Add(
           string(FCurrentMsg.Text),
@@ -1377,6 +1445,10 @@ begin
     end;
   finally
     FLogTreeView.EndUpdate;
+  end;
+  if actAutoScroll.Checked then
+  begin
+    FLogTreeView.FocusedNode := FLogTreeView.GetLast;
   end;
 end;
 

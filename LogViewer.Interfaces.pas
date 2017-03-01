@@ -1,5 +1,5 @@
 {
-  Copyright (C) 2013-2016 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2017 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@ unit LogViewer.Interfaces;
 interface
 
 uses
-  System.Classes,
+  System.Classes, System.Actions,
+  Vcl.ActnList,
 
   Spring;
 
@@ -43,12 +44,23 @@ type
       read GetOnReceiveMessage;
   end;
 
-  IMessageViewer = interface
-  ['{89AAD6E2-FECF-4E20-B985-8BAA0CB351F2}']
-    function GetReceiver: IChannelReceiver;
+  ILogViewerManager = interface
+  ['{3EC3A6B2-88B8-4B5E-9160-D267DBFB9C22}']
+  end;
 
-    property Receiver: IChannelReceiver
-      read GetReceiver;
+  ILogViewerActions = interface
+  ['{73B2BDA9-4098-49A3-95D7-E837EC129FE4}']
+    function GetActionList: TActionList;
+    function GetItem(AName: string): TCustomAction;
+
+    procedure UpdateActions;
+
+    property Items[AName: string]: TCustomAction
+      read GetItem; default;
+
+    property ActionList: TActionList
+      read GetActionList;
+
   end;
 
 implementation

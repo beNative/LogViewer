@@ -175,7 +175,8 @@ uses
 begin
   Application.Title := 'Log viewer';
   Application.Initialize;
-  Application.CreateForm(TfrmMain, frmMain);
+    Application.CreateForm(TfrmMainOld, frmMainOld);
+//  Application.CreateForm(TfrmMain, frmMain);
   Application.Run;
 end.
 

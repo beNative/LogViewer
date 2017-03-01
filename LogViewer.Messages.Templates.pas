@@ -1,5 +1,5 @@
 {
-  Copyright (C) 2013-2016 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2017 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -13,6 +13,8 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 }
+
+// will be dismissed.
 
 unit LogViewer.Messages.Templates;
 
@@ -69,14 +71,14 @@ uses
 
   DDuce.Logger.Interfaces, DDuce.Reflect;
 
-{$REGION 'non-interfaced routines'}
+{ TLogMessageTemplate }
+
 procedure Debug(const AString: string);
 begin
   OutputDebugString(PWideChar(AString));
 end;
-{$ENDREGION}
 
-{$REGION 'TLogTemplate'}
+
 constructor TLogTemplate.Create(AColumnDefinitions: IColumnDefinitions;
   AMessages: IList<TLogMessageData>);
 begin
@@ -94,16 +96,15 @@ begin
 //  if Item is IList then
 //    Result := (Item as IList).Count
 //  else
-  Result := GetItems(Item).Count;
+    Result := 1;
 end;
 
 function TLogTemplate.GetItems(const Item: TObject): IObjectList;
 begin
   Result := FMessages as IObjectList;
 end;
-{$ENDREGION}
 
-{$REGION 'TLogMessageTemplate'}
+
 {$REGION 'construction and destruction'}
 constructor TLogMessageTemplate.Create(AColumnDefinitions: IColumnDefinitions;
   AMessages: IList<TLogMessageData>);
@@ -126,6 +127,7 @@ begin
     Result := inherited GetItem(Item, Index);
 
   Debug(Reflect.Properties(Result).ToString);
+
 end;
 
 function TLogMessageTemplate.GetItemCount(const Item: TObject): Integer;
@@ -138,33 +140,39 @@ begin
     Result := LMD.Children.Count;
     if Result > 0 then
       Debug(Format('GetItemCount = %d', [Result]));
+
+
   end
   else
     Result := inherited GetItemCount(Item);
+
+
 end;
 
 function TLogMessageTemplate.GetItems(const Item: TObject): IObjectList;
 var
   LMD : TLogMessageData;
   O   : IList<TLogMessageData>;
-  I   : TLogMessageData;
 begin
-//  if Item is TLogMessageData then
-//  begin
-//    LMD := Item as TLogMessageData;
-//    if (LMD.MessageType = lmtEnterMethod) {and (LMD.Level > 0)} then
-//    begin
-//      Result := LMD.Children as IObjectList
-//
-//    end
-//    else
-//      Result := inherited GetItems(Item);
-//  end
-//  else
+  if Item is TLogMessageData then
   begin
+    LMD := Item as TLogMessageData;
+    if (LMD.MessageType = lmtEnterMethod) {and (LMD.Level > 0)} then
+    begin
+      Result := LMD.Children as IObjectList
+
+    end
+    else
+      Result := inherited GetItems(Item);
+  end
+  else
+  begin
+
     Result := inherited GetItems(Item);
   end;
 end;
-{$ENDREGION}
+
+
+
 
 end.
