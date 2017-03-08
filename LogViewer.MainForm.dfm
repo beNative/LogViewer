@@ -12,6 +12,8 @@ object frmMain: TfrmMain
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
+  ScreenSnap = True
+  ShowHint = True
   PixelsPerInch = 96
   TextHeight = 13
   object pgcMain: TPageControl
@@ -19,7 +21,7 @@ object frmMain: TfrmMain
     Left = 3
     Top = 3
     Width = 1428
-    Height = 933
+    Height = 914
     ActivePage = tsIPC
     Align = alClient
     TabOrder = 0
@@ -29,10 +31,25 @@ object frmMain: TfrmMain
     object tsODS: TTabSheet
       Caption = 'ODS'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object tsZeroMQ: TTabSheet
       Caption = 'ZeroMQ'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
+  end
+  object sbrMain: TStatusBar
+    Left = 0
+    Top = 920
+    Width = 1434
+    Height = 19
+    Panels = <>
   end
 end

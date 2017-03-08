@@ -33,18 +33,33 @@ type
     tsIPC    : TTabSheet;
     tsODS    : TTabSheet;
     tsZeroMQ : TTabSheet;
+    sbrMain: TStatusBar;
   private
     FMessageViewerIPC : TfrmMessagesView;
     FReceiverIPC      : IChannelReceiver;
     FMessageViewerODS : TfrmMessagesView;
     FReceiverODS      : IChannelReceiver;
-    FManager       : TdmManager;
-    FSettings      : TLogViewerSettings;
+    FManager          : TdmManager;
+    FSettings         : TLogViewerSettings;
+    FMainToolbar      : TToolBar;
+    function GetActions: ILogViewerActions;
+    function GetMenus: ILogViewerMenus;
+    function GetManager: ILogViewerManager;
 
   public
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 
+
+    property Manager: ILogViewerManager
+      read GetManager;
+
+    property Actions: ILogViewerActions
+      read GetActions;
+
+    { Menu components to use in the user interface. }
+    property Menus: ILogViewerMenus
+      read GetMenus;
   end;
 
 var
@@ -73,15 +88,39 @@ begin
     tsODS,
     FReceiverODS
   );
+  FMainToolbar := TLogViewerFactories.CreateMainToolbar(
+    Self,
+    Self,
+    Actions,
+    Menus
+  );
 
   FReceiverIPC.Enabled := True;
   FReceiverODS.Enabled := False;
+
 end;
 
 procedure TfrmMain.BeforeDestruction;
 begin
   FSettings.Free;
   inherited BeforeDestruction;
+end;
+{$ENDREGION}
+
+{$REGION 'property access methods'}
+function TfrmMain.GetActions: ILogViewerActions;
+begin
+  Result := Manager.Actions;
+end;
+
+function TfrmMain.GetManager: ILogViewerManager;
+begin
+  Result := FManager as ILogViewerManager;
+end;
+
+function TfrmMain.GetMenus: ILogViewerMenus;
+begin
+  Result := Manager.Menus;
 end;
 {$ENDREGION}
 

@@ -18,6 +18,8 @@ unit LogViewer.Manager;
 
 interface
 
+{ Handles all application events. }
+
 uses
   System.SysUtils, System.Classes, System.Actions,
   Vcl.ExtCtrls, System.ImageList, Vcl.ImgList, Vcl.Controls, Vcl.ActnList,
@@ -25,7 +27,10 @@ uses
   LogViewer.Interfaces, LogViewer.Settings;
 
 type
-  TdmManager = class(TDataModule, ILogViewerActions, ILogViewerManager)
+  TdmManager = class(TDataModule, ILogViewerActions,
+                                  ILogViewerMenus,
+                                  ILogViewerManager
+  )
     {$REGION 'designer controls'}
     aclMain              : TActionList;
     actClearMessages     : TAction;
@@ -34,8 +39,8 @@ type
     actSave              : TAction;
     actSelectAll         : TAction;
     actSelectNone        : TAction;
-    actToggleInfo        : TAction;
-    actToggleWarning     : TAction;
+    actInfo: TAction;
+    actWarning: TAction;
     actValue             : TAction;
     actError             : TAction;
     actConditional       : TAction;
@@ -61,17 +66,19 @@ type
     imlMessageTypes      : TImageList;
     tmrPoll              : TTimer;
     imlMain              : TImageList;
+    actSerialPortChannel: TAction;
     {$ENDREGION}
 
+    {$REGION 'action handlers'}
     procedure actClearMessagesExecute(Sender: TObject);
     procedure actToggleAlwaysOnTopExecute(Sender: TObject);
     procedure actOpenExecute(Sender: TObject);
     procedure actSaveExecute(Sender: TObject);
     procedure actSelectAllExecute(Sender: TObject);
     procedure actSelectNoneExecute(Sender: TObject);
-    procedure actToggleInfoExecute(Sender: TObject);
+    procedure actInfoExecute(Sender: TObject);
     procedure actValueExecute(Sender: TObject);
-    procedure actToggleWarningExecute(Sender: TObject);
+    procedure actWarningExecute(Sender: TObject);
     procedure actConditionalExecute(Sender: TObject);
     procedure actErrorExecute(Sender: TObject);
     procedure actCheckPointExecute(Sender: TObject);
@@ -93,12 +100,17 @@ type
     procedure actODSChannelExecute(Sender: TObject);
     procedure actCollapseAllExecute(Sender: TObject);
     procedure actExpandAllExecute(Sender: TObject);
+    {$ENDREGION}
 
   private
-    FSettings : TLogViewerSettings;
+    FSettings   : TLogViewerSettings;
+    FActiveView : ILogViewerMessagesView;
 
   protected
+    function GetActiveView: ILogViewerMessagesView;
+    procedure SetActiveView(const Value: ILogViewerMessagesView);
 
+    {$REGION 'ILogViewerActions'}
     function GetActionList: TActionList;
     function GetItem(AName: string): TCustomAction;
 
@@ -109,14 +121,60 @@ type
 
     property ActionList: TActionList
       read GetActionList;
+    {$ENDREGION}
+
+    {$REGION 'ILogViewerMenus'}
+    // TODO
+    {$ENDREGION}
+
+    {$REGION 'ILogViewerManager'}
+    function GetMenus: ILogViewerMenus;
+    function GetActions: ILogViewerActions;
+    function GetSettings: TLogViewerSettings;
+
+    property Menus: ILogViewerMenus
+      read GetMenus;
+
+    property Actions: ILogViewerActions
+      read GetActions;
+
+    property Settings: TLogViewerSettings
+      read GetSettings;
+    {$ENDREGION}
+
+    { Set/get the reference to the active view. }
+    property ActiveView: ILogViewerMessagesView
+      read GetActiveView write SetActiveView;
 
   public
+    procedure AfterConstruction; override;
+    procedure BeforeDestruction; override;
+
+
 
   end;
 
 implementation
 
+uses
+  Vcl.Forms;
+
 {$R *.dfm}
+
+{$REGION 'construction and destruction'}
+procedure TdmManager.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  FSettings := TLogViewerSettings.Create;
+
+end;
+
+procedure TdmManager.BeforeDestruction;
+begin
+  FSettings.Free;
+  inherited BeforeDestruction;
+end;
+{$ENDREGION}
 
 {$REGION 'action handlers'}
 procedure TdmManager.actBitmapExecute(Sender: TObject);
@@ -235,21 +293,33 @@ begin
 end;
 
 procedure TdmManager.actToggleAlwaysOnTopExecute(Sender: TObject);
+var
+  A : TAction;
 begin
-//
+  A := Sender as TAction;
+  if A.Checked then
+    Settings.FormSettings.FormStyle := fsStayOnTop
+  else
+    Settings.FormSettings.FormStyle := fsNormal;
 end;
 
 procedure TdmManager.actToggleFullscreenExecute(Sender: TObject);
+var
+  A : TAction;
+begin
+  A := Sender as TAction;
+  if A.Checked then
+    Settings.FormSettings.WindowState := wsMaximized
+  else
+    Settings.FormSettings.WindowState := wsNormal;
+end;
+
+procedure TdmManager.actInfoExecute(Sender: TObject);
 begin
 //
 end;
 
-procedure TdmManager.actToggleInfoExecute(Sender: TObject);
-begin
-//
-end;
-
-procedure TdmManager.actToggleWarningExecute(Sender: TObject);
+procedure TdmManager.actWarningExecute(Sender: TObject);
 begin
 //
 end;
@@ -276,15 +346,51 @@ begin
   Result := aclMain;
 end;
 
-function TdmManager.GetItem(AName: string): TCustomAction;
-//var
-//  A: TCustomAction;
+function TdmManager.GetActions: ILogViewerActions;
 begin
-//  A := aclMain.ActionByName(AName) as TCustomAction;
-//  if Assigned(A) then
-//    Result := A
-//  else
-//    Logger.SendWarning(Format('Action with name (%s) not found!', [AName]));
+  Result := Self as ILogViewerActions;
+end;
+
+function TdmManager.GetActiveView: ILogViewerMessagesView;
+begin
+  Result := FActiveView;
+end;
+
+procedure TdmManager.SetActiveView(const Value: ILogViewerMessagesView);
+begin
+  if Assigned(Value) and (Value <> FActiveView) then
+  begin
+    FActiveView := Value;
+    //Events.DoActiveViewChange;
+    //ActiveViewChanged;
+  end;
+end;
+
+function TdmManager.GetItem(AName: string): TCustomAction;
+var
+  A  : TCustomAction;
+  CA : TContainedAction;
+begin
+  Result := nil;
+  for CA in aclMain do
+  begin
+    if CA.Name = AName then
+    begin
+      A := CA as TCustomAction;
+      Result := A;
+      Break;
+    end;
+  end;
+end;
+
+function TdmManager.GetMenus: ILogViewerMenus;
+begin
+  Result := Self as ILogViewerMenus;
+end;
+
+function TdmManager.GetSettings: TLogViewerSettings;
+begin
+  Result := FSettings;
 end;
 {$ENDREGION}
 
@@ -294,7 +400,5 @@ begin
 
 end;
 {$ENDREGION}
-
-
 
 end.

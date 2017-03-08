@@ -93,8 +93,6 @@ uses
   DDuce.Logger.Factories in '..\..\libraries\dduce\Source\Modules\Logger\DDuce.Logger.Factories.pas',
   LogViewer.Watches.Data in 'LogViewer.Watches.Data.pas',
   DDuce.WinIPC.Server in '..\..\libraries\dduce\Source\DDuce.WinIPC.Server.pas',
-  ZeroMQ.API in 'ZeroMQ.API.pas',
-  ZeroMQ in 'ZeroMQ.pas',
   DDuce.Logger.Base in '..\..\libraries\dduce\Source\Modules\Logger\DDuce.Logger.Base.pas',
   DDuce.Logger.Channels.WinODS in '..\..\libraries\dduce\Source\Modules\Logger\DDuce.Logger.Channels.WinODS.pas',
   JsonDataObjects in '..\..\libraries\JsonDataObjects\Source\JsonDataObjects.pas',
@@ -168,15 +166,21 @@ uses
   Spring.Patches.QC98671 in '..\..\libraries\spring4d\Source\Base\Patches\Spring.Patches.QC98671.pas',
   Spring.Patches.QC107219 in '..\..\libraries\spring4d\Source\Base\Patches\Spring.Patches.QC107219.pas',
   LogViewer.Settings.Dialog in 'LogViewer.Settings.Dialog.pas' {frmLogViewerSettings},
-  LogViewer.Receivers.Serial in 'LogViewer.Receivers.Serial.pas';
+  LogViewer.Receivers.Serial in 'LogViewer.Receivers.Serial.pas',
+  ZeroMQ.API in '..\..\libraries\Delphi-ZeroMQ\ZeroMQ.API.pas',
+  ZeroMQ in '..\..\libraries\Delphi-ZeroMQ\ZeroMQ.pas',
+  synaser in '..\..\libraries\synapse\synaser.pas',
+  synafpc in '..\..\libraries\synapse\synafpc.pas',
+  synautil in '..\..\libraries\synapse\synautil.pas',
+  LogViewer.Factories.Toolbars in 'LogViewer.Factories.Toolbars.pas';
 
 {$R *.res}
 
 begin
   Application.Title := 'Log viewer';
   Application.Initialize;
-    Application.CreateForm(TfrmMainOld, frmMainOld);
-//  Application.CreateForm(TfrmMain, frmMain);
+//  Application.CreateForm(TfrmMainOld, frmMainOld);
+  Application.CreateForm(TfrmMain, frmMain);
   Application.Run;
 end.
 

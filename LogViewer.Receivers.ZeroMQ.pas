@@ -41,12 +41,13 @@ uses
 type
   TZeroMQChannelReceiver = class(TInterfacedObject, IChannelReceiver)
   private
-    FZMQStream  : TStringStream;
-    FZMQ        : IZeroMQ;
-    FSubscriber : IZMQPair;
-    FPoll       : IZMQPoll;
-    FTimer      : TTimer;
-    FEnabled    : Boolean;
+    FOnReceiveMessage : Event<TReceiveMessageEvent>;
+    FZMQStream        : TStringStream;
+    FZMQ              : IZeroMQ;
+    FSubscriber       : IZMQPair;
+    FPoll             : IZMQPoll;
+    FTimer            : TTimer;
+    FEnabled          : Boolean;
 
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
@@ -98,11 +99,6 @@ begin
   Result := FEnabled;
 end;
 
-function TZeroMQChannelReceiver.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
-begin
-//
-end;
-
 procedure TZeroMQChannelReceiver.SetEnabled(const Value: Boolean);
 begin
   if Value <> Enabled then
@@ -114,6 +110,11 @@ begin
       CloseSubscriber;
     FTimer.Enabled := FEnabled;
   end;
+end;
+
+function TZeroMQChannelReceiver.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
+begin
+  Result := FOnReceiveMessage;
 end;
 {$ENDREGION}
 
@@ -151,8 +152,8 @@ var
   N : Integer;
 begin
   FSubscriber := FZMQ.Start(ZMQSocket.Subscriber);
-  N := FSubscriber.Connect('tcp://GANYMEDES:5555');
-  N := FSubscriber.Connect('tcp://localhost:5555');
+//  N := FSubscriber.Connect('tcp://GANYMEDES:5555');
+//  N := FSubscriber.Connect('tcp://localhost:5555');
   //N := FSubscriber.Connect('tcp://EUROPA:5555');
 
   FSubscriber.Subscribe(''); // required!!

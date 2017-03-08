@@ -44,6 +44,7 @@ type
     tsSelected      : TTabSheet;
     tsHistory       : TTabSheet;
     cbxWatchHistory : TComboBox;
+    procedure pgcWatchesChanging(Sender: TObject; var AllowChange: Boolean);
 
   private
     FWatches                : TWatchList;
@@ -181,10 +182,8 @@ procedure TfrmWatchesView.FWatchesUpdate(const AVariable, AValue: string);
 begin
   FLatestWatchInspector.Rows.Count   := FWatches.Count;
   FSelectedWatchInspector.Rows.Count := FWatches.Count;
-//  FWatchHistoryInspector.Refresh;
-//  FSelectedWatchInspector.Refresh;
-//  FLatestWatchInspector.Refresh;
-
+  FSelectedWatchInspector.Refresh;
+  FLatestWatchInspector.Refresh;
 end;
 procedure TfrmWatchesView.FWatchHistoryInspectorGetCellText(Sender: TObject;
   Cell: TGridCell; var Value: string);
@@ -193,6 +192,12 @@ begin
     Value := FWatches.Items[cbxWatchHistory.ItemIndex].Name
   else
     Value := FWatches.Items[cbxWatchHistory.ItemIndex].Values[Cell.Row];
+end;
+
+procedure TfrmWatchesView.pgcWatchesChanging(Sender: TObject;
+  var AllowChange: Boolean);
+begin
+  UpdateView;
 end;
 
 procedure TfrmWatchesView.UpdateView;

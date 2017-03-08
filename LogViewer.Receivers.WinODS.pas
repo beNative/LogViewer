@@ -34,7 +34,7 @@ type
   TODSMessage = class
     Index       : Cardinal;
     Time        : TDateTime; // time of send
-    //ProcessName : AnsiString; // optional : the name of the originating process
+    ProcessName : AnsiString; // optional : the name of the originating process
     MsgText     : AnsiString;
   end;
 
@@ -255,7 +255,7 @@ constructor TODSThread.Create(AODSQueue: IQueue<TODSMessage>);
 begin
   inherited Create;
   FODSQueue := AODSQueue;
-  hCloseEvent := CreateEvent( nil, True, False, nil );  // Create the close event
+  hCloseEvent := CreateEvent(nil, True, False, nil);  // Create the close event
 end;
 
 procedure TODSThread.Execute;
@@ -330,7 +330,7 @@ begin
         begin
           ODSMessage             := TODSMessage.Create;
           ODSMessage.Time        := Now;
-          //ODSMessage.ProcessName := GetExenameForProcess(LPDWORD(SharedMem)^);
+          ODSMessage.ProcessName := GetExenameForProcess(LPDWORD(SharedMem)^);
            //'$' + inttohex (pThisPid^,2)
           ODSMessage.MsgText := AnsiString(PAnsiChar(SharedMem) + SizeOf(DWORD));
           // the native version of OutputDebugString is ASCII. result is always AnsiString

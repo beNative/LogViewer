@@ -55,6 +55,7 @@ type
   TVariableValue = record
     Index : Integer;
     Value : string;
+    // timestamp?
   end;
 
   { TWatchVariable }

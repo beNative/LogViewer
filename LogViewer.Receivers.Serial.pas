@@ -21,6 +21,62 @@ unit LogViewer.Receivers.Serial;
 
 interface
 
+uses
+  System.Classes,
+  Vcl.ExtCtrls,
+
+  Spring,
+
+  synaser,
+
+  LogViewer.Interfaces;
+
+type
+  TSerialPortReceiver = class(TInterfacedObject, IChannelReceiver)
+  private
+    FEnabled          : Boolean;
+    FOnReceiveMessage : Event<TReceiveMessageEvent>;
+    FComPort          : TBlockSerial;
+
+  protected
+    function GetEnabled: Boolean;
+    procedure SetEnabled(const Value: Boolean);
+    function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
+
+    procedure DoReceiveMessage(AStream : TStream);
+
+    property Enabled: Boolean
+      read GetEnabled write SetEnabled;
+
+    property OnReceiveMessage: IEvent<TReceiveMessageEvent>
+      read GetOnReceiveMessage;
+
+  end;
+
 implementation
+
+{$REGION 'property access methods'}
+function TSerialPortReceiver.GetEnabled: Boolean;
+begin
+  Result := FEnabled;
+end;
+
+procedure TSerialPortReceiver.SetEnabled(const Value: Boolean);
+begin
+  FEnabled := Value;
+end;
+
+function TSerialPortReceiver.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
+begin
+  Result := FOnReceiveMessage;
+end;
+{$ENDREGION}
+
+{$REGION 'event dispatch methods'}
+procedure TSerialPortReceiver.DoReceiveMessage(AStream: TStream);
+begin
+  FOnReceiveMessage.Invoke(Self, AStream);
+end;
+{$ENDREGION}
 
 end.

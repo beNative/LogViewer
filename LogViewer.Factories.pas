@@ -16,11 +16,19 @@
 
 unit LogViewer.Factories;
 
+{ Factories for all modules used in the application:
+    - Callstack view
+    - Watches view
+    - Main message view
+    - Manager instance
+    - Settings
+}
+
 interface
 
 uses
   System.Classes,
-  Vcl.Controls,
+  Vcl.Controls, Vcl.ComCtrls, Vcl.Menus,
 
   Spring.Collections,
 
@@ -30,6 +38,7 @@ uses
 
 type
   TLogViewerFactories = class sealed
+  public
     class function CreateCallStackView(
       AOwner  : TComponent;
       AParent : TWinControl;
@@ -55,13 +64,25 @@ type
 
     class function CreateSettings(
     ): TLogViewerSettings;
+
+    class function CreateMainToolbar(
+      AOwner   : TComponent;
+      AParent  : TWinControl;
+      AActions : ILogViewerActions;
+      AMenus   : ILogViewerMenus
+    ): TToolbar;
   end;
 
 implementation
 
 uses
-  Vcl.Forms;
+  Vcl.Forms,
 
+  Spring,
+
+  LogViewer.Factories.Toolbars;
+
+{$REGION 'public methods'}
 class function TLogViewerFactories.CreateCallStackView(AOwner: TComponent;
   AParent: TWinControl; AData: IObjectList): TfrmCallStackView;
 begin
@@ -70,6 +91,18 @@ begin
   Result.Align       := alClient;
   Result.BorderStyle := bsNone;
   Result.Visible     := True;
+end;
+
+class function TLogViewerFactories.CreateMainToolbar(AOwner: TComponent;
+  AParent: TWinControl; AActions: ILogViewerActions;
+  AMenus: ILogViewerMenus): TToolbar;
+var
+  TBF : ILogViewerToolbarsFactory;
+begin
+  Guard.CheckNotNull(AActions, 'AActions');
+  Guard.CheckNotNull(AMenus, 'AMenus');
+  TBF := TLogViewerToolbarsFactory.Create(AActions, AMenus);
+  Result := TBF.CreateMainToolbar(AOwner, AParent);
 end;
 
 class function TLogViewerFactories.CreateManager(
@@ -103,5 +136,6 @@ begin
   Result.BorderStyle := bsNone;
   Result.Visible     := True;
 end;
+{$ENDREGION}
 
 end.

@@ -20,22 +20,15 @@ object frmWatchesView: TfrmWatchesView
     ActivePage = tsLatest
     Align = alClient
     TabOrder = 0
+    OnChanging = pgcWatchesChanging
     object tsLatest: TTabSheet
       Caption = 'Latest'
     end
     object tsSelected: TTabSheet
       Caption = 'Selected'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
     end
     object tsHistory: TTabSheet
       Caption = 'History'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object cbxWatchHistory: TComboBox
         Left = 0
         Top = 0

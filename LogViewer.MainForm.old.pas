@@ -333,7 +333,7 @@ type
     FIPCServer      : TWinIPCServer;
     FWatches        : TWatchList;
     FExpandParent   : Boolean;
-    FManager        : IEditorManager;
+    FEditorManager  : IEditorManager;
     FEditorSettings : IEditorSettings;
     FEditorView     : IEditorView;
     FVKPressed      : Boolean;
@@ -504,7 +504,7 @@ var
   N : Integer;
 begin
   FZMQ := TZeroMQ.Create;
-  FSubscriber := FZMQ.Start(Subscriber);
+  FSubscriber := FZMQ.Start(ZMQSocket.Subscriber);
   N := FSubscriber.Connect('tcp://GANYMEDES:5555');
   N := FSubscriber.Connect('tcp://localhost:5555');
   //N := FSubscriber.Connect('tcp://EUROPA:5555');
@@ -581,8 +581,8 @@ end;
 procedure TfrmMainOld.CreateEditor;
 begin
   FEditorSettings := TEditorFactories.CreateSettings(Self, 'settings.xml');
-  FManager    := TEditorFactories.CreateManager(Self, FEditorSettings);
-  FEditorView := TEditorFactories.CreateView(tsTextViewer, FManager, 'Tool');
+  FEditorManager  := TEditorFactories.CreateManager(Self, FEditorSettings);
+  FEditorView     := TEditorFactories.CreateView(tsTextViewer, FEditorManager);
 end;
 {$ENDREGION}
 

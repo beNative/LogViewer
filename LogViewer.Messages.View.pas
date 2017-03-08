@@ -18,6 +18,9 @@ unit LogViewer.Messages.View;
 
 interface
 
+{ Message viewer that can be used to display all messages from an associated
+  log channel (IChannelReceiver receiver instance) }
+
 uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes,
@@ -37,7 +40,7 @@ uses
   LogViewer.Interfaces, LogViewer.CallStack.Data, LogViewer.CallStack.View;
 
 type
-  TfrmMessagesView = class(TForm)
+  TfrmMessagesView = class(TForm, ILogViewerMessagesView)
     {$REGION 'designer controls'}
     pnlRight          : TPanel;
     pgcMessageDetails : TPageControl;
@@ -91,8 +94,6 @@ type
 
     procedure CreateLogTreeView;
     procedure CreateEditor;
-
-
     procedure CreateCallStackView;
     procedure CreateWatchesView;
 
