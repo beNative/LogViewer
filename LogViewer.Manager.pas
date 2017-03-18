@@ -26,6 +26,13 @@ uses
 
   LogViewer.Interfaces, LogViewer.Settings;
 
+
+{
+  TODO:
+  - handle list of registered channels (of wich each is associated with a
+    view?) => IList<IChannelReceiver>
+}
+
 type
   TdmManager = class(TDataModule, ILogViewerActions,
                                   ILogViewerMenus,
@@ -33,40 +40,40 @@ type
   )
     {$REGION 'designer controls'}
     aclMain              : TActionList;
+    actBitmap            : TAction;
+    actCallStack         : TAction;
+    actCheckPoint        : TAction;
     actClearMessages     : TAction;
-    actToggleAlwaysOnTop : TAction;
+    actCollapseAll       : TAction;
+    actConditional       : TAction;
+    actCustomData        : TAction;
+    actError             : TAction;
+    actException         : TAction;
+    actExpandAll         : TAction;
+    actFilterMessages    : TAction;
+    actHeapInfo          : TAction;
+    actInfo              : TAction;
+    actMemory            : TAction;
+    actMethodTraces      : TAction;
+    actObject            : TAction;
+    actODSChannel        : TAction;
     actOpen              : TAction;
     actSave              : TAction;
     actSelectAll         : TAction;
     actSelectNone        : TAction;
-    actInfo: TAction;
-    actWarning: TAction;
-    actValue             : TAction;
-    actError             : TAction;
-    actConditional       : TAction;
-    actCheckPoint        : TAction;
-    actStrings           : TAction;
-    actCallStack         : TAction;
-    actObject            : TAction;
-    actException         : TAction;
-    actBitmap            : TAction;
-    actHeapInfo          : TAction;
-    actMemory            : TAction;
-    actCustomData        : TAction;
-    actMethodTraces      : TAction;
-    actStop              : TAction;
-    actFilterMessages    : TAction;
-    actZeroMQChannel     : TAction;
-    actWinIPCChannel     : TAction;
+    actSerialPortChannel : TAction;
     actSetFocusToFilter  : TAction;
+    actStop              : TAction;
+    actStrings           : TAction;
+    actToggleAlwaysOnTop : TAction;
     actToggleFullscreen  : TAction;
-    actODSChannel        : TAction;
-    actCollapseAll       : TAction;
-    actExpandAll         : TAction;
+    actValue             : TAction;
+    actWarning           : TAction;
+    actWinIPCChannel     : TAction;
+    actZeroMQChannel     : TAction;
+    imlMain              : TImageList;
     imlMessageTypes      : TImageList;
     tmrPoll              : TTimer;
-    imlMain              : TImageList;
-    actSerialPortChannel: TAction;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -149,8 +156,6 @@ type
   public
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
-
-
 
   end;
 

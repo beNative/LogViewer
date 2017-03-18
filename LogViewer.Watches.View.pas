@@ -16,9 +16,9 @@
 
 unit LogViewer.Watches.View;
 
-interface
-
 { View showing watch values and history. }
+
+interface
 
 uses
   Winapi.Windows, Winapi.Messages,
@@ -44,7 +44,11 @@ type
     tsSelected      : TTabSheet;
     tsHistory       : TTabSheet;
     cbxWatchHistory : TComboBox;
-    procedure pgcWatchesChanging(Sender: TObject; var AllowChange: Boolean);
+
+    procedure pgcWatchesChanging(
+      Sender          : TObject;
+      var AllowChange : Boolean
+    );
 
   private
     FWatches                : TWatchList;
@@ -108,8 +112,8 @@ begin
   FMessages := AMessages;
   FMessages.OnChanged.Add(FMessagesChanged);
   FWatches  := AData;
-  FWatches.OnUpdate := FWatchesUpdate;
-  FWatches.OnNewVariable := FWatchesNewVariable;
+  FWatches.OnUpdateWatch := FWatchesUpdate;
+  FWatches.OnNewWatch := FWatchesNewVariable;
   FLatestWatchInspector := TDDuceComponents.CreateInspector(Self, tsLatest);
   FLatestWatchInspector.OnGetCellText := FLatestWatchInspectorGetCellText;
   FLatestWatchInspector.ReadOnly  := True;
@@ -157,6 +161,7 @@ begin
     FWatches.Add(
       Item.Text,
       FMessages.Count,
+      Item.TimeStamp,
       Item.MessageType = lmtCounter
     );
     UpdateView;
@@ -185,6 +190,7 @@ begin
   FSelectedWatchInspector.Refresh;
   FLatestWatchInspector.Refresh;
 end;
+
 procedure TfrmWatchesView.FWatchHistoryInspectorGetCellText(Sender: TObject;
   Cell: TGridCell; var Value: string);
 begin
@@ -199,7 +205,9 @@ procedure TfrmWatchesView.pgcWatchesChanging(Sender: TObject;
 begin
   UpdateView;
 end;
+{$ENDREGION}
 
+{$REGION 'protected methods'}
 procedure TfrmWatchesView.UpdateView;
 var
   LTempIndex: Integer;
@@ -227,7 +235,6 @@ begin
     end;
   end;
 end;
-
 {$ENDREGION}
 
 end.

@@ -203,8 +203,10 @@ type
     procedure actFilterMessagesExecute(Sender: TObject);
     procedure actZeroMQChannelExecute(Sender: TObject);
     procedure actWinIPCChannelExecute(Sender: TObject);
-
-    procedure cbxWatchHistorySelect(Sender: TObject);
+    procedure actSetFocusToFilterExecute(Sender: TObject);
+    procedure actToggleFullscreenExecute(Sender: TObject);
+    procedure actExpandAllExecute(Sender: TObject);
+    procedure actCollapseAllExecute(Sender: TObject);
 
     procedure FLogTreeViewFocusChanged(
       Sender : TBaseVirtualTree;
@@ -244,7 +246,10 @@ type
       Node              : PVirtualNode;
       var InitialStates : TVirtualNodeInitStates
     );
-    procedure FLogTreeViewKeyPress(Sender: TObject; var Key: Char);
+    procedure FLogTreeViewKeyPress(
+      Sender  : TObject;
+      var Key : Char
+    );
     procedure FLogTreeViewBeforeCellPaint(
       Sender          : TBaseVirtualTree;
       TargetCanvas    : TCanvas;
@@ -288,8 +293,8 @@ type
       var Kind : TVTHintKind
     );
 
-    procedure FWatchesUpdate(const AVariable, AValue: string);
-    procedure FWatchesNewVariable(const AVariable: string; AIndex: Integer);
+    procedure FWatchesUpdateWatch(const AVariable, AValue: string);
+    procedure FWatchesNewWatch(const AVariable: string; AIndex: Integer);
 
     procedure FWatchHistoryInspectorGetCellText(
       Sender    : TObject;
@@ -314,11 +319,8 @@ type
       Shift: TShiftState);
     procedure edtMessageFilterKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
+    procedure cbxWatchHistorySelect(Sender: TObject);
     procedure tmrPollTimer(Sender: TObject);
-    procedure actSetFocusToFilterExecute(Sender: TObject);
-    procedure actToggleFullscreenExecute(Sender: TObject);
-    procedure actExpandAllExecute(Sender: TObject);
-    procedure actCollapseAllExecute(Sender: TObject);
     procedure actAutoScrollExecute(Sender: TObject);
 
   private
@@ -524,8 +526,8 @@ end;
 procedure TfrmMainOld.CreateWatches;
 begin
   FWatches := TWatchList.Create;
-  FWatches.OnUpdate := FWatchesUpdate;
-  FWatches.OnNewVariable := FWatchesNewVariable;
+  FWatches.OnUpdateWatch := FWatchesUpdateWatch;
+  FWatches.OnNewWatch    := FWatchesNewWatch;
 end;
 
 procedure TfrmMainOld.CreateLogTreeView;
@@ -655,7 +657,7 @@ end;
 
 procedure TfrmMainOld.actAutoScrollExecute(Sender: TObject);
 begin
-  //
+//
 end;
 
 procedure TfrmMainOld.actBitmapExecute(Sender: TObject);
@@ -841,12 +843,12 @@ end;
 {$ENDREGION}
 
 {$REGION 'FWatches'}
-procedure TfrmMainOld.FWatchesNewVariable(const AVariable: string; AIndex: Integer);
+procedure TfrmMainOld.FWatchesNewWatch(const AVariable: string; AIndex: Integer);
 begin
   cbxWatchHistory.Items.Add(AVariable);
 end;
 
-procedure TfrmMainOld.FWatchesUpdate(const AVariable, AValue: string);
+procedure TfrmMainOld.FWatchesUpdateWatch(const AVariable, AValue: string);
 begin
   FLatestWatchInspector.Rows.Count   := FWatches.Count;
   FSelectedWatchInspector.Rows.Count := FWatches.Count;
@@ -1354,7 +1356,8 @@ end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
-{ Decodes message stream and assigns it to FCurrentMsg: TLogMessage. }
+{ Decodes message stream and assigns it to FCurrentMsg: TLogMessage, and updates
+  the corresponding message viewers (logdata, callstack, watches, etc.). }
 
 procedure TfrmMainOld.ProcessMessage(AStream: TStream);
 var
@@ -1424,7 +1427,8 @@ begin
         FWatches.Add(
           string(FCurrentMsg.Text),
           FMessageCount,
-          FCurrentMsg.MsgType = Integer(lmtCounter)
+          FCurrentMsg.TimeStamp,
+          FCurrentMsg.MsgType = Integer(lmtCounter) // SkipOnNewValue
         );
         UpdateWatches;
       end;

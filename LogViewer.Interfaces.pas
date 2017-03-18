@@ -58,7 +58,6 @@ type
 
     property ActionList: TActionList
       read GetActionList;
-
   end;
 
   ILogViewerMenus = interface

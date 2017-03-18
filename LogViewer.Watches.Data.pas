@@ -42,40 +42,46 @@ uses
   Spring.Collections;
 
 type
-  TWatchUpdateEvent = procedure (
-    const AVariable : string;
-    const AValue    : string
+  TUpdateWatchEvent = procedure (
+    const AName  : string;
+    const AValue : string
   ) of object;
 
-  TNewWatchVariableEvent = procedure (
-    const AVariable : string;
-    AIndex          : Integer
+  TNewWatchEvent = procedure (
+    const AName : string;
+    AIndex      : Integer
   ) of object;
 
-  TVariableValue = record
-    Index : Integer;
-    Value : string;
-    // timestamp?
+  TWatchValue = record
+    Index     : Integer;
+    Value     : string;
+    TimeStamp : TDateTime;
   end;
 
-  { TWatchVariable }
-
-  TWatchVariable = class
+  TWatch = class
   private
     FFirstIndex   : Integer;
     FCurrentIndex : Integer;
     FName         : string;
-    FList         : IList<TVariableValue>;
+    FList         : IList<TWatchValue>;
 
     function GetCount: Integer;
     function GetCurrentValue:string;
     function GetValues(AIndex: Integer): string;
 
   public
-    constructor Create(const AName: string; AIndex: Integer);
+    constructor Create(
+      const AName : string;
+      AIndex      : Integer;
+      ATimeStamp  : TDateTime
+    );
 
-    procedure AddValue(const AValue: string; AIndex: Integer);
-    function Find (AIndex: Integer): Boolean;
+    procedure AddValue(
+      const AValue : string;
+      AIndex       : Integer;
+      ATimeStamp   : TDateTime
+    );
+    function Find(AIndex: Integer): Boolean;
 
     property Name: string
       read FName;
@@ -94,78 +100,81 @@ type
 
   TWatchList = class
   private
-    FList          : IList<TWatchVariable>;
-    FOnNewVariable : TNewWatchVariableEvent;
-    FOnUpdate      : TWatchUpdateEvent;
+    FList          : IList<TWatch>;
+    FOnNewWatch    : TNewWatchEvent;
+    FOnUpdateWatch : TUpdateWatchEvent;
 
     function GetCount: Integer;
-    function GetItems(AValue: Integer): TWatchVariable;
+    function GetItems(AValue: Integer): TWatch;
 
   public
     procedure AfterConstruction; override;
 
     function IndexOf(const AName: string): Integer;
     procedure Add(
-      const ANameValue   : string;
-      AIndex             : Integer;
-      ASkipOnNewVariable : Boolean
+      const AName          : string;
+      AIndex               : Integer;
+      ATimeStamp           : TDateTime;
+      ASkipOnNewWatchEvent : Boolean = False
     );
     procedure Clear;
     procedure Update(AIndex: Integer);
 
-    property OnUpdate: TWatchUpdateEvent
-      read FOnUpdate write FOnUpdate;
-
-    property OnNewVariable: TNewWatchVariableEvent
-      read FOnNewVariable write FOnNewVariable;
-
-    property Items[AValue: Integer]: TWatchVariable
+    property Items[AValue: Integer]: TWatch
       read GetItems; default;
 
     property Count: Integer
       read GetCount;
+
+    property OnUpdateWatch: TUpdateWatchEvent
+      read FOnUpdateWatch write FOnUpdateWatch;
+
+    property OnNewWatch: TNewWatchEvent
+      read FOnNewWatch write FOnNewWatch;
   end;
 
 implementation
 
 {$REGION 'TWatchVariable'}
 {$REGION 'construction and destruction'}
-constructor TWatchVariable.Create(const AName: string; AIndex: Integer);
+constructor TWatch.Create(const AName: string; AIndex: Integer;
+  ATimeStamp: TDateTime);
 begin
-  FList := TCollections.CreateList<TVariableValue>;
+  FList := TCollections.CreateList<TWatchValue>;
   FName := AName;
   FFirstIndex := AIndex;
 end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
-function TWatchVariable.GetCurrentValue: string;
+function TWatch.GetCurrentValue: string;
 begin
   Result := FList[FCurrentIndex].Value;
 end;
 
-function TWatchVariable.GetCount: Integer;
+function TWatch.GetCount: Integer;
 begin
   Result := FList.Count;
 end;
 
-function TWatchVariable.GetValues(AIndex: Integer): string;
+function TWatch.GetValues(AIndex: Integer): string;
 begin
   Result := FList[AIndex].Value;
 end;
 {$ENDREGION}
 
 {$REGION 'public methods'}
-procedure TWatchVariable.AddValue(const AValue: string; AIndex: Integer);
+procedure TWatch.AddValue(const AValue: string; AIndex: Integer; ATimeStamp:
+  TDateTime);
 var
-  Item : TVariableValue;
+  Item : TWatchValue;
 begin
   Item.Index := AIndex;
   Item.Value := AValue;
   FList.Add(Item);
 end;
 
-function TWatchVariable.Find(AIndex: Integer): Boolean;
+function TWatch.Find(AIndex: Integer): Boolean;
 var
   I : Integer;
 begin
@@ -190,7 +199,7 @@ end;
 procedure TWatchList.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FList := TCollections.CreateObjectList<TWatchVariable>;
+  FList := TCollections.CreateObjectList<TWatch>;
 end;
 {$ENDREGION}
 
@@ -200,7 +209,7 @@ begin
   Result := FList.Count;
 end;
 
-function TWatchList.GetItems(AValue: Integer): TWatchVariable;
+function TWatchList.GetItems(AValue: Integer): TWatch;
 begin
   Result := FList[AValue];
 end;
@@ -209,37 +218,37 @@ end;
 {$REGION 'public methods'}
 function TWatchList.IndexOf(const AName: string): Integer;
 var
-  WV : TWatchVariable;
+  W : TWatch;
 begin
-  if FList.TryGetSingle(WV,
-    function(const AWatchVariable: TWatchVariable): Boolean
+  if FList.TryGetSingle(W,
+    function(const AWatchVariable: TWatch): Boolean
     begin
       Result := AWatchVariable.Name = AName;
     end
   ) then
-    Result := FList.IndexOf(WV)
+    Result := FList.IndexOf(W)
   else
     Result := -1;
 end;
 
-procedure TWatchList.Add(const ANameValue: string; AIndex: Integer;
-  ASkipOnNewVariable: Boolean);
+procedure TWatchList.Add(const AName: string; AIndex: Integer; ATimeStamp
+  : TDateTime; ASkipOnNewWatchEvent: Boolean);
 var
   PosEqual : Integer;
   I        : Integer;
   S        : string;
 begin
-  PosEqual := Pos('=', ANameValue);
-  S := Copy(ANameValue, 1, PosEqual - 1);
+  PosEqual := Pos('=', AName);
+  S := Copy(AName, 1, PosEqual - 1);
   I := IndexOf(S);
   if I = -1 then
   begin
-    I := FList.Add(TWatchVariable.Create(S,AIndex));
-    if not ASkipOnNewVariable then
-      FOnNewVariable(S, I);
+    I := FList.Add(TWatch.Create(S, AIndex, ATimeStamp));
+    if not ASkipOnNewWatchEvent then
+      FOnNewWatch(S, I);
   end;
-  S := Copy(ANameValue, PosEqual + 1, Length(ANameValue) - PosEqual);
-  FList[I].AddValue(S, AIndex);
+  S := Copy(AName, PosEqual + 1, Length(AName) - PosEqual);
+  FList[I].AddValue(S, AIndex, ATimeStamp);
 end;
 
 procedure TWatchList.Clear;
@@ -249,14 +258,14 @@ end;
 
 procedure TWatchList.Update(AIndex: Integer);
 var
-  WV : TWatchVariable;
+  W : TWatch;
 begin
-  if Assigned(FOnUpdate) then
+  if Assigned(FOnUpdateWatch) then
   begin
-    for WV in FList do
+    for W in FList do
     begin
-      if WV.Find(AIndex) then
-        FOnUpdate(WV.Name, WV.CurrentValue);
+      if W.Find(AIndex) then
+        FOnUpdateWatch(W.Name, W.CurrentValue);
     end;
   end;
 end;

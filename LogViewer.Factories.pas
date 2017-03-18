@@ -82,7 +82,7 @@ uses
 
   LogViewer.Factories.Toolbars;
 
-{$REGION 'public methods'}
+{$REGION 'public class methods'}
 class function TLogViewerFactories.CreateCallStackView(AOwner: TComponent;
   AParent: TWinControl; AData: IObjectList): TfrmCallStackView;
 begin

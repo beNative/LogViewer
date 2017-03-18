@@ -16,6 +16,8 @@
 
 unit LogViewer.Messages.Data;
 
+// will be dismissed.
+
 interface
 
 uses
@@ -37,6 +39,7 @@ type
     FParent      : TLogMessageData;
     FChildren    : IList<TLogMessageData>;
 
+  protected
     function GetChildren: IList<TLogMessageData>;
 
   public

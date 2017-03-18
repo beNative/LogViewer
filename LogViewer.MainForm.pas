@@ -33,7 +33,8 @@ type
     tsIPC    : TTabSheet;
     tsODS    : TTabSheet;
     tsZeroMQ : TTabSheet;
-    sbrMain: TStatusBar;
+    sbrMain  : TStatusBar;
+
   private
     FMessageViewerIPC : TfrmMessagesView;
     FReceiverIPC      : IChannelReceiver;
@@ -42,6 +43,8 @@ type
     FManager          : TdmManager;
     FSettings         : TLogViewerSettings;
     FMainToolbar      : TToolBar;
+
+  protected
     function GetActions: ILogViewerActions;
     function GetMenus: ILogViewerMenus;
     function GetManager: ILogViewerManager;
@@ -49,7 +52,6 @@ type
   public
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
-
 
     property Manager: ILogViewerManager
       read GetManager;
@@ -97,7 +99,6 @@ begin
 
   FReceiverIPC.Enabled := True;
   FReceiverODS.Enabled := False;
-
 end;
 
 procedure TfrmMain.BeforeDestruction;

@@ -26,6 +26,10 @@ object frmWatchesView: TfrmWatchesView
     end
     object tsSelected: TTabSheet
       Caption = 'Selected'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object tsHistory: TTabSheet
       Caption = 'History'

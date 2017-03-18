@@ -42,30 +42,30 @@ uses
 type
   TfrmMessagesView = class(TForm, ILogViewerMessagesView)
     {$REGION 'designer controls'}
-    pnlRight          : TPanel;
-    pgcMessageDetails : TPageControl;
-    tsTextViewer      : TTabSheet;
-    tsImageViewer     : TTabSheet;
+    btnCollapseAll    : TSpeedButton;
+    btnExpandAll      : TSpeedButton;
+    btnFilterMessages : TButton;
+    chkAutoFilter     : TCheckBox;
+    edtMessageFilter  : TLabeledEdit;
     imgViewer         : TImage;
-    tsInspector       : TTabSheet;
-    tsHexEditor       : TTabSheet;
-    pnlMessageContent : TPanel;
-    splVertical       : TSplitter;
-    splLeftVertical   : TSplitter;
-    pnlLeft           : TPanel;
-    pnlCallStackWatch : TPanel;
-    splLeftHorizontal : TSplitter;
-    pnlLeftBottom     : TPanel;
-    pnlWatches        : TPanel;
+    pgcMessageDetails : TPageControl;
     pnlCallStack      : TPanel;
     pnlCallStackTitle : TPanel;
-    pnlMessages: TPanel;
-    pnlFilter: TPanel;
-    btnExpandAll: TSpeedButton;
-    btnCollapseAll: TSpeedButton;
-    edtMessageFilter: TLabeledEdit;
-    btnFilterMessages: TButton;
-    chkAutoFilter: TCheckBox;
+    pnlCallStackWatch : TPanel;
+    pnlFilter         : TPanel;
+    pnlLeft           : TPanel;
+    pnlLeftBottom     : TPanel;
+    pnlMessageContent : TPanel;
+    pnlMessages       : TPanel;
+    pnlRight          : TPanel;
+    pnlWatches        : TPanel;
+    splLeftHorizontal : TSplitter;
+    splLeftVertical   : TSplitter;
+    splVertical       : TSplitter;
+    tsHexEditor       : TTabSheet;
+    tsImageViewer     : TTabSheet;
+    tsInspector       : TTabSheet;
+    tsTextViewer      : TTabSheet;
     {$ENDREGION}
 
   private
@@ -83,6 +83,91 @@ type
     FEditorManager   : IEditorManager;
     FEditorSettings  : IEditorSettings;
     FEditorView      : IEditorView;
+
+    procedure FLogTreeViewFocusChanged(
+      Sender : TBaseVirtualTree;
+      Node   : PVirtualNode;
+      Column : TColumnIndex
+    );
+    procedure FLogTreeViewFocusChanging(
+      Sender      : TBaseVirtualTree;
+      OldNode     : PVirtualNode;
+      NewNode     : PVirtualNode;
+      OldColumn   : TColumnIndex;
+      NewColumn   : TColumnIndex;
+      var Allowed : Boolean
+    );
+    procedure FLogTreeViewFreeNode(
+      Sender : TBaseVirtualTree;
+      Node   : PVirtualNode
+    );
+    procedure FLogTreeViewGetImageIndex(
+      Sender         : TBaseVirtualTree;
+      Node           : PVirtualNode;
+      Kind           : TVTImageKind;
+      Column         : TColumnIndex;
+      var Ghosted    : Boolean;
+      var ImageIndex : LongInt
+    );
+    procedure FLogTreeViewGetText(
+      Sender       : TBaseVirtualTree;
+      Node         : PVirtualNode;
+      Column       : TColumnIndex;
+      TextType     : TVSTTextType;
+      var CellText : string
+    );
+    procedure FLogTreeViewInitNode(
+      Sender            : TBaseVirtualTree;
+      ParentNode        : PVirtualNode;
+      Node              : PVirtualNode;
+      var InitialStates : TVirtualNodeInitStates
+    );
+    procedure FLogTreeViewKeyPress(
+      Sender  : TObject;
+      var Key : Char
+    );
+    procedure FLogTreeViewBeforeCellPaint(
+      Sender          : TBaseVirtualTree;
+      TargetCanvas    : TCanvas;
+      Node            : PVirtualNode;
+      Column          : TColumnIndex;
+      CellPaintMode   : TVTCellPaintMode;
+      CellRect        : TRect;
+      var ContentRect : TRect
+    );
+    procedure FLogTreeViewBeforeItemPaint(
+      Sender         : TBaseVirtualTree;
+      TargetCanvas   : TCanvas;
+      Node           : PVirtualNode;
+      ItemRect       : TRect;
+      var CustomDraw : Boolean
+    );
+    procedure FLogTreeViewAfterItemPaint(
+      Sender       : TBaseVirtualTree;
+      TargetCanvas : TCanvas;
+      Node         : PVirtualNode;
+      ItemRect     : TRect
+    );
+    procedure FLogTreeViewPaintText(
+      Sender             : TBaseVirtualTree;
+      const TargetCanvas : TCanvas;
+      Node               : PVirtualNode;
+      Column             : TColumnIndex;
+      TextType           : TVSTTextType
+    );
+    procedure FLogTreeViewGetHint(
+      Sender             : TBaseVirtualTree;
+      Node               : PVirtualNode;
+      Column             : TColumnIndex;
+      var LineBreakStyle : TVTTooltipLineBreakStyle;
+      var HintText       : string
+    );
+    procedure FLogTreeViewGetHintKind(
+      Sender   : TBaseVirtualTree;
+      Node     : PVirtualNode;
+      Column   : TColumnIndex;
+      var Kind : TVTHintKind
+    );
 
   protected
     procedure FReceiverReceiveMessage(Sender: TObject; AStream: TStream);
@@ -186,6 +271,92 @@ end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
+{$REGION 'FLogTreeView'}
+procedure TfrmMessagesView.FLogTreeViewAfterItemPaint(Sender: TBaseVirtualTree;
+  TargetCanvas: TCanvas; Node: PVirtualNode; ItemRect: TRect);
+begin
+//
+end;
+
+procedure TfrmMessagesView.FLogTreeViewBeforeCellPaint(Sender: TBaseVirtualTree;
+  TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
+  CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
+begin
+//
+end;
+
+procedure TfrmMessagesView.FLogTreeViewBeforeItemPaint(Sender: TBaseVirtualTree;
+  TargetCanvas: TCanvas; Node: PVirtualNode; ItemRect: TRect;
+  var CustomDraw: Boolean);
+begin
+//
+end;
+
+procedure TfrmMessagesView.FLogTreeViewFocusChanged(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; Column: TColumnIndex);
+begin
+//
+end;
+
+procedure TfrmMessagesView.FLogTreeViewFocusChanging(Sender: TBaseVirtualTree;
+  OldNode, NewNode: PVirtualNode; OldColumn, NewColumn: TColumnIndex;
+  var Allowed: Boolean);
+begin
+//
+end;
+
+procedure TfrmMessagesView.FLogTreeViewFreeNode(Sender: TBaseVirtualTree;
+  Node: PVirtualNode);
+begin
+//
+end;
+
+procedure TfrmMessagesView.FLogTreeViewGetHint(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; Column: TColumnIndex;
+  var LineBreakStyle: TVTTooltipLineBreakStyle; var HintText: string);
+begin
+//
+end;
+
+procedure TfrmMessagesView.FLogTreeViewGetHintKind(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; Column: TColumnIndex; var Kind: TVTHintKind);
+begin
+//
+end;
+
+procedure TfrmMessagesView.FLogTreeViewGetImageIndex(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
+  var Ghosted: Boolean; var ImageIndex: Integer);
+begin
+//
+end;
+
+procedure TfrmMessagesView.FLogTreeViewGetText(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
+  var CellText: string);
+begin
+//
+end;
+
+procedure TfrmMessagesView.FLogTreeViewInitNode(Sender: TBaseVirtualTree;
+  ParentNode, Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
+begin
+//
+end;
+
+procedure TfrmMessagesView.FLogTreeViewKeyPress(Sender: TObject; var Key: Char);
+begin
+//
+end;
+
+procedure TfrmMessagesView.FLogTreeViewPaintText(Sender: TBaseVirtualTree;
+  const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
+  TextType: TVSTTextType);
+begin
+//
+end;
+{$ENDREGION}
+
 procedure TfrmMessagesView.FReceiverReceiveMessage(Sender: TObject;
   AStream: TStream);
 begin
