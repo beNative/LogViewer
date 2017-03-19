@@ -52,10 +52,21 @@ type
     AIndex      : Integer
   ) of object;
 
-  TWatchValue = record
-    Index     : Integer;
-    Value     : string;
-    TimeStamp : TDateTime;
+  TWatchValue = class
+  private
+    FIndex     : Integer;
+    FValue     : string;
+    FTimeStamp : TDateTime;
+
+  public
+    property Index: Integer
+      read FIndex write FIndex;
+
+    property Value: string
+      read FValue write FValue;
+
+    property TimeStamp: TDateTime
+      read FTimeStamp write FTimeStamp;
   end;
 
   TWatch = class
@@ -66,14 +77,15 @@ type
     FList         : IList<TWatchValue>;
 
     function GetCount: Integer;
-    function GetCurrentValue:string;
+    function GetValue:string;
     function GetValues(AIndex: Integer): string;
+    function GetTimeStamp: TDateTime;
+    function GetList: IList<TWatchValue>;
 
   public
     constructor Create(
       const AName : string;
-      AIndex      : Integer;
-      ATimeStamp  : TDateTime
+      AIndex      : Integer
     );
 
     procedure AddValue(
@@ -83,11 +95,17 @@ type
     );
     function Find(AIndex: Integer): Boolean;
 
+    property List: IList<TWatchValue>
+      read GetList;
+
     property Name: string
       read FName;
 
-    property CurrentValue: string
-      read GetCurrentValue;
+    property Value: string
+      read GetValue;
+
+    property TimeStamp: TDateTime
+      read GetTimeStamp;
 
     property Values[AIndex: Integer]: string
       read GetValues; default;
@@ -106,6 +124,7 @@ type
 
     function GetCount: Integer;
     function GetItems(AValue: Integer): TWatch;
+    function GetList: IList<TWatch>;
 
   public
     procedure AfterConstruction; override;
@@ -113,12 +132,15 @@ type
     function IndexOf(const AName: string): Integer;
     procedure Add(
       const AName          : string;
-      AIndex               : Integer;
+      AIndex               : Integer; // ID of the logmessage
       ATimeStamp           : TDateTime;
       ASkipOnNewWatchEvent : Boolean = False
     );
     procedure Clear;
     procedure Update(AIndex: Integer);
+
+    property List: IList<TWatch>
+      read GetList;
 
     property Items[AValue: Integer]: TWatch
       read GetItems; default;
@@ -137,17 +159,16 @@ implementation
 
 {$REGION 'TWatchVariable'}
 {$REGION 'construction and destruction'}
-constructor TWatch.Create(const AName: string; AIndex: Integer;
-  ATimeStamp: TDateTime);
+constructor TWatch.Create(const AName: string; AIndex: Integer);
 begin
-  FList := TCollections.CreateList<TWatchValue>;
+  FList := TCollections.CreateObjectList<TWatchValue>;
   FName := AName;
   FFirstIndex := AIndex;
 end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
-function TWatch.GetCurrentValue: string;
+function TWatch.GetValue: string;
 begin
   Result := FList[FCurrentIndex].Value;
 end;
@@ -155,6 +176,16 @@ end;
 function TWatch.GetCount: Integer;
 begin
   Result := FList.Count;
+end;
+
+function TWatch.GetList: IList<TWatchValue>;
+begin
+  Result := FList;
+end;
+
+function TWatch.GetTimeStamp: TDateTime;
+begin
+  Result := FList[FCurrentIndex].TimeStamp;
 end;
 
 function TWatch.GetValues(AIndex: Integer): string;
@@ -169,8 +200,10 @@ procedure TWatch.AddValue(const AValue: string; AIndex: Integer; ATimeStamp:
 var
   Item : TWatchValue;
 begin
-  Item.Index := AIndex;
-  Item.Value := AValue;
+  Item := TWatchValue.Create;
+  Item.Index     := AIndex;
+  Item.Value     := AValue;
+  Item.TimeStamp := ATimeStamp;
   FList.Add(Item);
 end;
 
@@ -213,6 +246,11 @@ function TWatchList.GetItems(AValue: Integer): TWatch;
 begin
   Result := FList[AValue];
 end;
+
+function TWatchList.GetList: IList<TWatch>;
+begin
+  Result := FList;
+end;
 {$ENDREGION}
 
 {$REGION 'public methods'}
@@ -243,7 +281,7 @@ begin
   I := IndexOf(S);
   if I = -1 then
   begin
-    I := FList.Add(TWatch.Create(S, AIndex, ATimeStamp));
+    I := FList.Add(TWatch.Create(S, AIndex));
     if not ASkipOnNewWatchEvent then
       FOnNewWatch(S, I);
   end;
@@ -265,7 +303,7 @@ begin
     for W in FList do
     begin
       if W.Find(AIndex) then
-        FOnUpdateWatch(W.Name, W.CurrentValue);
+        FOnUpdateWatch(W.Name, W.Value);
     end;
   end;
 end;

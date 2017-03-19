@@ -127,7 +127,7 @@ begin
 end;
 
 class function TLogViewerFactories.CreateWatchesView(AOwner: TComponent;
-  AParent: TWinControl; AData: TWatchList; AMessages : IList<TLogMessageData>)
+  AParent: TWinControl; AData: TWatchList; AMessages: IList<TLogMessageData>)
   : TfrmWatchesView;
 begin
   Result := TfrmWatchesView.Create(AOwner, AData, AMessages);

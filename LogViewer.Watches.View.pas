@@ -33,8 +33,6 @@ uses
   DSharp.Windows.TreeViewPresenter, DSharp.Windows.ColumnDefinitions,
   DSharp.Core.DataTemplates,
 
-  DDuce.Components.GridView, DDuce.Components.Inspector,
-
   LogViewer.Messages.Data, LogViewer.Watches.Data;
 
 type
@@ -49,16 +47,19 @@ type
       Sender          : TObject;
       var AllowChange : Boolean
     );
+    procedure cbxWatchHistoryChange(Sender: TObject);
 
   private
     FWatches                : TWatchList;
-    FLatestWatchInspector   : TInspector;
-    FSelectedWatchInspector : TInspector;
+    FVSTLastWatchValues     : TVirtualStringTree;
+    FVSTSelectedWatchValues : TVirtualStringTree;
+    FVSTWatchHistory        : TVirtualStringTree;
+
+    FTVPLastWatchValues     : TTreeViewPresenter;
+    FTVPSelectedWatchValues : TTreeViewPresenter;
+    FTVPWatchHistory        : TTreeViewPresenter;
 
     FMessages : IList<TLogMessageData>;
-
-    FTVPHistory : TTreeViewPresenter;
-    FVSTHistory : TVirtualStringTree;
 
     procedure FMessagesChanged(
       Sender     : TObject;
@@ -66,24 +67,14 @@ type
       Action     : TCollectionChangedAction
     );
 
-    procedure FWatchesUpdate(const AVariable, AValue: string);
-    procedure FWatchesNewVariable(const AVariable: string; AIndex: Integer);
+    procedure FWatchesUpdateWatch(const AName, AValue: string);
+    procedure FWatchesNewWatch(const AName: string; AIndex: Integer);
+    function FCDSTimeStampGetText(
+      Sender           : TObject;
+      ColumnDefinition : TColumnDefinition;
+      Item             : TObject
+    ): string;
 
-    procedure FWatchHistoryInspectorGetCellText(
-      Sender    : TObject;
-      Cell      : TGridCell;
-      var Value : string
-    );
-    procedure FSelectedWatchInspectorGetCellText(
-      Sender    : TObject;
-      Cell      : TGridCell;
-      var Value : string
-    );
-    procedure FLatestWatchInspectorGetCellText(
-      Sender    : TObject;
-      Cell      : TGridCell;
-      var Value : string
-    );
 
   public
     constructor Create(
@@ -107,28 +98,38 @@ uses
 {$REGION 'construction and destruction'}
 constructor TfrmWatchesView.Create(AOwner: TComponent; AData: TWatchList;
   AMessages : IList<TLogMessageData>);
+var
+  CDS : IColumnDefinitions;
+  CD  : TColumnDefinition;
 begin
   inherited Create(AOwner);
   FMessages := AMessages;
   FMessages.OnChanged.Add(FMessagesChanged);
   FWatches  := AData;
-  FWatches.OnUpdateWatch := FWatchesUpdate;
-  FWatches.OnNewWatch := FWatchesNewVariable;
-  FLatestWatchInspector := TDDuceComponents.CreateInspector(Self, tsLatest);
-  FLatestWatchInspector.OnGetCellText := FLatestWatchInspectorGetCellText;
-  FLatestWatchInspector.ReadOnly  := True;
-  FLatestWatchInspector.AllowEdit := False;
-  FLatestWatchInspector.ThemingEnabled := True;
-
-  FSelectedWatchInspector := TDDuceComponents.CreateInspector(Self, tsSelected);
-  FSelectedWatchInspector.OnGetCellText := FSelectedWatchInspectorGetCellText;
-  FSelectedWatchInspector.ReadOnly := True;
-  FSelectedWatchInspector.AllowEdit := False;
-
-  FVSTHistory := TFactories.CreateVirtualStringTree(Self, tsHistory);
-  FTVPHistory := TFactories.CreateTreeViewPresenter(
+  FWatches.OnUpdateWatch := FWatchesUpdateWatch;
+  FWatches.OnNewWatch    := FWatchesNewWatch;
+  FVSTLastWatchValues := TFactories.CreateVirtualStringTree(Self, tsLatest);
+  CDS  := TFactories.CreateColumnDefinitions;
+  CDS.Add('Name').ValuePropertyName      := 'Name';
+  CDS.Add('Value').ValuePropertyName     := 'Value';
+  CD := CDS.Add('TimeStamp');
+  CD.ValuePropertyName := 'TimeStamp';
+  CD.OnGetText := FCDSTimeStampGetText;
+  FTVPLastWatchValues := TFactories.CreateTreeViewPresenter(
     Self,
-    FVSTHistory
+    FVSTLastWatchValues,
+    FWatches.List as IObjectList,
+    CDS
+  );
+  FVSTSelectedWatchValues := TFactories.CreateVirtualStringTree(Self, tsSelected);
+  FTVPSelectedWatchValues := TFactories.CreateTreeViewPresenter(
+    Self,
+    FVSTSelectedWatchValues
+  );
+  FVSTWatchHistory := TFactories.CreateVirtualStringTree(Self, tsHistory);
+  FTVPWatchHistory := TFactories.CreateTreeViewPresenter(
+    Self,
+    FVSTWatchHistory
   );
 end;
 
@@ -140,16 +141,24 @@ end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
-procedure TfrmWatchesView.FLatestWatchInspectorGetCellText(Sender: TObject;
-  Cell: TGridCell; var Value: string);
+procedure TfrmWatchesView.cbxWatchHistoryChange(Sender: TObject);
 begin
-  if Cell.Col = 0 then
-  begin
-    Value := FWatches.Items[Cell.Row].Name;
-  end
+  TFactories.InitializeTVP(
+    FTVPWatchHistory,
+    FVSTWatchHistory,
+    FWatches.Items[FWatches.IndexOf(cbxWatchHistory.Text)].List as IObjectList
+  );
+  FTVPWatchHistory.ColumnDefinitions.Items[2].OnGetText := FCDSTimeStampGetText;
+end;
+
+function TfrmWatchesView.FCDSTimeStampGetText(Sender: TObject;
+  ColumnDefinition: TColumnDefinition; Item: TObject): string;
+begin
+  if Item is TWatch then
+    Result := FormatDateTime('hh:nn:ss:zzz',  TWatch(Item).TimeStamp)
   else
   begin
-    Value := FWatches.Items[Cell.Row].CurrentValue
+    Result := FormatDateTime('hh:nn:ss:zzz',  TWatchValue(Item).TimeStamp)
   end;
 end;
 
@@ -168,36 +177,19 @@ begin
   end;
 end;
 
-procedure TfrmWatchesView.FSelectedWatchInspectorGetCellText(Sender: TObject;
-  Cell: TGridCell; var Value: string);
-begin
-  if Cell.Col = 0 then
-    Value := FWatches.Items[Cell.Row].Name
-  else
-    Value := FWatches.Items[Cell.Row].CurrentValue;
-end;
-
-procedure TfrmWatchesView.FWatchesNewVariable(const AVariable: string;
+procedure TfrmWatchesView.FWatchesNewWatch(const AName: string;
   AIndex: Integer);
 begin
-  cbxWatchHistory.Items.Add(AVariable);
+  cbxWatchHistory.Items.Add(AName);
 end;
 
-procedure TfrmWatchesView.FWatchesUpdate(const AVariable, AValue: string);
+procedure TfrmWatchesView.FWatchesUpdateWatch(const AName, AValue: string);
 begin
-  FLatestWatchInspector.Rows.Count   := FWatches.Count;
-  FSelectedWatchInspector.Rows.Count := FWatches.Count;
-  FSelectedWatchInspector.Refresh;
-  FLatestWatchInspector.Refresh;
-end;
-
-procedure TfrmWatchesView.FWatchHistoryInspectorGetCellText(Sender: TObject;
-  Cell: TGridCell; var Value: string);
-begin
-  if Cell.Col = 0 then
-    Value := FWatches.Items[cbxWatchHistory.ItemIndex].Name
-  else
-    Value := FWatches.Items[cbxWatchHistory.ItemIndex].Values[Cell.Row];
+  if (pgcWatches.ActivePage = tsHistory) and (AName = cbxWatchHistory.Text) then
+  begin
+    FTVPWatchHistory.Refresh;
+    FVSTWatchHistory.FocusedNode := FVSTWatchHistory.GetLast;
+  end;
 end;
 
 procedure TfrmWatchesView.pgcWatchesChanging(Sender: TObject;
@@ -218,6 +210,7 @@ begin
       if pgcWatches.ActivePageIndex = 0 then
       begin
         LTempIndex := FMessages.Count;
+        FTVPLastWatchValues.Refresh;
       end
       else
       begin
@@ -231,7 +224,7 @@ begin
     end;
     2:
     begin
-      //UpdateWatchHistory;
+
     end;
   end;
 end;

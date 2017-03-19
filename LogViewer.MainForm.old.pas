@@ -1166,7 +1166,7 @@ begin
   end
   else
   begin
-    Value := FWatches.Items[Cell.Row].CurrentValue
+    Value := FWatches.Items[Cell.Row].Value
   end;
 end;
 
@@ -1176,7 +1176,7 @@ begin
   if Cell.Col = 0 then
     Value := FWatches.Items[Cell.Row].Name
   else
-    Value := FWatches.Items[Cell.Row].CurrentValue;
+    Value := FWatches.Items[Cell.Row].Value;
 end;
 
 procedure TfrmMainOld.pgcWatchesChange(Sender: TObject);
