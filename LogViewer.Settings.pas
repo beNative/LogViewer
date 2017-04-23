@@ -23,15 +23,18 @@ interface
 uses
   System.Classes,
 
-  DDuce.FormSettings;
+  DDuce.FormSettings,
+
+  LogViewer.MessageList.Settings;
 
 type
   TLogViewerSettings = class(TPersistent)
   private
-    FFormSettings    : TFormSettings;
-    FFileName        : string;
-    FLeftPanelWidth  : Integer;
-    FRightPanelWidth : Integer;
+    FFormSettings        : TFormSettings;
+    FFileName            : string;
+    FLeftPanelWidth      : Integer;
+    FRightPanelWidth     : Integer;
+    FMessageListSettings : TMessageListSettings;
 
   public
     procedure AfterConstruction; override;
@@ -42,6 +45,9 @@ type
 
     property FormSettings: TFormSettings
       read FFormSettings;
+
+    property MessageListSettings: TMessageListSettings
+      read FMessageListSettings;
 
   published
     property LeftPanelWidth: Integer
@@ -64,11 +70,13 @@ begin
   inherited AfterConstruction;
   FFileName := 'settings.json';
   FFormSettings := TFormSettings.Create;
+  FMessageListSettings := TMessageListSettings.Create;
 end;
 
 procedure TLogViewerSettings.BeforeDestruction;
 begin
   FreeAndNil(FFormSettings);
+  FreeAndNil(FMessageListSettings);
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
@@ -85,6 +93,7 @@ begin
     try
       JO.LoadFromFile(FFileName);
       JO['FormSettings'].ObjectValue.ToSimpleObject(FFormSettings);
+      JO['MessageListSettings'].ObjectValue.ToSimpleObject(FMessageListSettings);
       JO.ToSimpleObject(Self);
     finally
       JO.Free;
@@ -100,7 +109,7 @@ begin
   try
     JO.FromSimpleObject(Self);
     JO['FormSettings'].ObjectValue.FromSimpleObject(FFormSettings);
-
+    JO['MessageListSettings'].ObjectValue.FromSimpleObject(FMessageListSettings);
     JO.SaveToFile(FFileName, False);
   finally
     JO.Free;

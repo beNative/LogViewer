@@ -97,8 +97,7 @@ uses
   DDuce.Logger.Channels.WinODS in '..\..\libraries\dduce\Source\Modules\Logger\DDuce.Logger.Channels.WinODS.pas',
   JsonDataObjects in '..\..\libraries\JsonDataObjects\Source\JsonDataObjects.pas',
   LogViewer.Settings in 'LogViewer.Settings.pas',
-  LogViewer.Messages.View in 'LogViewer.Messages.View.pas' {frmMessagesView},
-  LogViewer.Messages.Data in 'LogViewer.Messages.Data.pas',
+  LogViewer.MessageList.View in 'LogViewer.MessageList.View.pas' {frmMessageList},
   LogViewer.CallStack.Data in 'LogViewer.CallStack.Data.pas',
   LogViewer.Receivers.WinIPC in 'LogViewer.Receivers.WinIPC.pas',
   LogViewer.Receivers.ZeroMQ in 'LogViewer.Receivers.ZeroMQ.pas',
@@ -125,7 +124,6 @@ uses
   LogViewer.CallStack.View in 'LogViewer.CallStack.View.pas' {frmCallStackView},
   LogViewer.Factories in 'LogViewer.Factories.pas',
   LogViewer.Manager in 'LogViewer.Manager.pas' {dmManager: TDataModule},
-  LogViewer.Messages.Templates in 'LogViewer.Messages.Templates.pas',
   Spring.DesignPatterns in '..\..\libraries\spring4d\Source\Base\Spring.DesignPatterns.pas',
   Spring.Events.Base in '..\..\libraries\spring4d\Source\Base\Spring.Events.Base.pas',
   Spring.Events in '..\..\libraries\spring4d\Source\Base\Spring.Events.pas',
@@ -172,7 +170,8 @@ uses
   synaser in '..\..\libraries\synapse\synaser.pas',
   synafpc in '..\..\libraries\synapse\synafpc.pas',
   synautil in '..\..\libraries\synapse\synautil.pas',
-  LogViewer.Factories.Toolbars in 'LogViewer.Factories.Toolbars.pas';
+  LogViewer.Factories.Toolbars in 'LogViewer.Factories.Toolbars.pas',
+  LogViewer.MessageList.Settings in 'LogViewer.MessageList.Settings.pas';
 
 {$R *.res}
 

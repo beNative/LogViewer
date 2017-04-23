@@ -23,7 +23,7 @@ uses
   System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls,
 
-  LogViewer.Messages.View, LogViewer.Interfaces, LogViewer.Receivers.WinIPC,
+  LogViewer.MessageList.View, LogViewer.Interfaces, LogViewer.Receivers.WinIPC,
   LogViewer.Receivers.WinODS,
   LogViewer.Factories, LogViewer.Manager, LogViewer.Settings;
 
@@ -36,9 +36,9 @@ type
     sbrMain  : TStatusBar;
 
   private
-    FMessageViewerIPC : TfrmMessagesView;
+    FMessageViewerIPC : TfrmMessageList;
     FReceiverIPC      : IChannelReceiver;
-    FMessageViewerODS : TfrmMessagesView;
+    FMessageViewerODS : TfrmMessageList;
     FReceiverODS      : IChannelReceiver;
     FManager          : TdmManager;
     FSettings         : TLogViewerSettings;

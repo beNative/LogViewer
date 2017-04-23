@@ -32,8 +32,8 @@ uses
 
   Spring.Collections,
 
-  LogViewer.CallStack.View, LogViewer.Watches.View, LogViewer.Messages.View,
-  LogViewer.CallStack.Data, LogViewer.Watches.Data, LogViewer.Messages.Data,
+  LogViewer.CallStack.View, LogViewer.Watches.View, LogViewer.CallStack.Data,
+  LogViewer.Watches.Data, LogViewer.Messages.Data, LogViewer.MessageList.View,
   LogViewer.Interfaces, LogViewer.Manager, LogViewer.Settings;
 
 type
@@ -55,7 +55,7 @@ type
       AOwner    : TComponent;
       AParent   : TWinControl;
       AReceiver : IChannelReceiver
-    ): TfrmMessagesView;
+    ): TfrmMessageList;
 
     class function CreateManager(
       AOwner : TComponent
@@ -111,9 +111,9 @@ begin
 end;
 
 class function TLogViewerFactories.CreateMessageView(AOwner: TComponent;
-  AParent: TWinControl; AReceiver: IChannelReceiver): TfrmMessagesView;
+  AParent: TWinControl; AReceiver: IChannelReceiver): TfrmMessageList;
 begin
-  Result := TfrmMessagesView.Create(AOwner, AReceiver);
+  Result := TfrmMessageList.Create(AOwner, AReceiver);
   Result.Parent      := AParent;
   Result.Align       := alClient;
   Result.BorderStyle := bsNone;

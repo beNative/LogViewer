@@ -76,8 +76,7 @@ uses
   ZeroMQ,
 
   LogViewer.Watches.Data, LogViewer.Settings, LogViewer.Messages.Data,
-  LogViewer.CallStack.Data, LogViewer.Messages.View, LogViewer.Interfaces,
-  LogViewer.Factories;
+  LogViewer.CallStack.Data, LogViewer.Interfaces, LogViewer.Factories;
 
 type
   TMessageSet = set of TLogMessageType;
