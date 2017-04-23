@@ -44,7 +44,7 @@ unit LogViewer.MainForm.old;
   Supported channels:
     - WinIPC
     - File
-    -
+    - Serial
     - ZeroMQ
 
   Dependencies:

@@ -171,7 +171,6 @@ procedure TdmManager.AfterConstruction;
 begin
   inherited AfterConstruction;
   FSettings := TLogViewerSettings.Create;
-
 end;
 
 procedure TdmManager.BeforeDestruction;
@@ -400,6 +399,8 @@ end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
+{ Gets called from the active messages view. }
+
 procedure TdmManager.UpdateActions;
 begin
 

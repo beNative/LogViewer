@@ -59,28 +59,19 @@ type
     FTVPSelectedWatchValues : TTreeViewPresenter;
     FTVPWatchHistory        : TTreeViewPresenter;
 
-    FMessages : IList<TLogMessageData>;
-
-    procedure FMessagesChanged(
-      Sender     : TObject;
-      const Item : TLogMessageData;
-      Action     : TCollectionChangedAction
-    );
-
     procedure FWatchesUpdateWatch(const AName, AValue: string);
     procedure FWatchesNewWatch(const AName: string; AIndex: Integer);
+
     function FCDSTimeStampGetText(
       Sender           : TObject;
       ColumnDefinition : TColumnDefinition;
       Item             : TObject
     ): string;
 
-
   public
     constructor Create(
-      AOwner    : TComponent;
-      AData     : TWatchList;
-      AMessages : IList<TLogMessageData>
+      AOwner : TComponent;
+      AData  : TWatchList
     ); reintroduce; virtual;
     procedure BeforeDestruction; override;
 
@@ -96,22 +87,19 @@ uses
 {$R *.dfm}
 
 {$REGION 'construction and destruction'}
-constructor TfrmWatchesView.Create(AOwner: TComponent; AData: TWatchList;
-  AMessages : IList<TLogMessageData>);
+constructor TfrmWatchesView.Create(AOwner: TComponent; AData: TWatchList);
 var
   CDS : IColumnDefinitions;
   CD  : TColumnDefinition;
 begin
   inherited Create(AOwner);
-  FMessages := AMessages;
-  FMessages.OnChanged.Add(FMessagesChanged);
-  FWatches  := AData;
+  FWatches := AData;
   FWatches.OnUpdateWatch := FWatchesUpdateWatch;
   FWatches.OnNewWatch    := FWatchesNewWatch;
   FVSTLastWatchValues := TFactories.CreateVirtualStringTree(Self, tsLatest);
   CDS  := TFactories.CreateColumnDefinitions;
-  CDS.Add('Name').ValuePropertyName      := 'Name';
-  CDS.Add('Value').ValuePropertyName     := 'Value';
+  CDS.Add('Name').ValuePropertyName  := 'Name';
+  CDS.Add('Value').ValuePropertyName := 'Value';
   CD := CDS.Add('TimeStamp');
   CD.ValuePropertyName := 'TimeStamp';
   CD.OnGetText := FCDSTimeStampGetText;
@@ -135,7 +123,7 @@ end;
 
 procedure TfrmWatchesView.BeforeDestruction;
 begin
-  FMessages.OnChanged.Remove(FMessagesChanged);
+  FWatches := nil;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
@@ -159,21 +147,6 @@ begin
   else
   begin
     Result := FormatDateTime('hh:nn:ss:zzz',  TWatchValue(Item).TimeStamp)
-  end;
-end;
-
-procedure TfrmWatchesView.FMessagesChanged(Sender: TObject;
-  const Item: TLogMessageData; Action: TCollectionChangedAction);
-begin
-  if (Action = caAdded) and (Item.MessageType in [lmtWatch, lmtCounter]) then
-  begin
-    FWatches.Add(
-      Item.Text,
-      FMessages.Count,
-      Item.TimeStamp,
-      Item.MessageType = lmtCounter
-    );
-    UpdateView;
   end;
 end;
 
@@ -209,7 +182,7 @@ begin
     begin
       if pgcWatches.ActivePageIndex = 0 then
       begin
-        LTempIndex := FMessages.Count;
+//      LTempIndex := FMessages.Count;
         FTVPLastWatchValues.Refresh;
       end
       else

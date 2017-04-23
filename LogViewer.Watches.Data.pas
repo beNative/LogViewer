@@ -36,6 +36,8 @@ unit LogViewer.Watches.Data;
 
 interface
 
+{ Implements support for watches to monitor values over time. }
+
 uses
   System.Classes, System.SysUtils,
 
@@ -49,18 +51,18 @@ type
 
   TNewWatchEvent = procedure (
     const AName : string;
-    AIndex      : Integer
+    AID         : Integer
   ) of object;
 
   TWatchValue = class
   private
-    FIndex     : Integer;
+    FID        : Integer;
     FValue     : string;
     FTimeStamp : TDateTime;
 
   public
-    property Index: Integer
-      read FIndex write FIndex;
+    property ID: Integer
+      read FID write FID;
 
     property Value: string
       read FValue write FValue;
@@ -71,29 +73,29 @@ type
 
   TWatch = class
   private
-    FFirstIndex   : Integer;
-    FCurrentIndex : Integer;
-    FName         : string;
-    FList         : IList<TWatchValue>;
+    FFirstID   : Integer;
+    FCurrentID : Integer;
+    FName      : string;
+    FList      : IList<TWatchValue>;
 
     function GetCount: Integer;
     function GetValue:string;
-    function GetValues(AIndex: Integer): string;
+    function GetValues(AID: Integer): string;
     function GetTimeStamp: TDateTime;
     function GetList: IList<TWatchValue>;
 
   public
     constructor Create(
       const AName : string;
-      AIndex      : Integer
+      AID         : Integer
     );
 
     procedure AddValue(
       const AValue : string;
-      AIndex       : Integer;
+      AID       : Integer;
       ATimeStamp   : TDateTime
     );
-    function Find(AIndex: Integer): Boolean;
+    function Find(AID: Integer): Boolean;
 
     property List: IList<TWatchValue>
       read GetList;
@@ -107,7 +109,7 @@ type
     property TimeStamp: TDateTime
       read GetTimeStamp;
 
-    property Values[AIndex: Integer]: string
+    property Values[AID: Integer]: string
       read GetValues; default;
 
     property Count: Integer
@@ -132,12 +134,12 @@ type
     function IndexOf(const AName: string): Integer;
     procedure Add(
       const AName          : string;
-      AIndex               : Integer; // ID of the logmessage
+      AID                  : Integer; // ID of the logmessage
       ATimeStamp           : TDateTime;
-      ASkipOnNewWatchEvent : Boolean = False
+      ASkipOnNewWatchEvent : Boolean = False // used for counter support
     );
     procedure Clear;
-    procedure Update(AIndex: Integer);
+    procedure Update(AID: Integer);
 
     property List: IList<TWatch>
       read GetList;
@@ -159,18 +161,18 @@ implementation
 
 {$REGION 'TWatchVariable'}
 {$REGION 'construction and destruction'}
-constructor TWatch.Create(const AName: string; AIndex: Integer);
+constructor TWatch.Create(const AName: string; AID: Integer);
 begin
   FList := TCollections.CreateObjectList<TWatchValue>;
   FName := AName;
-  FFirstIndex := AIndex;
+  FFirstID := AID;
 end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
 function TWatch.GetValue: string;
 begin
-  Result := FList[FCurrentIndex].Value;
+  Result := FList[FCurrentID].Value;
 end;
 
 function TWatch.GetCount: Integer;
@@ -185,41 +187,41 @@ end;
 
 function TWatch.GetTimeStamp: TDateTime;
 begin
-  Result := FList[FCurrentIndex].TimeStamp;
+  Result := FList[FCurrentID].TimeStamp;
 end;
 
-function TWatch.GetValues(AIndex: Integer): string;
+function TWatch.GetValues(AID: Integer): string;
 begin
-  Result := FList[AIndex].Value;
+  Result := FList[AID].Value;
 end;
 {$ENDREGION}
 
 {$REGION 'public methods'}
-procedure TWatch.AddValue(const AValue: string; AIndex: Integer; ATimeStamp:
+procedure TWatch.AddValue(const AValue: string; AID: Integer; ATimeStamp:
   TDateTime);
 var
   Item : TWatchValue;
 begin
   Item := TWatchValue.Create;
-  Item.Index     := AIndex;
+  Item.ID        := AID;
   Item.Value     := AValue;
   Item.TimeStamp := ATimeStamp;
   FList.Add(Item);
 end;
 
-function TWatch.Find(AIndex: Integer): Boolean;
+function TWatch.Find(AID: Integer): Boolean;
 var
   I : Integer;
 begin
   Result := False;
-  if AIndex < FFirstIndex then
+  if AID < FFirstID then
     Exit;
   for I := FList.Count - 1 downto 0 do
   begin
-    if AIndex >= FList[I].Index then
+    if AID >= FList[I].ID then
     begin
       Result := True;
-      FCurrentIndex := I;
+      FCurrentID := I;
       Exit;
     end;
   end;
@@ -269,7 +271,7 @@ begin
     Result := -1;
 end;
 
-procedure TWatchList.Add(const AName: string; AIndex: Integer; ATimeStamp
+procedure TWatchList.Add(const AName: string; AID: Integer; ATimeStamp
   : TDateTime; ASkipOnNewWatchEvent: Boolean);
 var
   PosEqual : Integer;
@@ -281,12 +283,12 @@ begin
   I := IndexOf(S);
   if I = -1 then
   begin
-    I := FList.Add(TWatch.Create(S, AIndex));
+    I := FList.Add(TWatch.Create(S, AID));
     if not ASkipOnNewWatchEvent then
       FOnNewWatch(S, I);
   end;
   S := Copy(AName, PosEqual + 1, Length(AName) - PosEqual);
-  FList[I].AddValue(S, AIndex, ATimeStamp);
+  FList[I].AddValue(S, AID, ATimeStamp);
 end;
 
 procedure TWatchList.Clear;
@@ -294,7 +296,7 @@ begin
   FList.Clear;
 end;
 
-procedure TWatchList.Update(AIndex: Integer);
+procedure TWatchList.Update(AID: Integer);
 var
   W : TWatch;
 begin
@@ -302,7 +304,7 @@ begin
   begin
     for W in FList do
     begin
-      if W.Find(AIndex) then
+      if W.Find(AID) then
         FOnUpdateWatch(W.Name, W.Value);
     end;
   end;

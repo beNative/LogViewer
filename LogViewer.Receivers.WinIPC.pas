@@ -18,7 +18,7 @@ unit LogViewer.Receivers.WinIPC;
 
 interface
 
-{ Receives logmessages from through WinIPC (WM_COPYDATA) messages. }
+{ Receives logmessages through WinIPC (WM_COPYDATA) messages. }
 
 uses
   System.Classes,
@@ -83,11 +83,6 @@ begin
   Result := FEnabled;
 end;
 
-function TWinIPChannelReceiver.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
-begin
-  Result := FOnReceiveMessage;
-end;
-
 procedure TWinIPChannelReceiver.SetEnabled(const Value: Boolean);
 begin
   if Value <> Enabled then
@@ -98,6 +93,11 @@ begin
     else
       FIPCServer.OnMessage := nil;
   end;
+end;
+
+function TWinIPChannelReceiver.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
+begin
+  Result := FOnReceiveMessage;
 end;
 {$ENDREGION}
 

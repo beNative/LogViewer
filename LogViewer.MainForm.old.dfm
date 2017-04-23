@@ -54,10 +54,6 @@ object frmMainOld: TfrmMainOld
       TabOrder = 0
       object tsTextViewer: TTabSheet
         Caption = 'Text'
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
       end
       object tsImageViewer: TTabSheet
         Caption = 'Image'
@@ -165,10 +161,6 @@ object frmMainOld: TfrmMainOld
           OnChange = pgcWatchesChange
           object tsLatest: TTabSheet
             Caption = 'Latest'
-            ExplicitLeft = 0
-            ExplicitTop = 0
-            ExplicitWidth = 0
-            ExplicitHeight = 0
           end
           object tsSelected: TTabSheet
             Caption = 'Selected'

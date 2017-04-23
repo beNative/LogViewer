@@ -69,6 +69,9 @@ var
 
 implementation
 
+uses
+  LogViewer.Resources;
+
 {$R *.dfm}
 
 {$REGION 'construction and destruction'}
@@ -103,6 +106,8 @@ end;
 
 procedure TfrmMain.BeforeDestruction;
 begin
+  FReceiverIPC.Enabled := False;
+  FReceiverIPC := nil;
   FSettings.Free;
   inherited BeforeDestruction;
 end;

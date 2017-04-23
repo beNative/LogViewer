@@ -8,6 +8,7 @@ object dmManager: TdmManager
     Top = 22
     object actClearMessages: TAction
       Caption = 'Clear messages'
+      Hint = 'Clears all received messages.'
       ImageIndex = 3
       ShortCut = 115
       OnExecute = actClearMessagesExecute
@@ -15,6 +16,9 @@ object dmManager: TdmManager
     object actToggleAlwaysOnTop: TAction
       AutoCheck = True
       Caption = 'Always on top'
+      Hint = 
+        'Shows the main application form always in front of any other app' +
+        'lication.'
       ImageIndex = 11
       OnExecute = actToggleAlwaysOnTopExecute
     end

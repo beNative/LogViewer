@@ -16,6 +16,8 @@
 
 unit LogViewer.Interfaces;
 
+{ Interfaces used by application. }
+
 interface
 
 uses

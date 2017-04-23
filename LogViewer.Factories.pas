@@ -48,8 +48,7 @@ type
     class function CreateWatchesView(
       AOwner    : TComponent;
       AParent   : TWinControl;
-      AData     : TWatchList;
-      AMessages : IList<TLogMessageData>
+      AData     : TWatchList
     ): TfrmWatchesView;
 
     class function CreateMessageView(
@@ -127,10 +126,9 @@ begin
 end;
 
 class function TLogViewerFactories.CreateWatchesView(AOwner: TComponent;
-  AParent: TWinControl; AData: TWatchList; AMessages: IList<TLogMessageData>)
-  : TfrmWatchesView;
+  AParent: TWinControl; AData: TWatchList): TfrmWatchesView;
 begin
-  Result := TfrmWatchesView.Create(AOwner, AData, AMessages);
+  Result := TfrmWatchesView.Create(AOwner, AData);
   Result.Parent      := AParent;
   Result.Align       := alClient;
   Result.BorderStyle := bsNone;
