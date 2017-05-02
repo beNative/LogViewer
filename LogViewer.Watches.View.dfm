@@ -1,8 +1,8 @@
 object frmWatchesView: TfrmWatchesView
   Left = 0
   Top = 0
-  ClientHeight = 378
-  ClientWidth = 401
+  ClientHeight = 581
+  ClientWidth = 402
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -12,33 +12,34 @@ object frmWatchesView: TfrmWatchesView
   OldCreateOrder = False
   PixelsPerInch = 96
   TextHeight = 13
-  object pgcWatches: TPageControl
+  object splHorizontal: TSplitter
+    Left = 0
+    Top = 314
+    Width = 402
+    Height = 10
+    Cursor = crVSplit
+    Align = alBottom
+    ExplicitTop = 319
+  end
+  object pnlWatches: TPanel
     Left = 0
     Top = 0
-    Width = 401
-    Height = 378
-    ActivePage = tsLatest
+    Width = 402
+    Height = 314
     Align = alClient
+    BevelOuter = bvNone
     TabOrder = 0
-    OnChanging = pgcWatchesChanging
-    object tsLatest: TTabSheet
-      Caption = 'Latest'
-    end
-    object tsSelected: TTabSheet
-      Caption = 'Selected'
-    end
-    object tsHistory: TTabSheet
-      Caption = 'History'
-      object cbxWatchHistory: TComboBox
-        Left = 0
-        Top = 0
-        Width = 393
-        Height = 21
-        Align = alTop
-        Style = csDropDownList
-        TabOrder = 0
-        OnChange = cbxWatchHistoryChange
-      end
-    end
+    ExplicitTop = -1
+    ExplicitHeight = 319
+  end
+  object pnlWatchHistory: TPanel
+    Left = 0
+    Top = 324
+    Width = 402
+    Height = 257
+    Align = alBottom
+    BevelOuter = bvNone
+    TabOrder = 1
+    ExplicitTop = 325
   end
 end

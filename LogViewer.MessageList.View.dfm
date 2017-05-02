@@ -120,7 +120,7 @@ object frmMessageList: TfrmMessageList
       TabOrder = 0
       object splLeftHorizontal: TSplitter
         Left = 0
-        Top = 378
+        Top = 184
         Width = 353
         Height = 8
         Cursor = crVSplit
@@ -130,9 +130,9 @@ object frmMessageList: TfrmMessageList
       end
       object pnlLeftBottom: TPanel
         Left = 0
-        Top = 386
+        Top = 192
         Width = 353
-        Height = 420
+        Height = 614
         Align = alBottom
         BevelOuter = bvNone
         Caption = 'pnlLeftBottom'
@@ -163,7 +163,7 @@ object frmMessageList: TfrmMessageList
         Left = 0
         Top = 0
         Width = 353
-        Height = 378
+        Height = 184
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 0
@@ -246,6 +246,9 @@ object frmMessageList: TfrmMessageList
         ParentFont = False
         TabOrder = 0
         TextHint = 'filter log messages'
+        OnChange = edtMessageFilterChange
+        OnKeyDown = edtMessageFilterKeyDown
+        OnKeyUp = edtMessageFilterKeyUp
       end
       object btnFilterMessages: TButton
         Left = 481

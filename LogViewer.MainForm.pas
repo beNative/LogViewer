@@ -83,22 +83,24 @@ begin
   FReceiverODS := TWinODSReceiver.Create;
 
   FManager := TLogViewerFactories.CreateManager(Self);
-  FMessageViewerIPC := TLogViewerFactories.CreateMessageView(
-    Self,
+  FMessageViewerIPC := TLogViewerFactories.CreateMessagesView(
+    FManager,
     tsIPC,
     FReceiverIPC
   );
-  FMessageViewerODS := TLogViewerFactories.CreateMessageView(
-    Self,
+  FMessageViewerODS := TLogViewerFactories.CreateMessagesView(
+    FManager,
     tsODS,
     FReceiverODS
   );
   FMainToolbar := TLogViewerFactories.CreateMainToolbar(
-    Self,
+    FManager,
     Self,
     Actions,
     Menus
   );
+
+  (FManager as ILogViewerManager).ActiveView := FMessageViewerIPC;
 
   FReceiverIPC.Enabled := True;
   FReceiverODS.Enabled := False;

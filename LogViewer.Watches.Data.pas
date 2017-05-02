@@ -159,7 +159,7 @@ type
 
 implementation
 
-{$REGION 'TWatchVariable'}
+{$REGION 'TWatch'}
 {$REGION 'construction and destruction'}
 constructor TWatch.Create(const AName: string; AID: Integer);
 begin

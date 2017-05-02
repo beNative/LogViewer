@@ -24,7 +24,7 @@ uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
-  Vcl.ComCtrls,
+  Vcl.ComCtrls, Vcl.ExtCtrls,
 
   VirtualTrees,
 
@@ -37,36 +37,30 @@ uses
 
 type
   TfrmWatchesView = class(TForm)
-    pgcWatches      : TPageControl;
-    tsLatest        : TTabSheet;
-    tsSelected      : TTabSheet;
-    tsHistory       : TTabSheet;
-    cbxWatchHistory : TComboBox;
-
-    procedure pgcWatchesChanging(
-      Sender          : TObject;
-      var AllowChange : Boolean
-    );
-    procedure cbxWatchHistoryChange(Sender: TObject);
+    pnlWatches      : TPanel;
+    splHorizontal   : TSplitter;
+    pnlWatchHistory : TPanel;
 
   private
-    FWatches                : TWatchList;
-    FVSTLastWatchValues     : TVirtualStringTree;
-    FVSTSelectedWatchValues : TVirtualStringTree;
-    FVSTWatchHistory        : TVirtualStringTree;
+    FWatches         : TWatchList;
+    FVSTWatchValues  : TVirtualStringTree;
+    FVSTWatchHistory : TVirtualStringTree;
 
-    FTVPLastWatchValues     : TTreeViewPresenter;
-    FTVPSelectedWatchValues : TTreeViewPresenter;
-    FTVPWatchHistory        : TTreeViewPresenter;
+    FTVPWatchValues  : TTreeViewPresenter;
+    FTVPWatchHistory : TTreeViewPresenter;
+    FSelectedWatch   : TWatch;
 
     procedure FWatchesUpdateWatch(const AName, AValue: string);
     procedure FWatchesNewWatch(const AName: string; AIndex: Integer);
+
+    procedure FTVPWatchValuesSelectionChanged(Sender: TObject);
 
     function FCDSTimeStampGetText(
       Sender           : TObject;
       ColumnDefinition : TColumnDefinition;
       Item             : TObject
     ): string;
+    procedure UpdateWatchHistory;
 
   public
     constructor Create(
@@ -75,7 +69,7 @@ type
     ); reintroduce; virtual;
     procedure BeforeDestruction; override;
 
-    procedure UpdateView;
+    procedure UpdateView(AMessageID: Int64 = 0);
 
   end;
 
@@ -96,25 +90,21 @@ begin
   FWatches := AData;
   FWatches.OnUpdateWatch := FWatchesUpdateWatch;
   FWatches.OnNewWatch    := FWatchesNewWatch;
-  FVSTLastWatchValues := TFactories.CreateVirtualStringTree(Self, tsLatest);
-  CDS  := TFactories.CreateColumnDefinitions;
+  FVSTWatchValues := TFactories.CreateVirtualStringTree(Self, pnlWatches);
+  CDS := TFactories.CreateColumnDefinitions;
   CDS.Add('Name').ValuePropertyName  := 'Name';
   CDS.Add('Value').ValuePropertyName := 'Value';
   CD := CDS.Add('TimeStamp');
   CD.ValuePropertyName := 'TimeStamp';
   CD.OnGetText := FCDSTimeStampGetText;
-  FTVPLastWatchValues := TFactories.CreateTreeViewPresenter(
+  FTVPWatchValues := TFactories.CreateTreeViewPresenter(
     Self,
-    FVSTLastWatchValues,
+    FVSTWatchValues,
     FWatches.List as IObjectList,
     CDS
   );
-  FVSTSelectedWatchValues := TFactories.CreateVirtualStringTree(Self, tsSelected);
-  FTVPSelectedWatchValues := TFactories.CreateTreeViewPresenter(
-    Self,
-    FVSTSelectedWatchValues
-  );
-  FVSTWatchHistory := TFactories.CreateVirtualStringTree(Self, tsHistory);
+  FTVPWatchValues.OnSelectionChanged := FTVPWatchValuesSelectionChanged;
+  FVSTWatchHistory := TFactories.CreateVirtualStringTree(Self, pnlWatchHistory);
   FTVPWatchHistory := TFactories.CreateTreeViewPresenter(
     Self,
     FVSTWatchHistory
@@ -123,22 +113,13 @@ end;
 
 procedure TfrmWatchesView.BeforeDestruction;
 begin
+  FSelectedWatch := nil;
   FWatches := nil;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
-procedure TfrmWatchesView.cbxWatchHistoryChange(Sender: TObject);
-begin
-  TFactories.InitializeTVP(
-    FTVPWatchHistory,
-    FVSTWatchHistory,
-    FWatches.Items[FWatches.IndexOf(cbxWatchHistory.Text)].List as IObjectList
-  );
-  FTVPWatchHistory.ColumnDefinitions.Items[2].OnGetText := FCDSTimeStampGetText;
-end;
-
 function TfrmWatchesView.FCDSTimeStampGetText(Sender: TObject;
   ColumnDefinition: TColumnDefinition; Item: TObject): string;
 begin
@@ -150,56 +131,51 @@ begin
   end;
 end;
 
+procedure TfrmWatchesView.FTVPWatchValuesSelectionChanged(Sender: TObject);
+var
+  LWatch : TWatch;
+begin
+  LWatch := FTVPWatchValues.SelectedItem as TWatch;
+  if LWatch <> FSelectedWatch then
+  begin
+    FSelectedWatch := LWatch;
+    UpdateWatchHistory;
+  end;
+end;
+
 procedure TfrmWatchesView.FWatchesNewWatch(const AName: string;
   AIndex: Integer);
 begin
-  cbxWatchHistory.Items.Add(AName);
+  //
 end;
 
 procedure TfrmWatchesView.FWatchesUpdateWatch(const AName, AValue: string);
 begin
-  if (pgcWatches.ActivePage = tsHistory) and (AName = cbxWatchHistory.Text) then
-  begin
-    FTVPWatchHistory.Refresh;
-    FVSTWatchHistory.FocusedNode := FVSTWatchHistory.GetLast;
-  end;
-end;
-
-procedure TfrmWatchesView.pgcWatchesChanging(Sender: TObject;
-  var AllowChange: Boolean);
-begin
-  UpdateView;
+//  if Assigned(FSelectedWatch) and (FSelectedWatch.Name = AName) then
+//  begin
+//    FVSTWatchHistory.FocusedNode := FVSTWatchHistory.GetLast;
+//    FVSTWatchHistory.Selected[FVSTWatchHistory.FocusedNode] := True;
+//  end;
 end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
-procedure TfrmWatchesView.UpdateView;
-var
-  LTempIndex: Integer;
+procedure TfrmWatchesView.UpdateView(AMessageID: Int64);
 begin
-  case pgcWatches.ActivePageIndex of
-    0{Latest}, 1{Selected}:
-    begin
-      if pgcWatches.ActivePageIndex = 0 then
-      begin
-//      LTempIndex := FMessages.Count;
-        FTVPLastWatchValues.Refresh;
-      end
-      else
-      begin
-//        if FLogTreeView.FocusedNode <> nil then
-//          LTempIndex := PNodeData(FLogTreeView.GetNodeData(
-//            FLogTreeView.FocusedNode))^.Index
-//        else
-//          LTempIndex := 0;
-      end;
-      FWatches.Update(LTempIndex);
-    end;
-    2:
-    begin
+  FTVPWatchValues.Refresh;
+  FWatches.Update(AMessageId);
+end;
 
-    end;
-  end;
+procedure TfrmWatchesView.UpdateWatchHistory;
+begin
+  TFactories.InitializeTVP(
+    FTVPWatchHistory,
+    FVSTWatchHistory,
+    FSelectedWatch.List as IObjectList
+  );
+  FTVPWatchHistory.ColumnDefinitions.Items[2].OnGetText := FCDSTimeStampGetText;
+  FVSTWatchHistory.FocusedNode := FVSTWatchHistory.GetLast;
+  FVSTWatchHistory.Selected[FVSTWatchHistory.FocusedNode] := True;
 end;
 {$ENDREGION}
 

@@ -26,9 +26,13 @@ uses
 
   Spring,
 
+  DDuce.Logger.Interfaces,
+
   LogViewer.Settings;
 
 type
+  TLogMessageTypes = set of TLogMessageType;
+
   TReceiveMessageEvent = procedure(
     Sender  : TObject;
     AStream : TStream
@@ -68,6 +72,17 @@ type
 
   ILogViewerMessagesView = interface
   ['{C1DF2E26-4507-4B35-94E1-19A36775633F}']
+    procedure Clear;
+    procedure UpdateView;
+  end;
+
+  ILogViewerEvents = interface
+  ['{3BD96AF8-654C-4E7C-9C73-EA6522330E88}']
+  end;
+
+  ILogViewerCommands = interface
+  ['{70304CE3-9498-4738-9084-175B44104236}']
+    procedure ClearMessages;
   end;
 
   ILogViewerManager = interface
@@ -75,6 +90,12 @@ type
     function GetMenus: ILogViewerMenus;
     function GetActions: ILogViewerActions;
     function GetSettings: TLogViewerSettings;
+    function GetVisibleMessageTypes: TLogMessageTypes;
+    function GetActiveView: ILogViewerMessagesView;
+    procedure SetActiveView(const Value: ILogViewerMessagesView);
+
+    property ActiveView: ILogViewerMessagesView
+      read GetActiveView write SetActiveView;
 
     property Menus: ILogViewerMenus
       read GetMenus;
@@ -84,6 +105,9 @@ type
 
     property Settings: TLogViewerSettings
       read GetSettings;
+
+    property VisibleMessageTypes: TLogMessageTypes
+      read GetVisibleMessageTypes;
   end;
 
   ILogViewerToolbarsFactory = interface

@@ -14,7 +14,6 @@ object dmManager: TdmManager
       OnExecute = actClearMessagesExecute
     end
     object actToggleAlwaysOnTop: TAction
-      AutoCheck = True
       Caption = 'Always on top'
       Hint = 
         'Shows the main application form always in front of any other app' +
@@ -39,38 +38,32 @@ object dmManager: TdmManager
       OnExecute = actSelectNoneExecute
     end
     object actInfo: TAction
-      AutoCheck = True
       Caption = 'Info'
       ImageIndex = 7
       OnExecute = actInfoExecute
     end
     object actWarning: TAction
-      AutoCheck = True
       Caption = 'Warning'
       ImageIndex = 4
       OnExecute = actWarningExecute
     end
     object actValue: TAction
-      AutoCheck = True
       Caption = 'Value'
       ImageIndex = 10
       OnExecute = actValueExecute
     end
     object actError: TAction
-      AutoCheck = True
       Caption = 'Error'
       GroupIndex = 1
       ImageIndex = 5
       OnExecute = actErrorExecute
     end
     object actConditional: TAction
-      AutoCheck = True
       Caption = 'Conditional'
       ImageIndex = 2
       OnExecute = actConditionalExecute
     end
     object actCheckPoint: TAction
-      AutoCheck = True
       Caption = 'Checkpoint'
       ImageIndex = 8
       OnExecute = actCheckPointExecute
@@ -81,55 +74,46 @@ object dmManager: TdmManager
       OnExecute = actStringsExecute
     end
     object actCallStack: TAction
-      AutoCheck = True
       Caption = 'CallStack'
       ImageIndex = 6
       OnExecute = actCallStackExecute
     end
     object actObject: TAction
-      AutoCheck = True
       Caption = 'Object'
       ImageIndex = 13
       OnExecute = actObjectExecute
     end
     object actException: TAction
-      AutoCheck = True
       Caption = 'Exception'
       ImageIndex = 1
       OnExecute = actExceptionExecute
     end
     object actBitmap: TAction
-      AutoCheck = True
       Caption = 'Bitmap'
       ImageIndex = 22
       OnExecute = actBitmapExecute
     end
     object actHeapInfo: TAction
-      AutoCheck = True
       Caption = 'HeapInfo'
       ImageIndex = 21
       OnExecute = actHeapInfoExecute
     end
     object actMemory: TAction
-      AutoCheck = True
       Caption = 'Memory'
       ImageIndex = 20
       OnExecute = actMemoryExecute
     end
     object actCustomData: TAction
-      AutoCheck = True
       Caption = 'Custom Data'
       ImageIndex = 21
       OnExecute = actCustomDataExecute
     end
     object actMethodTraces: TAction
-      AutoCheck = True
       Caption = 'Method Traces'
       ImageIndex = 0
       OnExecute = actMethodTracesExecute
     end
     object actStop: TAction
-      AutoCheck = True
       Caption = 'Stop capturing'
       ImageIndex = 9
       ShortCut = 116
@@ -142,13 +126,11 @@ object dmManager: TdmManager
       OnExecute = actFilterMessagesExecute
     end
     object actZeroMQChannel: TAction
-      AutoCheck = True
       Caption = 'ZeroMQ'
       ImageIndex = 6
       OnExecute = actZeroMQChannelExecute
     end
     object actWinIPCChannel: TAction
-      AutoCheck = True
       Caption = 'WinIPC'
       OnExecute = actWinIPCChannelExecute
     end
@@ -158,13 +140,11 @@ object dmManager: TdmManager
       OnExecute = actSetFocusToFilterExecute
     end
     object actToggleFullscreen: TAction
-      AutoCheck = True
       Caption = 'Toggle full screen'
       ShortCut = 122
       OnExecute = actToggleFullscreenExecute
     end
     object actODSChannel: TAction
-      AutoCheck = True
       Caption = 'ODS'
       OnExecute = actODSChannelExecute
     end
@@ -179,7 +159,6 @@ object dmManager: TdmManager
       OnExecute = actExpandAllExecute
     end
     object actSerialPortChannel: TAction
-      AutoCheck = True
       Caption = 'Serial port channel'
       ImageIndex = 24
     end

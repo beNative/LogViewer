@@ -171,7 +171,9 @@ uses
   synafpc in '..\..\libraries\synapse\synafpc.pas',
   synautil in '..\..\libraries\synapse\synautil.pas',
   LogViewer.Factories.Toolbars in 'LogViewer.Factories.Toolbars.pas',
-  LogViewer.MessageList.Settings in 'LogViewer.MessageList.Settings.pas';
+  LogViewer.MessageList.Settings in 'LogViewer.MessageList.Settings.pas',
+  LogViewer.Commands in 'LogViewer.Commands.pas',
+  LogViewer.Events in 'LogViewer.Events.pas';
 
 {$R *.res}
 

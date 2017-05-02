@@ -57,6 +57,10 @@ object frmMainOld: TfrmMainOld
       end
       object tsImageViewer: TTabSheet
         Caption = 'Image'
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object imgViewer: TImage
           Left = 0
           Top = 0
@@ -68,9 +72,17 @@ object frmMainOld: TfrmMainOld
       end
       object tsInspector: TTabSheet
         Caption = 'Inspector'
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
       end
       object tsHexEditor: TTabSheet
         Caption = 'Hex edtor'
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
       end
     end
     object pnlMessageContent: TPanel
@@ -152,9 +164,17 @@ object frmMainOld: TfrmMainOld
           end
           object tsSelected: TTabSheet
             Caption = 'Selected'
+            ExplicitLeft = 0
+            ExplicitTop = 0
+            ExplicitWidth = 0
+            ExplicitHeight = 0
           end
           object tsHistory: TTabSheet
             Caption = 'History'
+            ExplicitLeft = 0
+            ExplicitTop = 0
+            ExplicitWidth = 0
+            ExplicitHeight = 0
             object cbxWatchHistory: TComboBox
               Left = 0
               Top = 0

@@ -68,6 +68,12 @@ type
     tsInspector       : TTabSheet;
     tsTextViewer      : TTabSheet;
     imlMessageTypes   : TImageList;
+
+    procedure edtMessageFilterChange(Sender: TObject);
+    procedure edtMessageFilterKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure edtMessageFilterKeyUp(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
     {$ENDREGION}
 
   private
@@ -80,6 +86,7 @@ type
     FReceiver        : IChannelReceiver;
     FCallStackView   : TfrmCallStackView;
     FWatchesView     : TfrmWatchesView;
+    FManager         : ILogViewerManager;
 
     FEditorManager   : IEditorManager;
     FEditorSettings  : IEditorSettings;
@@ -87,8 +94,16 @@ type
     FExpandParent    : Boolean;
     FLastParent      : PVirtualNode;
     FLastNode        : PVirtualNode;
+    FVKPressed       : Boolean;
 
     {$REGION 'FLogTreeView event handlers'}
+    procedure FLogTreeViewFilterCallback(
+      Sender    : TBaseVirtualTree;
+      Node      : PVirtualNode;
+      Data      : Pointer;
+      var Abort : Boolean
+    );
+
     procedure FLogTreeViewFocusChanged(
       Sender : TBaseVirtualTree;
       Node   : PVirtualNode;
@@ -173,36 +188,54 @@ type
       Column   : TColumnIndex;
       var Kind : TVTHintKind
     );
+    function GetManager: ILogViewerManager;
+    function GetActions: ILogViewerActions;
     {$ENDREGION}
 
   protected
     procedure FReceiverReceiveMessage(Sender: TObject; AStream: TStream);
 
-    procedure ClearMessages;
+    procedure Clear;
 
     procedure ProcessMessage(AStream: TStream);
 
     procedure AddMessageToTree(const AMessage: TLogMessage);
 
     procedure UpdateCallStack(var ANode: PVirtualNode);
+    procedure UpdateLogTreeView;
 
     procedure CreateLogTreeView;
     procedure CreateEditor;
     procedure CreateCallStackView;
     procedure CreateWatchesView;
 
+    procedure Activate; override;
+    procedure UpdateActions; override;
+    procedure UpdateView;
+
+    property Manager: ILogViewerManager
+      read GetManager;
+
+    property Actions: ILogViewerActions
+      read GetActions;
+
   public
     constructor Create(
       AOwner    : TComponent;
+      AManager  : ILogViewerManager;
       AReceiver : IChannelReceiver
     ); reintroduce; virtual;
     procedure BeforeDestruction; override;
+
+
 
   end;
 
 implementation
 
 uses
+  System.StrUtils,
+
   Spring,
 
   DDuce.Factories, DDuce.Reflect,
@@ -221,11 +254,12 @@ const
   COLUMN_TIMESTAMP = 3;
 
 {$REGION 'construction and destruction'}
-constructor TfrmMessageList.Create(AOwner: TComponent;
-  AReceiver: IChannelReceiver);
+constructor TfrmMessageList.Create(AOwner: TComponent; AManager
+  : ILogViewerManager; AReceiver: IChannelReceiver);
 begin
   inherited Create(AOwner);
   FReceiver := AReceiver;
+  FManager := AManager;
   CreateEditor;
   CreateLogTreeView;
   CreateWatchesView;
@@ -236,6 +270,7 @@ end;
 procedure TfrmMessageList.BeforeDestruction;
 begin
   FReceiver.OnReceiveMessage.Remove(FReceiverReceiveMessage);
+  FManager := nil;
   inherited BeforeDestruction;
 end;
 
@@ -333,6 +368,91 @@ begin
     FWatches
   );
 end;
+procedure TfrmMessageList.edtMessageFilterChange(Sender: TObject);
+begin
+  if edtMessageFilter.Text <> '' then
+  begin
+    edtMessageFilter.Font.Style := [fsBold];
+    edtMessageFilter.Color := clYellow;
+  end
+  else
+  begin
+    edtMessageFilter.Font.Style := [];
+    edtMessageFilter.Color := clWhite;
+  end;
+
+  if chkAutoFilter.Checked then
+    UpdateLogTreeView;
+end;
+
+procedure TfrmMessageList.edtMessageFilterKeyDown(Sender: TObject;
+  var Key: Word; Shift: TShiftState);
+var
+  A : Boolean;
+  B : Boolean;
+  C : Boolean;
+  D : Boolean;
+  E : Boolean;
+  F : Boolean;
+  G : Boolean;
+  H : Boolean;
+begin
+  // SHIFTED and ALTED keycombinations
+  A := (ssAlt in Shift) or (ssShift in Shift);
+  { Single keys that need to be handled by the edit control like all displayable
+    characters but also HOME and END }
+  B := (Key in VK_EDIT_KEYS) and (Shift = []);
+  { CTRL-keycombinations that need to be handled by the edit control like
+    CTRL-C for clipboard copy. }
+  C := (Key in VK_CTRL_EDIT_KEYS) {and (Shift = [ssCtrlOS])};
+  { SHIFT-keycombinations that need to be handled by the edit control for
+    uppercase characters but also eg. SHIFT-HOME for selections. }
+  D := (Key in VK_SHIFT_EDIT_KEYS) and (Shift = [ssShift]);
+  { Only CTRL key is pressed. }
+  E := (Key = VK_CONTROL) {and (Shift = [ssCtrlOS])};
+  { Only SHIFT key is pressed. }
+  F := (Key = VK_SHIFT) and (Shift = [ssShift]);
+  { Only (left) ALT key is pressed. }
+  G := (Key = VK_MENU) and (Shift = [ssAlt]);
+  { ESCAPE }
+  H := Key = VK_ESCAPE;
+  if not (A or B or C or D or E or F or G or H) then
+  begin
+    FVKPressed := True;
+    Key := 0;
+  end
+  { Prevents jumping to the application's main menu which happens by default
+    if ALT is pressed. }
+  else if G then
+  begin
+    Key := 0;
+  end;
+end;
+
+procedure TfrmMessageList.edtMessageFilterKeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if FVKPressed and FLogTreeView.Enabled then
+  begin
+    FLogTreeView.Perform(WM_KEYDOWN, Key, 0);
+    if Visible and FLogTreeView.CanFocus then
+      FLogTreeView.SetFocus;
+  end;
+  FVKPressed := False;
+end;
+
+{$ENDREGION}
+
+{$REGION 'property access methods'}
+function TfrmMessageList.GetActions: ILogViewerActions;
+begin
+  Result := Manager as ILogViewerActions;
+end;
+
+function TfrmMessageList.GetManager: ILogViewerManager;
+begin
+  Result := FManager;
+end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
@@ -374,6 +494,23 @@ begin
   if Allowed and ((OldNode = nil) or (NewNode = nil) or
     (OldNode^.Parent <> NewNode^.Parent)) then
     UpdateCallStack(NewNode);
+end;
+
+procedure TfrmMessageList.FLogTreeViewFilterCallback(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; Data: Pointer; var Abort: Boolean);
+var
+  ND : PNodeData;
+  B  : Boolean;
+begin
+  ND := Sender.GetNodeData(Node);
+  B := ND.MsgType in Manager.VisibleMessageTypes;
+  if edtMessageFilter.Text <> '' then
+    B := B and
+    (ContainsText(ND.Title, edtMessageFilter.Text) or
+     ContainsText(ND.Name, edtMessageFilter.Text) or
+     ContainsText(ND.Value, edtMessageFilter.Text));
+
+  Sender.IsVisible[Node] := B;
 end;
 
 procedure TfrmMessageList.FLogTreeViewFocusChanged(Sender: TBaseVirtualTree;
@@ -527,12 +664,9 @@ begin
   end;
   ND.Index := FMessageCount;
   //Show only what matches filter criterias
-  Sender.IsVisible[Node] := True;
-  //(MsgType in [lmtEnterMethod, lmtExitMethod]) or
-//      ((MsgType in FActiveMessages);
+  Sender.IsVisible[Node] := (ND.MsgType in [lmtEnterMethod, lmtLeaveMethod]) or
+      (ND.MsgType in Manager.VisibleMessageTypes);
     //and IsWild(Title, FTitleFilter, True));
-
-  FWatchesView.UpdateView;
 end;
 
 procedure TfrmMessageList.FLogTreeViewFreeNode(Sender: TBaseVirtualTree;
@@ -610,6 +744,11 @@ end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
+procedure TfrmMessageList.Activate;
+begin
+  inherited Activate;
+  Manager.ActiveView := Self as ILogViewerMessagesView;
+end;
 
 procedure TfrmMessageList.AddMessageToTree(const AMessage: TLogMessage);
 begin
@@ -655,7 +794,7 @@ begin
   end;
 end;
 
-procedure TfrmMessageList.ClearMessages;
+procedure TfrmMessageList.Clear;
 begin
   FLogTreeView.Clear;
   FWatches.Clear;
@@ -706,11 +845,11 @@ begin
         FCurrentMsg.TimeStamp,
         FCurrentMsg.MsgType = Integer(lmtCounter) // SkipOnNewValue
       );
-      FWatchesView.UpdateView;
+      FWatchesView.UpdateView(FMessageCount);
     end;
     lmtClear:
     begin
-      ClearMessages;
+      Clear;
     end
     else
     begin
@@ -793,6 +932,28 @@ begin
 
 end;
 
+procedure TfrmMessageList.UpdateActions;
+var
+  B: Boolean;
+begin
+  B := Focused;
+  if not B and Assigned(Parent) then
+  begin
+    if Parent.Focused then
+      B := True;
+  end;
+
+  if B then
+  begin
+    Activate;
+  end;
+
+  if Assigned(Actions) then
+    Actions.UpdateActions;
+
+  inherited UpdateActions;
+end;
+
 procedure TfrmMessageList.UpdateCallStack(var ANode: PVirtualNode);
 var
   I   : Integer;
@@ -811,6 +972,22 @@ begin
   end;
   //FTVPCallStack.TreeView.Header.AutoFitColumns;
 end;
-{$ENDREGION}
 
+procedure TfrmMessageList.UpdateLogTreeView;
+begin
+  FLogTreeView.BeginUpdate;
+  try
+    FLogTreeView.IterateSubtree(nil, FLogTreeViewFilterCallback, nil);
+    FLogTreeView.Header.AutoFitColumns;
+  finally
+    FLogTreeView.EndUpdate;
+  end;
+end;
+
+procedure TfrmMessageList.UpdateView;
+begin
+  UpdateLogTreeView;
+end;
+
+{$ENDREGION}
 end.

@@ -79,7 +79,6 @@ uses
   LogViewer.CallStack.Data, LogViewer.Interfaces, LogViewer.Factories;
 
 type
-  TMessageSet = set of TLogMessageType;
   TBitmap     = Vcl.Graphics.TBitmap;
 
   TfrmMainOld = class(TForm)
@@ -325,7 +324,7 @@ type
   private
     FSettings       : TLogViewerSettings;
     FLogTreeView    : TVirtualStringTree;
-    FActiveMessages : TMessageSet;
+    FActiveMessages : TLogMessageTypes;
     FMessageCount   : Integer;
     FCurrentMsg     : TLogMessage;
     FReceiver       : IChannelReceiver;

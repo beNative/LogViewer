@@ -51,8 +51,8 @@ type
       AData     : TWatchList
     ): TfrmWatchesView;
 
-    class function CreateMessageView(
-      AOwner    : TComponent;
+    class function CreateMessagesView(
+      AManager  : ILogViewerManager;
       AParent   : TWinControl;
       AReceiver : IChannelReceiver
     ): TfrmMessageList;
@@ -110,10 +110,10 @@ begin
   Result := TdmManager.Create(AOwner);
 end;
 
-class function TLogViewerFactories.CreateMessageView(AOwner: TComponent;
+class function TLogViewerFactories.CreateMessagesView(AManager: ILogViewerManager;
   AParent: TWinControl; AReceiver: IChannelReceiver): TfrmMessageList;
 begin
-  Result := TfrmMessageList.Create(AOwner, AReceiver);
+  Result := TfrmMessageList.Create(Application, AManager, AReceiver);
   Result.Parent      := AParent;
   Result.Align       := alClient;
   Result.BorderStyle := bsNone;
