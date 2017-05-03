@@ -292,7 +292,7 @@ type
     );
 
     procedure FWatchesUpdateWatch(const AVariable, AValue: string);
-    procedure FWatchesNewWatch(const AVariable: string; AIndex: Integer);
+    procedure FWatchesNewWatch(const AVariable: string; AId: Int64);
 
     procedure FWatchHistoryInspectorGetCellText(
       Sender    : TObject;
@@ -841,7 +841,7 @@ end;
 {$ENDREGION}
 
 {$REGION 'FWatches'}
-procedure TfrmMainOld.FWatchesNewWatch(const AVariable: string; AIndex: Integer);
+procedure TfrmMainOld.FWatchesNewWatch(const AVariable: string; AId: Int64);
 begin
   cbxWatchHistory.Items.Add(AVariable);
 end;

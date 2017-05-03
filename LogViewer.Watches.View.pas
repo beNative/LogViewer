@@ -42,25 +42,64 @@ type
     pnlWatchHistory : TPanel;
 
   private
+    FMessageId       : Int64;
     FWatches         : TWatchList;
     FVSTWatchValues  : TVirtualStringTree;
     FVSTWatchHistory : TVirtualStringTree;
 
     FTVPWatchValues  : TTreeViewPresenter;
     FTVPWatchHistory : TTreeViewPresenter;
-    FSelectedWatch   : TWatch;
+
+    function GetSelectedWatch: TWatch;
 
     procedure FWatchesUpdateWatch(const AName, AValue: string);
-    procedure FWatchesNewWatch(const AName: string; AIndex: Integer);
-
+    procedure FWatchesNewWatch(const AName: string; AId: Int64);
     procedure FTVPWatchValuesSelectionChanged(Sender: TObject);
-
-    function FCDSTimeStampGetText(
+    function FCDTimeStampGetText(
       Sender           : TObject;
       ColumnDefinition : TColumnDefinition;
       Item             : TObject
     ): string;
+    function FCDTimeStampCustomDraw(
+      Sender          : TObject;
+      ColumnDefinition: TColumnDefinition;
+      Item            : TObject;
+      TargetCanvas    : TCanvas;
+      CellRect        : TRect;
+      ImageList       : TCustomImageList;
+      DrawMode        : TDrawMode;
+      Selected        : Boolean
+    ): Boolean;
+    function FCDValueCustomDraw(
+      Sender          : TObject;
+      ColumnDefinition: TColumnDefinition;
+      Item            : TObject;
+      TargetCanvas    : TCanvas;
+      CellRect        : TRect;
+      ImageList       : TCustomImageList;
+      DrawMode        : TDrawMode;
+      Selected        : Boolean
+    ): Boolean;
+    function FCDNameCustomDraw(
+      Sender          : TObject;
+      ColumnDefinition: TColumnDefinition;
+      Item            : TObject;
+      TargetCanvas    : TCanvas;
+      CellRect        : TRect;
+      ImageList       : TCustomImageList;
+      DrawMode        : TDrawMode;
+      Selected        : Boolean
+    ): Boolean;
+
+    procedure ConnectWatchHistoryCDEvents;
+    procedure ConnectWatchValuesCDEvents;
+
+
+  protected
     procedure UpdateWatchHistory;
+
+    property SelectedWatch: TWatch
+      read GetSelectedWatch;
 
   public
     constructor Create(
@@ -69,18 +108,68 @@ type
     ); reintroduce; virtual;
     procedure BeforeDestruction; override;
 
-    procedure UpdateView(AMessageID: Int64 = 0);
+    procedure UpdateView(AMessageId: Int64 = 0);
 
   end;
 
 implementation
 
 uses
+  DSharp.Windows.ControlTemplates,
+
   DDuce.Components.Factories, DDuce.Factories, DDuce.Logger.Interfaces;
 
 {$R *.dfm}
 
 {$REGION 'construction and destruction'}
+procedure TfrmWatchesView.ConnectWatchHistoryCDEvents;
+var
+  CD : TColumnDefinition;
+  I  : Integer;
+begin
+  for I := 0 to FTVPWatchHistory.ColumnDefinitions.Count - 1 do
+  begin
+    CD := FTVPWatchHistory.ColumnDefinitions[I];
+    if CD.ValuePropertyName = 'TimeStamp' then
+    begin
+      CD.OnCustomDraw := FCDTimeStampCustomDraw;
+      CD.OnGetText    := FCDTimeStampGetText;
+    end
+    else if CD.ValuePropertyName = 'Name' then
+    begin
+      CD.OnCustomDraw := FCDNameCustomDraw;
+    end
+    else if CD.ValuePropertyName = 'Value' then
+    begin
+      CD.OnCustomDraw := FCDValueCustomDraw;
+    end;
+  end;
+end;
+
+procedure TfrmWatchesView.ConnectWatchValuesCDEvents;
+var
+  CD : TColumnDefinition;
+  I  : Integer;
+begin
+  for I := 0 to FTVPWatchValues.ColumnDefinitions.Count - 1 do
+  begin
+    CD := FTVPWatchValues.ColumnDefinitions[I];
+    if CD.ValuePropertyName = 'TimeStamp' then
+    begin
+      CD.OnCustomDraw := FCDTimeStampCustomDraw;
+      CD.OnGetText    := FCDTimeStampGetText;
+    end
+    else if CD.ValuePropertyName = 'Name' then
+    begin
+      CD.OnCustomDraw := FCDNameCustomDraw;
+    end
+    else if CD.ValuePropertyName = 'Value' then
+    begin
+      CD.OnCustomDraw := FCDValueCustomDraw;
+    end;
+  end;
+end;
+
 constructor TfrmWatchesView.Create(AOwner: TComponent; AData: TWatchList);
 var
   CDS : IColumnDefinitions;
@@ -92,17 +181,24 @@ begin
   FWatches.OnNewWatch    := FWatchesNewWatch;
   FVSTWatchValues := TFactories.CreateVirtualStringTree(Self, pnlWatches);
   CDS := TFactories.CreateColumnDefinitions;
-  CDS.Add('Name').ValuePropertyName  := 'Name';
-  CDS.Add('Value').ValuePropertyName := 'Value';
+  CD := CDS.Add('Name');
+  CD.ValuePropertyName  := 'Name';
+  CD.OnCustomDraw := FCDNameCustomDraw;
+  CD := CDS.Add('Value');
+  CD.ValuePropertyName := 'Value';
+  CD.OnCustomDraw := FCDValueCustomDraw;
   CD := CDS.Add('TimeStamp');
   CD.ValuePropertyName := 'TimeStamp';
-  CD.OnGetText := FCDSTimeStampGetText;
+  CD.OnGetText := FCDTimeStampGetText;
+  CD.OnCustomDraw := FCDTimeStampCustomDraw;
+
   FTVPWatchValues := TFactories.CreateTreeViewPresenter(
     Self,
     FVSTWatchValues,
     FWatches.List as IObjectList,
     CDS
   );
+  ConnectWatchValuesCDEvents;
   FTVPWatchValues.OnSelectionChanged := FTVPWatchValuesSelectionChanged;
   FVSTWatchHistory := TFactories.CreateVirtualStringTree(Self, pnlWatchHistory);
   FTVPWatchHistory := TFactories.CreateTreeViewPresenter(
@@ -113,14 +209,56 @@ end;
 
 procedure TfrmWatchesView.BeforeDestruction;
 begin
-  FSelectedWatch := nil;
-  FWatches := nil;
+  FWatches.Free;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
 
+{$REGION 'property access methods'}
+function TfrmWatchesView.GetSelectedWatch: TWatch;
+begin
+  if Assigned(FTVPWatchValues.SelectedItem) then
+    Result := FTVPWatchValues.SelectedItem as TWatch
+  else
+    Result := nil;
+end;
+{$ENDREGION}
+
 {$REGION 'event handlers'}
-function TfrmWatchesView.FCDSTimeStampGetText(Sender: TObject;
+function TfrmWatchesView.FCDNameCustomDraw(Sender: TObject;
+  ColumnDefinition: TColumnDefinition; Item: TObject; TargetCanvas: TCanvas;
+  CellRect: TRect; ImageList: TCustomImageList; DrawMode: TDrawMode;
+  Selected: Boolean): Boolean;
+begin
+  if DrawMode = dmPaintText then
+  begin
+    TargetCanvas.Font.Style := TargetCanvas.Font.Style + [fsBold];
+  end;
+end;
+
+function TfrmWatchesView.FCDTimeStampCustomDraw(Sender: TObject;
+  ColumnDefinition: TColumnDefinition; Item: TObject; TargetCanvas: TCanvas;
+  CellRect: TRect; ImageList: TCustomImageList; DrawMode: TDrawMode;
+  Selected: Boolean): Boolean;
+begin
+  if DrawMode = dmPaintText then
+  begin
+    TargetCanvas.Font.Color := clBlue;
+  end;
+end;
+
+function TfrmWatchesView.FCDValueCustomDraw(Sender: TObject;
+  ColumnDefinition: TColumnDefinition; Item: TObject; TargetCanvas: TCanvas;
+  CellRect: TRect; ImageList: TCustomImageList; DrawMode: TDrawMode;
+  Selected: Boolean): Boolean;
+begin
+  if DrawMode = dmPaintText then
+  begin
+    TargetCanvas.Font.Color := clNavy;
+  end;
+end;
+
+function TfrmWatchesView.FCDTimeStampGetText(Sender: TObject;
   ColumnDefinition: TColumnDefinition; Item: TObject): string;
 begin
   if Item is TWatch then
@@ -132,50 +270,50 @@ begin
 end;
 
 procedure TfrmWatchesView.FTVPWatchValuesSelectionChanged(Sender: TObject);
-var
-  LWatch : TWatch;
 begin
-  LWatch := FTVPWatchValues.SelectedItem as TWatch;
-  if LWatch <> FSelectedWatch then
-  begin
-    FSelectedWatch := LWatch;
-    UpdateWatchHistory;
-  end;
+  UpdateWatchHistory;
 end;
 
 procedure TfrmWatchesView.FWatchesNewWatch(const AName: string;
-  AIndex: Integer);
+  AId: Int64);
 begin
   //
 end;
 
 procedure TfrmWatchesView.FWatchesUpdateWatch(const AName, AValue: string);
 begin
-//  if Assigned(FSelectedWatch) and (FSelectedWatch.Name = AName) then
-//  begin
-//    FVSTWatchHistory.FocusedNode := FVSTWatchHistory.GetLast;
-//    FVSTWatchHistory.Selected[FVSTWatchHistory.FocusedNode] := True;
-//  end;
+//
 end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
-procedure TfrmWatchesView.UpdateView(AMessageID: Int64);
+procedure TfrmWatchesView.UpdateView(AMessageId: Int64);
 begin
+  FMessageId := AMessageId;
   FTVPWatchValues.Refresh;
   FWatches.Update(AMessageId);
+  UpdateWatchHistory;
 end;
 
 procedure TfrmWatchesView.UpdateWatchHistory;
 begin
-  TFactories.InitializeTVP(
-    FTVPWatchHistory,
-    FVSTWatchHistory,
-    FSelectedWatch.List as IObjectList
-  );
-  FTVPWatchHistory.ColumnDefinitions.Items[2].OnGetText := FCDSTimeStampGetText;
-  FVSTWatchHistory.FocusedNode := FVSTWatchHistory.GetLast;
-  FVSTWatchHistory.Selected[FVSTWatchHistory.FocusedNode] := True;
+  if Assigned(SelectedWatch) then
+  begin
+    TFactories.InitializeTVP(
+      FTVPWatchHistory,
+      FVSTWatchHistory,
+      SelectedWatch.List as IObjectList
+    );
+    ConnectWatchHistoryCDEvents;
+    if FMessageId = 0 then
+    begin
+      FTVPWatchHistory.SelectedItem := SelectedWatch.List.Last;
+    end
+    else
+    begin
+      FTVPWatchHistory.SelectedItem := SelectedWatch.CurrentWatchValue;
+    end;
+  end;
 end;
 {$ENDREGION}
 

@@ -108,7 +108,6 @@ end;
 
 procedure TfrmMain.BeforeDestruction;
 begin
-  FReceiverIPC.Enabled := False;
   FReceiverIPC := nil;
   FSettings.Free;
   inherited BeforeDestruction;

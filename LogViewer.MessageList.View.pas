@@ -227,8 +227,6 @@ type
     ); reintroduce; virtual;
     procedure BeforeDestruction; override;
 
-
-
   end;
 
 implementation
@@ -269,7 +267,9 @@ end;
 
 procedure TfrmMessageList.BeforeDestruction;
 begin
+  FReceiver.Enabled := False;
   FReceiver.OnReceiveMessage.Remove(FReceiverReceiveMessage);
+  FReceiver := nil;
   FManager := nil;
   inherited BeforeDestruction;
 end;
@@ -520,9 +520,9 @@ var
   S       : string;
   ND      : PNodeData;
 begin
-  FWatchesView.UpdateView;
   LStream := TStringStream.Create('', TEncoding.ANSI);
   ND := PNodeData(Sender.GetNodeData(Node));
+  FWatchesView.UpdateView(ND.Index);
   try
     if ND.MsgData = nil then
     begin
@@ -857,13 +857,10 @@ begin
     end;
   end; // case
 
-
-
 //  if actAutoScroll.Checked then
 //  begin
 //    FLogTreeView.FocusedNode := FLogTreeView.GetLast;
 //  end;
-
 
 {
 var

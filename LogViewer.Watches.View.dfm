@@ -29,8 +29,6 @@ object frmWatchesView: TfrmWatchesView
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitTop = -1
-    ExplicitHeight = 319
   end
   object pnlWatchHistory: TPanel
     Left = 0
@@ -40,6 +38,5 @@ object frmWatchesView: TfrmWatchesView
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitTop = 325
   end
 end
