@@ -95,7 +95,6 @@ type
     procedure ConnectWatchValuesCDEvents;
     procedure CreateObjects;
 
-
   protected
     procedure UpdateWatchHistory;
 

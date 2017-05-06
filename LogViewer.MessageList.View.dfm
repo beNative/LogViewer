@@ -87,7 +87,7 @@ object frmMessageList: TfrmMessageList
         Width = 353
         Height = 8
         Cursor = crVSplit
-        Align = alBottom
+        Align = alTop
         Color = clWhite
         ParentColor = False
         ExplicitTop = 392
@@ -98,7 +98,7 @@ object frmMessageList: TfrmMessageList
         Top = 192
         Width = 353
         Height = 614
-        Align = alBottom
+        Align = alClient
         BevelOuter = bvNone
         Caption = 'pnlLeftBottom'
         ShowCaption = False
@@ -129,9 +129,11 @@ object frmMessageList: TfrmMessageList
         Top = 0
         Width = 353
         Height = 184
-        Align = alClient
+        Align = alTop
         BevelOuter = bvNone
         TabOrder = 0
+        ExplicitLeft = 3
+        ExplicitTop = 2
         object pnlCallStackTitle: TPanel
           AlignWithMargins = True
           Left = 3
