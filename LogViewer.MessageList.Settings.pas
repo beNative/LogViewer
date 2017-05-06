@@ -18,6 +18,15 @@
 
 unit LogViewer.MessageList.Settings;
 
+{ TODO:
+   - column settings for
+        - TimeStamp columns
+        - Name columns
+        - Value columns
+   - default filtered messages
+
+ }
+
 interface
 
 uses

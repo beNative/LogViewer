@@ -257,19 +257,6 @@ type
       CellRect        : TRect;
       var ContentRect : TRect
     );
-    procedure FLogTreeViewBeforeItemPaint(
-      Sender         : TBaseVirtualTree;
-      TargetCanvas   : TCanvas;
-      Node           : PVirtualNode;
-      ItemRect       : TRect;
-      var CustomDraw : Boolean
-    );
-    procedure FLogTreeViewAfterItemPaint(
-      Sender       : TBaseVirtualTree;
-      TargetCanvas : TCanvas;
-      Node         : PVirtualNode;
-      ItemRect     : TRect
-    );
     procedure FLogTreeViewPaintText(
       Sender             : TBaseVirtualTree;
       const TargetCanvas : TCanvas;
@@ -327,7 +314,6 @@ type
     FActiveMessages : TLogMessageTypes;
     FMessageCount   : Integer;
     FCurrentMsg     : TLogMessage;
-    FReceiver       : IChannelReceiver;
     FLastParent     : PVirtualNode;
     FLastNode       : PVirtualNode;
     FIPCServer      : TWinIPCServer;
@@ -352,8 +338,6 @@ type
 
     function GetEditor: IEditorView;
     function GetTitleFilter: string;
-
-    procedure FReceiverReceiveMessage(Sender: TObject; AStream: TStream);
 
     procedure FilterCallback(
       Sender    : TBaseVirtualTree;
@@ -500,14 +484,11 @@ begin
 end;
 
 procedure TfrmMainOld.CreateZMQSubscriber;
-var
-  N : Integer;
 begin
   FZMQ := TZeroMQ.Create;
   FSubscriber := FZMQ.Start(ZMQSocket.Subscriber);
-  N := FSubscriber.Connect('tcp://GANYMEDES:5555');
-  N := FSubscriber.Connect('tcp://localhost:5555');
-  //N := FSubscriber.Connect('tcp://EUROPA:5555');
+  FSubscriber.Connect('tcp://GANYMEDES:5555');
+  FSubscriber.Connect('tcp://localhost:5555');
   FSubscriber.Subscribe(''); // required!!
   FPoll := FZMQ.Poller;
   FPoll.RegisterPair(FSubscriber, [PollEvent.PollIn],
@@ -542,8 +523,6 @@ begin
   FLogTreeView.OnGetText         := FLogTreeViewGetText;
   FLogTreeView.OnKeyPress        := FLogTreeViewKeyPress;
   FLogTreeView.OnBeforeCellPaint := FLogTreeViewBeforeCellPaint;
-  FLogTreeView.OnBeforeItemPaint := FLogTreeViewBeforeItemPaint;
-  FLogTreeView.OnAfterItemPaint  := FLogTreeViewAfterItemPaint;
 
   FLogTreeView.OnPaintText       := FLogTreeViewPaintText;
   FLogTreeView.OnGetHintKind     := FLogTreeViewGetHintKind;
@@ -868,14 +847,6 @@ begin
     UpdateCallStack(NewNode);
 end;
 
-procedure TfrmMainOld.FLogTreeViewAfterItemPaint(Sender: TBaseVirtualTree;
-  TargetCanvas: TCanvas; Node: PVirtualNode; ItemRect: TRect);
-var
-  ND : PNodeData;
-begin
-  ND := PNodeData(Sender.GetNodeData(Node));
-end;
-
 procedure TfrmMainOld.FLogTreeViewBeforeCellPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
@@ -888,15 +859,6 @@ begin
     TargetCanvas.Brush.Color := $00EEEEEE;
     TargetCanvas.FillRect(CellRect);
   end
-end;
-
-procedure TfrmMainOld.FLogTreeViewBeforeItemPaint(Sender: TBaseVirtualTree;
-  TargetCanvas: TCanvas; Node: PVirtualNode; ItemRect: TRect;
-  var CustomDraw: Boolean);
-var
-  ND : PNodeData;
-begin
-  ND := PNodeData(Sender.GetNodeData(Node));
 end;
 
 procedure TfrmMainOld.FLogTreeViewPaintText(Sender: TBaseVirtualTree;
@@ -1055,8 +1017,6 @@ procedure TfrmMainOld.FLogTreeViewGetText(Sender: TBaseVirtualTree;
   var CellText: string);
 var
   ND  : PNodeData;
-  NDP : PNodeData;
-  S   : string;
 begin
   ND := Sender.GetNodeData(Node);
   if Column = COLUMN_MAIN then
@@ -1189,12 +1149,6 @@ end;
 {$ENDREGION}
 
 {$REGION 'Receiver events'}
-procedure TfrmMainOld.FReceiverReceiveMessage(Sender: TObject;
-  AStream: TStream);
-begin
-  ProcessMessage(AStream);
-end;
-
 procedure TfrmMainOld.FIPCServerMessage(Sender: TObject);
 begin
   ProcessMessage(TWinIPCServer(Sender).MsgData);

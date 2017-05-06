@@ -21,7 +21,9 @@ interface
 uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Vcl.ExtCtrls,
+
+  ChromeTabs, ChromeTabsClasses,
 
   LogViewer.MessageList.View, LogViewer.Interfaces, LogViewer.Receivers.WinIPC,
   LogViewer.Receivers.WinODS,
@@ -29,13 +31,22 @@ uses
 
 type
   TfrmMain = class(TForm)
-    sbrMain  : TStatusBar;
+    sbrMain       : TStatusBar;
+    ctMain        : TChromeTabs;
+    pnlMainClient : TPanel;
+
+    procedure ctMainActiveTabChanged(Sender: TObject; ATab: TChromeTab);
+    procedure ctMainButtonAddClick(Sender: TObject; var Handled: Boolean);
+    procedure ctMainButtonCloseTabClick(Sender: TObject; ATab: TChromeTab;
+      var Close: Boolean);
+    procedure ctMainNeedDragImageControl(Sender: TObject; ATab: TChromeTab;
+      var DragControl: TWinControl);
 
   private
     FMessageViewerIPC : TfrmMessageList;
     FReceiverIPC      : IChannelReceiver;
 //    FMessageViewerODS : TfrmMessageList;
-    FReceiverODS      : IChannelReceiver;
+    //FReceiverODS      : IChannelReceiver;
     FManager          : TdmManager;
     FSettings         : TLogViewerSettings;
     FMainToolbar      : TToolBar;
@@ -44,6 +55,9 @@ type
     function GetActions: ILogViewerActions;
     function GetMenus: ILogViewerMenus;
     function GetManager: ILogViewerManager;
+
+    procedure UpdateTabs;
+    procedure UpdateStatusBar;
 
   public
     procedure AfterConstruction; override;
@@ -81,7 +95,7 @@ begin
   FManager := TLogViewerFactories.CreateManager(Self);
   FMessageViewerIPC := TLogViewerFactories.CreateMessagesView(
     FManager,
-    Self,
+    pnlMainClient,
     FReceiverIPC
   );
 //  FMessageViewerODS := TLogViewerFactories.CreateMessagesView(
@@ -124,6 +138,60 @@ end;
 function TfrmMain.GetMenus: ILogViewerMenus;
 begin
   Result := Manager.Menus;
+end;
+
+procedure TfrmMain.UpdateStatusBar;
+begin
+//
+end;
+
+procedure TfrmMain.UpdateTabs;
+//var
+  //EV : IEditorView;
+  //CT : TChromeTab;
+begin
+//  if Views.Count = 1 then
+//  begin
+//    ctMain.Visible := False;
+//    if Assigned(Editor) then
+//      Editor.Visible := True;
+//  end
+//  else
+//  begin
+//    ctMain.BeginUpdate;
+//    ctMain.Tabs.Clear;
+//    //for EV in Views do
+//    begin
+//      CT := ctMain.Tabs.Add;
+//      CT.Caption := ExtractFileName(EV.FileName);
+//      CT.Data := Pointer(EV);
+//    end;
+//    ctMain.Visible := True;
+//    ctMain.EndUpdate;
+end;
+{$ENDREGION}
+
+{$REGION 'event handlers'}
+procedure TfrmMain.ctMainActiveTabChanged(Sender: TObject; ATab: TChromeTab);
+begin
+//
+end;
+
+procedure TfrmMain.ctMainButtonAddClick(Sender: TObject; var Handled: Boolean);
+begin
+//
+end;
+
+procedure TfrmMain.ctMainButtonCloseTabClick(Sender: TObject; ATab: TChromeTab;
+  var Close: Boolean);
+begin
+//
+end;
+
+procedure TfrmMain.ctMainNeedDragImageControl(Sender: TObject; ATab: TChromeTab;
+  var DragControl: TWinControl);
+begin
+  DragControl := pnlMainClient;
 end;
 {$ENDREGION}
 

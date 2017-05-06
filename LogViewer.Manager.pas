@@ -102,11 +102,8 @@ type
     procedure actMethodTracesExecute(Sender: TObject);
     procedure actStopExecute(Sender: TObject);
     procedure actFilterMessagesExecute(Sender: TObject);
-    procedure actZeroMQChannelExecute(Sender: TObject);
-    procedure actWinIPCChannelExecute(Sender: TObject);
     procedure actSetFocusToFilterExecute(Sender: TObject);
     procedure actToggleFullscreenExecute(Sender: TObject);
-    procedure actODSChannelExecute(Sender: TObject);
     procedure actCollapseAllExecute(Sender: TObject);
     procedure actExpandAllExecute(Sender: TObject);
     {$ENDREGION}
@@ -287,17 +284,12 @@ end;
 procedure TdmManager.actMethodTracesExecute(Sender: TObject);
 begin
   UpdateVisibleMessageTypes(lmtEnterMethod, Sender);
-  UpdateVisibleMessageTypes(lmtLeaveMethod, Sender);
+  UpdateVisibleMessageTypes(lmtLeaveMethod, Sender, False);
 end;
 
 procedure TdmManager.actObjectExecute(Sender: TObject);
 begin
   UpdateVisibleMessageTypes(lmtObject, Sender);
-end;
-
-procedure TdmManager.actODSChannelExecute(Sender: TObject);
-begin
-//
 end;
 
 procedure TdmManager.actOpenExecute(Sender: TObject);
@@ -373,16 +365,6 @@ end;
 procedure TdmManager.actValueExecute(Sender: TObject);
 begin
   UpdateVisibleMessageTypes(lmtValue, Sender);
-end;
-
-procedure TdmManager.actWinIPCChannelExecute(Sender: TObject);
-begin
-//
-end;
-
-procedure TdmManager.actZeroMQChannelExecute(Sender: TObject);
-begin
-//
 end;
 {$ENDREGION}
 
@@ -507,16 +489,17 @@ procedure TdmManager.UpdateVisibleMessageTypes(
 var
   A : TAction;
 begin
-  A := Sender as TAction;
-  if AToggle then
-    A.Checked := not A.Checked;
-  if A.Checked then
-    Include(FVisibleMessageTypes, AMessageType)
-  else
-    Exclude(FVisibleMessageTypes, AMessageType);
-
   if Assigned(FActiveView) then
+  begin
+    A := Sender as TAction;
+    if AToggle then
+      A.Checked := not A.Checked;
+    if A.Checked then
+      Include(FVisibleMessageTypes, AMessageType)
+    else
+      Exclude(FVisibleMessageTypes, AMessageType);
     FActiveView.UpdateView;
+  end;
 end;
 
 {$ENDREGION}

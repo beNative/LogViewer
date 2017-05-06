@@ -21,6 +21,12 @@ interface
 { Message viewer that can be used to display all messages from an associated
   log channel (IChannelReceiver receiver instance) }
 
+
+{
+  https://stackoverflow.com/questions/5365365/tree-like-datastructure-for-use-with-virtualtreeview
+
+}
+
 uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes, System.ImageList,
@@ -62,6 +68,10 @@ type
     splLeftHorizontal : TSplitter;
     splLeftVertical   : TSplitter;
     splVertical       : TSplitter;
+    pgcMessageContent: TPageControl;
+    tsTextViewer: TTabSheet;
+    tsImageViewer: TTabSheet;
+    pnlTextViewer: TPanel;
     {$ENDREGION}
 
     procedure edtMessageFilterChange(Sender: TObject);
@@ -84,7 +94,7 @@ type
     FEditorManager   : IEditorManager;
     FEditorSettings  : IEditorSettings;
     FEditorView      : IEditorView;
-    FExpandParent    : Boolean;
+    FExpandParents   : Boolean;
     FLastParent      : PVirtualNode;
     FLastNode        : PVirtualNode;
     FVKPressed       : Boolean;
@@ -222,6 +232,7 @@ type
       AManager  : ILogViewerManager;
       AReceiver : IChannelReceiver
     ); reintroduce; virtual;
+
     procedure BeforeDestruction; override;
 
   end;
@@ -229,7 +240,7 @@ type
 implementation
 
 uses
-  System.StrUtils,
+  System.StrUtils, System.UITypes,
 
   Spring,
 
@@ -255,6 +266,8 @@ begin
   inherited Create(AOwner);
   FReceiver := AReceiver;
   FManager := AManager;
+  btnFilterMessages.Action := FManager.Actions.Items['actFilterMessages'];
+  FExpandParents := False;
   CreateEditor;
   CreateLogTreeView;
   CreateWatchesView;
@@ -285,7 +298,7 @@ procedure TfrmMessageList.CreateEditor;
 begin
   FEditorSettings := TEditorFactories.CreateSettings(Self, 'settings.xml');
   FEditorManager  := TEditorFactories.CreateManager(Self, FEditorSettings);
-  FEditorView     := TEditorFactories.CreateView(pnlRight, FEditorManager);
+  FEditorView     := TEditorFactories.CreateView(pnlTextViewer, FEditorManager);
 end;
 
 procedure TfrmMessageList.CreateLogTreeView;
@@ -568,7 +581,6 @@ begin
           S := Copy(S, Pos('=', S) + 2, Length(S));
           FEditorView.Text := S;
         end;
-//        pgcMessageDetails.ActivePageIndex := 0;
       end;
     end;
     UpdateCallStack(Node);
@@ -634,17 +646,22 @@ procedure TfrmMessageList.FLogTreeViewInitNode(Sender: TBaseVirtualTree;
 var
   ND: PNodeData;
   I : Integer;
+  S : string;
 begin
   ND := Sender.GetNodeData(Node);
-  ND.Title   := string(FCurrentMsg.Text);
   ND.MsgData := FCurrentMsg.Data;
   ND.MsgTime := FCurrentMsg.TimeStamp;
   ND.MsgType := TLogMessageType(FCurrentMsg.MsgType);
-  if (ND.MsgType = lmtValue) and not (ND.Title.Contains(sLineBreak)) then
+  if not (ND.MsgType in [lmtValue, lmtObject, lmtStrings]) then
   begin
-    I := ND.Title.IndexOf('=');
-    ND.Name := Copy(ND.Title, 1, I - 1);
-    ND.Value := Copy(ND.Title, I + 2, ND.Title.Length);
+    ND.Title := string(FCurrentMsg.Text);
+  end;
+  S := string(FCurrentMsg.Text);
+  if (ND.MsgType = lmtValue) and not (S.Contains(sLineBreak)) then
+  begin
+    I := S.IndexOf('=');
+    ND.Name := Copy(S, 1, I - 1);
+    ND.Value := Copy(S, I + 2, S.Length);
     ND.Title := '';
   end;
   ND.Index := FMessageCount;
@@ -661,6 +678,8 @@ var
 begin
   ND := Sender.GetNodeData(Node);
   ND.Title := '';
+  ND.Name  := '';
+  ND.Value := '';
   if Assigned(ND.MsgData) then
     FreeAndNil(ND.MsgData);
 end;
@@ -743,10 +762,10 @@ begin
       lmtEnterMethod:
       begin
         FLastNode := FLogTreeView.AddChild(FLastParent, nil);
-        if FExpandParent then
-          FLogTreeView.Expanded[FLastParent] := True
-        else
-          FExpandParent := True;
+        if FExpandParents then
+          FLogTreeView.Expanded[FLastParent] := True;
+//        else
+//          FExpandParent := True;
         FLastParent := FLastNode;
       end;
       lmtLeaveMethod:
@@ -768,11 +787,11 @@ begin
         FLastNode := FLogTreeView.AddChild(FLastParent, nil);
       end;
     end; // case
-    FLogTreeView.ValidateNode(FLastNode, False);
-    if FExpandParent then
+//    FLogTreeView.ValidateNode(FLastNode, False); // calls InitNode
+    if FExpandParents then
     begin
       FLogTreeView.Expanded[FLastParent] := True;
-      FExpandParent := False;
+//      FExpandParent := False;
     end;
   finally
     FLogTreeView.EndUpdate;
@@ -796,7 +815,6 @@ procedure TfrmMessageList.ProcessMessage(AStream: TStream);
 var
   LTextSize : Integer;
   LDataSize : Integer;
-  SS        : TStringStream;
 begin
   Guard.CheckNotNull(AStream, 'AStream');
   LTextSize := 0;
@@ -816,14 +834,6 @@ begin
     FCurrentMsg.Data.Size := 0;
     FCurrentMsg.Data.Position := 0;
     FCurrentMsg.Data.CopyFrom(AStream, LDataSize);
-
-    SS := TStringStream.Create;
-    try
-      SS.LoadFromStream(FCurrentMsg.Data);
-      FCurrentMsg.Text := Format('%s = %s', [FCurrentMsg.Text, SS.DataString]);
-    finally
-      SS.Free;
-    end;
   end
   else
     FCurrentMsg.Data := nil;
@@ -853,72 +863,6 @@ begin
 //  begin
 //    FLogTreeView.FocusedNode := FLogTreeView.GetLast;
 //  end;
-
-{
-var
-  LTextSize : Integer;
-  LDataSize : Integer;
-  LMD       : TLogMessageData;
-  LTime     : TDateTime;
-  LType     : Integer;
-  LText     : AnsiString;
-begin
-  Guard.CheckNotNull(AStream, 'AStream');
-  LMD := TLogMessageData.Create;
-  LMD.Index := FMessages.Count;
-  LTextSize := 0;
-  LDataSize := 0;
-  AStream.Seek(0, soFromBeginning);
-  AStream.ReadBuffer(LType, SizeOf(Integer));
-  LMD.MessageType := TLogMessageType(LType);
-  AStream.ReadBuffer(LTime, SizeOf(TDateTime));
-  LMD.TimeStamp := LTime;
-  AStream.ReadBuffer(LTextSize, SizeOf(Integer));
-  SetLength(LText, LTextSize);
-  AStream.ReadBuffer(LText[1], LTextSize);
-  LMD.Text := LText;
-  AStream.ReadBuffer(LDataSize, SizeOf(Integer));
-  if LDataSize > 0 then
-  begin
-    LMD.Data.CopyFrom(AStream, LDataSize);
-  end;
-  if LMD.MessageType = lmtLeaveMethod then
-  begin
-    LMD.Level  := FCurrentMessage.Level - 1;
-    if Assigned(FCurrentMessage.Parent) then
-      LMD.Parent := FCurrentMessage.Parent.Parent;
-  end
-  else
-  begin
-    if Assigned(FCurrentMessage) then
-    begin
-      if FCurrentMessage.MessageType = lmtEnterMethod then
-      begin
-        LMD.Level  := FCurrentMessage.Level + 1;
-        LMD.Parent := FCurrentMessage;
-        LMD.Parent.Children.Add(LMD);
-      end
-  //    else if LMD.MsgType = lmtLeaveMethod then
-  //    begin
-  //      LMD.MsgLevel := FCurrentMessage.MsgLevel - 1;
-  //    end
-      else
-      begin
-        LMD.Level  := FCurrentMessage.Level;
-        LMD.Parent := FCurrentMessage.Parent;
-        if Assigned(LMD.Parent) then
-          LMD.Parent.Children.Add(LMD);
-      end;
-    end
-    else
-    begin
-      LMD.Level := 0;
-    end;
-  end;
-  FMessages.Add(LMD);
-  FCurrentMessage := LMD;
-}
-
 end;
 
 procedure TfrmMessageList.UpdateActions;
@@ -959,7 +903,6 @@ begin
     ANode := ANode^.Parent;
     Dec(I);
   end;
-  //FTVPCallStack.TreeView.Header.AutoFitColumns;
 end;
 
 procedure TfrmMessageList.UpdateLogTreeView;
@@ -977,6 +920,5 @@ procedure TfrmMessageList.UpdateView;
 begin
   UpdateLogTreeView;
 end;
-
 {$ENDREGION}
 end.

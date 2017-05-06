@@ -42,6 +42,7 @@ object frmMessageList: TfrmMessageList
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
+    ExplicitLeft = 957
     object pnlMessageContent: TPanel
       AlignWithMargins = True
       Left = 3
@@ -49,10 +50,8 @@ object frmMessageList: TfrmMessageList
       Width = 424
       Height = 25
       Align = alTop
-      BevelKind = bkFlat
       BevelOuter = bvNone
       Caption = 'Message content'
-      Color = clWhite
       Font.Charset = ANSI_CHARSET
       Font.Color = clGray
       Font.Height = -16
@@ -61,6 +60,36 @@ object frmMessageList: TfrmMessageList
       ParentBackground = False
       ParentFont = False
       TabOrder = 0
+    end
+    object pgcMessageContent: TPageControl
+      Left = 0
+      Top = 31
+      Width = 430
+      Height = 775
+      ActivePage = tsTextViewer
+      Align = alClient
+      MultiLine = True
+      TabOrder = 1
+      object tsTextViewer: TTabSheet
+        Caption = 'Text viewer'
+        object pnlTextViewer: TPanel
+          Left = 0
+          Top = 0
+          Width = 422
+          Height = 747
+          Align = alClient
+          BevelOuter = bvNone
+          TabOrder = 0
+          ExplicitLeft = 120
+          ExplicitTop = 352
+          ExplicitWidth = 185
+          ExplicitHeight = 41
+        end
+      end
+      object tsImageViewer: TTabSheet
+        Caption = 'Image viewer'
+        ImageIndex = 1
+      end
     end
   end
   object pnlLeft: TPanel
@@ -110,10 +139,8 @@ object frmMessageList: TfrmMessageList
           Width = 347
           Height = 25
           Align = alTop
-          BevelKind = bkFlat
           BevelOuter = bvNone
           Caption = 'Watches'
-          Color = clWhite
           Font.Charset = ANSI_CHARSET
           Font.Color = clGray
           Font.Height = -16
@@ -132,8 +159,6 @@ object frmMessageList: TfrmMessageList
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitLeft = 3
-        ExplicitTop = 2
         object pnlCallStackTitle: TPanel
           AlignWithMargins = True
           Left = 3
@@ -141,10 +166,8 @@ object frmMessageList: TfrmMessageList
           Width = 347
           Height = 25
           Align = alTop
-          BevelKind = bkFlat
           BevelOuter = bvNone
           Caption = 'Callstack'
-          Color = clWhite
           Font.Charset = ANSI_CHARSET
           Font.Color = clGray
           Font.Height = -16
@@ -194,8 +217,8 @@ object frmMessageList: TfrmMessageList
         Flat = True
       end
       object edtMessageFilter: TLabeledEdit
-        Left = 126
-        Top = 6
+        Left = 83
+        Top = 5
         Width = 272
         Height = 21
         Alignment = taCenter
@@ -217,16 +240,17 @@ object frmMessageList: TfrmMessageList
         OnKeyUp = edtMessageFilterKeyUp
       end
       object btnFilterMessages: TButton
-        Left = 481
+        Left = 449
         Top = 3
-        Width = 102
+        Width = 134
         Height = 25
         Anchors = [akTop, akRight]
+        Caption = 'Filter messages'
         Default = True
         TabOrder = 1
       end
       object chkAutoFilter: TCheckBox
-        Left = 404
+        Left = 372
         Top = 7
         Width = 71
         Height = 17
