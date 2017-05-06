@@ -48,8 +48,7 @@ type
     btnFilterMessages : TButton;
     chkAutoFilter     : TCheckBox;
     edtMessageFilter  : TLabeledEdit;
-    imgViewer         : TImage;
-    pgcMessageDetails : TPageControl;
+    imlMessageTypes   : TImageList;
     pnlCallStack      : TPanel;
     pnlCallStackTitle : TPanel;
     pnlCallStackWatch : TPanel;
@@ -63,21 +62,15 @@ type
     splLeftHorizontal : TSplitter;
     splLeftVertical   : TSplitter;
     splVertical       : TSplitter;
-    tsHexEditor       : TTabSheet;
-    tsImageViewer     : TTabSheet;
-    tsInspector       : TTabSheet;
-    tsTextViewer      : TTabSheet;
-    imlMessageTypes   : TImageList;
+    {$ENDREGION}
 
     procedure edtMessageFilterChange(Sender: TObject);
     procedure edtMessageFilterKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure edtMessageFilterKeyUp(Sender: TObject; var Key: Word;
       Shift: TShiftState);
-    {$ENDREGION}
 
   private
-//    FMessages        : IList<TLogMessageData>;
     FMessageCount    : Integer;
     FCurrentMsg      : TLogMessage;
     FCallStack       : IList<TCallStackData>;
@@ -190,6 +183,7 @@ type
     );
     function GetManager: ILogViewerManager;
     function GetActions: ILogViewerActions;
+    function GetReceiver: IChannelReceiver;
     {$ENDREGION}
 
   protected
@@ -218,6 +212,9 @@ type
 
     property Actions: ILogViewerActions
       read GetActions;
+
+    property Receiver: IChannelReceiver
+      read GetReceiver;
 
   public
     constructor Create(
@@ -288,14 +285,13 @@ procedure TfrmMessageList.CreateEditor;
 begin
   FEditorSettings := TEditorFactories.CreateSettings(Self, 'settings.xml');
   FEditorManager  := TEditorFactories.CreateManager(Self, FEditorSettings);
-  FEditorView     := TEditorFactories.CreateView(tsTextViewer, FEditorManager);
+  FEditorView     := TEditorFactories.CreateView(pnlRight, FEditorManager);
 end;
 
 procedure TfrmMessageList.CreateLogTreeView;
 var
   C : TVirtualTreeColumn;
 begin
-//  FMessages := TCollections.CreateObjectList<TLogMessageData>;
   FLogTreeView := TFactories.CreateVirtualStringTree(Self, pnlMessages);
   FLogTreeView.TreeOptions.AutoOptions := FLogTreeView.TreeOptions.AutoOptions +
     [toAutoSpanColumns];
@@ -345,18 +341,6 @@ begin
   C.Text := STimestamp;
   C.Width    := 80;
   C.MinWidth := 80;
-
-
-//  FTVPMessages := TFactories.CreateTreeViewPresenter(
-//    Self,
-//    FLogTreeView,
-//    FMessages as IObjectList
-//  );
-//  FTVPMessages.View.ItemTemplate := TLogTemplate.Create(
-//    FTVPMessages.ColumnDefinitions,
-//    FMessages
-//  );
-//  FTVPMessages.OnSelectionChanged := FTVPMessagesSelectionChanged;
 end;
 
 procedure TfrmMessageList.CreateWatchesView;
@@ -453,6 +437,11 @@ function TfrmMessageList.GetManager: ILogViewerManager;
 begin
   Result := FManager;
 end;
+
+function TfrmMessageList.GetReceiver: IChannelReceiver;
+begin
+  Result := FReceiver;
+end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
@@ -526,7 +515,6 @@ begin
   try
     if ND.MsgData = nil then
     begin
-      pgcMessageDetails.ActivePage := tsTextViewer;
       FEditorView.Text := '';
     end
     else
@@ -541,7 +529,6 @@ begin
         S := LStream.DataString;
         FEditorView.Text := S;
         FEditorView.HighlighterName := 'INI';
-        pgcMessageDetails.ActivePage := tsTextViewer;
       end;
       lmtObject:
       begin
@@ -553,27 +540,25 @@ begin
           S := LStream.DataString;
           FEditorView.Text := S;
           FEditorView.HighlighterName := 'DFM';
-          pgcMessageDetails.ActivePage := tsTextViewer;
         end
         else
         begin
           S := ND.Title;
           ND.Name := Copy(S, 1, Pos(sLineBreak, S));
           FEditorView.Text := Copy(S, Pos(sLineBreak, S) + 2, Length(S));
-          pgcMessageDetails.ActivePageIndex := 0;
         end;
       end;
       lmtBitmap:
       begin
-        imgViewer.Picture.Bitmap.LoadFromStream(ND.MsgData);
-        pgcMessageDetails.ActivePage := tsImageViewer;
+//        imgViewer.Picture.Bitmap.LoadFromStream(ND.MsgData);
+//        pgcMessageDetails.ActivePage := tsImageViewer;
         // Index := 1;
         //ShowBitmapInfo(imgViewer.Picture.Bitmap);
       end;
       lmtMemory:
       begin
         //edtHex.OpenStream(ND.MsgData);
-        pgcMessageDetails.ActivePageIndex := 3;
+//        pgcMessageDetails.ActivePageIndex := 3;
       end;
       else
       begin
@@ -583,7 +568,7 @@ begin
           S := Copy(S, Pos('=', S) + 2, Length(S));
           FEditorView.Text := S;
         end;
-        pgcMessageDetails.ActivePageIndex := 0;
+//        pgcMessageDetails.ActivePageIndex := 0;
       end;
     end;
     UpdateCallStack(Node);
@@ -640,7 +625,7 @@ begin
   end
   else if Column = COLUMN_TIMESTAMP then
   begin
-    CellText := TimeToStr(ND.MsgTime);
+    CellText := FormatDateTime('hh:nn:ss:zzz',  ND.MsgTime);
   end;
 end;
 
@@ -800,7 +785,6 @@ begin
   FWatches.Clear;
   FEditorView.Clear;
   FCallStack.Clear;
-  pgcMessageDetails.ActivePageIndex := 0;
   FMessageCount := 0;
   FLastNode     := nil;
   FLastParent   := nil;
@@ -812,11 +796,11 @@ procedure TfrmMessageList.ProcessMessage(AStream: TStream);
 var
   LTextSize : Integer;
   LDataSize : Integer;
+  SS        : TStringStream;
 begin
   Guard.CheckNotNull(AStream, 'AStream');
   LTextSize := 0;
   LDataSize := 0;
-
   Inc(FMessageCount);
   AStream.Seek(0, soFromBeginning);
   AStream.ReadBuffer(FCurrentMsg.MsgType, SizeOf(Integer));
@@ -832,6 +816,14 @@ begin
     FCurrentMsg.Data.Size := 0;
     FCurrentMsg.Data.Position := 0;
     FCurrentMsg.Data.CopyFrom(AStream, LDataSize);
+
+    SS := TStringStream.Create;
+    try
+      SS.LoadFromStream(FCurrentMsg.Data);
+      FCurrentMsg.Text := Format('%s = %s', [FCurrentMsg.Text, SS.DataString]);
+    finally
+      SS.Free;
+    end;
   end
   else
     FCurrentMsg.Data := nil;

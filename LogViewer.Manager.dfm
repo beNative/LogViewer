@@ -14,6 +14,7 @@ object dmManager: TdmManager
       OnExecute = actClearMessagesExecute
     end
     object actToggleAlwaysOnTop: TAction
+      AutoCheck = True
       Caption = 'Always on top'
       Hint = 
         'Shows the main application form always in front of any other app' +
@@ -31,10 +32,12 @@ object dmManager: TdmManager
     end
     object actSelectAll: TAction
       Caption = 'Select all'
+      Hint = 'Show all message types.'
       OnExecute = actSelectAllExecute
     end
     object actSelectNone: TAction
       Caption = 'Select none'
+      Hint = 'Hide all message types.'
       OnExecute = actSelectNoneExecute
     end
     object actInfo: TAction
@@ -114,6 +117,7 @@ object dmManager: TdmManager
       OnExecute = actMethodTracesExecute
     end
     object actStop: TAction
+      AutoCheck = True
       Caption = 'Stop capturing'
       ImageIndex = 9
       ShortCut = 116
@@ -125,15 +129,6 @@ object dmManager: TdmManager
       ShortCut = 16454
       OnExecute = actFilterMessagesExecute
     end
-    object actZeroMQChannel: TAction
-      Caption = 'ZeroMQ'
-      ImageIndex = 6
-      OnExecute = actZeroMQChannelExecute
-    end
-    object actWinIPCChannel: TAction
-      Caption = 'WinIPC'
-      OnExecute = actWinIPCChannelExecute
-    end
     object actSetFocusToFilter: TAction
       Caption = 'Sets focus to filter entry'
       ShortCut = 113
@@ -144,23 +139,17 @@ object dmManager: TdmManager
       ShortCut = 122
       OnExecute = actToggleFullscreenExecute
     end
-    object actODSChannel: TAction
-      Caption = 'ODS'
-      OnExecute = actODSChannelExecute
-    end
     object actCollapseAll: TAction
-      Caption = 'actCollapseAll'
+      Caption = 'Collapse all'
+      Hint = 'Collapse all messages.'
       ImageIndex = 18
       OnExecute = actCollapseAllExecute
     end
     object actExpandAll: TAction
-      Caption = 'actExpandAll'
+      Caption = 'Expand all'
+      Hint = 'Expand all messages.'
       ImageIndex = 14
       OnExecute = actExpandAllExecute
-    end
-    object actSerialPortChannel: TAction
-      Caption = 'Serial port channel'
-      ImageIndex = 24
     end
   end
   object imlMessageTypes: TImageList

@@ -72,8 +72,13 @@ type
 
   ILogViewerMessagesView = interface
   ['{C1DF2E26-4507-4B35-94E1-19A36775633F}']
+    function GetReceiver: IChannelReceiver;
+
     procedure Clear;
     procedure UpdateView;
+
+    property Receiver: IChannelReceiver
+      read GetReceiver;
   end;
 
   ILogViewerEvents = interface
@@ -83,6 +88,10 @@ type
   ILogViewerCommands = interface
   ['{70304CE3-9498-4738-9084-175B44104236}']
     procedure ClearMessages;
+    procedure Start;
+    procedure Stop;
+    procedure CollapseAll;
+    procedure ExpandAll;
   end;
 
   ILogViewerManager = interface

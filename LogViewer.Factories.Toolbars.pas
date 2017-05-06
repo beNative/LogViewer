@@ -47,13 +47,15 @@ type
 
     function CreateToolButton(
        AParent    : TToolBar;
-       AAction    : TBasicAction;
+       AAction    : TBasicAction = nil;
+       AStyle     : TToolButtonStyle = tbsButton;
        APopupMenu : TPopupMenu = nil
     ): TToolButton; overload;
 
     function CreateToolButton(
             AParent     : TToolBar;
-      const AActionName : string = '';
+      const AActionName : string;
+            AStyle      : TToolButtonStyle = tbsButton;
             APopupMenu  : TPopupMenu = nil
     ): TToolButton; overload;
 
@@ -123,16 +125,19 @@ begin
 end;
 
 function TLogViewerToolbarsFactory.CreateToolButton(AParent: TToolBar;
-  const AActionName: string; APopupMenu: TPopupMenu): TToolButton;
+  const AActionName: string; AStyle: TToolButtonStyle; APopupMenu: TPopupMenu)
+  : TToolButton;
 begin
   if AActionName = '' then
-    Result := CreateToolButton(AParent, nil)
+    Result := CreateToolButton(AParent)
   else
-    Result := CreateToolButton(AParent, FActions[AActionName], APopupMenu);
+    Result :=
+      CreateToolButton(AParent, FActions[AActionName], AStyle, APopupMenu);
 end;
 
 function TLogViewerToolbarsFactory.CreateToolButton(AParent: TToolBar;
-  AAction: TBasicAction; APopupMenu: TPopupMenu): TToolButton;
+  AAction: TBasicAction; AStyle: TToolButtonStyle; APopupMenu: TPopupMenu)
+  : TToolButton;
 var
   TB : TToolButton;
   N  : Integer;
@@ -151,6 +156,7 @@ begin
   end
   else
   begin
+    TB.Style := AStyle;
     if Assigned(APopupMenu) then
     begin
       TB.Style        := tbsDropDown;
@@ -176,43 +182,41 @@ begin
   TB.Parent := AParent;
   TB.Images := FActions.ActionList.Images;
   TB.ButtonWidth:= 10;
+  TB.AllowTextButtons := True;
   CreateToolButton(TB, 'actToggleAlwaysOnTop');
   CreateToolButton(TB, 'actToggleFullScreen');
   CreateToolButton(TB, 'actStop');
   CreateToolButton(TB, 'actClearMessages');
   CreateToolButton(TB);
-  CreateToolButton(TB, 'actSave');
-  CreateToolButton(TB, 'actSaveAll');
+  CreateToolButton(TB, 'actInfo', tbsTextButton);
+  CreateToolButton(TB, 'actWarning', tbsTextButton);
+  CreateToolButton(TB, 'actError', tbsTextButton);
+  CreateToolButton(TB, 'actEcxeption', tbsTextButton);
   CreateToolButton(TB);
-  CreateToolButton(TB, 'actInfo');
-  CreateToolButton(TB, 'actWarning');
-  CreateToolButton(TB, 'actError');
-  CreateToolButton(TB, 'actEcxeption');
+  //CreateToolButton(TB, 'actConditional', tbsTextButton);
+  CreateToolButton(TB, 'actCheckPoint', tbsTextButton);
+  //CreateToolButton(TB, 'actCallStack', tbsTextButton);
   CreateToolButton(TB);
-  CreateToolButton(TB, 'actConditional');
-  CreateToolButton(TB, 'actCheckPoint');
-  CreateToolButton(TB, 'actCallStack');
-  CreateToolButton(TB);
-  CreateToolButton(TB, 'actValue');
-  CreateToolButton(TB, 'actStrings');
-  CreateToolButton(TB, 'actObject');
-  CreateToolButton(TB, 'actBitmap');
-  CreateToolButton(TB, 'actMemory');
-  CreateToolButton(TB, 'actHeapInfo');
-  CreateToolButton(TB, 'actCustomData');
-  CreateToolButton(TB);
-  CreateToolButton(TB, 'actMethodTraces');
-  CreateToolButton(TB);
-  CreateToolButton(TB, 'actFilterMessages');
-  CreateToolButton(TB);
-  CreateToolButton(TB, 'actZeroMQChannel');
-  CreateToolButton(TB, 'actWinIPCChannel');
-  CreateToolButton(TB, 'actODSChannel');
-  CreateToolButton(TB);
-  CreateToolButton(TB, 'actSetFocusToFilter');
-  CreateToolButton(TB);
-  CreateToolButton(TB, 'actCollapseAll');
-  CreateToolButton(TB, 'actExpandAll');
+  CreateToolButton(TB, 'actValue', tbsTextButton);
+  CreateToolButton(TB, 'actStrings', tbsTextButton);
+  CreateToolButton(TB, 'actObject', tbsTextButton);
+//  CreateToolButton(TB, 'actBitmap', tbsTextButton);
+  //CreateToolButton(TB, 'actMemory', tbsTextButton);
+  //CreateToolButton(TB, 'actHeapInfo', tbsTextButton);
+  CreateToolButton(TB, 'actCustomData', tbsTextButton);
+//  CreateToolButton(TB);
+  CreateToolButton(TB, 'actMethodTraces', tbsTextButton);
+//  CreateToolButton(TB);
+//  CreateToolButton(TB, 'actFilterMessages');
+//  CreateToolButton(TB);
+//  CreateToolButton(TB, 'actZeroMQChannel');
+//  CreateToolButton(TB, 'actWinIPCChannel');
+//  CreateToolButton(TB, 'actODSChannel');
+//  CreateToolButton(TB);
+//  CreateToolButton(TB, 'actSetFocusToFilter');
+//  CreateToolButton(TB);
+  CreateToolButton(TB, 'actCollapseAll', tbsTextButton);
+  CreateToolButton(TB, 'actExpandAll', tbsTextButton);
 end;
 {$ENDREGION}
 

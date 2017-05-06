@@ -62,12 +62,10 @@ type
     actMemory            : TAction;
     actMethodTraces      : TAction;
     actObject            : TAction;
-    actODSChannel        : TAction;
     actOpen              : TAction;
     actSave              : TAction;
     actSelectAll         : TAction;
     actSelectNone        : TAction;
-    actSerialPortChannel : TAction;
     actSetFocusToFilter  : TAction;
     actStop              : TAction;
     actStrings           : TAction;
@@ -75,8 +73,6 @@ type
     actToggleFullscreen  : TAction;
     actValue             : TAction;
     actWarning           : TAction;
-    actWinIPCChannel     : TAction;
-    actZeroMQChannel     : TAction;
     imlMain              : TImageList;
     imlMessageTypes      : TImageList;
     tmrPoll              : TTimer;
@@ -245,7 +241,7 @@ end;
 
 procedure TdmManager.actCollapseAllExecute(Sender: TObject);
 begin
-//
+  Commands.CollapseAll;
 end;
 
 procedure TdmManager.actConditionalExecute(Sender: TObject);
@@ -270,7 +266,7 @@ end;
 
 procedure TdmManager.actExpandAllExecute(Sender: TObject);
 begin
-//
+  Commands.ExpandAll;
 end;
 
 procedure TdmManager.actFilterMessagesExecute(Sender: TObject);
@@ -331,7 +327,10 @@ end;
 
 procedure TdmManager.actStopExecute(Sender: TObject);
 begin
-//
+  if actStop.Checked then
+    Commands.Stop
+  else
+    Commands.Start;
 end;
 
 procedure TdmManager.actStringsExecute(Sender: TObject);

@@ -206,20 +206,31 @@ const
 var
   TextSize: Integer;
   MsgType : Integer;
+  DataSize: Integer;
 begin
   if Action = caAdded then
   begin
-    if OnReceiveMessage.CanInvoke then
+    if OnReceiveMessage.CanInvoke and (Item.ProcessName <> 'explorer.exe') then
     begin
       FBuffer.Clear;
-      TextSize := Length(Item.MsgText);
-      MsgType := 0;
+      //TextSize := Length(Item.MsgText);
+      TextSize := Length(Item.ProcessName);
+
+      //lmtValue
+      //MsgType := 0;
+      MsgType := 3;
       FBuffer.Seek(0, soFromBeginning);
       FBuffer.WriteBuffer(MsgType, SizeOf(Integer));
       FBuffer.WriteBuffer(Item.Time, SizeOf(TDateTime));
       FBuffer.WriteBuffer(TextSize, SizeOf(Integer));
-      FBuffer.WriteBuffer(Item.MsgText[1], TextSize);
-      FBuffer.WriteBuffer(ZeroBuf, SizeOf(Integer));
+      FBuffer.WriteBuffer(Item.ProcessName[1], TextSize);
+
+      DataSize := Length(Item.MsgText);
+      FBuffer.WriteBuffer(DataSize, SizeOf(Integer));
+      FBuffer.WriteBuffer(Item.MsgText[1], DataSize);
+
+      //FBuffer.WriteBuffer(Item.MsgText[1], TextSize);
+      //FBuffer.WriteBuffer(ZeroBuf, SizeOf(Integer));
 //      TextSize := Length(Item.ProcessName);
 //      FBuffer.WriteBuffer(TextSize, SizeOf(Integer));
 //      FBuffer.WriteBuffer(Item.ProcessName[1], TextSize);

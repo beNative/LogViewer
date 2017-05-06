@@ -72,6 +72,7 @@ end;
 
 procedure TWinIPChannelReceiver.BeforeDestruction;
 begin
+  FIPCServer.Active := False;
   FIPCServer.Free;
   inherited BeforeDestruction;
 end;
@@ -92,6 +93,7 @@ begin
       FIPCServer.OnMessage := FIPCServerMessage
     else
       FIPCServer.OnMessage := nil;
+    FIPCServer.Active := Value;
   end;
 end;
 

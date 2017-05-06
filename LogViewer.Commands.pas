@@ -30,6 +30,10 @@ type
 
   protected
     procedure ClearMessages;
+    procedure Start;
+    procedure Stop;
+    procedure CollapseAll;
+    procedure ExpandAll;
 
   public
     constructor Create(AManager: ILogViewerManager);
@@ -54,7 +58,27 @@ end;
 {$REGION 'protected methods'}
 procedure TLogViewerCommands.ClearMessages;
 begin
+  FManager.ActiveView.Clear;
+end;
 
+procedure TLogViewerCommands.CollapseAll;
+begin
+//
+end;
+
+procedure TLogViewerCommands.ExpandAll;
+begin
+//
+end;
+
+procedure TLogViewerCommands.Start;
+begin
+  FManager.ActiveView.Receiver.Enabled := True;
+end;
+
+procedure TLogViewerCommands.Stop;
+begin
+  FManager.ActiveView.Receiver.Enabled := False;
 end;
 {$ENDREGION}
 

@@ -93,6 +93,7 @@ type
 
     procedure ConnectWatchHistoryCDEvents;
     procedure ConnectWatchValuesCDEvents;
+    procedure CreateObjects;
 
 
   protected
@@ -103,8 +104,8 @@ type
 
   public
     constructor Create(
-      AOwner : TComponent;
-      AData  : TWatchList
+      AOwner   : TComponent;
+      AWatches : TWatchList
     ); reintroduce; virtual;
     procedure BeforeDestruction; override;
 
@@ -170,41 +171,13 @@ begin
   end;
 end;
 
-constructor TfrmWatchesView.Create(AOwner: TComponent; AData: TWatchList);
-var
-  CDS : IColumnDefinitions;
-  CD  : TColumnDefinition;
+constructor TfrmWatchesView.Create(AOwner: TComponent; AWatches: TWatchList);
 begin
   inherited Create(AOwner);
-  FWatches := AData;
+  FWatches := AWatches;
   FWatches.OnUpdateWatch := FWatchesUpdateWatch;
   FWatches.OnNewWatch    := FWatchesNewWatch;
-  FVSTWatchValues := TFactories.CreateVirtualStringTree(Self, pnlWatches);
-  CDS := TFactories.CreateColumnDefinitions;
-  CD := CDS.Add('Name');
-  CD.ValuePropertyName  := 'Name';
-  CD.OnCustomDraw := FCDNameCustomDraw;
-  CD := CDS.Add('Value');
-  CD.ValuePropertyName := 'Value';
-  CD.OnCustomDraw := FCDValueCustomDraw;
-  CD := CDS.Add('TimeStamp');
-  CD.ValuePropertyName := 'TimeStamp';
-  CD.OnGetText := FCDTimeStampGetText;
-  CD.OnCustomDraw := FCDTimeStampCustomDraw;
-
-  FTVPWatchValues := TFactories.CreateTreeViewPresenter(
-    Self,
-    FVSTWatchValues,
-    FWatches.List as IObjectList,
-    CDS
-  );
-  ConnectWatchValuesCDEvents;
-  FTVPWatchValues.OnSelectionChanged := FTVPWatchValuesSelectionChanged;
-  FVSTWatchHistory := TFactories.CreateVirtualStringTree(Self, pnlWatchHistory);
-  FTVPWatchHistory := TFactories.CreateTreeViewPresenter(
-    Self,
-    FVSTWatchHistory
-  );
+  CreateObjects;
 end;
 
 procedure TfrmWatchesView.BeforeDestruction;
@@ -287,6 +260,36 @@ end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
+procedure TfrmWatchesView.CreateObjects;
+var
+  CDS : IColumnDefinitions;
+  CD  : TColumnDefinition;
+begin
+  FVSTWatchValues := TFactories.CreateVirtualStringTree(Self, pnlWatches);
+  CDS := TFactories.CreateColumnDefinitions;
+  CD := CDS.Add('Name');
+  CD.ValuePropertyName := 'Name';
+  CD.OnCustomDraw := FCDNameCustomDraw;
+  CD := CDS.Add('Value');
+  CD.ValuePropertyName := 'Value';
+  CD.OnCustomDraw := FCDValueCustomDraw;
+  CD := CDS.Add('TimeStamp');
+  CD.ValuePropertyName := 'TimeStamp';
+  CD.OnGetText := FCDTimeStampGetText;
+  CD.OnCustomDraw := FCDTimeStampCustomDraw;
+
+  FTVPWatchValues := TFactories.CreateTreeViewPresenter(
+    Self,
+    FVSTWatchValues,
+    FWatches.List as IObjectList,
+    CDS
+  );
+  ConnectWatchValuesCDEvents;
+  FTVPWatchValues.OnSelectionChanged := FTVPWatchValuesSelectionChanged;
+  FVSTWatchHistory := TFactories.CreateVirtualStringTree(Self, pnlWatchHistory);
+  FTVPWatchHistory := TFactories.CreateTreeViewPresenter(Self, FVSTWatchHistory);
+end;
+
 procedure TfrmWatchesView.UpdateView(AMessageId: Int64);
 begin
   FMessageId := AMessageId;
@@ -313,6 +316,10 @@ begin
     begin
       FTVPWatchHistory.SelectedItem := SelectedWatch.CurrentWatchValue;
     end;
+  end
+  else
+  begin
+    FVSTWatchHistory.Clear;
   end;
 end;
 {$ENDREGION}

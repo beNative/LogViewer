@@ -93,8 +93,8 @@ type
 
     procedure AddValue(
       const AValue : string;
-      AId        : Int64;
-      ATimeStamp : TDateTime
+      AId          : Int64;
+      ATimeStamp   : TDateTime
     );
     function Find(AId: Int64): Boolean;
 

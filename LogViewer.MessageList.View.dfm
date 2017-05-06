@@ -3,13 +3,14 @@ object frmMessageList: TfrmMessageList
   Top = 0
   ClientHeight = 806
   ClientWidth = 1389
-  Color = clBtnFace
+  Color = clWhite
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  ShowHint = True
   PixelsPerInch = 96
   TextHeight = 13
   object splVertical: TSplitter
@@ -38,49 +39,9 @@ object frmMessageList: TfrmMessageList
     Height = 806
     Align = alRight
     BevelOuter = bvNone
-    Caption = 'pnlRight'
+    Color = clWhite
+    ParentBackground = False
     TabOrder = 0
-    object pgcMessageDetails: TPageControl
-      Left = 0
-      Top = 31
-      Width = 430
-      Height = 775
-      ActivePage = tsTextViewer
-      Align = alClient
-      TabOrder = 0
-      object tsTextViewer: TTabSheet
-        Caption = 'Text'
-      end
-      object tsImageViewer: TTabSheet
-        Caption = 'Image'
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
-        object imgViewer: TImage
-          Left = 0
-          Top = 0
-          Width = 422
-          Height = 747
-          Align = alClient
-          ExplicitHeight = 561
-        end
-      end
-      object tsInspector: TTabSheet
-        Caption = 'Inspector'
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
-      end
-      object tsHexEditor: TTabSheet
-        Caption = 'Hex edtor'
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
-      end
-    end
     object pnlMessageContent: TPanel
       AlignWithMargins = True
       Left = 3
@@ -91,15 +52,15 @@ object frmMessageList: TfrmMessageList
       BevelKind = bkFlat
       BevelOuter = bvNone
       Caption = 'Message content'
-      Color = clAppWorkSpace
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
+      Color = clWhite
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clGray
+      Font.Height = -16
+      Font.Name = 'Segoe UI Semibold'
+      Font.Style = []
       ParentBackground = False
       ParentFont = False
-      TabOrder = 1
+      TabOrder = 0
     end
   end
   object pnlLeft: TPanel
@@ -117,6 +78,8 @@ object frmMessageList: TfrmMessageList
       Height = 806
       Align = alClient
       BevelOuter = bvNone
+      Color = clWhite
+      ParentBackground = False
       TabOrder = 0
       object splLeftHorizontal: TSplitter
         Left = 0
@@ -125,6 +88,8 @@ object frmMessageList: TfrmMessageList
         Height = 8
         Cursor = crVSplit
         Align = alBottom
+        Color = clWhite
+        ParentColor = False
         ExplicitTop = 392
         ExplicitWidth = 286
       end
@@ -148,12 +113,12 @@ object frmMessageList: TfrmMessageList
           BevelKind = bkFlat
           BevelOuter = bvNone
           Caption = 'Watches'
-          Color = clAppWorkSpace
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -11
-          Font.Name = 'Tahoma'
-          Font.Style = [fsBold]
+          Color = clWhite
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clGray
+          Font.Height = -16
+          Font.Name = 'Segoe UI Semibold'
+          Font.Style = []
           ParentBackground = False
           ParentFont = False
           TabOrder = 0
@@ -177,12 +142,12 @@ object frmMessageList: TfrmMessageList
           BevelKind = bkFlat
           BevelOuter = bvNone
           Caption = 'Callstack'
-          Color = clAppWorkSpace
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -11
-          Font.Name = 'Tahoma'
-          Font.Style = [fsBold]
+          Color = clWhite
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clGray
+          Font.Height = -16
+          Font.Name = 'Segoe UI Semibold'
+          Font.Style = []
           ParentBackground = False
           ParentFont = False
           TabOrder = 0
@@ -198,8 +163,7 @@ object frmMessageList: TfrmMessageList
     Align = alClient
     BevelOuter = bvNone
     BevelWidth = 2
-    Constraints.MinHeight = 806
-    Constraints.MinWidth = 589
+    Color = clWhite
     ParentBackground = False
     TabOrder = 2
     object pnlFilter: TPanel

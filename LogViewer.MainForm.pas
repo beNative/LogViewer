@@ -29,16 +29,12 @@ uses
 
 type
   TfrmMain = class(TForm)
-    pgcMain  : TPageControl;
-    tsIPC    : TTabSheet;
-    tsODS    : TTabSheet;
-    tsZeroMQ : TTabSheet;
     sbrMain  : TStatusBar;
 
   private
     FMessageViewerIPC : TfrmMessageList;
     FReceiverIPC      : IChannelReceiver;
-    FMessageViewerODS : TfrmMessageList;
+//    FMessageViewerODS : TfrmMessageList;
     FReceiverODS      : IChannelReceiver;
     FManager          : TdmManager;
     FSettings         : TLogViewerSettings;
@@ -80,19 +76,19 @@ begin
   inherited AfterConstruction;
   FSettings := TLogViewerSettings.Create;
   FReceiverIPC := TWinIPChannelReceiver.Create;
-  FReceiverODS := TWinODSReceiver.Create;
+  //FReceiverODS := TWinODSReceiver.Create;
 
   FManager := TLogViewerFactories.CreateManager(Self);
   FMessageViewerIPC := TLogViewerFactories.CreateMessagesView(
     FManager,
-    tsIPC,
+    Self,
     FReceiverIPC
   );
-  FMessageViewerODS := TLogViewerFactories.CreateMessagesView(
-    FManager,
-    tsODS,
-    FReceiverODS
-  );
+//  FMessageViewerODS := TLogViewerFactories.CreateMessagesView(
+//    FManager,
+//    tsODS,
+//    FReceiverODS
+//  );
   FMainToolbar := TLogViewerFactories.CreateMainToolbar(
     FManager,
     Self,
@@ -103,7 +99,7 @@ begin
   (FManager as ILogViewerManager).ActiveView := FMessageViewerIPC;
 
   FReceiverIPC.Enabled := True;
-  FReceiverODS.Enabled := False;
+  //FReceiverODS.Enabled := True;
 end;
 
 procedure TfrmMain.BeforeDestruction;
