@@ -352,7 +352,6 @@ object frmMain: TfrmMain
     LookAndFeel.ScrollButtons.Arrow.Disabled.OutlineAlpha = 200
     Align = alTop
     TabOrder = 1
-    ExplicitWidth = 1107
   end
   object pnlMainClient: TPanel
     Left = 0
@@ -362,9 +361,5 @@ object frmMain: TfrmMain
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 2
-    ExplicitLeft = 632
-    ExplicitTop = 472
-    ExplicitWidth = 185
-    ExplicitHeight = 41
   end
 end

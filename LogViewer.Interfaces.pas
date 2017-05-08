@@ -28,7 +28,7 @@ uses
 
   DDuce.Logger.Interfaces,
 
-  LogViewer.Settings;
+  LogViewer.Settings, LogViewer.ComPort.Settings;
 
 type
   TLogMessageTypes = set of TLogMessageType;
@@ -39,6 +39,14 @@ type
   ) of object;
 
 type
+  IComPortSettings = interface
+  ['{BFE46291-9932-4319-8387-9F926597F17F}']
+    function GetSettings: TComPortSettings;
+
+    property Settings: TComPortSettings
+      read GetSettings;
+  end;
+
   IChannelReceiver = interface
   ['{7C96D7BD-3D10-4A9A-90AF-43E755859B37}']
     function GetEnabled: Boolean;
@@ -76,6 +84,8 @@ type
 
     procedure Clear;
     procedure UpdateView;
+    procedure GotoFirst;
+    procedure GotoLast;
 
     property Receiver: IChannelReceiver
       read GetReceiver;
@@ -92,6 +102,8 @@ type
     procedure Stop;
     procedure CollapseAll;
     procedure ExpandAll;
+    procedure GotoFirst;
+    procedure GotoLast;
   end;
 
   ILogViewerManager = interface
@@ -122,8 +134,8 @@ type
   ILogViewerToolbarsFactory = interface
   ['{1024A18F-56B5-4B28-A81F-4C016828D2A2}']
     function CreateMainToolbar(
-        AOwner  : TComponent;
-        AParent : TWinControl
+      AOwner  : TComponent;
+      AParent : TWinControl
     ): TToolbar;
   end;
 

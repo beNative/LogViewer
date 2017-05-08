@@ -151,6 +151,18 @@ object dmManager: TdmManager
       ImageIndex = 14
       OnExecute = actExpandAllExecute
     end
+    object actGotoFirst: TAction
+      Caption = 'Go to first'
+      Hint = 'Go to first message.'
+      ShortCut = 16420
+      OnExecute = actGotoFirstExecute
+    end
+    object actGotoLast: TAction
+      Caption = 'Go to last'
+      Hint = 'Go to last message.'
+      ShortCut = 16419
+      OnExecute = actGotoLastExecute
+    end
   end
   object imlMessageTypes: TImageList
     ColorDepth = cd32Bit

@@ -42,7 +42,6 @@ object frmMessageList: TfrmMessageList
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitLeft = 957
     object pnlMessageContent: TPanel
       AlignWithMargins = True
       Left = 3
@@ -60,6 +59,8 @@ object frmMessageList: TfrmMessageList
       ParentBackground = False
       ParentFont = False
       TabOrder = 0
+      ExplicitLeft = 6
+      ExplicitTop = 0
     end
     object pgcMessageContent: TPageControl
       Left = 0
@@ -80,10 +81,6 @@ object frmMessageList: TfrmMessageList
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
-          ExplicitLeft = 120
-          ExplicitTop = 352
-          ExplicitWidth = 185
-          ExplicitHeight = 41
         end
       end
       object tsImageViewer: TTabSheet

@@ -34,6 +34,8 @@ type
     procedure Stop;
     procedure CollapseAll;
     procedure ExpandAll;
+    procedure GotoFirst;
+    procedure GotoLast;
 
   public
     constructor Create(AManager: ILogViewerManager);
@@ -69,6 +71,16 @@ end;
 procedure TLogViewerCommands.ExpandAll;
 begin
 //
+end;
+
+procedure TLogViewerCommands.GotoFirst;
+begin
+  FManager.ActiveView.GotoFirst;
+end;
+
+procedure TLogViewerCommands.GotoLast;
+begin
+  FManager.ActiveView.GotoLast;
 end;
 
 procedure TLogViewerCommands.Start;

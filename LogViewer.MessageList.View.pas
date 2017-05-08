@@ -217,6 +217,9 @@ type
     procedure UpdateActions; override;
     procedure UpdateView;
 
+    procedure GotoFirst;
+    procedure GotoLast;
+
     property Manager: ILogViewerManager
       read GetManager;
 
@@ -240,7 +243,7 @@ type
 implementation
 
 uses
-  System.StrUtils, System.UITypes,
+  System.StrUtils, System.UITypes, System.DateUtils,
 
   Spring,
 
@@ -637,6 +640,7 @@ begin
   end
   else if Column = COLUMN_TIMESTAMP then
   begin
+   if YearOf(ND.MsgTime) = YearOf(Now) then
     CellText := FormatDateTime('hh:nn:ss:zzz',  ND.MsgTime);
   end;
 end;
@@ -652,15 +656,16 @@ begin
   ND.MsgData := FCurrentMsg.Data;
   ND.MsgTime := FCurrentMsg.TimeStamp;
   ND.MsgType := TLogMessageType(FCurrentMsg.MsgType);
-  if not (ND.MsgType in [lmtValue, lmtObject, lmtStrings]) then
+  if not (ND.MsgType in [lmtValue, lmtObject, lmtStrings, lmtText]) then
   begin
     ND.Title := string(FCurrentMsg.Text);
   end;
   S := string(FCurrentMsg.Text);
-  if (ND.MsgType = lmtValue) and not (S.Contains(sLineBreak)) then
+  if (ND.MsgType in  [lmtValue, lmtText]) then
+  //and not (S.Contains(sLineBreak)) then
   begin
     I := S.IndexOf('=');
-    ND.Name := Copy(S, 1, I - 1);
+    ND.Name := Copy(S, 1, I);
     ND.Value := Copy(S, I + 2, S.Length);
     ND.Title := '';
   end;
@@ -809,7 +814,44 @@ begin
   FLastParent   := nil;
 end;
 
+procedure TfrmMessageList.GotoFirst;
+begin
+  if FWatchesView.HasFocus then
+  begin
+    FWatchesView.GotoFirst;
+  end
+  else
+  begin
+    FLogTreeView.FocusedNode := FLogTreeView.GetFirst;
+    FLogTreeView.Selected[FLogTreeView.FocusedNode] := True;
+  end;
+end;
+
+procedure TfrmMessageList.GotoLast;
+begin
+  if FWatchesView.HasFocus then
+  begin
+    FWatchesView.GotoLast;
+  end
+  else
+  begin
+    FLogTreeView.FocusedNode := FLogTreeView.GetLast;
+    FLogTreeView.Selected[FLogTreeView.FocusedNode] := True;
+  end;
+end;
+
 { Reads the received message from the active logchannel. }
+
+{
+   Message layout in stream
+     1. Message type (4 byte)
+     2. Timestamp (8 byte)
+     3. Text size (4 byte)
+     4. Text (variable size)
+     5. Data size (4 byte)
+     6. Data (variable size)
+
+}
 
 procedure TfrmMessageList.ProcessMessage(AStream: TStream);
 var

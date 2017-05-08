@@ -76,6 +76,8 @@ type
     imlMain              : TImageList;
     imlMessageTypes      : TImageList;
     tmrPoll              : TTimer;
+    actGotoFirst: TAction;
+    actGotoLast: TAction;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -106,6 +108,8 @@ type
     procedure actToggleFullscreenExecute(Sender: TObject);
     procedure actCollapseAllExecute(Sender: TObject);
     procedure actExpandAllExecute(Sender: TObject);
+    procedure actGotoFirstExecute(Sender: TObject);
+    procedure actGotoLastExecute(Sender: TObject);
     {$ENDREGION}
 
   private
@@ -269,6 +273,16 @@ end;
 procedure TdmManager.actFilterMessagesExecute(Sender: TObject);
 begin
 //
+end;
+
+procedure TdmManager.actGotoFirstExecute(Sender: TObject);
+begin
+  Commands.GotoFirst;
+end;
+
+procedure TdmManager.actGotoLastExecute(Sender: TObject);
+begin
+  Commands.GotoLast;
 end;
 
 procedure TdmManager.actHeapInfoExecute(Sender: TObject);

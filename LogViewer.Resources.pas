@@ -121,7 +121,8 @@ const
     lmtMemory,
     lmtCustomData,
     lmtWatch,
-    lmtCounter
+    lmtCounter,
+    lmtText
   ];
 
 implementation

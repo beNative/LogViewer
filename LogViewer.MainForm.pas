@@ -25,8 +25,7 @@ uses
 
   ChromeTabs, ChromeTabsClasses,
 
-  LogViewer.MessageList.View, LogViewer.Interfaces, LogViewer.Receivers.WinIPC,
-  LogViewer.Receivers.WinODS,
+  LogViewer.MessageList.View, LogViewer.Interfaces,
   LogViewer.Factories, LogViewer.Manager, LogViewer.Settings;
 
 type
@@ -44,7 +43,7 @@ type
 
   private
     FMessageViewerIPC : TfrmMessageList;
-    FReceiverIPC      : IChannelReceiver;
+    FReceiver      : IChannelReceiver;
 //    FMessageViewerODS : TfrmMessageList;
     //FReceiverODS      : IChannelReceiver;
     FManager          : TdmManager;
@@ -80,6 +79,8 @@ var
 implementation
 
 uses
+  LogViewer.Receivers.WinIPC, LogViewer.Receivers.Serial,
+  LogViewer.Receivers.WinODS,
   LogViewer.Resources;
 
 {$R *.dfm}
@@ -89,14 +90,14 @@ procedure TfrmMain.AfterConstruction;
 begin
   inherited AfterConstruction;
   FSettings := TLogViewerSettings.Create;
-  FReceiverIPC := TWinIPChannelReceiver.Create;
-  //FReceiverODS := TWinODSReceiver.Create;
-
+  //FReceiver := TWinIPChannelReceiver.Create;
+  //FReceiver := TWinODSReceiver.Create;
+  FReceiver := TSerialPortReceiver.Create;
   FManager := TLogViewerFactories.CreateManager(Self);
   FMessageViewerIPC := TLogViewerFactories.CreateMessagesView(
     FManager,
     pnlMainClient,
-    FReceiverIPC
+    FReceiver
   );
 //  FMessageViewerODS := TLogViewerFactories.CreateMessagesView(
 //    FManager,
@@ -112,13 +113,13 @@ begin
 
   (FManager as ILogViewerManager).ActiveView := FMessageViewerIPC;
 
-  FReceiverIPC.Enabled := True;
+  FReceiver.Enabled := True;
   //FReceiverODS.Enabled := True;
 end;
 
 procedure TfrmMain.BeforeDestruction;
 begin
-  FReceiverIPC := nil;
+  FReceiver := nil;
   FSettings.Free;
   inherited BeforeDestruction;
 end;

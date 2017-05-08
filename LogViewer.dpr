@@ -173,7 +173,8 @@ uses
   LogViewer.Factories.Toolbars in 'LogViewer.Factories.Toolbars.pas',
   LogViewer.MessageList.Settings in 'LogViewer.MessageList.Settings.pas',
   LogViewer.Commands in 'LogViewer.Commands.pas',
-  LogViewer.Events in 'LogViewer.Events.pas';
+  LogViewer.Events in 'LogViewer.Events.pas',
+  LogViewer.ComPort.Settings in 'LogViewer.ComPort.Settings.pas';
 
 {$R *.res}
 

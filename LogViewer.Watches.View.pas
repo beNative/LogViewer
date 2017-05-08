@@ -109,6 +109,10 @@ type
     procedure BeforeDestruction; override;
 
     procedure UpdateView(AMessageId: Int64 = 0);
+    procedure GotoFirst;
+    procedure GotoLast;
+
+    function HasFocus: Boolean;
 
   end;
 
@@ -320,6 +324,32 @@ begin
   begin
     FVSTWatchHistory.Clear;
   end;
+end;
+{$ENDREGION}
+
+{$REGION 'public methods'}
+procedure TfrmWatchesView.GotoFirst;
+begin
+  if FVSTWatchValues.Focused then
+    FTVPWatchValues.View.MoveCurrentToFirst
+  else if FVSTWatchHistory.Focused then
+    FTVPWatchHistory.View.MoveCurrentToFirst;
+end;
+
+procedure TfrmWatchesView.GotoLast;
+begin
+  if FVSTWatchValues.Focused then
+    FTVPWatchValues.View.MoveCurrentToLast
+  else if FVSTWatchHistory.Focused then
+    FTVPWatchHistory.View.MoveCurrentToLast;
+end;
+
+{ Returns true if this form has the focused control. }
+
+function TfrmWatchesView.HasFocus: Boolean;
+begin
+  Result := Assigned(Screen.ActiveControl)
+    and (Screen.ActiveControl.Owner = Self);
 end;
 {$ENDREGION}
 
