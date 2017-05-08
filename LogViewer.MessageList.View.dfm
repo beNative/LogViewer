@@ -59,8 +59,6 @@ object frmMessageList: TfrmMessageList
       ParentBackground = False
       ParentFont = False
       TabOrder = 0
-      ExplicitLeft = 6
-      ExplicitTop = 0
     end
     object pgcMessageContent: TPageControl
       Left = 0
@@ -86,6 +84,10 @@ object frmMessageList: TfrmMessageList
       object tsImageViewer: TTabSheet
         Caption = 'Image viewer'
         ImageIndex = 1
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
       end
     end
   end

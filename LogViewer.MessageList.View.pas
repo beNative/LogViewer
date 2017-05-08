@@ -334,6 +334,7 @@ begin
   FLogTreeView.OnGetImageIndex   := FLogTreeViewGetImageIndex;
 
   FLogTreeView.OnKeyPress        := FLogTreeViewKeyPress;
+  FLogTreeView.HintMode          := hmHint;
 
   C := FLogTreeView.Header.Columns.Add;
   C.Text := STitle;
@@ -440,7 +441,6 @@ begin
   end;
   FVKPressed := False;
 end;
-
 {$ENDREGION}
 
 {$REGION 'property access methods'}
@@ -887,6 +887,7 @@ begin
         string(FCurrentMsg.Text),
         FMessageCount,
         FCurrentMsg.TimeStamp,
+        True,
         FCurrentMsg.MsgType = Integer(lmtCounter) // SkipOnNewValue
       );
       FWatchesView.UpdateView(FMessageCount);

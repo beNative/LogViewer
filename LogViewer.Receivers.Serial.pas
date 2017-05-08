@@ -17,7 +17,13 @@
 unit LogViewer.Receivers.Serial;
 
 { Receives data from a serial port. The data is queued as a TLogMessage
-  compatible stream. }
+  compatible stream.
+
+  For now the serial data is handled as:
+    - a watch message if the text has a format like '%s=%s' (name-value pair
+      with '=' as delimiter)
+    - a text message
+}
 
 interface
 
@@ -134,6 +140,8 @@ begin
     end
     else
     begin
+      if FSerialPort.InstanceActive then
+        FSerialPort.CloseSocket;
       FPollTimer.Enabled := False;
     end;
   end;
@@ -143,11 +151,11 @@ function TSerialPortReceiver.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
 begin
   Result := FOnReceiveMessage;
 end;
+
 function TSerialPortReceiver.GetSettings: TComPortSettings;
 begin
-  //Result :=
+  Result := FSettings;
 end;
-
 {$ENDREGION}
 
 {$REGION 'event dispatch methods'}
@@ -168,7 +176,7 @@ begin
   FBuffer.Clear;
   if ContainsStr(AString, '=') then
   begin
-    LMsgType := Integer(lmtValue);
+    LMsgType := Integer(lmtWatch);
   end
   else
     LMsgType := Integer(lmtText);
@@ -194,7 +202,7 @@ begin
   while FSerialPort.WaitingDataEx <> 0 do
   begin
     //DoStringReceived(FSerialPort.RecvPacket(0));
-    DoStringReceived(FSerialPort.RecvTerminated(10, #13#10));
+    DoStringReceived(FSerialPort.RecvTerminated(10, #10));
   end;
 end;
 
