@@ -14,30 +14,23 @@
   limitations under the License.
 }
 
-unit LogViewer.ComPort.Settings.View;
+unit LogViewer.ZeroMQ.Settings.View;
 
 interface
 
 uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs;
 
 type
-  TfrmComPortSettings = class(TForm)
-    cbxPort: TComboBox;
-    cbxBaudRate: TComboBox;
-    cbxParity: TComboBox;
-    cbxDataBits: TComboBox;
-    cbxStopBits: TComboBox;
-    lblPort: TLabel;
-    lblBaudRate: TLabel;
-    lblDataBits: TLabel;
-    lblParity: TLabel;
-    lblStopBits: TLabel;
+  TfrmZeroMQSettings = class(TForm)
   private
   public
   end;
+
+var
+  frmZeroMQSettings: TfrmZeroMQSettings;
 
 implementation
 

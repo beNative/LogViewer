@@ -26,7 +26,8 @@ uses
   ChromeTabs, ChromeTabsClasses,
 
   LogViewer.MessageList.View, LogViewer.Interfaces,
-  LogViewer.Factories, LogViewer.Manager, LogViewer.Settings;
+  LogViewer.Factories, LogViewer.Manager, LogViewer.Settings,
+  LogViewer.ComPort.Settings;
 
 type
   TfrmMain = class(TForm)
@@ -38,12 +39,14 @@ type
       var Close: Boolean);
     procedure ctMainNeedDragImageControl(Sender: TObject; ATab: TChromeTab;
       var DragControl: TWinControl);
+    procedure ctMainActiveTabChanged(Sender: TObject; ATab: TChromeTab);
 
   private
     FMessageViewer : ILogViewerMessagesView;
     FManager       : TdmManager;
     FSettings      : TLogViewerSettings;
     FMainToolbar   : TToolBar;
+    FComPortSettings : TComPortSettings;
 
   protected
     function GetActions: ILogViewerActions;
@@ -83,20 +86,59 @@ uses
 
 {$REGION 'construction and destruction'}
 procedure TfrmMain.AfterConstruction;
+var
+  MV : ILogViewerMessagesView;
 begin
   inherited AfterConstruction;
   FSettings := TLogViewerSettings.Create;
-  //FReceiver := TWinODSReceiver.Create;
+  FComPortSettings := TComPortSettings.Create;
+  FComPortSettings.Port := 'COM3';
+
+    //FReceiver := TWinODSReceiver.Create;
   //FReceiver := TSerialPortReceiver.Create;
   FManager := TLogViewerFactories.CreateManager(Self);
-  FMessageViewer := TLogViewerFactories.CreateMessagesView(
+  MV := TLogViewerFactories.CreateMessagesView(
     FManager,
     pnlMainClient,
     TLogViewerFactories.CreateWinIPCChannelReceiver
   );
-  Manager.AddView(FMessageViewer);
+  Manager.AddView(MV);
+  MV.Receiver.Enabled := True;
   ctMain.Tabs.Add;
-  ctMain.ActiveTab.Data := Pointer(FMessageViewer.Form);
+  ctMain.ActiveTab.Data := Pointer(MV);
+  ctMain.ActiveTab.Caption := Format('%s-%s', [
+    MV.Form.Caption,
+    MV.Receiver.Name
+  ]);
+
+  MV := TLogViewerFactories.CreateMessagesView(
+    FManager,
+    pnlMainClient,
+    TLogViewerFactories.CreateComPortChannelReceiver(FComPortSettings)
+  );
+  Manager.AddView(MV);
+  ctMain.Tabs.Add;
+  ctMain.ActiveTab.Data := Pointer(MV);
+  ctMain.ActiveTab.Caption := Format('%s-%s', [
+    MV.Form.Caption,
+    MV.Receiver.Name
+  ]);
+  MV.Receiver.Enabled := True;
+
+  MV := TLogViewerFactories.CreateMessagesView(
+    FManager,
+    pnlMainClient,
+    TLogViewerFactories.CreateWinODSChannelReceiver
+  );
+  Manager.AddView(MV);
+  ctMain.Tabs.Add;
+  ctMain.ActiveTab.Data := Pointer(MV);
+  ctMain.ActiveTab.Caption := Format('%s-%s', [
+    MV.Form.Caption,
+    MV.Receiver.Name
+  ]);
+  MV.Receiver.Enabled := True;
+
   FMainToolbar := TLogViewerFactories.CreateMainToolbar(
     FManager,
     Self,
@@ -104,18 +146,27 @@ begin
     Menus
   );
 
-  FMessageViewer.Receiver.Enabled := True;
+
   //(FManager as ILogViewerManager).ActiveView := FMessageViewer;
 end;
 
 procedure TfrmMain.BeforeDestruction;
 begin
   FSettings.Free;
+  FComPortSettings.Free;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
+procedure TfrmMain.ctMainActiveTabChanged(Sender: TObject; ATab: TChromeTab);
+begin
+  if Assigned(ATab.Data) then
+  begin
+    ILogViewerMessagesView(ATab.Data).Form.Show;
+  end;
+end;
+
 procedure TfrmMain.ctMainButtonAddClick(Sender: TObject; var Handled: Boolean);
 var
   LMessageViewer: ILogViewerMessagesView;
@@ -126,15 +177,20 @@ begin
     pnlMainClient,
     FMessageViewer.Receiver
   );
+  Manager.AddView(LMessageViewer);
   LTab := ctMain.Tabs.Add;
-  LTab.Data := LMessageViewer.Form;
+  LTab.Data := Pointer(LMessageViewer);
+  LTab.Caption := Format('%s-%s', [
+    LMessageViewer.Form.Caption,
+    LMessageViewer.Receiver.Name
+  ]);
   Handled := True;
 end;
 
 procedure TfrmMain.ctMainButtonCloseTabClick(Sender: TObject; ATab: TChromeTab;
   var Close: Boolean);
 begin
-//
+  Close := False;
 end;
 
 procedure TfrmMain.ctMainNeedDragImageControl(Sender: TObject; ATab: TChromeTab;

@@ -176,7 +176,13 @@ uses
   LogViewer.Events in 'LogViewer.Events.pas',
   LogViewer.ComPort.Settings in 'LogViewer.ComPort.Settings.pas',
   LogViewer.AddMessageView.Dialog in 'LogViewer.AddMessageView.Dialog.pas' {frmAddMessageView},
-  LogViewer.ComPort.Settings.View in 'LogViewer.ComPort.Settings.View.pas' {frmComPortSettings};
+  LogViewer.ComPort.Settings.View in 'LogViewer.ComPort.Settings.View.pas' {frmComPortSettings},
+  LogViewer.WinODS.Settings.View in 'LogViewer.WinODS.Settings.View.pas' {frmWinODSSettings},
+  LogViewer.WinIPC.Settings.View in 'LogViewer.WinIPC.Settings.View.pas' {frmWinIPCSettings},
+  LogViewer.ZeroMQ.Settings.View in 'LogViewer.ZeroMQ.Settings.View.pas' {frmZeroMQSettings},
+  LogViewer.WinODS.Settings in 'LogViewer.WinODS.Settings.pas',
+  LogViewer.ZeroMQ.Settings in 'LogViewer.ZeroMQ.Settings.pas',
+  LogViewer.WinIPC.Settings in 'LogViewer.WinIPC.Settings.pas';
 
 {$R *.res}
 

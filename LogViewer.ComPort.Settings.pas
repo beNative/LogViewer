@@ -55,7 +55,6 @@ type
 
   protected
     procedure Changed;
-
     procedure Assign(Source: TPersistent); override;
 
   public
@@ -84,7 +83,7 @@ type
 
 implementation
 
-{$REGION 'property access methods'}
+{$REGION 'construction and destruction'}
 procedure TComPortSettings.AfterConstruction;
 begin
   inherited AfterConstruction;
@@ -93,7 +92,9 @@ begin
   FDataBits := DEFAULT_DATA_BITS;
   FStopBits := DEFAULT_STOP_BITS;
 end;
+{$ENDREGION}
 
+{$REGION 'property access methods'}
 function TComPortSettings.GetBaudRate: Integer;
 begin
   Result := FBaudRate;

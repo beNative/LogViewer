@@ -80,6 +80,8 @@ type
     procedure edtMessageFilterKeyUp(Sender: TObject; var Key: Word;
       Shift: TShiftState);
 
+  private class var
+    FCounter : Integer;
   private
     FMessageCount    : Integer;
     FCurrentMsg      : TLogMessage;
@@ -240,7 +242,9 @@ type
       AReceiver : IChannelReceiver
     ); reintroduce; virtual;
 
+
     procedure BeforeDestruction; override;
+    procedure AfterConstruction; override;
 
   end;
 
@@ -280,6 +284,13 @@ begin
   CreateWatchesView;
   CreateCallStackView;
   FReceiver.OnReceiveMessage.Add(FReceiverReceiveMessage);
+end;
+
+procedure TfrmMessageList.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  Inc(FCounter);
+  Caption := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
 end;
 
 procedure TfrmMessageList.BeforeDestruction;

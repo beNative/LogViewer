@@ -14,27 +14,20 @@
   limitations under the License.
 }
 
-unit LogViewer.ComPort.Settings.View;
+unit LogViewer.WinODS.Settings.View;
 
 interface
 
 uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls;
 
 type
-  TfrmComPortSettings = class(TForm)
-    cbxPort: TComboBox;
-    cbxBaudRate: TComboBox;
-    cbxParity: TComboBox;
-    cbxDataBits: TComboBox;
-    cbxStopBits: TComboBox;
-    lblPort: TLabel;
-    lblBaudRate: TLabel;
-    lblDataBits: TLabel;
-    lblParity: TLabel;
-    lblStopBits: TLabel;
+  TfrmWinODSSettings = class(TForm)
+    lblProcess: TLabel;
+    lblProcessId: TLabel;
+    edtProcess: TButtonedEdit;
   private
   public
   end;

@@ -40,6 +40,8 @@ uses
 
 type
   TZeroMQChannelReceiver = class(TInterfacedObject, IChannelReceiver)
+  private class var
+     FCounter : Integer;
   private
     FOnReceiveMessage : Event<TReceiveMessageEvent>;
     FZMQStream        : TStringStream;
@@ -81,15 +83,24 @@ type
 
 implementation
 
+uses
+  System.SysUtils;
+
 {$REGION 'construction and destruction'}
 constructor TZeroMQChannelReceiver.Create(const AName: string);
 begin
   inherited Create;
-  FName := AName;
+  if AName = '' then
+  begin
+    FName := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
+  end
+  else
+    FName := AName;
 end;
 
 procedure TZeroMQChannelReceiver.AfterConstruction;
 begin
+  Inc(FCounter);
   FTimer := TTimer.Create(nil);
   FTimer.OnTimer := FTimerTimer;
   FZMQ     := TZeroMQ.Create;

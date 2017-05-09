@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.ComPort.Settings.View;
+unit LogViewer.WinIPC.Settings.View;
 
 interface
 
@@ -24,17 +24,9 @@ uses
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
 
 type
-  TfrmComPortSettings = class(TForm)
-    cbxPort: TComboBox;
-    cbxBaudRate: TComboBox;
-    cbxParity: TComboBox;
-    cbxDataBits: TComboBox;
-    cbxStopBits: TComboBox;
-    lblPort: TLabel;
-    lblBaudRate: TLabel;
-    lblDataBits: TLabel;
-    lblParity: TLabel;
-    lblStopBits: TLabel;
+  TfrmWinIPCSettings = class(TForm)
+    lblWindowHandleName: TLabel;
+    edtWindowHandleName: TEdit;
   private
   public
   end;

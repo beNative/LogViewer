@@ -379,6 +379,21 @@
             <Form>frmComPortSettings</Form>
             <FormType>dfm</FormType>
         </DCCReference>
+        <DCCReference Include="LogViewer.WinODS.Settings.View.pas">
+            <Form>frmWinODSSettings</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="LogViewer.WinIPC.Settings.View.pas">
+            <Form>frmWinIPCSettings</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="LogViewer.ZeroMQ.Settings.View.pas">
+            <Form>frmZeroMQSettings</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="LogViewer.WinODS.Settings.pas"/>
+        <DCCReference Include="LogViewer.ZeroMQ.Settings.pas"/>
+        <DCCReference Include="LogViewer.WinIPC.Settings.pas"/>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
