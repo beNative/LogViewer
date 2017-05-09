@@ -51,6 +51,8 @@ type
 
 type
   TWinODSChannelReceiver = class(TInterfacedObject, IChannelReceiver)
+  private class var
+     FCounter : Integer;
   private
      FEnabled          : Boolean;
      FBuffer           : TMemoryStream;
@@ -192,12 +194,18 @@ end;
 constructor TWinODSChannelReceiver.Create(const AName: string);
 begin
   inherited Create;
-  FName := AName;
+  if AName = '' then
+  begin
+    FName := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
+  end
+  else
+    FName := AName;
 end;
 
 procedure TWinODSChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
+  Inc(FCounter);
   FBuffer := TMemoryStream.Create;
   FODSQueue := TCollections.CreateQueue<TODSMessage>;
   FODSQueue.OnChanged.Add(FODSQueueChanged);

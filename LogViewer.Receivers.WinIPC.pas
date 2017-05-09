@@ -32,6 +32,8 @@ uses
 
 type
   TWinIPChannelReceiver = class(TInterfacedObject, IChannelReceiver)
+  private class var
+     FCounter : Integer;
   private
      FEnabled          : Boolean;
      FIPCServer        : TWinIPCServer;
@@ -68,16 +70,25 @@ type
 
 implementation
 
+uses
+  System.SysUtils;
+
 {$REGION 'construction and destruction'}
 constructor TWinIPChannelReceiver.Create(const AName: string);
 begin
-  inherited Create;
-  FName := AName;
+  inherited Create;  
+  if AName = '' then
+  begin
+    FName := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
+  end
+  else
+    FName := AName;
 end;
 
 procedure TWinIPChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
+  Inc(FCounter);
   FIPCServer := TWinIPCServer.Create;
   FIPCServer.OnMessage := FIPCServerMessage;
   FIPCServer.Active := True;

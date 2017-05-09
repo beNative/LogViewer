@@ -39,6 +39,8 @@ uses
 
 type
   TComPortChannelReceiver = class(TInterfacedObject, IChannelReceiver)
+  private class var
+    FCounter : Integer;
   private
     FEnabled          : Boolean;
     FOnReceiveMessage : Event<TReceiveMessageEvent>;
@@ -103,15 +105,20 @@ constructor TComPortChannelReceiver.Create(const AName : string;
   ASettings: TComPortSettings);
 begin
   inherited Create;
-  FName := AName;
+  if AName = '' then
+  begin
+    FName := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
+  end
+  else
+    FName := AName;
+  FSettings := TComPortSettings.Create;
   FSettings.Assign(ASettings);
 end;
 
 procedure TComPortChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FSettings := TComPortSettings.Create;
-  FSettings.Port := 'COM3';
+  Inc(FCounter);
   FBuffer := TMemoryStream.Create;
   FPollTimer := TTimer.Create(nil);
   FPollTimer.Interval := 1;
