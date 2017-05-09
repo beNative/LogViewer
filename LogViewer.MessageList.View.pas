@@ -194,6 +194,7 @@ type
     function GetManager: ILogViewerManager;
     function GetActions: ILogViewerActions;
     function GetReceiver: IChannelReceiver;
+    function GetForm: TCustomForm;
     {$ENDREGION}
 
   protected
@@ -228,6 +229,9 @@ type
 
     property Receiver: IChannelReceiver
       read GetReceiver;
+
+    property Form: TCustomForm
+      read GetForm;
 
   public
     constructor Create(
@@ -447,6 +451,11 @@ end;
 function TfrmMessageList.GetActions: ILogViewerActions;
 begin
   Result := Manager as ILogViewerActions;
+end;
+
+function TfrmMessageList.GetForm: TCustomForm;
+begin
+  Result := Self;
 end;
 
 function TfrmMessageList.GetManager: ILogViewerManager;

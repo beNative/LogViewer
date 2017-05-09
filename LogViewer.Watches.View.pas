@@ -119,6 +119,8 @@ type
 implementation
 
 uses
+  System.UITypes,
+
   DSharp.Windows.ControlTemplates,
 
   DDuce.Components.Factories, DDuce.Factories, DDuce.Logger.Interfaces;
@@ -272,12 +274,15 @@ begin
   CDS := TFactories.CreateColumnDefinitions;
   CD := CDS.Add('Name');
   CD.ValuePropertyName := 'Name';
+  CD.HintPropertyName := CD.ValuePropertyName;
   CD.OnCustomDraw := FCDNameCustomDraw;
   CD := CDS.Add('Value');
   CD.ValuePropertyName := 'Value';
+  CD.HintPropertyName := CD.ValuePropertyName;
   CD.OnCustomDraw := FCDValueCustomDraw;
   CD := CDS.Add('TimeStamp');
   CD.ValuePropertyName := 'TimeStamp';
+  CD.HintPropertyName := CD.ValuePropertyName;
   CD.OnGetText := FCDTimeStampGetText;
   CD.OnCustomDraw := FCDTimeStampCustomDraw;
 

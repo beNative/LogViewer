@@ -164,7 +164,7 @@ uses
   Spring.Patches.QC98671 in '..\..\libraries\spring4d\Source\Base\Patches\Spring.Patches.QC98671.pas',
   Spring.Patches.QC107219 in '..\..\libraries\spring4d\Source\Base\Patches\Spring.Patches.QC107219.pas',
   LogViewer.Settings.Dialog in 'LogViewer.Settings.Dialog.pas' {frmLogViewerSettings},
-  LogViewer.Receivers.Serial in 'LogViewer.Receivers.Serial.pas',
+  LogViewer.Receivers.ComPort in 'LogViewer.Receivers.ComPort.pas',
   ZeroMQ.API in '..\..\libraries\Delphi-ZeroMQ\ZeroMQ.API.pas',
   ZeroMQ in '..\..\libraries\Delphi-ZeroMQ\ZeroMQ.pas',
   synaser in '..\..\libraries\synapse\synaser.pas',
@@ -174,7 +174,9 @@ uses
   LogViewer.MessageList.Settings in 'LogViewer.MessageList.Settings.pas',
   LogViewer.Commands in 'LogViewer.Commands.pas',
   LogViewer.Events in 'LogViewer.Events.pas',
-  LogViewer.ComPort.Settings in 'LogViewer.ComPort.Settings.pas';
+  LogViewer.ComPort.Settings in 'LogViewer.ComPort.Settings.pas',
+  LogViewer.AddMessageView.Dialog in 'LogViewer.AddMessageView.Dialog.pas' {frmAddMessageView},
+  LogViewer.ComPort.Settings.View in 'LogViewer.ComPort.Settings.View.pas' {frmComPortSettings};
 
 {$R *.res}
 

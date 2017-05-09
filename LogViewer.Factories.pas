@@ -34,7 +34,8 @@ uses
 
   LogViewer.CallStack.View, LogViewer.Watches.View, LogViewer.CallStack.Data,
   LogViewer.Watches.Data, LogViewer.Messages.Data, LogViewer.MessageList.View,
-  LogViewer.Interfaces, LogViewer.Manager, LogViewer.Settings;
+  LogViewer.Interfaces, LogViewer.Manager, LogViewer.Settings,
+  LogViewer.ComPort.Settings;
 
 type
   TLogViewerFactories = class sealed
@@ -70,6 +71,19 @@ type
       AActions : ILogViewerActions;
       AMenus   : ILogViewerMenus
     ): TToolbar;
+
+    class function CreateComPortChannelReceiver(
+      ASettings: TComPortSettings
+    ): IChannelReceiver;
+
+    class function CreateWinIPCChannelReceiver(
+    ): IChannelReceiver;
+
+    class function CreateWinODSChannelReceiver(
+    ): IChannelReceiver;
+
+    class function CreateZeroMQChannelReceiver(
+    ): IChannelReceiver;
   end;
 
 implementation
@@ -79,7 +93,9 @@ uses
 
   Spring,
 
-  LogViewer.Factories.Toolbars;
+  LogViewer.Factories.Toolbars,
+  LogViewer.Receivers.WinIPC, LogViewer.Receivers.WinODS,
+  LogViewer.Receivers.ZeroMQ, LogViewer.Receivers.ComPort;
 
 {$REGION 'public class methods'}
 class function TLogViewerFactories.CreateCallStackView(AOwner: TComponent;
@@ -133,6 +149,27 @@ begin
   Result.Align       := alClient;
   Result.BorderStyle := bsNone;
   Result.Visible     := True;
+end;
+
+class function TLogViewerFactories.CreateWinIPCChannelReceiver: IChannelReceiver;
+begin
+  Result := TWinIPChannelReceiver.Create('');
+end;
+
+class function TLogViewerFactories.CreateWinODSChannelReceiver: IChannelReceiver;
+begin
+  Result := TWinODSChannelReceiver.Create('');
+end;
+
+class function TLogViewerFactories.CreateZeroMQChannelReceiver: IChannelReceiver;
+begin
+  Result := TZeroMQChannelReceiver.Create('');
+end;
+
+class function TLogViewerFactories.CreateComPortChannelReceiver(
+  ASettings: TComPortSettings): IChannelReceiver;
+begin
+  Result := TComPortChannelReceiver.Create('', ASettings);
 end;
 {$ENDREGION}
 

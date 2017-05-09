@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.Receivers.Serial;
+unit LogViewer.Receivers.ComPort;
 
 { Receives data from a serial port. The data is queued as a TLogMessage
   compatible stream.
@@ -38,7 +38,7 @@ uses
   LogViewer.Interfaces, LogViewer.ComPort.Settings;
 
 type
-  TSerialPortReceiver = class(TInterfacedObject, IChannelReceiver, IComPortSettings)
+  TComPortChannelReceiver = class(TInterfacedObject, IChannelReceiver)
   private
     FEnabled          : Boolean;
     FOnReceiveMessage : Event<TReceiveMessageEvent>;
@@ -46,6 +46,7 @@ type
     FPollTimer        : TTimer;
     FSettings         : TComPortSettings;
     FBuffer           : TMemoryStream;
+    FName             : string;
 
     procedure FSerialPortStatus(
       Sender      : TObject;
@@ -54,6 +55,8 @@ type
     );
     procedure FPollTimerTimer(Sender: TObject);
     function GetSettings: TComPortSettings;
+    function GetName: string;
+    procedure SetName(const Value: string);
 
   protected
     function GetEnabled: Boolean;
@@ -71,10 +74,18 @@ type
     property Settings: TComPortSettings
       read GetSettings;
 
+    property Name: string
+      read GetName write SetName;
+
     property OnReceiveMessage: IEvent<TReceiveMessageEvent>
       read GetOnReceiveMessage;
 
   public
+    constructor Create(
+      const AName : string;
+      ASettings   : TComPortSettings
+    ); reintroduce;
+
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 
@@ -88,7 +99,15 @@ uses
   DDuce.Logger.Interfaces;
 
 {$REGION 'construction and destruction'}
-procedure TSerialPortReceiver.AfterConstruction;
+constructor TComPortChannelReceiver.Create(const AName : string;
+  ASettings: TComPortSettings);
+begin
+  inherited Create;
+  FName := AName;
+  FSettings.Assign(ASettings);
+end;
+
+procedure TComPortChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
   FSettings := TComPortSettings.Create;
@@ -103,7 +122,7 @@ begin
   FSettings.OnChanged.Add(FSettingsChanged);
 end;
 
-procedure TSerialPortReceiver.BeforeDestruction;
+procedure TComPortChannelReceiver.BeforeDestruction;
 begin
   FSerialPort.Free;
   FBuffer.Free;
@@ -115,12 +134,12 @@ end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
-function TSerialPortReceiver.GetEnabled: Boolean;
+function TComPortChannelReceiver.GetEnabled: Boolean;
 begin
   Result := FEnabled;
 end;
 
-procedure TSerialPortReceiver.SetEnabled(const Value: Boolean);
+procedure TComPortChannelReceiver.SetEnabled(const Value: Boolean);
 begin
   if Value <> Enabled then
   begin
@@ -147,24 +166,34 @@ begin
   end;
 end;
 
-function TSerialPortReceiver.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
+function TComPortChannelReceiver.GetName: string;
+begin
+  Result := FName;
+end;
+
+procedure TComPortChannelReceiver.SetName(const Value: string);
+begin
+  FName := Value;
+end;
+
+function TComPortChannelReceiver.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
 begin
   Result := FOnReceiveMessage;
 end;
 
-function TSerialPortReceiver.GetSettings: TComPortSettings;
+function TComPortChannelReceiver.GetSettings: TComPortSettings;
 begin
   Result := FSettings;
 end;
 {$ENDREGION}
 
 {$REGION 'event dispatch methods'}
-procedure TSerialPortReceiver.DoReceiveMessage(AStream: TStream);
+procedure TComPortChannelReceiver.DoReceiveMessage(AStream: TStream);
 begin
   FOnReceiveMessage.Invoke(Self, AStream);
 end;
 
-procedure TSerialPortReceiver.DoStringReceived(const AString: RawByteString);
+procedure TComPortChannelReceiver.DoStringReceived(const AString: RawByteString);
 const
   LZero : Integer = 0;
 var
@@ -195,7 +224,7 @@ end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
-procedure TSerialPortReceiver.FPollTimerTimer(Sender: TObject);
+procedure TComPortChannelReceiver.FPollTimerTimer(Sender: TObject);
 var
   SS : TStringStream;
 begin
@@ -206,7 +235,7 @@ begin
   end;
 end;
 
-procedure TSerialPortReceiver.FSerialPortStatus(Sender: TObject;
+procedure TComPortChannelReceiver.FSerialPortStatus(Sender: TObject;
   Reason: THookSerialReason; const Value: string);
 var
   S: string;
@@ -230,7 +259,7 @@ begin
   end;
 end;
 
-procedure TSerialPortReceiver.FSettingsChanged(Sender: TObject);
+procedure TComPortChannelReceiver.FSettingsChanged(Sender: TObject);
 var
   B : Boolean;
 begin
@@ -251,7 +280,6 @@ begin
     True
   );
 end;
-
 {$ENDREGION}
 
 end.

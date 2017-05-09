@@ -24,12 +24,11 @@ uses
   System.SysUtils, System.Classes, System.Actions,
   Vcl.ExtCtrls, System.ImageList, Vcl.ImgList, Vcl.Controls, Vcl.ActnList,
 
-  Spring.Collections, Spring,
+  Spring, Spring.Collections,
 
   DDuce.Logger.Interfaces,
 
   LogViewer.Interfaces, LogViewer.Settings;
-
 
 {
   TODO:
@@ -118,6 +117,7 @@ type
     FCommands            : ILogViewerCommands;
     FActiveView          : ILogViewerMessagesView;
     FViewList            : IList<ILogViewerMessagesView>;
+    FReceivers           : IList<IChannelReceiver>;
     FVisibleMessageTypes : TLogMessageTypes;
 
   protected
@@ -125,6 +125,7 @@ type
     function GetEvents: ILogViewerEvents;
     function GetVisibleMessageTypes: TLogMessageTypes;
     function GetSettings: TLogViewerSettings;
+    function GetViews: IList<ILogViewerMessagesView>;
 
     procedure UpdateVisibleMessageTypes(
       const AMessageType : TLogMessageType;
@@ -182,6 +183,9 @@ type
     property VisibleMessageTypes: TLogMessageTypes
       read GetVisibleMessageTypes;
 
+    property Views: IList<ILogViewerMessagesView>
+      read GetViews;
+
   public
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
@@ -198,11 +202,6 @@ uses
 {$R *.dfm}
 
 {$REGION 'construction and destruction'}
-procedure TdmManager.AddView(AView: ILogViewerMessagesView);
-begin
-  FViewList.Add(AView);
-end;
-
 procedure TdmManager.AfterConstruction;
 begin
   inherited AfterConstruction;
@@ -210,6 +209,8 @@ begin
   FEvents   := TLogViewerEvents.Create(Self);
   FCommands := TLogViewerCommands.Create(Self);
   FVisibleMessageTypes := ALL_MESSAGES;
+  FReceivers := TCollections.CreateInterfaceList<IChannelReceiver>;
+  FViewList  := TCollections.CreateInterfaceList<ILogViewerMessagesView>;
 end;
 
 procedure TdmManager.BeforeDestruction;
@@ -445,6 +446,11 @@ begin
   Result := FSettings;
 end;
 
+function TdmManager.GetViews: IList<ILogViewerMessagesView>;
+begin
+  Result := FViewList;
+end;
+
 function TdmManager.GetVisibleMessageTypes: TLogMessageTypes;
 begin
   Result := FVisibleMessageTypes;
@@ -452,6 +458,16 @@ end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
+procedure TdmManager.AddView(AView: ILogViewerMessagesView);
+begin
+  FViewList.Add(AView);
+  if not FReceivers.Contains(AView.Receiver) then
+  begin
+    FReceivers.Add(AView.Receiver);
+  end;
+  FActiveView := AView;
+end;
+
 { Gets called from the active messages view. }
 
 procedure TdmManager.UpdateActions;

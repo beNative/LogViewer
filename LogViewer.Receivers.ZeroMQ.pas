@@ -48,6 +48,7 @@ type
     FPoll             : IZMQPoll;
     FTimer            : TTimer;
     FEnabled          : Boolean;
+    FName             : string;
 
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
@@ -55,6 +56,8 @@ type
     function ConnectSubscriber: Boolean;
     procedure CloseSubscriber;
     function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
+    function GetName: string;
+    procedure SetName(const Value: string);
 
   protected
     procedure DoReceiveMessage(AStream : TStream);
@@ -62,11 +65,15 @@ type
     procedure FTimerTimer(Sender: TObject);
 
   public
+    constructor Create(const AName: string);
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
+
+    property Name: string
+      read GetName write SetName;
 
     property OnReceiveMessage: IEvent<TReceiveMessageEvent>
       read GetOnReceiveMessage;
@@ -75,6 +82,12 @@ type
 implementation
 
 {$REGION 'construction and destruction'}
+constructor TZeroMQChannelReceiver.Create(const AName: string);
+begin
+  inherited Create;
+  FName := AName;
+end;
+
 procedure TZeroMQChannelReceiver.AfterConstruction;
 begin
   FTimer := TTimer.Create(nil);
@@ -97,6 +110,16 @@ end;
 function TZeroMQChannelReceiver.GetEnabled: Boolean;
 begin
   Result := FEnabled;
+end;
+
+function TZeroMQChannelReceiver.GetName: string;
+begin
+  Result := FName;
+end;
+
+procedure TZeroMQChannelReceiver.SetName(const Value: string);
+begin
+  FName := Value;
 end;
 
 procedure TZeroMQChannelReceiver.SetEnabled(const Value: Boolean);

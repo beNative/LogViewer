@@ -22,9 +22,9 @@ interface
 
 uses
   System.Classes, System.Actions,
-  Vcl.Controls, Vcl.ActnList, Vcl.ComCtrls,
+  Vcl.Controls, Vcl.ActnList, Vcl.ComCtrls, Vcl.Forms,
 
-  Spring,
+  Spring, Spring.Collections,
 
   DDuce.Logger.Interfaces,
 
@@ -52,6 +52,11 @@ type
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
     function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
+    function GetName: string;
+    procedure SetName(const Value: string);
+
+    property Name: string
+      read GetName write SetName;
 
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
@@ -81,6 +86,7 @@ type
   ILogViewerMessagesView = interface
   ['{C1DF2E26-4507-4B35-94E1-19A36775633F}']
     function GetReceiver: IChannelReceiver;
+    function GetForm: TCustomForm;
 
     procedure Clear;
     procedure UpdateView;
@@ -89,6 +95,9 @@ type
 
     property Receiver: IChannelReceiver
       read GetReceiver;
+
+   property Form: TCustomForm
+      read GetForm;
   end;
 
   ILogViewerEvents = interface
@@ -114,6 +123,9 @@ type
     function GetVisibleMessageTypes: TLogMessageTypes;
     function GetActiveView: ILogViewerMessagesView;
     procedure SetActiveView(const Value: ILogViewerMessagesView);
+    function GetViews: IList<ILogViewerMessagesView>;
+
+    procedure AddView(AView: ILogViewerMessagesView);
 
     property ActiveView: ILogViewerMessagesView
       read GetActiveView write SetActiveView;
@@ -126,6 +138,9 @@ type
 
     property Settings: TLogViewerSettings
       read GetSettings;
+
+    property Views: IList<ILogViewerMessagesView>
+      read GetViews;
 
     property VisibleMessageTypes: TLogMessageTypes
       read GetVisibleMessageTypes;

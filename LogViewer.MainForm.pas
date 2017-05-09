@@ -33,8 +33,6 @@ type
     sbrMain       : TStatusBar;
     ctMain        : TChromeTabs;
     pnlMainClient : TPanel;
-
-    procedure ctMainActiveTabChanged(Sender: TObject; ATab: TChromeTab);
     procedure ctMainButtonAddClick(Sender: TObject; var Handled: Boolean);
     procedure ctMainButtonCloseTabClick(Sender: TObject; ATab: TChromeTab;
       var Close: Boolean);
@@ -42,13 +40,10 @@ type
       var DragControl: TWinControl);
 
   private
-    FMessageViewerIPC : TfrmMessageList;
-    FReceiver      : IChannelReceiver;
-//    FMessageViewerODS : TfrmMessageList;
-    //FReceiverODS      : IChannelReceiver;
-    FManager          : TdmManager;
-    FSettings         : TLogViewerSettings;
-    FMainToolbar      : TToolBar;
+    FMessageViewer : ILogViewerMessagesView;
+    FManager       : TdmManager;
+    FSettings      : TLogViewerSettings;
+    FMainToolbar   : TToolBar;
 
   protected
     function GetActions: ILogViewerActions;
@@ -71,7 +66,8 @@ type
     { Menu components to use in the user interface. }
     property Menus: ILogViewerMenus
       read GetMenus;
-  end;
+
+    end;
 
 var
   frmMain: TfrmMain;
@@ -79,7 +75,7 @@ var
 implementation
 
 uses
-  LogViewer.Receivers.WinIPC, LogViewer.Receivers.Serial,
+  LogViewer.Receivers.WinIPC, LogViewer.Receivers.ComPort,
   LogViewer.Receivers.WinODS,
   LogViewer.Resources;
 
@@ -90,20 +86,17 @@ procedure TfrmMain.AfterConstruction;
 begin
   inherited AfterConstruction;
   FSettings := TLogViewerSettings.Create;
-  //FReceiver := TWinIPChannelReceiver.Create;
   //FReceiver := TWinODSReceiver.Create;
-  FReceiver := TSerialPortReceiver.Create;
+  //FReceiver := TSerialPortReceiver.Create;
   FManager := TLogViewerFactories.CreateManager(Self);
-  FMessageViewerIPC := TLogViewerFactories.CreateMessagesView(
+  FMessageViewer := TLogViewerFactories.CreateMessagesView(
     FManager,
     pnlMainClient,
-    FReceiver
+    TLogViewerFactories.CreateWinIPCChannelReceiver
   );
-//  FMessageViewerODS := TLogViewerFactories.CreateMessagesView(
-//    FManager,
-//    tsODS,
-//    FReceiverODS
-//  );
+  Manager.AddView(FMessageViewer);
+  ctMain.Tabs.Add;
+  ctMain.ActiveTab.Data := Pointer(FMessageViewer.Form);
   FMainToolbar := TLogViewerFactories.CreateMainToolbar(
     FManager,
     Self,
@@ -111,17 +104,43 @@ begin
     Menus
   );
 
-  (FManager as ILogViewerManager).ActiveView := FMessageViewerIPC;
-
-  FReceiver.Enabled := True;
-  //FReceiverODS.Enabled := True;
+  FMessageViewer.Receiver.Enabled := True;
+  //(FManager as ILogViewerManager).ActiveView := FMessageViewer;
 end;
 
 procedure TfrmMain.BeforeDestruction;
 begin
-  FReceiver := nil;
   FSettings.Free;
   inherited BeforeDestruction;
+end;
+{$ENDREGION}
+
+{$REGION 'event handlers'}
+procedure TfrmMain.ctMainButtonAddClick(Sender: TObject; var Handled: Boolean);
+var
+  LMessageViewer: ILogViewerMessagesView;
+  LTab            : TChromeTab;
+begin
+  LMessageViewer := TLogViewerFactories.CreateMessagesView(
+    FManager,
+    pnlMainClient,
+    FMessageViewer.Receiver
+  );
+  LTab := ctMain.Tabs.Add;
+  LTab.Data := LMessageViewer.Form;
+  Handled := True;
+end;
+
+procedure TfrmMain.ctMainButtonCloseTabClick(Sender: TObject; ATab: TChromeTab;
+  var Close: Boolean);
+begin
+//
+end;
+
+procedure TfrmMain.ctMainNeedDragImageControl(Sender: TObject; ATab: TChromeTab;
+  var DragControl: TWinControl);
+begin
+  DragControl := pnlMainClient;
 end;
 {$ENDREGION}
 
@@ -140,59 +159,38 @@ function TfrmMain.GetMenus: ILogViewerMenus;
 begin
   Result := Manager.Menus;
 end;
+{$ENDREGION}
 
+{$REGION 'protected methods'}
 procedure TfrmMain.UpdateStatusBar;
 begin
 //
 end;
 
 procedure TfrmMain.UpdateTabs;
-//var
-  //EV : IEditorView;
-  //CT : TChromeTab;
+var
+  MV : ILogViewerMessagesView;
+  CT : TChromeTab;
 begin
-//  if Views.Count = 1 then
-//  begin
-//    ctMain.Visible := False;
+  if Manager.Views.Count = 1 then
+  begin
+    ctMain.Visible := False;
 //    if Assigned(Editor) then
 //      Editor.Visible := True;
-//  end
-//  else
-//  begin
-//    ctMain.BeginUpdate;
-//    ctMain.Tabs.Clear;
-//    //for EV in Views do
-//    begin
-//      CT := ctMain.Tabs.Add;
-//      CT.Caption := ExtractFileName(EV.FileName);
-//      CT.Data := Pointer(EV);
-//    end;
-//    ctMain.Visible := True;
-//    ctMain.EndUpdate;
-end;
-{$ENDREGION}
-
-{$REGION 'event handlers'}
-procedure TfrmMain.ctMainActiveTabChanged(Sender: TObject; ATab: TChromeTab);
-begin
-//
-end;
-
-procedure TfrmMain.ctMainButtonAddClick(Sender: TObject; var Handled: Boolean);
-begin
-//
-end;
-
-procedure TfrmMain.ctMainButtonCloseTabClick(Sender: TObject; ATab: TChromeTab;
-  var Close: Boolean);
-begin
-//
-end;
-
-procedure TfrmMain.ctMainNeedDragImageControl(Sender: TObject; ATab: TChromeTab;
-  var DragControl: TWinControl);
-begin
-  DragControl := pnlMainClient;
+  end
+  else
+  begin
+    ctMain.BeginUpdate;
+    ctMain.Tabs.Clear;
+    for MV in Manager.Views do
+    begin
+      CT := ctMain.Tabs.Add;
+      //CT.Caption := ExtractFileName(EV.FileName);
+      CT.Data := Pointer(MV);
+    end;
+    ctMain.Visible := True;
+    ctMain.EndUpdate;
+  end;
 end;
 {$ENDREGION}
 

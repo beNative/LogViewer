@@ -50,13 +50,16 @@ type
   end;
 
 type
-  TWinODSReceiver = class(TInterfacedObject, IChannelReceiver)
+  TWinODSChannelReceiver = class(TInterfacedObject, IChannelReceiver)
   private
      FEnabled          : Boolean;
      FBuffer           : TMemoryStream;
      FODSQueue         : IQueue<TODSMessage>;
      FODSThread        : TODSThread;
      FOnReceiveMessage : Event<TReceiveMessageEvent>;
+     FName             : string;
+    function GetName: string;
+    procedure SetName(const Value: string);
 
   protected
     function GetEnabled: Boolean;
@@ -70,11 +73,15 @@ type
     );
 
   public
+    constructor Create(const AName: string); reintroduce;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
+
+    property Name: string
+      read GetName write SetName;
 
     property OnReceiveMessage: IEvent<TReceiveMessageEvent>
       read GetOnReceiveMessage;
@@ -182,7 +189,13 @@ end;
 {$ENDREGION}
 
 {$REGION 'construction and destruction'}
-procedure TWinODSReceiver.AfterConstruction;
+constructor TWinODSChannelReceiver.Create(const AName: string);
+begin
+  inherited Create;
+  FName := AName;
+end;
+
+procedure TWinODSChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
   FBuffer := TMemoryStream.Create;
@@ -191,7 +204,7 @@ begin
   FODSThread := TODSThread.Create(FODSQueue);
 end;
 
-procedure TWinODSReceiver.BeforeDestruction;
+procedure TWinODSChannelReceiver.BeforeDestruction;
 begin
   FODSThread.Terminate;
   FBuffer.Free;
@@ -199,7 +212,7 @@ begin
   inherited BeforeDestruction;
 end;
 
-procedure TWinODSReceiver.FODSQueueChanged(Sender: TObject;
+procedure TWinODSChannelReceiver.FODSQueueChanged(Sender: TObject;
   const Item: TODSMessage; Action: TCollectionChangedAction);
 const
   ZeroBuf: Integer = 0;
@@ -242,12 +255,22 @@ end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
-function TWinODSReceiver.GetEnabled: Boolean;
+function TWinODSChannelReceiver.GetEnabled: Boolean;
 begin
   Result := FEnabled;
 end;
 
-procedure TWinODSReceiver.SetEnabled(const Value: Boolean);
+function TWinODSChannelReceiver.GetName: string;
+begin
+  Result := FName;
+end;
+
+procedure TWinODSChannelReceiver.SetName(const Value: string);
+begin
+  FName := Value;
+end;
+
+procedure TWinODSChannelReceiver.SetEnabled(const Value: Boolean);
 begin
   if Value <> Enabled then
   begin
@@ -255,7 +278,7 @@ begin
   end;
 end;
 
-function TWinODSReceiver.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
+function TWinODSChannelReceiver.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
 begin
   Result := FOnReceiveMessage;
 end;

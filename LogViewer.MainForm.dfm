@@ -28,7 +28,6 @@ object frmMain: TfrmMain
     Top = 0
     Width = 1434
     Height = 30
-    OnActiveTabChanged = ctMainActiveTabChanged
     OnButtonAddClick = ctMainButtonAddClick
     OnButtonCloseTabClick = ctMainButtonCloseTabClick
     OnNeedDragImageControl = ctMainNeedDragImageControl
