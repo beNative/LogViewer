@@ -242,7 +242,6 @@ type
       AReceiver : IChannelReceiver
     ); reintroduce; virtual;
 
-
     procedure BeforeDestruction; override;
     procedure AfterConstruction; override;
 

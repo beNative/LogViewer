@@ -66,7 +66,7 @@ type
     function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
 
     procedure DoReceiveMessage(AStream : TStream);
-    procedure DoStringReceived(const AString: RawByteString);
+    procedure DoStringReceived(const AString: AnsiString);
 
     procedure FSettingsChanged(Sender: TObject);
 
@@ -96,7 +96,7 @@ type
 implementation
 
 uses
-  System.SysUtils, System.StrUtils,
+  System.SysUtils, System.AnsiStrings,
 
   DDuce.Logger.Interfaces;
 
@@ -200,7 +200,7 @@ begin
   FOnReceiveMessage.Invoke(Self, AStream);
 end;
 
-procedure TComPortChannelReceiver.DoStringReceived(const AString: RawByteString);
+procedure TComPortChannelReceiver.DoStringReceived(const AString: AnsiString);
 const
   LZero : Integer = 0;
 var
@@ -216,9 +216,8 @@ begin
   end
   else
     LMsgType := Integer(lmtText);
-
-  LString := AString;
-  LTextSize := Length(LString);
+  LString    := UTF8String(AString);
+  LTextSize  := Length(LString);
   LTimeStamp := Now;
   FBuffer.Seek(0, soFromBeginning);
   FBuffer.WriteBuffer(LMsgType, SizeOf(Integer));
@@ -233,12 +232,12 @@ end;
 {$REGION 'event handlers'}
 procedure TComPortChannelReceiver.FPollTimerTimer(Sender: TObject);
 var
-  SS : TStringStream;
+  S : AnsiString;
 begin
   while FSerialPort.WaitingDataEx <> 0 do
   begin
-    //DoStringReceived(FSerialPort.RecvPacket(0));
-    DoStringReceived(FSerialPort.RecvTerminated(10, #10));
+    S := Trim(FSerialPort.RecvTerminated(10, #10));
+    DoStringReceived(S);
   end;
 end;
 
@@ -267,8 +266,6 @@ begin
 end;
 
 procedure TComPortChannelReceiver.FSettingsChanged(Sender: TObject);
-var
-  B : Boolean;
 begin
   if FSerialPort.Device <> FSettings.Port then
   begin

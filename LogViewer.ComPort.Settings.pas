@@ -55,10 +55,11 @@ type
 
   protected
     procedure Changed;
-    procedure Assign(Source: TPersistent); override;
 
   public
     procedure AfterConstruction; override;
+
+    procedure Assign(Source: TPersistent); override;
 
     property BaudRate: Integer
       read GetBaudRate write SetBaudRate default DEFAULT_BAUDRATE;

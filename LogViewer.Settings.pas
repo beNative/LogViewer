@@ -84,7 +84,6 @@ end;
 {$REGION 'public methods'}
 procedure TLogViewerSettings.Load;
 var
-  JDO : TJsonDataValueHelper;
   JO  : TJsonObject;
 begin
   if FileExists(FFileName) then

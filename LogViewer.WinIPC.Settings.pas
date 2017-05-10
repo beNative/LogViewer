@@ -32,9 +32,10 @@ type
 
   protected
     procedure Changed;
-    procedure Assign(Source: TPersistent); override;
 
   public
+    procedure Assign(Source: TPersistent); override;
+
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
   end;

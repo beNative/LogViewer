@@ -127,6 +127,8 @@ type
     function GetSettings: TLogViewerSettings;
     function GetViews: IList<ILogViewerMessagesView>;
 
+    procedure ActiveViewChanged;
+
     procedure UpdateVisibleMessageTypes(
       const AMessageType : TLogMessageType;
       const Sender       : TObject;
@@ -414,8 +416,8 @@ begin
   if Assigned(Value) and (Value <> FActiveView) then
   begin
     FActiveView := Value;
-    //Events.DoActiveViewChange;
-    //ActiveViewChanged;
+//    Events.DoActiveViewChange;
+    ActiveViewChanged;
   end;
 end;
 
@@ -458,6 +460,11 @@ end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
+procedure TdmManager.ActiveViewChanged;
+begin
+  UpdateActions;
+end;
+
 procedure TdmManager.AddView(AView: ILogViewerMessagesView);
 begin
   FViewList.Add(AView);
@@ -474,39 +481,39 @@ procedure TdmManager.UpdateActions;
 var
   B: Boolean;
 begin
-  actBitmap.Checked        := lmtBitmap in FVisibleMessageTypes;
-  actCallStack.Checked     := lmtCallStack in FVisibleMessageTypes;
-  actCheckPoint.Checked    := lmtCheckpoint in FVisibleMessageTypes;
-  actConditional.Checked   := lmtConditional in FVisibleMessageTypes;
-  actInfo.Checked          := lmtInfo in FVisibleMessageTypes;
-  actWarning.Checked       := lmtWarning in FVisibleMessageTypes;
-  actValue.Checked         := lmtValue in FVisibleMessageTypes;
-  actError.Checked         := lmtError in FVisibleMessageTypes;
-  actMethodTraces.Checked  := lmtEnterMethod in FVisibleMessageTypes;
-  actException.Checked     := lmtException in FVisibleMessageTypes;
-  actObject.Checked        := lmtObject in FVisibleMessageTypes;
-  actHeapInfo.Checked      := lmtHeapInfo in FVisibleMessageTypes;
-  actCustomData.Checked    := lmtCustomData in FVisibleMessageTypes;
-  actStrings.Checked       := lmtStrings in FVisibleMessageTypes;
-  actMemory.Checked        := lmtMemory in FVisibleMessageTypes;
-  B                        := not actStop.Checked;
-  actBitmap.Enabled        := B;
-  actCallStack.Enabled     := B;
-  actCheckPoint.Enabled    := B;
-  actConditional.Enabled   := B;
-  actInfo.Enabled          := B;
-  actWarning.Enabled       := B;
-  actValue.Enabled         := B;
-  actError.Enabled         := B;
-  actMethodTraces.Enabled  := B;
-  actException.Enabled     := B;
-  actObject.Enabled        := B;
-  actHeapInfo.Enabled      := B;
-  actCustomData.Enabled    := B;
-  actStrings.Enabled       := B;
-  actMemory.Enabled        := B;
-  actSelectAll.Enabled  := not (FVisibleMessageTypes = ALL_MESSAGES);
-  actSelectNone.Enabled := not (FVisibleMessageTypes = []);
+  actBitmap.Checked       := lmtBitmap in FVisibleMessageTypes;
+  actCallStack.Checked    := lmtCallStack in FVisibleMessageTypes;
+  actCheckPoint.Checked   := lmtCheckpoint in FVisibleMessageTypes;
+  actConditional.Checked  := lmtConditional in FVisibleMessageTypes;
+  actInfo.Checked         := lmtInfo in FVisibleMessageTypes;
+  actWarning.Checked      := lmtWarning in FVisibleMessageTypes;
+  actValue.Checked        := lmtValue in FVisibleMessageTypes;
+  actError.Checked        := lmtError in FVisibleMessageTypes;
+  actMethodTraces.Checked := lmtEnterMethod in FVisibleMessageTypes;
+  actException.Checked    := lmtException in FVisibleMessageTypes;
+  actObject.Checked       := lmtObject in FVisibleMessageTypes;
+  actHeapInfo.Checked     := lmtHeapInfo in FVisibleMessageTypes;
+  actCustomData.Checked   := lmtCustomData in FVisibleMessageTypes;
+  actStrings.Checked      := lmtStrings in FVisibleMessageTypes;
+  actMemory.Checked       := lmtMemory in FVisibleMessageTypes;
+  B                       := not actStop.Checked;
+  actBitmap.Enabled       := B;
+  actCallStack.Enabled    := B;
+  actCheckPoint.Enabled   := B;
+  actConditional.Enabled  := B;
+  actInfo.Enabled         := B;
+  actWarning.Enabled      := B;
+  actValue.Enabled        := B;
+  actError.Enabled        := B;
+  actMethodTraces.Enabled := B;
+  actException.Enabled    := B;
+  actObject.Enabled       := B;
+  actHeapInfo.Enabled     := B;
+  actCustomData.Enabled   := B;
+  actStrings.Enabled      := B;
+  actMemory.Enabled       := B;
+  actSelectAll.Enabled    := not (FVisibleMessageTypes = ALL_MESSAGES);
+  actSelectNone.Enabled   := not (FVisibleMessageTypes = []);
   //actToggleAlwaysOnTop.Checked := FormStyle = fsStayOnTop;
 
   //actFilterMessages.Enabled := not chkAutoFilter.Checked and (TitleFilter <> '');
@@ -531,7 +538,6 @@ begin
     FActiveView.UpdateView;
   end;
 end;
-
 {$ENDREGION}
 
 end.

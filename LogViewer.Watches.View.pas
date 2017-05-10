@@ -212,6 +212,7 @@ begin
   begin
     TargetCanvas.Font.Style := TargetCanvas.Font.Style + [fsBold];
   end;
+  Result := True;
 end;
 
 function TfrmWatchesView.FCDTimeStampCustomDraw(Sender: TObject;
@@ -223,6 +224,7 @@ begin
   begin
     TargetCanvas.Font.Color := clBlue;
   end;
+  Result := True;
 end;
 
 function TfrmWatchesView.FCDValueCustomDraw(Sender: TObject;
@@ -234,6 +236,7 @@ begin
   begin
     TargetCanvas.Font.Color := clNavy;
   end;
+  Result := True;
 end;
 
 function TfrmWatchesView.FCDTimeStampGetText(Sender: TObject;

@@ -182,8 +182,8 @@ begin
 end;
 
 function TZeroMQChannelReceiver.ConnectSubscriber: Boolean;
-var
-  N : Integer;
+//var
+//  N : Integer;
 begin
   FSubscriber := FZMQ.Start(ZMQSocket.Subscriber);
 //  N := FSubscriber.Connect('tcp://GANYMEDES:5555');

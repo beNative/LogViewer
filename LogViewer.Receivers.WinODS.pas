@@ -33,37 +33,39 @@ uses
 type
   TODSMessage = class
     Index       : Cardinal;
-    Time        : TDateTime; // time of send
-    ProcessName : AnsiString; // optional : the name of the originating process
-    MsgText     : AnsiString;
+    TimeStamp   : TDateTime; // time of send
+    ProcessName : string; // optional : the name of the originating process
+    MsgText     : AnsiString; // ODS messages are always AnsiStrings.
   end;
 
   // the thread that catches OutputDebugString content
   TODSThread = class(TThread)
   private
-    FODSQueue : IQueue<TODSMessage>;
+    FODSQueue         : IQueue<TODSMessage>;
+    FCloseEventHandle : THandle;
+
   protected
-    hCloseEvent : THandle;
     procedure Execute; override;
 
+  public
     constructor Create(AODSQueue: IQueue<TODSMessage>);
   end;
 
 type
   TWinODSChannelReceiver = class(TInterfacedObject, IChannelReceiver)
   private class var
-     FCounter : Integer;
+    FCounter : Integer;
   private
-     FEnabled          : Boolean;
-     FBuffer           : TMemoryStream;
-     FODSQueue         : IQueue<TODSMessage>;
-     FODSThread        : TODSThread;
-     FOnReceiveMessage : Event<TReceiveMessageEvent>;
-     FName             : string;
-    function GetName: string;
-    procedure SetName(const Value: string);
+    FEnabled          : Boolean;
+    FBuffer           : TMemoryStream;
+    FODSQueue         : IQueue<TODSMessage>;
+    FODSThread        : TODSThread;
+    FOnReceiveMessage : Event<TReceiveMessageEvent>;
+    FName             : string;
 
   protected
+    function GetName: string;
+    procedure SetName(const Value: string);
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
     function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
@@ -219,7 +221,9 @@ begin
   FODSThread.Free;
   inherited BeforeDestruction;
 end;
+{$ENDREGION}
 
+{$REGION 'event handlers'}
 procedure TWinODSChannelReceiver.FODSQueueChanged(Sender: TObject;
   const Item: TODSMessage; Action: TCollectionChangedAction);
 const
@@ -231,7 +235,7 @@ var
 begin
   if Action = caAdded then
   begin
-    if OnReceiveMessage.CanInvoke and (Item.ProcessName <> 'explorer.exe') then
+    if OnReceiveMessage.CanInvoke then
     begin
       FBuffer.Clear;
       //TextSize := Length(Item.MsgText);
@@ -242,7 +246,7 @@ begin
       MsgType := 3;
       FBuffer.Seek(0, soFromBeginning);
       FBuffer.WriteBuffer(MsgType, SizeOf(Integer));
-      FBuffer.WriteBuffer(Item.Time, SizeOf(TDateTime));
+      FBuffer.WriteBuffer(Item.TimeStamp, SizeOf(TDateTime));
       FBuffer.WriteBuffer(TextSize, SizeOf(Integer));
       FBuffer.WriteBuffer(Item.ProcessName[1], TextSize);
 
@@ -259,7 +263,6 @@ begin
     end
   end;
 end;
-
 {$ENDREGION}
 
 {$REGION 'property access methods'}
@@ -293,24 +296,27 @@ end;
 {$ENDREGION}
 
 {$REGION 'TODSThread'}
+{$REGION 'construction and destruction'}
 constructor TODSThread.Create(AODSQueue: IQueue<TODSMessage>);
 begin
   inherited Create;
   FODSQueue := AODSQueue;
-  hCloseEvent := CreateEvent(nil, True, False, nil);  // Create the close event
+  FCloseEventHandle := CreateEvent(nil, True, False, nil);
 end;
+{$ENDREGION}
 
+{$REGION 'protected methods'}
 procedure TODSThread.Execute;
 var
   AckEvent         : THandle;
   ReadyEvent       : THandle;
   SharedFile       : THandle;
-  SharedMem        : pointer;
-  Ret              : DWORD;
-  SA               : SECURITY_ATTRIBUTES;
-  SD               : SECURITY_DESCRIPTOR;
+  SharedMem        : Pointer;
+  ReturnCode       : DWORD;
   ODSMessage       : TODSMessage;
   HandlesToWaitFor : array [0 .. 1] of THandle;
+  SA               : SECURITY_ATTRIBUTES;
+  SD               : SECURITY_DESCRIPTOR;
 begin
   SA.nLength              := SizeOf(SECURITY_ATTRIBUTES);
   SA.bInheritHandle       := TRUE;
@@ -349,18 +355,18 @@ begin
 
   while not Terminated do
   begin
-    HandlesToWaitFor[0] := hCloseEvent;
+    HandlesToWaitFor[0] := FCloseEventHandle;
     HandlesToWaitFor[1] := ReadyEvent;
 
     SetEvent(AckEvent); // set ACK event to allow buffer to be used
-    Ret := WaitForMultipleObjects(
+    ReturnCode := WaitForMultipleObjects(
       2,
       @HandlesToWaitFor,
       False { bWaitAll } ,
       3000 { INFINITE }
     );
 
-    case Ret of
+    case ReturnCode of
       WAIT_TIMEOUT :
         Continue;
 
@@ -371,27 +377,27 @@ begin
       WAIT_OBJECT_0 + 1 :
         begin
           ODSMessage             := TODSMessage.Create;
-          ODSMessage.Time        := Now;
+          ODSMessage.TimeStamp   := Now;
           ODSMessage.ProcessName := GetExenameForProcess(LPDWORD(SharedMem)^);
            //'$' + inttohex (pThisPid^,2)
           ODSMessage.MsgText := AnsiString(PAnsiChar(SharedMem) + SizeOf(DWORD));
           // the native version of OutputDebugString is ASCII. result is always AnsiString
           ODSMessage.Index := LastChildOrder;
           Inc(LastChildOrder);
-
           Queue(procedure
           begin
             FODSQueue.Enqueue(ODSMessage);
           end
           );
         end;
-      WAIT_FAILED: // Wait failed.  Shouldn't happen.
+      WAIT_FAILED:
         Continue;
     end;
   end;
   UnmapViewOfFile(SharedMem);
   CloseHandle(SharedFile);
 end;
+{$ENDREGION}
 {$ENDREGION}
 
 end.

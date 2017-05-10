@@ -217,6 +217,7 @@ begin
 //  CreateToolButton(TB);
   CreateToolButton(TB, 'actCollapseAll', tbsTextButton);
   CreateToolButton(TB, 'actExpandAll', tbsTextButton);
+  Result := TB;
 end;
 {$ENDREGION}
 
