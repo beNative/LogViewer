@@ -31,8 +31,6 @@ uses
   LogViewer.Settings, LogViewer.ComPort.Settings;
 
 type
-  TLogMessageTypes = set of TLogMessageType;
-
   TReceiveMessageEvent = procedure(
     Sender  : TObject;
     AStream : TStream
@@ -120,7 +118,6 @@ type
     function GetMenus: ILogViewerMenus;
     function GetActions: ILogViewerActions;
     function GetSettings: TLogViewerSettings;
-    function GetVisibleMessageTypes: TLogMessageTypes;
     function GetActiveView: ILogViewerMessagesView;
     procedure SetActiveView(const Value: ILogViewerMessagesView);
     function GetViews: IList<ILogViewerMessagesView>;
@@ -141,9 +138,6 @@ type
 
     property Views: IList<ILogViewerMessagesView>
       read GetViews;
-
-    property VisibleMessageTypes: TLogMessageTypes
-      read GetVisibleMessageTypes;
   end;
 
   ILogViewerToolbarsFactory = interface

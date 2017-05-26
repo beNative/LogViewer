@@ -25,8 +25,8 @@ uses
 
 type
   TfrmWinIPCSettings = class(TForm)
-    lblWindowHandleName: TLabel;
-    edtWindowHandleName: TEdit;
+    lblWindowHandleName : TLabel;
+    edtWindowHandleName : TEdit;
   private
   public
   end;

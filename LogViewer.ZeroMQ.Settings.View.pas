@@ -29,9 +29,6 @@ type
   public
   end;
 
-var
-  frmZeroMQSettings: TfrmZeroMQSettings;
-
 implementation
 
 {$R *.dfm}

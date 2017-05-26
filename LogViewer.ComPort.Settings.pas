@@ -172,6 +172,13 @@ begin
 end;
 {$ENDREGION}
 
+{$REGION 'event dispatch methods'}
+procedure TComPortSettings.Changed;
+begin
+  FOnChanged.Invoke(Self);
+end;
+{$ENDREGION}
+
 {$REGION 'protected methods'}
 procedure TComPortSettings.Assign(Source: TPersistent);
 var
@@ -188,11 +195,6 @@ begin
   end
   else
     inherited Assign(Source);
-end;
-
-procedure TComPortSettings.Changed;
-begin
-  FOnChanged.Invoke(Self);
 end;
 {$ENDREGION}
 

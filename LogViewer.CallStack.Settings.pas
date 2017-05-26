@@ -1,5 +1,5 @@
 {
-  Copyright (C) 2013-2017 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2016 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.ZeroMQ.Settings;
+unit LogViewer.CallStack.Settings;
 
 interface
 
@@ -24,16 +24,18 @@ uses
   Spring;
 
 type
-  TZeroMQSettings = class(TPersistent)
+  TCallStackSettings = class(TPersistent)
   private
     FOnChanged : Event<TNotifyEvent>;
 
+  protected
     function GetOnChanged: IEvent<TNotifyEvent>;
 
-  protected
     procedure Changed;
 
   public
+    procedure AfterConstruction; override;
+
     procedure Assign(Source: TPersistent); override;
 
     property OnChanged: IEvent<TNotifyEvent>
@@ -42,33 +44,45 @@ type
 
 implementation
 
+{$REGION 'construction and destruction'}
+procedure TCallStackSettings.AfterConstruction;
+begin
+  inherited;
+
+end;
+{$ENDREGION}
+
 {$REGION 'property access methods'}
-function TZeroMQSettings.GetOnChanged: IEvent<TNotifyEvent>;
+function TCallStackSettings.GetOnChanged: IEvent<TNotifyEvent>;
 begin
   Result := FOnChanged;
 end;
 {$ENDREGION}
 
-{$REGION 'protected methods'}
-procedure TZeroMQSettings.Changed;
+{$REGION 'event dispatch methods'}
+procedure TCallStackSettings.Changed;
 begin
   FOnChanged.Invoke(Self);
 end;
 {$ENDREGION}
 
 {$REGION 'public methods'}
-procedure TZeroMQSettings.Assign(Source: TPersistent);
+procedure TCallStackSettings.Assign(Source: TPersistent);
 var
-  LSettings: TZeroMQSettings;
+  LSettings: TCallStackSettings;
 begin
-  if Source is TZeroMQSettings then
+  if Source is TCallStackSettings then
   begin
-    LSettings := TZeroMQSettings(Source);
+    LSettings := TCallStackSettings(Source);
 
   end
   else
     inherited Assign(Source);
 end;
+
 {$ENDREGION}
+
+
+
 
 end.

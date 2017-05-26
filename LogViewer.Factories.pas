@@ -59,7 +59,8 @@ type
     ): TfrmMessageList;
 
     class function CreateManager(
-      AOwner : TComponent
+      AOwner    : TComponent;
+      ASettings : TLogViewerSettings
     ): TdmManager;
 
     class function CreateSettings(
@@ -121,15 +122,20 @@ begin
 end;
 
 class function TLogViewerFactories.CreateManager(
-  AOwner: TComponent): TdmManager;
+  AOwner: TComponent; ASettings: TLogViewerSettings): TdmManager;
 begin
-  Result := TdmManager.Create(AOwner);
+  Result := TdmManager.Create(AOwner, ASettings);
 end;
 
 class function TLogViewerFactories.CreateMessagesView(AManager: ILogViewerManager;
   AParent: TWinControl; AReceiver: IChannelReceiver): TfrmMessageList;
 begin
-  Result := TfrmMessageList.Create(Application, AManager, AReceiver);
+  Result := TfrmMessageList.Create(
+    Application,
+    AManager,
+    AReceiver,
+    AManager.Settings.MessageListSettings
+  );
   Result.Parent      := AParent;
   Result.Align       := alClient;
   Result.BorderStyle := bsNone;

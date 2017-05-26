@@ -49,7 +49,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION 'protected methods'}
+{$REGION 'event dispatch methods'}
 procedure TWinODSSettings.Changed;
 begin
   FOnChanged.Invoke(Self);
@@ -58,9 +58,16 @@ end;
 
 {$REGION 'public methods'}
 procedure TWinODSSettings.Assign(Source: TPersistent);
+var
+  LSettings: TWinODSSettings;
 begin
-  inherited Assign(Source);
-//
+  if Source is TWinODSSettings then
+  begin
+    LSettings := TWinODSSettings(Source);
+
+  end
+  else
+    inherited Assign(Source);
 end;
 {$ENDREGION}
 end.

@@ -25,16 +25,16 @@ uses
 
 type
   TfrmComPortSettings = class(TForm)
-    cbxPort: TComboBox;
-    cbxBaudRate: TComboBox;
-    cbxParity: TComboBox;
-    cbxDataBits: TComboBox;
-    cbxStopBits: TComboBox;
-    lblPort: TLabel;
-    lblBaudRate: TLabel;
-    lblDataBits: TLabel;
-    lblParity: TLabel;
-    lblStopBits: TLabel;
+    cbxPort     : TComboBox;
+    cbxBaudRate : TComboBox;
+    cbxParity   : TComboBox;
+    cbxDataBits : TComboBox;
+    cbxStopBits : TComboBox;
+    lblPort     : TLabel;
+    lblBaudRate : TLabel;
+    lblDataBits : TLabel;
+    lblParity   : TLabel;
+    lblStopBits : TLabel;
   private
   public
   end;

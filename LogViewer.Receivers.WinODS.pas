@@ -31,14 +31,20 @@ uses
   Spring, Spring.Collections;
 
 type
-  TODSMessage = class
-    Index       : Cardinal;
-    TimeStamp   : TDateTime; // time of send
-    ProcessName : string; // optional : the name of the originating process
-    MsgText     : AnsiString; // ODS messages are always AnsiStrings.
+  TProcessInfo = packed record
+    ProcessId   : Integer;
+    ProcessName : UTF8String;
   end;
 
-  // the thread that catches OutputDebugString content
+  TODSMessage = class
+    Id          : Cardinal;
+    TimeStamp   : TDateTime;
+    MsgText     : AnsiString; // ODS messages are always AnsiStrings.
+    ProcessInfo : TProcessInfo;
+  end;
+
+  { Thread instance that captures OutputDebugString content }
+
   TODSThread = class(TThread)
   private
     FODSQueue         : IQueue<TODSMessage>;
@@ -114,7 +120,8 @@ begin
   ProcHandle := OpenProcess(
     PROCESS_QUERY_INFORMATION or PROCESS_VM_READ,
     False,
-    AProcessID);
+    AProcessID
+  );
   if ProcHandle <> 0 then
   begin
     try
@@ -140,9 +147,9 @@ end;
 
 function GetExenameForProcessUsingToolhelp32(AProcessID: DWORD): string;
 var
-  Snapshot : THandle;
-  ProcEntry: TProcessEntry32;
-  Ret      : BOOL;
+  Snapshot  : THandle;
+  ProcEntry : TProcessEntry32;
+  Ret       : BOOL;
 begin
   SetLastError(0);
   Result   := '';
@@ -150,7 +157,7 @@ begin
   if Snapshot <> INVALID_HANDLE_VALUE then
     try
       ProcEntry.dwSize := SizeOf(ProcEntry);
-      Ret              := Process32FIRST(Snapshot, ProcEntry);
+      Ret              := Process32First(Snapshot, ProcEntry);
       while Ret do
       begin
         if ProcEntry.th32ProcessID = AProcessID then
@@ -168,13 +175,10 @@ end;
 
 function GetExenameForProcess(AProcessID: DWORD): string;
 begin
-  if (Win32Platform = VER_PLATFORM_WIN32_NT) and
-    (Win32MajorVersion <= 4)
-  then
+  if (Win32Platform = VER_PLATFORM_WIN32_NT) and (Win32MajorVersion <= 4) then
     Result := GetExenameForProcessUsingPSAPI(AProcessID)
   else
     Result := GetExenameForProcessUsingToolhelp32(AProcessID);
-
   Result := ExtractFileName(Result)
 end;
 
@@ -227,19 +231,18 @@ end;
 procedure TWinODSChannelReceiver.FODSQueueChanged(Sender: TObject;
   const Item: TODSMessage; Action: TCollectionChangedAction);
 const
-  ZeroBuf: Integer = 0;
+  ZeroBuf : Integer = 0;
 var
-  TextSize: Integer;
-  MsgType : Integer;
-  DataSize: Integer;
+  TextSize : Integer;
+  MsgType  : Integer;
+  DataSize : Integer;
 begin
   if Action = caAdded then
   begin
     if OnReceiveMessage.CanInvoke then
     begin
       FBuffer.Clear;
-      //TextSize := Length(Item.MsgText);
-      TextSize := Length(Item.ProcessName);
+      TextSize := Length(Item.MsgText);
 
       //lmtValue
       //MsgType := 0;
@@ -248,13 +251,14 @@ begin
       FBuffer.WriteBuffer(MsgType, SizeOf(Integer));
       FBuffer.WriteBuffer(Item.TimeStamp, SizeOf(TDateTime));
       FBuffer.WriteBuffer(TextSize, SizeOf(Integer));
-      FBuffer.WriteBuffer(Item.ProcessName[1], TextSize);
+      FBuffer.WriteBuffer(Item.MsgText[1], TextSize);
 
-      DataSize := Length(Item.MsgText);
-      FBuffer.WriteBuffer(DataSize, SizeOf(Integer));
-      FBuffer.WriteBuffer(Item.MsgText[1], DataSize);
+//      DataSize := SizeOf(Item.ProcessInfo);
+//      FBuffer.WriteBuffer(DataSize, SizeOf(Integer));
+//      FBuffer.WriteBuffer(Item.ProcessInfo, DataSize);
 
       //FBuffer.WriteBuffer(Item.MsgText[1], TextSize);
+      FBuffer.WriteBuffer(ZeroBuf, SizeOf(Integer));
       //FBuffer.WriteBuffer(ZeroBuf, SizeOf(Integer));
 //      TextSize := Length(Item.ProcessName);
 //      FBuffer.WriteBuffer(TextSize, SizeOf(Integer));
@@ -329,12 +333,10 @@ begin
     Exit;
 
   AckEvent := CreateEvent(@SA, False, TRUE, 'DBWIN_BUFFER_READY');
-  // initial state = CLEARED !!!
   if AckEvent = 0 then
     Exit;
 
   ReadyEvent := CreateEvent(@SA, False, False, 'DBWIN_DATA_READY');
-  // initial state = CLEARED
   if ReadyEvent = 0 then
     Exit;
 
@@ -350,7 +352,7 @@ begin
     Exit;
 
   SharedMem := MapViewOfFile(SharedFile, FILE_MAP_READ, 0, 0, 512);
-  if SharedMem = nil then
+  if not Assigned(SharedMem) then
     Exit;
 
   while not Terminated do
@@ -358,7 +360,7 @@ begin
     HandlesToWaitFor[0] := FCloseEventHandle;
     HandlesToWaitFor[1] := ReadyEvent;
 
-    SetEvent(AckEvent); // set ACK event to allow buffer to be used
+    SetEvent(AckEvent);
     ReturnCode := WaitForMultipleObjects(
       2,
       @HandlesToWaitFor,
@@ -371,23 +373,24 @@ begin
         Continue;
 
       WAIT_OBJECT_0 :
-        begin // hCloseEvent
+        begin
           Break;
         end;
       WAIT_OBJECT_0 + 1 :
         begin
           ODSMessage             := TODSMessage.Create;
           ODSMessage.TimeStamp   := Now;
-          ODSMessage.ProcessName := GetExenameForProcess(LPDWORD(SharedMem)^);
+          ODSMessage.ProcessInfo.ProcessId   := LPDWORD(SharedMem)^;
+          ODSMessage.ProcessInfo.ProcessName := UTF8String(GetExenameForProcess(ODSMessage.ProcessInfo.ProcessId));
            //'$' + inttohex (pThisPid^,2)
           ODSMessage.MsgText := AnsiString(PAnsiChar(SharedMem) + SizeOf(DWORD));
           // the native version of OutputDebugString is ASCII. result is always AnsiString
-          ODSMessage.Index := LastChildOrder;
+          ODSMessage.Id := LastChildOrder;
           Inc(LastChildOrder);
           Queue(procedure
-          begin
-            FODSQueue.Enqueue(ODSMessage);
-          end
+            begin
+              FODSQueue.Enqueue(ODSMessage);
+            end
           );
         end;
       WAIT_FAILED:

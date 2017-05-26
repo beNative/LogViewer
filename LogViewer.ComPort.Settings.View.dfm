@@ -48,7 +48,7 @@ object frmComPortSettings: TfrmComPortSettings
     Left = 53
     Top = 127
     Width = 49
-    Height = 18
+    Height = 13
     Caption = 'lblStopBits'
   end
   object cbxPort: TComboBox

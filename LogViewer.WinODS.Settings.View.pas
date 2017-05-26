@@ -25,9 +25,11 @@ uses
 
 type
   TfrmWinODSSettings = class(TForm)
-    lblProcess: TLabel;
-    lblProcessId: TLabel;
-    edtProcess: TButtonedEdit;
+  {$REGION 'designer controls'}
+    lblProcess   : TLabel;
+    lblProcessId : TLabel;
+    edtProcess   : TButtonedEdit;
+  {$ENDREGION}
   private
   public
   end;
