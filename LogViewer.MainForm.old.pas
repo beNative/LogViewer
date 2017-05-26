@@ -311,7 +311,6 @@ type
   private
     FSettings       : TLogViewerSettings;
     FLogTreeView    : TVirtualStringTree;
-    FActiveMessages : TLogMessageTypes;
     FMessageCount   : Integer;
     FCurrentMsg     : TLogMessage;
     FLastParent     : PVirtualNode;
@@ -421,7 +420,6 @@ begin
   CreateWatches;
   CreateWatchInspectors;
   CreateCallStackViewer;
-  FActiveMessages := ALL_MESSAGES;
   CreateIPCServer;
   CreateZMQSubscriber;
 //  FReceiver := TWinODSReceiver.Create;
@@ -649,13 +647,11 @@ end;
 
 procedure TfrmMainOld.actSelectAllExecute(Sender: TObject);
 begin
-  FActiveMessages := ALL_MESSAGES;
-  UpdateMessageDisplay;
+    UpdateMessageDisplay;
 end;
 
 procedure TfrmMainOld.actSelectNoneExecute(Sender: TObject);
 begin
-  FActiveMessages := [];
   UpdateMessageDisplay;
 end;
 
@@ -1205,7 +1201,7 @@ var
   B  : Boolean;
 begin
   ND := Sender.GetNodeData(Node);
-  B := ND.MsgType in FActiveMessages;
+//  B := ND.MsgType in FActiveMessages;
   if TitleFilter <> '' then
     B := B and ContainsText(ND.Title, TitleFilter);
   Sender.IsVisible[Node] := B;
@@ -1219,10 +1215,6 @@ begin
   A := Sender as TAction;
   if AToggle then
     A.Checked := not A.Checked;
-  if A.Checked then
-    Include(FActiveMessages, AMessageType)
-  else
-    Exclude(FActiveMessages, AMessageType);
   UpdateMessageDisplay;
 end;
 
@@ -1412,21 +1404,7 @@ procedure TfrmMainOld.UpdateActions;
 var
   B: Boolean;
 begin
-  actBitmap.Checked        := lmtBitmap in FActiveMessages;
-  actCallStack.Checked     := lmtCallStack in FActiveMessages;
-  actCheckPoint.Checked    := lmtCheckpoint in FActiveMessages;
-  actConditional.Checked   := lmtConditional in FActiveMessages;
-  actToggleInfo.Checked    := lmtInfo in FActiveMessages;
-  actToggleWarning.Checked := lmtWarning in FActiveMessages;
-  actValue.Checked         := lmtValue in FActiveMessages;
-  actError.Checked         := lmtError in FActiveMessages;
-  actMethodTraces.Checked  := lmtEnterMethod in FActiveMessages;
-  actException.Checked     := lmtException in FActiveMessages;
-  actObject.Checked        := lmtObject in FActiveMessages;
-  actHeapInfo.Checked      := lmtHeapInfo in FActiveMessages;
-  actCustomData.Checked    := lmtCustomData in FActiveMessages;
-  actStrings.Checked       := lmtStrings in FActiveMessages;
-  actMemory.Checked        := lmtMemory in FActiveMessages;
+
   B := not actStop.Checked;
   actBitmap.Enabled        := B;
   actCallStack.Enabled     := B;
@@ -1443,8 +1421,7 @@ begin
   actCustomData.Enabled    := B;
   actStrings.Enabled       := B;
   actMemory.Enabled        := B;
-  actSelectAll.Enabled  := not (FActiveMessages = ALL_MESSAGES);
-  actSelectNone.Enabled := not (FActiveMessages = []);
+  
   actToggleAlwaysOnTop.Checked := FormStyle = fsStayOnTop;
 
   actFilterMessages.Enabled := not chkAutoFilter.Checked and (TitleFilter <> '');

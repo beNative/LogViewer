@@ -182,7 +182,8 @@ uses
   LogViewer.ZeroMQ.Settings.View in 'LogViewer.ZeroMQ.Settings.View.pas' {frmZeroMQSettings},
   LogViewer.WinODS.Settings in 'LogViewer.WinODS.Settings.pas',
   LogViewer.ZeroMQ.Settings in 'LogViewer.ZeroMQ.Settings.pas',
-  LogViewer.WinIPC.Settings in 'LogViewer.WinIPC.Settings.pas';
+  LogViewer.WinIPC.Settings in 'LogViewer.WinIPC.Settings.pas',
+  LogViewer.Settings.Dialog.ConfigNode in 'LogViewer.Settings.Dialog.ConfigNode.pas';
 
 {$R *.res}
 

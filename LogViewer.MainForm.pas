@@ -34,6 +34,7 @@ type
     sbrMain       : TStatusBar;
     ctMain        : TChromeTabs;
     pnlMainClient : TPanel;
+
     procedure ctMainButtonAddClick(Sender: TObject; var Handled: Boolean);
     procedure ctMainButtonCloseTabClick(Sender: TObject; ATab: TChromeTab;
       var Close: Boolean);
@@ -47,6 +48,8 @@ type
     FSettings      : TLogViewerSettings;
     FMainToolbar   : TToolBar;
     FComPortSettings : TComPortSettings;
+
+    procedure FFormSettingsChanged(Sender: TObject);
 
   protected
     function GetActions: ILogViewerActions;
@@ -78,6 +81,8 @@ var
 implementation
 
 uses
+  Spring,
+
   LogViewer.Receivers.WinIPC, LogViewer.Receivers.ComPort,
   LogViewer.Receivers.WinODS,
   LogViewer.Resources;
@@ -90,13 +95,20 @@ var
   MV : ILogViewerMessagesView;
 begin
   inherited AfterConstruction;
-  FSettings := TLogViewerSettings.Create;
+  FSettings := TLogViewerFactories.CreateSettings;
   FComPortSettings := TComPortSettings.Create;
   FComPortSettings.Port := 'COM3';
+  FManager := TLogViewerFactories.CreateManager(Self, FSettings);
 
-    //FReceiver := TWinODSReceiver.Create;
-  //FReceiver := TSerialPortReceiver.Create;
-  FManager := TLogViewerFactories.CreateManager(Self);
+  FSettings.FormSettings.OnChanged.Add(FFormSettingsChanged);
+
+  FMainToolbar := TLogViewerFactories.CreateMainToolbar(
+    FManager,
+    Self,
+    Actions,
+    Menus
+  );
+
   MV := TLogViewerFactories.CreateMessagesView(
     FManager,
     pnlMainClient,
@@ -139,14 +151,6 @@ begin
   ]);
   MV.Receiver.Enabled := True;
 
-  FMainToolbar := TLogViewerFactories.CreateMainToolbar(
-    FManager,
-    Self,
-    Actions,
-    Menus
-  );
-
-
   //(FManager as ILogViewerManager).ActiveView := FMessageViewer;
 end;
 
@@ -160,10 +164,15 @@ end;
 
 {$REGION 'event handlers'}
 procedure TfrmMain.ctMainActiveTabChanged(Sender: TObject; ATab: TChromeTab);
+var
+  MV : ILogViewerMessagesView;
 begin
   if Assigned(ATab.Data) then
   begin
-    ILogViewerMessagesView(ATab.Data).Form.Show;
+    MV := ILogViewerMessagesView(ATab.Data);
+    MV.Form.Show;
+    MV.Form.SetFocus;
+    Manager.ActiveView := MV;
   end;
 end;
 
@@ -198,6 +207,12 @@ procedure TfrmMain.ctMainNeedDragImageControl(Sender: TObject; ATab: TChromeTab;
 begin
   DragControl := pnlMainClient;
 end;
+
+procedure TfrmMain.FFormSettingsChanged(Sender: TObject);
+begin
+  FSettings.FormSettings.AssignTo(Self);
+end;
+
 {$ENDREGION}
 
 {$REGION 'property access methods'}

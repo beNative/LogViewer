@@ -77,6 +77,8 @@ type
     tmrPoll              : TTimer;
     actGotoFirst: TAction;
     actGotoLast: TAction;
+    actSettings: TAction;
+    actAutoScrollMessages: TAction;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -109,6 +111,8 @@ type
     procedure actExpandAllExecute(Sender: TObject);
     procedure actGotoFirstExecute(Sender: TObject);
     procedure actGotoLastExecute(Sender: TObject);
+    procedure actSettingsExecute(Sender: TObject);
+    procedure actAutoScrollMessagesExecute(Sender: TObject);
     {$ENDREGION}
 
   private
@@ -118,12 +122,10 @@ type
     FActiveView          : ILogViewerMessagesView;
     FViewList            : IList<ILogViewerMessagesView>;
     FReceivers           : IList<IChannelReceiver>;
-    FVisibleMessageTypes : TLogMessageTypes;
 
   protected
     function GetCommands: ILogViewerCommands;
     function GetEvents: ILogViewerEvents;
-    function GetVisibleMessageTypes: TLogMessageTypes;
     function GetSettings: TLogViewerSettings;
     function GetViews: IList<ILogViewerMessagesView>;
 
@@ -182,13 +184,11 @@ type
     property Settings: TLogViewerSettings
       read GetSettings;
 
-    property VisibleMessageTypes: TLogMessageTypes
-      read GetVisibleMessageTypes;
-
     property Views: IList<ILogViewerMessagesView>
       read GetViews;
 
   public
+    constructor Create(AOwner: TComponent; ASettings: TLogViewerSettings);
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 
@@ -199,7 +199,8 @@ implementation
 uses
   Vcl.Forms,
 
-  LogViewer.Events, LogViewer.Commands, LogViewer.Resources;
+  LogViewer.Events, LogViewer.Commands, LogViewer.Resources,
+  LogViewer.Settings.Dialog, LogViewer.MessageList.Settings;
 
 {$R *.dfm}
 
@@ -207,22 +208,32 @@ uses
 procedure TdmManager.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FSettings := TLogViewerSettings.Create;
   FEvents   := TLogViewerEvents.Create(Self);
   FCommands := TLogViewerCommands.Create(Self);
-  FVisibleMessageTypes := ALL_MESSAGES;
   FReceivers := TCollections.CreateInterfaceList<IChannelReceiver>;
   FViewList  := TCollections.CreateInterfaceList<ILogViewerMessagesView>;
 end;
 
 procedure TdmManager.BeforeDestruction;
 begin
-  FSettings.Free;
+  FSettings := nil;
   inherited BeforeDestruction;
+end;
+
+constructor TdmManager.Create(AOwner: TComponent; ASettings: TLogViewerSettings);
+begin
+  inherited Create(AOwner);
+  FSettings := ASettings;
 end;
 {$ENDREGION}
 
 {$REGION 'action handlers'}
+procedure TdmManager.actAutoScrollMessagesExecute(Sender: TObject);
+begin
+  FSettings.MessageListSettings.AutoScrollMessages :=
+    not FSettings.MessageListSettings.AutoScrollMessages;
+end;
+
 procedure TdmManager.actBitmapExecute(Sender: TObject);
 begin
   UpdateVisibleMessageTypes(lmtBitmap, Sender);
@@ -332,6 +343,18 @@ end;
 procedure TdmManager.actSetFocusToFilterExecute(Sender: TObject);
 begin
 //
+end;
+
+procedure TdmManager.actSettingsExecute(Sender: TObject);
+var
+  F : TfrmLogViewerSettings;
+begin
+  F := TfrmLogViewerSettings.Create(Self);
+  try
+    F.ShowModal;
+  finally
+    F.Free;
+  end;
 end;
 
 procedure TdmManager.actStopExecute(Sender: TObject);
@@ -452,11 +475,6 @@ function TdmManager.GetViews: IList<ILogViewerMessagesView>;
 begin
   Result := FViewList;
 end;
-
-function TdmManager.GetVisibleMessageTypes: TLogMessageTypes;
-begin
-  Result := FVisibleMessageTypes;
-end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
@@ -479,23 +497,27 @@ end;
 
 procedure TdmManager.UpdateActions;
 var
-  B: Boolean;
+  B   : Boolean;
+  MLS : TMessageListSettings;
 begin
-  actBitmap.Checked       := lmtBitmap in FVisibleMessageTypes;
-  actCallStack.Checked    := lmtCallStack in FVisibleMessageTypes;
-  actCheckPoint.Checked   := lmtCheckpoint in FVisibleMessageTypes;
-  actConditional.Checked  := lmtConditional in FVisibleMessageTypes;
-  actInfo.Checked         := lmtInfo in FVisibleMessageTypes;
-  actWarning.Checked      := lmtWarning in FVisibleMessageTypes;
-  actValue.Checked        := lmtValue in FVisibleMessageTypes;
-  actError.Checked        := lmtError in FVisibleMessageTypes;
-  actMethodTraces.Checked := lmtEnterMethod in FVisibleMessageTypes;
-  actException.Checked    := lmtException in FVisibleMessageTypes;
-  actObject.Checked       := lmtObject in FVisibleMessageTypes;
-  actHeapInfo.Checked     := lmtHeapInfo in FVisibleMessageTypes;
-  actCustomData.Checked   := lmtCustomData in FVisibleMessageTypes;
-  actStrings.Checked      := lmtStrings in FVisibleMessageTypes;
-  actMemory.Checked       := lmtMemory in FVisibleMessageTypes;
+  MLS := Settings.MessageListSettings;
+  actBitmap.Checked       := lmtBitmap in MLS.VisibleMessageTypes;
+  actCallStack.Checked    := lmtCallStack in MLS.VisibleMessageTypes;
+  actCheckPoint.Checked   := lmtCheckpoint in MLS.VisibleMessageTypes;
+  actConditional.Checked  := lmtConditional in MLS.VisibleMessageTypes;
+  actInfo.Checked         := lmtInfo in MLS.VisibleMessageTypes;
+  actWarning.Checked      := lmtWarning in MLS.VisibleMessageTypes;
+  actValue.Checked        := lmtValue in MLS.VisibleMessageTypes;
+  actError.Checked        := lmtError in MLS.VisibleMessageTypes;
+  actMethodTraces.Checked := lmtEnterMethod in MLS.VisibleMessageTypes;
+  actException.Checked    := lmtException in MLS.VisibleMessageTypes;
+  actObject.Checked       := lmtObject in MLS.VisibleMessageTypes;
+  actHeapInfo.Checked     := lmtHeapInfo in MLS.VisibleMessageTypes;
+  actCustomData.Checked   := lmtCustomData in MLS.VisibleMessageTypes;
+  actStrings.Checked      := lmtStrings in MLS.VisibleMessageTypes;
+  actMemory.Checked       := lmtMemory in MLS.VisibleMessageTypes;
+  actAutoScrollMessages.Checked
+    := FSettings.MessageListSettings.AutoScrollMessages;
   B                       := not actStop.Checked;
   actBitmap.Enabled       := B;
   actCallStack.Enabled    := B;
@@ -512,9 +534,10 @@ begin
   actCustomData.Enabled   := B;
   actStrings.Enabled      := B;
   actMemory.Enabled       := B;
-  actSelectAll.Enabled    := not (FVisibleMessageTypes = ALL_MESSAGES);
-  actSelectNone.Enabled   := not (FVisibleMessageTypes = []);
-  //actToggleAlwaysOnTop.Checked := FormStyle = fsStayOnTop;
+  actSelectAll.Enabled    := MLS.VisibleMessageTypes <> ALL_MESSAGES;
+  actSelectNone.Enabled   := MLS.VisibleMessageTypes <> [];
+  actToggleAlwaysOnTop.Checked := Settings.FormSettings.FormStyle = fsStayOnTop;
+  actToggleFullscreen.Checked := Settings.FormSettings.WindowState = wsMaximized;
 
   //actFilterMessages.Enabled := not chkAutoFilter.Checked and (TitleFilter <> '');
   //sbrMain.SimpleText := Format('%d messages received.', [FMessageCount]);
@@ -524,17 +547,19 @@ procedure TdmManager.UpdateVisibleMessageTypes(
   const AMessageType: TLogMessageType; const Sender: TObject;
   const AToggle: Boolean);
 var
-  A : TAction;
+  A   : TAction;
+  MLS : TMessageListSettings;
 begin
+  MLS := Settings.MessageListSettings;
   if Assigned(FActiveView) then
   begin
     A := Sender as TAction;
     if AToggle then
       A.Checked := not A.Checked;
     if A.Checked then
-      Include(FVisibleMessageTypes, AMessageType)
+      MLS.VisibleMessageTypes := MLS.VisibleMessageTypes + [AMessageType]
     else
-      Exclude(FVisibleMessageTypes, AMessageType);
+      MLS.VisibleMessageTypes := MLS.VisibleMessageTypes - [AMessageType];
     FActiveView.UpdateView;
   end;
 end;

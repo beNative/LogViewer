@@ -24,7 +24,6 @@ interface
 
 {
   https://stackoverflow.com/questions/5365365/tree-like-datastructure-for-use-with-virtualtreeview
-
 }
 
 uses
@@ -68,10 +67,10 @@ type
     splLeftHorizontal : TSplitter;
     splLeftVertical   : TSplitter;
     splVertical       : TSplitter;
-    pgcMessageContent: TPageControl;
-    tsTextViewer: TTabSheet;
-    tsImageViewer: TTabSheet;
-    pnlTextViewer: TPanel;
+    pgcMessageContent : TPageControl;
+    tsTextViewer      : TTabSheet;
+    tsImageViewer     : TTabSheet;
+    pnlTextViewer     : TPanel;
     {$ENDREGION}
 
     procedure edtMessageFilterChange(Sender: TObject);
@@ -82,6 +81,7 @@ type
 
   private class var
     FCounter : Integer;
+
   private
     FMessageCount    : Integer;
     FCurrentMsg      : TLogMessage;
@@ -100,6 +100,10 @@ type
     FLastParent      : PVirtualNode;
     FLastNode        : PVirtualNode;
     FVKPressed       : Boolean;
+
+    FSettings        : TMessageListSettings;
+
+    procedure FSettingsChanged(Sender: TObject);
 
     {$REGION 'FLogTreeView event handlers'}
     procedure FLogTreeViewFilterCallback(
@@ -197,6 +201,7 @@ type
     function GetActions: ILogViewerActions;
     function GetReceiver: IChannelReceiver;
     function GetForm: TCustomForm;
+    function GetSettings: TMessageListSettings;
     {$ENDREGION}
 
   protected
@@ -232,6 +237,9 @@ type
     property Receiver: IChannelReceiver
       read GetReceiver;
 
+    property Settings: TMessageListSettings
+      read GetSettings;
+
     property Form: TCustomForm
       read GetForm;
 
@@ -239,7 +247,8 @@ type
     constructor Create(
       AOwner    : TComponent;
       AManager  : ILogViewerManager;
-      AReceiver : IChannelReceiver
+      AReceiver : IChannelReceiver;
+      ASettings : TMessageListSettings
     ); reintroduce; virtual;
 
     procedure BeforeDestruction; override;
@@ -271,11 +280,12 @@ const
 
 {$REGION 'construction and destruction'}
 constructor TfrmMessageList.Create(AOwner: TComponent; AManager
-  : ILogViewerManager; AReceiver: IChannelReceiver);
+  : ILogViewerManager; AReceiver: IChannelReceiver; ASettings: TMessageListSettings);
 begin
   inherited Create(AOwner);
   FReceiver := AReceiver;
   FManager := AManager;
+  FSettings := ASettings;
   btnFilterMessages.Action := FManager.Actions.Items['actFilterMessages'];
   FExpandParents := False;
   CreateEditor;
@@ -290,6 +300,7 @@ begin
   inherited AfterConstruction;
   Inc(FCounter);
   Caption := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
+  FSettings.OnChanged.Add(FSettingsChanged);
 end;
 
 procedure TfrmMessageList.BeforeDestruction;
@@ -298,6 +309,8 @@ begin
   FReceiver.OnReceiveMessage.Remove(FReceiverReceiveMessage);
   FReceiver := nil;
   FManager := nil;
+  FSettings.OnChanged.Remove(FSettingsChanged);
+  FSettings := nil;
   inherited BeforeDestruction;
 end;
 
@@ -477,6 +490,11 @@ function TfrmMessageList.GetReceiver: IChannelReceiver;
 begin
   Result := FReceiver;
 end;
+function TfrmMessageList.GetSettings: TMessageListSettings;
+begin
+  Result := FSettings;
+end;
+
 {$ENDREGION}
 
 {$REGION 'event handlers'}
@@ -527,7 +545,7 @@ var
   B  : Boolean;
 begin
   ND := Sender.GetNodeData(Node);
-  B := ND.MsgType in Manager.VisibleMessageTypes;
+  B := ND.MsgType in Settings.VisibleMessageTypes;
   if edtMessageFilter.Text <> '' then
     B := B and
     (ContainsText(ND.Title, edtMessageFilter.Text) or
@@ -691,7 +709,7 @@ begin
   ND.Index := FMessageCount;
   //Show only what matches filter criterias
   Sender.IsVisible[Node] := (ND.MsgType in [lmtEnterMethod, lmtLeaveMethod]) or
-      (ND.MsgType in Manager.VisibleMessageTypes);
+      (ND.MsgType in Settings.VisibleMessageTypes);
     //and IsWild(Title, FTitleFilter, True));
 end;
 
@@ -769,6 +787,12 @@ procedure TfrmMessageList.FReceiverReceiveMessage(Sender: TObject;
 begin
   ProcessMessage(AStream);
 end;
+
+procedure TfrmMessageList.FSettingsChanged(Sender: TObject);
+begin
+  UpdateView;
+end;
+
 {$ENDREGION}
 
 {$REGION 'protected methods'}
@@ -788,8 +812,6 @@ begin
         FLastNode := FLogTreeView.AddChild(FLastParent, nil);
         if FExpandParents then
           FLogTreeView.Expanded[FLastParent] := True;
-//        else
-//          FExpandParent := True;
         FLastParent := FLastNode;
       end;
       lmtLeaveMethod:
@@ -811,11 +833,9 @@ begin
         FLastNode := FLogTreeView.AddChild(FLastParent, nil);
       end;
     end; // case
-//    FLogTreeView.ValidateNode(FLastNode, False); // calls InitNode
     if FExpandParents then
     begin
       FLogTreeView.Expanded[FLastParent] := True;
-//      FExpandParent := False;
     end;
   finally
     FLogTreeView.EndUpdate;
@@ -921,10 +941,11 @@ begin
     end;
   end; // case
 
-//  if actAutoScroll.Checked then
-//  begin
-//    FLogTreeView.FocusedNode := FLogTreeView.GetLast;
-//  end;
+  if Settings.AutoScrollMessages then
+  begin
+    FLogTreeView.FocusedNode := FLogTreeView.GetLast;
+    FLogTreeView.Selected[FLogTreeView.FocusedNode] := True;
+  end;
 end;
 
 procedure TfrmMessageList.UpdateActions;

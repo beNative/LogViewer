@@ -217,6 +217,8 @@ begin
 //  CreateToolButton(TB);
   CreateToolButton(TB, 'actCollapseAll', tbsTextButton);
   CreateToolButton(TB, 'actExpandAll', tbsTextButton);
+  CreateToolButton(TB);
+  CreateToolButton(TB, 'actAutoScrollMessages', tbsTextButton);
   Result := TB;
 end;
 {$ENDREGION}

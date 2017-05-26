@@ -130,11 +130,13 @@ object dmManager: TdmManager
       OnExecute = actFilterMessagesExecute
     end
     object actSetFocusToFilter: TAction
+      AutoCheck = True
       Caption = 'Sets focus to filter entry'
       ShortCut = 113
       OnExecute = actSetFocusToFilterExecute
     end
     object actToggleFullscreen: TAction
+      AutoCheck = True
       Caption = 'Toggle full screen'
       ShortCut = 122
       OnExecute = actToggleFullscreenExecute
@@ -162,6 +164,15 @@ object dmManager: TdmManager
       Hint = 'Go to last message.'
       ShortCut = 16419
       OnExecute = actGotoLastExecute
+    end
+    object actSettings: TAction
+      Caption = 'actSettings'
+      ShortCut = 49235
+      OnExecute = actSettingsExecute
+    end
+    object actAutoScrollMessages: TAction
+      Caption = 'Auto scroll to last message'
+      OnExecute = actAutoScrollMessagesExecute
     end
   end
   object imlMessageTypes: TImageList
