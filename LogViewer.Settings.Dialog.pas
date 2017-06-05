@@ -62,7 +62,6 @@ type
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 
-
   end;
 
 implementation

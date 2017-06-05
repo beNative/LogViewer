@@ -26,7 +26,9 @@ uses
 type
   TWinODSSettings = class(TPersistent)
   private
-    FOnChanged : Event<TNotifyEvent>;
+    FOnChanged   : Event<TNotifyEvent>;
+    FProcessId   : Integer;
+    FProcessName : string;
 
     function GetOnChanged: IEvent<TNotifyEvent>;
 
@@ -35,6 +37,12 @@ type
 
   public
     procedure Assign(Source: TPersistent); override;
+
+    property ProcessName: string
+      read FProcessName write FProcessName;
+
+    property ProcessId: Integer
+      read FProcessId write FProcessId;
 
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;

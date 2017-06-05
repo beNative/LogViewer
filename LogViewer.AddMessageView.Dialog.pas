@@ -25,13 +25,14 @@ uses
 
 type
   TfrmAddMessageView = class(TForm)
-    pgcReceiverSettings: TPageControl;
-    tsWinIPC: TTabSheet;
-    tsZeroMQ: TTabSheet;
-    tsSerial: TTabSheet;
-    pnlWinIPC: TPanel;
-    pnlZeroMQ: TPanel;
-    pnlSerial: TPanel;
+    pgcReceiverSettings : TPageControl;
+    tsWinIPC            : TTabSheet;
+    tsZeroMQ            : TTabSheet;
+    tsSerial            : TTabSheet;
+    pnlWinIPC           : TPanel;
+    pnlZeroMQ           : TPanel;
+    pnlSerial           : TPanel;
+    tsODS               : TTabSheet;
   private
 
   public

@@ -4,8 +4,8 @@ interface
 
 {
   See this topic for more information:
-  https://stackoverflow.com/questions/5365365/tree-like-datastructure-for-use-with-virtualtreeview }
-
+  https://stackoverflow.com/questions/5365365/tree-like-datastructure-for-use-with-virtualtreeview
+}
 
 uses
   Spring.Collections,
@@ -68,6 +68,11 @@ begin
   Result := FText;
 end;
 
+procedure TConfigNode.SetText(const Value: string);
+begin
+  FText := Value;;
+end;
+
 function TConfigNode.GetVTNode: PVirtualNode;
 begin
   Result := FVTNode;
@@ -76,11 +81,6 @@ end;
 procedure TConfigNode.SetVTNode(const Value: PVirtualNode);
 begin
   FVTNode := Value;
-end;
-
-procedure TConfigNode.SetText(const Value: string);
-begin
-  FText := Value;;
 end;
 {$ENDREGION}
 

@@ -1,7 +1,6 @@
 object frmZeroMQSettings: TfrmZeroMQSettings
   Left = 0
   Top = 0
-  Caption = 'frmZeroMQSettings'
   ClientHeight = 411
   ClientWidth = 852
   Color = clBtnFace

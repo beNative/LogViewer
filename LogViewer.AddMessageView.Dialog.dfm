@@ -17,12 +17,11 @@ object frmAddMessageView: TfrmAddMessageView
     Top = 40
     Width = 504
     Height = 313
-    ActivePage = tsSerial
+    ActivePage = tsWinIPC
     Align = alBottom
     TabOrder = 0
     object tsWinIPC: TTabSheet
       Caption = 'WinIPC'
-      ExplicitLeft = 8
       object pnlWinIPC: TPanel
         Left = 0
         Top = 0
@@ -31,17 +30,11 @@ object frmAddMessageView: TfrmAddMessageView
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitLeft = 160
-        ExplicitTop = 120
-        ExplicitWidth = 185
-        ExplicitHeight = 41
       end
     end
     object tsZeroMQ: TTabSheet
       Caption = 'ZeroMQ'
       ImageIndex = 1
-      ExplicitWidth = 281
-      ExplicitHeight = 165
       object pnlZeroMQ: TPanel
         Left = 0
         Top = 0
@@ -49,17 +42,11 @@ object frmAddMessageView: TfrmAddMessageView
         Height = 285
         Align = alClient
         TabOrder = 0
-        ExplicitLeft = 168
-        ExplicitTop = 128
-        ExplicitWidth = 185
-        ExplicitHeight = 41
       end
     end
     object tsSerial: TTabSheet
       Caption = 'Serial'
       ImageIndex = 2
-      ExplicitWidth = 281
-      ExplicitHeight = 165
       object pnlSerial: TPanel
         Left = 0
         Top = 0
@@ -68,11 +55,11 @@ object frmAddMessageView: TfrmAddMessageView
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitLeft = 176
-        ExplicitTop = 136
-        ExplicitWidth = 185
-        ExplicitHeight = 41
       end
+    end
+    object tsODS: TTabSheet
+      Caption = 'OutputDebugString API'
+      ImageIndex = 3
     end
   end
 end

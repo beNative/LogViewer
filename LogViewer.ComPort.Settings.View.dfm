@@ -13,43 +13,43 @@ object frmComPortSettings: TfrmComPortSettings
   PixelsPerInch = 96
   TextHeight = 13
   object lblPort: TLabel
-    Left = 72
+    Left = 56
     Top = 19
-    Width = 30
+    Width = 24
     Height = 13
-    Caption = 'lblPort'
+    Caption = 'Port:'
     FocusControl = cbxPort
   end
   object lblBaudRate: TLabel
-    Left = 52
+    Left = 56
     Top = 46
-    Width = 57
+    Width = 48
     Height = 13
-    Caption = 'lblBaudRate'
+    Caption = 'Baudrate:'
     FocusControl = cbxBaudRate
   end
   object lblDataBits: TLabel
-    Left = 52
+    Left = 56
     Top = 100
-    Width = 50
+    Width = 47
     Height = 13
-    Caption = 'lblDataBits'
+    Caption = 'Data bits:'
     FocusControl = cbxDataBits
   end
   object lblParity: TLabel
     Left = 56
     Top = 73
-    Width = 38
+    Width = 32
     Height = 13
-    Caption = 'lblParity'
+    Caption = 'Parity:'
     FocusControl = cbxParity
   end
   object lblStopBits: TLabel
-    Left = 53
+    Left = 56
     Top = 127
-    Width = 49
+    Width = 46
     Height = 13
-    Caption = 'lblStopBits'
+    Caption = 'Stop bits:'
   end
   object cbxPort: TComboBox
     Left = 128
