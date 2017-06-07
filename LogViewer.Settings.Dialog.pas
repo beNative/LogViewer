@@ -30,17 +30,24 @@ unit LogViewer.Settings.Dialog;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages,
+//  Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls,
 
   VirtualTrees,
 
-  LogViewer.Settings.Dialog.ConfigNode;
+  LogViewer.Settings.Dialog.ConfigNode, System.ImageList, Vcl.ImgList,
+  Vcl.ComCtrls;
 
 type
   TfrmLogViewerSettings = class(TForm)
     pnlConfigTree: TPanel;
+    pgcMain: TPageControl;
+    tvConfig: TTreeView;
+    ts1: TTabSheet;
+    ts2: TTabSheet;
+    ts3: TTabSheet;
+    ctgrypnlgrp1: TCategoryPanelGroup;
 
   private
     FViewSettings : TConfigNode;
@@ -76,15 +83,15 @@ uses
 procedure TfrmLogViewerSettings.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FConfigTree := TFactories.CreateVirtualStringTree(Self, pnlConfigTree);
-  FConfigTree.OnGetText := FConfigTreeGetText;
-  FConfigTree.TreeOptions.PaintOptions :=
-    FConfigTree.TreeOptions.PaintOptions + [toShowTreeLines];
+//  FConfigTree := TFactories.CreateVirtualStringTree(Self, pnlConfigTree);
+//  FConfigTree.OnGetText := FConfigTreeGetText;
+//  FConfigTree.TreeOptions.PaintOptions :=
+//    FConfigTree.TreeOptions.PaintOptions + [toShowTreeLines];
 //
 //  FConfigTree.TreeOptions.AutoOptions := FConfigTree.TreeOptions.AutoOptions
 //    + [toAutoExpand];
 
-  FConfigTree.NodeDataSize := SizeOf(TConfigNode);
+//  FConfigTree.NodeDataSize := SizeOf(TConfigNode);
   BuildConfigNodes;
 end;
 
@@ -123,12 +130,12 @@ end;
 
 procedure TfrmLogViewerSettings.BuildConfigNodes;
 begin
-  FViewSettings := TConfigNode.Create('View settings');
-  AddNodesToTree(nil, FViewSettings);
-  AddNodesToTree(FViewSettings.VTNode, TConfigNode.Create('Watches'));
-  AddNodesToTree(FViewSettings.VTNode, TConfigNode.Create('Callstack'));
-  AddNodesToTree(nil, TConfigNode.Create('Channel settings'));
-  AddNodesToTree(nil, TConfigNode.Create('General settings'));
+//  FViewSettings := TConfigNode.Create('View settings');
+//  AddNodesToTree(nil, FViewSettings);
+//  AddNodesToTree(FViewSettings.VTNode, TConfigNode.Create('Watches'));
+//  AddNodesToTree(FViewSettings.VTNode, TConfigNode.Create('Callstack'));
+//  AddNodesToTree(nil, TConfigNode.Create('Channel settings'));
+//  AddNodesToTree(nil, TConfigNode.Create('General settings'));
   //FConfigRoot.Nodes.Add();
 end;
 {$ENDREGION}

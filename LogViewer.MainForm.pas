@@ -96,8 +96,8 @@ var
 begin
   inherited AfterConstruction;
   FSettings := TLogViewerFactories.CreateSettings;
-  FComPortSettings := TComPortSettings.Create;
-  FComPortSettings.Port := 'COM3';
+//  FComPortSettings := TComPortSettings.Create;
+//  FComPortSettings.Port := 'COM3';
   FManager := TLogViewerFactories.CreateManager(Self, FSettings);
 
   FSettings.FormSettings.OnChanged.Add(FFormSettingsChanged);
@@ -123,33 +123,33 @@ begin
     MV.Receiver.Name
   ]);
 
-  MV := TLogViewerFactories.CreateMessagesView(
-    FManager,
-    pnlMainClient,
-    TLogViewerFactories.CreateComPortChannelReceiver(FComPortSettings)
-  );
-  Manager.AddView(MV);
-  ctMain.Tabs.Add;
-  ctMain.ActiveTab.Data := Pointer(MV);
-  ctMain.ActiveTab.Caption := Format('%s-%s', [
-    MV.Form.Caption,
-    MV.Receiver.Name
-  ]);
-  MV.Receiver.Enabled := True;
-
-  MV := TLogViewerFactories.CreateMessagesView(
-    FManager,
-    pnlMainClient,
-    TLogViewerFactories.CreateWinODSChannelReceiver
-  );
-  Manager.AddView(MV);
-  ctMain.Tabs.Add;
-  ctMain.ActiveTab.Data := Pointer(MV);
-  ctMain.ActiveTab.Caption := Format('%s-%s', [
-    MV.Form.Caption,
-    MV.Receiver.Name
-  ]);
-  MV.Receiver.Enabled := True;
+//  MV := TLogViewerFactories.CreateMessagesView(
+//    FManager,
+//    pnlMainClient,
+//    TLogViewerFactories.CreateComPortChannelReceiver(FComPortSettings)
+//  );
+//  Manager.AddView(MV);
+//  ctMain.Tabs.Add;
+//  ctMain.ActiveTab.Data := Pointer(MV);
+//  ctMain.ActiveTab.Caption := Format('%s-%s', [
+//    MV.Form.Caption,
+//    MV.Receiver.Name
+//  ]);
+//  MV.Receiver.Enabled := True;
+//
+//  MV := TLogViewerFactories.CreateMessagesView(
+//    FManager,
+//    pnlMainClient,
+//    TLogViewerFactories.CreateWinODSChannelReceiver
+//  );
+//  Manager.AddView(MV);
+//  ctMain.Tabs.Add;
+//  ctMain.ActiveTab.Data := Pointer(MV);
+//  ctMain.ActiveTab.Caption := Format('%s-%s', [
+//    MV.Form.Caption,
+//    MV.Receiver.Name
+//  ]);
+//  MV.Receiver.Enabled := True;
 
   //(FManager as ILogViewerManager).ActiveView := FMessageViewer;
 end;
