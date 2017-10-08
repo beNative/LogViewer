@@ -1,5 +1,5 @@
 {
-  Copyright (C) 2013-2016 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2017 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
   limitations under the License.
 }
 
-unit LogViewer.Settings.Dialog.ConfigNode;
-
-interface
-
 {
   See this topic for more information:
   https://stackoverflow.com/questions/5365365/tree-like-datastructure-for-use-with-virtualtreeview
 }
+
+unit LogViewer.MessageList.LogNode;
+
+interface
 
 uses
   Spring.Collections,
@@ -29,14 +29,14 @@ uses
   VirtualTrees;
 
 type
-  TConfigNode = class
+  TLogNode = class
   private
     FText   : string;
     FVTNode : PVirtualNode;
-    FNodes  : IList<TConfigNode>;
+    FNodes  : IList<TLogNode>;
 
   protected
-    function GetNodes: IList<TConfigNode>;
+    function GetNodes: IList<TLogNode>;
     function GetText: string;
     procedure SetText(const Value: string);
     function GetVTNode: PVirtualNode;
@@ -47,57 +47,60 @@ type
 
     procedure AfterConstruction; override;
 
-    property Nodes: IList<TConfigNode>
+    property Nodes: IList<TLogNode>
       read GetNodes;
 
     property Text: string
       read GetText write SetText;
 
-    property VTNode : PVirtualNode
+    property VTNode: PVirtualNode
       read GetVTNode write SetVTNode;
   end;
+
 
 implementation
 
 {$REGION 'construction and destruction'}
-procedure TConfigNode.AfterConstruction;
+procedure TLogNode.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FNodes := TCollections.CreateObjectList<TConfigNode>;
+
 end;
 
-constructor TConfigNode.Create(AText: string);
+constructor TLogNode.Create(AText: string);
 begin
-  inherited Create;
-  FText := AText;
+//
 end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
-function TConfigNode.GetNodes: IList<TConfigNode>;
+function TLogNode.GetNodes: IList<TLogNode>;
 begin
+  if not Assigned(FNodes) then
+    FNodes := TCollections.CreateObjectList<TLogNode>;
   Result := FNodes;
 end;
 
-function TConfigNode.GetText: string;
+function TLogNode.GetText: string;
 begin
-  Result := FText;
+
 end;
 
-procedure TConfigNode.SetText(const Value: string);
+procedure TLogNode.SetText(const Value: string);
 begin
-  FText := Value;;
+
 end;
 
-function TConfigNode.GetVTNode: PVirtualNode;
+function TLogNode.GetVTNode: PVirtualNode;
 begin
-  Result := FVTNode;
+
 end;
 
-procedure TConfigNode.SetVTNode(const Value: PVirtualNode);
+procedure TLogNode.SetVTNode(const Value: PVirtualNode);
 begin
-  FVTNode := Value;
+
 end;
 {$ENDREGION}
+
 
 end.

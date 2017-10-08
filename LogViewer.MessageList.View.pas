@@ -476,9 +476,9 @@ begin
   B := ND.MsgType in Settings.VisibleMessageTypes;
   if edtMessageFilter.Text <> '' then
     B := B and
-    (ContainsText(ND.Title, edtMessageFilter.Text) or
-     ContainsText(ND.Name, edtMessageFilter.Text) or
-     ContainsText(ND.Value, edtMessageFilter.Text));
+      (ContainsText(ND.Title, edtMessageFilter.Text) or
+       ContainsText(ND.Name, edtMessageFilter.Text) or
+       ContainsText(ND.Value, edtMessageFilter.Text));
 
   Sender.IsVisible[Node] := B;
 end;
@@ -1005,3 +1005,4 @@ begin
 end;
 {$ENDREGION}
 end.
+

@@ -172,7 +172,9 @@ uses
   LogViewer.WinIPC.Settings in 'LogViewer.WinIPC.Settings.pas',
   LogViewer.Settings.Dialog.ConfigNode in 'LogViewer.Settings.Dialog.ConfigNode.pas',
   LogViewer.Watches.Settings in 'LogViewer.Watches.Settings.pas',
-  LogViewer.CallStack.Settings in 'LogViewer.CallStack.Settings.pas';
+  LogViewer.CallStack.Settings in 'LogViewer.CallStack.Settings.pas',
+  LogViewer.Watches.Settings.View in 'LogViewer.Watches.Settings.View.pas' {frmWatchSettings},
+  LogViewer.MessageList.LogNode in 'LogViewer.MessageList.LogNode.pas';
 
 {$R *.res}
 

@@ -21,18 +21,43 @@ interface
 uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
+
+  LogViewer.WinIPC.Settings;
 
 type
   TfrmWinIPCSettings = class(TForm)
     lblWindowHandleName : TLabel;
     edtWindowHandleName : TEdit;
   private
+    FSettings : TWinIPCSettings;
   public
+    constructor Create(
+      AOwner    : TComponent;
+      ASettings : TWinIPCSettings
+    ); reintroduce;
+    procedure BeforeDestruction; override;
+
+
   end;
 
 implementation
 
 {$R *.dfm}
+
+{ TfrmWinIPCSettings }
+
+procedure TfrmWinIPCSettings.BeforeDestruction;
+begin
+  FSettings := nil;
+  inherited BeforeDestruction;
+end;
+
+constructor TfrmWinIPCSettings.Create(AOwner: TComponent;
+  ASettings: TWinIPCSettings);
+begin
+  inherited Create(AOwner);
+  FSettings := ASettings;
+end;
 
 end.

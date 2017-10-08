@@ -1,7 +1,7 @@
 object frmLogViewerSettings: TfrmLogViewerSettings
   Left = 0
   Top = 0
-  Caption = 'c'
+  Caption = 'Settings'
   ClientHeight = 373
   ClientWidth = 665
   Color = clBtnFace
@@ -11,13 +11,15 @@ object frmLogViewerSettings: TfrmLogViewerSettings
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  PopupMode = pmAuto
+  Position = poMainFormCenter
   PixelsPerInch = 96
   TextHeight = 13
   object pnlConfigTree: TPanel
     Left = 0
     Top = 0
-    Width = 249
-    Height = 373
+    Width = 201
+    Height = 332
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 0
@@ -25,13 +27,14 @@ object frmLogViewerSettings: TfrmLogViewerSettings
       AlignWithMargins = True
       Left = 3
       Top = 3
-      Width = 243
-      Height = 367
+      Width = 195
+      Height = 326
       Align = alClient
       AutoExpand = True
       Indent = 19
       ReadOnly = True
       TabOrder = 0
+      OnChange = tvConfigChange
       Items.NodeData = {
         03020000003C0000000000000000000000FFFFFFFFFFFFFFFF01000000000000
         0002000000010F5600690065007700650072002000730065007400740069006E
@@ -48,49 +51,81 @@ object frmLogViewerSettings: TfrmLogViewerSettings
         00000000000000010B530065007200690061006C00200070006F00720074002A
         0000000200000000000000FFFFFFFFFFFFFFFF00000000000000000000000001
         065A00650072006F004D005100}
-      ExplicitLeft = 4
-      ExplicitTop = 2
+      ExplicitWidth = 198
     end
   end
   object pgcMain: TPageControl
-    Left = 249
+    Left = 201
     Top = 0
-    Width = 416
-    Height = 373
-    ActivePage = ts3
+    Width = 464
+    Height = 332
+    ActivePage = tsComport
     Align = alClient
     Style = tsFlatButtons
     TabOrder = 1
-    object ts1: TTabSheet
-      TabVisible = False
-      ExplicitLeft = 6
-      ExplicitTop = 7
-      object ctgrypnlgrp1: TCategoryPanelGroup
-        Left = 0
-        Top = 0
-        Height = 363
-        VertScrollBar.Tracking = True
-        HeaderFont.Charset = DEFAULT_CHARSET
-        HeaderFont.Color = clWindowText
-        HeaderFont.Height = -11
-        HeaderFont.Name = 'Tahoma'
-        HeaderFont.Style = []
-        TabOrder = 0
-      end
+    ExplicitLeft = 249
+    ExplicitWidth = 416
+    object tsWatches: TTabSheet
+      Caption = 'Watches'
+      ExplicitWidth = 408
     end
-    object ts2: TTabSheet
-      Caption = 'ts2'
+    object tsCallstack: TTabSheet
+      Caption = 'Callstack'
       ImageIndex = 1
-      TabVisible = False
-      ExplicitTop = 27
-      ExplicitHeight = 342
+      ExplicitWidth = 408
     end
-    object ts3: TTabSheet
-      Caption = 'ts3'
+    object tsWinIPC: TTabSheet
+      Caption = 'WinIPC'
       ImageIndex = 2
-      TabVisible = False
-      ExplicitTop = 27
-      ExplicitHeight = 342
+      ExplicitWidth = 408
+    end
+    object tsWinODS: TTabSheet
+      Caption = 'OutputDebugString API'
+      ImageIndex = 3
+      ExplicitWidth = 408
+    end
+    object tsComport: TTabSheet
+      Caption = 'Serial port'
+      ImageIndex = 4
+      ExplicitWidth = 408
+    end
+    object tsZeroMQ: TTabSheet
+      Caption = 'ZeroMQ'
+      ImageIndex = 5
+      ExplicitWidth = 473
+    end
+  end
+  object pnlBottom: TPanel
+    Left = 0
+    Top = 332
+    Width = 665
+    Height = 41
+    Align = alBottom
+    BevelOuter = bvNone
+    TabOrder = 2
+    object btnClose: TButton
+      Left = 541
+      Top = 6
+      Width = 120
+      Height = 25
+      Action = actClose
+      TabOrder = 0
+    end
+    object btn2: TButton
+      Left = 415
+      Top = 6
+      Width = 120
+      Height = 25
+      Caption = 'btn2'
+      TabOrder = 1
+    end
+  end
+  object aclMain: TActionList
+    Left = 328
+    Top = 192
+    object actClose: TAction
+      Caption = 'Close'
+      OnExecute = actCloseExecute
     end
   end
 end

@@ -25,7 +25,8 @@ uses
 
   DDuce.FormSettings,
 
-  LogViewer.MessageList.Settings;
+  LogViewer.MessageList.Settings, LogViewer.Watches.Settings,
+  LogViewer.ComPort.Settings, LogViewer.WinODS.Settings, LogViewer.WinIPC.Settings;
 
 type
   TLogViewerSettings = class(TPersistent)
@@ -35,6 +36,10 @@ type
     FLeftPanelWidth      : Integer;
     FRightPanelWidth     : Integer;
     FMessageListSettings : TMessageListSettings;
+    FWinODSSettings      : TWinODSSettings;
+    FWinIPCSettings      : TWinIPCSettings;
+    FComPortSettings     : TComPortSettings;
+    FWatchSettings       : TWatchSettings;
 
   public
     procedure AfterConstruction; override;
@@ -45,6 +50,18 @@ type
 
     property FormSettings: TFormSettings
       read FFormSettings;
+
+    property WinODSSettings: TWinODSSettings
+      read FWinODSSettings;
+
+    property WinIPCSettings: TWinIPCSettings
+      read FWinIPCSettings;
+
+    property ComPortSettings: TComPortSettings
+      read FComPortSettings;
+
+    property WatchSettings: TWatchSettings
+      read FWatchSettings;
 
     property MessageListSettings: TMessageListSettings
       read FMessageListSettings;
@@ -71,12 +88,20 @@ begin
   FFileName := 'settings.json';
   FFormSettings := TFormSettings.Create;
   FMessageListSettings := TMessageListSettings.Create;
+  FWinODSSettings := TWinODSSettings.Create;
+  FWinIPCSettings := TWinIPCSettings.Create;
+  FComPortSettings := TComPortSettings.Create;
+  FWatchSettings := TWatchSettings.Create;
 end;
 
 procedure TLogViewerSettings.BeforeDestruction;
 begin
   FreeAndNil(FFormSettings);
   FreeAndNil(FMessageListSettings);
+  FreeAndNil(FWinODSSettings);
+  FreeAndNil(FWinIPCSettings);
+  FreeAndNil(FComPortSettings);
+  FreeAndNil(FWatchSettings);
   inherited BeforeDestruction;
 end;
 {$ENDREGION}

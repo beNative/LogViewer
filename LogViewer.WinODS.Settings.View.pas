@@ -21,7 +21,9 @@ interface
 uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls;
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
+
+  LogViewer.WinODS.Settings;
 
 type
   TfrmWinODSSettings = class(TForm)
@@ -31,11 +33,34 @@ type
     edtProcess   : TButtonedEdit;
   {$ENDREGION}
   private
+    FSettings : TWinODSSettings;
   public
+
+    constructor Create(
+      AOwner    : TComponent;
+      ASettings : TWinODSSettings
+    ); reintroduce;
+
+    procedure BeforeDestruction; override;
   end;
 
 implementation
 
 {$R *.dfm}
+
+{$REGION 'construction and destruction'}
+constructor TfrmWinODSSettings.Create(AOwner: TComponent;
+  ASettings: TWinODSSettings);
+begin
+  inherited Create(AOwner);
+  FSettings := ASettings;
+end;
+
+procedure TfrmWinODSSettings.BeforeDestruction;
+begin
+  FSettings := nil;
+  inherited BeforeDestruction;
+end;
+{$ENDREGION}
 
 end.

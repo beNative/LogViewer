@@ -352,7 +352,7 @@ procedure TdmManager.actSettingsExecute(Sender: TObject);
 var
   F : TfrmLogViewerSettings;
 begin
-  F := TfrmLogViewerSettings.Create(Self);
+  F := TfrmLogViewerSettings.Create(Self, FSettings);
   try
     F.ShowModal;
   finally

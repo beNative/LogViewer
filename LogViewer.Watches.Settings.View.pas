@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.ComPort.Settings.View;
+unit LogViewer.Watches.Settings.View;
 
 interface
 
@@ -23,35 +23,24 @@ uses
   System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
 
-  LogViewer.ComPort.Settings;
+  LogViewer.Watches.Settings;
 
 type
-  TfrmComPortSettings = class(TForm)
-    cbxPort     : TComboBox;
-    cbxBaudRate : TComboBox;
-    cbxParity   : TComboBox;
-    cbxDataBits : TComboBox;
-    cbxStopBits : TComboBox;
-    lblPort     : TLabel;
-    lblBaudRate : TLabel;
-    lblDataBits : TLabel;
-    lblParity   : TLabel;
-    lblStopBits : TLabel;
-
+  TfrmWatchSettings = class(TForm)
+    chkOnlyTrackChanges: TCheckBox;
+    procedure chkOnlyTrackChangesClick(Sender: TObject);
   private
-    FSettings: TComPortSettings;
+    FSettings : TWatchSettings;
   protected
     procedure UpdateActions; override;
 
   public
     constructor Create(
       AOwner    : TComponent;
-      ASettings : TComPortSettings
+      ASettings : TWatchSettings
     ); reintroduce;
+
     procedure BeforeDestruction; override;
-
-
-
   end;
 
 implementation
@@ -59,29 +48,30 @@ implementation
 {$R *.dfm}
 
 {$REGION 'construction and destruction'}
-constructor TfrmComPortSettings.Create(AOwner: TComponent;
-  ASettings: TComPortSettings);
+constructor TfrmWatchSettings.Create(AOwner: TComponent;
+  ASettings: TWatchSettings);
 begin
   inherited Create(AOwner);
   FSettings := ASettings;
 end;
 
-procedure TfrmComPortSettings.BeforeDestruction;
+procedure TfrmWatchSettings.UpdateActions;
+begin
+  inherited UpdateActions;
+  chkOnlyTrackChanges.Checked := FSettings.OnlyTrackChanges;
+end;
+
+procedure TfrmWatchSettings.BeforeDestruction;
 begin
   FSettings := nil;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
 
-{$REGION 'protected methods'}
-procedure TfrmComPortSettings.UpdateActions;
+{$REGION 'event handlers'}
+procedure TfrmWatchSettings.chkOnlyTrackChangesClick(Sender: TObject);
 begin
-  inherited UpdateActions;
-  cbxPort.Text     := FSettings.Port;
-  cbxBaudRate.Text := FSettings.BaudRate.ToString;
-  cbxDataBits.Text := FSettings.DataBits.ToString;
-  cbxStopBits.Text := FSettings.StopBits.ToString;
-  cbxParity.Text   := FSettings.Parity;
+  FSettings.OnlyTrackChanges := chkOnlyTrackChanges.Checked;
 end;
 {$ENDREGION}
 
