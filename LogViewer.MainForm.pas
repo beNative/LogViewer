@@ -35,12 +35,24 @@ type
     ctMain        : TChromeTabs;
     pnlMainClient : TPanel;
 
-    procedure ctMainButtonAddClick(Sender: TObject; var Handled: Boolean);
-    procedure ctMainButtonCloseTabClick(Sender: TObject; ATab: TChromeTab;
-      var Close: Boolean);
-    procedure ctMainNeedDragImageControl(Sender: TObject; ATab: TChromeTab;
-      var DragControl: TWinControl);
-    procedure ctMainActiveTabChanged(Sender: TObject; ATab: TChromeTab);
+    procedure ctMainButtonAddClick(
+      Sender      : TObject;
+      var Handled : Boolean
+    );
+    procedure ctMainButtonCloseTabClick(
+      Sender    : TObject;
+      ATab      : TChromeTab;
+      var Close : Boolean
+    );
+    procedure ctMainNeedDragImageControl(
+      Sender          : TObject;
+      ATab            : TChromeTab;
+      var DragControl : TWinControl
+    );
+    procedure ctMainActiveTabChanged(
+      Sender : TObject;
+      ATab   : TChromeTab
+    );
 
   private
     FMessageViewer : ILogViewerMessagesView;
@@ -212,7 +224,6 @@ procedure TfrmMain.FFormSettingsChanged(Sender: TObject);
 begin
   FSettings.FormSettings.AssignTo(Self);
 end;
-
 {$ENDREGION}
 
 {$REGION 'property access methods'}

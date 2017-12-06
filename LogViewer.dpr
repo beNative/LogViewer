@@ -105,7 +105,7 @@ uses
   DDuce.Editor.Filter.Settings in '..\..\libraries\dduce\Source\Modules\Editor\DDuce.Editor.Filter.Settings.pas',
   uCustomImageDrawHook in 'uCustomImageDrawHook.pas',
   LogViewer.Resources in 'LogViewer.Resources.pas',
-  DDuce.ObjectInspector in '..\..\libraries\dduce\Source\Modules\ObjectInspector\DDuce.ObjectInspector.pas' {frmComponentInspector},
+  DDuce.ObjectInspector.zObjectInspector in '..\..\libraries\dduce\Source\Modules\ObjectInspector\DDuce.ObjectInspector.zObjectInspector.pas' {frmComponentInspectorzObjectInspector},
   LogViewer.MainForm in 'LogViewer.MainForm.pas' {frmMain},
   LogViewer.Watches.View in 'LogViewer.Watches.View.pas' {frmWatchesView},
   LogViewer.CallStack.View in 'LogViewer.CallStack.View.pas' {frmCallStackView},
