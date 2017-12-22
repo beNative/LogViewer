@@ -55,10 +55,10 @@ type
     );
 
   private
-    FMessageViewer : ILogViewerMessagesView;
-    FManager       : TdmManager;
-    FSettings      : TLogViewerSettings;
-    FMainToolbar   : TToolBar;
+    FMessageViewer   : ILogViewerMessagesView;
+    FManager         : TdmManager;
+    FSettings        : TLogViewerSettings;
+    FMainToolbar     : TToolBar;
     FComPortSettings : TComPortSettings;
 
     procedure FFormSettingsChanged(Sender: TObject);

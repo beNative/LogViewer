@@ -123,7 +123,8 @@ uses
 
   DSharp.Windows.ControlTemplates,
 
-  DDuce.Components.Factories, DDuce.Factories, DDuce.Logger.Interfaces;
+  DDuce.Components.Factories, DDuce.Factories, DDuce.Factories.VirtualTrees,
+  DDuce.Logger.Interfaces;
 
 {$R *.dfm}
 
@@ -273,7 +274,7 @@ var
   CDS : IColumnDefinitions;
   CD  : TColumnDefinition;
 begin
-  FVSTWatchValues := TFactories.CreateVirtualStringTree(Self, pnlWatches);
+  FVSTWatchValues := TVirtualStringTreeFactory.CreateGrid(Self, pnlWatches);
   CDS := TFactories.CreateColumnDefinitions;
   CD := CDS.Add('Name');
   CD.ValuePropertyName := 'Name';
@@ -297,7 +298,7 @@ begin
   );
   ConnectWatchValuesCDEvents;
   FTVPWatchValues.OnSelectionChanged := FTVPWatchValuesSelectionChanged;
-  FVSTWatchHistory := TFactories.CreateVirtualStringTree(Self, pnlWatchHistory);
+  FVSTWatchHistory := TVirtualStringTreeFactory.CreateGrid(Self, pnlWatchHistory);
   FTVPWatchHistory := TFactories.CreateTreeViewPresenter(Self, FVSTWatchHistory);
 end;
 

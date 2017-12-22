@@ -61,7 +61,7 @@ implementation
 {$R *.dfm}
 
 uses
-  DDuce.Factories;
+  DDuce.Factories, DDuce.Factories.VirtualTrees;
 
 {$REGION 'construction and destruction'}
 constructor TfrmCallStackView.Create(AOwner: TComponent; AData: IObjectList);
@@ -69,7 +69,7 @@ begin
   inherited Create(AOwner);
   FCallStack := AData;
   FCallStack.OnChanged.Add(FCallStackChanged);
-  FVSTCallStack := TFactories.CreateVirtualStringTree(Self, Self);
+  FVSTCallStack := TVirtualStringTreeFactory.CreateGrid(Self, Self);
   FTVPCallStack := TFactories.CreateTreeViewPresenter(
     Self,
     FVSTCallStack,

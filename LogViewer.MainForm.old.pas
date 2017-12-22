@@ -229,7 +229,7 @@ type
       Kind          : TVTImageKind;
       Column        : TColumnIndex;
       var Ghosted   : Boolean;
-      var ImageIndex: LongInt
+      var ImageIndex: TImageIndex
     );
     procedure FLogTreeViewGetText(
       Sender       : TBaseVirtualTree;
@@ -404,7 +404,8 @@ uses
 
   Spring,
 
-  DDuce.Factories, DDuce.Components.Factories, DDuce.Editor.Factories,
+  DDuce.Factories, DDuce.Factories.VirtualTrees, DDuce.Components.Factories,
+  DDuce.Editor.Factories,
   DDuce.Logger, DDuce.ScopedReference, DDuce.ObjectInspector, DDuce.Reflect,
 
   LogViewer.Resources, LogViewer.Receivers.WinODS;
@@ -446,7 +447,7 @@ end;
 procedure TfrmMainOld.CreateCallStackViewer;
 begin
   FCallStack    := TCollections.CreateObjectList<TCallStackData>;
-  FVSTCallStack := TFactories.CreateVirtualStringTree(Self, pnlCallStack);
+  FVSTCallStack := TVirtualStringTreeFactory.CreateGrid(Self, pnlCallStack);
   FTVPCallStack := TFactories.CreateTreeViewPresenter(
     Self,
     FVSTCallStack,
@@ -999,7 +1000,7 @@ end;
 
 procedure TfrmMainOld.FLogTreeViewGetImageIndex(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
-  var Ghosted: Boolean; var ImageIndex: LongInt);
+  var Ghosted: Boolean; var ImageIndex: TImageIndex);
 var
   ND: PNodeData;
 begin

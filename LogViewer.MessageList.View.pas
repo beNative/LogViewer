@@ -21,7 +21,6 @@ interface
 { Message viewer that can be used to display all messages from an associated
   log channel (IChannelReceiver receiver instance) }
 
-
 {
   https://stackoverflow.com/questions/5365365/tree-like-datastructure-for-use-with-virtualtreeview
 }
@@ -136,7 +135,7 @@ type
       Kind           : TVTImageKind;
       Column         : TColumnIndex;
       var Ghosted    : Boolean;
-      var ImageIndex : LongInt
+      var ImageIndex : TImageIndex
     );
     procedure FLogTreeViewGetText(
       Sender       : TBaseVirtualTree;
@@ -263,8 +262,8 @@ uses
 
   Spring,
 
-  DDuce.Factories, DDuce.Reflect,
-  DDuce.Editor.Factories,
+  DDuce.Factories, DDuce.Factories.VirtualTrees, DDuce.Editor.Factories,
+  DDuce.Reflect,
 
   DSharp.Windows.ColumnDefinitions.ControlTemplate,
 
@@ -335,7 +334,7 @@ procedure TfrmMessageList.CreateLogTreeView;
 var
   C : TVirtualTreeColumn;
 begin
-  FLogTreeView := TFactories.CreateVirtualStringTree(Self, pnlMessages);
+  FLogTreeView := TVirtualStringTreeFactory.CreateTreeGrid(Self, pnlMessages);
   FLogTreeView.TreeOptions.AutoOptions := FLogTreeView.TreeOptions.AutoOptions +
     [toAutoSpanColumns];
 
@@ -526,7 +525,8 @@ begin
         begin
           S := ND.Title;
           ND.Name := Copy(S, 1, Pos(sLineBreak, S));
-          FEditorView.Text := Copy(S, Pos(sLineBreak, S) + 2, Length(S));
+//          FEditorView.Text := Copy(S, Pos(sLineBreak, S) + 2, Length(S));
+            FEditorView.Text := ND.Value;
         end;
       end;
       lmtBitmap:
@@ -543,13 +543,9 @@ begin
       end;
       else
       begin
-        S := ND.Title;
-        if S.Contains('=') then
-        begin
-          S := Copy(S, Pos('=', S) + 2, Length(S));
-          FEditorView.Text := S;
-        end;
-      end;
+        S := ND.Value;
+        FEditorView.Text := Trim(S);
+       end;
     end;
     UpdateCallStack(Node);
   finally
@@ -575,13 +571,20 @@ end;
 
 procedure TfrmMessageList.FLogTreeViewGetImageIndex(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
-  var Ghosted: Boolean; var ImageIndex: Integer);
+  var Ghosted: Boolean; var ImageIndex: TImageIndex);
 var
   ND: PNodeData;
 begin
   ND := Sender.GetNodeData(Node);
-  if Column = COLUMN_MAIN then
-    ImageIndex := Integer(ND.MsgType);
+  if (Kind in [ikNormal, ikSelected]) and (Column = COLUMN_MAIN) then
+  begin
+    if Integer(ND.MsgType) < imlMessageTypes.Count then
+    begin
+      ImageIndex := Integer(ND.MsgType);
+    end
+    else
+      ImageIndex := 0;
+  end;
 end;
 
 procedure TfrmMessageList.FLogTreeViewGetText(Sender: TBaseVirtualTree;
@@ -710,6 +713,7 @@ begin
 end;
 {$ENDREGION}
 
+{$REGION 'edtMessageFilter'}
 procedure TfrmMessageList.edtMessageFilterChange(Sender: TObject);
 begin
   if edtMessageFilter.Text <> '' then
@@ -782,6 +786,7 @@ begin
   end;
   FVKPressed := False;
 end;
+{$ENDREGION}
 
 procedure TfrmMessageList.FReceiverReceiveMessage(Sender: TObject;
   AStream: TStream);

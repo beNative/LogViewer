@@ -158,10 +158,6 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="LogViewer.MainForm.old.pas">
-            <Form>frmMainOld</Form>
-            <FormType>dfm</FormType>
-        </DCCReference>
         <DCCReference Include="..\..\libraries\dduce\Source\Modules\DDuce.Factories.pas"/>
         <DCCReference Include="..\..\libraries\dduce\Source\Modules\DDuce.FormSettings.pas"/>
         <DCCReference Include="..\..\libraries\dduce\Source\Modules\Editor\DDuce.Editor.ActionList.Templates.pas"/>
@@ -402,6 +398,13 @@
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.MessageList.LogNode.pas"/>
+        <DCCReference Include="..\..\libraries\dduce\Source\Dependencies\NativeXml\NativeXml.pas"/>
+        <DCCReference Include="..\..\libraries\dduce\Source\Dependencies\NativeXml\NativeXmlCodepages.pas"/>
+        <DCCReference Include="..\..\libraries\dduce\Source\Dependencies\NativeXml\NativeXmlNodes.pas"/>
+        <DCCReference Include="..\..\libraries\dduce\Source\Dependencies\NativeXml\NativeXmlObjectStorage.pas"/>
+        <DCCReference Include="..\..\libraries\dduce\Source\Dependencies\NativeXml\sdDebug.pas"/>
+        <DCCReference Include="..\..\libraries\dduce\Source\Dependencies\NativeXml\sdStreams.pas"/>
+        <DCCReference Include="..\..\libraries\dduce\Source\Dependencies\NativeXml\sdStringTable.pas"/>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -438,8 +441,14 @@
                 <Platform value="Win64">True</Platform>
             </Platforms>
             <Deployment Version="3">
-                <DeployFile LocalName="Library\Win32\Debug\LogViewer.exe" Configuration="Debug" Class="ProjectOutput"/>
                 <DeployFile LocalName="Library\Win64\Debug\LogViewer.exe" Configuration="Debug" Class="ProjectOutput"/>
+                <DeployFile LocalName="Library\Win32\Debug\LogViewer.exe" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>LogViewer.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="Library\Win32\Debug\LogViewer.exe" Configuration="Debug" Class="ProjectOutput"/>
                 <DeployClass Name="AdditionalDebugSymbols">
                     <Platform Name="iOSSimulator">
                         <Operation>1</Operation>

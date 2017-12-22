@@ -3,7 +3,6 @@ program LogViewer;
 uses
   Forms,
   VirtualTrees,
-  LogViewer.MainForm.old in 'LogViewer.MainForm.old.pas' {frmMainOld},
   DDuce.Factories in '..\..\libraries\dduce\Source\Modules\DDuce.Factories.pas',
   DDuce.FormSettings in '..\..\libraries\dduce\Source\Modules\DDuce.FormSettings.pas',
   DDuce.Editor.ActionList.Templates in '..\..\libraries\dduce\Source\Modules\Editor\DDuce.Editor.ActionList.Templates.pas',
@@ -174,14 +173,20 @@ uses
   LogViewer.Watches.Settings in 'LogViewer.Watches.Settings.pas',
   LogViewer.CallStack.Settings in 'LogViewer.CallStack.Settings.pas',
   LogViewer.Watches.Settings.View in 'LogViewer.Watches.Settings.View.pas' {frmWatchSettings},
-  LogViewer.MessageList.LogNode in 'LogViewer.MessageList.LogNode.pas';
+  LogViewer.MessageList.LogNode in 'LogViewer.MessageList.LogNode.pas',
+  NativeXml in '..\..\libraries\dduce\Source\Dependencies\NativeXml\NativeXml.pas',
+  NativeXmlCodepages in '..\..\libraries\dduce\Source\Dependencies\NativeXml\NativeXmlCodepages.pas',
+  NativeXmlNodes in '..\..\libraries\dduce\Source\Dependencies\NativeXml\NativeXmlNodes.pas',
+  NativeXmlObjectStorage in '..\..\libraries\dduce\Source\Dependencies\NativeXml\NativeXmlObjectStorage.pas',
+  sdDebug in '..\..\libraries\dduce\Source\Dependencies\NativeXml\sdDebug.pas',
+  sdStreams in '..\..\libraries\dduce\Source\Dependencies\NativeXml\sdStreams.pas',
+  sdStringTable in '..\..\libraries\dduce\Source\Dependencies\NativeXml\sdStringTable.pas';
 
 {$R *.res}
 
 begin
   Application.Title := 'Log viewer';
   Application.Initialize;
-//  Application.CreateForm(TfrmMainOld, frmMainOld);
   Application.CreateForm(TfrmMain, frmMain);
   Application.Run;
 end.

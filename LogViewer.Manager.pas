@@ -116,12 +116,12 @@ type
     {$ENDREGION}
 
   private
-    FSettings            : TLogViewerSettings;
-    FEvents              : ILogViewerEvents;
-    FCommands            : ILogViewerCommands;
-    FActiveView          : ILogViewerMessagesView;
-    FViewList            : IList<ILogViewerMessagesView>;
-    FReceivers           : IList<IChannelReceiver>;
+    FSettings   : TLogViewerSettings;
+    FEvents     : ILogViewerEvents;
+    FCommands   : ILogViewerCommands;
+    FActiveView : ILogViewerMessagesView;
+    FViewList   : IList<ILogViewerMessagesView>;
+    FReceivers  : IList<IChannelReceiver>;
 
   protected
     function GetCommands: ILogViewerCommands;
