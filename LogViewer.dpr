@@ -180,7 +180,10 @@ uses
   NativeXmlObjectStorage in '..\..\libraries\dduce\Source\Dependencies\NativeXml\NativeXmlObjectStorage.pas',
   sdDebug in '..\..\libraries\dduce\Source\Dependencies\NativeXml\sdDebug.pas',
   sdStreams in '..\..\libraries\dduce\Source\Dependencies\NativeXml\sdStreams.pas',
-  sdStringTable in '..\..\libraries\dduce\Source\Dependencies\NativeXml\sdStringTable.pas';
+  sdStringTable in '..\..\libraries\dduce\Source\Dependencies\NativeXml\sdStringTable.pas',
+  DDuce.Factories.VirtualTrees in '..\..\libraries\dduce\Source\Factories\DDuce.Factories.VirtualTrees.pas',
+  DDuce.Factories.zObjInspector in '..\..\libraries\dduce\Source\Factories\DDuce.Factories.zObjInspector.pas',
+  DDuce.Factories.GridView in '..\..\libraries\dduce\Source\Factories\DDuce.Factories.GridView.pas';
 
 {$R *.res}
 

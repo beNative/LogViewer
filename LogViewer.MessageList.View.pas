@@ -1,5 +1,5 @@
 {
-  Copyright (C) 2013-2017 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2018 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -328,6 +328,7 @@ begin
   FEditorSettings := TEditorFactories.CreateSettings(Self, 'settings.xml');
   FEditorManager  := TEditorFactories.CreateManager(Self, FEditorSettings);
   FEditorView     := TEditorFactories.CreateView(pnlTextViewer, FEditorManager);
+  FEditorView.Settings.EditorOptions.WordWrapEnabled := True;
 end;
 
 procedure TfrmMessageList.CreateLogTreeView;

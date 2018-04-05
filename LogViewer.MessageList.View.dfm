@@ -71,6 +71,10 @@ object frmMessageList: TfrmMessageList
       TabOrder = 1
       object tsTextViewer: TTabSheet
         Caption = 'Text viewer'
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
         object pnlTextViewer: TPanel
           Left = 0
           Top = 0
@@ -84,6 +88,10 @@ object frmMessageList: TfrmMessageList
       object tsImageViewer: TTabSheet
         Caption = 'Image viewer'
         ImageIndex = 1
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
       end
     end
   end
@@ -262,7 +270,7 @@ object frmMessageList: TfrmMessageList
     Left = 607
     Top = 150
     Bitmap = {
-      494C010112001500100010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010112001500180010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000005000000001002000000000000050
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
