@@ -183,7 +183,8 @@ uses
   sdStringTable in '..\..\libraries\dduce\Source\Dependencies\NativeXml\sdStringTable.pas',
   DDuce.Factories.VirtualTrees in '..\..\libraries\dduce\Source\Factories\DDuce.Factories.VirtualTrees.pas',
   DDuce.Factories.zObjInspector in '..\..\libraries\dduce\Source\Factories\DDuce.Factories.zObjInspector.pas',
-  DDuce.Factories.GridView in '..\..\libraries\dduce\Source\Factories\DDuce.Factories.GridView.pas';
+  DDuce.Factories.GridView in '..\..\libraries\dduce\Source\Factories\DDuce.Factories.GridView.pas',
+  Spring.Collections.Trees in '..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.Trees.pas';
 
 {$R *.res}
 
