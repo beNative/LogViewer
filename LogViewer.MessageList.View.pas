@@ -46,9 +46,6 @@ uses
 
 type
   TfrmMessageList = class(TForm, ILogViewerMessagesView)
-    {$REGION 'designer controls'}
-    btnCollapseAll    : TSpeedButton;
-    btnExpandAll      : TSpeedButton;
     btnFilterMessages : TButton;
     chkAutoFilter     : TCheckBox;
     edtMessageFilter  : TLabeledEdit;
@@ -335,7 +332,8 @@ procedure TfrmMessageList.CreateLogTreeView;
 var
   C : TVirtualTreeColumn;
 begin
-  FLogTreeView := TVirtualStringTreeFactory.CreateTreeGrid(Self, pnlMessages);
+  FLogTreeView := TVirtualStringTreeFactory.CreateTreeList(Self, pnlMessages);
+  FLogTreeView.AlignWithMargins := False;
   FLogTreeView.TreeOptions.AutoOptions := FLogTreeView.TreeOptions.AutoOptions +
     [toAutoSpanColumns];
 

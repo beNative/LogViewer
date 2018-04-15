@@ -72,7 +72,8 @@ begin
   if Source is TWinODSSettings then
   begin
     LSettings := TWinODSSettings(Source);
-
+    ProcessName := LSettings.ProcessName;
+    ProcessId   := LSettings.ProcessId;
   end
   else
     inherited Assign(Source);

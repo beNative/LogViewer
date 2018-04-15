@@ -14,23 +14,22 @@ object frmMessageList: TfrmMessageList
   PixelsPerInch = 96
   TextHeight = 13
   object splVertical: TSplitter
-    Left = 951
+    Left = 953
     Top = 0
-    Width = 8
+    Width = 6
     Height = 806
     Align = alRight
-    ExplicitLeft = 1005
-    ExplicitTop = -8
-    ExplicitHeight = 814
+    Color = clBtnFace
+    ParentColor = False
+    ExplicitLeft = 951
   end
   object splLeftVertical: TSplitter
     Left = 353
     Top = 0
-    Width = 9
+    Width = 6
     Height = 806
-    ExplicitLeft = 286
-    ExplicitTop = -8
-    ExplicitHeight = 814
+    Color = clBtnFace
+    ParentColor = False
   end
   object pnlRight: TPanel
     Left = 959
@@ -43,10 +42,9 @@ object frmMessageList: TfrmMessageList
     ParentBackground = False
     TabOrder = 0
     object pnlMessageContent: TPanel
-      AlignWithMargins = True
-      Left = 3
-      Top = 3
-      Width = 424
+      Left = 0
+      Top = 0
+      Width = 430
       Height = 25
       Align = alTop
       BevelOuter = bvNone
@@ -62,24 +60,20 @@ object frmMessageList: TfrmMessageList
     end
     object pgcMessageContent: TPageControl
       Left = 0
-      Top = 31
+      Top = 25
       Width = 430
-      Height = 775
+      Height = 781
       ActivePage = tsTextViewer
       Align = alClient
       MultiLine = True
       TabOrder = 1
       object tsTextViewer: TTabSheet
         Caption = 'Text viewer'
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
         object pnlTextViewer: TPanel
           Left = 0
           Top = 0
           Width = 422
-          Height = 747
+          Height = 753
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
@@ -88,10 +82,6 @@ object frmMessageList: TfrmMessageList
       object tsImageViewer: TTabSheet
         Caption = 'Image viewer'
         ImageIndex = 1
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
       end
     end
   end
@@ -115,31 +105,29 @@ object frmMessageList: TfrmMessageList
       TabOrder = 0
       object splLeftHorizontal: TSplitter
         Left = 0
-        Top = 184
+        Top = 137
         Width = 353
-        Height = 8
+        Height = 6
         Cursor = crVSplit
         Align = alTop
-        Color = clWhite
+        Color = clBtnFace
         ParentColor = False
-        ExplicitTop = 392
-        ExplicitWidth = 286
+        ExplicitTop = 184
       end
       object pnlLeftBottom: TPanel
         Left = 0
-        Top = 192
+        Top = 143
         Width = 353
-        Height = 614
+        Height = 663
         Align = alClient
         BevelOuter = bvNone
         Caption = 'pnlLeftBottom'
         ShowCaption = False
         TabOrder = 1
         object pnlWatches: TPanel
-          AlignWithMargins = True
-          Left = 3
-          Top = 3
-          Width = 347
+          Left = 0
+          Top = 0
+          Width = 353
           Height = 25
           Align = alTop
           BevelOuter = bvNone
@@ -158,15 +146,14 @@ object frmMessageList: TfrmMessageList
         Left = 0
         Top = 0
         Width = 353
-        Height = 184
+        Height = 137
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 0
         object pnlCallStackTitle: TPanel
-          AlignWithMargins = True
-          Left = 3
-          Top = 3
-          Width = 347
+          Left = 0
+          Top = 0
+          Width = 353
           Height = 25
           Align = alTop
           BevelOuter = bvNone
@@ -184,9 +171,9 @@ object frmMessageList: TfrmMessageList
     end
   end
   object pnlMessages: TPanel
-    Left = 362
+    Left = 359
     Top = 0
-    Width = 589
+    Width = 594
     Height = 806
     Align = alClient
     BevelOuter = bvNone
@@ -197,55 +184,36 @@ object frmMessageList: TfrmMessageList
     object pnlFilter: TPanel
       Left = 0
       Top = 0
-      Width = 589
-      Height = 30
+      Width = 594
+      Height = 25
       Align = alTop
       BevelOuter = bvNone
+      ParentBackground = False
       TabOrder = 0
       DesignSize = (
-        589
-        30)
-      object btnExpandAll: TSpeedButton
-        Left = 3
-        Top = 5
-        Width = 23
-        Height = 22
-        Flat = True
-      end
-      object btnCollapseAll: TSpeedButton
-        Left = 24
-        Top = 5
-        Width = 23
-        Height = 22
-        Flat = True
-      end
+        594
+        25)
       object edtMessageFilter: TLabeledEdit
-        Left = 83
-        Top = 5
-        Width = 272
+        Left = 88
+        Top = 2
+        Width = 325
         Height = 21
         Alignment = taCenter
         Anchors = [akLeft, akTop, akRight]
+        AutoSize = False
         EditLabel.Width = 71
         EditLabel.Height = 13
         EditLabel.Caption = 'Message filter:'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Style = []
         LabelPosition = lpLeft
-        ParentFont = False
         TabOrder = 0
-        TextHint = 'filter log messages'
         OnChange = edtMessageFilterChange
         OnKeyDown = edtMessageFilterKeyDown
         OnKeyUp = edtMessageFilterKeyUp
       end
       object btnFilterMessages: TButton
-        Left = 449
-        Top = 3
-        Width = 134
+        Left = 496
+        Top = 0
+        Width = 98
         Height = 25
         Anchors = [akTop, akRight]
         Caption = 'Filter messages'
@@ -253,8 +221,8 @@ object frmMessageList: TfrmMessageList
         TabOrder = 1
       end
       object chkAutoFilter: TCheckBox
-        Left = 372
-        Top = 7
+        Left = 419
+        Top = 4
         Width = 71
         Height = 17
         Anchors = [akTop, akRight]
@@ -270,7 +238,7 @@ object frmMessageList: TfrmMessageList
     Left = 607
     Top = 150
     Bitmap = {
-      494C010112001500180010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010112001500200010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000005000000001002000000000000050
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

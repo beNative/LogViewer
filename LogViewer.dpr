@@ -189,6 +189,7 @@ uses
 {$R *.res}
 
 begin
+  ReportMemoryLeaksOnShutdown := True;
   Application.Title := 'Log viewer';
   Application.Initialize;
   Application.CreateForm(TfrmMain, frmMain);

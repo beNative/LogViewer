@@ -47,6 +47,8 @@ type
     FVSTWatchValues  : TVirtualStringTree;
     FVSTWatchHistory : TVirtualStringTree;
 
+    FWatchHistoryColumnDefinitions : IColumnDefinitions;
+
     FTVPWatchValues  : TTreeViewPresenter;
     FTVPWatchHistory : TTreeViewPresenter;
 
@@ -81,6 +83,16 @@ type
       Selected        : Boolean
     ): Boolean;
     function FCDNameCustomDraw(
+      Sender          : TObject;
+      ColumnDefinition: TColumnDefinition;
+      Item            : TObject;
+      TargetCanvas    : TCanvas;
+      CellRect        : TRect;
+      ImageList       : TCustomImageList;
+      DrawMode        : TDrawMode;
+      Selected        : Boolean
+    ): Boolean;
+    function FCDIdCustomDraw(
       Sender          : TObject;
       ColumnDefinition: TColumnDefinition;
       Item            : TObject;
@@ -142,10 +154,6 @@ begin
       CD.OnCustomDraw := FCDTimeStampCustomDraw;
       CD.OnGetText    := FCDTimeStampGetText;
     end
-    else if CD.ValuePropertyName = 'Name' then
-    begin
-      CD.OnCustomDraw := FCDNameCustomDraw;
-    end
     else if CD.ValuePropertyName = 'Value' then
     begin
       CD.OnCustomDraw := FCDValueCustomDraw;
@@ -204,6 +212,18 @@ end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
+function TfrmWatchesView.FCDIdCustomDraw(Sender: TObject;
+  ColumnDefinition: TColumnDefinition; Item: TObject; TargetCanvas: TCanvas;
+  CellRect: TRect; ImageList: TCustomImageList; DrawMode: TDrawMode;
+  Selected: Boolean): Boolean;
+begin
+  if DrawMode = dmPaintText then
+  begin
+    TargetCanvas.Font.Color := clDkGray;
+  end;
+  Result := True;
+end;
+
 function TfrmWatchesView.FCDNameCustomDraw(Sender: TObject;
   ColumnDefinition: TColumnDefinition; Item: TObject; TargetCanvas: TCanvas;
   CellRect: TRect; ImageList: TCustomImageList; DrawMode: TDrawMode;
@@ -274,7 +294,8 @@ var
   CDS : IColumnDefinitions;
   CD  : TColumnDefinition;
 begin
-  FVSTWatchValues := TVirtualStringTreeFactory.CreateGrid(Self, pnlWatches);
+  FVSTWatchValues := TVirtualStringTreeFactory.CreateList(Self, pnlWatches);
+  FVSTWatchValues.AlignWithMargins := False;
   CDS := TFactories.CreateColumnDefinitions;
   CD := CDS.Add('Name');
   CD.ValuePropertyName := 'Name';
@@ -283,10 +304,32 @@ begin
   CD := CDS.Add('Value');
   CD.ValuePropertyName := 'Value';
   CD.HintPropertyName := CD.ValuePropertyName;
+  CD.AutoSize := True; // Test
   CD.OnCustomDraw := FCDValueCustomDraw;
   CD := CDS.Add('TimeStamp');
+  CD.Width     := 80;
   CD.ValuePropertyName := 'TimeStamp';
   CD.HintPropertyName := CD.ValuePropertyName;
+  CD.OnGetText := FCDTimeStampGetText;
+  CD.OnCustomDraw := FCDTimeStampCustomDraw;
+
+  FWatchHistoryColumnDefinitions := TFactories.CreateColumnDefinitions;
+  CD := FWatchHistoryColumnDefinitions.Add('Id');
+  CD.AutoSize := True;
+  CD.ValuePropertyName := 'Id';
+  CD.HintPropertyName := CD.ValuePropertyName;
+  CD.Width := 50;
+  CD.OnCustomDraw := FCDIdCustomDraw;
+  CD := FWatchHistoryColumnDefinitions.Add('Value');
+  CD.ValuePropertyName := 'Value';
+  CD.HintPropertyName := CD.ValuePropertyName;
+  CD.AutoSize := True; // Test
+  CD.OnCustomDraw := FCDValueCustomDraw;
+  CD := FWatchHistoryColumnDefinitions.Add('TimeStamp');
+  CD.ValuePropertyName := 'TimeStamp';
+  CD.HintPropertyName := CD.ValuePropertyName;
+  CD.Alignment := taCenter;
+  CD.Width     := 80;
   CD.OnGetText := FCDTimeStampGetText;
   CD.OnCustomDraw := FCDTimeStampCustomDraw;
 
@@ -298,7 +341,8 @@ begin
   );
   ConnectWatchValuesCDEvents;
   FTVPWatchValues.OnSelectionChanged := FTVPWatchValuesSelectionChanged;
-  FVSTWatchHistory := TVirtualStringTreeFactory.CreateGrid(Self, pnlWatchHistory);
+  FVSTWatchHistory := TVirtualStringTreeFactory.CreateList(Self, pnlWatchHistory);
+  FVSTWatchHistory.AlignWithMargins := False;
   FTVPWatchHistory := TFactories.CreateTreeViewPresenter(Self, FVSTWatchHistory);
 end;
 
@@ -317,7 +361,8 @@ begin
     TFactories.InitializeTVP(
       FTVPWatchHistory,
       FVSTWatchHistory,
-      SelectedWatch.List as IObjectList
+      SelectedWatch.List as IObjectList,
+      FWatchHistoryColumnDefinitions
     );
     ConnectWatchHistoryCDEvents;
     if FMessageId = 0 then

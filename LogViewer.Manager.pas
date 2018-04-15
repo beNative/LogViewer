@@ -28,7 +28,8 @@ uses
 
   DDuce.Logger.Interfaces,
 
-  LogViewer.Interfaces, LogViewer.Settings;
+  LogViewer.Interfaces, LogViewer.Settings, LogViewer.Events,
+  LogViewer.Commands;
 
 {
   TODO:
@@ -117,8 +118,8 @@ type
 
   private
     FSettings   : TLogViewerSettings;
-    FEvents     : ILogViewerEvents;
-    FCommands   : ILogViewerCommands;
+    FEvents     : TLogViewerEvents;
+    FCommands   : TLogViewerCommands;
     FActiveView : ILogViewerMessagesView;
     FViewList   : IList<ILogViewerMessagesView>;
     FReceivers  : IList<IChannelReceiver>;
@@ -202,7 +203,7 @@ implementation
 uses
   Vcl.Forms,
 
-  LogViewer.Events, LogViewer.Commands, LogViewer.Resources,
+  LogViewer.Resources,
   LogViewer.Settings.Dialog, LogViewer.MessageList.Settings;
 
 {$R *.dfm}
@@ -219,6 +220,8 @@ end;
 
 procedure TdmManager.BeforeDestruction;
 begin
+  FreeAndNil(FCommands);
+  FreeAndNil(FEvents);
   FSettings := nil;
   inherited BeforeDestruction;
 end;

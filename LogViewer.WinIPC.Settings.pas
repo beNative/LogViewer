@@ -58,16 +58,17 @@ end;
 
 {$REGION 'public methods'}
 procedure TWinIPCSettings.Assign(Source: TPersistent);
-var
-  LSettings: TWinIPCSettings;
+//var
+//  LSettings: TWinIPCSettings;
 begin
-  if Source is TWinIPCSettings then
-  begin
-    LSettings := TWinIPCSettings(Source);
-
-  end
-  else
-    inherited Assign(Source);
+//  if Source is TWinIPCSettings then
+//  begin
+//    LSettings := TWinIPCSettings(Source);
+//
+//
+//  end
+//  else
+//    inherited Assign(Source);
 end;
 {$ENDREGION}
 end.

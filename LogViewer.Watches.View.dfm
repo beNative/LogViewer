@@ -14,21 +14,24 @@ object frmWatchesView: TfrmWatchesView
   TextHeight = 13
   object splHorizontal: TSplitter
     Left = 0
-    Top = 314
+    Top = 318
     Width = 402
-    Height = 10
+    Height = 6
     Cursor = crVSplit
     Align = alBottom
-    ExplicitTop = 319
+    Color = clBtnFace
+    ParentColor = False
+    ExplicitTop = 320
   end
   object pnlWatches: TPanel
     Left = 0
     Top = 0
     Width = 402
-    Height = 314
+    Height = 318
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitHeight = 314
   end
   object pnlWatchHistory: TPanel
     Left = 0
