@@ -70,11 +70,13 @@ type
     FName             : string;
 
   protected
+    {$REGION 'property access methods'}
     function GetName: string;
     procedure SetName(const Value: string);
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
     function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
+    {$ENDREGION}
 
     procedure FODSQueueChanged(
       Sender     : TObject;
@@ -86,6 +88,8 @@ type
     constructor Create(const AName: string); reintroduce;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
+
+    function ToString: string; override;
 
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
@@ -101,12 +105,12 @@ implementation
 
 uses
   Winapi.PsAPI, Winapi.TlHelp32,
-  System.SyncObjs, System.DateUtils;
+  System.SyncObjs;
 
 var
   LastChildOrder : Cardinal;
 
-{$REGION 'interfaced routines'}
+{$REGION 'non-interfaced routines'}
 function GetExenameForProcessUsingPSAPI(AProcessID: DWORD): string;
 var
   I          : DWORD;
@@ -223,6 +227,7 @@ begin
   FODSThread.Terminate;
   FBuffer.Free;
   FODSThread.Free;
+  FODSQueue.Clear;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
@@ -263,7 +268,7 @@ begin
 //      TextSize := Length(Item.ProcessName);
 //      FBuffer.WriteBuffer(TextSize, SizeOf(Integer));
 //      FBuffer.WriteBuffer(Item.ProcessName[1], TextSize);
-      OnReceiveMessage.Invoke(Self, FBuffer);
+      OnReceiveMessage.Invoke(Self, Self as IChannelReceiver, FBuffer);
     end
   end;
 end;
@@ -296,6 +301,13 @@ end;
 function TWinODSChannelReceiver.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
 begin
   Result := FOnReceiveMessage;
+end;
+{$ENDREGION}
+
+{$REGION 'public methods'}
+function TWinODSChannelReceiver.ToString: string;
+begin
+//
 end;
 {$ENDREGION}
 

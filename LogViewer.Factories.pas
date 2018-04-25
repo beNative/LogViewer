@@ -32,7 +32,7 @@ uses
 
   Spring.Collections,
 
-  LogViewer.CallStack.View, LogViewer.Watches.View, LogViewer.CallStack.Data,
+  LogViewer.CallStack.View, LogViewer.Watches.View,
   LogViewer.Watches.Data, LogViewer.Messages.Data, LogViewer.MessageList.View,
   LogViewer.Interfaces, LogViewer.Manager, LogViewer.Settings,
   LogViewer.ComPort.Settings;
@@ -47,15 +47,15 @@ type
     ): TfrmCallStackView;
 
     class function CreateWatchesView(
-      AOwner    : TComponent;
-      AParent   : TWinControl;
-      AData     : TWatchList
+      AOwner  : TComponent;
+      AParent : TWinControl;
+      AData   : TWatchList
     ): TfrmWatchesView;
 
-    class function CreateMessagesView(
+    class function CreateLogViewer(
       AManager  : ILogViewerManager;
-      AParent   : TWinControl;
-      AReceiver : IChannelReceiver
+      AReceiver : IChannelReceiver;
+      AParent   : TWinControl = nil
     ): TfrmMessageList;
 
     class function CreateManager(
@@ -127,8 +127,8 @@ begin
   Result := TdmManager.Create(AOwner, ASettings);
 end;
 
-class function TLogViewerFactories.CreateMessagesView(AManager: ILogViewerManager;
-  AParent: TWinControl; AReceiver: IChannelReceiver): TfrmMessageList;
+class function TLogViewerFactories.CreateLogViewer(AManager: ILogViewerManager;
+  AReceiver: IChannelReceiver; AParent: TWinControl): TfrmMessageList;
 begin
   Result := TfrmMessageList.Create(
     Application,
@@ -139,7 +139,6 @@ begin
   Result.Parent      := AParent;
   Result.Align       := alClient;
   Result.BorderStyle := bsNone;
-  Result.Visible     := True;
 end;
 
 class function TLogViewerFactories.CreateSettings: TLogViewerSettings;

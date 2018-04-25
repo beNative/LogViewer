@@ -26,12 +26,28 @@ uses
 type
   TLogViewerEvents = class(TInterfaceBase, ILogViewerEvents) // no refcount
   private
-    FManager : ILogViewerManager;
+    FManager        : ILogViewerManager;
+    FOnAddLogViewer : Event<TLogViewerEvent>;
+    FOnAddReceiver  : Event<TChannelReceiverEvent>;
+
+  protected
+    {$REGION 'property access methods'}
+    function GetOnAddLogViewer: IEvent<TLogViewerEvent>;
+    function GetOnAddReceiver: IEvent<TChannelReceiverEvent>;
+    {$ENDREGION}
+
+    procedure DoAddLogViewer(ALogViewer: ILogViewer); virtual;
+    procedure DoAddReceiver(AReceiver: IChannelReceiver); virtual;
 
   public
     constructor Create(AManager: ILogViewerManager);
     procedure BeforeDestruction; override;
 
+    property OnAddLogViewer: IEvent<TLogViewerEvent>
+      read GetOnAddLogViewer;
+
+    property OnAddReceiver: IEvent<TChannelReceiverEvent>
+      read GetOnAddReceiver;
   end;
 
 implementation
@@ -45,8 +61,32 @@ end;
 procedure TLogViewerEvents.BeforeDestruction;
 begin
   FManager := nil;
+  inherited BeforeDestruction;
+end;
+{$ENDREGION}
+
+{$REGION 'property access methods'}
+function TLogViewerEvents.GetOnAddLogViewer: IEvent<TLogViewerEvent>;
+begin
+  Result := FOnAddLogViewer;
 end;
 
+function TLogViewerEvents.GetOnAddReceiver: IEvent<TChannelReceiverEvent>;
+begin
+  Result := FOnAddReceiver;
+end;
+{$ENDREGION}
+
+{$REGION 'event dispatch methods'}
+procedure TLogViewerEvents.DoAddLogViewer(ALogViewer: ILogViewer);
+begin
+  FOnAddLogViewer.Invoke(Self, ALogViewer);
+end;
+
+procedure TLogViewerEvents.DoAddReceiver(AReceiver: IChannelReceiver);
+begin
+  FOnAddReceiver.Invoke(Self, AReceiver);
+end;
 {$ENDREGION}
 
 end.

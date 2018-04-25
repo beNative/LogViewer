@@ -30,7 +30,6 @@ object frmLogViewerSettings: TfrmLogViewerSettings
       Width = 195
       Height = 326
       Align = alClient
-      AutoExpand = True
       Indent = 19
       ReadOnly = True
       TabOrder = 0
@@ -51,7 +50,6 @@ object frmLogViewerSettings: TfrmLogViewerSettings
         00000000000000010B530065007200690061006C00200070006F00720074002A
         0000000200000000000000FFFFFFFFFFFFFFFF00000000000000000000000001
         065A00650072006F004D005100}
-      ExplicitWidth = 198
     end
   end
   object pgcMain: TPageControl
@@ -59,40 +57,52 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Top = 0
     Width = 464
     Height = 332
-    ActivePage = tsComport
+    ActivePage = tsWatches
     Align = alClient
     Style = tsFlatButtons
     TabOrder = 1
-    ExplicitLeft = 249
-    ExplicitWidth = 416
     object tsWatches: TTabSheet
       Caption = 'Watches'
-      ExplicitWidth = 408
     end
     object tsCallstack: TTabSheet
       Caption = 'Callstack'
       ImageIndex = 1
-      ExplicitWidth = 408
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object tsWinIPC: TTabSheet
       Caption = 'WinIPC'
       ImageIndex = 2
-      ExplicitWidth = 408
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object tsWinODS: TTabSheet
       Caption = 'OutputDebugString API'
       ImageIndex = 3
-      ExplicitWidth = 408
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object tsComport: TTabSheet
       Caption = 'Serial port'
       ImageIndex = 4
-      ExplicitWidth = 408
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object tsZeroMQ: TTabSheet
       Caption = 'ZeroMQ'
       ImageIndex = 5
-      ExplicitWidth = 473
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
   end
   object pnlBottom: TPanel

@@ -24,7 +24,6 @@ unit LogViewer.MessageList.Settings;
         - Name columns
         - Value columns
    - default filtered messages
-
  }
 
 interface
@@ -48,11 +47,13 @@ type
     FVisibleMessageTypes : TLogMessageTypes;
     FWatchSettings       : TWatchSettings;
 
+    {$REGION 'property access methods'}
     function GetAutoScrollMessages: Boolean;
     procedure SetAutoScrollMessages(const Value: Boolean);
     function GetOnChanged: IEvent<TNotifyEvent>;
     function GetVisibleMessageTypes: TLogMessageTypes;
     procedure SetVisibleMessageTypes(const Value: TLogMessageTypes);
+    {$ENDREGION}
 
   protected
     procedure Changed;

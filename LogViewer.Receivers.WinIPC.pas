@@ -40,13 +40,14 @@ type
      FOnReceiveMessage : Event<TReceiveMessageEvent>;
      FName             : string;
 
+  protected
+    {$REGION 'property access methods'}
     function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
     function GetName: string;
     procedure SetName(const Value: string);
-
-  protected
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
+    {$ENDREGION}
 
     procedure FIPCServerMessage(Sender: TObject);
 
@@ -56,6 +57,8 @@ type
     constructor Create(const AName: string); reintroduce;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
+
+    function ToString: string; override;
 
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
@@ -118,6 +121,11 @@ begin
   FName := Value;
 end;
 
+function TWinIPChannelReceiver.ToString: string;
+begin
+  Result := ClassName;
+end;
+
 procedure TWinIPChannelReceiver.SetEnabled(const Value: Boolean);
 begin
   if Value <> Enabled then
@@ -140,7 +148,7 @@ end;
 {$REGION 'event dispatch methods'}
 procedure TWinIPChannelReceiver.DoReceiveMessage(AStream: TStream);
 begin
-  FOnReceiveMessage.Invoke(Self, AStream);
+  FOnReceiveMessage.Invoke(Self, Self as IChannelReceiver, AStream);
 end;
 {$ENDREGION}
 

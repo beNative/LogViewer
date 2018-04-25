@@ -48,7 +48,7 @@ object frmMessageList: TfrmMessageList
       Height = 25
       Align = alTop
       BevelOuter = bvNone
-      Caption = 'Message content'
+      Caption = 'Message Details'
       Font.Charset = ANSI_CHARSET
       Font.Color = clGray
       Font.Height = -16
@@ -131,7 +131,7 @@ object frmMessageList: TfrmMessageList
           Height = 25
           Align = alTop
           BevelOuter = bvNone
-          Caption = 'Watches'
+          Caption = 'Watch List'
           Font.Charset = ANSI_CHARSET
           Font.Color = clGray
           Font.Height = -16
@@ -157,7 +157,7 @@ object frmMessageList: TfrmMessageList
           Height = 25
           Align = alTop
           BevelOuter = bvNone
-          Caption = 'Callstack'
+          Caption = 'Call Stack'
           Font.Charset = ANSI_CHARSET
           Font.Color = clGray
           Font.Height = -16
@@ -238,7 +238,7 @@ object frmMessageList: TfrmMessageList
     Left = 607
     Top = 150
     Bitmap = {
-      494C010112001500200010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010112001500380010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000005000000001002000000000000050
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

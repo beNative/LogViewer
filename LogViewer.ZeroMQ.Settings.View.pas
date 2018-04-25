@@ -21,12 +21,13 @@ interface
 uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs;
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
 
 type
   TfrmZeroMQSettings = class(TForm)
-  private
-  public
+    edtAddress : TEdit;
+    lblAddress : TLabel;
+
   end;
 
 implementation

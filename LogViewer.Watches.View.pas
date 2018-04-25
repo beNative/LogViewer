@@ -23,7 +23,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
   Vcl.ComCtrls, Vcl.ExtCtrls,
 
   VirtualTrees,
@@ -31,7 +31,7 @@ uses
   Spring.Collections,
 
   DSharp.Windows.TreeViewPresenter, DSharp.Windows.ColumnDefinitions,
-  DSharp.Core.DataTemplates,
+
 
   LogViewer.Messages.Data, LogViewer.Watches.Data;
 
@@ -135,8 +135,7 @@ uses
 
   DSharp.Windows.ControlTemplates,
 
-  DDuce.Components.Factories, DDuce.Factories, DDuce.Factories.VirtualTrees,
-  DDuce.Logger.Interfaces;
+  DDuce.Factories, DDuce.Factories.VirtualTrees;
 
 {$R *.dfm}
 

@@ -27,15 +27,17 @@ uses
 
 type
   TfrmWinODSSettings = class(TForm)
-  {$REGION 'designer controls'}
+    {$REGION 'designer controls'}
     lblProcess   : TLabel;
     lblProcessId : TLabel;
     edtProcess   : TButtonedEdit;
-  {$ENDREGION}
+    edtProcessId : TButtonedEdit;
+    {$ENDREGION}
+
   private
     FSettings : TWinODSSettings;
-  public
 
+  public
     constructor Create(
       AOwner    : TComponent;
       ASettings : TWinODSSettings

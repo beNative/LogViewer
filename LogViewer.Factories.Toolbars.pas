@@ -53,18 +53,18 @@ type
     ): TToolButton; overload;
 
     function CreateToolButton(
-            AParent     : TToolBar;
+      AParent           : TToolBar;
       const AActionName : string;
-            AStyle      : TToolButtonStyle = tbsButton;
-            APopupMenu  : TPopupMenu = nil
+      AStyle            : TToolButtonStyle = tbsButton;
+      APopupMenu        : TPopupMenu = nil
     ): TToolButton; overload;
 
   public
     procedure AfterConstruction; override;
 
     constructor Create(
-      AActions  : ILogViewerActions;
-      AMenus    : ILogViewerMenus
+      AActions : ILogViewerActions;
+      AMenus   : ILogViewerMenus
     );
 
     function CreateMainToolbar(
@@ -185,6 +185,7 @@ begin
   TB.AllowTextButtons := True;
   CreateToolButton(TB, 'actToggleAlwaysOnTop');
   CreateToolButton(TB, 'actToggleFullScreen');
+  CreateToolButton(TB, 'actStart');
   CreateToolButton(TB, 'actStop');
   CreateToolButton(TB, 'actClearMessages');
   CreateToolButton(TB);

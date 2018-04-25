@@ -41,6 +41,7 @@ type
   TComPortChannelReceiver = class(TInterfacedObject, IChannelReceiver)
   private class var
     FCounter : Integer;
+
   private
     FEnabled          : Boolean;
     FOnReceiveMessage : Event<TReceiveMessageEvent>;
@@ -50,20 +51,25 @@ type
     FBuffer           : TMemoryStream;
     FName             : string;
 
+    function GetSettings: TComPortSettings;
+    function GetName: string;
+    procedure SetName(const Value: string);
+
     procedure FSerialPortStatus(
       Sender      : TObject;
       Reason      : THookSerialReason;
       const Value : string
     );
     procedure FPollTimerTimer(Sender: TObject);
-    function GetSettings: TComPortSettings;
-    function GetName: string;
-    procedure SetName(const Value: string);
 
   protected
+    {$REGION 'property access methods'}
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
     function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
+    {$ENDREGION}
+
+    function ToString: string;
 
     procedure DoReceiveMessage(AStream : TStream);
     procedure DoStringReceived(const AString: AnsiString);
@@ -105,6 +111,7 @@ constructor TComPortChannelReceiver.Create(const AName : string;
   ASettings: TComPortSettings);
 begin
   inherited Create;
+  Guard.CheckNotNull(ASettings, 'ASettings');
   if AName = '' then
   begin
     FName := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
@@ -197,7 +204,7 @@ end;
 {$REGION 'event dispatch methods'}
 procedure TComPortChannelReceiver.DoReceiveMessage(AStream: TStream);
 begin
-  FOnReceiveMessage.Invoke(Self, AStream);
+  FOnReceiveMessage.Invoke(Self, Self as IChannelReceiver, AStream);
 end;
 
 procedure TComPortChannelReceiver.DoStringReceived(const AString: AnsiString);
@@ -283,6 +290,13 @@ begin
     False,
     True
   );
+end;
+{$ENDREGION}
+
+{$REGION 'protected methods'}
+function TComPortChannelReceiver.ToString: string;
+begin
+//
 end;
 {$ENDREGION}
 

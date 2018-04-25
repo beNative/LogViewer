@@ -1,8 +1,8 @@
 object frmWinIPCSettings: TfrmWinIPCSettings
   Left = 0
   Top = 0
-  ClientHeight = 411
-  ClientWidth = 690
+  ClientHeight = 36
+  ClientWidth = 324
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -13,18 +13,18 @@ object frmWinIPCSettings: TfrmWinIPCSettings
   PixelsPerInch = 96
   TextHeight = 13
   object lblWindowHandleName: TLabel
-    Left = 72
-    Top = 32
-    Width = 108
+    Left = 8
+    Top = 8
+    Width = 106
     Height = 13
-    Caption = 'lblWindowHandleName'
+    Caption = 'Window handle name:'
+    FocusControl = edtWindowHandleName
   end
   object edtWindowHandleName: TEdit
-    Left = 200
-    Top = 29
-    Width = 121
+    Left = 120
+    Top = 6
+    Width = 193
     Height = 21
     TabOrder = 0
-    Text = 'edtWindowHandleName'
   end
 end

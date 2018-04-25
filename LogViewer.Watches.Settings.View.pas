@@ -27,10 +27,13 @@ uses
 
 type
   TfrmWatchSettings = class(TForm)
-    chkOnlyTrackChanges: TCheckBox;
+    chkOnlyTrackChanges : TCheckBox;
+
     procedure chkOnlyTrackChangesClick(Sender: TObject);
+
   private
     FSettings : TWatchSettings;
+
   protected
     procedure UpdateActions; override;
 

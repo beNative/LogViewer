@@ -25,14 +25,13 @@ uses
 
   synaser;
 
-const
-  DEFAULT_PARITY    = 'N';
-  DEFAULT_BAUDRATE  = 115200;
-  DEFAULT_DATA_BITS = 8;
-  DEFAULT_STOP_BITS = SB1;
-
 type
   TComPortSettings = class(TPersistent)
+  const
+    DEFAULT_PARITY    = 'N';
+    DEFAULT_BAUDRATE  = 115200;
+    DEFAULT_DATA_BITS = 8;
+    DEFAULT_STOP_BITS = SB1;
   private
     FBaudRate  : Integer;
     FDataBits  : Integer;
@@ -41,6 +40,7 @@ type
     FPort      : string;
     FOnChanged : Event<TNotifyEvent>;
 
+    {$REGION 'property access methods'}
     function GetBaudRate: Integer;
     procedure SetBaudRate(const Value: Integer);
     function GetDataBits: Integer;
@@ -52,6 +52,7 @@ type
     function GetParity: Char;
     procedure SetParity(const Value: Char);
     function GetOnChanged: IEvent<TNotifyEvent>;
+    {$ENDREGION}
 
   protected
     procedure Changed;

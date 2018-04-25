@@ -27,9 +27,9 @@ unit LogViewer.Settings.Dialog;
 interface
 
 uses
-  System.SysUtils, System.Variants, System.Classes, System.ImageList,
+  System.SysUtils, System.Variants, System.Classes,
   System.Actions,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.ImgList,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls,
   Vcl.ComCtrls, Vcl.ActnList, Vcl.StdCtrls,
 
   VirtualTrees,
@@ -78,6 +78,11 @@ type
       var CellText : string
     );
 
+    procedure FConfigTreeFreeNode(
+      Sender: TBaseVirtualTree;
+      Node: PVirtualNode
+    );
+
   protected
     procedure BuildConfigNodes;
     procedure AddNodesToTree(AParent: PVirtualNode; ANode: TConfigNode);
@@ -86,7 +91,6 @@ type
     procedure CreateSettingsForms;
 
   public
-
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
     constructor Create(
@@ -101,35 +105,49 @@ implementation
 {$R *.dfm}
 
 uses
-  DDuce.Factories;
+  DDuce.Factories.VirtualTrees;
 
 {$REGION 'construction and destruction'}
+constructor TfrmLogViewerSettings.Create(AOwner: TComponent;
+  ASettings: TLogViewerSettings);
+begin
+  inherited Create(AOwner);
+  FSettings := ASettings;
+end;
 
 procedure TfrmLogViewerSettings.AfterConstruction;
 begin
   inherited AfterConstruction;
-  InitializeControls;
-//  FConfigTree := TFactories.CreateVirtualStringTree(Self, pnlConfigTree);
-//  FConfigTree.OnGetText := FConfigTreeGetText;
-//  FConfigTree.TreeOptions.PaintOptions :=
-//    FConfigTree.TreeOptions.PaintOptions + [toShowTreeLines];
-//
-//  FConfigTree.TreeOptions.AutoOptions := FConfigTree.TreeOptions.AutoOptions
-//    + [toAutoExpand];
+//  InitializeControls;
+  FConfigTree := TVirtualStringTreeFactory.CreateTreeList(Self, pnlConfigTree);
+  FConfigTree.OnGetText := FConfigTreeGetText;
+  FConfigTree.OnFreeNode := FConfigTreeFreeNode;
+  FConfigTree.TreeOptions.PaintOptions :=
+    FConfigTree.TreeOptions.PaintOptions + [toShowTreeLines];
 
-//  FConfigTree.NodeDataSize := SizeOf(TConfigNode);
+  FConfigTree.NodeDataSize := SizeOf(TConfigNode);
   BuildConfigNodes;
 end;
 
 procedure TfrmLogViewerSettings.BeforeDestruction;
 begin
-  //FConfigRoot.Free;
+//  FViewSettings.Free;
+//  FConfigTree.Clear;
   FConfigTree.Free;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
+procedure TfrmLogViewerSettings.FConfigTreeFreeNode(Sender: TBaseVirtualTree;
+  Node: PVirtualNode);
+var
+  CN : TConfigNode;
+begin
+  CN := Sender.GetNodeData<TConfigNode>(Node);
+  FreeAndNil(CN);
+end;
+
 procedure TfrmLogViewerSettings.FConfigTreeGetText(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
   var CellText: string);
@@ -142,9 +160,9 @@ end;
 
 procedure TfrmLogViewerSettings.InitializeControls;
 var
-  I, J: Integer;
-  B : Boolean;
-  LNode: TTreeNode;
+  I, J  : Integer;
+  B     : Boolean;
+  LNode : TTreeNode;
 begin
   // store index of corresponding page in Data property of treenode.
   for I := 0 to tvConfig.Items.Count - 1 do
@@ -163,10 +181,8 @@ begin
       Inc(J);
     end;
   end;
-
   CreateSettingsForms;
   tvConfig.FullExpand;
-
 end;
 
 procedure TfrmLogViewerSettings.tvConfigChange(Sender: TObject;
@@ -197,19 +213,13 @@ end;
 
 procedure TfrmLogViewerSettings.BuildConfigNodes;
 begin
-//  FViewSettings := TConfigNode.Create('View settings');
-//  AddNodesToTree(nil, FViewSettings);
-//  AddNodesToTree(FViewSettings.VTNode, TConfigNode.Create('Watches'));
-//  AddNodesToTree(FViewSettings.VTNode, TConfigNode.Create('Callstack'));
-//  AddNodesToTree(nil, TConfigNode.Create('Channel settings'));
-//  AddNodesToTree(nil, TConfigNode.Create('General settings'));
-  //FConfigRoot.Nodes.Add();
-end;
-constructor TfrmLogViewerSettings.Create(AOwner: TComponent;
-  ASettings: TLogViewerSettings);
-begin
-  inherited Create(AOwner);
-  FSettings := ASettings;
+  FViewSettings := TConfigNode.Create('View settings');
+  AddNodesToTree(nil, FViewSettings);
+  AddNodesToTree(FViewSettings.VTNode, TConfigNode.Create('Watches'));
+  AddNodesToTree(FViewSettings.VTNode, TConfigNode.Create('Callstack'));
+  AddNodesToTree(nil, TConfigNode.Create('Channel settings'));
+  AddNodesToTree(nil, TConfigNode.Create('General settings'));
+  //FConfigTree.Nodes.Add();
 end;
 
 procedure TfrmLogViewerSettings.CreateSettingsForms;

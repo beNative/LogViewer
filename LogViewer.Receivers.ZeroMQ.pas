@@ -38,6 +38,11 @@ uses
 
   LogViewer.Interfaces;
 
+const
+  ZQM_DEFAULT_ADDRESS = 'tcp://localhost:5555';
+//  tcp://GANYMEDES:5555
+//  tcp://EUROPA:5555
+
 type
   TZeroMQChannelReceiver = class(TInterfacedObject, IChannelReceiver)
   private class var
@@ -51,6 +56,7 @@ type
     FTimer            : TTimer;
     FEnabled          : Boolean;
     FName             : string;
+    FAddress          : string;
 
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
@@ -67,7 +73,10 @@ type
     procedure FTimerTimer(Sender: TObject);
 
   public
-    constructor Create(const AName: string);
+    constructor Create(
+      const AName    : string = '';
+      const AAddress : string = ''
+    );
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 
@@ -87,7 +96,8 @@ uses
   System.SysUtils;
 
 {$REGION 'construction and destruction'}
-constructor TZeroMQChannelReceiver.Create(const AName: string);
+constructor TZeroMQChannelReceiver.Create(const AName: string;
+  const AAddress: string);
 begin
   inherited Create;
   if AName = '' then
@@ -96,23 +106,27 @@ begin
   end
   else
     FName := AName;
+  FAddress := AAddress;
 end;
 
 procedure TZeroMQChannelReceiver.AfterConstruction;
 begin
+  inherited AfterConstruction;
   Inc(FCounter);
+  if FAddress = '' then
+    FAddress := ZQM_DEFAULT_ADDRESS;
   FTimer := TTimer.Create(nil);
   FTimer.OnTimer := FTimerTimer;
   FZMQ     := TZeroMQ.Create;
   FEnabled := ConnectSubscriber;
-
-  inherited AfterConstruction;
+  FZMQStream := TStringStream.Create;
 end;
 
 procedure TZeroMQChannelReceiver.BeforeDestruction;
 begin
   CloseSubscriber;
   FTimer.Free;
+  FZMQStream.Free;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
@@ -155,7 +169,7 @@ end;
 {$REGION 'event dispatch methods'}
 procedure TZeroMQChannelReceiver.DoReceiveMessage(AStream: TStream);
 begin
-//
+  FOnReceiveMessage.Invoke(Self, Self as IChannelReceiver, AStream);
 end;
 {$ENDREGION}
 
@@ -182,14 +196,13 @@ begin
 end;
 
 function TZeroMQChannelReceiver.ConnectSubscriber: Boolean;
-//var
-//  N : Integer;
+var
+  N : Integer;
 begin
   FSubscriber := FZMQ.Start(ZMQSocket.Subscriber);
-//  N := FSubscriber.Connect('tcp://GANYMEDES:5555');
-//  N := FSubscriber.Connect('tcp://localhost:5555');
-  //N := FSubscriber.Connect('tcp://EUROPA:5555');
-
+  N := FSubscriber.Connect(FAddress);
+  // '' as Filter means all ?
+  //FSubscriber.Subscribe(Name); // required!!
   FSubscriber.Subscribe(''); // required!!
   FPoll := FZMQ.Poller;
   FPoll.RegisterPair(FSubscriber, [PollEvent.PollIn],

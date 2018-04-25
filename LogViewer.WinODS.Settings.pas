@@ -30,7 +30,13 @@ type
     FProcessId   : Integer;
     FProcessName : string;
 
+    {$REGION 'property access methods'}
     function GetOnChanged: IEvent<TNotifyEvent>;
+    function GetProcessId: Integer;
+    function GetProcessName: string;
+    procedure SetProcessId(const Value: Integer);
+    procedure SetProcessName(const Value: string);
+    {$ENDREGION}
 
   protected
     procedure Changed;
@@ -39,10 +45,10 @@ type
     procedure Assign(Source: TPersistent); override;
 
     property ProcessName: string
-      read FProcessName write FProcessName;
+      read GetProcessName write SetProcessName;
 
     property ProcessId: Integer
-      read FProcessId write FProcessId;
+      read GetProcessId write SetProcessId;
 
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
@@ -54,6 +60,34 @@ implementation
 function TWinODSSettings.GetOnChanged: IEvent<TNotifyEvent>;
 begin
   Result := FOnChanged;
+end;
+
+function TWinODSSettings.GetProcessId: Integer;
+begin
+  Result := FProcessId;
+end;
+
+procedure TWinODSSettings.SetProcessId(const Value: Integer);
+begin
+  if Value <> ProcessId then
+  begin
+    FProcessId := Value;
+    Changed;
+  end;
+end;
+
+function TWinODSSettings.GetProcessName: string;
+begin
+  Result := FProcessName;
+end;
+
+procedure TWinODSSettings.SetProcessName(const Value: string);
+begin
+  if Value <> ProcessName then
+  begin
+    FProcessName := Value;
+    Changed;
+  end;
 end;
 {$ENDREGION}
 
@@ -71,7 +105,7 @@ var
 begin
   if Source is TWinODSSettings then
   begin
-    LSettings := TWinODSSettings(Source);
+    LSettings   := TWinODSSettings(Source);
     ProcessName := LSettings.ProcessName;
     ProcessId   := LSettings.ProcessId;
   end

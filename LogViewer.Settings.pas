@@ -26,7 +26,8 @@ uses
   DDuce.FormSettings,
 
   LogViewer.MessageList.Settings, LogViewer.Watches.Settings,
-  LogViewer.ComPort.Settings, LogViewer.WinODS.Settings, LogViewer.WinIPC.Settings;
+  LogViewer.ComPort.Settings, LogViewer.WinODS.Settings,
+  LogViewer.WinIPC.Settings;
 
 type
   TLogViewerSettings = class(TPersistent)

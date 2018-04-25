@@ -22,21 +22,32 @@ interface
 
 uses
   System.Classes, System.Actions,
-  Vcl.Controls, Vcl.ActnList, Vcl.ComCtrls, Vcl.Forms,
+  Vcl.Controls, Vcl.ActnList, Vcl.ComCtrls, Vcl.Forms, Vcl.Menus,
 
   Spring, Spring.Collections,
-
-  DDuce.Logger.Interfaces,
 
   LogViewer.Settings, LogViewer.ComPort.Settings;
 
 type
+  ILogViewer       = interface;
+  IChannelReceiver = interface;
+
   TReceiveMessageEvent = procedure(
-    Sender  : TObject;
-    AStream : TStream
+    Sender    : TObject;
+    AReceiver : IChannelReceiver;
+    AStream   : TStream
   ) of object;
 
-type
+  TLogViewerEvent = procedure(
+    Sender     : TObject;
+    ALogViewer : ILogViewer
+  ) of object;
+
+  TChannelReceiverEvent = procedure(
+    Sender    : TObject;
+    AReceiver : IChannelReceiver
+  ) of object;
+
   IComPortSettings = interface
   ['{BFE46291-9932-4319-8387-9F926597F17F}']
     function GetSettings: TComPortSettings;
@@ -47,11 +58,15 @@ type
 
   IChannelReceiver = interface
   ['{7C96D7BD-3D10-4A9A-90AF-43E755859B37}']
+    {$REGION 'property access methods'}
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
     function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
     function GetName: string;
     procedure SetName(const Value: string);
+    {$ENDREGION}
+
+    function ToString: string;
 
     property Name: string
       read GetName write SetName;
@@ -65,8 +80,10 @@ type
 
   ILogViewerActions = interface
   ['{73B2BDA9-4098-49A3-95D7-E837EC129FE4}']
+    {$REGION 'property access methods'}
     function GetActionList: TActionList;
     function GetItem(AName: string): TCustomAction;
+    {$ENDREGION}
 
     procedure UpdateActions;
 
@@ -79,17 +96,31 @@ type
 
   ILogViewerMenus = interface
   ['{B3F8FAFC-00FB-4233-890A-BBBC356B186E}']
+    {$REGION 'property access methods'}
+    function GetLogTreeViewerPopupMenu: TPopupMenu;
+    function GetMessageTypesPopupMenu: TPopupMenu;
+    {$ENDREGION}
+
+    property LogTreeViewerPopupMenu: TPopupMenu
+      read GetLogTreeViewerPopupMenu;
+
+    property MessageTypesPopupMenu: TPopupMenu
+      read GetMessageTypesPopupMenu;
   end;
 
-  ILogViewerMessagesView = interface
+  ILogViewer = interface
   ['{C1DF2E26-4507-4B35-94E1-19A36775633F}']
+    {$REGION 'property access methods'}
     function GetReceiver: IChannelReceiver;
     function GetForm: TCustomForm;
+    {$ENDREGION}
 
     procedure Clear;
     procedure UpdateView;
     procedure GotoFirst;
     procedure GotoLast;
+    procedure CollapseAll;
+    procedure ExpandAll;
 
     property Receiver: IChannelReceiver
       read GetReceiver;
@@ -100,6 +131,19 @@ type
 
   ILogViewerEvents = interface
   ['{3BD96AF8-654C-4E7C-9C73-EA6522330E88}']
+    {$REGION 'property access methods'}
+    function GetOnAddLogViewer: IEvent<TLogViewerEvent>;
+    function GetOnAddReceiver: IEvent<TChannelReceiverEvent>;
+    {$ENDREGION}
+
+    procedure DoAddLogViewer(ALogViewer: ILogViewer);
+    procedure DoAddReceiver(AReceiver: IChannelReceiver);
+
+    property OnAddReceiver: IEvent<TChannelReceiverEvent>
+      read GetOnAddReceiver;
+
+    property OnAddLogViewer: IEvent<TLogViewerEvent>
+      read GetOnAddLogViewer;
   end;
 
   ILogViewerCommands = interface
@@ -115,16 +159,22 @@ type
 
   ILogViewerManager = interface
   ['{3EC3A6B2-88B8-4B5E-9160-D267DBFB9C22}']
+    {$REGION 'property access methods'}
     function GetMenus: ILogViewerMenus;
     function GetActions: ILogViewerActions;
     function GetSettings: TLogViewerSettings;
-    function GetActiveView: ILogViewerMessagesView;
-    procedure SetActiveView(const Value: ILogViewerMessagesView);
-    function GetViews: IList<ILogViewerMessagesView>;
+    function GetActiveView: ILogViewer;
+    procedure SetActiveView(const Value: ILogViewer);
+    function GetViews: IList<ILogViewer>;
+    function GetReceivers: IList<IChannelReceiver>;
+    function GetCommands: ILogViewerCommands;
+    function GetEvents: ILogViewerEvents;
+    {$ENDREGION}
 
-    procedure AddView(AView: ILogViewerMessagesView);
+    procedure AddView(ALogViewer: ILogViewer);
+    procedure AddReceiver(AReceiver: IChannelReceiver);
 
-    property ActiveView: ILogViewerMessagesView
+    property ActiveView: ILogViewer
       read GetActiveView write SetActiveView;
 
     property Menus: ILogViewerMenus
@@ -133,11 +183,20 @@ type
     property Actions: ILogViewerActions
       read GetActions;
 
+    property Commands: ILogViewerCommands
+      read GetCommands;
+
     property Settings: TLogViewerSettings
       read GetSettings;
 
-    property Views: IList<ILogViewerMessagesView>
+    property Events: ILogViewerEvents
+      read GetEvents;
+
+    property Views: IList<ILogViewer>
       read GetViews;
+
+    property Receivers: IList<IChannelReceiver>
+      read GetReceivers;
   end;
 
   ILogViewerToolbarsFactory = interface

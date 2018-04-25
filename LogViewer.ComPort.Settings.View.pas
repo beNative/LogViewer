@@ -40,6 +40,7 @@ type
 
   private
     FSettings: TComPortSettings;
+
   protected
     procedure UpdateActions; override;
 
@@ -49,8 +50,6 @@ type
       ASettings : TComPortSettings
     ); reintroduce;
     procedure BeforeDestruction; override;
-
-
 
   end;
 

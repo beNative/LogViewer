@@ -7,6 +7,7 @@ object dmManager: TdmManager
     Left = 255
     Top = 22
     object actClearMessages: TAction
+      Category = 'Commands'
       Caption = 'Clear messages'
       Hint = 'Clears all received messages.'
       ImageIndex = 3
@@ -14,6 +15,7 @@ object dmManager: TdmManager
       OnExecute = actClearMessagesExecute
     end
     object actToggleAlwaysOnTop: TAction
+      Category = 'Form'
       AutoCheck = True
       Caption = 'Always on top'
       Hint = 
@@ -23,156 +25,194 @@ object dmManager: TdmManager
       OnExecute = actToggleAlwaysOnTopExecute
     end
     object actOpen: TAction
+      Category = 'File'
       Caption = 'Open file'
       OnExecute = actOpenExecute
     end
     object actSave: TAction
+      Category = 'File'
       Caption = 'Save'
       OnExecute = actSaveExecute
     end
     object actSelectAll: TAction
+      Category = 'Commands'
       Caption = 'Select all'
       Hint = 'Show all message types.'
       OnExecute = actSelectAllExecute
     end
     object actSelectNone: TAction
+      Category = 'Commands'
       Caption = 'Select none'
       Hint = 'Hide all message types.'
       OnExecute = actSelectNoneExecute
     end
     object actInfo: TAction
+      Category = 'NotificationMessages'
       Caption = 'Info'
       ImageIndex = 7
       OnExecute = actInfoExecute
     end
     object actWarning: TAction
+      Category = 'NotificationMessages'
       Caption = 'Warning'
       ImageIndex = 4
       OnExecute = actWarningExecute
     end
     object actValue: TAction
+      Category = 'DataMessages'
       Caption = 'Value'
       ImageIndex = 10
       OnExecute = actValueExecute
     end
     object actError: TAction
+      Category = 'NotificationMessages'
       Caption = 'Error'
       GroupIndex = 1
       ImageIndex = 5
       OnExecute = actErrorExecute
     end
     object actConditional: TAction
+      Category = 'NotificationMessages'
       Caption = 'Conditional'
       ImageIndex = 2
       OnExecute = actConditionalExecute
     end
     object actCheckPoint: TAction
+      Category = 'ControlFlowMessages'
       Caption = 'Checkpoint'
       ImageIndex = 8
       OnExecute = actCheckPointExecute
     end
     object actStrings: TAction
+      Category = 'DataMessages'
       Caption = 'Strings'
       ImageIndex = 19
       OnExecute = actStringsExecute
     end
     object actCallStack: TAction
+      Category = 'DiagnosticMessages'
       Caption = 'CallStack'
       ImageIndex = 6
       OnExecute = actCallStackExecute
     end
     object actObject: TAction
+      Category = 'DataMessages'
       Caption = 'Object'
       ImageIndex = 13
       OnExecute = actObjectExecute
     end
     object actException: TAction
+      Category = 'NotificationMessages'
       Caption = 'Exception'
       ImageIndex = 1
       OnExecute = actExceptionExecute
     end
     object actBitmap: TAction
+      Category = 'DataMessages'
       Caption = 'Bitmap'
       ImageIndex = 22
       OnExecute = actBitmapExecute
     end
     object actHeapInfo: TAction
+      Category = 'DiagnosticMessages'
       Caption = 'HeapInfo'
       ImageIndex = 21
       OnExecute = actHeapInfoExecute
     end
     object actMemory: TAction
+      Category = 'DataMessages'
       Caption = 'Memory'
       ImageIndex = 20
       OnExecute = actMemoryExecute
     end
     object actCustomData: TAction
+      Category = 'DataMessages'
       Caption = 'Custom Data'
       ImageIndex = 21
       OnExecute = actCustomDataExecute
     end
     object actMethodTraces: TAction
+      Category = 'ControlFlowMessages'
       Caption = 'Method Traces'
       ImageIndex = 0
       OnExecute = actMethodTracesExecute
     end
     object actStop: TAction
-      AutoCheck = True
+      Category = 'Commands'
       Caption = 'Stop capturing'
       ImageIndex = 9
       ShortCut = 116
       OnExecute = actStopExecute
     end
     object actFilterMessages: TAction
+      Category = 'Commands'
       Caption = 'Filter messages'
       ImageIndex = 15
       ShortCut = 16454
       OnExecute = actFilterMessagesExecute
     end
     object actSetFocusToFilter: TAction
+      Category = 'Commands'
       AutoCheck = True
       Caption = 'Sets focus to filter entry'
       ShortCut = 113
       OnExecute = actSetFocusToFilterExecute
     end
     object actToggleFullscreen: TAction
+      Category = 'Form'
       AutoCheck = True
       Caption = 'Toggle full screen'
       ShortCut = 122
       OnExecute = actToggleFullscreenExecute
     end
     object actCollapseAll: TAction
+      Category = 'Commands'
       Caption = 'Collapse all'
       Hint = 'Collapse all messages.'
       ImageIndex = 18
       OnExecute = actCollapseAllExecute
     end
     object actExpandAll: TAction
+      Category = 'Commands'
       Caption = 'Expand all'
       Hint = 'Expand all messages.'
       ImageIndex = 14
       OnExecute = actExpandAllExecute
     end
     object actGotoFirst: TAction
+      Category = 'Commands'
       Caption = 'Go to first'
       Hint = 'Go to first message.'
       ShortCut = 16420
       OnExecute = actGotoFirstExecute
     end
     object actGotoLast: TAction
+      Category = 'Commands'
       Caption = 'Go to last'
       Hint = 'Go to last message.'
       ShortCut = 16419
       OnExecute = actGotoLastExecute
     end
     object actSettings: TAction
+      Category = 'Commands'
       Caption = 'actSettings'
       ShortCut = 49235
       OnExecute = actSettingsExecute
     end
     object actAutoScrollMessages: TAction
+      Category = 'Commands'
       Caption = 'Auto scroll to last message'
       OnExecute = actAutoScrollMessagesExecute
+    end
+    object actMessageTypesMenu: TAction
+      Category = 'Menus'
+      Caption = 'Message types'
+    end
+    object actStart: TAction
+      Category = 'Commands'
+      Caption = 'Start capturing'
+      ImageIndex = 12
+      OnExecute = actStartExecute
     end
   end
   object imlMessageTypes: TImageList
@@ -180,7 +220,7 @@ object dmManager: TdmManager
     Left = 183
     Top = 22
     Bitmap = {
-      494C010112001500040010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010112001500280010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000005000000001002000000000000050
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -858,7 +898,7 @@ object dmManager: TdmManager
     Left = 39
     Top = 22
     Bitmap = {
-      494C010119001D00040010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010119001D00280010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000007000000001002000000000000070
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000330000003300000000000000000000
@@ -1788,5 +1828,15 @@ object dmManager: TdmManager
       000100000000FE07000380018001FE830003C003C003FFC30007C003C003FFC1
       000FF00FF00FFFE1FFFFF81FF81FFFF100000000000000000000000000000000
       000000000000}
+  end
+  object ppmLogTreeViewer: TPopupMenu
+    Images = imlMain
+    Left = 80
+    Top = 120
+  end
+  object ppmMessageTypes: TPopupMenu
+    Images = imlMessageTypes
+    Left = 200
+    Top = 120
   end
 end

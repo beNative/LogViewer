@@ -29,10 +29,7 @@ uses
 
   Spring.Collections,
 
-  DSharp.Windows.TreeViewPresenter, DSharp.Windows.ColumnDefinitions,
-  DSharp.Core.DataTemplates,
-
-  LogViewer.CallStack.Data;
+  DSharp.Windows.TreeViewPresenter, DSharp.Windows.ColumnDefinitions;
 
 type
   TfrmCallStackView = class(TForm)
@@ -61,9 +58,7 @@ implementation
 {$R *.dfm}
 
 uses
-  DDuce.Factories, DDuce.Factories.VirtualTrees,
-
-  DDuce.ObjectInspector.zObjectInspector;
+  DDuce.Factories, DDuce.Factories.VirtualTrees;
 
 {$REGION 'construction and destruction'}
 constructor TfrmCallStackView.Create(AOwner: TComponent; AData: IObjectList);

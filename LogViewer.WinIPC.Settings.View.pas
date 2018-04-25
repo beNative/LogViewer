@@ -29,8 +29,10 @@ type
   TfrmWinIPCSettings = class(TForm)
     lblWindowHandleName : TLabel;
     edtWindowHandleName : TEdit;
+
   private
     FSettings : TWinIPCSettings;
+
   public
     constructor Create(
       AOwner    : TComponent;
@@ -38,15 +40,13 @@ type
     ); reintroduce;
     procedure BeforeDestruction; override;
 
-
   end;
 
 implementation
 
 {$R *.dfm}
 
-{ TfrmWinIPCSettings }
-
+{$REGION 'construction and destruction'}
 procedure TfrmWinIPCSettings.BeforeDestruction;
 begin
   FSettings := nil;
@@ -59,5 +59,6 @@ begin
   inherited Create(AOwner);
   FSettings := ASettings;
 end;
+{$ENDREGION}
 
 end.

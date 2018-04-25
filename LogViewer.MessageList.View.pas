@@ -35,9 +35,6 @@ uses
 
   Spring.Collections,
 
-  DSharp.Windows.TreeViewPresenter, DSharp.Windows.ColumnDefinitions,
-  DSharp.Core.DataTemplates,
-
   DDuce.Editor.Interfaces, DDuce.Logger.Interfaces,
 
   LogViewer.Messages.Data, LogViewer.Watches.Data, LogViewer.Watches.View,
@@ -45,7 +42,7 @@ uses
   LogViewer.MessageList.Settings;
 
 type
-  TfrmMessageList = class(TForm, ILogViewerMessagesView)
+  TfrmMessageList = class(TForm, ILogViewer)
     btnFilterMessages : TButton;
     chkAutoFilter     : TCheckBox;
     edtMessageFilter  : TLabeledEdit;
@@ -70,34 +67,48 @@ type
     {$ENDREGION}
 
     procedure edtMessageFilterChange(Sender: TObject);
-    procedure edtMessageFilterKeyDown(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
-    procedure edtMessageFilterKeyUp(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
+    procedure edtMessageFilterKeyDown(
+      Sender  : TObject;
+      var Key : Word;
+      Shift   : TShiftState
+    );
+    procedure edtMessageFilterKeyUp(
+      Sender  : TObject;
+      var Key : Word;
+      Shift   : TShiftState
+    );
 
   private class var
     FCounter : Integer;
 
   private
-    FMessageCount    : Integer;
-    FCurrentMsg      : TLogMessage;
-    FCallStack       : IList<TCallStackData>;
-    FWatches         : TWatchList;
-    FLogTreeView     : TVirtualStringTree;
-    FReceiver        : IChannelReceiver;
-    FCallStackView   : TfrmCallStackView;
-    FWatchesView     : TfrmWatchesView;
-    FManager         : ILogViewerManager;
+    FMessageCount   : Integer;
+    FCurrentMsg     : TLogMessage;
+    FCallStack      : IList<TCallStackData>;
+    FWatches        : TWatchList;
+    FLogTreeView    : TVirtualStringTree;
+    FReceiver       : IChannelReceiver;
+    FCallStackView  : TfrmCallStackView;
+    FWatchesView    : TfrmWatchesView;
+    FManager        : ILogViewerManager;
 
-    FEditorManager   : IEditorManager;
-    FEditorSettings  : IEditorSettings;
-    FEditorView      : IEditorView;
-    FExpandParents   : Boolean;
-    FLastParent      : PVirtualNode;
-    FLastNode        : PVirtualNode;
-    FVKPressed       : Boolean;
+    FEditorManager  : IEditorManager;
+    FEditorSettings : IEditorSettings;
+    FEditorView     : IEditorView;
+    FExpandParents  : Boolean;
+    FLastParent     : PVirtualNode;
+    FLastNode       : PVirtualNode;
+    FVKPressed      : Boolean;
 
-    FSettings        : TMessageListSettings;
+    FSettings       : TMessageListSettings;
+
+    {$REGION 'property access methods'}
+    function GetManager: ILogViewerManager;
+    function GetActions: ILogViewerActions;
+    function GetReceiver: IChannelReceiver;
+    function GetForm: TCustomForm;
+    function GetSettings: TMessageListSettings;
+    {$ENDREGION}
 
     procedure FSettingsChanged(Sender: TObject);
 
@@ -193,15 +204,14 @@ type
       Column   : TColumnIndex;
       var Kind : TVTHintKind
     );
-    function GetManager: ILogViewerManager;
-    function GetActions: ILogViewerActions;
-    function GetReceiver: IChannelReceiver;
-    function GetForm: TCustomForm;
-    function GetSettings: TMessageListSettings;
     {$ENDREGION}
 
   protected
-    procedure FReceiverReceiveMessage(Sender: TObject; AStream: TStream);
+    procedure FReceiverReceiveMessage(
+      Sender    : TObject;
+      AReceiver : IChannelReceiver;
+      AStream   : TStream
+    );
 
     procedure Clear;
 
@@ -216,6 +226,9 @@ type
     procedure CreateEditor;
     procedure CreateCallStackView;
     procedure CreateWatchesView;
+
+    procedure CollapseAll;
+    procedure ExpandAll;
 
     procedure Activate; override;
     procedure UpdateActions; override;
@@ -257,9 +270,9 @@ implementation
 uses
   System.StrUtils, System.UITypes, System.DateUtils,
 
-  Spring,
+  Spring, Spring.Helpers,
 
-  DDuce.Factories, DDuce.Factories.VirtualTrees, DDuce.Editor.Factories,
+  DDuce.Factories.VirtualTrees, DDuce.Editor.Factories,
   DDuce.Reflect,
 
   DSharp.Windows.ColumnDefinitions.ControlTemplate,
@@ -280,23 +293,24 @@ constructor TfrmMessageList.Create(AOwner: TComponent; AManager
 begin
   inherited Create(AOwner);
   FReceiver := AReceiver;
-  FManager := AManager;
+  FManager  := AManager;
   FSettings := ASettings;
-  btnFilterMessages.Action := FManager.Actions.Items['actFilterMessages'];
-  FExpandParents := False;
-  CreateEditor;
-  CreateLogTreeView;
-  CreateWatchesView;
-  CreateCallStackView;
-  FReceiver.OnReceiveMessage.Add(FReceiverReceiveMessage);
 end;
 
 procedure TfrmMessageList.AfterConstruction;
 begin
   inherited AfterConstruction;
   Inc(FCounter);
+  btnFilterMessages.Action := FManager.Actions.Items['actFilterMessages'];
+  FExpandParents           := False;
+  CreateEditor;
+  CreateLogTreeView;
+  CreateWatchesView;
+  CreateCallStackView;
+  FReceiver.OnReceiveMessage.Add(FReceiverReceiveMessage);
   Caption := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
   FSettings.OnChanged.Add(FSettingsChanged);
+  FLogTreeView.PopupMenu := Manager.Menus.LogTreeViewerPopupMenu;
 end;
 
 procedure TfrmMessageList.BeforeDestruction;
@@ -416,11 +430,11 @@ function TfrmMessageList.GetReceiver: IChannelReceiver;
 begin
   Result := FReceiver;
 end;
+
 function TfrmMessageList.GetSettings: TMessageListSettings;
 begin
   Result := FSettings;
 end;
-
 {$ENDREGION}
 
 {$REGION 'event handlers'}
@@ -788,7 +802,7 @@ end;
 {$ENDREGION}
 
 procedure TfrmMessageList.FReceiverReceiveMessage(Sender: TObject;
-  AStream: TStream);
+  AReceiver: IChannelReceiver; AStream: TStream);
 begin
   ProcessMessage(AStream);
 end;
@@ -803,14 +817,14 @@ end;
 procedure TfrmMessageList.Activate;
 begin
   inherited Activate;
-  Manager.ActiveView := Self as ILogViewerMessagesView;
+  Manager.ActiveView := Self as ILogViewer;
 end;
 
 procedure TfrmMessageList.AddMessageToTree(const AMessage: TLogMessage);
 begin
   FLogTreeView.BeginUpdate;
   try
-    case TLogMessageType(FCurrentMsg.MsgType) of
+    case TLogMessageType(AMessage.MsgType) of
       lmtEnterMethod:
       begin
         FLastNode := FLogTreeView.AddChild(FLastParent, nil);
@@ -823,12 +837,12 @@ begin
         if (FLastParent = nil)
           or (FLastParent^.Parent = FLogTreeView.RootNode) then
         begin
-          FLastNode := FLogTreeView.AddChild(nil, nil);
+          FLastNode   := FLogTreeView.AddChild(nil, nil);
           FLastParent := nil;
         end
         else
         begin
-          FLastNode := FLogTreeView.AddChild(FLastParent^.Parent, nil);
+          FLastNode   := FLogTreeView.AddChild(FLastParent^.Parent, nil);
           FLastParent := FLastNode^.Parent;
         end;
       end
@@ -855,6 +869,16 @@ begin
   FMessageCount := 0;
   FLastNode     := nil;
   FLastParent   := nil;
+end;
+
+procedure TfrmMessageList.CollapseAll;
+begin
+  FLogTreeView.FullCollapse;
+end;
+
+procedure TfrmMessageList.ExpandAll;
+begin
+  FLogTreeView.FullExpand;
 end;
 
 procedure TfrmMessageList.GotoFirst;
@@ -887,13 +911,19 @@ end;
 
 {
    Message layout in stream
-     1. Message type (4 byte)
-     2. Timestamp (8 byte)
-     3. Text size (4 byte)
-     4. Text (variable size)
-     5. Data size (4 byte)
-     6. Data (variable size)
+     1. Message type (4 byte)          => TLogMessage.MsgType (TLogMessageType)
+     2. Timestamp    (8 byte)          => TLogMessage.TimeStamp
+     3. Text size    (4 byte)
+     4. Text         (variable size)   => TLogMessage.Text
+     5. Data size    (4 byte)
+     6. Data         (variable size)   => TLogMessage.Data
 
+    TLogMessage = packed record
+      MsgType   : Integer; // (TLogMessageType)
+      TimeStamp : TDateTime;
+      Text      : UTF8String;
+      Data      : TStream;
+    end;
 }
 
 procedure TfrmMessageList.ProcessMessage(AStream: TStream);
@@ -906,13 +936,12 @@ begin
   LDataSize := 0;
   Inc(FMessageCount);
   AStream.Seek(0, soFromBeginning);
-  AStream.ReadBuffer(FCurrentMsg.MsgType, SizeOf(Integer));
-  AStream.ReadBuffer(FCurrentMsg.TimeStamp, SizeOf(TDateTime));
-  AStream.ReadBuffer(LTextSize, SizeOf(Integer));
+  AStream.ReadBuffer(FCurrentMsg.MsgType);
+  AStream.ReadBuffer(FCurrentMsg.TimeStamp);
+  AStream.ReadBuffer(LTextSize);
   SetLength(FCurrentMsg.Text, LTextSize);
   AStream.ReadBuffer(FCurrentMsg.Text[1], LTextSize);
-  AStream.ReadBuffer(LDataSize, SizeOf(Integer));
-
+  AStream.ReadBuffer(LDataSize);
   if LDataSize > 0 then
   begin
     FCurrentMsg.Data := TMemoryStream.Create;
@@ -924,7 +953,7 @@ begin
     FCurrentMsg.Data := nil;
 
   case TLogMessageType(FCurrentMsg.MsgType) of
-   lmtWatch, lmtCounter:
+    lmtWatch, lmtCounter:
     begin
       FWatches.Add(
         string(FCurrentMsg.Text),

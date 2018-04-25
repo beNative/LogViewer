@@ -30,9 +30,11 @@ type
     FOnlyTrackChanges : Boolean;
 
   protected
+    {$REGION 'property access methods'}
     function GetOnChanged: IEvent<TNotifyEvent>;
     function GetOnlyTrackChanges: Boolean;
     procedure SetOnlyTrackChanges(const Value: Boolean);
+    {$ENDREGION}
 
     procedure Changed;
 

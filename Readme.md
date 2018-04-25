@@ -2,9 +2,9 @@
 
 A general purpose logviewer that supports multiple source types or logchannels to receive messages from.
 
-* WinIPC
-* OutputDebugString API
-* ZeroMQ
+* Windows IPC (using WM_COPY messages)
+* Windows OutputDebugString API
+* ZeroMQ (PUB/SUB socket)
 * Serial port
 * Spring4D logging API
 

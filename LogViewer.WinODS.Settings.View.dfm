@@ -1,8 +1,8 @@
 object frmWinODSSettings: TfrmWinODSSettings
   Left = 0
   Top = 0
-  ClientHeight = 411
-  ClientWidth = 521
+  ClientHeight = 61
+  ClientWidth = 213
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -13,25 +13,33 @@ object frmWinODSSettings: TfrmWinODSSettings
   PixelsPerInch = 96
   TextHeight = 13
   object lblProcess: TLabel
-    Left = 64
-    Top = 32
-    Width = 47
+    Left = 16
+    Top = 8
+    Width = 41
     Height = 13
-    Caption = 'lblProcess'
+    Caption = 'Process:'
+    FocusControl = edtProcess
   end
   object lblProcessId: TLabel
-    Left = 54
-    Top = 72
-    Width = 57
+    Left = 16
+    Top = 32
+    Width = 54
     Height = 13
-    Caption = 'lblProcessId'
+    Caption = 'Process Id:'
+    FocusControl = edtProcessId
   end
   object edtProcess: TButtonedEdit
-    Left = 136
-    Top = 29
+    Left = 76
+    Top = 5
     Width = 121
     Height = 21
     TabOrder = 0
-    Text = 'edtProcess'
+  end
+  object edtProcessId: TButtonedEdit
+    Left = 76
+    Top = 29
+    Width = 121
+    Height = 21
+    TabOrder = 1
   end
 end

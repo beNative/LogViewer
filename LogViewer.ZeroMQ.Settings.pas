@@ -27,14 +27,22 @@ type
   TZeroMQSettings = class(TPersistent)
   private
     FOnChanged : Event<TNotifyEvent>;
-
-    function GetOnChanged: IEvent<TNotifyEvent>;
+    FAddress   : string;
 
   protected
+    {$REGION 'property access methods'}
+    function GetOnChanged: IEvent<TNotifyEvent>;
+    function GetAddress: string;
+    procedure SetAddress(const Value: string);
+    {$ENDREGION}
+
     procedure Changed;
 
   public
     procedure Assign(Source: TPersistent); override;
+
+    property Address: string
+      read GetAddress write SetAddress;
 
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
@@ -46,6 +54,20 @@ implementation
 function TZeroMQSettings.GetOnChanged: IEvent<TNotifyEvent>;
 begin
   Result := FOnChanged;
+end;
+
+function TZeroMQSettings.GetAddress: string;
+begin
+  Result := FAddress;
+end;
+
+procedure TZeroMQSettings.SetAddress(const Value: string);
+begin
+  if Value <> Address then
+  begin
+    FAddress := Value;
+    Changed;
+  end;
 end;
 {$ENDREGION}
 
@@ -64,7 +86,7 @@ begin
   if Source is TZeroMQSettings then
   begin
     LSettings := TZeroMQSettings(Source);
-
+    FAddress  := LSettings.Address;
   end
   else
     inherited Assign(Source);

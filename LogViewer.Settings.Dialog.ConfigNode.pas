@@ -1,5 +1,5 @@
 {
-  Copyright (C) 2013-2016 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2018 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ interface
 }
 
 uses
-  Spring.Collections,
+  Spring, Spring.Collections,
 
   VirtualTrees;
 
@@ -33,7 +33,7 @@ type
   private
     FText   : string;
     FVTNode : PVirtualNode;
-    FNodes  : IList<TConfigNode>;
+    FNodes  : Lazy<IList<TConfigNode>>;
 
   protected
     function GetNodes: IList<TConfigNode>;
@@ -43,9 +43,10 @@ type
     procedure SetVTNode(const Value: PVirtualNode);
 
   public
-    constructor Create(AText: string = '');
+    constructor Create(const AText: string = '');
 
     procedure AfterConstruction; override;
+    procedure BeforeDestruction; override;
 
     property Nodes: IList<TConfigNode>
       read GetNodes;
@@ -63,10 +64,22 @@ implementation
 procedure TConfigNode.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FNodes := TCollections.CreateObjectList<TConfigNode>;
+  FNodes.Create(
+    function: IList<TConfigNode>
+    begin
+      Result := TCollections.CreateObjectList<TConfigNode>(False);
+    end,
+    True
+  );
 end;
 
-constructor TConfigNode.Create(AText: string);
+procedure TConfigNode.BeforeDestruction;
+begin
+  FNodes := nil;
+  inherited BeforeDestruction;
+end;
+
+constructor TConfigNode.Create(const AText: string);
 begin
   inherited Create;
   FText := AText;
@@ -86,7 +99,7 @@ end;
 
 procedure TConfigNode.SetText(const Value: string);
 begin
-  FText := Value;;
+  FText := Value;
 end;
 
 function TConfigNode.GetVTNode: PVirtualNode;
