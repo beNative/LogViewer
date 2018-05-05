@@ -46,7 +46,7 @@ const
 type
   TZeroMQChannelReceiver = class(TInterfacedObject, IChannelReceiver)
   private class var
-     FCounter : Integer;
+    FCounter : Integer;
   private
     FOnReceiveMessage : Event<TReceiveMessageEvent>;
     FZMQStream        : TStringStream;
@@ -60,12 +60,12 @@ type
 
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
-
-    function ConnectSubscriber: Boolean;
-    procedure CloseSubscriber;
     function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
     function GetName: string;
     procedure SetName(const Value: string);
+
+    function ConnectSubscriber: Boolean;
+    procedure CloseSubscriber;
 
   protected
     procedure DoReceiveMessage(AStream : TStream);
@@ -112,14 +112,15 @@ end;
 procedure TZeroMQChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
+  FOnReceiveMessage.UseFreeNotification := False;
   Inc(FCounter);
   if FAddress = '' then
     FAddress := ZQM_DEFAULT_ADDRESS;
-  FTimer := TTimer.Create(nil);
+  FTimer         := TTimer.Create(nil);
   FTimer.OnTimer := FTimerTimer;
-  FZMQ     := TZeroMQ.Create;
-  FEnabled := ConnectSubscriber;
-  FZMQStream := TStringStream.Create;
+  FZMQ           := TZeroMQ.Create;
+  FEnabled       := ConnectSubscriber;
+  FZMQStream     := TStringStream.Create;
 end;
 
 procedure TZeroMQChannelReceiver.BeforeDestruction;
@@ -137,16 +138,6 @@ begin
   Result := FEnabled;
 end;
 
-function TZeroMQChannelReceiver.GetName: string;
-begin
-  Result := FName;
-end;
-
-procedure TZeroMQChannelReceiver.SetName(const Value: string);
-begin
-  FName := Value;
-end;
-
 procedure TZeroMQChannelReceiver.SetEnabled(const Value: Boolean);
 begin
   if Value <> Enabled then
@@ -158,6 +149,16 @@ begin
       CloseSubscriber;
     FTimer.Enabled := FEnabled;
   end;
+end;
+
+function TZeroMQChannelReceiver.GetName: string;
+begin
+  Result := FName;
+end;
+
+procedure TZeroMQChannelReceiver.SetName(const Value: string);
+begin
+  FName := Value;
 end;
 
 function TZeroMQChannelReceiver.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;

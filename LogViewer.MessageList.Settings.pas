@@ -85,6 +85,7 @@ implementation
 procedure TMessageListSettings.AfterConstruction;
 begin
   inherited AfterConstruction;
+  FOnChanged.UseFreeNotification := False;
   FVisibleMessageTypes := ALL_MESSAGES;
   FWatchSettings := TWatchSettings.Create;
 end;
@@ -132,7 +133,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION 'protected methods'}
+{$REGION 'event dispatch methods'}
 procedure TMessageListSettings.Changed;
 begin
   FOnChanged.Invoke(Self);

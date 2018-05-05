@@ -18,7 +18,7 @@ unit LogViewer.MessageList.View;
 
 interface
 
-{ Message viewer that can be used to display all messages from an associated
+{ Message viewer responsible for displaying all messages from an associated
   log channel (IChannelReceiver receiver instance) }
 
 {
@@ -43,6 +43,7 @@ uses
 
 type
   TfrmMessageList = class(TForm, ILogViewer)
+    {$REGION 'designer controls'}
     btnFilterMessages : TButton;
     chkAutoFilter     : TCheckBox;
     edtMessageFilter  : TLabeledEdit;
@@ -64,6 +65,10 @@ type
     tsTextViewer      : TTabSheet;
     tsImageViewer     : TTabSheet;
     pnlTextViewer     : TPanel;
+    tsRawMessageData  : TTabSheet;
+    edtMessageType    : TLabeledEdit;
+    edtTimeStamp      : TLabeledEdit;
+    mmoMessageText    : TMemo;
     {$ENDREGION}
 
     procedure edtMessageFilterChange(Sender: TObject);
@@ -91,7 +96,6 @@ type
     FCallStackView  : TfrmCallStackView;
     FWatchesView    : TfrmWatchesView;
     FManager        : ILogViewerManager;
-
     FEditorManager  : IEditorManager;
     FEditorSettings : IEditorSettings;
     FEditorView     : IEditorView;
@@ -277,7 +281,7 @@ uses
 
   DSharp.Windows.ColumnDefinitions.ControlTemplate,
 
-  LogViewer.Factories, LogViewer.Resources;
+  LogViewer.Factories, LogViewer.Resources, LogViewer.MessageList.LogNode;
 
 {$R *.dfm}
 
@@ -456,9 +460,9 @@ procedure TfrmMessageList.FLogTreeViewBeforeCellPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
 var
-  ND : PNodeData;
+  ND : TNodeData;
 begin
-  ND := PNodeData(Sender.GetNodeData(Node));
+  ND := Sender.GetNodeData<TNodeData>(Node);
   if ND.MsgType in [lmtEnterMethod, lmtLeaveMethod] then
   begin
     TargetCanvas.Brush.Color := $00EEEEEE;
@@ -481,10 +485,11 @@ end;
 procedure TfrmMessageList.FLogTreeViewFilterCallback(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Data: Pointer; var Abort: Boolean);
 var
-  ND : PNodeData;
+  ND : TNodeData;
   B  : Boolean;
 begin
-  ND := Sender.GetNodeData(Node);
+  ND := Sender.GetNodeData<TNodeData>(Node);
+  Guard.CheckNotNull(ND, 'ND');
   B := ND.MsgType in Settings.VisibleMessageTypes;
   if edtMessageFilter.Text <> '' then
     B := B and
@@ -500,10 +505,11 @@ procedure TfrmMessageList.FLogTreeViewFocusChanged(Sender: TBaseVirtualTree;
 var
   LStream : TStringStream;
   S       : string;
-  ND      : PNodeData;
+  ND      : TNodeData;
 begin
   LStream := TStringStream.Create('', TEncoding.ANSI);
-  ND := PNodeData(Sender.GetNodeData(Node));
+  ND := Sender.GetNodeData<TNodeData>(Node);
+  Guard.CheckNotNull(ND, 'ND');
   FWatchesView.UpdateView(ND.Index);
   try
     if ND.MsgData = nil then
@@ -560,6 +566,8 @@ begin
         FEditorView.Text := Trim(S);
        end;
     end;
+    edtMessageType.Text := Integer(ND.MsgType) .ToString;
+    edtTimeStamp.Text   := DateTimeToStr(ND.MsgTime);
     UpdateCallStack(Node);
   finally
     LStream.Free;
@@ -570,10 +578,11 @@ procedure TfrmMessageList.FLogTreeViewGetHint(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex;
   var LineBreakStyle: TVTTooltipLineBreakStyle; var HintText: string);
 var
-  ND: PNodeData;
+  ND: TNodeData;
 begin
-  ND := Sender.GetNodeData(Node);
-  HintText := Reflect.Fields(ND).ToString;
+  ND := Sender.GetNodeData<TNodeData>(Node);
+  Guard.CheckNotNull(ND, 'ND');
+  //HintText := Reflect.Fields(ND).ToString;
 end;
 
 procedure TfrmMessageList.FLogTreeViewGetHintKind(Sender: TBaseVirtualTree;
@@ -586,9 +595,10 @@ procedure TfrmMessageList.FLogTreeViewGetImageIndex(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
   var Ghosted: Boolean; var ImageIndex: TImageIndex);
 var
-  ND: PNodeData;
+  ND: TNodeData;
 begin
-  ND := Sender.GetNodeData(Node);
+  ND := Sender.GetNodeData<TNodeData>(Node);
+  Guard.CheckNotNull(ND, 'ND');
   if (Kind in [ikNormal, ikSelected]) and (Column = COLUMN_MAIN) then
   begin
     if Integer(ND.MsgType) < imlMessageTypes.Count then
@@ -604,9 +614,10 @@ procedure TfrmMessageList.FLogTreeViewGetText(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
   var CellText: string);
 var
-  ND : PNodeData;
+  ND : TNodeData;
 begin
-  ND := Sender.GetNodeData(Node);
+  ND := Sender.GetNodeData<TNodeData>(Node);
+  Guard.CheckNotNull(ND, 'ND');
   if Column = COLUMN_MAIN then
   begin
     CellText := ND.Title;
@@ -629,11 +640,13 @@ end;
 procedure TfrmMessageList.FLogTreeViewInitNode(Sender: TBaseVirtualTree;
   ParentNode, Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
 var
-  ND: PNodeData;
+  ND: TNodeData;
   I : Integer;
   S : string;
 begin
-  ND := Sender.GetNodeData(Node);
+  ND := TNodeData.Create;
+  Node.SetData(ND);
+  ND := Sender.GetNodeData<TNodeData>(Node);
   ND.MsgData := FCurrentMsg.Data;
   ND.MsgTime := FCurrentMsg.TimeStamp;
   ND.MsgType := TLogMessageType(FCurrentMsg.MsgType);
@@ -660,14 +673,15 @@ end;
 procedure TfrmMessageList.FLogTreeViewFreeNode(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 var
-  ND: PNodeData;
+  ND: TNodeData;
 begin
-  ND := Sender.GetNodeData(Node);
+  ND := Sender.GetNodeData<TNodeData>(Node);
   ND.Title := '';
   ND.Name  := '';
   ND.Value := '';
   if Assigned(ND.MsgData) then
     FreeAndNil(ND.MsgData);
+  ND.Free;
 end;
 
 procedure TfrmMessageList.FLogTreeViewKeyPress(Sender: TObject; var Key: Char);
@@ -688,9 +702,10 @@ procedure TfrmMessageList.FLogTreeViewPaintText(Sender: TBaseVirtualTree;
   const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   TextType: TVSTTextType);
 var
-  ND : PNodeData;
+  ND : TNodeData;
 begin
-  ND := PNodeData(Sender.GetNodeData(Node));
+  ND := Sender.GetNodeData<TNodeData>(Node);
+  Guard.CheckNotNull(ND, 'ND');
   if Column = COLUMN_MAIN then
   begin
     case ND.MsgType of
@@ -1007,13 +1022,15 @@ procedure TfrmMessageList.UpdateCallStack(var ANode: PVirtualNode);
 var
   I   : Integer;
   CSD : TCallStackData;
+  ND  : TNodeData;
 begin
   FCallStack.Clear;
   I := FLogTreeView.GetNodeLevel(ANode);
   while I > 0 do
   begin
+    ND := FLogTreeView.GetNodeData<TNodeData>(ANode^.Parent);
     CSD := TCallStackData.Create;
-    CSD.Title := PNodeData(FLogTreeView.GetNodeData(ANode^.Parent))^.Title;
+    CSD.Title := ND.Title;
     CSD.Level := I;
     FCallStack.Add(CSD);
     ANode := ANode^.Parent;

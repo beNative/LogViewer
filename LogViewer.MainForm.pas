@@ -62,6 +62,7 @@ type
       Cancelled          : Boolean;
       var TabDropOptions : TTabDropOptions
     );
+    procedure FormShortCut(var Msg: TWMKey; var Handled: Boolean);
 
   private
     FMessageViewer   : ILogViewer;
@@ -71,7 +72,7 @@ type
     FComPortSettings : TComPortSettings;
     FDashboard       : TfrmDashboard;
 
-    procedure FFormSettingsChanged(Sender: TObject);
+    procedure SettingsChanged(Sender: TObject);
 
     procedure ProcessDroppedTab(
       Sender             : TObject;
@@ -134,9 +135,11 @@ procedure TfrmMain.AfterConstruction;
 begin
   inherited AfterConstruction;
   FSettings := TLogViewerFactories.CreateSettings;
+  FSettings.Load;
   FManager := TLogViewerFactories.CreateManager(Self, FSettings);
   Events.OnAddLogViewer.Add(EventsAddLogViewer);
-  FSettings.FormSettings.OnChanged.Add(FFormSettingsChanged);
+  FSettings.FormSettings.AssignTo(Self);
+  FSettings.OnChanged.Add(SettingsChanged);
   FMainToolbar := TLogViewerFactories.CreateMainToolbar(
     FManager,
     Self,
@@ -148,6 +151,8 @@ end;
 
 procedure TfrmMain.BeforeDestruction;
 begin
+  FSettings.FormSettings.Assign(Self);
+  FSettings.Save;
   FSettings.Free;
   FComPortSettings.Free;
   inherited BeforeDestruction;
@@ -224,10 +229,17 @@ begin
   ALogViewer.Form.Show;
 end;
 
-procedure TfrmMain.FFormSettingsChanged(Sender: TObject);
+procedure TfrmMain.SettingsChanged(Sender: TObject);
 begin
-  FSettings.FormSettings.AssignTo(Self);
+  FormStyle   := FSettings.FormSettings.FormStyle;
+  WindowState := FSettings.FormSettings.WindowState;
 end;
+
+procedure TfrmMain.FormShortCut(var Msg: TWMKey; var Handled: Boolean);
+begin
+  Handled := Manager.Actions.ActionList.IsShortCut(Msg);
+end;
+
 {$ENDREGION}
 
 {$REGION 'property access methods'}

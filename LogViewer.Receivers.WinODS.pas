@@ -18,7 +18,7 @@ unit LogViewer.Receivers.WinODS;
 
 { Receives messages posted by the OutputDebugString Windows API routine. The
   OutputDebugString messages are fetched in a thread and queued as TLogMessage
-  compatible stream.  }
+  compatible stream. }
 
 interface
 
@@ -31,16 +31,12 @@ uses
   Spring, Spring.Collections;
 
 type
-  TProcessInfo = packed record
-    ProcessId   : Integer;
-    ProcessName : UTF8String;
-  end;
-
   TODSMessage = class
-    Id          : Cardinal;
+    Id          : UInt32;
     TimeStamp   : TDateTime;
     MsgText     : AnsiString; // ODS messages are always AnsiStrings.
-    ProcessInfo : TProcessInfo;
+    ProcessId   : Integer;
+    ProcessName : UTF8String;
   end;
 
   { Thread instance that captures OutputDebugString content }
@@ -105,100 +101,15 @@ implementation
 
 uses
   Winapi.PsAPI, Winapi.TlHelp32,
-  System.SyncObjs;
+  System.SyncObjs,
+  Vcl.Dialogs,
+
+  Spring.Helpers,
+
+  DDuce.Utils.WinApi;
 
 var
-  LastChildOrder : Cardinal;
-
-{$REGION 'non-interfaced routines'}
-function GetExenameForProcessUsingPSAPI(AProcessID: DWORD): string;
-var
-  I          : DWORD;
-  cbNeeded   : DWORD;
-  Modules    : array [1 .. 1024] of HINST;
-  ProcHandle : THandle;
-  FileName   : array [0 .. 512] of Char;
-begin
-  SetLastError(0);
-  Result     := '';
-  ProcHandle := OpenProcess(
-    PROCESS_QUERY_INFORMATION or PROCESS_VM_READ,
-    False,
-    AProcessID
-  );
-  if ProcHandle <> 0 then
-  begin
-    try
-      if EnumProcessModules(ProcHandle, @Modules[1], SizeOf(Modules), cbNeeded)
-      then
-        for I := 1 to cbNeeded div SizeOf(HINST) do
-        begin
-          if GetModuleFilenameEx(ProcHandle, Modules[I], FileName,
-            SizeOf(FileName)) > 0 then
-          begin
-            if CompareText(ExtractFileExt(FileName), '.EXE') = 0 then
-            begin
-              Result := FileName;
-              Break;
-            end;
-          end;
-        end;
-    finally
-      CloseHandle(ProcHandle);
-    end;
-  end;
-end;
-
-function GetExenameForProcessUsingToolhelp32(AProcessID: DWORD): string;
-var
-  Snapshot  : THandle;
-  ProcEntry : TProcessEntry32;
-  Ret       : BOOL;
-begin
-  SetLastError(0);
-  Result   := '';
-  Snapshot := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-  if Snapshot <> INVALID_HANDLE_VALUE then
-    try
-      ProcEntry.dwSize := SizeOf(ProcEntry);
-      Ret              := Process32First(Snapshot, ProcEntry);
-      while Ret do
-      begin
-        if ProcEntry.th32ProcessID = AProcessID then
-        begin
-          Result := ProcEntry.szExeFile;
-          Break;
-        end
-        else
-          Ret := Process32Next(Snapshot, ProcEntry);
-      end;
-    finally
-      CloseHandle(Snapshot);
-    end;
-end;
-
-function GetExenameForProcess(AProcessID: DWORD): string;
-begin
-  if (Win32Platform = VER_PLATFORM_WIN32_NT) and (Win32MajorVersion <= 4) then
-    Result := GetExenameForProcessUsingPSAPI(AProcessID)
-  else
-    Result := GetExenameForProcessUsingToolhelp32(AProcessID);
-  Result := ExtractFileName(Result)
-end;
-
-function GetExenameForWindow(AWndHandle: HWND): string;
-var
-  ProcessID: DWORD;
-begin
-  Result := '';
-  if IsWindow(AWndHandle) then
-  begin
-    GetWindowThreadProcessID(AWndHandle, ProcessID);
-    if ProcessID <> 0 then
-      Result := GetExenameForProcess(ProcessID);
-  end;
-end;
-{$ENDREGION}
+  LastChildOrder : UInt32;
 
 {$REGION 'construction and destruction'}
 constructor TWinODSChannelReceiver.Create(const AName: string);
@@ -215,19 +126,21 @@ end;
 procedure TWinODSChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
+  FOnReceiveMessage.UseFreeNotification := False;
   Inc(FCounter);
   FBuffer := TMemoryStream.Create;
-  FODSQueue := TCollections.CreateQueue<TODSMessage>;
+  FODSQueue := TCollections.CreateQueue<TODSMessage>(True);
   FODSQueue.OnChanged.Add(FODSQueueChanged);
   FODSThread := TODSThread.Create(FODSQueue);
 end;
 
 procedure TWinODSChannelReceiver.BeforeDestruction;
 begin
+  FOnReceiveMessage.Clear;
   FODSThread.Terminate;
   FBuffer.Free;
-  FODSThread.Free;
   FODSQueue.Clear;
+  FODSThread.Free;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
@@ -236,38 +149,37 @@ end;
 procedure TWinODSChannelReceiver.FODSQueueChanged(Sender: TObject;
   const Item: TODSMessage; Action: TCollectionChangedAction);
 const
-  ZeroBuf : Integer = 0;
+  ZERO_BUF : Integer = 0;
 var
-  TextSize : Integer;
-  MsgType  : Integer;
-  DataSize : Integer;
+  LTextSize : Integer;
+  LMsgType  : Integer;
+  LDataSize : Integer;
 begin
   if Action = caAdded then
   begin
     if OnReceiveMessage.CanInvoke then
     begin
       FBuffer.Clear;
-      TextSize := Length(Item.MsgText);
+      LTextSize := Length(Item.MsgText);
+
 
       //lmtValue
-      //MsgType := 0;
-      MsgType := 3;
+      //LMsgType := 0;
+      LMsgType := 3;
       FBuffer.Seek(0, soFromBeginning);
-      FBuffer.WriteBuffer(MsgType, SizeOf(Integer));
-      FBuffer.WriteBuffer(Item.TimeStamp, SizeOf(TDateTime));
-      FBuffer.WriteBuffer(TextSize, SizeOf(Integer));
-      FBuffer.WriteBuffer(Item.MsgText[1], TextSize);
+      FBuffer.WriteBuffer(LMsgType);
+      FBuffer.WriteBuffer(Item.TimeStamp);
+      FBuffer.WriteBuffer(LTextSize);
+      FBuffer.WriteBuffer(Item.MsgText[1], LTextSize);
 
-//      DataSize := SizeOf(Item.ProcessInfo);
-//      FBuffer.WriteBuffer(DataSize, SizeOf(Integer));
-//      FBuffer.WriteBuffer(Item.ProcessInfo, DataSize);
+//      LDataSize := SizeOf(Item.ProcessInfo);
+//      FBuffer.WriteBuffer(LDataSize, SizeOf(Integer));
+//      FBuffer.WriteBuffer(Item.ProcessInfo, LDataSize);
 
-      //FBuffer.WriteBuffer(Item.MsgText[1], TextSize);
-      FBuffer.WriteBuffer(ZeroBuf, SizeOf(Integer));
-      //FBuffer.WriteBuffer(ZeroBuf, SizeOf(Integer));
-//      TextSize := Length(Item.ProcessName);
-//      FBuffer.WriteBuffer(TextSize, SizeOf(Integer));
-//      FBuffer.WriteBuffer(Item.ProcessName[1], TextSize);
+      FBuffer.WriteBuffer(ZERO_BUF);
+//      LTextSize := Length(Item.ProcessName);
+//      FBuffer.WriteBuffer(Item.ProcessName[1], LTextSize);
+      //ShowMessage(Item.ProcessInfo.ProcessName);
       OnReceiveMessage.Invoke(Self, Self as IChannelReceiver, FBuffer);
     end
   end;
@@ -307,7 +219,7 @@ end;
 {$REGION 'public methods'}
 function TWinODSChannelReceiver.ToString: string;
 begin
-//
+  Result := Name;
 end;
 {$ENDREGION}
 
@@ -324,15 +236,15 @@ end;
 {$REGION 'protected methods'}
 procedure TODSThread.Execute;
 var
-  AckEvent         : THandle;
-  ReadyEvent       : THandle;
-  SharedFile       : THandle;
-  SharedMem        : Pointer;
-  ReturnCode       : DWORD;
-  ODSMessage       : TODSMessage;
-  HandlesToWaitFor : array [0 .. 1] of THandle;
-  SA               : SECURITY_ATTRIBUTES;
-  SD               : SECURITY_DESCRIPTOR;
+  LAckEvent         : THandle;
+  LReadyEvent       : THandle;
+  LSharedFile       : THandle;
+  LSharedMem        : Pointer;
+  LReturnCode       : DWORD;
+  LODSMessage       : TODSMessage;
+  LHandlesToWaitFor : array [0 .. 1] of THandle;
+  SA                : SECURITY_ATTRIBUTES;
+  SD                : SECURITY_DESCRIPTOR;
 begin
   SA.nLength              := SizeOf(SECURITY_ATTRIBUTES);
   SA.bInheritHandle       := TRUE;
@@ -344,15 +256,15 @@ begin
   if not SetSecurityDescriptorDacl(@SD, TRUE, nil { (PACL)NULL } , False) then
     Exit;
 
-  AckEvent := CreateEvent(@SA, False, TRUE, 'DBWIN_BUFFER_READY');
-  if AckEvent = 0 then
+  LAckEvent := CreateEvent(@SA, False, TRUE, 'DBWIN_BUFFER_READY');
+  if LAckEvent = 0 then
     Exit;
 
-  ReadyEvent := CreateEvent(@SA, False, False, 'DBWIN_DATA_READY');
-  if ReadyEvent = 0 then
+  LReadyEvent := CreateEvent(@SA, False, False, 'DBWIN_DATA_READY');
+  if LReadyEvent = 0 then
     Exit;
 
-  SharedFile := CreateFileMapping(
+  LSharedFile := CreateFileMapping(
     THandle(-1),
     @SA,
     PAGE_READWRITE,
@@ -360,27 +272,27 @@ begin
     4096,
     'DBWIN_BUFFER'
   );
-  if SharedFile = 0 then
+  if LSharedFile = 0 then
     Exit;
 
-  SharedMem := MapViewOfFile(SharedFile, FILE_MAP_READ, 0, 0, 512);
-  if not Assigned(SharedMem) then
+  LSharedMem := MapViewOfFile(LSharedFile, FILE_MAP_READ, 0, 0, 512);
+  if not Assigned(LSharedMem) then
     Exit;
 
   while not Terminated do
   begin
-    HandlesToWaitFor[0] := FCloseEventHandle;
-    HandlesToWaitFor[1] := ReadyEvent;
+    LHandlesToWaitFor[0] := FCloseEventHandle;
+    LHandlesToWaitFor[1] := LReadyEvent;
 
-    SetEvent(AckEvent);
-    ReturnCode := WaitForMultipleObjects(
+    SetEvent(LAckEvent);
+    LReturnCode := WaitForMultipleObjects(
       2,
-      @HandlesToWaitFor,
+      @LHandlesToWaitFor,
       False { bWaitAll } ,
       3000 { INFINITE }
     );
 
-    case ReturnCode of
+    case LReturnCode of
       WAIT_TIMEOUT :
         Continue;
 
@@ -390,18 +302,22 @@ begin
         end;
       WAIT_OBJECT_0 + 1 :
         begin
-          ODSMessage             := TODSMessage.Create;
-          ODSMessage.TimeStamp   := Now;
-          ODSMessage.ProcessInfo.ProcessId   := LPDWORD(SharedMem)^;
-          ODSMessage.ProcessInfo.ProcessName := UTF8String(GetExenameForProcess(ODSMessage.ProcessInfo.ProcessId));
-           //'$' + inttohex (pThisPid^,2)
-          ODSMessage.MsgText := AnsiString(PAnsiChar(SharedMem) + SizeOf(DWORD));
-          // the native version of OutputDebugString is ASCII. result is always AnsiString
-          ODSMessage.Id := LastChildOrder;
+          LODSMessage             := TODSMessage.Create;
+          LODSMessage.TimeStamp   := Now;
+          LODSMessage.ProcessId   := LPDWORD(LSharedMem)^;
+          //'$' + inttohex (pThisPid^,2)
+          LODSMessage.ProcessName :=
+            UTF8String(GetExenameForProcess(LODSMessage.ProcessId));
+          // The native version of OutputDebugString is ASCII. result is always
+          // AnsiString
+          LODSMessage.MsgText :=
+            AnsiString(PAnsiChar(LSharedMem) + SizeOf(DWORD));
+
+          LODSMessage.Id := LastChildOrder;
           Inc(LastChildOrder);
           Queue(procedure
             begin
-              FODSQueue.Enqueue(ODSMessage);
+              FODSQueue.Enqueue(LODSMessage);
             end
           );
         end;
@@ -409,8 +325,8 @@ begin
         Continue;
     end;
   end;
-  UnmapViewOfFile(SharedMem);
-  CloseHandle(SharedFile);
+  UnmapViewOfFile(LSharedMem);
+  CloseHandle(LSharedFile);
 end;
 {$ENDREGION}
 {$ENDREGION}

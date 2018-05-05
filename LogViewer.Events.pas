@@ -16,6 +16,8 @@
 
 unit LogViewer.Events;
 
+{ Dispatches and handles events on the active view. }
+
 interface
 
 uses

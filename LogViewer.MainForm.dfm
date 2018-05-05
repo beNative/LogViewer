@@ -10,10 +10,12 @@ object frmMain: TfrmMain
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  KeyPreview = True
   OldCreateOrder = False
-  Position = poScreenCenter
+  Position = poDesigned
   ScreenSnap = True
   ShowHint = True
+  OnShortCut = FormShortCut
   PixelsPerInch = 96
   TextHeight = 13
   object sbrMain: TStatusBar

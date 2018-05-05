@@ -73,18 +73,6 @@ resourcestring
   STimestamp   = 'Timestamp';
   SProcessName = 'ProcessName';
 
-type
-  TNodeData = record
-    Title   : string;
-    MsgType : TLogMessageType;
-    MsgData : TStream;
-    MsgTime : TDateTime;
-    Index   : Integer;
-    Name    : string;
-    Value   : string;
-  end;
-  PNodeData = ^TNodeData;
-
 //const
 //  PixelFormatNames: array [TPixelFormat] of string =
 //    (

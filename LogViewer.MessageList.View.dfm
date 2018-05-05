@@ -83,6 +83,52 @@ object frmMessageList: TfrmMessageList
         Caption = 'Image viewer'
         ImageIndex = 1
       end
+      object tsRawMessageData: TTabSheet
+        Caption = 'Raw message data'
+        ImageIndex = 2
+        ExplicitLeft = 6
+        DesignSize = (
+          422
+          753)
+        object edtMessageType: TLabeledEdit
+          Left = 88
+          Top = 10
+          Width = 185
+          Height = 21
+          EditLabel.Width = 71
+          EditLabel.Height = 13
+          EditLabel.Caption = 'Message type:'
+          LabelPosition = lpLeft
+          LabelSpacing = 6
+          TabOrder = 0
+        end
+        object edtTimeStamp: TLabeledEdit
+          Left = 88
+          Top = 37
+          Width = 185
+          Height = 21
+          EditLabel.Width = 58
+          EditLabel.Height = 13
+          EditLabel.Caption = 'Time stamp:'
+          LabelPosition = lpLeft
+          LabelSpacing = 18
+          TabOrder = 1
+        end
+        object mmoMessageText: TMemo
+          Left = 3
+          Top = 80
+          Width = 416
+          Height = 670
+          Anchors = [akLeft, akTop, akRight, akBottom]
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Consolas'
+          Font.Style = []
+          ParentFont = False
+          TabOrder = 2
+        end
+      end
     end
   end
   object pnlLeft: TPanel
@@ -238,7 +284,7 @@ object frmMessageList: TfrmMessageList
     Left = 607
     Top = 150
     Bitmap = {
-      494C010112001500380010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010112001500400010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000005000000001002000000000000050
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

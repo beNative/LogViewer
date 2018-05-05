@@ -21,12 +21,30 @@
 
 unit LogViewer.MessageList.LogNode;
 
+{ Data structure to use in combination with the log treeview. }
+
 interface
 
 uses
+  System.Classes,
+
   Spring.Collections,
 
-  VirtualTrees;
+  VirtualTrees,
+
+  DDuce.Logger.Interfaces;
+
+type
+  TNodeData = class   // needs to be replaced by TLogNode
+    Title   : string;
+    MsgType : TLogMessageType;
+    MsgData : TStream;
+    MsgTime : TDateTime;
+    Index   : Integer;
+    Name    : string;
+    Value   : string;
+  end;
+
 
 type
   TLogNode = class
@@ -83,22 +101,22 @@ end;
 
 function TLogNode.GetText: string;
 begin
-
+  Result := FText;
 end;
 
 procedure TLogNode.SetText(const Value: string);
 begin
-
+  FText := Value;
 end;
 
 function TLogNode.GetVTNode: PVirtualNode;
 begin
-
+  Result := FVTNode;
 end;
 
 procedure TLogNode.SetVTNode(const Value: PVirtualNode);
 begin
-
+  FVTNode := Value;
 end;
 {$ENDREGION}
 

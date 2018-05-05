@@ -18,7 +18,7 @@ unit LogViewer.Manager;
 
 interface
 
-{ Handles all application events. }
+{ Handles all application modules. }
 
 uses
   System.SysUtils, System.Classes, System.Actions, System.ImageList,

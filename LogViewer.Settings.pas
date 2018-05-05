@@ -23,6 +23,8 @@ interface
 uses
   System.Classes,
 
+  Spring,
+
   DDuce.FormSettings,
 
   LogViewer.MessageList.Settings, LogViewer.Watches.Settings,
@@ -41,11 +43,17 @@ type
     FWinIPCSettings      : TWinIPCSettings;
     FComPortSettings     : TComPortSettings;
     FWatchSettings       : TWatchSettings;
+    FOnChanged           : Event<TNotifyEvent>;
+
+    function GetOnChanged: IEvent<TNotifyEvent>;
+
+    procedure FormSettingsChanged(Sender: TObject);
 
   public
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 
+    procedure Changed;
     procedure Load;
     procedure Save;
 
@@ -73,6 +81,9 @@ type
 
     property RightPanelWidth: Integer
       read FRightPanelWidth write FRightPanelWidth;
+
+    property OnChanged: IEvent<TNotifyEvent>
+      read GetOnChanged;
   end;
 
 implementation
@@ -86,13 +97,14 @@ uses
 procedure TLogViewerSettings.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FFileName := 'settings.json';
-  FFormSettings := TFormSettings.Create;
+  FFileName            := 'settings.json';
+  FFormSettings        := TFormSettings.Create;
+  FFormSettings.OnChanged.Add(FormSettingsChanged);
   FMessageListSettings := TMessageListSettings.Create;
-  FWinODSSettings := TWinODSSettings.Create;
-  FWinIPCSettings := TWinIPCSettings.Create;
-  FComPortSettings := TComPortSettings.Create;
-  FWatchSettings := TWatchSettings.Create;
+  FWinODSSettings      := TWinODSSettings.Create;
+  FWinIPCSettings      := TWinIPCSettings.Create;
+  FComPortSettings     := TComPortSettings.Create;
+  FWatchSettings       := TWatchSettings.Create;
 end;
 
 procedure TLogViewerSettings.BeforeDestruction;
@@ -107,10 +119,31 @@ begin
 end;
 {$ENDREGION}
 
+{$REGION 'property access methods'}
+function TLogViewerSettings.GetOnChanged: IEvent<TNotifyEvent>;
+begin
+  Result := FOnChanged;
+end;
+{$ENDREGION}
+
+{$REGION 'event dispatch methods'}
+procedure TLogViewerSettings.Changed;
+begin
+  FOnChanged.Invoke(Self);
+end;
+{$ENDREGION}
+
+{$REGION 'event handlers'}
+procedure TLogViewerSettings.FormSettingsChanged(Sender: TObject);
+begin
+  Changed;
+end;
+{$ENDREGION}
+
 {$REGION 'public methods'}
 procedure TLogViewerSettings.Load;
 var
-  JO  : TJsonObject;
+  JO : TJsonObject;
 begin
   if FileExists(FFileName) then
   begin
@@ -128,7 +161,7 @@ end;
 
 procedure TLogViewerSettings.Save;
 var
-  JO  : TJsonObject;
+  JO : TJsonObject;
 begin
   JO := TJsonObject.Create;
   try

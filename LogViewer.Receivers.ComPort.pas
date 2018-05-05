@@ -125,6 +125,7 @@ end;
 procedure TComPortChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
+  FOnReceiveMessage.UseFreeNotification := False;
   Inc(FCounter);
   FBuffer := TMemoryStream.Create;
   FPollTimer := TTimer.Create(nil);

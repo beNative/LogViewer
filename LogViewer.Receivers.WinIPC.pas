@@ -20,6 +20,9 @@ interface
 
 { Receives logmessages through WinIPC (WM_COPYDATA) messages. }
 
+
+{ Handles multiple queues which can be connected to a message viewer }
+
 uses
   System.Classes,
   Vcl.ExtCtrls,
@@ -92,6 +95,7 @@ procedure TWinIPChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
   Inc(FCounter);
+  FOnReceiveMessage.UseFreeNotification := False;
   FIPCServer := TWinIPCServer.Create;
   FIPCServer.OnMessage := FIPCServerMessage;
   FIPCServer.Active := True;
@@ -123,7 +127,7 @@ end;
 
 function TWinIPChannelReceiver.ToString: string;
 begin
-  Result := ClassName;
+  Result := Name;
 end;
 
 procedure TWinIPChannelReceiver.SetEnabled(const Value: Boolean);
