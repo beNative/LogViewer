@@ -69,6 +69,15 @@ type
     edtMessageType    : TLabeledEdit;
     edtTimeStamp      : TLabeledEdit;
     mmoMessageText    : TMemo;
+    pnlColor          : TPanel;
+    edtValueName      : TLabeledEdit;
+    edtValueType      : TLabeledEdit;
+    edtValue          : TLabeledEdit;
+    imgBitmap: TImage;
+    edtWidth: TLabeledEdit;
+    edtHeight: TLabeledEdit;
+    edtPixelFormat: TLabeledEdit;
+    edtHandleType: TLabeledEdit;
     {$ENDREGION}
 
     procedure edtMessageFilterChange(Sender: TObject);
@@ -87,7 +96,7 @@ type
     FCounter : Integer;
 
   private
-    FMessageCount   : Integer;
+    FMessageCount   : Int64;
     FCurrentMsg     : TLogMessage;
     FCallStack      : IList<TCallStackData>;
     FWatches        : TWatchList;
@@ -103,7 +112,6 @@ type
     FLastParent     : PVirtualNode;
     FLastNode       : PVirtualNode;
     FVKPressed      : Boolean;
-
     FSettings       : TMessageListSettings;
 
     {$REGION 'property access methods'}
@@ -123,6 +131,8 @@ type
       Data      : Pointer;
       var Abort : Boolean
     );
+
+    procedure FLogTreeViewClick(Sender: TObject);
 
     procedure FLogTreeViewFocusChanged(
       Sender : TBaseVirtualTree;
@@ -277,19 +287,13 @@ uses
   Spring, Spring.Helpers,
 
   DDuce.Factories.VirtualTrees, DDuce.Editor.Factories,
-  DDuce.Reflect,
+  DDuce.Reflect, DDuce.Utils,
 
   DSharp.Windows.ColumnDefinitions.ControlTemplate,
 
   LogViewer.Factories, LogViewer.Resources, LogViewer.MessageList.LogNode;
 
 {$R *.dfm}
-
-const
-  COLUMN_MAIN      = 0;
-  COLUMN_NAME      = 1;
-  COLUMN_VALUE     = 2;
-  COLUMN_TIMESTAMP = 3;
 
 {$REGION 'construction and destruction'}
 constructor TfrmMessageList.Create(AOwner: TComponent; AManager
@@ -315,6 +319,10 @@ begin
   Caption := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
   FSettings.OnChanged.Add(FSettingsChanged);
   FLogTreeView.PopupMenu := Manager.Menus.LogTreeViewerPopupMenu;
+  edtTimeStamp.Font.Color := TIMESTAMP_FONTCOLOR;
+  edtValueName.Font.Color := VALUENAME_FONTCOLOR;
+  edtValueType.Font.Color := VALUETYPE_FONTCOLOR;
+  edtValue.Font.Color     := VALUE_FONTCOLOR;
 end;
 
 procedure TfrmMessageList.BeforeDestruction;
@@ -355,7 +363,7 @@ begin
   FLogTreeView.TreeOptions.AutoOptions := FLogTreeView.TreeOptions.AutoOptions +
     [toAutoSpanColumns];
 
-  FLogTreeView.NodeDataSize := SizeOf(TNodeData);
+  FLogTreeView.NodeDataSize := SizeOf(TLogNode);
   FLogTreeView.Images       := imlMessageTypes;
 
   FLogTreeView.OnBeforeItemPaint := FLogTreeViewBeforeItemPaint;
@@ -365,6 +373,7 @@ begin
 
   FLogTreeView.OnFocusChanged    := FLogTreeViewFocusChanged;
   FLogTreeView.OnFocusChanging   := FLogTreeViewFocusChanging;
+  FLogTreeView.OnClick           := FLogTreeViewClick;
 
   FLogTreeView.OnInitNode        := FLogTreeViewInitNode;
   FLogTreeView.OnFreeNode        := FLogTreeViewFreeNode;
@@ -380,27 +389,36 @@ begin
   FLogTreeView.HintMode          := hmHint;
 
   C := FLogTreeView.Header.Columns.Add;
-  C.Text := STitle;
-  C.Options := C.Options + [coFixed, coAutoSpring];
-  C.Width := 50;
-  C.MinWidth := 50;
-
-  C := FLogTreeView.Header.Columns.Add;
-  C.Text := SName;
-  //C.Alignment := taCenter;
-  C.Width := 100;
+  C.Text     := STitle;
+  C.Options  := C.Options + [coFixed, coAutoSpring];
+  C.Width    := 100;
   C.MinWidth := 100;
+  C.MaxWidth := 1024;
 
   C := FLogTreeView.Header.Columns.Add;
-  C.Text := SValue;
-
-  C.Width := 300;
-  C.MinWidth := 150;
+  C.Text     := SName;
+  C.Width    := 100;
+  C.MinWidth := 100;
+  C.MaxWidth := 200;
 
   C := FLogTreeView.Header.Columns.Add;
-  C.Text := STimestamp;
+  C.Text      := SType;
+  C.Width     := 80;
+  C.MinWidth  := 50;
+  C.MaxWidth  := 200;
+
+  C := FLogTreeView.Header.Columns.Add;
+  C.Text     := SValue;
+  C.Options  := C.Options + [coAutoSpring];
+  C.Width    := 300;
+  C.MinWidth := 80;
+  C.MaxWidth := 800;
+
+  C := FLogTreeView.Header.Columns.Add;
+  C.Text     := STimestamp;
   C.Width    := 80;
   C.MinWidth := 80;
+  C.MaxWidth := 80;
 end;
 
 procedure TfrmMessageList.CreateWatchesView;
@@ -450,6 +468,11 @@ begin
 //
 end;
 
+procedure TfrmMessageList.FLogTreeViewClick(Sender: TObject);
+begin
+  FLogTreeView.Header.AutoFitColumns(False, smaUseColumnOption, -1, -1);
+end;
+
 procedure TfrmMessageList.FLogTreeViewAfterItemPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; ItemRect: TRect);
 begin
@@ -460,10 +483,10 @@ procedure TfrmMessageList.FLogTreeViewBeforeCellPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
 var
-  ND : TNodeData;
+  LN : TLogNode;
 begin
-  ND := Sender.GetNodeData<TNodeData>(Node);
-  if ND.MsgType in [lmtEnterMethod, lmtLeaveMethod] then
+  LN := Sender.GetNodeData<TLogNode>(Node);
+  if LN.MessageType in [lmtEnterMethod, lmtLeaveMethod] then
   begin
     TargetCanvas.Brush.Color := $00EEEEEE;
     TargetCanvas.FillRect(CellRect);
@@ -485,17 +508,17 @@ end;
 procedure TfrmMessageList.FLogTreeViewFilterCallback(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Data: Pointer; var Abort: Boolean);
 var
-  ND : TNodeData;
+  LN : TLogNode;
   B  : Boolean;
 begin
-  ND := Sender.GetNodeData<TNodeData>(Node);
-  Guard.CheckNotNull(ND, 'ND');
-  B := ND.MsgType in Settings.VisibleMessageTypes;
+  LN := Sender.GetNodeData<TLogNode>(Node);
+  Guard.CheckNotNull(LN, 'LogNode');
+  B := LN.MessageType in Settings.VisibleMessageTypes;
   if edtMessageFilter.Text <> '' then
     B := B and
-      (ContainsText(ND.Title, edtMessageFilter.Text) or
-       ContainsText(ND.Name, edtMessageFilter.Text) or
-       ContainsText(ND.Value, edtMessageFilter.Text));
+      (ContainsText(LN.Text, edtMessageFilter.Text) or
+       ContainsText(LN.ValueName, edtMessageFilter.Text) or
+       ContainsText(LN.Value, edtMessageFilter.Text));
 
   Sender.IsVisible[Node] := B;
 end;
@@ -505,36 +528,44 @@ procedure TfrmMessageList.FLogTreeViewFocusChanged(Sender: TBaseVirtualTree;
 var
   LStream : TStringStream;
   S       : string;
-  ND      : TNodeData;
+  LN      : TLogNode;
 begin
   LStream := TStringStream.Create('', TEncoding.ANSI);
-  ND := Sender.GetNodeData<TNodeData>(Node);
-  Guard.CheckNotNull(ND, 'ND');
-  FWatchesView.UpdateView(ND.Index);
+  LN := Sender.GetNodeData<TLogNode>(Node);
+  Guard.CheckNotNull(LN, 'LogNode');
+  FWatchesView.UpdateView(LN.Id);
   try
-    if ND.MsgData = nil then
+    if LN.MessageData = nil then
     begin
       FEditorView.Text := '';
     end
     else
-      ND.MsgData.Position := 0;
+      LN.MessageData.Position := 0;
 
-    case ND.MsgType of
-      lmtStrings, lmtCallStack, lmtException, lmtHeapInfo, lmtCustomData:
+    case LN.MessageType of
+      {lmtStrings,} lmtCallStack, {lmtException,} lmtHeapInfo, lmtCustomData:
       begin
         LStream.Position := 0;
-        LStream.CopyFrom(ND.MsgData, ND.MsgData.Size);
+        LStream.CopyFrom(LN.MessageData, LN.MessageData.Size);
         LStream.Position := 0;
         S := LStream.DataString;
         FEditorView.Text := S;
         FEditorView.HighlighterName := 'INI';
       end;
-      lmtObject:
+      lmtColor:
       begin
-        if Assigned(ND.MsgData) then // component
+        //LN.Value
+      end;
+      lmtAlphaColor:
+      begin
+
+      end;
+      lmtComponent:
+      begin
+        if Assigned(LN.MessageData) then // component
         begin
-          ND.MsgData.Position := 0;
-          ObjectBinaryToText(ND.MsgData, LStream);
+          LN.MessageData.Position := 0;
+          ObjectBinaryToText(LN.MessageData, LStream);
           LStream.Position := 0;
           S := LStream.DataString;
           FEditorView.Text := S;
@@ -542,32 +573,37 @@ begin
         end
         else
         begin
-          S := ND.Title;
-          ND.Name := Copy(S, 1, Pos(sLineBreak, S));
-//          FEditorView.Text := Copy(S, Pos(sLineBreak, S) + 2, Length(S));
-            FEditorView.Text := ND.Value;
+          FEditorView.Text := LN.Value;
         end;
       end;
       lmtBitmap:
       begin
-//        imgViewer.Picture.Bitmap.LoadFromStream(ND.MsgData);
-//        pgcMessageDetails.ActivePage := tsImageViewer;
-        // Index := 1;
-        //ShowBitmapInfo(imgViewer.Picture.Bitmap);
+        imgBitmap.Picture.Bitmap.LoadFromStream(LN.MessageData);
+        pgcMessageContent.ActivePage := tsImageViewer;
+        with imgBitmap.Picture do
+        begin
+          edtWidth.Text       := Bitmap.Width.ToString;
+          edtHeight.Text      := Bitmap.Height.ToString;
+          edtPixelFormat.Text := Reflect.EnumName(Bitmap.PixelFormat);
+          edtHandleType.Text  := Reflect.EnumName(Bitmap.HandleType);
+          //Color := '$' + IntToHex(TransparentColor, 8);
+        end;
       end;
       lmtMemory:
       begin
-        //edtHex.OpenStream(ND.MsgData);
+        //edtHex.OpenStream(LN.MessageData);
 //        pgcMessageDetails.ActivePageIndex := 3;
       end;
       else
       begin
-        S := ND.Value;
-        FEditorView.Text := Trim(S);
+        FEditorView.Text := LN.Value;
        end;
     end;
-    edtMessageType.Text := Integer(ND.MsgType) .ToString;
-    edtTimeStamp.Text   := DateTimeToStr(ND.MsgTime);
+    edtMessageType.Text := LogMessageTypeNameOf(LN.MessageType);
+    edtTimeStamp.Text   := DateTimeToStr(LN.TimeStamp);
+    edtValue.Text       := LN.Value;
+    edtValueName.Text   := LN.ValueName;
+    edtValueType.Text   := LN.ValueType;
     UpdateCallStack(Node);
   finally
     LStream.Free;
@@ -578,11 +614,11 @@ procedure TfrmMessageList.FLogTreeViewGetHint(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex;
   var LineBreakStyle: TVTTooltipLineBreakStyle; var HintText: string);
 var
-  ND: TNodeData;
+  LN: TLogNode;
 begin
-  ND := Sender.GetNodeData<TNodeData>(Node);
-  Guard.CheckNotNull(ND, 'ND');
-  //HintText := Reflect.Fields(ND).ToString;
+  LN := Sender.GetNodeData<TLogNode>(Node);
+  Guard.CheckNotNull(LN, 'ND');
+  //HintText := Reflect.Fields(LN).ToString;
 end;
 
 procedure TfrmMessageList.FLogTreeViewGetHintKind(Sender: TBaseVirtualTree;
@@ -595,15 +631,15 @@ procedure TfrmMessageList.FLogTreeViewGetImageIndex(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
   var Ghosted: Boolean; var ImageIndex: TImageIndex);
 var
-  ND: TNodeData;
+  ND: TLogNode;
 begin
-  ND := Sender.GetNodeData<TNodeData>(Node);
+  ND := Sender.GetNodeData<TLogNode>(Node);
   Guard.CheckNotNull(ND, 'ND');
   if (Kind in [ikNormal, ikSelected]) and (Column = COLUMN_MAIN) then
   begin
-    if Integer(ND.MsgType) < imlMessageTypes.Count then
+    if Integer(ND.MessageType) < imlMessageTypes.Count then
     begin
-      ImageIndex := Integer(ND.MsgType);
+      ImageIndex := Integer(ND.MessageType);
     end
     else
       ImageIndex := 0;
@@ -614,74 +650,79 @@ procedure TfrmMessageList.FLogTreeViewGetText(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
   var CellText: string);
 var
-  ND : TNodeData;
+  LN : TLogNode;
 begin
-  ND := Sender.GetNodeData<TNodeData>(Node);
-  Guard.CheckNotNull(ND, 'ND');
+  LN := Sender.GetNodeData<TLogNode>(Node);
+  Guard.CheckNotNull(LN, 'ND');
   if Column = COLUMN_MAIN then
   begin
-    CellText := ND.Title;
+    CellText := LN.Text;
   end
   else if Column = COLUMN_NAME then
   begin
-    CellText := ND.Name;
+    CellText := LN.ValueName;
+  end
+  else if Column = COLUMN_TYPE then
+  begin
+    CellText := LN.ValueType;
   end
   else if Column = COLUMN_VALUE then
   begin
-    CellText := ND.Value;
+    CellText := LN.Value;
   end
   else if Column = COLUMN_TIMESTAMP then
   begin
-   if YearOf(ND.MsgTime) = YearOf(Now) then
-    CellText := FormatDateTime('hh:nn:ss:zzz',  ND.MsgTime);
+    if YearOf(LN.TimeStamp) = YearOf(Now) then // sanity check
+      CellText := FormatDateTime('hh:nn:ss:zzz',  LN.TimeStamp);
   end;
 end;
 
 procedure TfrmMessageList.FLogTreeViewInitNode(Sender: TBaseVirtualTree;
   ParentNode, Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
 var
-  ND: TNodeData;
-  I : Integer;
-  S : string;
+  LN : TLogNode; // class type
+  I  : Integer;
+  S  : string;
+  A  : TArray<string>;
 begin
-  ND := TNodeData.Create;
-  Node.SetData(ND);
-  ND := Sender.GetNodeData<TNodeData>(Node);
-  ND.MsgData := FCurrentMsg.Data;
-  ND.MsgTime := FCurrentMsg.TimeStamp;
-  ND.MsgType := TLogMessageType(FCurrentMsg.MsgType);
-  if not (ND.MsgType in [lmtValue, lmtObject, lmtStrings, lmtText]) then
+  LN := TLogNode.Create;
+  Node.SetData(LN);
+  //LN := Sender.GetNodeData<TLogNode>(Node);
+  LN.MessageData := FCurrentMsg.Data;
+  LN.TimeStamp   := FCurrentMsg.TimeStamp;
+  LN.MessageType := TLogMessageType(FCurrentMsg.MsgType);
+  if not (LN.MessageType in [lmtValue, lmtComponent, lmtStrings, lmtText]) then
   begin
-    ND.Title := string(FCurrentMsg.Text);
+    LN.Text := string(FCurrentMsg.Text);
   end;
   S := string(FCurrentMsg.Text);
-  if (ND.MsgType in  [lmtValue, lmtText]) then
-  //and not (S.Contains(sLineBreak)) then
+
+  if (LN.MessageType in  [lmtValue, lmtText]) then
   begin
     I := S.IndexOf('=');
-    ND.Name := Copy(S, 1, I);
-    ND.Value := Copy(S, I + 2, S.Length);
-    ND.Title := '';
+    LN.ValueName := Copy(S, 1, I);
+    LN.Value := Copy(S, I + 2, S.Length);
+    LN.ValueType := ExtractText(LN.ValueName, '(', ')');
+    I := S.IndexOf('(');
+    if I > 1 then
+      LN.ValueName := Copy(S, 1, I);
+
+    LN.Text := '';
   end;
-  ND.Index := FMessageCount;
+  LN.Id := FMessageCount;
   //Show only what matches filter criterias
-  Sender.IsVisible[Node] := (ND.MsgType in [lmtEnterMethod, lmtLeaveMethod]) or
-      (ND.MsgType in Settings.VisibleMessageTypes);
-    //and IsWild(Title, FTitleFilter, True));
+  Sender.IsVisible[Node] := (LN.MessageType in [lmtEnterMethod, lmtLeaveMethod]) or
+      (LN.MessageType in Settings.VisibleMessageTypes);
+    //and IsWild(Text, FTitleFilter, True));
 end;
 
 procedure TfrmMessageList.FLogTreeViewFreeNode(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 var
-  ND: TNodeData;
+  LN: TLogNode;
 begin
-  ND := Sender.GetNodeData<TNodeData>(Node);
-  ND.Title := '';
-  ND.Name  := '';
-  ND.Value := '';
-  if Assigned(ND.MsgData) then
-    FreeAndNil(ND.MsgData);
-  ND.Free;
+  LN := Sender.GetNodeData<TLogNode>(Node);
+  LN.Free;
 end;
 
 procedure TfrmMessageList.FLogTreeViewKeyPress(Sender: TObject; var Key: Char);
@@ -690,7 +731,6 @@ begin
   begin
     edtMessageFilter.SetFocus;
     PostMessage(edtMessageFilter.Handle, WM_CHAR, Ord(Key), 0);
-    //edtMessageFilter.SelStart := Length(TitleFilter);
     // required to prevent the invocation of accelerator keys!
     Key := #0;
   end;
@@ -702,13 +742,13 @@ procedure TfrmMessageList.FLogTreeViewPaintText(Sender: TBaseVirtualTree;
   const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   TextType: TVSTTextType);
 var
-  ND : TNodeData;
+  LN : TLogNode;
 begin
-  ND := Sender.GetNodeData<TNodeData>(Node);
-  Guard.CheckNotNull(ND, 'ND');
+  LN := Sender.GetNodeData<TLogNode>(Node);
+  Guard.CheckNotNull(LN, 'ND');
   if Column = COLUMN_MAIN then
   begin
-    case ND.MsgType of
+    case LN.MessageType of
       lmtInfo:
       begin
         TargetCanvas.Font.Color := clBlue;
@@ -730,13 +770,18 @@ begin
   begin
     TargetCanvas.Font.Style := TargetCanvas.Font.Style + [fsBold];
   end
+  else if Column = COLUMN_TYPE then
+  begin
+    TargetCanvas.Font.Color := VALUETYPE_FONTCOLOR;
+    TargetCanvas.Font.Style := TargetCanvas.Font.Style + [fsBold];
+  end
   else if Column = COLUMN_VALUE then
   begin
-    TargetCanvas.Font.Color := clNavy;
+    TargetCanvas.Font.Color := VALUE_FONTCOLOR;
   end
   else if Column = COLUMN_TIMESTAMP then
   begin
-    TargetCanvas.Font.Color := clBlue;
+    TargetCanvas.Font.Color := TIMESTAMP_FONTCOLOR;
   end;
 end;
 {$ENDREGION}
@@ -835,6 +880,8 @@ begin
   Manager.ActiveView := Self as ILogViewer;
 end;
 
+{ Parses message data from the TLogMessage record. }
+
 procedure TfrmMessageList.AddMessageToTree(const AMessage: TLogMessage);
 begin
   FLogTreeView.BeginUpdate;
@@ -922,7 +969,7 @@ begin
   end;
 end;
 
-{ Reads the received message from the active logchannel. }
+{ Reads the received message stream from the active logchannel . }
 
 {
    Message layout in stream
@@ -945,6 +992,11 @@ procedure TfrmMessageList.ProcessMessage(AStream: TStream);
 var
   LTextSize : Integer;
   LDataSize : Integer;
+  S         : string;
+  I         : Integer;
+  LName     : string;
+  LType     : string;
+  LValue    : string;
 begin
   Guard.CheckNotNull(AStream, 'AStream');
   LTextSize := 0;
@@ -970,8 +1022,18 @@ begin
   case TLogMessageType(FCurrentMsg.MsgType) of
     lmtWatch, lmtCounter:
     begin
+      S := string(FCurrentMsg.Text);
+      I := S.IndexOf('=');
+      LName := Copy(S, 1, I);
+      LValue := Copy(S, I + 2, S.Length);
+      LType := ExtractText(LName, '(', ')');
+      I := S.IndexOf('(');
+      if I > 1 then
+        LName := Copy(S, 1, I);
       FWatches.Add(
-        string(FCurrentMsg.Text),
+        LName,
+        LType,
+        LValue,
         FMessageCount,
         FCurrentMsg.TimeStamp,
         True,
@@ -1022,15 +1084,15 @@ procedure TfrmMessageList.UpdateCallStack(var ANode: PVirtualNode);
 var
   I   : Integer;
   CSD : TCallStackData;
-  ND  : TNodeData;
+  LN  : TLogNode;
 begin
   FCallStack.Clear;
   I := FLogTreeView.GetNodeLevel(ANode);
   while I > 0 do
   begin
-    ND := FLogTreeView.GetNodeData<TNodeData>(ANode^.Parent);
+    LN := FLogTreeView.GetNodeData<TLogNode>(ANode^.Parent);
     CSD := TCallStackData.Create;
-    CSD.Title := ND.Title;
+    CSD.Title := LN.Text;
     CSD.Level := I;
     FCallStack.Add(CSD);
     ANode := ANode^.Parent;
@@ -1055,4 +1117,3 @@ begin
 end;
 {$ENDREGION}
 end.
-

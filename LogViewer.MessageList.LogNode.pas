@@ -34,36 +34,65 @@ uses
 
   DDuce.Logger.Interfaces;
 
-type
-  TNodeData = class   // needs to be replaced by TLogNode
-    Title   : string;
-    MsgType : TLogMessageType;
-    MsgData : TStream;
-    MsgTime : TDateTime;
-    Index   : Integer;
-    Name    : string;
-    Value   : string;
-  end;
+//type
+//  TNodeData = class   // needs to be replaced by TLogNode
+//    Title   : string;
+//    MsgType : TLogMessageType;
+//    MsgData : TStream;
+//    MsgTime : TDateTime;
+//    Index   : Integer;
+//    Name    : string;
+//    Value   : string;
+//  end;
 
+{ Datastructure holding the data to display extracted from the TLogMessage. }
 
 type
   TLogNode = class
   private
-    FText   : string;
-    FVTNode : PVirtualNode;
-    FNodes  : IList<TLogNode>;
+    FId          : Int64;
+    FText        : string; // warning/info/error
+    FVTNode      : PVirtualNode;
+    FNodes       : IList<TLogNode>;
+    FValueName   : string; // variables
+    FValueType   : string;
+    FValue       : string;
+    FMessageType : TLogMessageType;
+    FMessageData : TStream; // binary data stream for bitmaps, etc.
+    FTimeStamp   : TDateTime;
 
   protected
+    {$REGION 'property access methods'}
+    function GetMessageData: TStream;
+    procedure SetMessageData(const Value: TStream);
+    function GetTimeStamp: TDateTime;
+    procedure SetTimeStamp(const Value: TDateTime);
+    function GetId: Int64;
+    procedure SetId(const Value: Int64);
+    function GetMessageType: TLogMessageType;
+    procedure SetMessageType(const Value: TLogMessageType);
     function GetNodes: IList<TLogNode>;
     function GetText: string;
     procedure SetText(const Value: string);
     function GetVTNode: PVirtualNode;
     procedure SetVTNode(const Value: PVirtualNode);
+    function GetValue: string;
+    function GetValueName: string;
+    function GetValueType: string;
+    procedure SetValue(const Value: string);
+    procedure SetValueName(const Value: string);
+    procedure SetValueType(const Value: string);
+    {$ENDREGION}
 
   public
     constructor Create(AText: string = '');
 
     procedure AfterConstruction; override;
+    procedure BeforeDestruction; override;
+
+
+    property Id: Int64
+      read GetId write SetId;
 
     property Nodes: IList<TLogNode>
       read GetNodes;
@@ -71,18 +100,45 @@ type
     property Text: string
       read GetText write SetText;
 
+    property ValueName: string
+      read GetValueName write SetValueName;
+
+    property Value: string
+      read GetValue write SetValue;
+
+    property ValueType: string
+      read GetValueType write SetValueType;
+
+    property MessageType : TLogMessageType
+      read GetMessageType write SetMessageType;
+
+    property MessageData: TStream
+      read GetMessageData write SetMessageData;
+
+    property TimeStamp: TDateTime
+      read GetTimeStamp write SetTimeStamp;
+
     property VTNode: PVirtualNode
       read GetVTNode write SetVTNode;
   end;
 
-
 implementation
+
+uses
+  System.SysUtils;
 
 {$REGION 'construction and destruction'}
 procedure TLogNode.AfterConstruction;
 begin
   inherited AfterConstruction;
 
+end;
+
+procedure TLogNode.BeforeDestruction;
+begin
+  if Assigned(FMessageData) then
+    FreeAndNil(FMessageData);
+  inherited BeforeDestruction;
 end;
 
 constructor TLogNode.Create(AText: string);
@@ -92,6 +148,36 @@ end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
+function TLogNode.GetId: Int64;
+begin
+  Result := FId;
+end;
+
+procedure TLogNode.SetId(const Value: Int64);
+begin
+  FId := Value;
+end;
+
+function TLogNode.GetMessageData: TStream;
+begin
+  Result := FMessageData;
+end;
+
+procedure TLogNode.SetMessageData(const Value: TStream);
+begin
+  FMessageData := Value;
+end;
+
+function TLogNode.GetMessageType: TLogMessageType;
+begin
+  Result := FMessageType;
+end;
+
+procedure TLogNode.SetMessageType(const Value: TLogMessageType);
+begin
+  FMessageType := Value;
+end;
+
 function TLogNode.GetNodes: IList<TLogNode>;
 begin
   if not Assigned(FNodes) then
@@ -107,6 +193,46 @@ end;
 procedure TLogNode.SetText(const Value: string);
 begin
   FText := Value;
+end;
+
+function TLogNode.GetTimeStamp: TDateTime;
+begin
+  Result := FTimeStamp;
+end;
+
+procedure TLogNode.SetTimeStamp(const Value: TDateTime);
+begin
+  FTimeStamp := Value;
+end;
+
+function TLogNode.GetValue: string;
+begin
+  Result := FValue;
+end;
+
+procedure TLogNode.SetValue(const Value: string);
+begin
+  FValue := Value;
+end;
+
+function TLogNode.GetValueName: string;
+begin
+  Result := FValueName;
+end;
+
+procedure TLogNode.SetValueName(const Value: string);
+begin
+  FValueName := Value;
+end;
+
+function TLogNode.GetValueType: string;
+begin
+  Result := FValueType;
+end;
+
+procedure TLogNode.SetValueType(const Value: string);
+begin
+  FValueType := Value;
 end;
 
 function TLogNode.GetVTNode: PVirtualNode;

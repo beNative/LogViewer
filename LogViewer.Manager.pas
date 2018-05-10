@@ -64,7 +64,7 @@ type
     actInfo               : TAction;
     actMemory             : TAction;
     actMethodTraces       : TAction;
-    actObject             : TAction;
+    actComponent: TAction;
     actOpen               : TAction;
     actSave               : TAction;
     actSelectAll          : TAction;
@@ -105,7 +105,7 @@ type
     procedure actInfoExecute(Sender: TObject);
     procedure actMemoryExecute(Sender: TObject);
     procedure actMethodTracesExecute(Sender: TObject);
-    procedure actObjectExecute(Sender: TObject);
+    procedure actComponentExecute(Sender: TObject);
     procedure actOpenExecute(Sender: TObject);
     procedure actSaveExecute(Sender: TObject);
     procedure actSelectAllExecute(Sender: TObject);
@@ -352,9 +352,9 @@ begin
   UpdateVisibleMessageTypes(lmtLeaveMethod, Sender, False);
 end;
 
-procedure TdmManager.actObjectExecute(Sender: TObject);
+procedure TdmManager.actComponentExecute(Sender: TObject);
 begin
-  UpdateVisibleMessageTypes(lmtObject, Sender);
+  UpdateVisibleMessageTypes(lmtComponent, Sender);
 end;
 
 procedure TdmManager.actOpenExecute(Sender: TObject);
@@ -682,7 +682,7 @@ begin
   actError.Checked        := lmtError in MLS.VisibleMessageTypes;
   actMethodTraces.Checked := lmtEnterMethod in MLS.VisibleMessageTypes;
   actException.Checked    := lmtException in MLS.VisibleMessageTypes;
-  actObject.Checked       := lmtObject in MLS.VisibleMessageTypes;
+  actComponent.Checked    := lmtComponent in MLS.VisibleMessageTypes;
   actHeapInfo.Checked     := lmtHeapInfo in MLS.VisibleMessageTypes;
   actCustomData.Checked   := lmtCustomData in MLS.VisibleMessageTypes;
   actStrings.Checked      := lmtStrings in MLS.VisibleMessageTypes;
@@ -702,7 +702,7 @@ begin
   actError.Enabled              := B;
   actMethodTraces.Enabled       := B;
   actException.Enabled          := B;
-  actObject.Enabled             := B;
+  actComponent.Enabled          := B;
   actHeapInfo.Enabled           := B;
   actCustomData.Enabled         := B;
   actStrings.Enabled            := B;

@@ -63,9 +63,11 @@ type
     FFirstId          : Int64;
     FCurrentId        : Int64;
     FName             : string;
+    FValueType        : string;
     FList             : IList<TWatchValue>;
     FOnlyTrackChanges : Boolean;
 
+    {$REGION 'property access methods'}
     function GetCount: Integer;
     function GetValue:string;
     function GetValues(AId: Int64): string;
@@ -74,10 +76,13 @@ type
     function GetCurrentWatchValue: TWatchValue;
     function GetOnlyTrackChanges: Boolean;
     procedure SetOnlyTrackChanges(const Value: Boolean);
+    function GetValueType: string;
+    {$ENDREGION}
 
   public
     constructor Create(
       const AName       : string;
+      const AValueType  : string;
       AFirstId          : Int64;
       AOnlyTrackChanges : Boolean = False
     );
@@ -93,8 +98,13 @@ type
     property List: IList<TWatchValue>
       read GetList;
 
+    { Unique watch name. Typically this is the name of the variable you wish to
+      monitor. }
     property Name: string
       read FName;
+
+    property ValueType: string
+      read GetValueType;
 
     { Last received watch value. }
     property Value: string
@@ -136,6 +146,8 @@ type
     function IndexOf(const AName: string): Integer;
     procedure Add(
       const AName          : string;
+      const AValueType     : string;
+      const AValue         : string;
       AId                  : Int64; // Unique Id of the logmessage
       ATimeStamp           : TDateTime;
       AOnlyTrackChanges    : Boolean = False;
@@ -166,11 +178,12 @@ implementation
 
 {$REGION 'TWatch'}
 {$REGION 'construction and destruction'}
-constructor TWatch.Create(const AName: string; AFirstId: Int64;
-  AOnlyTrackChanges: Boolean);
+constructor TWatch.Create(const AName: string; const AValueType: string;
+  AFirstId: Int64; AOnlyTrackChanges: Boolean);
 begin
   FList := TCollections.CreateObjectList<TWatchValue>;
   FName             := AName;
+  FValueType        := AValueType;
   FFirstId          := AFirstId;
   FOnlyTrackChanges := AOnlyTrackChanges;
 end;
@@ -208,6 +221,11 @@ end;
 function TWatch.GetValues(AId: Int64): string;
 begin
   Result := FList[AId].Value;
+end;
+
+function TWatch.GetValueType: string;
+begin
+  Result := FValueType;
 end;
 
 function TWatch.GetOnlyTrackChanges: Boolean;
@@ -309,24 +327,20 @@ begin
     Result := -1;
 end;
 
-procedure TWatchList.Add(const AName: string; AId: Int64; ATimeStamp
-  : TDateTime; AOnlyTrackChanges: Boolean; ASkipOnNewWatchEvent: Boolean);
+procedure TWatchList.Add(const AName: string; const AValueType: string;
+  const AValue: string; AId: Int64; ATimeStamp: TDateTime;
+  AOnlyTrackChanges: Boolean; ASkipOnNewWatchEvent: Boolean);
 var
-  PosEqual : Integer;
-  I        : Integer;
-  S        : string;
+  I : Integer;
 begin
-  PosEqual := Pos('=', AName);
-  S := Copy(AName, 1, PosEqual - 1);
-  I := IndexOf(S);
+  I := IndexOf(AName);
   if I = -1 then
   begin
-    I := FList.Add(TWatch.Create(S, AId, AOnlyTrackChanges));
+    I := FList.Add(TWatch.Create(AName, AValueType, AId, AOnlyTrackChanges));
     if not ASkipOnNewWatchEvent then
-      FOnNewWatch(S, I);
+      FOnNewWatch(AName, I);
   end;
-  S := Copy(AName, PosEqual + 1, Length(AName) - PosEqual);
-  FList[I].AddValue(S, AId, ATimeStamp);
+  FList[I].AddValue(AValue, AId, ATimeStamp);
 end;
 
 procedure TWatchList.Clear;

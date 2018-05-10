@@ -348,6 +348,7 @@
             <Form>frmDashboard</Form>
             <FormType>dfm</FormType>
         </DCCReference>
+        <DCCReference Include="LogViewer.Receivers.Base.pas"/>
         <None Include="Readme.md"/>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>
@@ -398,12 +399,6 @@
                 <DeployFile LocalName="Library\Win32\Debug\LogViewer.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>LogViewer.exe</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="libzmq.dll" Configuration="Debug" Class="ProjectFile">
-                    <Platform Name="Win32">
-                        <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

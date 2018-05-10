@@ -23,8 +23,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  Vcl.ComCtrls, Vcl.ExtCtrls,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Vcl.ExtCtrls,
 
   VirtualTrees,
 
@@ -63,6 +62,16 @@ type
       Item             : TObject
     ): string;
     function FCDTimeStampCustomDraw(
+      Sender          : TObject;
+      ColumnDefinition: TColumnDefinition;
+      Item            : TObject;
+      TargetCanvas    : TCanvas;
+      CellRect        : TRect;
+      ImageList       : TCustomImageList;
+      DrawMode        : TDrawMode;
+      Selected        : Boolean
+    ): Boolean;
+    function FCDTypeCustomDraw(
       Sender          : TObject;
       ColumnDefinition: TColumnDefinition;
       Item            : TObject;
@@ -135,7 +144,9 @@ uses
 
   DSharp.Windows.ControlTemplates,
 
-  DDuce.Factories, DDuce.Factories.VirtualTrees;
+  DDuce.Factories, DDuce.Factories.VirtualTrees,
+
+  LogViewer.Resources;
 
 {$R *.dfm}
 
@@ -176,6 +187,10 @@ begin
     else if CD.ValuePropertyName = 'Name' then
     begin
       CD.OnCustomDraw := FCDNameCustomDraw;
+    end
+    else if CD.ValuePropertyName = 'ValueType' then
+    begin
+      CD.OnCustomDraw := FCDTypeCustomDraw;
     end
     else if CD.ValuePropertyName = 'Value' then
     begin
@@ -218,7 +233,7 @@ function TfrmWatchesView.FCDIdCustomDraw(Sender: TObject;
 begin
   if DrawMode = dmPaintText then
   begin
-    TargetCanvas.Font.Color := clDkGray;
+    TargetCanvas.Font.Color := ID_FONTCOLOR;
   end;
   Result := True;
 end;
@@ -242,7 +257,7 @@ function TfrmWatchesView.FCDTimeStampCustomDraw(Sender: TObject;
 begin
   if DrawMode = dmPaintText then
   begin
-    TargetCanvas.Font.Color := clBlue;
+    TargetCanvas.Font.Color := TIMESTAMP_FONTCOLOR;
   end;
   Result := True;
 end;
@@ -254,7 +269,7 @@ function TfrmWatchesView.FCDValueCustomDraw(Sender: TObject;
 begin
   if DrawMode = dmPaintText then
   begin
-    TargetCanvas.Font.Color := clNavy;
+    TargetCanvas.Font.Color := VALUE_FONTCOLOR;
   end;
   Result := True;
 end;
@@ -268,6 +283,19 @@ begin
   begin
     Result := FormatDateTime('hh:nn:ss:zzz',  TWatchValue(Item).TimeStamp)
   end;
+end;
+
+function TfrmWatchesView.FCDTypeCustomDraw(Sender: TObject;
+  ColumnDefinition: TColumnDefinition; Item: TObject; TargetCanvas: TCanvas;
+  CellRect: TRect; ImageList: TCustomImageList; DrawMode: TDrawMode;
+  Selected: Boolean): Boolean;
+begin
+  if DrawMode = dmPaintText then
+  begin
+    TargetCanvas.Font.Style := TargetCanvas.Font.Style + [fsBold];
+    TargetCanvas.Font.Color := VALUETYPE_FONTCOLOR;
+  end;
+  Result := True;
 end;
 
 procedure TfrmWatchesView.FTVPWatchValuesSelectionChanged(Sender: TObject);
@@ -300,6 +328,10 @@ begin
   CD.ValuePropertyName := 'Name';
   CD.HintPropertyName := CD.ValuePropertyName;
   CD.OnCustomDraw := FCDNameCustomDraw;
+  CD := CDS.Add('ValueType');
+  CD.ValuePropertyName := 'ValueType';
+  CD.HintPropertyName := CD.ValuePropertyName;
+  CD.OnCustomDraw := FCDTypeCustomDraw;
   CD := CDS.Add('Value');
   CD.ValuePropertyName := 'Value';
   CD.HintPropertyName := CD.ValuePropertyName;
@@ -324,7 +356,7 @@ begin
   CD.HintPropertyName := CD.ValuePropertyName;
   CD.AutoSize := True; // Test
   CD.OnCustomDraw := FCDValueCustomDraw;
-  CD := FWatchHistoryColumnDefinitions.Add('TimeStamp');
+  CD := FWatchHistoryColumnDefinitions.Add('Timestamp');
   CD.ValuePropertyName := 'TimeStamp';
   CD.HintPropertyName := CD.ValuePropertyName;
   CD.Alignment := taCenter;

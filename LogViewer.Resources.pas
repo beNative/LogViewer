@@ -21,6 +21,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages,
   System.Classes,
+  Vcl.Graphics,
 
   DDuce.Logger.Interfaces;
 
@@ -69,26 +70,10 @@ var
 resourcestring
   STitle       = 'Title';
   SName        = 'Name';
+  SType        = 'Type';
   SValue       = 'Value';
   STimestamp   = 'Timestamp';
   SProcessName = 'ProcessName';
-
-//const
-//  PixelFormatNames: array [TPixelFormat] of string =
-//    (
-//    'pfDevice',
-//    'pf1bit',
-//    'pf4bit',
-//    'pf8bit',
-//    'pf15bit',
-//    'pf16bit',
-//    'pf24bit',
-//    'pf32bit',
-//    'pfCustom'
-//    );
-//  HandleTypeNames: array [TBitmapHandleType] of string =
-//    ('bmDIB',
-//    'bmDDB');
 
 const
   ALL_MESSAGES = [
@@ -102,7 +87,7 @@ const
     lmtCheckpoint,
     lmtStrings,
     lmtCallStack,
-    lmtObject,
+    lmtComponent,
     lmtException,
     lmtBitmap,
     lmtHeapInfo,
@@ -112,6 +97,20 @@ const
     lmtCounter,
     lmtText
   ];
+
+  // message viewer
+const
+  COLUMN_MAIN      = 0;
+  COLUMN_NAME      = 1;
+  COLUMN_TYPE      = 2;
+  COLUMN_VALUE     = 3;
+  COLUMN_TIMESTAMP = 4;
+
+  VALUENAME_FONTCOLOR = clBlack;
+  VALUETYPE_FONTCOLOR = clBlue;
+  VALUE_FONTCOLOR     = clNavy;
+  TIMESTAMP_FONTCOLOR = clBlue;
+  ID_FONTCOLOR        = clDkGray;
 
 implementation
 

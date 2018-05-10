@@ -1,7 +1,7 @@
 object frmMessageList: TfrmMessageList
   Left = 0
   Top = 0
-  ClientHeight = 806
+  ClientHeight = 771
   ClientWidth = 1389
   Color = clWhite
   Font.Charset = DEFAULT_CHARSET
@@ -17,25 +17,27 @@ object frmMessageList: TfrmMessageList
     Left = 953
     Top = 0
     Width = 6
-    Height = 806
+    Height = 771
     Align = alRight
     Color = clBtnFace
     ParentColor = False
     ExplicitLeft = 951
+    ExplicitHeight = 806
   end
   object splLeftVertical: TSplitter
     Left = 353
     Top = 0
     Width = 6
-    Height = 806
+    Height = 771
     Color = clBtnFace
     ParentColor = False
+    ExplicitHeight = 806
   end
   object pnlRight: TPanel
     Left = 959
     Top = 0
     Width = 430
-    Height = 806
+    Height = 771
     Align = alRight
     BevelOuter = bvNone
     Color = clWhite
@@ -62,34 +64,97 @@ object frmMessageList: TfrmMessageList
       Left = 0
       Top = 25
       Width = 430
-      Height = 781
-      ActivePage = tsTextViewer
+      Height = 746
+      ActivePage = tsImageViewer
       Align = alClient
       MultiLine = True
       TabOrder = 1
       object tsTextViewer: TTabSheet
         Caption = 'Text viewer'
+        ExplicitLeft = 0
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 753
         object pnlTextViewer: TPanel
           Left = 0
           Top = 0
           Width = 422
-          Height = 753
+          Height = 718
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
+          ExplicitLeft = 2
+          ExplicitHeight = 753
         end
       end
       object tsImageViewer: TTabSheet
         Caption = 'Image viewer'
         ImageIndex = 1
+        object imgBitmap: TImage
+          Left = 0
+          Top = 64
+          Width = 422
+          Height = 654
+          Align = alBottom
+          Anchors = [akLeft, akTop, akRight, akBottom]
+          Center = True
+          IncrementalDisplay = True
+          Proportional = True
+          ExplicitLeft = 2
+          ExplicitTop = 60
+          ExplicitWidth = 419
+        end
+        object edtWidth: TLabeledEdit
+          Left = 64
+          Top = 6
+          Width = 73
+          Height = 21
+          EditLabel.Width = 32
+          EditLabel.Height = 13
+          EditLabel.Caption = 'Width:'
+          LabelPosition = lpLeft
+          TabOrder = 0
+        end
+        object edtHeight: TLabeledEdit
+          Left = 224
+          Top = 6
+          Width = 73
+          Height = 21
+          EditLabel.Width = 35
+          EditLabel.Height = 13
+          EditLabel.Caption = 'Height:'
+          LabelPosition = lpLeft
+          TabOrder = 1
+        end
+        object edtPixelFormat: TLabeledEdit
+          Left = 64
+          Top = 33
+          Width = 73
+          Height = 21
+          EditLabel.Width = 61
+          EditLabel.Height = 13
+          EditLabel.Caption = 'Pixel format:'
+          LabelPosition = lpLeft
+          TabOrder = 2
+        end
+        object edtHandleType: TLabeledEdit
+          Left = 224
+          Top = 33
+          Width = 73
+          Height = 21
+          EditLabel.Width = 62
+          EditLabel.Height = 13
+          EditLabel.Caption = 'Handle type:'
+          LabelPosition = lpLeft
+          TabOrder = 3
+        end
       end
       object tsRawMessageData: TTabSheet
         Caption = 'Raw message data'
         ImageIndex = 2
-        ExplicitLeft = 6
         DesignSize = (
           422
-          753)
+          718)
         object edtMessageType: TLabeledEdit
           Left = 88
           Top = 10
@@ -98,8 +163,14 @@ object frmMessageList: TfrmMessageList
           EditLabel.Width = 71
           EditLabel.Height = 13
           EditLabel.Caption = 'Message type:'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clGreen
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
           LabelPosition = lpLeft
           LabelSpacing = 6
+          ParentFont = False
           TabOrder = 0
         end
         object edtTimeStamp: TLabeledEdit
@@ -110,15 +181,21 @@ object frmMessageList: TfrmMessageList
           EditLabel.Width = 58
           EditLabel.Height = 13
           EditLabel.Caption = 'Time stamp:'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
           LabelPosition = lpLeft
           LabelSpacing = 18
+          ParentFont = False
           TabOrder = 1
         end
         object mmoMessageText: TMemo
           Left = 3
-          Top = 80
+          Top = 184
           Width = 416
-          Height = 670
+          Height = 531
           Anchors = [akLeft, akTop, akRight, akBottom]
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
@@ -127,6 +204,76 @@ object frmMessageList: TfrmMessageList
           Font.Style = []
           ParentFont = False
           TabOrder = 2
+          ExplicitHeight = 566
+        end
+        object pnlColor: TPanel
+          Left = 88
+          Top = 64
+          Width = 185
+          Height = 24
+          BevelKind = bkFlat
+          BevelOuter = bvNone
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
+          ParentFont = False
+          TabOrder = 3
+        end
+        object edtValueName: TLabeledEdit
+          Left = 88
+          Top = 94
+          Width = 185
+          Height = 21
+          EditLabel.Width = 31
+          EditLabel.Height = 13
+          EditLabel.Caption = 'Name:'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
+          LabelPosition = lpLeft
+          LabelSpacing = 6
+          ParentFont = False
+          TabOrder = 4
+        end
+        object edtValueType: TLabeledEdit
+          Left = 88
+          Top = 121
+          Width = 185
+          Height = 21
+          EditLabel.Width = 28
+          EditLabel.Height = 13
+          EditLabel.Caption = 'Type:'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
+          LabelPosition = lpLeft
+          LabelSpacing = 6
+          ParentFont = False
+          TabOrder = 5
+        end
+        object edtValue: TLabeledEdit
+          Left = 88
+          Top = 148
+          Width = 185
+          Height = 21
+          EditLabel.Width = 30
+          EditLabel.Height = 13
+          EditLabel.Caption = 'Value:'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
+          LabelPosition = lpLeft
+          LabelSpacing = 6
+          ParentFont = False
+          TabOrder = 6
         end
       end
     end
@@ -135,7 +282,7 @@ object frmMessageList: TfrmMessageList
     Left = 0
     Top = 0
     Width = 353
-    Height = 806
+    Height = 771
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 1
@@ -143,7 +290,7 @@ object frmMessageList: TfrmMessageList
       Left = 0
       Top = 0
       Width = 353
-      Height = 806
+      Height = 771
       Align = alClient
       BevelOuter = bvNone
       Color = clWhite
@@ -164,7 +311,7 @@ object frmMessageList: TfrmMessageList
         Left = 0
         Top = 143
         Width = 353
-        Height = 663
+        Height = 628
         Align = alClient
         BevelOuter = bvNone
         Caption = 'pnlLeftBottom'
@@ -220,7 +367,7 @@ object frmMessageList: TfrmMessageList
     Left = 359
     Top = 0
     Width = 594
-    Height = 806
+    Height = 771
     Align = alClient
     BevelOuter = bvNone
     BevelWidth = 2
@@ -284,7 +431,7 @@ object frmMessageList: TfrmMessageList
     Left = 607
     Top = 150
     Bitmap = {
-      494C010112001500400010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010112001500640010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000005000000001002000000000000050
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

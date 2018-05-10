@@ -200,7 +200,7 @@ begin
   CreateToolButton(TB);
   CreateToolButton(TB, 'actValue', tbsTextButton);
   CreateToolButton(TB, 'actStrings', tbsTextButton);
-  CreateToolButton(TB, 'actObject', tbsTextButton);
+  CreateToolButton(TB, 'actComponent', tbsTextButton);
 //  CreateToolButton(TB, 'actBitmap', tbsTextButton);
   //CreateToolButton(TB, 'actMemory', tbsTextButton);
   //CreateToolButton(TB, 'actHeapInfo', tbsTextButton);
@@ -209,10 +209,6 @@ begin
   CreateToolButton(TB, 'actMethodTraces', tbsTextButton);
 //  CreateToolButton(TB);
 //  CreateToolButton(TB, 'actFilterMessages');
-//  CreateToolButton(TB);
-//  CreateToolButton(TB, 'actZeroMQChannel');
-//  CreateToolButton(TB, 'actWinIPCChannel');
-//  CreateToolButton(TB, 'actODSChannel');
 //  CreateToolButton(TB);
 //  CreateToolButton(TB, 'actSetFocusToFilter');
 //  CreateToolButton(TB);

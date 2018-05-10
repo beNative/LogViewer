@@ -21,7 +21,13 @@ interface
 { Receives logmessages through WinIPC (WM_COPYDATA) messages. }
 
 
-{ Handles multiple queues which can be connected to a message viewer }
+{ TODO :
+  Need to handle multiple queues which can be connected to a message viewer
+
+  A channel receiver maintains a list of listeners which are associated with
+  the processId of the originating process.
+
+}
 
 uses
   System.Classes,
@@ -36,7 +42,7 @@ uses
 type
   TWinIPChannelReceiver = class(TInterfacedObject, IChannelReceiver)
   private class var
-     FCounter : Integer;
+     FCounter : Integer; // used for creating a unique server name
   private
      FEnabled          : Boolean;
      FIPCServer        : TWinIPCServer;
@@ -52,7 +58,11 @@ type
     procedure SetEnabled(const Value: Boolean);
     {$ENDREGION}
 
-    procedure FIPCServerMessage(Sender: TObject);
+    procedure FIPCServerMessage(
+      Sender    : TObject;
+      ASourceId : Integer;
+      AData     : TStream
+    );
 
     procedure DoReceiveMessage(AStream : TStream);
 
@@ -77,7 +87,9 @@ type
 implementation
 
 uses
-  System.SysUtils;
+  System.SysUtils,
+
+  DDuce.Utils;
 
 {$REGION 'construction and destruction'}
 constructor TWinIPChannelReceiver.Create(const AName: string);
@@ -96,9 +108,9 @@ begin
   inherited AfterConstruction;
   Inc(FCounter);
   FOnReceiveMessage.UseFreeNotification := False;
-  FIPCServer := TWinIPCServer.Create;
+  FIPCServer           := TWinIPCServer.Create;
   FIPCServer.OnMessage := FIPCServerMessage;
-  FIPCServer.Active := True;
+  FIPCServer.Active    := True;
 end;
 
 procedure TWinIPChannelReceiver.BeforeDestruction;
@@ -123,11 +135,6 @@ end;
 procedure TWinIPChannelReceiver.SetName(const Value: string);
 begin
   FName := Value;
-end;
-
-function TWinIPChannelReceiver.ToString: string;
-begin
-  Result := Name;
 end;
 
 procedure TWinIPChannelReceiver.SetEnabled(const Value: Boolean);
@@ -157,9 +164,18 @@ end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
-procedure TWinIPChannelReceiver.FIPCServerMessage(Sender: TObject);
+procedure TWinIPChannelReceiver.FIPCServerMessage(Sender: TObject;
+  ASourceId: Integer; AData: TStream);
 begin
-  DoReceiveMessage(TWinIPCServer(Sender).MsgData);
+  DoReceiveMessage(AData);
+  OutputDebugString('ClientProcessId = %d', [ASourceId]);
+end;
+{$ENDREGION}
+
+{$REGION 'public methods'}
+function TWinIPChannelReceiver.ToString: string;
+begin
+  Result := Name;
 end;
 {$ENDREGION}
 
