@@ -68,7 +68,6 @@ var
   ];
 
 resourcestring
-  STitle       = 'Title';
   SName        = 'Name';
   SType        = 'Type';
   SValue       = 'Value';
@@ -81,6 +80,8 @@ const
     lmtError,
     lmtWarning,
     lmtValue,
+    lmtAlphaColor,
+    lmtColor,
     lmtEnterMethod,
     lmtLeaveMethod,
     lmtConditional,
@@ -101,16 +102,22 @@ const
   // message viewer
 const
   COLUMN_MAIN      = 0;
-  COLUMN_NAME      = 1;
-  COLUMN_TYPE      = 2;
+  COLUMN_VALUENAME = 1;
+  COLUMN_VALUETYPE = 2;
   COLUMN_VALUE     = 3;
   COLUMN_TIMESTAMP = 4;
+
+  { max. amount of characters allowed to be displayed in the value column of the
+    logtree. }
+  MAX_TEXTLENGTH_VALUECOLUMN = 80;
 
   VALUENAME_FONTCOLOR = clBlack;
   VALUETYPE_FONTCOLOR = clBlue;
   VALUE_FONTCOLOR     = clNavy;
   TIMESTAMP_FONTCOLOR = clBlue;
   ID_FONTCOLOR        = clDkGray;
+
+
 
 implementation
 
