@@ -221,11 +221,15 @@ end;
 procedure TfrmMain.EventsAddLogViewer(Sender: TObject;
   ALogViewer: ILogViewer);
 begin
-  ALogViewer.Receiver.Enabled := True;
+  ALogViewer.LogQueue.Enabled := True;
   ALogViewer.Form.Parent := pnlMainClient;
   ctMain.Tabs.Add;
   ctMain.ActiveTab.Data := Pointer(ALogViewer);
-  ctMain.ActiveTab.Caption := ALogViewer.Receiver.ToString;
+  ctMain.ActiveTab.Caption :=
+    Format('%s (%d)', [
+      ALogViewer.LogQueue.Receiver.ToString, ALogViewer.LogQueue.SourceId
+    ]);
+
   ALogViewer.Form.Show;
 end;
 
@@ -239,7 +243,6 @@ procedure TfrmMain.FormShortCut(var Msg: TWMKey; var Handled: Boolean);
 begin
   Handled := Manager.Actions.ActionList.IsShortCut(Msg);
 end;
-
 {$ENDREGION}
 
 {$REGION 'property access methods'}

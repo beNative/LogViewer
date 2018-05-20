@@ -31,12 +31,6 @@ uses
   LogViewer.Interfaces, LogViewer.Settings, LogViewer.Events,
   LogViewer.Commands;
 
-{
-  TODO:
-  - handle list of registered channels (of wich each is associated with a
-    view?) => IList<IChannelReceiver>
-}
-
 type
   TdmManager = class(TDataModule, ILogViewerActions,
                                   ILogViewerMenus,
@@ -128,6 +122,7 @@ type
     FActiveView : ILogViewer;
     FViewList   : IList<ILogViewer>;
     FReceivers  : IList<IChannelReceiver>;
+    FLogQueues  : IList<ILogQueue>;
 
     function AddMenuItem(
       AParent : TMenuItem;
@@ -151,6 +146,11 @@ type
     function GetReceivers: IList<IChannelReceiver>;
 
     procedure ActiveViewChanged;
+
+    procedure ReceiverNewLogQueue(
+      Sender    : TObject;
+      ALogQueue : ILogQueue
+    );
 
     procedure UpdateVisibleMessageTypes(
       const AMessageType : TLogMessageType;
@@ -233,7 +233,8 @@ implementation
 uses
   Vcl.Forms,
 
-  LogViewer.Resources, LogViewer.Settings.Dialog, LogViewer.MessageList.Settings;
+  LogViewer.Factories, LogViewer.Resources,
+  LogViewer.Settings.Dialog, LogViewer.MessageList.Settings;
 
 {$R *.dfm}
 
@@ -244,6 +245,7 @@ begin
   FEvents    := TLogViewerEvents.Create(Self);
   FCommands  := TLogViewerCommands.Create(Self);
   FReceivers := TCollections.CreateInterfaceList<IChannelReceiver>;
+  FLogQueues := TCollections.CreateInterfaceList<ILogQueue>;
   FViewList  := TCollections.CreateInterfaceList<ILogViewer>;
   BuildMessageTypesPopupMenu;
   BuildLogTreeViewerPopupMenu;
@@ -535,6 +537,14 @@ begin
 end;
 {$ENDREGION}
 
+{$REGION 'event handlers'}
+procedure TdmManager.ReceiverNewLogQueue(Sender: TObject; ALogQueue: ILogQueue);
+begin
+  FLogQueues.Add(ALogQueue);
+  AddView(TLogViewerFactories.CreateLogViewer(Self, ALogQueue));
+end;
+{$ENDREGION}
+
 {$REGION 'private methods'}
 function TdmManager.AddMenuItem(AParent: TMenuItem;
   AAction: TBasicAction): TMenuItem;
@@ -650,15 +660,16 @@ begin
   Guard.CheckNotNull(AReceiver, 'AReceiver');
   FReceivers.Add(AReceiver);
   Events.DoAddReceiver(AReceiver);
+  AReceiver.OnNewLogQueue.Add(ReceiverNewLogQueue);
 end;
 
 procedure TdmManager.AddView(ALogViewer: ILogViewer);
 begin
   Guard.CheckNotNull(ALogViewer, 'ALogViewer');
   FViewList.Add(ALogViewer);
-  if not FReceivers.Contains(ALogViewer.Receiver) then
+  if not FReceivers.Contains(ALogViewer.LogQueue.Receiver) then
   begin
-    FReceivers.Add(ALogViewer.Receiver);
+    FReceivers.Add(ALogViewer.LogQueue.Receiver);
   end;
   Events.DoAddLogViewer(ALogViewer);
   FActiveView := ALogViewer;
@@ -690,7 +701,7 @@ begin
   actAutoScrollMessages.Checked
     := FSettings.MessageListSettings.AutoScrollMessages;
   B := Assigned(ActiveView);
-  actStart.Enabled              := B and not ActiveView.Receiver.Enabled;
+  actStart.Enabled              := B and not ActiveView.LogQueue.Enabled;
   actStop.Enabled               := B and not actStart.Enabled;
   actBitmap.Enabled             := B;
   actCallStack.Enabled          := B;

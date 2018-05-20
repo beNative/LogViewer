@@ -80,7 +80,7 @@ end;
 function TLogViewerCommands.GetReceiver: IChannelReceiver;
 begin
   if Assigned(ActiveView) then
-    Result := ActiveView.Receiver
+    Result := ActiveView.LogQueue.Receiver
   else
     Result := nil;
 end;

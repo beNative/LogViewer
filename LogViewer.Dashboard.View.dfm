@@ -18,7 +18,7 @@ object frmDashboard: TfrmDashboard
     Width = 106
     Height = 17
     Caption = 'WinODS enabled'
-    TabOrder = 0
+    TabOrder = 2
   end
   object chkWinIPCEnabled: TCheckBox
     Left = 28
@@ -26,7 +26,7 @@ object frmDashboard: TfrmDashboard
     Width = 97
     Height = 17
     Caption = 'WinIPC enabled'
-    TabOrder = 1
+    TabOrder = 0
   end
   object chkZeroMQEnabled: TCheckBox
     Left = 28
@@ -34,7 +34,7 @@ object frmDashboard: TfrmDashboard
     Width = 154
     Height = 17
     Caption = 'ZeroMQ subscriber enabled'
-    TabOrder = 2
+    TabOrder = 4
   end
   object pnlLogChannels: TPanel
     Left = 0
@@ -44,7 +44,7 @@ object frmDashboard: TfrmDashboard
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     BevelOuter = bvNone
-    TabOrder = 3
+    TabOrder = 8
   end
   object btnAddWinIPCLogViewer: TButton
     Left = 188
@@ -52,7 +52,7 @@ object frmDashboard: TfrmDashboard
     Width = 75
     Height = 25
     Action = actAddWinIPCLogViewer
-    TabOrder = 4
+    TabOrder = 1
   end
   object btnAddWinODSLogViewer: TButton
     Left = 188
@@ -60,7 +60,7 @@ object frmDashboard: TfrmDashboard
     Width = 75
     Height = 25
     Action = actAddWinODSLogViewer
-    TabOrder = 5
+    TabOrder = 3
   end
   object btnAddZeroMQLogViewer: TButton
     Left = 188
@@ -68,7 +68,7 @@ object frmDashboard: TfrmDashboard
     Width = 75
     Height = 25
     Action = actAddZeroMQLogViewer
-    TabOrder = 6
+    TabOrder = 5
   end
   object chkComPortEnabled: TCheckBox
     Left = 28
@@ -76,7 +76,7 @@ object frmDashboard: TfrmDashboard
     Width = 106
     Height = 17
     Caption = 'COM port enabled'
-    TabOrder = 7
+    TabOrder = 6
   end
   object btnAddComPortLogViewer: TButton
     Left = 188
@@ -84,7 +84,7 @@ object frmDashboard: TfrmDashboard
     Width = 75
     Height = 25
     Action = actAddComPortLogViewer
-    TabOrder = 8
+    TabOrder = 7
   end
   object aclMain: TActionList
     Left = 352

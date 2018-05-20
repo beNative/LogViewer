@@ -30,12 +30,17 @@ uses
 
 type
   ILogViewer       = interface;
+  ILogQueue        = interface;
   IChannelReceiver = interface;
 
   TReceiveMessageEvent = procedure(
     Sender    : TObject;
-    AReceiver : IChannelReceiver;
     AStream   : TStream
+  ) of object;
+
+  TLogQueueEvent = procedure(
+    Sender    : TObject;
+    ALogQueue : ILogQueue
   ) of object;
 
   TLogViewerEvent = procedure(
@@ -61,9 +66,9 @@ type
     {$REGION 'property access methods'}
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
-    function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
     function GetName: string;
     procedure SetName(const Value: string);
+    function GetOnNewLogQueue: IEvent<TLogQueueEvent>;
     {$ENDREGION}
 
     function ToString: string;
@@ -74,8 +79,8 @@ type
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
 
-    property OnReceiveMessage: IEvent<TReceiveMessageEvent>
-      read GetOnReceiveMessage;
+    property OnNewLogQueue: IEvent<TLogQueueEvent>
+      read GetOnNewLogQueue;
   end;
 
   ILogViewerActions = interface
@@ -108,10 +113,35 @@ type
       read GetMessageTypesPopupMenu;
   end;
 
+  ILogQueue = interface
+  ['{5F95008B-07B9-4092-8DA2-DCA9FD20B26E}']
+    {$REGION 'property access methods'}
+    function GetSourceId: Integer;
+    function GetReceiver: IChannelReceiver;
+    function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
+    function GetEnabled: Boolean;
+    procedure SetEnabled(const Value: Boolean);
+    {$ENDREGION}
+
+    procedure DoReceiveMessage(AStream : TStream);
+
+    property Enabled: Boolean
+      read GetEnabled write SetEnabled;
+
+    property SourceId: Integer
+      read GetSourceId;
+
+    property Receiver : IChannelReceiver
+      read GetReceiver;
+
+    property OnReceiveMessage: IEvent<TReceiveMessageEvent>
+      read GetOnReceiveMessage;
+  end;
+
   ILogViewer = interface
   ['{C1DF2E26-4507-4B35-94E1-19A36775633F}']
     {$REGION 'property access methods'}
-    function GetReceiver: IChannelReceiver;
+    function GetLogQueue: ILogQueue;
     function GetForm: TCustomForm;
     {$ENDREGION}
 
@@ -122,8 +152,8 @@ type
     procedure CollapseAll;
     procedure ExpandAll;
 
-    property Receiver: IChannelReceiver
-      read GetReceiver;
+    property LogQueue: ILogQueue
+      read GetLogQueue;
 
    property Form: TCustomForm
       read GetForm;

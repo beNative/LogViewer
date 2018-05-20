@@ -22,7 +22,8 @@ interface
 
 
 { TODO :
-  Need to handle multiple queues which can be connected to a message viewer
+  Need to handle multiple queues which each can be connected to a dedicated
+  message viewer
 
   A channel receiver maintains a list of listeners which are associated with
   the processId of the originating process.
@@ -37,25 +38,16 @@ uses
 
   DDuce.WinIPC.Server,
 
-  LogViewer.Interfaces;
+  LogViewer.Receivers.Base, LogViewer.Interfaces;
 
 type
-  TWinIPChannelReceiver = class(TInterfacedObject, IChannelReceiver)
-  private class var
-     FCounter : Integer; // used for creating a unique server name
+  TWinIPChannelReceiver = class(TChannelReceiver, IChannelReceiver)
   private
-     FEnabled          : Boolean;
      FIPCServer        : TWinIPCServer;
-     FOnReceiveMessage : Event<TReceiveMessageEvent>;
-     FName             : string;
 
   protected
     {$REGION 'property access methods'}
-    function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
-    function GetName: string;
-    procedure SetName(const Value: string);
-    function GetEnabled: Boolean;
-    procedure SetEnabled(const Value: Boolean);
+    procedure SetEnabled(const Value: Boolean); override;
     {$ENDREGION}
 
     procedure FIPCServerMessage(
@@ -64,23 +56,9 @@ type
       AData     : TStream
     );
 
-    procedure DoReceiveMessage(AStream : TStream);
-
   public
-    constructor Create(const AName: string); reintroduce;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
-
-    function ToString: string; override;
-
-    property Enabled: Boolean
-      read GetEnabled write SetEnabled;
-
-    property Name: string
-      read GetName write SetName;
-
-    property OnReceiveMessage: IEvent<TReceiveMessageEvent>
-      read GetOnReceiveMessage;
 
   end;
 
@@ -92,22 +70,9 @@ uses
   DDuce.Utils;
 
 {$REGION 'construction and destruction'}
-constructor TWinIPChannelReceiver.Create(const AName: string);
-begin
-  inherited Create;  
-  if AName = '' then
-  begin
-    FName := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
-  end
-  else
-    FName := AName;
-end;
-
 procedure TWinIPChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
-  Inc(FCounter);
-  FOnReceiveMessage.UseFreeNotification := False;
   FIPCServer           := TWinIPCServer.Create;
   FIPCServer.OnMessage := FIPCServerMessage;
   FIPCServer.Active    := True;
@@ -122,44 +87,14 @@ end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
-function TWinIPChannelReceiver.GetEnabled: Boolean;
-begin
-  Result := FEnabled;
-end;
-
-function TWinIPChannelReceiver.GetName: string;
-begin
-  Result := FName;
-end;
-
-procedure TWinIPChannelReceiver.SetName(const Value: string);
-begin
-  FName := Value;
-end;
-
 procedure TWinIPChannelReceiver.SetEnabled(const Value: Boolean);
 begin
-  if Value <> Enabled then
-  begin
-    FEnabled := Value;
-    if Value then
-      FIPCServer.OnMessage := FIPCServerMessage
-    else
-      FIPCServer.OnMessage := nil;
-    FIPCServer.Active := Value;
-  end;
-end;
-
-function TWinIPChannelReceiver.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
-begin
-  Result := FOnReceiveMessage;
-end;
-{$ENDREGION}
-
-{$REGION 'event dispatch methods'}
-procedure TWinIPChannelReceiver.DoReceiveMessage(AStream: TStream);
-begin
-  FOnReceiveMessage.Invoke(Self, Self as IChannelReceiver, AStream);
+  inherited SetEnabled(Value);
+  if Value then
+    FIPCServer.OnMessage := FIPCServerMessage
+  else
+    FIPCServer.OnMessage := nil;
+  FIPCServer.Active := Value;
 end;
 {$ENDREGION}
 
@@ -167,15 +102,7 @@ end;
 procedure TWinIPChannelReceiver.FIPCServerMessage(Sender: TObject;
   ASourceId: Integer; AData: TStream);
 begin
-  DoReceiveMessage(AData);
-  OutputDebugString('ClientProcessId = %d', [ASourceId]);
-end;
-{$ENDREGION}
-
-{$REGION 'public methods'}
-function TWinIPChannelReceiver.ToString: string;
-begin
-  Result := Name;
+  DoReceiveMessage(ASourceId, AData);
 end;
 {$ENDREGION}
 

@@ -36,7 +36,7 @@ uses
 
   ZeroMQ,
 
-  LogViewer.Interfaces;
+  LogViewer.Interfaces,  LogViewer.Receivers.Base;
 
 const
   ZQM_DEFAULT_ADDRESS = 'tcp://localhost:5555';
@@ -44,31 +44,22 @@ const
 //  tcp://EUROPA:5555
 
 type
-  TZeroMQChannelReceiver = class(TInterfacedObject, IChannelReceiver)
-  private class var
-    FCounter : Integer;
+  TZeroMQChannelReceiver = class(TChannelReceiver, IChannelReceiver)
   private
-    FOnReceiveMessage : Event<TReceiveMessageEvent>;
     FZMQStream        : TStringStream;
     FZMQ              : IZeroMQ;
     FSubscriber       : IZMQPair;
     FPoll             : IZMQPoll;
     FTimer            : TTimer;
-    FEnabled          : Boolean;
-    FName             : string;
     FAddress          : string;
 
-    function GetEnabled: Boolean;
-    procedure SetEnabled(const Value: Boolean);
-    function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
-    function GetName: string;
-    procedure SetName(const Value: string);
+    procedure SetEnabled(const Value: Boolean); override;
 
     function ConnectSubscriber: Boolean;
     procedure CloseSubscriber;
 
   protected
-    procedure DoReceiveMessage(AStream : TStream);
+
 
     procedure FTimerTimer(Sender: TObject);
 
@@ -76,7 +67,7 @@ type
     constructor Create(
       const AName    : string = '';
       const AAddress : string = ''
-    );
+    ); reintroduce;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 
@@ -85,9 +76,6 @@ type
 
     property Name: string
       read GetName write SetName;
-
-    property OnReceiveMessage: IEvent<TReceiveMessageEvent>
-      read GetOnReceiveMessage;
   end;
 
 implementation
@@ -99,27 +87,19 @@ uses
 constructor TZeroMQChannelReceiver.Create(const AName: string;
   const AAddress: string);
 begin
-  inherited Create;
-  if AName = '' then
-  begin
-    FName := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
-  end
-  else
-    FName := AName;
+  inherited Create(AName);
   FAddress := AAddress;
 end;
 
 procedure TZeroMQChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FOnReceiveMessage.UseFreeNotification := False;
-  Inc(FCounter);
   if FAddress = '' then
     FAddress := ZQM_DEFAULT_ADDRESS;
   FTimer         := TTimer.Create(nil);
   FTimer.OnTimer := FTimerTimer;
   FZMQ           := TZeroMQ.Create;
-  FEnabled       := ConnectSubscriber;
+  Enabled        := ConnectSubscriber;
   FZMQStream     := TStringStream.Create;
 end;
 
@@ -133,44 +113,17 @@ end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
-function TZeroMQChannelReceiver.GetEnabled: Boolean;
-begin
-  Result := FEnabled;
-end;
-
 procedure TZeroMQChannelReceiver.SetEnabled(const Value: Boolean);
+var
+  B : Boolean;
 begin
-  if Value <> Enabled then
-  begin
-    FEnabled := Value;
-    if Value then
-      FEnabled := ConnectSubscriber
-    else
-      CloseSubscriber;
-    FTimer.Enabled := FEnabled;
-  end;
-end;
-
-function TZeroMQChannelReceiver.GetName: string;
-begin
-  Result := FName;
-end;
-
-procedure TZeroMQChannelReceiver.SetName(const Value: string);
-begin
-  FName := Value;
-end;
-
-function TZeroMQChannelReceiver.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
-begin
-  Result := FOnReceiveMessage;
-end;
-{$ENDREGION}
-
-{$REGION 'event dispatch methods'}
-procedure TZeroMQChannelReceiver.DoReceiveMessage(AStream: TStream);
-begin
-  FOnReceiveMessage.Invoke(Self, Self as IChannelReceiver, AStream);
+  B := False;
+  if Value then
+    B := ConnectSubscriber
+  else
+    CloseSubscriber;
+  inherited SetEnabled(B);
+  FTimer.Enabled := B;
 end;
 {$ENDREGION}
 
@@ -210,7 +163,7 @@ begin
     procedure(Event: PollEvents)
     begin
       FZMQStream.WriteString(FSubscriber.ReceiveString);
-      DoReceiveMessage(FZMQStream);
+      DoReceiveMessage(0, FZMQStream);
       FZMQStream.Clear;
     end
   );

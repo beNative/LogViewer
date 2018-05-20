@@ -54,7 +54,7 @@ type
 
     class function CreateLogViewer(
       AManager  : ILogViewerManager;
-      AReceiver : IChannelReceiver;
+      ALogQueue : ILogQueue;
       AParent   : TWinControl = nil
     ): TfrmMessageList;
 
@@ -85,6 +85,11 @@ type
 
     class function CreateZeroMQChannelReceiver(
     ): IChannelReceiver;
+
+    class function CreateLogQueue(
+      ASourceId : Integer;
+      AReceiver : IChannelReceiver
+    ): ILogQueue;
   end;
 
 implementation
@@ -96,7 +101,8 @@ uses
 
   LogViewer.Factories.Toolbars,
   LogViewer.Receivers.WinIPC, LogViewer.Receivers.WinODS,
-  LogViewer.Receivers.ZeroMQ, LogViewer.Receivers.ComPort;
+  LogViewer.Receivers.ZeroMQ, LogViewer.Receivers.ComPort,
+  LogViewer.LogQueue;
 
 {$REGION 'public class methods'}
 class function TLogViewerFactories.CreateCallStackView(AOwner: TComponent;
@@ -127,13 +133,19 @@ begin
   Result := TdmManager.Create(AOwner, ASettings);
 end;
 
+class function TLogViewerFactories.CreateLogQueue(ASourceId: Integer;
+  AReceiver: IChannelReceiver): ILogQueue;
+begin
+  Result := TLogQueue.Create(AReceiver, ASourceId);
+end;
+
 class function TLogViewerFactories.CreateLogViewer(AManager: ILogViewerManager;
-  AReceiver: IChannelReceiver; AParent: TWinControl): TfrmMessageList;
+  ALogQueue: ILogQueue; AParent: TWinControl): TfrmMessageList;
 begin
   Result := TfrmMessageList.Create(
     Application,
     AManager,
-    AReceiver,
+    ALogQueue,
     AManager.Settings.MessageListSettings
   );
   Result.Parent      := AParent;
