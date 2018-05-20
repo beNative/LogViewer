@@ -28,7 +28,9 @@ uses
 
   LogViewer.Interfaces,
 
-  Spring, Spring.Collections;
+  Spring, Spring.Collections,
+
+  LogViewer.Receivers.Base;
 
 type
   TODSMessage = class
@@ -54,26 +56,13 @@ type
   end;
 
 type
-  TWinODSChannelReceiver = class(TInterfacedObject, IChannelReceiver)
-  private class var
-    FCounter : Integer;
+  TWinODSChannelReceiver = class(TChannelReceiver, IChannelReceiver)
   private
-    FEnabled          : Boolean;
     FBuffer           : TMemoryStream;
     FODSQueue         : IQueue<TODSMessage>;
     FODSThread        : TODSThread;
-    FOnReceiveMessage : Event<TReceiveMessageEvent>;
-    FName             : string;
 
   protected
-    {$REGION 'property access methods'}
-    function GetName: string;
-    procedure SetName(const Value: string);
-    function GetEnabled: Boolean;
-    procedure SetEnabled(const Value: Boolean);
-    function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
-    {$ENDREGION}
-
     procedure FODSQueueChanged(
       Sender     : TObject;
       const Item : TODSMessage;
@@ -81,20 +70,9 @@ type
     );
 
   public
-    constructor Create(const AName: string); reintroduce;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 
-    function ToString: string; override;
-
-    property Enabled: Boolean
-      read GetEnabled write SetEnabled;
-
-    property Name: string
-      read GetName write SetName;
-
-    property OnReceiveMessage: IEvent<TReceiveMessageEvent>
-      read GetOnReceiveMessage;
   end;
 
 implementation
@@ -112,22 +90,9 @@ var
   LastChildOrder : UInt32;
 
 {$REGION 'construction and destruction'}
-constructor TWinODSChannelReceiver.Create(const AName: string);
-begin
-  inherited Create;
-  if AName = '' then
-  begin
-    FName := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
-  end
-  else
-    FName := AName;
-end;
-
 procedure TWinODSChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FOnReceiveMessage.UseFreeNotification := False;
-  Inc(FCounter);
   FBuffer := TMemoryStream.Create;
   FODSQueue := TCollections.CreateQueue<TODSMessage>(True);
   FODSQueue.OnChanged.Add(FODSQueueChanged);
@@ -136,7 +101,6 @@ end;
 
 procedure TWinODSChannelReceiver.BeforeDestruction;
 begin
-  FOnReceiveMessage.Clear;
   FODSThread.Terminate;
   FBuffer.Free;
   FODSQueue.Clear;
@@ -157,69 +121,25 @@ var
 begin
   if Action = caAdded then
   begin
-    if OnReceiveMessage.CanInvoke then
-    begin
-      FBuffer.Clear;
-      LTextSize := Length(Item.MsgText);
-
-
-      //lmtValue
-      //LMsgType := 0;
-      LMsgType := 3;
-      FBuffer.Seek(0, soFromBeginning);
-      FBuffer.WriteBuffer(LMsgType);
-      FBuffer.WriteBuffer(Item.TimeStamp);
-      FBuffer.WriteBuffer(LTextSize);
-      FBuffer.WriteBuffer(Item.MsgText[1], LTextSize);
-
+    FBuffer.Clear;
+    LTextSize := Length(Item.MsgText);
+    //lmtValue
+    //LMsgType := 0;
+    LMsgType := 3;
+    FBuffer.Seek(0, soFromBeginning);
+    FBuffer.WriteBuffer(LMsgType);
+    FBuffer.WriteBuffer(Item.TimeStamp);
+    FBuffer.WriteBuffer(LTextSize);
+    FBuffer.WriteBuffer(Item.MsgText[1], LTextSize);
 //      LDataSize := SizeOf(Item.ProcessInfo);
 //      FBuffer.WriteBuffer(LDataSize, SizeOf(Integer));
 //      FBuffer.WriteBuffer(Item.ProcessInfo, LDataSize);
-
       FBuffer.WriteBuffer(ZERO_BUF);
 //      LTextSize := Length(Item.ProcessName);
 //      FBuffer.WriteBuffer(Item.ProcessName[1], LTextSize);
       //ShowMessage(Item.ProcessInfo.ProcessName);
-      OnReceiveMessage.Invoke(Self, Self as IChannelReceiver, FBuffer);
-    end
+      DoReceiveMessage(Item.ProcessId, FBuffer);
   end;
-end;
-{$ENDREGION}
-
-{$REGION 'property access methods'}
-function TWinODSChannelReceiver.GetEnabled: Boolean;
-begin
-  Result := FEnabled;
-end;
-
-function TWinODSChannelReceiver.GetName: string;
-begin
-  Result := FName;
-end;
-
-procedure TWinODSChannelReceiver.SetName(const Value: string);
-begin
-  FName := Value;
-end;
-
-procedure TWinODSChannelReceiver.SetEnabled(const Value: Boolean);
-begin
-  if Value <> Enabled then
-  begin
-    FEnabled := Value;
-  end;
-end;
-
-function TWinODSChannelReceiver.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
-begin
-  Result := FOnReceiveMessage;
-end;
-{$ENDREGION}
-
-{$REGION 'public methods'}
-function TWinODSChannelReceiver.ToString: string;
-begin
-  Result := Name;
 end;
 {$ENDREGION}
 

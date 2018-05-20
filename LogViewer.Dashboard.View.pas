@@ -85,6 +85,8 @@ uses
 
 {$REGION 'construction and destruction'}
 procedure TfrmDashboard.AfterConstruction;
+var
+  R : IChannelReceiver;
 begin
   inherited AfterConstruction;
   FVSTChannelReceivers := TVirtualStringTreeFactory.CreateList(Self, pnlLogChannels);
@@ -94,6 +96,20 @@ begin
 //    FVSTChannelReceivers,
 //    (FManager.Receivers as IInterfaceList).AsReadOnlyList as IObjectList
 //  );
+
+  // TODO : these are only added for testing
+
+  R := TLogViewerFactories.CreateWinIPCChannelReceiver;
+  FManager.AddReceiver(R);
+  R.Enabled := True;
+
+  R := TLogViewerFactories.CreateWinODSChannelReceiver;
+  FManager.AddReceiver(R);
+  R.Enabled := True;
+
+  R := TLogViewerFactories.CreateZeroMQChannelReceiver;
+  FManager.AddReceiver(R);
+  R.Enabled := True;
 end;
 
 constructor TfrmDashboard.Create(AOwner: TComponent;
@@ -119,47 +135,47 @@ end;
 
 {$REGION 'action handlers'}
 procedure TfrmDashboard.actAddComPortLogViewerExecute(Sender: TObject);
-var
-  MV : ILogViewer;
+//var
+//  MV : ILogViewer;
 begin
-  MV := TLogViewerFactories.CreateLogViewer(
-    FManager,
-    TLogViewerFactories.CreateComPortChannelReceiver(nil)
-  );
-  FManager.AddView(MV);
+//  MV := TLogViewerFactories.CreateLogViewer(
+//    FManager,
+//    TLogViewerFactories.CreateComPortChannelReceiver(nil)
+//  );
+//  FManager.AddView(MV);
 end;
 
 procedure TfrmDashboard.actAddWinIPCLogViewerExecute(Sender: TObject);
-var
-  MV : ILogViewer;
+//var
+//  MV : ILogViewer;
 begin
-  MV := TLogViewerFactories.CreateLogViewer(
-    FManager,
-    TLogViewerFactories.CreateWinIPCChannelReceiver
-  );
-  FManager.AddView(MV);
+//  MV := TLogViewerFactories.CreateLogViewer(
+//    FManager,
+//    TLogViewerFactories.CreateWinIPCChannelReceiver
+//  );
+//  FManager.AddView(MV);
 end;
 
 procedure TfrmDashboard.actAddWinODSLogViewerExecute(Sender: TObject);
-var
-  MV : ILogViewer;
+//var
+//  MV : ILogViewer;
 begin
-  MV := TLogViewerFactories.CreateLogViewer(
-    FManager,
-    TLogViewerFactories.CreateWinODSChannelReceiver
-  );
-  FManager.AddView(MV);
+//  MV := TLogViewerFactories.CreateLogViewer(
+//    FManager,
+//    TLogViewerFactories.CreateWinODSChannelReceiver
+//  );
+//  FManager.AddView(MV);
 end;
 
 procedure TfrmDashboard.actAddZeroMQLogViewerExecute(Sender: TObject);
-var
-  MV : ILogViewer;
+//var
+//  MV : ILogViewer;
 begin
-  MV := TLogViewerFactories.CreateLogViewer(
-    FManager,
-    TLogViewerFactories.CreateZeroMQChannelReceiver
-  );
-  FManager.AddView(MV);
+//  MV := TLogViewerFactories.CreateLogViewer(
+//    FManager,
+//    TLogViewerFactories.CreateZeroMQChannelReceiver
+//  );
+//  FManager.AddView(MV);
 end;
 {$ENDREGION}
 

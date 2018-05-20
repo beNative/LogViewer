@@ -46,38 +46,38 @@ type
     {$REGION 'designer controls'}
     btnFilterMessages : TButton;
     chkAutoFilter     : TCheckBox;
+    edtHandleType     : TLabeledEdit;
+    edtHeight         : TLabeledEdit;
     edtMessageFilter  : TLabeledEdit;
+    edtMessageType    : TLabeledEdit;
+    edtPixelFormat    : TLabeledEdit;
+    edtTimeStamp      : TLabeledEdit;
+    edtValue          : TLabeledEdit;
+    edtValueName      : TLabeledEdit;
+    edtValueType      : TLabeledEdit;
+    edtWidth          : TLabeledEdit;
+    imgBitmap         : TImage;
     imlMessageTypes   : TImageList;
+    pgcMessageDetails : TPageControl;
     pnlCallStack      : TPanel;
     pnlCallStackTitle : TPanel;
     pnlCallStackWatch : TPanel;
+    pnlColor          : TPanel;
     pnlFilter         : TPanel;
+    pnlImageViewer    : TPanel;
     pnlLeft           : TPanel;
     pnlLeftBottom     : TPanel;
     pnlMessageContent : TPanel;
     pnlMessages       : TPanel;
+    pnlRawMessageData : TPanel;
     pnlRight          : TPanel;
+    pnlTextViewer     : TPanel;
     pnlWatches        : TPanel;
     splLeftHorizontal : TSplitter;
     splLeftVertical   : TSplitter;
     splVertical       : TSplitter;
-    pnlRawMessageData: TPanel;
-    edtMessageType: TLabeledEdit;
-    edtValueName: TLabeledEdit;
-    edtValueType: TLabeledEdit;
-    edtValue: TLabeledEdit;
-    pnlColor: TPanel;
-    edtTimeStamp: TLabeledEdit;
-    pgcMessageDetails: TPageControl;
-    tsTextViewer: TTabSheet;
-    tsImageViewer: TTabSheet;
-    pnlTextViewer: TPanel;
-    pnlImageViewer: TPanel;
-    imgBitmap: TImage;
-    edtWidth: TLabeledEdit;
-    edtPixelFormat: TLabeledEdit;
-    edtHandleType: TLabeledEdit;
-    edtHeight: TLabeledEdit;
+    tsImageViewer     : TTabSheet;
+    tsTextViewer      : TTabSheet;
     {$ENDREGION}
 
     procedure edtMessageFilterChange(Sender: TObject);
@@ -101,7 +101,7 @@ type
     FCallStack      : IList<TCallStackData>;
     FWatches        : TWatchList;
     FLogTreeView    : TVirtualStringTree;
-    FReceiver       : IChannelReceiver;
+    FLogQueue       : ILogQueue;
     FCallStackView  : TfrmCallStackView;
     FWatchesView    : TfrmWatchesView;
     FManager        : ILogViewerManager;
@@ -117,7 +117,7 @@ type
     {$REGION 'property access methods'}
     function GetManager: ILogViewerManager;
     function GetActions: ILogViewerActions;
-    function GetReceiver: IChannelReceiver;
+    function GetLogQueue: ILogQueue;
     function GetForm: TCustomForm;
     function GetSettings: TMessageListSettings;
     {$ENDREGION}
@@ -221,9 +221,8 @@ type
     {$ENDREGION}
 
   protected
-    procedure FReceiverReceiveMessage(
+    procedure FLogQueueReceiveMessage(
       Sender    : TObject;
-      AReceiver : IChannelReceiver;
       AStream   : TStream
     );
 
@@ -260,8 +259,8 @@ type
     property Actions: ILogViewerActions
       read GetActions;
 
-    property Receiver: IChannelReceiver
-      read GetReceiver;
+    property LogQueue: ILogQueue
+      read GetLogQueue;
 
     property Settings: TMessageListSettings
       read GetSettings;
@@ -273,7 +272,7 @@ type
     constructor Create(
       AOwner    : TComponent;
       AManager  : ILogViewerManager;
-      AReceiver : IChannelReceiver;
+      ALogQueue : ILogQueue;
       ASettings : TMessageListSettings
     ); reintroduce; virtual;
 
@@ -301,10 +300,10 @@ uses
 
 {$REGION 'construction and destruction'}
 constructor TfrmMessageList.Create(AOwner: TComponent; AManager
-  : ILogViewerManager; AReceiver: IChannelReceiver; ASettings: TMessageListSettings);
+  : ILogViewerManager; ALogQueue : ILogQueue; ASettings: TMessageListSettings);
 begin
   inherited Create(AOwner);
-  FReceiver := AReceiver;
+  FLogQueue := ALogQueue;
   FManager  := AManager;
   FSettings := ASettings;
 end;
@@ -319,7 +318,7 @@ begin
   CreateLogTreeView;
   CreateWatchesView;
   CreateCallStackView;
-  FReceiver.OnReceiveMessage.Add(FReceiverReceiveMessage);
+  FLogQueue.OnReceiveMessage.Add(FLogQueueReceiveMessage);
   Caption := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
   FSettings.OnChanged.Add(FSettingsChanged);
   FLogTreeView.PopupMenu := Manager.Menus.LogTreeViewerPopupMenu;
@@ -331,11 +330,10 @@ end;
 
 procedure TfrmMessageList.BeforeDestruction;
 begin
-  FReceiver.Enabled := False;
-  FReceiver.OnReceiveMessage.Remove(FReceiverReceiveMessage);
-  FReceiver := nil;
-  FManager := nil;
+  FLogQueue.OnReceiveMessage.Remove(FLogQueueReceiveMessage);
   FSettings.OnChanged.Remove(FSettingsChanged);
+  FLogQueue := nil;
+  FManager  := nil;
   FSettings := nil;
   inherited BeforeDestruction;
 end;
@@ -454,9 +452,9 @@ begin
   Result := FManager;
 end;
 
-function TfrmMessageList.GetReceiver: IChannelReceiver;
+function TfrmMessageList.GetLogQueue: ILogQueue;
 begin
-  Result := FReceiver;
+  Result := FLogQueue;
 end;
 
 function TfrmMessageList.GetSettings: TMessageListSettings;
@@ -472,6 +470,12 @@ procedure TfrmMessageList.FLogTreeViewBeforeItemPaint(Sender: TBaseVirtualTree;
   var CustomDraw: Boolean);
 begin
 //
+end;
+
+procedure TfrmMessageList.FLogQueueReceiveMessage(Sender: TObject;
+  AStream: TStream);
+begin
+  ProcessMessage(AStream);
 end;
 
 procedure TfrmMessageList.FLogTreeViewAfterItemPaint(Sender: TBaseVirtualTree;
@@ -840,12 +844,6 @@ begin
   FVKPressed := False;
 end;
 {$ENDREGION}
-
-procedure TfrmMessageList.FReceiverReceiveMessage(Sender: TObject;
-  AReceiver: IChannelReceiver; AStream: TStream);
-begin
-  ProcessMessage(AStream);
-end;
 
 procedure TfrmMessageList.FSettingsChanged(Sender: TObject);
 begin

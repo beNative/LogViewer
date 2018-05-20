@@ -349,6 +349,7 @@
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.Receivers.Base.pas"/>
+        <DCCReference Include="LogViewer.LogQueue.pas"/>
         <None Include="Readme.md"/>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>

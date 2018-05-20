@@ -188,7 +188,8 @@ uses
   DDuce.Factories.GridView in '..\..\libraries\dduce\Source\Factories\DDuce.Factories.GridView.pas',
   Spring.Collections.Trees in '..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.Trees.pas',
   LogViewer.Dashboard.View in 'LogViewer.Dashboard.View.pas' {frmDashboard},
-  LogViewer.Receivers.Base in 'LogViewer.Receivers.Base.pas';
+  LogViewer.Receivers.Base in 'LogViewer.Receivers.Base.pas',
+  LogViewer.LogQueue in 'LogViewer.LogQueue.pas';
 
 {$R *.res}
 
