@@ -234,6 +234,14 @@ type
 
     procedure UpdateCallStack(ALogNode: TLogNode);
     procedure UpdateMessageDetails(ALogNode: TLogNode);
+
+    procedure UpdateComponentDisplay(ALogNode: TLogNode);
+    procedure UpdateBitmapDisplay(ALogNode: TLogNode);
+    procedure UpdateTextDisplay(ALogNode: TLogNode);
+    procedure UpdateTextStreamDisplay(ALogNode: TLogNode);
+    procedure UpdateColorDisplay(ALogNode: TLogNode);
+    procedure UpdateValueDisplay(ALogNode: TLogNode);
+
     procedure UpdateLogTreeView;
 
     procedure ClearMessageDetailsControls;
@@ -321,7 +329,7 @@ begin
   FLogQueue.OnReceiveMessage.Add(FLogQueueReceiveMessage);
   Caption := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
   FSettings.OnChanged.Add(FSettingsChanged);
-  FLogTreeView.PopupMenu := Manager.Menus.LogTreeViewerPopupMenu;
+  FLogTreeView.PopupMenu  := Manager.Menus.LogTreeViewerPopupMenu;
   edtTimeStamp.Font.Color := TIMESTAMP_FONTCOLOR;
   edtValueName.Font.Color := VALUENAME_FONTCOLOR;
   edtValueType.Font.Color := VALUETYPE_FONTCOLOR;
@@ -651,7 +659,7 @@ begin
   LN.VTNode      := Node;
   LN.Id          := FMessageCount;
   case LN.MessageType of
-    lmtValue, lmtComponent, lmtStrings, lmtText, lmtBitmap:
+    lmtValue, lmtComponent, lmtStrings, lmtBitmap:
     begin
       S := string(FCurrentMsg.Text);
       I := S.IndexOf('=');
@@ -685,7 +693,7 @@ begin
         LN.ValueName := Copy(S, 1, I);
       LN.Text := '';
     end;
-    lmtEnterMethod, lmtLeaveMethod, lmtInfo, lmtWarning, lmtError:
+    lmtEnterMethod, lmtLeaveMethod, lmtInfo, lmtWarning, lmtError, lmtText:
     begin
       LN.Text := string(FCurrentMsg.Text);
     end;
@@ -1073,6 +1081,23 @@ begin
   inherited UpdateActions;
 end;
 
+procedure TfrmMessageList.UpdateBitmapDisplay(ALogNode: TLogNode);
+begin
+  if Assigned(ALogNode.MessageData) then
+  begin
+    imgBitmap.Picture.Bitmap.LoadFromStream(ALogNode.MessageData);
+    pgcMessageDetails.ActivePage := tsImageViewer;
+    with imgBitmap.Picture do
+    begin
+      edtWidth.Text       := Bitmap.Width.ToString;
+      edtHeight.Text      := Bitmap.Height.ToString;
+      edtPixelFormat.Text := Reflect.EnumName(Bitmap.PixelFormat);
+      edtHandleType.Text  := Reflect.EnumName(Bitmap.HandleType);
+      //Color := '$' + IntToHex(TransparentColor, 8);
+    end;
+  end;
+end;
+
 procedure TfrmMessageList.UpdateCallStack(ALogNode: TLogNode);
 var
   I   : Integer;
@@ -1095,96 +1120,109 @@ begin
   end;
 end;
 
-procedure TfrmMessageList.UpdateMessageDetails(ALogNode: TLogNode);
+procedure TfrmMessageList.UpdateColorDisplay(ALogNode: TLogNode);
+var
+  I : Integer;
+  S : string;
+begin
+  I := ALogNode.Value.IndexOf('(');
+  if I > 1 then
+  begin
+    S := Copy(ALogNode.Value, 1, I - 1);
+  end
+  else
+    S := Trim(ALogNode.Value);
+  if ALogNode.MessageType = lmtAlphaColor then
+    // First byte in Alphacolors is the transparancy channel
+    pnlColor.Color := AlphaColorToColor(StrToInt(S))
+  else
+    pnlColor.Color := StrToInt(S);
+end;
+
+procedure TfrmMessageList.UpdateComponentDisplay(ALogNode: TLogNode);
 var
   LStream : TStringStream;
-  I       : Integer;
-  S       : string;
+begin
+  if Assigned(ALogNode.MessageData) then
+  begin
+    LStream := TStringStream.Create('', TEncoding.ANSI);
+    try
+      pgcMessageDetails.ActivePage := tsTextViewer;
+      ALogNode.MessageData.Position := 0;
+      ObjectBinaryToText(ALogNode.MessageData, LStream);
+      LStream.Position := 0;
+      FEditorView.Text := LStream.DataString;
+      FEditorView.HighlighterName := 'DFM';
+    finally
+      FreeAndNil(LStream);
+    end;
+  end
+  else
+  begin
+    FEditorView.Text := ALogNode.Value;
+  end;
+end;
+
+procedure TfrmMessageList.UpdateMessageDetails(ALogNode: TLogNode);
 begin
   ClearMessageDetailsControls;
   FWatchesView.UpdateView(ALogNode.Id);
-  LStream := TStringStream.Create('', TEncoding.ANSI);
-  try
-    if ALogNode.MessageData = nil then
+  case ALogNode.MessageType of
+    lmtStrings, lmtCallStack, {lmtException,} lmtHeapInfo, lmtCustomData:
+      UpdateTextStreamDisplay(ALogNode);
+    lmtAlphaColor, lmtColor:
+      UpdateColorDisplay(ALogNode);
+    lmtComponent:
+      UpdateComponentDisplay(ALogNode);
+    lmtBitmap:
+      UpdateBitmapDisplay(ALogNode);
+    lmtMemory:
     begin
-      FEditorView.Text := '';
-    end
-    else
-      ALogNode.MessageData.Position := 0;
-
-    case ALogNode.MessageType of
-      lmtStrings, lmtCallStack, {lmtException,} lmtHeapInfo, lmtCustomData:
-      begin
-        pgcMessageDetails.ActivePage := tsTextViewer;
-        LStream.Position := 0;
-        LStream.CopyFrom(ALogNode.MessageData, ALogNode.MessageData.Size);
-        LStream.Position := 0;
-        FEditorView.Text := LStream.DataString;
-        FEditorView.HighlighterName := 'TXT';
-      end;
-      lmtAlphaColor, lmtColor:
-      begin
-        I := ALogNode.Value.IndexOf('(');
-        if I > 1 then
-        begin
-          S := Copy(ALogNode.Value, 1, I - 1);
-        end
-        else
-          S := Trim(ALogNode.Value);
-        if ALogNode.MessageType = lmtAlphaColor then
-          // First byte in Alphacolors is the transparancy channel
-          pnlColor.Color := AlphaColorToColor(StrToInt(S))
-        else
-          pnlColor.Color := StrToInt(S);
-      end;
-      lmtComponent:
-      begin
-        if Assigned(ALogNode.MessageData) then // component
-        begin
-          pgcMessageDetails.ActivePage := tsTextViewer;
-          ALogNode.MessageData.Position := 0;
-          ObjectBinaryToText(ALogNode.MessageData, LStream);
-          LStream.Position := 0;
-          FEditorView.Text := LStream.DataString;
-          FEditorView.HighlighterName := 'DFM';
-        end
-        else
-        begin
-          FEditorView.Text := ALogNode.Value;
-        end;
-      end;
-      lmtBitmap:
-      begin
-        imgBitmap.Picture.Bitmap.LoadFromStream(ALogNode.MessageData);
-        pgcMessageDetails.ActivePage := tsImageViewer;
-        with imgBitmap.Picture do
-        begin
-          edtWidth.Text       := Bitmap.Width.ToString;
-          edtHeight.Text      := Bitmap.Height.ToString;
-          edtPixelFormat.Text := Reflect.EnumName(Bitmap.PixelFormat);
-          edtHandleType.Text  := Reflect.EnumName(Bitmap.HandleType);
-          //Color := '$' + IntToHex(TransparentColor, 8);
-        end;
-      end;
-      lmtMemory:
-      begin
-        //edtHex.OpenStream(ALogNode.MessageData);
+      //edtHex.OpenStream(ALogNode.MessageData);
 //        pgcMessageDetails.ActivePageIndex := 3;
-      end;
-      lmtValue:
-      begin
-        pgcMessageDetails.ActivePage := tsTextViewer;
-        FEditorView.Text := ALogNode.Value;
-        FEditorView.HighlighterName := 'TXT';
-      end;
     end;
-    edtMessageType.Text := LogMessageTypeNameOf(ALogNode.MessageType);
-    edtTimeStamp.Text   := DateTimeToStr(ALogNode.TimeStamp);
-    edtValue.Text       := ALogNode.Value;
-    edtValueName.Text   := ALogNode.ValueName;
-    edtValueType.Text   := ALogNode.ValueType;
-  finally
-    LStream.Free;
+    lmtEnterMethod, lmtLeaveMethod, lmtInfo, lmtWarning, lmtError, lmtText:
+      UpdateTextDisplay(ALogNode);
+    lmtValue:
+      UpdateValueDisplay(ALogNode);
+  end;
+  edtMessageType.Text := LogMessageTypeNameOf(ALogNode.MessageType);
+  edtTimeStamp.Text   :=
+    FormatDateTime('dd:mm:yyyy hh:nn:ss:zzz', ALogNode.TimeStamp);
+  edtValue.Text       := ALogNode.Value;
+  edtValueName.Text   := ALogNode.ValueName;
+  edtValueType.Text   := ALogNode.ValueType;
+end;
+
+procedure TfrmMessageList.UpdateTextDisplay(ALogNode: TLogNode);
+begin
+  pgcMessageDetails.ActivePage := tsTextViewer;
+  FEditorView.Text := ALogNode.Text;
+  FEditorView.HighlighterName := 'TXT';
+end;
+
+procedure TfrmMessageList.UpdateTextStreamDisplay(ALogNode: TLogNode);
+var
+  LStream : TStringStream;
+begin
+  if ALogNode.MessageData = nil then
+  begin
+    FEditorView.Text := '';
+  end
+  else
+  begin
+    ALogNode.MessageData.Position := 0;
+    LStream := TStringStream.Create('', TEncoding.ANSI);
+    try
+      pgcMessageDetails.ActivePage := tsTextViewer;
+      LStream.Position := 0;
+      LStream.CopyFrom(ALogNode.MessageData, ALogNode.MessageData.Size);
+      LStream.Position := 0;
+      FEditorView.Text := LStream.DataString;
+      FEditorView.HighlighterName := 'TXT';
+    finally
+      LStream.Free;
+    end;
   end;
 end;
 
@@ -1197,6 +1235,13 @@ begin
   finally
     FLogTreeView.EndUpdate;
   end;
+end;
+
+procedure TfrmMessageList.UpdateValueDisplay(ALogNode: TLogNode);
+begin
+  pgcMessageDetails.ActivePage := tsTextViewer;
+  FEditorView.Text := ALogNode.Value;
+  FEditorView.HighlighterName := 'TXT';
 end;
 
 procedure TfrmMessageList.UpdateView;

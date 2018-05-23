@@ -117,8 +117,6 @@ const
   TIMESTAMP_FONTCOLOR = clBlue;
   ID_FONTCOLOR        = clDkGray;
 
-
-
 implementation
 
 end.

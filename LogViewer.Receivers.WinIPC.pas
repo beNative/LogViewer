@@ -21,12 +21,7 @@ interface
 { Receives logmessages through WinIPC (WM_COPYDATA) messages. }
 
 
-{ TODO :
-  Need to handle multiple queues which each can be connected to a dedicated
-  message viewer
-
-  A channel receiver maintains a list of listeners which are associated with
-  the processId of the originating process.
+{ TODO :  Notification when a ProcessId/ProcessName does not exist anymore
 
 }
 

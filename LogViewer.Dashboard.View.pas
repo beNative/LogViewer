@@ -97,8 +97,17 @@ begin
 //    (FManager.Receivers as IInterfaceList).AsReadOnlyList as IObjectList
 //  );
 
-  //TLogViewerFactories.CreateComPortChannelReceiver(nil);
+  // TODO : these are only added for testing
+
   R := TLogViewerFactories.CreateWinIPCChannelReceiver;
+  FManager.AddReceiver(R);
+  R.Enabled := True;
+
+  R := TLogViewerFactories.CreateWinODSChannelReceiver;
+  FManager.AddReceiver(R);
+  R.Enabled := True;
+
+  R := TLogViewerFactories.CreateZeroMQChannelReceiver;
   FManager.AddReceiver(R);
   R.Enabled := True;
 end;

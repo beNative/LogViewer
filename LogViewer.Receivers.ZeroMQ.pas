@@ -46,12 +46,12 @@ const
 type
   TZeroMQChannelReceiver = class(TChannelReceiver, IChannelReceiver)
   private
-    FZMQStream        : TStringStream;
-    FZMQ              : IZeroMQ;
-    FSubscriber       : IZMQPair;
-    FPoll             : IZMQPoll;
-    FTimer            : TTimer;
-    FAddress          : string;
+    FZMQStream  : TStringStream;
+    FZMQ        : IZeroMQ;
+    FSubscriber : IZMQPair;
+    FPoll       : IZMQPoll;
+    FTimer      : TTimer;
+    FAddress    : string;
 
     procedure SetEnabled(const Value: Boolean); override;
 
@@ -59,8 +59,6 @@ type
     procedure CloseSubscriber;
 
   protected
-
-
     procedure FTimerTimer(Sender: TObject);
 
   public
@@ -71,11 +69,6 @@ type
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 
-    property Enabled: Boolean
-      read GetEnabled write SetEnabled;
-
-    property Name: string
-      read GetName write SetName;
   end;
 
 implementation

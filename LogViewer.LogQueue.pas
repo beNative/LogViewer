@@ -31,7 +31,7 @@ type
   TLogQueue = class(TInterfacedObject, ILogQueue)
   private
     //FReceiver         : IChannelReceiver;
-    FReceiver         : Pointer;
+    FReceiver         : Pointer;   // weak reference!
     FSourceId         : Integer;
     FOnReceiveMessage : Event<TReceiveMessageEvent>;
     FEnabled          : Boolean;
