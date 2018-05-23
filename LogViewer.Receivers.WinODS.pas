@@ -61,8 +61,13 @@ type
     FBuffer           : TMemoryStream;
     FODSQueue         : IQueue<TODSMessage>;
     FODSThread        : TODSThread;
+    FOnReceiveMessage : Event<TReceiveMessageEvent>;
 
   protected
+    {$REGION 'property access methods'}
+    function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
+    {$ENDREGION}
+
     procedure FODSQueueChanged(
       Sender     : TObject;
       const Item : TODSMessage;
@@ -73,6 +78,8 @@ type
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 
+    property OnReceiveMessage: IEvent<TReceiveMessageEvent>
+      read GetOnReceiveMessage;
   end;
 
 implementation
@@ -93,6 +100,7 @@ var
 procedure TWinODSChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
+  FOnReceiveMessage.UseFreeNotification := False;
   FBuffer := TMemoryStream.Create;
   FODSQueue := TCollections.CreateQueue<TODSMessage>(True);
   FODSQueue.OnChanged.Add(FODSQueueChanged);
@@ -101,6 +109,7 @@ end;
 
 procedure TWinODSChannelReceiver.BeforeDestruction;
 begin
+  FOnReceiveMessage.Clear;
   FODSThread.Terminate;
   FBuffer.Free;
   FODSQueue.Clear;
@@ -121,25 +130,39 @@ var
 begin
   if Action = caAdded then
   begin
-    FBuffer.Clear;
-    LTextSize := Length(Item.MsgText);
-    //lmtValue
-    //LMsgType := 0;
-    LMsgType := 3;
-    FBuffer.Seek(0, soFromBeginning);
-    FBuffer.WriteBuffer(LMsgType);
-    FBuffer.WriteBuffer(Item.TimeStamp);
-    FBuffer.WriteBuffer(LTextSize);
-    FBuffer.WriteBuffer(Item.MsgText[1], LTextSize);
+  //  if OnReceiveMessage.CanInvoke then
+    begin
+      FBuffer.Clear;
+      LTextSize := Length(Item.MsgText);
+
+
+      //lmtValue
+      //LMsgType := 0;
+      LMsgType := 3;
+      FBuffer.Seek(0, soFromBeginning);
+      FBuffer.WriteBuffer(LMsgType);
+      FBuffer.WriteBuffer(Item.TimeStamp);
+      FBuffer.WriteBuffer(LTextSize);
+      FBuffer.WriteBuffer(Item.MsgText[1], LTextSize);
+
 //      LDataSize := SizeOf(Item.ProcessInfo);
 //      FBuffer.WriteBuffer(LDataSize, SizeOf(Integer));
 //      FBuffer.WriteBuffer(Item.ProcessInfo, LDataSize);
+
       FBuffer.WriteBuffer(ZERO_BUF);
 //      LTextSize := Length(Item.ProcessName);
 //      FBuffer.WriteBuffer(Item.ProcessName[1], LTextSize);
       //ShowMessage(Item.ProcessInfo.ProcessName);
-      DoReceiveMessage(Item.ProcessId, FBuffer);
+//      OnReceiveMessage.Invoke(Self, Self as IChannelReceiver, FBuffer);
+    end
   end;
+end;
+{$ENDREGION}
+
+{$REGION 'property access methods'}
+function TWinODSChannelReceiver.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
+begin
+  Result := FOnReceiveMessage;
 end;
 {$ENDREGION}
 
