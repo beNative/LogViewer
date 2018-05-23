@@ -43,6 +43,7 @@ type
   TMessageListSettings = class(TPersistent)
   private
     FAutoScrollMessages  : Boolean;
+    FAutoFilterMessages  : Boolean;
     FOnChanged           : Event<TNotifyEvent>;
     FVisibleMessageTypes : TLogMessageTypes;
     FWatchSettings       : TWatchSettings;
@@ -53,6 +54,8 @@ type
     function GetOnChanged: IEvent<TNotifyEvent>;
     function GetVisibleMessageTypes: TLogMessageTypes;
     procedure SetVisibleMessageTypes(const Value: TLogMessageTypes);
+    function GetAutoFilterMessages: Boolean;
+    procedure SetAutoFilterMessages(const Value: Boolean);
     {$ENDREGION}
 
   protected
@@ -77,6 +80,9 @@ type
     property AutoScrollMessages: Boolean
       read GetAutoScrollMessages write SetAutoScrollMessages;
 
+    property AutoFilterMessages: Boolean
+      read GetAutoFilterMessages write SetAutoFilterMessages;
+
   end;
 
 implementation
@@ -98,6 +104,20 @@ end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
+function TMessageListSettings.GetAutoFilterMessages: Boolean;
+begin
+  Result := FAutoFilterMessages;
+end;
+
+procedure TMessageListSettings.SetAutoFilterMessages(const Value: Boolean);
+begin
+  if Value <> AutoFilterMessages then
+  begin
+    FAutoFilterMessages := Value;
+    Changed;
+  end;
+end;
+
 function TMessageListSettings.GetAutoScrollMessages: Boolean;
 begin
   Result := FAutoScrollMessages;

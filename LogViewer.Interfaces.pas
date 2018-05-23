@@ -121,6 +121,7 @@ type
     function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
+    function GetSourceName: string;
     {$ENDREGION}
 
     procedure DoReceiveMessage(AStream : TStream);
@@ -130,6 +131,9 @@ type
 
     property SourceId: Integer
       read GetSourceId;
+
+    property SourceName: string
+      read GetSourceName;
 
     property Receiver : IChannelReceiver
       read GetReceiver;
@@ -179,6 +183,7 @@ type
   ILogViewerCommands = interface
   ['{70304CE3-9498-4738-9084-175B44104236}']
     procedure ClearMessages;
+    procedure UpdateView;
     procedure Start;
     procedure Stop;
     procedure CollapseAll;

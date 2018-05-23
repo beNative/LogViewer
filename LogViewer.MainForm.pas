@@ -99,6 +99,8 @@ type
 
     procedure UpdateTabs;
     procedure UpdateStatusBar;
+    procedure UpdateActions; override;
+
 
   public
     procedure AfterConstruction; override;
@@ -220,14 +222,19 @@ end;
 
 procedure TfrmMain.EventsAddLogViewer(Sender: TObject;
   ALogViewer: ILogViewer);
+var
+  S : string;
 begin
   ALogViewer.LogQueue.Enabled := True;
   ALogViewer.Form.Parent := pnlMainClient;
+  S := ExtractFileName(ALogViewer.LogQueue.SourceName);
   ctMain.Tabs.Add;
   ctMain.ActiveTab.Data := Pointer(ALogViewer);
   ctMain.ActiveTab.Caption :=
-    Format('%s (%d)', [
-      ALogViewer.LogQueue.Receiver.ToString, ALogViewer.LogQueue.SourceId
+    Format('%s (%d %s)', [
+      ALogViewer.LogQueue.Receiver.ToString,
+      ALogViewer.LogQueue.SourceId,
+      S
     ]);
 
   ALogViewer.Form.Show;
@@ -320,9 +327,18 @@ begin
   end;
 end;
 
+procedure TfrmMain.UpdateActions;
+begin
+  inherited UpdateActions;
+  UpdateStatusBar;
+end;
+
 procedure TfrmMain.UpdateStatusBar;
 begin
-//
+  if Assigned(Manager) and Assigned(Manager.ActiveView) then
+    sbrMain.SimpleText := Manager.ActiveView.LogQueue.SourceName
+  else
+    sbrMain.SimpleText := '';
 end;
 
 procedure TfrmMain.UpdateTabs;

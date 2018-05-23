@@ -192,9 +192,9 @@ begin
   CreateToolButton(TB, 'actInfo', tbsTextButton);
   CreateToolButton(TB, 'actWarning', tbsTextButton);
   CreateToolButton(TB, 'actError', tbsTextButton);
+  CreateToolButton(TB, 'actConditional', tbsTextButton);
   CreateToolButton(TB, 'actEcxeption', tbsTextButton);
   CreateToolButton(TB);
-  //CreateToolButton(TB, 'actConditional', tbsTextButton);
   CreateToolButton(TB, 'actCheckPoint', tbsTextButton);
   //CreateToolButton(TB, 'actCallStack', tbsTextButton);
   CreateToolButton(TB);

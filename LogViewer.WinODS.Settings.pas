@@ -29,6 +29,7 @@ type
     FOnChanged   : Event<TNotifyEvent>;
     FProcessId   : Integer;
     FProcessName : string;
+    FEnabled     : Boolean;
 
     {$REGION 'property access methods'}
     function GetOnChanged: IEvent<TNotifyEvent>;
@@ -36,6 +37,8 @@ type
     function GetProcessName: string;
     procedure SetProcessId(const Value: Integer);
     procedure SetProcessName(const Value: string);
+    function GetEnabled: Boolean;
+    procedure SetEnabled(const Value: Boolean);
     {$ENDREGION}
 
   protected
@@ -52,11 +55,32 @@ type
 
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
+
+  published
+    property Enabled: Boolean
+      read GetEnabled write SetEnabled;
   end;
 
 implementation
 
+uses
+  DDuce.Utils.WinApi;
+
 {$REGION 'property access methods'}
+function TWinODSSettings.GetEnabled: Boolean;
+begin
+  Result := FEnabled;
+end;
+
+procedure TWinODSSettings.SetEnabled(const Value: Boolean);
+begin
+  if Value <> Enabled then
+  begin
+    FEnabled := Value;
+    Changed;
+  end;
+end;
+
 function TWinODSSettings.GetOnChanged: IEvent<TNotifyEvent>;
 begin
   Result := FOnChanged;
@@ -66,6 +90,7 @@ function TWinODSSettings.GetProcessId: Integer;
 begin
   Result := FProcessId;
 end;
+
 
 procedure TWinODSSettings.SetProcessId(const Value: Integer);
 begin
@@ -108,6 +133,7 @@ begin
     LSettings   := TWinODSSettings(Source);
     ProcessName := LSettings.ProcessName;
     ProcessId   := LSettings.ProcessId;
+    Enabled     := LSettings.Enabled;
   end
   else
     inherited Assign(Source);

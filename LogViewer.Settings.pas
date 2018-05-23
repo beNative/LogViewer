@@ -29,7 +29,7 @@ uses
 
   LogViewer.MessageList.Settings, LogViewer.Watches.Settings,
   LogViewer.ComPort.Settings, LogViewer.WinODS.Settings,
-  LogViewer.WinIPC.Settings;
+  LogViewer.WinIPC.Settings, LogViewer.ZeroMQ.Settings;
 
 type
   TLogViewerSettings = class(TPersistent)
@@ -42,6 +42,7 @@ type
     FWinODSSettings      : TWinODSSettings;
     FWinIPCSettings      : TWinIPCSettings;
     FComPortSettings     : TComPortSettings;
+    FZeroMQSettings      : TZeroMQSettings;
     FWatchSettings       : TWatchSettings;
     FOnChanged           : Event<TNotifyEvent>;
 
@@ -68,6 +69,9 @@ type
 
     property ComPortSettings: TComPortSettings
       read FComPortSettings;
+
+    property ZeroMQSettings: TZeroMQSettings
+      read FZeroMQSettings;
 
     property WatchSettings: TWatchSettings
       read FWatchSettings;
@@ -104,6 +108,7 @@ begin
   FWinODSSettings      := TWinODSSettings.Create;
   FWinIPCSettings      := TWinIPCSettings.Create;
   FComPortSettings     := TComPortSettings.Create;
+  FZeroMQSettings      := TZeroMQSettings.Create;
   FWatchSettings       := TWatchSettings.Create;
 end;
 
@@ -114,6 +119,7 @@ begin
   FreeAndNil(FWinODSSettings);
   FreeAndNil(FWinIPCSettings);
   FreeAndNil(FComPortSettings);
+  FreeAndNil(FZeroMQSettings);
   FreeAndNil(FWatchSettings);
   inherited BeforeDestruction;
 end;
@@ -152,6 +158,9 @@ begin
       JO.LoadFromFile(FFileName);
       JO['FormSettings'].ObjectValue.ToSimpleObject(FFormSettings);
       JO['MessageListSettings'].ObjectValue.ToSimpleObject(FMessageListSettings);
+      JO['WinODSSettings'].ObjectValue.ToSimpleObject(FWinODSSettings);
+      JO['WinIPCSettings'].ObjectValue.ToSimpleObject(FWinIPCSettings);
+      JO['ZeroMQSettings'].ObjectValue.ToSimpleObject(FZeroMQSettings);
       JO.ToSimpleObject(Self);
     finally
       JO.Free;
@@ -168,6 +177,9 @@ begin
     JO.FromSimpleObject(Self);
     JO['FormSettings'].ObjectValue.FromSimpleObject(FFormSettings);
     JO['MessageListSettings'].ObjectValue.FromSimpleObject(FMessageListSettings);
+    JO['WinODSSettings'].ObjectValue.FromSimpleObject(FWinODSSettings);
+    JO['WinIPCSettings'].ObjectValue.FromSimpleObject(FWinIPCSettings);
+    JO['ZeroMQSettings'].ObjectValue.FromSimpleObject(FZeroMQSettings);
     JO.SaveToFile(FFileName, False);
   finally
     JO.Free;

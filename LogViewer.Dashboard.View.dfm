@@ -18,7 +18,8 @@ object frmDashboard: TfrmDashboard
     Width = 106
     Height = 17
     Caption = 'WinODS enabled'
-    TabOrder = 2
+    TabOrder = 1
+    OnClick = chkWinODSEnabledClick
   end
   object chkWinIPCEnabled: TCheckBox
     Left = 28
@@ -27,6 +28,7 @@ object frmDashboard: TfrmDashboard
     Height = 17
     Caption = 'WinIPC enabled'
     TabOrder = 0
+    OnClick = chkWinIPCEnabledClick
   end
   object chkZeroMQEnabled: TCheckBox
     Left = 28
@@ -34,7 +36,8 @@ object frmDashboard: TfrmDashboard
     Width = 154
     Height = 17
     Caption = 'ZeroMQ subscriber enabled'
-    TabOrder = 4
+    TabOrder = 2
+    OnClick = chkZeroMQEnabledClick
   end
   object pnlLogChannels: TPanel
     Left = 0
@@ -44,31 +47,7 @@ object frmDashboard: TfrmDashboard
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     BevelOuter = bvNone
-    TabOrder = 8
-  end
-  object btnAddWinIPCLogViewer: TButton
-    Left = 188
-    Top = 4
-    Width = 75
-    Height = 25
-    Action = actAddWinIPCLogViewer
-    TabOrder = 1
-  end
-  object btnAddWinODSLogViewer: TButton
-    Left = 188
-    Top = 35
-    Width = 75
-    Height = 25
-    Action = actAddWinODSLogViewer
-    TabOrder = 3
-  end
-  object btnAddZeroMQLogViewer: TButton
-    Left = 188
-    Top = 66
-    Width = 75
-    Height = 25
-    Action = actAddZeroMQLogViewer
-    TabOrder = 5
+    TabOrder = 4
   end
   object chkComPortEnabled: TCheckBox
     Left = 28
@@ -76,34 +55,11 @@ object frmDashboard: TfrmDashboard
     Width = 106
     Height = 17
     Caption = 'COM port enabled'
-    TabOrder = 6
-  end
-  object btnAddComPortLogViewer: TButton
-    Left = 188
-    Top = 97
-    Width = 75
-    Height = 25
-    Action = actAddComPortLogViewer
-    TabOrder = 7
+    TabOrder = 3
+    OnClick = chkComPortEnabledClick
   end
   object aclMain: TActionList
     Left = 352
     Top = 40
-    object actAddWinIPCLogViewer: TAction
-      Caption = 'Add viewer'
-      OnExecute = actAddWinIPCLogViewerExecute
-    end
-    object actAddWinODSLogViewer: TAction
-      Caption = 'Add viewer'
-      OnExecute = actAddWinODSLogViewerExecute
-    end
-    object actAddZeroMQLogViewer: TAction
-      Caption = 'Add viewer'
-      OnExecute = actAddZeroMQLogViewerExecute
-    end
-    object actAddComPortLogViewer: TAction
-      Caption = 'Add viewer'
-      OnExecute = actAddComPortLogViewerExecute
-    end
   end
 end

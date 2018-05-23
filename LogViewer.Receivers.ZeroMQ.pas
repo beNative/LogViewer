@@ -26,6 +26,7 @@ interface
 
   TODO:
     - list of connectionstrings to subscribe to?
+    - many optimizations are possible
 }
 
 uses
@@ -36,7 +37,7 @@ uses
 
   ZeroMQ,
 
-  LogViewer.Interfaces,  LogViewer.Receivers.Base;
+  LogViewer.Interfaces,  LogViewer.Receivers.Base, LogViewer.ZeroMQ.Settings;
 
 const
   ZQM_DEFAULT_ADDRESS = 'tcp://localhost:5555';
@@ -53,21 +54,29 @@ type
     FTimer      : TTimer;
     FAddress    : string;
 
-    procedure SetEnabled(const Value: Boolean); override;
-
     function ConnectSubscriber: Boolean;
     procedure CloseSubscriber;
 
   protected
+    {$REGION 'property access methods'}
+    function GetSettings: TZeroMQSettings;
+    procedure SetEnabled(const Value: Boolean); override;
+    {$ENDREGION}
+
     procedure FTimerTimer(Sender: TObject);
+    procedure SettingsChanged(Sender: TObject); override;
 
   public
     constructor Create(
+      AManager       : ILogViewerManager;
       const AName    : string = '';
       const AAddress : string = ''
     ); reintroduce;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
+
+    property Settings: TZeroMQSettings
+      read GetSettings;
 
   end;
 
@@ -77,10 +86,10 @@ uses
   System.SysUtils;
 
 {$REGION 'construction and destruction'}
-constructor TZeroMQChannelReceiver.Create(const AName: string;
-  const AAddress: string);
+constructor TZeroMQChannelReceiver.Create(AManager: ILogViewerManager;
+  const AName: string; const AAddress: string);
 begin
-  inherited Create(AName);
+  inherited Create(AManager, AName);
   FAddress := AAddress;
 end;
 
@@ -89,11 +98,12 @@ begin
   inherited AfterConstruction;
   if FAddress = '' then
     FAddress := ZQM_DEFAULT_ADDRESS;
-  FTimer         := TTimer.Create(nil);
-  FTimer.OnTimer := FTimerTimer;
-  FZMQ           := TZeroMQ.Create;
-  Enabled        := ConnectSubscriber;
-  FZMQStream     := TStringStream.Create;
+  FTimer          := TTimer.Create(nil);
+  FTimer.OnTimer  := FTimerTimer;
+  FTimer.Interval := 5;
+  FZMQ            := TZeroMQ.Create;
+  FZMQStream      := TStringStream.Create;
+  Settings.OnChanged.Add(SettingsChanged);
 end;
 
 procedure TZeroMQChannelReceiver.BeforeDestruction;
@@ -112,15 +122,27 @@ var
 begin
   B := False;
   if Value then
-    B := ConnectSubscriber
+  begin
+    B := ConnectSubscriber;
+  end
   else
     CloseSubscriber;
   inherited SetEnabled(B);
   FTimer.Enabled := B;
 end;
+
+function TZeroMQChannelReceiver.GetSettings: TZeroMQSettings;
+begin
+  Result := Manager.Settings.ZeroMQSettings;
+end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
+procedure TZeroMQChannelReceiver.SettingsChanged(Sender: TObject);
+begin
+  Enabled := Settings.Enabled;
+end;
+
 procedure TZeroMQChannelReceiver.FTimerTimer(Sender: TObject);
 begin
   if Assigned(FPoll) then
@@ -148,19 +170,24 @@ var
 begin
   FSubscriber := FZMQ.Start(ZMQSocket.Subscriber);
   N := FSubscriber.Connect(FAddress);
-  // '' as Filter means all ?
-  //FSubscriber.Subscribe(Name); // required!!
-  FSubscriber.Subscribe(''); // required!!
-  FPoll := FZMQ.Poller;
-  FPoll.RegisterPair(FSubscriber, [PollEvent.PollIn],
-    procedure(Event: PollEvents)
-    begin
-      FZMQStream.WriteString(FSubscriber.ReceiveString);
-      DoReceiveMessage(0, FZMQStream);
-      FZMQStream.Clear;
-    end
-  );
-  Result := True;
+  if N = 0 then
+  begin
+    // '' as Filter means all ?
+    //FSubscriber.Subscribe(Name); // required!!
+    FSubscriber.Subscribe(''); // required!!
+    FPoll := FZMQ.Poller;
+    FPoll.RegisterPair(FSubscriber, [PollEvent.PollIn],
+      procedure(Event: PollEvents)
+      begin
+        FZMQStream.WriteString(FSubscriber.ReceiveString);
+        DoReceiveMessage(FZMQStream);
+        FZMQStream.Clear;
+      end
+    );
+    Result := True;
+  end
+  else
+    Result := False;
 end;
 {$ENDREGION}
 

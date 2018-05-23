@@ -30,10 +30,10 @@ uses
 type
   TLogQueue = class(TInterfacedObject, ILogQueue)
   private
-    //FReceiver         : IChannelReceiver;
-    FReceiver         : Pointer;   // weak reference!
-    FSourceId         : Integer;
+    FReceiver         : Weak<IChannelReceiver>; // weak reference!
     FOnReceiveMessage : Event<TReceiveMessageEvent>;
+    FSourceId         : Integer;
+    FSourceName       : string;
     FEnabled          : Boolean;
 
     {$REGION 'property access methods'}
@@ -42,12 +42,14 @@ type
     function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
+    function GetSourceName: string;
     {$ENDREGION}
 
   public
     constructor Create(
-      const AReceiver : IChannelReceiver;
-      ASourceId       : Integer
+      const AReceiver   : IChannelReceiver;
+      ASourceId         : Integer;
+      const ASourceName : string
     );
     procedure BeforeDestruction; override;
 
@@ -55,6 +57,9 @@ type
 
     property SourceId: Integer
       read GetSourceId;
+
+    property SourceName: string
+      read GetSourceName;
 
     property Receiver : IChannelReceiver
       read GetReceiver;
@@ -70,12 +75,13 @@ implementation
 
 {$REGION 'construction and destruction'}
 constructor TLogQueue.Create(const AReceiver: IChannelReceiver;
-  ASourceId: Integer);
+  ASourceId: Integer; const ASourceName: string);
 begin
   inherited Create;
   FOnReceiveMessage.UseFreeNotification := False;
-  FReceiver := Pointer(AReceiver);
+  FReceiver := AReceiver;
   FSourceId := ASourceId;
+  FSourceName := ASourceName;
   FEnabled  := True;
 end;
 
@@ -92,6 +98,11 @@ end;
 function TLogQueue.GetSourceId: Integer;
 begin
   Result := FSourceId;
+end;
+
+function TLogQueue.GetSourceName: string;
+begin
+  Result := FSourceName;
 end;
 
 function TLogQueue.GetEnabled: Boolean;
@@ -111,7 +122,7 @@ end;
 
 function TLogQueue.GetReceiver: IChannelReceiver;
 begin
-  Result := IChannelReceiver(FReceiver);
+  Result := FReceiver.Target;
 end;
 {$ENDREGION}
 

@@ -25,6 +25,11 @@ interface
   https://stackoverflow.com/questions/5365365/tree-like-datastructure-for-use-with-virtualtreeview
 }
 
+{
+  TODO:
+    - auto show message details, watches window and callstack (WinODS)
+}
+
 uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes, System.ImageList,
@@ -91,6 +96,7 @@ type
       var Key : Word;
       Shift   : TShiftState
     );
+    procedure chkAutoFilterClick(Sender: TObject);
 
   private class var
     FCounter : Integer;
@@ -222,8 +228,8 @@ type
 
   protected
     procedure FLogQueueReceiveMessage(
-      Sender    : TObject;
-      AStream   : TStream
+      Sender  : TObject;
+      AStream : TStream
     );
 
     procedure Clear;
@@ -234,7 +240,6 @@ type
 
     procedure UpdateCallStack(ALogNode: TLogNode);
     procedure UpdateMessageDetails(ALogNode: TLogNode);
-
     procedure UpdateComponentDisplay(ALogNode: TLogNode);
     procedure UpdateBitmapDisplay(ALogNode: TLogNode);
     procedure UpdateTextDisplay(ALogNode: TLogNode);
@@ -344,6 +349,11 @@ begin
   FManager  := nil;
   FSettings := nil;
   inherited BeforeDestruction;
+end;
+
+procedure TfrmMessageList.chkAutoFilterClick(Sender: TObject);
+begin
+  Settings.AutoFilterMessages := (Sender as TCheckBox).Checked;
 end;
 
 procedure TfrmMessageList.CreateCallStackView;
@@ -677,10 +687,6 @@ begin
 //    begin
 //      LN.Text := '';
 //    end;
-    lmtConditional:
-    begin
-
-    end;
     lmtAlphaColor, lmtColor:
     begin
       S := string(FCurrentMsg.Text);
@@ -693,7 +699,9 @@ begin
         LN.ValueName := Copy(S, 1, I);
       LN.Text := '';
     end;
-    lmtEnterMethod, lmtLeaveMethod, lmtInfo, lmtWarning, lmtError, lmtText:
+    lmtEnterMethod, lmtLeaveMethod,
+    lmtInfo, lmtWarning, lmtError, lmtConditional,
+    lmtText:
     begin
       LN.Text := string(FCurrentMsg.Text);
     end;
@@ -792,7 +800,7 @@ begin
     edtMessageFilter.Color := clWhite;
   end;
 
-  if chkAutoFilter.Checked then
+  if Settings.AutoFilterMessages then
     UpdateLogTreeView;
 end;
 
@@ -855,6 +863,7 @@ end;
 
 procedure TfrmMessageList.FSettingsChanged(Sender: TObject);
 begin
+  chkAutoFilter.Checked := Settings.AutoFilterMessages;
   UpdateView;
 end;
 {$ENDREGION}
@@ -1074,7 +1083,6 @@ begin
   begin
     Activate;
   end;
-
   if Assigned(Actions) then
     Actions.UpdateActions;
 
@@ -1085,6 +1093,7 @@ procedure TfrmMessageList.UpdateBitmapDisplay(ALogNode: TLogNode);
 begin
   if Assigned(ALogNode.MessageData) then
   begin
+    ALogNode.MessageData.Position := 0;
     imgBitmap.Picture.Bitmap.LoadFromStream(ALogNode.MessageData);
     pgcMessageDetails.ActivePage := tsImageViewer;
     with imgBitmap.Picture do
@@ -1093,7 +1102,6 @@ begin
       edtHeight.Text      := Bitmap.Height.ToString;
       edtPixelFormat.Text := Reflect.EnumName(Bitmap.PixelFormat);
       edtHandleType.Text  := Reflect.EnumName(Bitmap.HandleType);
-      //Color := '$' + IntToHex(TransparentColor, 8);
     end;
   end;
 end;
@@ -1181,7 +1189,8 @@ begin
       //edtHex.OpenStream(ALogNode.MessageData);
 //        pgcMessageDetails.ActivePageIndex := 3;
     end;
-    lmtEnterMethod, lmtLeaveMethod, lmtInfo, lmtWarning, lmtError, lmtText:
+    lmtEnterMethod, lmtLeaveMethod, lmtText,
+    lmtInfo, lmtWarning, lmtError, lmtConditional:
       UpdateTextDisplay(ALogNode);
     lmtValue:
       UpdateValueDisplay(ALogNode);

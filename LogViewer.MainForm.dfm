@@ -24,6 +24,7 @@ object frmMain: TfrmMain
     Width = 1434
     Height = 19
     Panels = <>
+    SimplePanel = True
   end
   object ctMain: TChromeTabs
     Left = 0

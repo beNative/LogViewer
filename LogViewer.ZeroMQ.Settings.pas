@@ -28,9 +28,12 @@ type
   private
     FOnChanged : Event<TNotifyEvent>;
     FAddress   : string;
+    FEnabled   : Boolean;
 
   protected
     {$REGION 'property access methods'}
+    function GetEnabled: Boolean;
+    procedure SetEnabled(const Value: Boolean);
     function GetOnChanged: IEvent<TNotifyEvent>;
     function GetAddress: string;
     procedure SetAddress(const Value: string);
@@ -46,6 +49,10 @@ type
 
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
+
+  published
+    property Enabled: Boolean
+      read GetEnabled write SetEnabled;
   end;
 
 implementation
@@ -69,6 +76,20 @@ begin
     Changed;
   end;
 end;
+
+function TZeroMQSettings.GetEnabled: Boolean;
+begin
+  Result := FEnabled;
+end;
+
+procedure TZeroMQSettings.SetEnabled(const Value: Boolean);
+begin
+  if Value <> Enabled then
+  begin
+    FEnabled := Value;
+    Changed;
+  end;
+end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
@@ -86,7 +107,8 @@ begin
   if Source is TZeroMQSettings then
   begin
     LSettings := TZeroMQSettings(Source);
-    FAddress  := LSettings.Address;
+    Address  := LSettings.Address;
+    Enabled  := LSettings.Enabled;
   end
   else
     inherited Assign(Source);

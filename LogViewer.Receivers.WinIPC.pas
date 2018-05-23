@@ -33,12 +33,13 @@ uses
 
   DDuce.WinIPC.Server,
 
-  LogViewer.Receivers.Base, LogViewer.Interfaces;
+  LogViewer.Receivers.Base, LogViewer.Interfaces, LogViewer.WinIPC.Settings;
 
 type
   TWinIPChannelReceiver = class(TChannelReceiver, IChannelReceiver)
   private
-     FIPCServer        : TWinIPCServer;
+     FIPCServer : TWinIPCServer;
+    function GetSettings: TWinIPCSettings;
 
   protected
     {$REGION 'property access methods'}
@@ -51,9 +52,14 @@ type
       AData     : TStream
     );
 
+    procedure SettingsChanged(Sender: TObject); override;
+
   public
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
+
+    property Settings: TWinIPCSettings
+      read GetSettings;
 
   end;
 
@@ -62,7 +68,7 @@ implementation
 uses
   System.SysUtils,
 
-  DDuce.Utils;
+  DDuce.Utils, DDuce.Utils.Winapi;
 
 {$REGION 'construction and destruction'}
 procedure TWinIPChannelReceiver.AfterConstruction;
@@ -71,6 +77,7 @@ begin
   FIPCServer           := TWinIPCServer.Create;
   FIPCServer.OnMessage := FIPCServerMessage;
   FIPCServer.Active    := True;
+  Settings.OnChanged.Add(SettingsChanged);
 end;
 
 procedure TWinIPChannelReceiver.BeforeDestruction;
@@ -91,13 +98,23 @@ begin
     FIPCServer.OnMessage := nil;
   FIPCServer.Active := Value;
 end;
+
+function TWinIPChannelReceiver.GetSettings: TWinIPCSettings;
+begin
+  Result := Manager.Settings.WinIPCSettings;
+end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
 procedure TWinIPChannelReceiver.FIPCServerMessage(Sender: TObject;
   ASourceId: Integer; AData: TStream);
 begin
-  DoReceiveMessage(ASourceId, AData);
+  DoReceiveMessage(AData, ASourceId, 0, GetExePathForProcess(ASourceId));
+end;
+
+procedure TWinIPChannelReceiver.SettingsChanged(Sender: TObject);
+begin
+  Enabled := Settings.Enabled;
 end;
 {$ENDREGION}
 

@@ -38,6 +38,7 @@ type
 
   protected
     procedure ClearMessages;
+    procedure UpdateView;
     procedure Start;
     procedure Stop;
     procedure CollapseAll;
@@ -140,6 +141,14 @@ begin
   if Assigned(Receiver) then
   begin
     Receiver.Enabled := False;
+  end;
+end;
+
+procedure TLogViewerCommands.UpdateView;
+begin
+  if Assigned(ActiveView) then
+  begin
+    ActiveView.UpdateView;
   end;
 end;
 {$ENDREGION}

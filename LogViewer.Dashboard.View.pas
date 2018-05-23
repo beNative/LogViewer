@@ -35,25 +35,19 @@ uses
 
 type
   TfrmDashboard = class(TForm)
-    aclMain                : TActionList;
-    actAddComPortLogViewer : TAction;
-    actAddWinIPCLogViewer  : TAction;
-    actAddWinODSLogViewer  : TAction;
-    actAddZeroMQLogViewer  : TAction;
-    btnAddComPortLogViewer : TButton;
-    btnAddWinIPCLogViewer  : TButton;
-    btnAddWinODSLogViewer  : TButton;
-    btnAddZeroMQLogViewer  : TButton;
-    chkComPortEnabled      : TCheckBox;
-    chkWinIPCEnabled       : TCheckBox;
-    chkWinODSEnabled       : TCheckBox;
-    chkZeroMQEnabled       : TCheckBox;
-    pnlLogChannels         : TPanel;
+    {$REGION 'designer controls'}
+    aclMain           : TActionList;
+    chkComPortEnabled : TCheckBox;
+    chkWinIPCEnabled  : TCheckBox;
+    chkWinODSEnabled  : TCheckBox;
+    chkZeroMQEnabled  : TCheckBox;
+    pnlLogChannels    : TPanel;
+    {$ENDREGION}
 
-    procedure actAddWinIPCLogViewerExecute(Sender: TObject);
-    procedure actAddWinODSLogViewerExecute(Sender: TObject);
-    procedure actAddZeroMQLogViewerExecute(Sender: TObject);
-    procedure actAddComPortLogViewerExecute(Sender: TObject);
+    procedure chkWinIPCEnabledClick(Sender: TObject);
+    procedure chkWinODSEnabledClick(Sender: TObject);
+    procedure chkZeroMQEnabledClick(Sender: TObject);
+    procedure chkComPortEnabledClick(Sender: TObject);
 
   private
     FManager             : ILogViewerManager;
@@ -77,13 +71,21 @@ implementation
 {$R *.dfm}
 
 uses
-  Spring,
+  Spring, Spring.Collections,
 
-  DDuce.Factories.VirtualTrees,
+  DDuce.Factories, DDuce.Factories.VirtualTrees,
 
   LogViewer.Factories;
 
 {$REGION 'construction and destruction'}
+constructor TfrmDashboard.Create(AOwner: TComponent;
+  AManager: ILogViewerManager);
+begin
+  inherited Create(AOwner);
+  Guard.CheckNotNull(AManager, 'AManager');
+  FManager := AManager;
+end;
+
 procedure TfrmDashboard.AfterConstruction;
 var
   R : IChannelReceiver;
@@ -94,88 +96,51 @@ begin
 //  FTVPChannelReceivers := TFactories.CreateTreeViewPresenter(
 //    Self,
 //    FVSTChannelReceivers,
-//    (FManager.Receivers as IInterfaceList).AsReadOnlyList as IObjectList
+//    IObjectList(FManager.Receivers.AsList.AsReadOnlyList)
 //  );
 
-  // TODO : these are only added for testing
-
-  R := TLogViewerFactories.CreateWinIPCChannelReceiver;
+  R := TLogViewerFactories.CreateWinIPCChannelReceiver(FManager);
   FManager.AddReceiver(R);
-  R.Enabled := True;
+  R.Enabled := FManager.Settings.WinIPCSettings.Enabled;
 
-  R := TLogViewerFactories.CreateWinODSChannelReceiver;
+  R := TLogViewerFactories.CreateWinODSChannelReceiver(FManager);
   FManager.AddReceiver(R);
-  R.Enabled := True;
+  R.Enabled := FManager.Settings.WinODSSettings.Enabled;
 
-  R := TLogViewerFactories.CreateZeroMQChannelReceiver;
+  R := TLogViewerFactories.CreateZeroMQChannelReceiver(FManager);
   FManager.AddReceiver(R);
-  R.Enabled := True;
+  R.Enabled := FManager.Settings.ZeroMQSettings.Enabled;
 end;
 
-constructor TfrmDashboard.Create(AOwner: TComponent;
-  AManager: ILogViewerManager);
+procedure TfrmDashboard.chkComPortEnabledClick(Sender: TObject);
 begin
-  inherited Create(AOwner);
-  Guard.CheckNotNull(AManager, 'AManager');
-  FManager := AManager;
+  //FManager.Settings.ComPortSettings.Enabled := (Sender as TCheckBox).Checked;
+end;
+
+procedure TfrmDashboard.chkWinIPCEnabledClick(Sender: TObject);
+begin
+  FManager.Settings.WinIPCSettings.Enabled := (Sender as TCheckBox).Checked;
+end;
+
+procedure TfrmDashboard.chkWinODSEnabledClick(Sender: TObject);
+begin
+  FManager.Settings.WinODSSettings.Enabled := (Sender as TCheckBox).Checked;
+end;
+
+procedure TfrmDashboard.chkZeroMQEnabledClick(Sender: TObject);
+begin
+  FManager.Settings.ZeroMQSettings.Enabled := (Sender as TCheckBox).Checked;
 end;
 
 procedure TfrmDashboard.UpdateActions;
 begin
-  actAddWinIPCLogViewer.Enabled  := chkWinIPCEnabled.Checked;
-  actAddWinODSLogViewer.Enabled  := chkWinODSEnabled.Checked;
-  actAddZeroMQLogViewer.Enabled  := chkZeroMQEnabled.Checked;
-  actAddComPortLogViewer.Enabled := chkComPortEnabled.Checked;
-
+  chkWinIPCEnabled.Checked := FManager.Settings.WinIPCSettings.Enabled;
+  chkWinODSEnabled.Checked := FManager.Settings.WinODSSettings.Enabled;
+  chkZeroMQEnabled.Checked := FManager.Settings.ZeroMQSettings.Enabled;
+  //chkComPortEnabled.Checked := FManager.Settings.ComPortSettings.
   FManager.Actions.UpdateActions;
 
   inherited UpdateActions;
-end;
-{$ENDREGION}
-
-{$REGION 'action handlers'}
-procedure TfrmDashboard.actAddComPortLogViewerExecute(Sender: TObject);
-//var
-//  MV : ILogViewer;
-begin
-//  MV := TLogViewerFactories.CreateLogViewer(
-//    FManager,
-//    TLogViewerFactories.CreateComPortChannelReceiver(nil)
-//  );
-//  FManager.AddView(MV);
-end;
-
-procedure TfrmDashboard.actAddWinIPCLogViewerExecute(Sender: TObject);
-//var
-//  MV : ILogViewer;
-begin
-//  MV := TLogViewerFactories.CreateLogViewer(
-//    FManager,
-//    TLogViewerFactories.CreateWinIPCChannelReceiver
-//  );
-//  FManager.AddView(MV);
-end;
-
-procedure TfrmDashboard.actAddWinODSLogViewerExecute(Sender: TObject);
-//var
-//  MV : ILogViewer;
-begin
-//  MV := TLogViewerFactories.CreateLogViewer(
-//    FManager,
-//    TLogViewerFactories.CreateWinODSChannelReceiver
-//  );
-//  FManager.AddView(MV);
-end;
-
-procedure TfrmDashboard.actAddZeroMQLogViewerExecute(Sender: TObject);
-//var
-//  MV : ILogViewer;
-begin
-//  MV := TLogViewerFactories.CreateLogViewer(
-//    FManager,
-//    TLogViewerFactories.CreateZeroMQChannelReceiver
-//  );
-//  FManager.AddView(MV);
 end;
 {$ENDREGION}
 

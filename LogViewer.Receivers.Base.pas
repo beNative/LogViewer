@@ -32,9 +32,11 @@ type
     FName          : string;
     FQueueList     : IDictionary<Integer, ILogQueue>;
     FOnNewLogQueue : Event<TLogQueueEvent>;
+    FManager       : ILogViewerManager;
 
   protected
     {$REGION 'property access methods'}
+    function GetManager: ILogViewerManager;
     function GetOnNewLogQueue: IEvent<TLogQueueEvent>;
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean); virtual;
@@ -42,12 +44,19 @@ type
     procedure SetName(const Value: string);
     {$ENDREGION}
 
+    procedure SettingsChanged(Sender: TObject); virtual;
+
   public
-    constructor Create(const AName: string); reintroduce;
+    constructor Create(
+      AManager    : ILogViewerManager;
+      const AName : string
+    ); reintroduce;
 
     procedure DoReceiveMessage(
-      ASourceId : Integer;
-      AStream   : TStream
+      AStream           : TStream;
+      ASourceId         : Integer = 0;
+      AThreadId         : Integer = 0;
+      const ASourceName : string = ''
     ); virtual;
 
     function ToString: string; override;
@@ -56,6 +65,9 @@ type
 
     property Name: string
       read GetName write SetName;
+
+    property Manager: ILogViewerManager
+      read GetManager;
 
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
@@ -68,6 +80,8 @@ implementation
 
 uses
   System.SysUtils,
+
+  DDuce.Utils.Winapi,
 
   LogViewer.Factories;
 
@@ -85,8 +99,10 @@ begin
   inherited BeforeDestruction;
 end;
 
-constructor TChannelReceiver.Create(const AName: string);
+constructor TChannelReceiver.Create(AManager: ILogViewerManager;
+  const AName: string);
 begin
+  FManager := AManager;
   if AName = '' then
   begin
     Name := Copy(ClassName, 2, Length(ClassName));
@@ -97,14 +113,15 @@ end;
 {$ENDREGION}
 
 {$REGION 'event dispatch methods'}
-procedure TChannelReceiver.DoReceiveMessage(ASourceId: Integer;
-  AStream: TStream);
+procedure TChannelReceiver.DoReceiveMessage(AStream: TStream; ASourceId: Integer;
+  AThreadId: Integer; const ASourceName : string);
 var
-  LLogQueue: ILogQueue;
+  LLogQueue  : ILogQueue;
+  S          : string;
 begin
   if not FQueueList.TryGetValue(ASourceId, LLogQueue) then
   begin
-    LLogQueue := TLogViewerFactories.CreateLogQueue(ASourceId, Self);
+    LLogQueue := TLogViewerFactories.CreateLogQueue(Self, ASourceId, ASourceName);
     FQueueList.AddOrSetValue(ASourceId, LLogQueue);
     FOnNewLogQueue.Invoke(Self, LLogQueue);
   end;
@@ -123,19 +140,29 @@ begin
   FEnabled := Value;
 end;
 
+function TChannelReceiver.GetManager: ILogViewerManager;
+begin
+  Result := FManager;
+end;
+
 function TChannelReceiver.GetName: string;
 begin
   Result := FName;
 end;
 
-function TChannelReceiver.GetOnNewLogQueue: IEvent<TLogQueueEvent>;
-begin
-  Result := FOnNewLogQueue;
-end;
-
 procedure TChannelReceiver.SetName(const Value: string);
 begin
   FName := Value;
+end;
+
+procedure TChannelReceiver.SettingsChanged(Sender: TObject);
+begin
+//
+end;
+
+function TChannelReceiver.GetOnNewLogQueue: IEvent<TLogQueueEvent>;
+begin
+  Result := FOnNewLogQueue;
 end;
 {$ENDREGION}
 

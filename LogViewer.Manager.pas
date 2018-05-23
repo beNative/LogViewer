@@ -325,7 +325,7 @@ end;
 
 procedure TdmManager.actFilterMessagesExecute(Sender: TObject);
 begin
-//
+  Commands.UpdateView;
 end;
 
 procedure TdmManager.actGotoFirstExecute(Sender: TObject);
@@ -724,6 +724,8 @@ begin
   actClearMessages.Enabled      := B;
   actSelectAll.Enabled          := MLS.VisibleMessageTypes <> ALL_MESSAGES;
   actSelectNone.Enabled         := MLS.VisibleMessageTypes <> [];
+  actFilterMessages.Enabled :=
+    not Settings.MessageListSettings.AutoFilterMessages;
   actToggleAlwaysOnTop.Checked := Settings.FormSettings.FormStyle = fsStayOnTop;
   actToggleFullscreen.Checked := Settings.FormSettings.WindowState = wsMaximized;
 end;

@@ -66,14 +66,14 @@ type
 
     procedure DoReceiveMessage(AStream : TStream);
     procedure DoStringReceived(const AString: AnsiString);
-
-    procedure FSettingsChanged(Sender: TObject);
+    procedure SettingsChanged(Sender: TObject); override;
 
     property Settings: TComPortSettings
       read GetSettings;
 
   public
     constructor Create(
+      AManager    : ILogViewerManager;
       const AName : string;
       ASettings   : TComPortSettings
     ); reintroduce;
@@ -91,10 +91,10 @@ uses
   DDuce.Logger.Interfaces;
 
 {$REGION 'construction and destruction'}
-constructor TComPortChannelReceiver.Create(const AName : string;
-  ASettings: TComPortSettings);
+constructor TComPortChannelReceiver.Create(AManager: ILogViewerManager;
+  const AName : string; ASettings: TComPortSettings);
 begin
-  inherited Create(AName);
+  inherited Create(AManager, AName);
   Guard.CheckNotNull(ASettings, 'ASettings');
   FSettings := TComPortSettings.Create;
   FSettings.Assign(ASettings);
@@ -110,7 +110,7 @@ begin
   FPollTimer.OnTimer := FPollTimerTimer;
   FSerialPort := TBlockSerial.Create;
   FSerialPort.OnStatus := FSerialPortStatus;
-  FSettings.OnChanged.Add(FSettingsChanged);
+  FSettings.OnChanged.Add(SettingsChanged);
 end;
 
 procedure TComPortChannelReceiver.BeforeDestruction;
@@ -226,7 +226,7 @@ begin
   end;
 end;
 
-procedure TComPortChannelReceiver.FSettingsChanged(Sender: TObject);
+procedure TComPortChannelReceiver.SettingsChanged(Sender: TObject);
 begin
   if FSerialPort.Device <> FSettings.Port then
   begin
