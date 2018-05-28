@@ -176,7 +176,7 @@ object frmMain: TfrmMain
     LookAndFeel.Tabs.DefaultFont.Color = clBlack
     LookAndFeel.Tabs.DefaultFont.Size = 9
     LookAndFeel.Tabs.DefaultFont.Alpha = 255
-    LookAndFeel.Tabs.DefaultFont.TextRendoringMode = TextRenderingHintClearTypeGridFit
+    LookAndFeel.Tabs.DefaultFont.TextRenderingMode = TextRenderingHintClearTypeGridFit
     LookAndFeel.Tabs.MouseGlow.CentreColor = clWhite
     LookAndFeel.Tabs.MouseGlow.OutsideColor = clWhite
     LookAndFeel.Tabs.MouseGlow.CentreAlpha = 120
@@ -191,7 +191,7 @@ object frmMain: TfrmMain
     LookAndFeel.Tabs.Active.Font.Color = clOlive
     LookAndFeel.Tabs.Active.Font.Size = 9
     LookAndFeel.Tabs.Active.Font.Alpha = 100
-    LookAndFeel.Tabs.Active.Font.TextRendoringMode = TextRenderingHintClearTypeGridFit
+    LookAndFeel.Tabs.Active.Font.TextRenderingMode = TextRenderingHintClearTypeGridFit
     LookAndFeel.Tabs.Active.Font.UseDefaultFont = True
     LookAndFeel.Tabs.Active.Style.StartColor = clWhite
     LookAndFeel.Tabs.Active.Style.StopColor = clWhite
@@ -204,7 +204,7 @@ object frmMain: TfrmMain
     LookAndFeel.Tabs.NotActive.Font.Color = 4603477
     LookAndFeel.Tabs.NotActive.Font.Size = 9
     LookAndFeel.Tabs.NotActive.Font.Alpha = 215
-    LookAndFeel.Tabs.NotActive.Font.TextRendoringMode = TextRenderingHintClearTypeGridFit
+    LookAndFeel.Tabs.NotActive.Font.TextRenderingMode = TextRenderingHintClearTypeGridFit
     LookAndFeel.Tabs.NotActive.Font.UseDefaultFont = False
     LookAndFeel.Tabs.NotActive.Style.StartColor = clSilver
     LookAndFeel.Tabs.NotActive.Style.StopColor = clSilver
@@ -217,7 +217,7 @@ object frmMain: TfrmMain
     LookAndFeel.Tabs.Hot.Font.Color = 4210752
     LookAndFeel.Tabs.Hot.Font.Size = 9
     LookAndFeel.Tabs.Hot.Font.Alpha = 215
-    LookAndFeel.Tabs.Hot.Font.TextRendoringMode = TextRenderingHintClearTypeGridFit
+    LookAndFeel.Tabs.Hot.Font.TextRenderingMode = TextRenderingHintClearTypeGridFit
     LookAndFeel.Tabs.Hot.Font.UseDefaultFont = False
     LookAndFeel.Tabs.Hot.Style.StartColor = clSilver
     LookAndFeel.Tabs.Hot.Style.StopColor = clSilver

@@ -222,7 +222,7 @@ type
     constructor Create(
       AOwner    : TComponent;
       ASettings : TLogViewerSettings
-    );
+    ); reintroduce; virtual;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 

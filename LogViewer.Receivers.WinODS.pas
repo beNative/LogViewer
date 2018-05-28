@@ -250,11 +250,14 @@ begin
 
         LODSMessage.Id := FLastChildOrder;
         Inc(FLastChildOrder);
-        Queue(procedure
-          begin
-            FODSQueue.Enqueue(LODSMessage);
-          end
-        );
+        if Trim(LODSMessage.MsgText) <> '' then
+        begin
+          Queue(procedure
+            begin
+              FODSQueue.Enqueue(LODSMessage);
+            end
+          );
+        end;
       end;
       WAIT_FAILED:
         Continue;
