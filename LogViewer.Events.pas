@@ -38,8 +38,10 @@ type
     function GetOnAddReceiver: IEvent<TChannelReceiverEvent>;
     {$ENDREGION}
 
+    {$REGION 'event dispatch methods'}
     procedure DoAddLogViewer(ALogViewer: ILogViewer); virtual;
     procedure DoAddReceiver(AReceiver: IChannelReceiver); virtual;
+    {$ENDREGION}
 
   public
     constructor Create(AManager: ILogViewerManager);

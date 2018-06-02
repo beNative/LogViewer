@@ -201,6 +201,9 @@ begin
   CreateToolButton(TB, 'actValue', tbsTextButton);
   CreateToolButton(TB, 'actStrings', tbsTextButton);
   CreateToolButton(TB, 'actComponent', tbsTextButton);
+  CreateToolButton(TB, 'actObject', tbsTextButton);
+  CreateToolButton(TB, 'actPersistent', tbsTextButton);
+  CreateToolButton(TB, 'actInterface', tbsTextButton);
   CreateToolButton(TB, 'actBitmap', tbsTextButton);
   //CreateToolButton(TB, 'actMemory', tbsTextButton);
   //CreateToolButton(TB, 'actHeapInfo', tbsTextButton);

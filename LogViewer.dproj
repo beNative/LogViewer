@@ -310,9 +310,6 @@
         <DCCReference Include="LogViewer.Commands.pas"/>
         <DCCReference Include="LogViewer.Events.pas"/>
         <DCCReference Include="LogViewer.ComPort.Settings.pas"/>
-        <DCCReference Include="LogViewer.AddMessageView.Dialog.pas">
-            <Form>frmAddMessageView</Form>
-        </DCCReference>
         <DCCReference Include="LogViewer.ComPort.Settings.View.pas">
             <Form>frmComPortSettings</Form>
         </DCCReference>

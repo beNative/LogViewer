@@ -42,11 +42,12 @@ type
 
   TMessageListSettings = class(TPersistent)
   private
-    FAutoScrollMessages  : Boolean;
-    FAutoFilterMessages  : Boolean;
-    FOnChanged           : Event<TNotifyEvent>;
-    FVisibleMessageTypes : TLogMessageTypes;
-    FWatchSettings       : TWatchSettings;
+    FAutoScrollMessages     : Boolean;
+    FAutoFilterMessages     : Boolean;
+    FDynamicAutoSizeColumns : Boolean;
+    FOnChanged              : Event<TNotifyEvent>;
+    FVisibleMessageTypes    : TLogMessageTypes;
+    FWatchSettings          : TWatchSettings;
 
     {$REGION 'property access methods'}
     function GetAutoScrollMessages: Boolean;
@@ -56,6 +57,8 @@ type
     procedure SetVisibleMessageTypes(const Value: TLogMessageTypes);
     function GetAutoFilterMessages: Boolean;
     procedure SetAutoFilterMessages(const Value: Boolean);
+    function GetDynamicAutoSizeColumns: Boolean;
+    procedure SetDynamicAutoSizeColumns(const Value: Boolean);
     {$ENDREGION}
 
   protected
@@ -82,6 +85,9 @@ type
 
     property AutoFilterMessages: Boolean
       read GetAutoFilterMessages write SetAutoFilterMessages;
+
+    property DynamicAutoSizeColumns: Boolean
+      read GetDynamicAutoSizeColumns write SetDynamicAutoSizeColumns;
 
   end;
 
@@ -128,6 +134,20 @@ begin
   if Value <> AutoScrollMessages then
   begin
     FAutoScrollMessages := Value;
+    Changed;
+  end;
+end;
+
+function TMessageListSettings.GetDynamicAutoSizeColumns: Boolean;
+begin
+  Result := FDynamicAutoSizeColumns;
+end;
+
+procedure TMessageListSettings.SetDynamicAutoSizeColumns(const Value: Boolean);
+begin
+  if Value <> DynamicAutoSizeColumns then
+  begin
+    FDynamicAutoSizeColumns := Value;
     Changed;
   end;
 end;

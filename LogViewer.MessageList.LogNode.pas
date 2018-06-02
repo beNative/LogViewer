@@ -14,14 +14,9 @@
   limitations under the License.
 }
 
-{
-  See this topic for more information:
-  https://stackoverflow.com/questions/5365365/tree-like-datastructure-for-use-with-virtualtreeview
-}
-
 unit LogViewer.MessageList.LogNode;
 
-{ Data structure to use in combination with the log treeview. }
+{ Datastructure holding the data to display extracted from the TLogMessage. }
 
 interface
 
@@ -34,18 +29,14 @@ uses
 
   DDuce.Logger.Interfaces;
 
-//type
-//  TNodeData = class   // needs to be replaced by TLogNode
-//    Title   : string;
-//    MsgType : TLogMessageType;
-//    MsgData : TStream;
-//    MsgTime : TDateTime;
-//    Index   : Integer;
-//    Name    : string;
-//    Value   : string;
-//  end;
+{$REGION 'documentation'}
+{
+  See this topic for more information on creating a datastructure for tree
+  nodes:
 
-{ Datastructure holding the data to display extracted from the TLogMessage. }
+  https://stackoverflow.com/questions/5365365/tree-like-datastructure-for-use-with-virtualtreeview
+}
+{$ENDREGION}
 
 type
   TLogNode = class
@@ -77,19 +68,15 @@ type
     function GetVTNode: PVirtualNode;
     procedure SetVTNode(const Value: PVirtualNode);
     function GetValue: string;
-    function GetValueName: string;
-    function GetValueType: string;
     procedure SetValue(const Value: string);
+    function GetValueName: string;
     procedure SetValueName(const Value: string);
+    function GetValueType: string;
     procedure SetValueType(const Value: string);
     {$ENDREGION}
 
   public
-    constructor Create(AText: string = '');
-
-    procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
-
 
     property Id: Int64
       read GetId write SetId;
@@ -128,22 +115,11 @@ uses
   System.SysUtils;
 
 {$REGION 'construction and destruction'}
-procedure TLogNode.AfterConstruction;
-begin
-  inherited AfterConstruction;
-
-end;
-
 procedure TLogNode.BeforeDestruction;
 begin
   if Assigned(FMessageData) then
     FreeAndNil(FMessageData);
   inherited BeforeDestruction;
-end;
-
-constructor TLogNode.Create(AText: string);
-begin
-//
 end;
 {$ENDREGION}
 

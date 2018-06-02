@@ -2,8 +2,8 @@ object frmMain: TfrmMain
   Left = 0
   Top = 0
   Caption = 'Logviewer'
-  ClientHeight = 939
-  ClientWidth = 1434
+  ClientHeight = 599
+  ClientWidth = 997
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -20,8 +20,8 @@ object frmMain: TfrmMain
   TextHeight = 13
   object sbrMain: TStatusBar
     Left = 0
-    Top = 920
-    Width = 1434
+    Top = 580
+    Width = 997
     Height = 19
     Panels = <>
     SimplePanel = True
@@ -29,7 +29,7 @@ object frmMain: TfrmMain
   object ctMain: TChromeTabs
     Left = 0
     Top = 0
-    Width = 1434
+    Width = 997
     Height = 30
     OnActiveTabChanged = ctMainActiveTabChanged
     OnButtonAddClick = ctMainButtonAddClick
@@ -360,8 +360,8 @@ object frmMain: TfrmMain
   object pnlMainClient: TPanel
     Left = 0
     Top = 30
-    Width = 1434
-    Height = 890
+    Width = 997
+    Height = 550
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 2

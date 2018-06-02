@@ -78,6 +78,9 @@ type
     ppmMessageTypes: TPopupMenu;
     actMessageTypesMenu: TAction;
     actStart: TAction;
+    actObject: TAction;
+    actPersistent: TAction;
+    actInterface: TAction;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -146,6 +149,8 @@ type
     function GetReceivers: IList<IChannelReceiver>;
 
     procedure ActiveViewChanged;
+
+    function AsComponent: TComponent;
 
     procedure ReceiverNewLogQueue(
       Sender    : TObject;
@@ -650,6 +655,11 @@ end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
+function TdmManager.AsComponent: TComponent;
+begin
+  Result := Self;
+end;
+
 procedure TdmManager.ActiveViewChanged;
 begin
   UpdateActions;
@@ -694,6 +704,9 @@ begin
   actMethodTraces.Checked := lmtEnterMethod in MLS.VisibleMessageTypes;
   actException.Checked    := lmtException in MLS.VisibleMessageTypes;
   actComponent.Checked    := lmtComponent in MLS.VisibleMessageTypes;
+  actObject.Checked       := lmtObject in MLS.VisibleMessageTypes;
+  actPersistent.Checked   := lmtPersistent in MLS.VisibleMessageTypes;
+  actInterface.Checked    := lmtInterface in MLS.VisibleMessageTypes;
   actHeapInfo.Checked     := lmtHeapInfo in MLS.VisibleMessageTypes;
   actCustomData.Checked   := lmtCustomData in MLS.VisibleMessageTypes;
   actStrings.Checked      := lmtStrings in MLS.VisibleMessageTypes;
@@ -717,6 +730,9 @@ begin
   actHeapInfo.Enabled           := B;
   actCustomData.Enabled         := B;
   actStrings.Enabled            := B;
+  actObject.Enabled             := B;
+  actPersistent.Enabled         := B;
+  actInterface.Enabled          := B;
   actMemory.Enabled             := B;
   actCollapseAll.Enabled        := B;
   actExpandAll.Enabled          := B;

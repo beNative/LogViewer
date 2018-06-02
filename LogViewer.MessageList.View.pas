@@ -54,12 +54,7 @@ type
     edtHandleType     : TLabeledEdit;
     edtHeight         : TLabeledEdit;
     edtMessageFilter  : TLabeledEdit;
-    edtMessageType    : TLabeledEdit;
     edtPixelFormat    : TLabeledEdit;
-    edtTimeStamp      : TLabeledEdit;
-    edtValue          : TLabeledEdit;
-    edtValueName      : TLabeledEdit;
-    edtValueType      : TLabeledEdit;
     edtWidth          : TLabeledEdit;
     imgBitmap         : TImage;
     imlMessageTypes   : TImageList;
@@ -67,7 +62,6 @@ type
     pnlCallStack      : TPanel;
     pnlCallStackTitle : TPanel;
     pnlCallStackWatch : TPanel;
-    pnlColor          : TPanel;
     pnlFilter         : TPanel;
     pnlImageViewer    : TPanel;
     pnlLeft           : TPanel;
@@ -83,6 +77,19 @@ type
     splVertical       : TSplitter;
     tsImageViewer     : TTabSheet;
     tsTextViewer      : TTabSheet;
+    pnlMessageDetails: TGridPanel;
+    pnlMessageType: TPanel;
+    pnlTimeStamp: TPanel;
+    pnlValueName: TPanel;
+    pnlValueType: TPanel;
+    pnlValue: TPanel;
+    pnlValueExtra: TPanel;
+    edtMessageType: TLabeledEdit;
+    edtTimeStamp: TLabeledEdit;
+    edtValueName: TLabeledEdit;
+    edtValueType: TLabeledEdit;
+    edtValue: TLabeledEdit;
+    pnlColor: TPanel;
     {$ENDREGION}
 
     procedure edtMessageFilterChange(Sender: TObject);
@@ -119,6 +126,7 @@ type
     FLastNode       : PVirtualNode;
     FVKPressed      : Boolean;
     FSettings       : TMessageListSettings;
+    FAutoFit        : Boolean;
 
     {$REGION 'property access methods'}
     function GetManager: ILogViewerManager;
@@ -233,6 +241,7 @@ type
     );
 
     procedure Clear;
+    procedure AutoFitColumns;
 
     procedure ProcessMessage(AStream: TStream);
 
@@ -305,6 +314,8 @@ uses
   DDuce.Factories.VirtualTrees, DDuce.Editor.Factories,
   DDuce.Reflect, DDuce.Utils,
 
+  DDuce.ObjectInspector.zObjectInspector,
+
   DSharp.Windows.ColumnDefinitions.ControlTemplate,
 
   LogViewer.Factories, LogViewer.Resources;
@@ -339,6 +350,12 @@ begin
   edtValueName.Font.Color := VALUENAME_FONTCOLOR;
   edtValueType.Font.Color := VALUETYPE_FONTCOLOR;
   edtValue.Font.Color     := VALUE_FONTCOLOR;
+end;
+
+procedure TfrmMessageList.AutoFitColumns;
+begin
+  FLogTreeView.Header.AutoFitColumns(False, smaUseColumnOption, -1, -1);
+  FAutoFit := True;
 end;
 
 procedure TfrmMessageList.BeforeDestruction;
@@ -413,27 +430,27 @@ begin
   C.Options  := C.Options + [coFixed];
   C.Width    := 120;
   C.MinWidth := 120;
-  C.MaxWidth := 200;
+  C.MaxWidth := 150;
 
   C := FLogTreeView.Header.Columns.Add;
   C.Text     := SName;
-  C.Options  := C.Options + [coSmartResize];
-  C.Width    := 100;
+  C.Options  := C.Options + [coSmartResize, coAutoSpring];
+  C.Width    := 150;
   C.MinWidth := 100;
-  C.MaxWidth := 200;
+  C.MaxWidth := 800;
 
   C := FLogTreeView.Header.Columns.Add;
   C.Text      := SType;
-  C.Options  := C.Options + [coSmartResize];
-  C.Width     := 50;
+  C.Options   := C.Options + [coSmartResize, coAutoSpring];
+  C.Width     := 150;
   C.MinWidth  := 50;
-  C.MaxWidth  := 200;
+  C.MaxWidth  := 800;
 
   C := FLogTreeView.Header.Columns.Add;
   C.Text     := SValue;
   C.Options  := C.Options + [coAutoSpring];
-  C.Width    := 100;
-  C.MinWidth := 50;
+  C.Width    := 150;
+  C.MinWidth := 80;
   C.MaxWidth := 1024;
 
   C := FLogTreeView.Header.Columns.Add;
@@ -441,6 +458,8 @@ begin
   C.Width    := 80;
   C.MinWidth := 80;
   C.MaxWidth := 80;
+
+  FLogTreeView.Header.AutoSizeIndex := 3;
 end;
 
 procedure TfrmMessageList.CreateWatchesView;
@@ -504,8 +523,7 @@ end;
 
 procedure TfrmMessageList.FLogTreeViewClick(Sender: TObject);
 begin
-  FLogTreeView.Header.AutoFitColumns(False, smaUseColumnOption, -1, -1);
-  //FLogTreeView.Header.AutoFitColumns(False, smaAllColumns, -1, -1);
+  AutoFitColumns;
 end;
 
 procedure TfrmMessageList.FLogTreeViewBeforeCellPaint(Sender: TBaseVirtualTree;
@@ -624,6 +642,12 @@ begin
         CellText := 'Bitmap';
       lmtComponent:
         CellText := 'Component';
+      lmtObject:
+        CellText := 'Object';
+      lmtPersistent:
+        CellText := 'Persistent';
+      lmtInterface:
+        CellText := 'Interface';
       lmtStrings:
         CellText := 'Strings';
       else
@@ -669,7 +693,8 @@ begin
   LN.VTNode      := Node;
   LN.Id          := FMessageCount;
   case LN.MessageType of
-    lmtValue, lmtComponent, lmtStrings, lmtBitmap:
+    lmtValue, lmtComponent, lmtStrings, lmtBitmap, lmtPersistent, lmtObject,
+    lmtInterface:
     begin
       S := string(FCurrentMsg.Text);
       I := S.IndexOf('=');
@@ -683,6 +708,7 @@ begin
         LN.ValueName := Copy(S, 1, I);
       LN.Text := '';
     end;
+    //lmtStrings:
 //    lmtComponent:
 //    begin
 //      LN.Text := '';
@@ -760,7 +786,8 @@ begin
         TargetCanvas.Font.Color := clRed;
         TargetCanvas.Font.Style := TargetCanvas.Font.Style + [fsBold];
       end;
-      lmtValue, lmtComponent, lmtAlphaColor, lmtColor, lmtBitmap, lmtStrings:
+      lmtValue, lmtComponent, lmtAlphaColor, lmtColor, lmtBitmap, lmtStrings,
+      lmtObject, lmtPersistent, lmtInterface:
       begin
         TargetCanvas.Font.Color := clDkGray;
       end;
@@ -912,6 +939,7 @@ begin
     begin
       FLogTreeView.Expanded[FLastParent] := True;
     end;
+    FAutoFit := False;
   finally
     FLogTreeView.EndUpdate;
   end;
@@ -939,7 +967,9 @@ begin
   edtHandleType.Text  := '';
   edtMessageType.Text := '';
   edtTimeStamp.Text   := '';
+  edtValueName.Text   := '';
   edtValueType.Text   := '';
+  FEditorView.Clear;
   pnlColor.Color      := clBtnFace;
 end;
 
@@ -1086,6 +1116,9 @@ begin
   if Assigned(Actions) then
     Actions.UpdateActions;
 
+  if not FAutoFit then
+    AutoFitColumns;
+
   inherited UpdateActions;
 end;
 
@@ -1176,7 +1209,7 @@ begin
   ClearMessageDetailsControls;
   FWatchesView.UpdateView(ALogNode.Id);
   case ALogNode.MessageType of
-    lmtStrings, lmtCallStack, {lmtException,} lmtHeapInfo, lmtCustomData:
+    lmtCallStack, {lmtException,} lmtHeapInfo, lmtCustomData:
       UpdateTextStreamDisplay(ALogNode);
     lmtAlphaColor, lmtColor:
       UpdateColorDisplay(ALogNode);
@@ -1192,7 +1225,7 @@ begin
     lmtEnterMethod, lmtLeaveMethod, lmtText,
     lmtInfo, lmtWarning, lmtError, lmtConditional:
       UpdateTextDisplay(ALogNode);
-    lmtValue:
+    lmtValue, lmtObject, lmtPersistent, lmtInterface, lmtStrings:
       UpdateValueDisplay(ALogNode);
   end;
   edtMessageType.Text := LogMessageTypeNameOf(ALogNode.MessageType);

@@ -61,7 +61,7 @@ type
     class function CreateManager(
       AOwner    : TComponent;
       ASettings : TLogViewerSettings
-    ): TdmManager;
+    ): ILogViewerManager;
 
     class function CreateSettings(
     ): TLogViewerSettings;
@@ -133,7 +133,7 @@ begin
 end;
 
 class function TLogViewerFactories.CreateManager(
-  AOwner: TComponent; ASettings: TLogViewerSettings): TdmManager;
+  AOwner: TComponent; ASettings: TLogViewerSettings): ILogViewerManager;
 begin
   Result := TdmManager.Create(AOwner, ASettings);
 end;

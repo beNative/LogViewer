@@ -209,6 +209,8 @@ type
     procedure AddView(ALogViewer: ILogViewer);
     procedure AddReceiver(AReceiver: IChannelReceiver);
 
+    function AsComponent: TComponent;
+
     property ActiveView: ILogViewer
       read GetActiveView write SetActiveView;
 

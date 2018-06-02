@@ -163,7 +163,6 @@ uses
   LogViewer.Commands in 'LogViewer.Commands.pas',
   LogViewer.Events in 'LogViewer.Events.pas',
   LogViewer.ComPort.Settings in 'LogViewer.ComPort.Settings.pas',
-  LogViewer.AddMessageView.Dialog in 'LogViewer.AddMessageView.Dialog.pas' {frmAddMessageView},
   LogViewer.ComPort.Settings.View in 'LogViewer.ComPort.Settings.View.pas' {frmComPortSettings},
   LogViewer.WinODS.Settings.View in 'LogViewer.WinODS.Settings.View.pas' {frmWinODSSettings},
   LogViewer.WinIPC.Settings.View in 'LogViewer.WinIPC.Settings.View.pas' {frmWinIPCSettings},

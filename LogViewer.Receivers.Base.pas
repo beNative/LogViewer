@@ -116,8 +116,7 @@ end;
 procedure TChannelReceiver.DoReceiveMessage(AStream: TStream; ASourceId: Integer;
   AThreadId: Integer; const ASourceName : string);
 var
-  LLogQueue  : ILogQueue;
-  S          : string;
+  LLogQueue : ILogQueue;
 begin
   if not FQueueList.TryGetValue(ASourceId, LLogQueue) then
   begin

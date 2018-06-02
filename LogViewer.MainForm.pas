@@ -66,7 +66,7 @@ type
 
   private
     FMessageViewer   : ILogViewer;
-    FManager         : TdmManager;
+    FManager         : ILogViewerManager;
     FSettings        : TLogViewerSettings;
     FMainToolbar     : TToolBar;
     FComPortSettings : TComPortSettings;
@@ -100,7 +100,6 @@ type
     procedure UpdateTabs;
     procedure UpdateStatusBar;
     procedure UpdateActions; override;
-
 
   public
     procedure AfterConstruction; override;
@@ -143,7 +142,7 @@ begin
   FSettings.FormSettings.AssignTo(Self);
   FSettings.OnChanged.Add(SettingsChanged);
   FMainToolbar := TLogViewerFactories.CreateMainToolbar(
-    FManager,
+    FManager.AsComponent,
     Self,
     Actions,
     Menus
@@ -331,6 +330,7 @@ procedure TfrmMain.UpdateActions;
 begin
   inherited UpdateActions;
   UpdateStatusBar;
+  //UpdateTabs;
 end;
 
 procedure TfrmMain.UpdateStatusBar;
@@ -341,6 +341,8 @@ begin
     sbrMain.SimpleText := '';
 end;
 
+{ not in use yet }
+
 procedure TfrmMain.UpdateTabs;
 var
   MV : ILogViewer;
@@ -349,8 +351,6 @@ begin
   if Manager.Views.Count = 1 then
   begin
     ctMain.Visible := False;
-//    if Assigned(Editor) then
-//      Editor.Visible := True;
   end
   else
   begin
