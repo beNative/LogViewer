@@ -25,6 +25,10 @@ uses
 
   ChromeTabs, ChromeTabsClasses, ChromeTabsTypes,
 
+  Spring,
+
+  DDuce.Settings.TextFormat,
+
   LogViewer.Interfaces,
   LogViewer.Factories, LogViewer.Manager, LogViewer.Settings,
   LogViewer.ComPort.Settings,
@@ -65,7 +69,6 @@ type
     procedure FormShortCut(var Msg: TWMKey; var Handled: Boolean);
 
   private
-    FMessageViewer   : ILogViewer;
     FManager         : ILogViewerManager;
     FSettings        : TLogViewerSettings;
     FMainToolbar     : TToolBar;
@@ -74,13 +77,13 @@ type
 
     procedure SettingsChanged(Sender: TObject);
 
-    procedure ProcessDroppedTab(
-      Sender             : TObject;
-      X, Y               : Integer;
-      DragTabObject      : IDragTabObject;
-      Cancelled          : Boolean;
-      var TabDropOptions : TTabDropOptions
-    );
+//    procedure ProcessDroppedTab(
+//      Sender             : TObject;
+//      X, Y               : Integer;
+//      DragTabObject      : IDragTabObject;
+//      Cancelled          : Boolean;
+//      var TabDropOptions : TTabDropOptions
+//    );
 
   protected
     {$REGION 'property access methods'}
@@ -127,7 +130,7 @@ var
 implementation
 
 uses
-  Spring;
+  DDuce.ObjectInspector.zObjectInspector;
 
 {$R *.dfm}
 
@@ -291,40 +294,40 @@ end;
 
 { Handles the drop operation of a dragged tab. }
 
-procedure TfrmMain.ProcessDroppedTab(Sender: TObject; X, Y: Integer;
-  DragTabObject: IDragTabObject; Cancelled: Boolean;
-  var TabDropOptions: TTabDropOptions);
-var
-  WinX, WinY: Integer;
-  NewForm   : TForm;
-begin
-  // Make sure that the drag drop hasn't been cancelled and that
-  // we are not dropping on a TChromeTab control
-  if (not Cancelled) and
-    (DragTabObject.SourceControl <> DragTabObject.DockControl) and
-    (DragTabObject.DockControl = nil) then
-  begin
-    // Find the drop position
-    WinX := Mouse.CursorPos.X - DragTabObject.DragCursorOffset.X -
-      ((Width - ClientWidth) div 2);
-    WinY := Mouse.CursorPos.Y - DragTabObject.DragCursorOffset.Y -
-      (Height - ClientHeight) + ((Width - ClientWidth) div 2);
-
-    // Create a new form
-    NewForm := TForm.Create(Application);
-
-    // Set the new form position
-    NewForm.Position := poDesigned;
-    NewForm.Left     := WinX;
-    NewForm.Top      := WinY;
-
-    // Show the form
-    NewForm.Show;
-
-    // Remove the original tab
-    TabDropOptions := [tdDeleteDraggedTab];
-  end;
-end;
+//procedure TfrmMain.ProcessDroppedTab(Sender: TObject; X, Y: Integer;
+//  DragTabObject: IDragTabObject; Cancelled: Boolean;
+//  var TabDropOptions: TTabDropOptions);
+//var
+//  WinX, WinY: Integer;
+//  NewForm   : TForm;
+//begin
+//  // Make sure that the drag drop hasn't been cancelled and that
+//  // we are not dropping on a TChromeTab control
+//  if (not Cancelled) and
+//    (DragTabObject.SourceControl <> DragTabObject.DockControl) and
+//    (DragTabObject.DockControl = nil) then
+//  begin
+//    // Find the drop position
+//    WinX := Mouse.CursorPos.X - DragTabObject.DragCursorOffset.X -
+//      ((Width - ClientWidth) div 2);
+//    WinY := Mouse.CursorPos.Y - DragTabObject.DragCursorOffset.Y -
+//      (Height - ClientHeight) + ((Width - ClientWidth) div 2);
+//
+//    // Create a new form
+//    NewForm := TForm.Create(Application);
+//
+//    // Set the new form position
+//    NewForm.Position := poDesigned;
+//    NewForm.Left     := WinX;
+//    NewForm.Top      := WinY;
+//
+//    // Show the form
+//    NewForm.Show;
+//
+//    // Remove the original tab
+//    TabDropOptions := [tdDeleteDraggedTab];
+//  end;
+//end;
 
 procedure TfrmMain.UpdateActions;
 begin

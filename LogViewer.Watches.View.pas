@@ -16,7 +16,7 @@
 
 unit LogViewer.Watches.View;
 
-{ View showing watch values and history. }
+{ View showing watch values and value history. }
 
 interface
 
@@ -139,6 +139,8 @@ type
 
 implementation
 
+{$R *.dfm}
+
 uses
   System.UITypes,
 
@@ -147,8 +149,6 @@ uses
   DDuce.Factories, DDuce.Factories.VirtualTrees,
 
   LogViewer.Resources;
-
-{$R *.dfm}
 
 {$REGION 'construction and destruction'}
 procedure TfrmWatchesView.ConnectWatchHistoryCDEvents;

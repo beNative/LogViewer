@@ -39,9 +39,6 @@ uses
 
 type
   TComPortChannelReceiver = class(TChannelReceiver, IChannelReceiver)
-  private class var
-    FCounter : Integer;
-
   private
     FSerialPort : TBlockSerial;
     FPollTimer  : TTimer;
@@ -62,9 +59,14 @@ type
     procedure SetEnabled(const Value: Boolean); override;
     {$ENDREGION}
 
-    function ToString: string;
+    function ToString: string; override;
 
-    procedure DoReceiveMessage(AStream : TStream);
+    procedure DoReceiveMessage(
+      AStream           : TStream;
+      ASourceId         : Integer = 0;
+      AThreadId         : Integer = 0;
+      const ASourceName : string = ''
+    ); override;
     procedure DoStringReceived(const AString: AnsiString);
     procedure SettingsChanged(Sender: TObject); override;
 
@@ -156,7 +158,8 @@ end;
 {$ENDREGION}
 
 {$REGION 'event dispatch methods'}
-procedure TComPortChannelReceiver.DoReceiveMessage(AStream: TStream);
+procedure TComPortChannelReceiver.DoReceiveMessage(AStream: TStream; ASourceId,
+  AThreadId: Integer; const ASourceName: string);
 begin
   //FOnReceiveMessage.Invoke(Self, Self as IChannelReceiver, AStream);
 end;

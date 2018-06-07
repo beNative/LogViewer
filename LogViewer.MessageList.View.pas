@@ -77,19 +77,19 @@ type
     splVertical       : TSplitter;
     tsImageViewer     : TTabSheet;
     tsTextViewer      : TTabSheet;
-    pnlMessageDetails: TGridPanel;
-    pnlMessageType: TPanel;
-    pnlTimeStamp: TPanel;
-    pnlValueName: TPanel;
-    pnlValueType: TPanel;
-    pnlValue: TPanel;
-    pnlValueExtra: TPanel;
-    edtMessageType: TLabeledEdit;
-    edtTimeStamp: TLabeledEdit;
-    edtValueName: TLabeledEdit;
-    edtValueType: TLabeledEdit;
-    edtValue: TLabeledEdit;
-    pnlColor: TPanel;
+    pnlMessageDetails : TGridPanel;
+    pnlMessageType    : TPanel;
+    pnlTimeStamp      : TPanel;
+    pnlValueName      : TPanel;
+    pnlValueType      : TPanel;
+    pnlValue          : TPanel;
+    pnlValueExtra     : TPanel;
+    edtMessageType    : TLabeledEdit;
+    edtTimeStamp      : TLabeledEdit;
+    edtValueName      : TLabeledEdit;
+    edtValueType      : TLabeledEdit;
+    edtValue          : TLabeledEdit;
+    pnlColor          : TPanel;
     {$ENDREGION}
 
     procedure edtMessageFilterChange(Sender: TObject);
@@ -109,24 +109,24 @@ type
     FCounter : Integer;
 
   private
-    FMessageCount   : Int64;
-    FCurrentMsg     : TLogMessage;
-    FCallStack      : IList<TCallStackData>;
-    FWatches        : TWatchList;
-    FLogTreeView    : TVirtualStringTree;
-    FLogQueue       : ILogQueue;
-    FCallStackView  : TfrmCallStackView;
-    FWatchesView    : TfrmWatchesView;
-    FManager        : ILogViewerManager;
-    FEditorManager  : IEditorManager;
-    FEditorSettings : IEditorSettings;
-    FEditorView     : IEditorView;
-    FExpandParents  : Boolean;
-    FLastParent     : PVirtualNode;
-    FLastNode       : PVirtualNode;
-    FVKPressed      : Boolean;
-    FSettings       : TMessageListSettings;
-    FAutoFit        : Boolean;
+    FMessageCount    : Int64;
+    FCurrentMsg      : TLogMessage;
+    FCallStack       : IList<TCallStackData>;
+    FWatches         : TWatchList;
+    FLogTreeView     : TVirtualStringTree;
+    FLogQueue        : ILogQueue;
+    FCallStackView   : TfrmCallStackView;
+    FWatchesView     : TfrmWatchesView;
+    FManager         : ILogViewerManager;
+    FEditorManager   : IEditorManager;
+    FEditorSettings  : IEditorSettings;
+    FEditorView      : IEditorView;
+    FExpandParents   : Boolean;
+    FLastParent      : PVirtualNode;
+    FLastNode        : PVirtualNode;
+    FVKPressed       : Boolean;
+    FSettings        : TMessageListSettings;
+    FAutoSizeColumns : Boolean;
 
     {$REGION 'property access methods'}
     function GetManager: ILogViewerManager;
@@ -243,6 +243,8 @@ type
     procedure Clear;
     procedure AutoFitColumns;
 
+    procedure ApplySettings;
+
     procedure ProcessMessage(AStream: TStream);
 
     procedure AddMessageToTree(const AMessage: TLogMessage);
@@ -350,27 +352,19 @@ begin
   edtValueName.Font.Color := VALUENAME_FONTCOLOR;
   edtValueType.Font.Color := VALUETYPE_FONTCOLOR;
   edtValue.Font.Color     := VALUE_FONTCOLOR;
-end;
-
-procedure TfrmMessageList.AutoFitColumns;
-begin
-  FLogTreeView.Header.AutoFitColumns(False, smaUseColumnOption, -1, -1);
-  FAutoFit := True;
+  ApplySettings;
 end;
 
 procedure TfrmMessageList.BeforeDestruction;
 begin
+  FSettings.LeftPanelWidth  := pnlLeft.Width;
+  FSettings.RightPanelWidth := pnlRight.Width;
   FLogQueue.OnReceiveMessage.Remove(FLogQueueReceiveMessage);
   FSettings.OnChanged.Remove(FSettingsChanged);
   FLogQueue := nil;
   FManager  := nil;
   FSettings := nil;
   inherited BeforeDestruction;
-end;
-
-procedure TfrmMessageList.chkAutoFilterClick(Sender: TObject);
-begin
-  Settings.AutoFilterMessages := (Sender as TCheckBox).Checked;
 end;
 
 procedure TfrmMessageList.CreateCallStackView;
@@ -683,7 +677,7 @@ var
   LN : TLogNode; // class type
   I  : Integer;
   S  : string;
-  A  : TArray<string>;
+  //A  : TArray<string>;
 begin
   LN := TLogNode.Create;
   Node.SetData(LN);
@@ -888,14 +882,32 @@ begin
 end;
 {$ENDREGION}
 
+procedure TfrmMessageList.chkAutoFilterClick(Sender: TObject);
+begin
+  Settings.AutoFilterMessages := (Sender as TCheckBox).Checked;
+end;
+
 procedure TfrmMessageList.FSettingsChanged(Sender: TObject);
 begin
-  chkAutoFilter.Checked := Settings.AutoFilterMessages;
-  UpdateView;
+  ApplySettings;
 end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
+procedure TfrmMessageList.ApplySettings;
+begin
+  chkAutoFilter.Checked := Settings.AutoFilterMessages;
+  pnlLeft.Width         := Settings.LeftPanelWidth;
+  pnlRight.Width        := Settings.RightPanelWidth;
+  UpdateView;
+end;
+
+procedure TfrmMessageList.AutoFitColumns;
+begin
+  FLogTreeView.Header.AutoFitColumns(False, smaUseColumnOption, -1, -1);
+  FAutoSizeColumns := True;
+end;
+
 procedure TfrmMessageList.Activate;
 begin
   inherited Activate;
@@ -939,7 +951,7 @@ begin
     begin
       FLogTreeView.Expanded[FLastParent] := True;
     end;
-    FAutoFit := False;
+    FAutoSizeColumns := False;
   finally
     FLogTreeView.EndUpdate;
   end;
@@ -1116,7 +1128,7 @@ begin
   if Assigned(Actions) then
     Actions.UpdateActions;
 
-  if not FAutoFit then
+  if Settings.DynamicAutoSizeColumns and not FAutoSizeColumns then
     AutoFitColumns;
 
   inherited UpdateActions;

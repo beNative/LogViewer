@@ -63,7 +63,7 @@ type
   private
     FBuffer           : TMemoryStream;
     FODSQueue         : IQueue<TODSMessage>;
-    FODSThread        : TODSThread;
+    //FODSThread        : TODSThread;
     function GetSettings: TWinODSSettings;
 
   protected
@@ -103,16 +103,16 @@ begin
   FBuffer := TMemoryStream.Create;
   FODSQueue := TCollections.CreateQueue<TODSMessage>(True);
   FODSQueue.OnChanged.Add(FODSQueueChanged);
-  FODSThread := TODSThread.Create(FODSQueue);
+  //FODSThread := TODSThread.Create(FODSQueue);
   Settings.OnChanged.Add(SettingsChanged);
 end;
 
 procedure TWinODSChannelReceiver.BeforeDestruction;
 begin
-  FODSThread.Terminate;
+  //FODSThread.Terminate;
   FBuffer.Free;
   FODSQueue.Clear;
-  FODSThread.Free;
+  //FODSThread.Free;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
@@ -137,7 +137,7 @@ const
 var
   LTextSize : Integer;
   LMsgType  : Integer;
-  LDataSize : Integer;
+//  LDataSize : Integer;
 begin
   if Enabled and (Action = caAdded) then
   begin
@@ -241,8 +241,8 @@ begin
         LODSMessage.TimeStamp   := Now;
         LODSMessage.ProcessId   := LPDWORD(LSharedMem)^;
         //'$' + inttohex (pThisPid^,2)
-        LODSMessage.ProcessName :=
-          UTF8String(GetExenameForProcess(LODSMessage.ProcessId));
+//        LODSMessage.ProcessName :=
+//          UTF8String(GetExenameForProcess(LODSMessage.ProcessId));
         // The native version of OutputDebugString is ASCII. result is always
         // AnsiString
         LODSMessage.MsgText :=

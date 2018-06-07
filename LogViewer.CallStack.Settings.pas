@@ -68,12 +68,12 @@ end;
 
 {$REGION 'public methods'}
 procedure TCallStackSettings.Assign(Source: TPersistent);
-var
-  LSettings: TCallStackSettings;
+//var
+//  LSettings: TCallStackSettings;
 begin
   if Source is TCallStackSettings then
   begin
-    LSettings := TCallStackSettings(Source);
+    //LSettings := TCallStackSettings(Source);
 
   end
   else

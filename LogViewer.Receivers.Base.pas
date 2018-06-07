@@ -45,6 +45,12 @@ type
     {$ENDREGION}
 
     procedure SettingsChanged(Sender: TObject); virtual;
+    procedure DoReceiveMessage(
+      AStream           : TStream;
+      ASourceId         : Integer = 0;
+      AThreadId         : Integer = 0;
+      const ASourceName : string = ''
+    ); virtual;
 
   public
     constructor Create(
@@ -52,12 +58,6 @@ type
       const AName : string
     ); reintroduce;
 
-    procedure DoReceiveMessage(
-      AStream           : TStream;
-      ASourceId         : Integer = 0;
-      AThreadId         : Integer = 0;
-      const ASourceName : string = ''
-    ); virtual;
 
     function ToString: string; override;
     procedure AfterConstruction; override;

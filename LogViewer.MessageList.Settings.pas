@@ -48,6 +48,8 @@ type
     FOnChanged              : Event<TNotifyEvent>;
     FVisibleMessageTypes    : TLogMessageTypes;
     FWatchSettings          : TWatchSettings;
+    FLeftPanelWidth         : Integer;
+    FRightPanelWidth        : Integer;
 
     {$REGION 'property access methods'}
     function GetAutoScrollMessages: Boolean;
@@ -59,6 +61,10 @@ type
     procedure SetAutoFilterMessages(const Value: Boolean);
     function GetDynamicAutoSizeColumns: Boolean;
     procedure SetDynamicAutoSizeColumns(const Value: Boolean);
+    function GetLeftPanelWidth: Integer;
+    procedure SetLeftPanelWidth(const Value: Integer);
+    function GetRightPanelWidth: Integer;
+    procedure SetRightPanelWidth(const Value: Integer);
     {$ENDREGION}
 
   protected
@@ -88,6 +94,12 @@ type
 
     property DynamicAutoSizeColumns: Boolean
       read GetDynamicAutoSizeColumns write SetDynamicAutoSizeColumns;
+
+    property LeftPanelWidth: Integer
+      read GetLeftPanelWidth write SetLeftPanelWidth;
+
+    property RightPanelWidth: Integer
+      read GetRightPanelWidth write SetRightPanelWidth;
 
   end;
 
@@ -152,6 +164,20 @@ begin
   end;
 end;
 
+function TMessageListSettings.GetLeftPanelWidth: Integer;
+begin
+  Result := FLeftPanelWidth;
+end;
+
+procedure TMessageListSettings.SetLeftPanelWidth(const Value: Integer);
+begin
+  if Value <> LeftPanelWidth then
+  begin
+    FLeftPanelWidth := Value;
+    Changed;
+  end;
+end;
+
 function TMessageListSettings.GetVisibleMessageTypes: TLogMessageTypes;
 begin
   Result := FVisibleMessageTypes;
@@ -171,6 +197,20 @@ function TMessageListSettings.GetOnChanged: IEvent<TNotifyEvent>;
 begin
   Result := FOnChanged;
 end;
+
+function TMessageListSettings.GetRightPanelWidth: Integer;
+begin
+  Result := FRightPanelWidth;
+end;
+
+procedure TMessageListSettings.SetRightPanelWidth(const Value: Integer);
+begin
+  if Value <> RightPanelWidth then
+  begin
+    FRightPanelWidth := Value;
+    Changed;
+  end;
+end;
 {$ENDREGION}
 
 {$REGION 'event dispatch methods'}
@@ -188,8 +228,11 @@ begin
   if Source is TMessageListSettings then
   begin
     LSettings := TMessageListSettings(Source);
-    AutoScrollMessages  := LSettings.AutoScrollMessages;
-    VisibleMessageTypes := LSettings.VisibleMessageTypes;
+    AutoScrollMessages     := LSettings.AutoScrollMessages;
+    VisibleMessageTypes    := LSettings.VisibleMessageTypes;
+    DynamicAutoSizeColumns := LSettings.DynamicAutoSizeColumns;
+    LeftPanelWidth         := LSettings.LeftPanelWidth;
+    RightPanelWidth        := LSettings.RightPanelWidth;
     WatchSettings.Assign(LSettings.WatchSettings);
   end
   else

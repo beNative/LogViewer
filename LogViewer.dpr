@@ -6,7 +6,6 @@ uses
   Forms,
   VirtualTrees,
   DDuce.Factories in '..\..\libraries\dduce\Source\Modules\DDuce.Factories.pas',
-  DDuce.FormSettings in '..\..\libraries\dduce\Source\Modules\DDuce.FormSettings.pas',
   DDuce.Editor.ActionList.Templates in '..\..\libraries\dduce\Source\Modules\Editor\DDuce.Editor.ActionList.Templates.pas',
   DDuce.Editor.ActionList.ToolView in '..\..\libraries\dduce\Source\Modules\Editor\DDuce.Editor.ActionList.ToolView.pas' {frmActionListView},
   DDuce.Editor.AlignLines.Settings in '..\..\libraries\dduce\Source\Modules\Editor\DDuce.Editor.AlignLines.Settings.pas',
@@ -188,7 +187,11 @@ uses
   Spring.Collections.Trees in '..\..\libraries\spring4d\Source\Base\Collections\Spring.Collections.Trees.pas',
   LogViewer.Dashboard.View in 'LogViewer.Dashboard.View.pas' {frmDashboard},
   LogViewer.Receivers.Base in 'LogViewer.Receivers.Base.pas',
-  LogViewer.LogQueue in 'LogViewer.LogQueue.pas';
+  LogViewer.LogQueue in 'LogViewer.LogQueue.pas',
+  DDuce.Settings.Form in '..\..\libraries\dduce\Source\Settings\DDuce.Settings.Form.pas',
+  DDuce.Settings.TextFormat in '..\..\libraries\dduce\Source\Settings\DDuce.Settings.TextFormat.pas',
+  LogViewer.DisplayValues.Settings in 'LogViewer.DisplayValues.Settings.pas',
+  LogViewer.DisplayValues.Settings.View in 'LogViewer.DisplayValues.Settings.View.pas' {frmDisplayValuesSettings};
 
 {$R *.res}
 

@@ -118,7 +118,6 @@
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
         <DCCReference Include="..\..\libraries\dduce\Source\Modules\DDuce.Factories.pas"/>
-        <DCCReference Include="..\..\libraries\dduce\Source\Modules\DDuce.FormSettings.pas"/>
         <DCCReference Include="..\..\libraries\dduce\Source\Modules\Editor\DDuce.Editor.ActionList.Templates.pas"/>
         <DCCReference Include="..\..\libraries\dduce\Source\Modules\Editor\DDuce.Editor.ActionList.ToolView.pas">
             <Form>frmActionListView</Form>
@@ -349,6 +348,13 @@
         </DCCReference>
         <DCCReference Include="LogViewer.Receivers.Base.pas"/>
         <DCCReference Include="LogViewer.LogQueue.pas"/>
+        <DCCReference Include="..\..\libraries\dduce\Source\Settings\DDuce.Settings.Form.pas"/>
+        <DCCReference Include="..\..\libraries\dduce\Source\Settings\DDuce.Settings.TextFormat.pas"/>
+        <DCCReference Include="LogViewer.DisplayValues.Settings.pas"/>
+        <DCCReference Include="LogViewer.DisplayValues.Settings.View.pas">
+            <Form>frmDisplayValuesSettings</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <None Include="Readme.md"/>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>

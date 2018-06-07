@@ -38,13 +38,13 @@ uses
   LogViewer.Settings.Dialog.ConfigNode,
 
   LogViewer.Comport.Settings.View, LogViewer.WinIPC.Settings.View,
-  LogViewer.Watches.Settings.View, LogViewer.WinODS.Settings.View;
+  LogViewer.Watches.Settings.View, LogViewer.WinODS.Settings.View,
+  LogViewer.DisplayValues.Settings.View;
 
 type
   TfrmLogViewerSettings = class(TForm)
     pnlConfigTree : TPanel;
     pgcMain       : TPageControl;
-    tvConfig      : TTreeView;
     tsWatches     : TTabSheet;
     tsCallstack   : TTabSheet;
     tsWinIPC      : TTabSheet;
@@ -56,19 +56,18 @@ type
     actClose      : TAction;
     btnClose      : TButton;
     btn2          : TButton;
-
-    procedure tvConfigChange(Sender: TObject; Node: TTreeNode);
+    tsDisplayValuesSettings: TTabSheet;
 
     procedure actCloseExecute(Sender: TObject);
 
   private
-    FViewSettings        : TConfigNode;
-    FConfigTree          : TVirtualStringTree;
-    FSettings            : TLogViewerSettings;
-    FComportSettingsForm : TfrmComPortSettings;
-    FWatchSettingsForm   : TfrmWatchSettings;
-    FWinIPCSettingsForm  : TfrmWinIPCSettings;
-    FWinODSSettingsForm  : TfrmWinODSSettings;
+    FConfigTree                : TVirtualStringTree;
+    FSettings                  : TLogViewerSettings;
+    FComportSettingsForm       : TfrmComPortSettings;
+    FWatchSettingsForm         : TfrmWatchSettings;
+    FWinIPCSettingsForm        : TfrmWinIPCSettings;
+    FWinODSSettingsForm        : TfrmWinODSSettings;
+    FDisplayValuesSettingsForm : TfrmDisplayValuesSettings;
 
     procedure FConfigTreeGetText(
       Sender       : TBaseVirtualTree;
@@ -76,6 +75,12 @@ type
       Column       : TColumnIndex;
       TextType     : TVSTTextType;
       var CellText : string
+    );
+
+    procedure FConfigTreeFocusChanged(
+      Sender : TBaseVirtualTree;
+      Node   : PVirtualNode;
+      Column : TColumnIndex
     );
 
     procedure FConfigTreeFreeNode(
@@ -87,7 +92,6 @@ type
     procedure BuildConfigNodes;
     procedure AddNodesToTree(AParent: PVirtualNode; ANode: TConfigNode);
 
-    procedure InitializeControls;
     procedure CreateSettingsForms;
 
   public
@@ -118,10 +122,11 @@ end;
 procedure TfrmLogViewerSettings.AfterConstruction;
 begin
   inherited AfterConstruction;
-//  InitializeControls;
+  CreateSettingsForms;
   FConfigTree := TVirtualStringTreeFactory.CreateTreeList(Self, pnlConfigTree);
-  FConfigTree.OnGetText := FConfigTreeGetText;
-  FConfigTree.OnFreeNode := FConfigTreeFreeNode;
+  FConfigTree.OnGetText      := FConfigTreeGetText;
+  FConfigTree.OnFreeNode     := FConfigTreeFreeNode;
+  FConfigTree.OnFocusChanged := FConfigTreeFocusChanged;
   FConfigTree.TreeOptions.PaintOptions :=
     FConfigTree.TreeOptions.PaintOptions + [toShowTreeLines];
 
@@ -131,14 +136,22 @@ end;
 
 procedure TfrmLogViewerSettings.BeforeDestruction;
 begin
-//  FViewSettings.Free;
-//  FConfigTree.Clear;
   FConfigTree.Free;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
+procedure TfrmLogViewerSettings.FConfigTreeFocusChanged(
+  Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
+var
+  CN: TConfigNode;
+begin
+  CN := Sender.GetNodeData<TConfigNode>(Node);
+  if Assigned(CN.TabSheet) then
+    pgcMain.ActivePage := CN.TabSheet;
+end;
+
 procedure TfrmLogViewerSettings.FConfigTreeFreeNode(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 var
@@ -157,48 +170,16 @@ begin
   CN := Sender.GetNodeData<TConfigNode>(Node);
   CellText := CN.Text;
 end;
-
-procedure TfrmLogViewerSettings.InitializeControls;
-var
-  I, J  : Integer;
-  B     : Boolean;
-  LNode : TTreeNode;
-begin
-  // store index of corresponding page in Data property of treenode.
-  for I := 0 to tvConfig.Items.Count - 1 do
-  begin
-    LNode := tvConfig.Items[I];
-    B := False;
-    J := 0;
-    while not B and (J < pgcMain.PageCount) do
-    begin
-      if pgcMain.Pages[J].Caption = LNode.Text then
-      begin
-        pgcMain.Pages[J].TabVisible := False;
-        B := True;
-        LNode.Data := Pointer(J);
-      end;
-      Inc(J);
-    end;
-  end;
-  CreateSettingsForms;
-  tvConfig.FullExpand;
-end;
-
-procedure TfrmLogViewerSettings.tvConfigChange(Sender: TObject;
-  Node: TTreeNode);
-begin
-  pgcMain.ActivePageIndex := Integer(Node.Data);
-end;
-
 {$ENDREGION}
 
-{$REGION 'protected methods'}
+{$REGION 'action handlers'}
 procedure TfrmLogViewerSettings.actCloseExecute(Sender: TObject);
 begin
   Close;
 end;
+{$ENDREGION}
 
+{$REGION 'protected methods'}
 procedure TfrmLogViewerSettings.AddNodesToTree(AParent: PVirtualNode;
   ANode: TConfigNode);
 var
@@ -212,14 +193,21 @@ begin
 end;
 
 procedure TfrmLogViewerSettings.BuildConfigNodes;
+var
+  LNode : TConfigNode;
 begin
-  FViewSettings := TConfigNode.Create('View settings');
-  AddNodesToTree(nil, FViewSettings);
-  AddNodesToTree(FViewSettings.VTNode, TConfigNode.Create('Watches'));
-  AddNodesToTree(FViewSettings.VTNode, TConfigNode.Create('Callstack'));
-  AddNodesToTree(nil, TConfigNode.Create('Channel settings'));
-  AddNodesToTree(nil, TConfigNode.Create('General settings'));
-  //FConfigTree.Nodes.Add();
+  LNode := TConfigNode.Create('View settings');
+  AddNodesToTree(nil, LNode);
+  AddNodesToTree(LNode.VTNode, TConfigNode.Create('Watches', tsWatches));
+  AddNodesToTree(LNode.VTNode, TConfigNode.Create('Callstack', tsCallstack));
+  LNode := TConfigNode.Create('Channel settings');
+  AddNodesToTree(nil, LNode);
+  AddNodesToTree(LNode.VTNode, TConfigNode.Create('WinIPC', tsWinIPC));
+  AddNodesToTree(LNode.VTNode, TConfigNode.Create('OutputDebugString API', tsWinODS));
+  AddNodesToTree(LNode.VTNode, TConfigNode.Create('Serial port', tsComport));
+  AddNodesToTree(LNode.VTNode, TConfigNode.Create('ZeroMQ', tsZeroMQ));
+  LNode := TConfigNode.Create('General settings');
+  AddNodesToTree(nil, LNode);
 end;
 
 procedure TfrmLogViewerSettings.CreateSettingsForms;
@@ -247,6 +235,14 @@ begin
   FWinODSSettingsForm.Align       := alClient;
   FWinODSSettingsForm.BorderStyle := bsNone;
   FWinODSSettingsForm.Visible     := True;
+
+  FDisplayValuesSettingsForm := TfrmDisplayValuesSettings.Create(
+    Self, FSettings.DisplayValuesSettings
+  );
+  FDisplayValuesSettingsForm.Parent      := tsDisplayValuesSettings;
+  FDisplayValuesSettingsForm.Align       := alClient;
+  FDisplayValuesSettingsForm.BorderStyle := bsNone;
+  FDisplayValuesSettingsForm.Visible     := True;
 end;
 {$ENDREGION}
 

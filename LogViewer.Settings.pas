@@ -25,30 +25,31 @@ uses
 
   Spring,
 
-  DDuce.FormSettings,
+  DDuce.Settings.Form,
 
   LogViewer.MessageList.Settings, LogViewer.Watches.Settings,
   LogViewer.ComPort.Settings, LogViewer.WinODS.Settings,
-  LogViewer.WinIPC.Settings, LogViewer.ZeroMQ.Settings;
+  LogViewer.WinIPC.Settings, LogViewer.ZeroMQ.Settings,
+  LogViewer.DisplayValues.Settings;
 
 type
   TLogViewerSettings = class(TPersistent)
   private
-    FFormSettings        : TFormSettings;
-    FFileName            : string;
-    FLeftPanelWidth      : Integer;
-    FRightPanelWidth     : Integer;
-    FMessageListSettings : TMessageListSettings;
-    FWinODSSettings      : TWinODSSettings;
-    FWinIPCSettings      : TWinIPCSettings;
-    FComPortSettings     : TComPortSettings;
-    FZeroMQSettings      : TZeroMQSettings;
-    FWatchSettings       : TWatchSettings;
-    FOnChanged           : Event<TNotifyEvent>;
-
-    function GetOnChanged: IEvent<TNotifyEvent>;
+    FFormSettings          : TFormSettings;
+    FFileName              : string;
+    FMessageListSettings   : TMessageListSettings;
+    FWinODSSettings        : TWinODSSettings;
+    FWinIPCSettings        : TWinIPCSettings;
+    FComPortSettings       : TComPortSettings;
+    FZeroMQSettings        : TZeroMQSettings;
+    FWatchSettings         : TWatchSettings;
+    FDisplayValuesSettings : TDisplayValuesSettings;
+    FOnChanged             : Event<TNotifyEvent>;
 
     procedure FormSettingsChanged(Sender: TObject);
+
+  protected
+    function GetOnChanged: IEvent<TNotifyEvent>;
 
   public
     procedure AfterConstruction; override;
@@ -79,13 +80,10 @@ type
     property MessageListSettings: TMessageListSettings
       read FMessageListSettings;
 
+    property DisplayValuesSettings: TDisplayValuesSettings
+      read FDisplayValuesSettings;
+
   published
-    property LeftPanelWidth: Integer
-      read FLeftPanelWidth write FLeftPanelWidth;
-
-    property RightPanelWidth: Integer
-      read FRightPanelWidth write FRightPanelWidth;
-
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
   end;
@@ -101,15 +99,16 @@ uses
 procedure TLogViewerSettings.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FFileName            := 'settings.json';
-  FFormSettings        := TFormSettings.Create;
+  FFileName              := 'settings.json';
+  FFormSettings          := TFormSettings.Create;
   FFormSettings.OnChanged.Add(FormSettingsChanged);
-  FMessageListSettings := TMessageListSettings.Create;
-  FWinODSSettings      := TWinODSSettings.Create;
-  FWinIPCSettings      := TWinIPCSettings.Create;
-  FComPortSettings     := TComPortSettings.Create;
-  FZeroMQSettings      := TZeroMQSettings.Create;
-  FWatchSettings       := TWatchSettings.Create;
+  FMessageListSettings   := TMessageListSettings.Create;
+  FWinODSSettings        := TWinODSSettings.Create;
+  FWinIPCSettings        := TWinIPCSettings.Create;
+  FComPortSettings       := TComPortSettings.Create;
+  FZeroMQSettings        := TZeroMQSettings.Create;
+  FWatchSettings         := TWatchSettings.Create;
+  FDisplayValuesSettings := TDisplayValuesSettings.Create;
 end;
 
 procedure TLogViewerSettings.BeforeDestruction;
@@ -121,6 +120,7 @@ begin
   FreeAndNil(FComPortSettings);
   FreeAndNil(FZeroMQSettings);
   FreeAndNil(FWatchSettings);
+  FreeAndNil(FDisplayValuesSettings);
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
@@ -161,6 +161,14 @@ begin
       JO['WinODSSettings'].ObjectValue.ToSimpleObject(FWinODSSettings);
       JO['WinIPCSettings'].ObjectValue.ToSimpleObject(FWinIPCSettings);
       JO['ZeroMQSettings'].ObjectValue.ToSimpleObject(FZeroMQSettings);
+      JO['DisplayValueSettings'].ObjectValue['TimeStamp'].ObjectValue
+        .ToSimpleObject(FDisplayValuesSettings.TimeStamp);
+      JO['DisplayValueSettings'].ObjectValue['ValueName'].ObjectValue
+        .ToSimpleObject(FDisplayValuesSettings.ValueName);
+      JO['DisplayValueSettings'].ObjectValue['ValueType'].ObjectValue
+        .ToSimpleObject(FDisplayValuesSettings.ValueType);
+      JO['DisplayValueSettings'].ObjectValue['Value'].ObjectValue
+        .ToSimpleObject(FDisplayValuesSettings.Value);
       JO.ToSimpleObject(Self);
     finally
       JO.Free;
@@ -180,6 +188,14 @@ begin
     JO['WinODSSettings'].ObjectValue.FromSimpleObject(FWinODSSettings);
     JO['WinIPCSettings'].ObjectValue.FromSimpleObject(FWinIPCSettings);
     JO['ZeroMQSettings'].ObjectValue.FromSimpleObject(FZeroMQSettings);
+    JO['DisplayValueSettings'].ObjectValue['TimeStamp'].ObjectValue
+      .FromSimpleObject(FDisplayValuesSettings.TimeStamp);
+    JO['DisplayValueSettings'].ObjectValue['ValueName'].ObjectValue
+      .FromSimpleObject(FDisplayValuesSettings.ValueName);
+    JO['DisplayValueSettings'].ObjectValue['ValueType'].ObjectValue
+      .FromSimpleObject(FDisplayValuesSettings.ValueType);
+    JO['DisplayValueSettings'].ObjectValue['Value'].ObjectValue
+      .FromSimpleObject(FDisplayValuesSettings.Value);
     JO.SaveToFile(FFileName, False);
   finally
     JO.Free;

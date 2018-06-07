@@ -52,7 +52,7 @@ type
   private
     FManager             : ILogViewerManager;
     FVSTChannelReceivers : TVirtualStringTree;
-    FTVPChannelReceivers : TTreeViewPresenter;
+//    FTVPChannelReceivers : TTreeViewPresenter;
 
   protected
     procedure UpdateActions; override;
@@ -103,9 +103,9 @@ begin
   FManager.AddReceiver(R);
   R.Enabled := FManager.Settings.WinIPCSettings.Enabled;
 
-  R := TLogViewerFactories.CreateWinODSChannelReceiver(FManager);
-  FManager.AddReceiver(R);
-  R.Enabled := FManager.Settings.WinODSSettings.Enabled;
+//  R := TLogViewerFactories.CreateWinODSChannelReceiver(FManager);
+//  FManager.AddReceiver(R);
+//  R.Enabled := FManager.Settings.WinODSSettings.Enabled;
 
   R := TLogViewerFactories.CreateZeroMQChannelReceiver(FManager);
   FManager.AddReceiver(R);

@@ -630,7 +630,6 @@ var
   MI: TMenuItem;
 begin
   actMessageTypesMenu.DisableIfNoHandler := False;
-  MI.Clear;
   MI := MessageTypesPopupMenu.Items;
   MI.Action := actMessageTypesMenu;
   AddMenuItem(MI, actInfo);
