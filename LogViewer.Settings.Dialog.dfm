@@ -29,64 +29,40 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Top = 0
     Width = 583
     Height = 332
-    ActivePage = tsDisplayValuesSettings
+    ActivePage = tsAdvanced
     Align = alClient
     Style = tsFlatButtons
     TabOrder = 1
     object tsWatches: TTabSheet
       Caption = 'Watches'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 456
-      ExplicitHeight = 0
     end
     object tsCallstack: TTabSheet
       Caption = 'Callstack'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
     end
     object tsWinIPC: TTabSheet
       Caption = 'WinIPC'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
     end
     object tsWinODS: TTabSheet
       Caption = 'OutputDebugString API'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
     end
     object tsComport: TTabSheet
       Caption = 'Serial port'
       ImageIndex = 4
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
     end
     object tsZeroMQ: TTabSheet
       Caption = 'ZeroMQ'
       ImageIndex = 5
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
     end
     object tsDisplayValuesSettings: TTabSheet
       Caption = 'DisplayValuesSettings'
       ImageIndex = 6
-      ExplicitLeft = 6
-      ExplicitTop = 25
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+    end
+    object tsAdvanced: TTabSheet
+      Caption = 'Advanced'
+      ImageIndex = 7
     end
   end
   object pnlBottom: TPanel
@@ -97,7 +73,6 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 2
-    ExplicitWidth = 665
     object btnClose: TButton
       Left = 541
       Top = 6

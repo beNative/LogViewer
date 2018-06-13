@@ -26,6 +26,8 @@ uses
 
   Spring, Spring.Collections,
 
+  DDuce.Editor.Interfaces,
+
   LogViewer.Settings, LogViewer.ComPort.Settings;
 
 type
@@ -100,7 +102,7 @@ type
   end;
 
   ILogViewerMenus = interface
-  ['{B3F8FAFC-00FB-4233-890A-BBBC356B186E}']
+  ['{807937AA-BA66-4302-BE92-D93E25865C97}']
     {$REGION 'property access methods'}
     function GetLogTreeViewerPopupMenu: TPopupMenu;
     function GetMessageTypesPopupMenu: TPopupMenu;
@@ -204,6 +206,7 @@ type
     function GetReceivers: IList<IChannelReceiver>;
     function GetCommands: ILogViewerCommands;
     function GetEvents: ILogViewerEvents;
+    function GetEditorManager: IEditorManager;
     {$ENDREGION}
 
     procedure AddView(ALogViewer: ILogViewer);
@@ -234,6 +237,9 @@ type
 
     property Receivers: IList<IChannelReceiver>
       read GetReceivers;
+
+    property EditorManager: IEditorManager
+      read GetEditorManager;
   end;
 
   ILogViewerToolbarsFactory = interface

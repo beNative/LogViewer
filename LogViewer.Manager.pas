@@ -27,6 +27,7 @@ uses
   Spring, Spring.Collections,
 
   DDuce.Logger.Interfaces,
+  DDuce.Editor.Interfaces,
 
   LogViewer.Interfaces, LogViewer.Settings, LogViewer.Events,
   LogViewer.Commands;
@@ -119,13 +120,15 @@ type
     {$ENDREGION}
 
   private
-    FSettings   : TLogViewerSettings;
-    FEvents     : TLogViewerEvents;
-    FCommands   : TLogViewerCommands;
-    FActiveView : ILogViewer;
-    FViewList   : IList<ILogViewer>;
-    FReceivers  : IList<IChannelReceiver>;
-    FLogQueues  : IList<ILogQueue>;
+    FSettings       : TLogViewerSettings;
+    FEvents         : TLogViewerEvents;
+    FCommands       : TLogViewerCommands;
+    FActiveView     : ILogViewer;
+    FViewList       : IList<ILogViewer>;
+    FReceivers      : IList<IChannelReceiver>;
+    FLogQueues      : IList<ILogQueue>;
+    FEditorManager  : IEditorManager;
+    FEditorSettings : IEditorSettings;
 
     function AddMenuItem(
       AParent : TMenuItem;
@@ -140,13 +143,14 @@ type
     procedure BuildMessageTypesPopupMenu;
 
   protected
-    function GetMessageTypesPopupMenu: TPopupMenu;
-    function GetLogTreeViewerPopupMenu: TPopupMenu;
+    function GetEditorManager: IEditorManager;
     function GetCommands: ILogViewerCommands;
     function GetEvents: ILogViewerEvents;
     function GetSettings: TLogViewerSettings;
     function GetViews: IList<ILogViewer>;
     function GetReceivers: IList<IChannelReceiver>;
+    function GetMessageTypesPopupMenu: TPopupMenu;
+    function GetLogTreeViewerPopupMenu: TPopupMenu;
 
     procedure ActiveViewChanged;
 
@@ -223,6 +227,9 @@ type
     property Receivers: IList<IChannelReceiver>
       read GetReceivers;
 
+    property EditorManager: IEditorManager
+      read GetEditorManager;
+
   public
     constructor Create(
       AOwner    : TComponent;
@@ -238,6 +245,8 @@ implementation
 uses
   Vcl.Forms,
 
+  DDuce.Editor.Factories,
+
   LogViewer.Factories, LogViewer.Resources,
   LogViewer.Settings.Dialog, LogViewer.MessageList.Settings;
 
@@ -247,11 +256,13 @@ uses
 procedure TdmManager.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FEvents    := TLogViewerEvents.Create(Self);
-  FCommands  := TLogViewerCommands.Create(Self);
-  FReceivers := TCollections.CreateInterfaceList<IChannelReceiver>;
-  FLogQueues := TCollections.CreateInterfaceList<ILogQueue>;
-  FViewList  := TCollections.CreateInterfaceList<ILogViewer>;
+  FEvents         := TLogViewerEvents.Create(Self);
+  FCommands       := TLogViewerCommands.Create(Self);
+  FReceivers      := TCollections.CreateInterfaceList<IChannelReceiver>;
+  FLogQueues      := TCollections.CreateInterfaceList<ILogQueue>;
+  FViewList       := TCollections.CreateInterfaceList<ILogViewer>;
+  FEditorSettings := TEditorFactories.CreateSettings(Self, 'settings.xml');
+  FEditorManager  := TEditorFactories.CreateManager(Self, FEditorSettings);
   BuildMessageTypesPopupMenu;
   BuildLogTreeViewerPopupMenu;
 end;
@@ -261,6 +272,8 @@ begin
   FreeAndNil(FCommands);
   FreeAndNil(FEvents);
   FSettings := nil;
+  FEditorSettings := nil;
+  FEditorManager := nil;
   inherited BeforeDestruction;
 end;
 
@@ -479,6 +492,11 @@ begin
   Result := FCommands;
 end;
 
+function TdmManager.GetEditorManager: IEditorManager;
+begin
+  Result := FEditorManager;
+end;
+
 function TdmManager.GetEvents: ILogViewerEvents;
 begin
   Result := FEvents;
@@ -513,7 +531,7 @@ end;
 
 function TdmManager.GetLogTreeViewerPopupMenu: TPopupMenu;
 begin
-  Result := ppmLogTreeViewer
+  Result := ppmLogTreeViewer;
 end;
 
 function TdmManager.GetMenus: ILogViewerMenus;

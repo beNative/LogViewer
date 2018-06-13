@@ -34,6 +34,8 @@ uses
 
   VirtualTrees,
 
+  DDuce.Editor.Interfaces,
+
   LogViewer.Settings,
   LogViewer.Settings.Dialog.ConfigNode,
 
@@ -43,20 +45,21 @@ uses
 
 type
   TfrmLogViewerSettings = class(TForm)
-    pnlConfigTree : TPanel;
-    pgcMain       : TPageControl;
-    tsWatches     : TTabSheet;
-    tsCallstack   : TTabSheet;
-    tsWinIPC      : TTabSheet;
-    tsWinODS      : TTabSheet;
-    tsComport     : TTabSheet;
-    tsZeroMQ      : TTabSheet;
-    pnlBottom     : TPanel;
-    aclMain       : TActionList;
-    actClose      : TAction;
-    btnClose      : TButton;
-    btn2          : TButton;
-    tsDisplayValuesSettings: TTabSheet;
+    pnlConfigTree           : TPanel;
+    pgcMain                 : TPageControl;
+    tsWatches               : TTabSheet;
+    tsCallstack             : TTabSheet;
+    tsWinIPC                : TTabSheet;
+    tsWinODS                : TTabSheet;
+    tsComport               : TTabSheet;
+    tsZeroMQ                : TTabSheet;
+    pnlBottom               : TPanel;
+    aclMain                 : TActionList;
+    actClose                : TAction;
+    btnClose                : TButton;
+    btn2                    : TButton;
+    tsDisplayValuesSettings : TTabSheet;
+    tsAdvanced              : TTabSheet;
 
     procedure actCloseExecute(Sender: TObject);
 
@@ -68,6 +71,7 @@ type
     FWinIPCSettingsForm        : TfrmWinIPCSettings;
     FWinODSSettingsForm        : TfrmWinODSSettings;
     FDisplayValuesSettingsForm : TfrmDisplayValuesSettings;
+    FEditor                    : IEditorView;
 
     procedure FConfigTreeGetText(
       Sender       : TBaseVirtualTree;
@@ -109,7 +113,7 @@ implementation
 {$R *.dfm}
 
 uses
-  DDuce.Factories.VirtualTrees;
+  DDuce.Editor.Factories, DDuce.Factories.VirtualTrees;
 
 {$REGION 'construction and destruction'}
 constructor TfrmLogViewerSettings.Create(AOwner: TComponent;

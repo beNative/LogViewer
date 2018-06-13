@@ -118,8 +118,6 @@ type
     FCallStackView   : TfrmCallStackView;
     FWatchesView     : TfrmWatchesView;
     FManager         : ILogViewerManager;
-    FEditorManager   : IEditorManager;
-    FEditorSettings  : IEditorSettings;
     FEditorView      : IEditorView;
     FExpandParents   : Boolean;
     FLastParent      : PVirtualNode;
@@ -347,7 +345,7 @@ begin
   FLogQueue.OnReceiveMessage.Add(FLogQueueReceiveMessage);
   Caption := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
   FSettings.OnChanged.Add(FSettingsChanged);
-  FLogTreeView.PopupMenu  := Manager.Menus.LogTreeViewerPopupMenu;
+  //FLogTreeView.PopupMenu  := Manager.Menus.LogTreeViewerPopupMenu;
   edtTimeStamp.Font.Color := TIMESTAMP_FONTCOLOR;
   edtValueName.Font.Color := VALUENAME_FONTCOLOR;
   edtValueType.Font.Color := VALUETYPE_FONTCOLOR;
@@ -379,9 +377,7 @@ end;
 
 procedure TfrmMessageList.CreateEditor;
 begin
-  FEditorSettings := TEditorFactories.CreateSettings(Self, 'settings.xml');
-  FEditorManager  := TEditorFactories.CreateManager(Self, FEditorSettings);
-  FEditorView     := TEditorFactories.CreateView(pnlTextViewer, FEditorManager);
+  FEditorView := TEditorFactories.CreateView(pnlTextViewer, Manager.EditorManager);
   FEditorView.Settings.EditorOptions.WordWrapEnabled := True;
 end;
 
