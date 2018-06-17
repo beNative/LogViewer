@@ -100,7 +100,7 @@ begin
     FAddress := ZQM_DEFAULT_ADDRESS;
   FTimer          := TTimer.Create(nil);
   FTimer.OnTimer  := FTimerTimer;
-  FTimer.Interval := 5;
+  FTimer.Interval := 50;
   FZMQ            := TZeroMQ.Create;
   FZMQStream      := TStringStream.Create;
   Settings.OnChanged.Add(SettingsChanged);

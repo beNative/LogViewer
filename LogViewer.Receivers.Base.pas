@@ -42,6 +42,7 @@ type
     procedure SetEnabled(const Value: Boolean); virtual;
     function GetName: string;
     procedure SetName(const Value: string);
+    function GetQueueList: IDictionary<Integer, ILogQueue>;
     {$ENDREGION}
 
     procedure SettingsChanged(Sender: TObject); virtual;
@@ -58,7 +59,6 @@ type
       const AName : string
     ); reintroduce;
 
-
     function ToString: string; override;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
@@ -71,6 +71,9 @@ type
 
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
+
+    property QueueList: IDictionary<Integer, ILogQueue>
+      read GetQueueList;
 
     property OnNewLogQueue: IEvent<TLogQueueEvent>
       read GetOnNewLogQueue;
@@ -154,14 +157,21 @@ begin
   FName := Value;
 end;
 
-procedure TChannelReceiver.SettingsChanged(Sender: TObject);
-begin
-//
-end;
-
 function TChannelReceiver.GetOnNewLogQueue: IEvent<TLogQueueEvent>;
 begin
   Result := FOnNewLogQueue;
+end;
+function TChannelReceiver.GetQueueList: IDictionary<Integer, ILogQueue>;
+begin
+  Result := FQueueList;
+end;
+
+{$ENDREGION}
+
+{$REGION 'event handlers'}
+procedure TChannelReceiver.SettingsChanged(Sender: TObject);
+begin
+//
 end;
 {$ENDREGION}
 

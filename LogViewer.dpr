@@ -5,7 +5,7 @@ program LogViewer;
 uses
   Forms,
   VirtualTrees,
-  DDuce.Factories in '..\..\libraries\dduce\Source\Modules\DDuce.Factories.pas',
+  DDuce.Factories.TreeViewPresenter in '..\..\libraries\dduce\Source\Factories\DDuce.Factories.TreeViewPresenter.pas',
   DDuce.Editor.ActionList.Templates in '..\..\libraries\dduce\Source\Modules\Editor\DDuce.Editor.ActionList.Templates.pas',
   DDuce.Editor.ActionList.ToolView in '..\..\libraries\dduce\Source\Modules\Editor\DDuce.Editor.ActionList.ToolView.pas' {frmActionListView},
   DDuce.Editor.AlignLines.Settings in '..\..\libraries\dduce\Source\Modules\Editor\DDuce.Editor.AlignLines.Settings.pas',
@@ -191,7 +191,10 @@ uses
   DDuce.Settings.Form in '..\..\libraries\dduce\Source\Settings\DDuce.Settings.Form.pas',
   DDuce.Settings.TextFormat in '..\..\libraries\dduce\Source\Settings\DDuce.Settings.TextFormat.pas',
   LogViewer.DisplayValues.Settings in 'LogViewer.DisplayValues.Settings.pas',
-  LogViewer.DisplayValues.Settings.View in 'LogViewer.DisplayValues.Settings.View.pas' {frmDisplayValuesSettings};
+  LogViewer.DisplayValues.Settings.View in 'LogViewer.DisplayValues.Settings.View.pas' {frmDisplayValuesSettings},
+  LogViewer.Dashboard.View.Node in 'LogViewer.Dashboard.View.Node.pas',
+  DDuce.ValueList in '..\..\libraries\dduce\Source\Modules\ValueList\DDuce.ValueList.pas',
+  DDuce.ValueList.Node in '..\..\libraries\dduce\Source\Modules\ValueList\DDuce.ValueList.Node.pas';
 
 {$R *.res}
 

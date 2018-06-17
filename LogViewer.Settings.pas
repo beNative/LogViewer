@@ -161,6 +161,14 @@ begin
       JO['WinODSSettings'].ObjectValue.ToSimpleObject(FWinODSSettings);
       JO['WinIPCSettings'].ObjectValue.ToSimpleObject(FWinIPCSettings);
       JO['ZeroMQSettings'].ObjectValue.ToSimpleObject(FZeroMQSettings);
+      JO['DisplayValueSettings'].ObjectValue['Id'].ObjectValue
+        .ToSimpleObject(FDisplayValuesSettings.Id);
+      JO['DisplayValueSettings'].ObjectValue['Info'].ObjectValue
+        .ToSimpleObject(FDisplayValuesSettings.Info);
+      JO['DisplayValueSettings'].ObjectValue['Warning'].ObjectValue
+        .ToSimpleObject(FDisplayValuesSettings.Warning);
+      JO['DisplayValueSettings'].ObjectValue['Error'].ObjectValue
+        .ToSimpleObject(FDisplayValuesSettings.Error);
       JO['DisplayValueSettings'].ObjectValue['TimeStamp'].ObjectValue
         .ToSimpleObject(FDisplayValuesSettings.TimeStamp);
       JO['DisplayValueSettings'].ObjectValue['ValueName'].ObjectValue
@@ -169,6 +177,14 @@ begin
         .ToSimpleObject(FDisplayValuesSettings.ValueType);
       JO['DisplayValueSettings'].ObjectValue['Value'].ObjectValue
         .ToSimpleObject(FDisplayValuesSettings.Value);
+      JO['DisplayValueSettings'].ObjectValue['CheckPoint'].ObjectValue
+        .ToSimpleObject(FDisplayValuesSettings.CheckPoint);
+      JO['DisplayValueSettings'].ObjectValue['Counter'].ObjectValue
+        .ToSimpleObject(FDisplayValuesSettings.Counter);
+      JO['DisplayValueSettings'].ObjectValue['Tracing'].ObjectValue
+        .ToSimpleObject(FDisplayValuesSettings.Tracing);
+      JO['DisplayValueSettings'].ObjectValue['Conditional'].ObjectValue
+        .ToSimpleObject(FDisplayValuesSettings.Conditional);
       JO.ToSimpleObject(Self);
     finally
       JO.Free;
@@ -188,6 +204,14 @@ begin
     JO['WinODSSettings'].ObjectValue.FromSimpleObject(FWinODSSettings);
     JO['WinIPCSettings'].ObjectValue.FromSimpleObject(FWinIPCSettings);
     JO['ZeroMQSettings'].ObjectValue.FromSimpleObject(FZeroMQSettings);
+    JO['DisplayValueSettings'].ObjectValue['Id'].ObjectValue
+      .FromSimpleObject(FDisplayValuesSettings.Id);
+    JO['DisplayValueSettings'].ObjectValue['Info'].ObjectValue
+      .FromSimpleObject(FDisplayValuesSettings.Info);
+    JO['DisplayValueSettings'].ObjectValue['Warning'].ObjectValue
+      .FromSimpleObject(FDisplayValuesSettings.Warning);
+    JO['DisplayValueSettings'].ObjectValue['Error'].ObjectValue
+      .FromSimpleObject(FDisplayValuesSettings.Error);
     JO['DisplayValueSettings'].ObjectValue['TimeStamp'].ObjectValue
       .FromSimpleObject(FDisplayValuesSettings.TimeStamp);
     JO['DisplayValueSettings'].ObjectValue['ValueName'].ObjectValue
@@ -196,6 +220,14 @@ begin
       .FromSimpleObject(FDisplayValuesSettings.ValueType);
     JO['DisplayValueSettings'].ObjectValue['Value'].ObjectValue
       .FromSimpleObject(FDisplayValuesSettings.Value);
+    JO['DisplayValueSettings'].ObjectValue['CheckPoint'].ObjectValue
+      .FromSimpleObject(FDisplayValuesSettings.CheckPoint);
+    JO['DisplayValueSettings'].ObjectValue['Counter'].ObjectValue
+      .FromSimpleObject(FDisplayValuesSettings.Counter);
+    JO['DisplayValueSettings'].ObjectValue['Tracing'].ObjectValue
+      .FromSimpleObject(FDisplayValuesSettings.Tracing);
+    JO['DisplayValueSettings'].ObjectValue['Conditional'].ObjectValue
+      .FromSimpleObject(FDisplayValuesSettings.Conditional);
     JO.SaveToFile(FFileName, False);
   finally
     JO.Free;

@@ -35,21 +35,23 @@ uses
   LogViewer.CallStack.View, LogViewer.Watches.View,
   LogViewer.Watches.Data, LogViewer.Messages.Data, LogViewer.MessageList.View,
   LogViewer.Interfaces, LogViewer.Manager, LogViewer.Settings,
-  LogViewer.ComPort.Settings;
+  LogViewer.ComPort.Settings, LogViewer.DisplayValues.Settings;
 
 type
   TLogViewerFactories = class sealed
   public
     class function CreateCallStackView(
-      AOwner  : TComponent;
-      AParent : TWinControl;
-      AData   : IObjectList
+      AOwner                 : TComponent;
+      AParent                : TWinControl;
+      AData                  : IObjectList;
+      ADisplayValuesSettings : TDisplayValuesSettings
     ): TfrmCallStackView;
 
     class function CreateWatchesView(
-      AOwner  : TComponent;
-      AParent : TWinControl;
-      AData   : TWatchList
+      AOwner                 : TComponent;
+      AParent                : TWinControl;
+      AData                  : TWatchList;
+      ADisplayValuesSettings : TDisplayValuesSettings
     ): TfrmWatchesView;
 
     class function CreateLogViewer(
@@ -111,9 +113,10 @@ uses
 
 {$REGION 'public class methods'}
 class function TLogViewerFactories.CreateCallStackView(AOwner: TComponent;
-  AParent: TWinControl; AData: IObjectList): TfrmCallStackView;
+  AParent: TWinControl; AData: IObjectList; ADisplayValuesSettings:
+  TDisplayValuesSettings): TfrmCallStackView;
 begin
-  Result := TfrmCallStackView.Create(AOwner, AData);
+  Result := TfrmCallStackView.Create(AOwner, AData, ADisplayValuesSettings);
   Result.Parent      := AParent;
   Result.Align       := alClient;
   Result.BorderStyle := bsNone;
@@ -164,9 +167,10 @@ begin
 end;
 
 class function TLogViewerFactories.CreateWatchesView(AOwner: TComponent;
-  AParent: TWinControl; AData: TWatchList): TfrmWatchesView;
+  AParent: TWinControl; AData: TWatchList; ADisplayValuesSettings:
+  TDisplayValuesSettings): TfrmWatchesView;
 begin
-  Result := TfrmWatchesView.Create(AOwner, AData);
+  Result := TfrmWatchesView.Create(AOwner, AData, ADisplayValuesSettings);
   Result.Parent      := AParent;
   Result.Align       := alClient;
   Result.BorderStyle := bsNone;

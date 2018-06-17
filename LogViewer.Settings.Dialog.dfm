@@ -29,7 +29,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Top = 0
     Width = 583
     Height = 332
-    ActivePage = tsAdvanced
+    ActivePage = tsWinIPC
     Align = alClient
     Style = tsFlatButtons
     TabOrder = 1
@@ -63,6 +63,8 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     object tsAdvanced: TTabSheet
       Caption = 'Advanced'
       ImageIndex = 7
+      ExplicitLeft = 6
+      ExplicitTop = 25
     end
   end
   object pnlBottom: TPanel
@@ -74,27 +76,19 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     BevelOuter = bvNone
     TabOrder = 2
     object btnClose: TButton
-      Left = 541
+      Left = 660
       Top = 6
       Width = 120
       Height = 25
       Action = actClose
       TabOrder = 0
     end
-    object btn2: TButton
-      Left = 415
-      Top = 6
-      Width = 120
-      Height = 25
-      Caption = 'btn2'
-      TabOrder = 1
-    end
   end
   object aclMain: TActionList
     Left = 328
     Top = 192
     object actClose: TAction
-      Caption = 'Close'
+      Caption = '&Close'
       OnExecute = actCloseExecute
     end
   end

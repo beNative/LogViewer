@@ -48,16 +48,15 @@ type
     FListPresenter : TTreeViewPresenter;
 
     function FCDNameCustomDraw(
-      Sender          : TObject;
-      ColumnDefinition: TColumnDefinition;
-      Item            : TObject;
-      TargetCanvas    : TCanvas;
-      CellRect        : TRect;
-      ImageList       : TCustomImageList;
-      DrawMode        : TDrawMode;
-      Selected        : Boolean
+      Sender           : TObject;
+      ColumnDefinition : TColumnDefinition;
+      Item             : TObject;
+      TargetCanvas     : TCanvas;
+      CellRect         : TRect;
+      ImageList        : TCustomImageList;
+      DrawMode         : TDrawMode;
+      Selected         : Boolean
     ): Boolean;
-
 
     procedure FListPresenterSelectionChanged(Sender: TObject);
 
@@ -71,9 +70,6 @@ type
       AOwner    : TComponent;
       ASettings : TDisplayValuesSettings
     ); reintroduce;
-    procedure BeforeDestruction; override;
-
-
 
   end;
 
@@ -84,7 +80,7 @@ implementation
 uses
   DSharp.Windows.ControlTemplates,
 
-  DDuce.Factories,
+  DDuce.Factories.TreeViewPresenter,
 
   DDuce.Factories.zObjInspector, DDuce.Factories.VirtualTrees;
 
@@ -99,7 +95,10 @@ begin
   FSettings   := ASettings;
   FSettings.OnChanged.Add(FFormatSettingsChanged);
   FInspector  := TzObjectInspectorFactory.Create(Self, pnlRight);
+
   FListViewer := TVirtualStringTreeFactory.CreateList(Self, pnlLeft);
+  FListViewer.Header.AutoSizeIndex := 0;
+
   FList := TCollections.CreateObjectList<TTextFormatSettings>(False);
   FList.Add(FSettings.TimeStamp);
   FList.Add(FSettings.ValueName);
@@ -118,6 +117,7 @@ begin
   CD                   := CDS.Add('Name');
   CD.ValuePropertyName := 'Name';
   CD.OnCustomDraw      := FCDNameCustomDraw;
+  CD.AutoSize          := True;
 
   FListPresenter := TFactories.CreateTreeViewPresenter(
     Self,
@@ -127,33 +127,6 @@ begin
   );
   FListPresenter.ShowHeader := False;
   FListPresenter.OnSelectionChanged := FListPresenterSelectionChanged;
-
-
-
-//  CD.ValuePropertyName := 'TimeStamp';
-//  CD.HintPropertyName  := CD.ValuePropertyName;
-//  //CD.OnCustomDraw      := FCDNameCustomDraw;
-//  CD                   := CDS.Add('ValueType');
-//  CD.ValuePropertyName := 'ValueType';
-//  CD.HintPropertyName  := CD.ValuePropertyName;
-//  CD.OnCustomDraw      := FCDTypeCustomDraw;
-//  CD                   := CDS.Add('Value');
-//  CD.ValuePropertyName := 'Value';
-//  CD.HintPropertyName  := CD.ValuePropertyName;
-//  CD.AutoSize          := True; // Test
-//  CD.OnCustomDraw      := FCDValueCustomDraw;
-//  CD                   := CDS.Add('TimeStamp');
-//  CD.Width             := 80;
-//  CD.ValuePropertyName := 'TimeStamp';
-//  CD.HintPropertyName  := CD.ValuePropertyName;
-//  CD.OnGetText         := FCDTimeStampGetText;
-//  CD.OnCustomDraw      := FCDTimeStampCustomDraw;
-end;
-
-procedure TfrmDisplayValuesSettings.BeforeDestruction;
-begin
-  //FreeAndNil(FListPresenter);
-  inherited BeforeDestruction;
 end;
 {$ENDREGION}
 
@@ -162,13 +135,6 @@ procedure TfrmDisplayValuesSettings.FListPresenterSelectionChanged(
   Sender: TObject);
 begin
   FInspector.Component := FListPresenter.SelectedItem;
-end;
-
-procedure TfrmDisplayValuesSettings.UpdateActions;
-begin
-  inherited UpdateActions;
-  if Assigned(FListViewer) then
-    FListViewer.Invalidate;
 end;
 
 function TfrmDisplayValuesSettings.FCDNameCustomDraw(Sender: TObject;
@@ -190,6 +156,15 @@ end;
 procedure TfrmDisplayValuesSettings.FFormatSettingsChanged(Sender: TObject);
 begin
   UpdateActions;
+end;
+{$ENDREGION}
+
+{$REGION 'public methods'}
+procedure TfrmDisplayValuesSettings.UpdateActions;
+begin
+  inherited UpdateActions;
+  if Assigned(FListViewer) then
+    FListViewer.Invalidate;
 end;
 {$ENDREGION}
 

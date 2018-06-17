@@ -114,12 +114,6 @@ const
     logtree. }
   MAX_TEXTLENGTH_VALUECOLUMN = 80;
 
-  VALUENAME_FONTCOLOR = clBlack;
-  VALUETYPE_FONTCOLOR = clBlue;
-  VALUE_FONTCOLOR     = clNavy;
-  TIMESTAMP_FONTCOLOR = clBlue;
-  ID_FONTCOLOR        = clDkGray;
-
 implementation
 
 end.

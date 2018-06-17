@@ -40,11 +40,12 @@ uses
 
   Spring.Collections,
 
-  DDuce.Editor.Interfaces, DDuce.Logger.Interfaces,
+  DDuce.Editor.Interfaces, DDuce.Logger.Interfaces, DDuce.ValueList,
 
   LogViewer.Messages.Data, LogViewer.Watches.Data, LogViewer.Watches.View,
   LogViewer.Interfaces, LogViewer.CallStack.Data, LogViewer.CallStack.View,
-  LogViewer.MessageList.Settings, LogViewer.MessageList.LogNode;
+  LogViewer.MessageList.Settings, LogViewer.MessageList.LogNode,
+  LogViewer.DisplayValues.Settings;
 
 type
   TfrmMessageList = class(TForm, ILogViewer)
@@ -70,7 +71,6 @@ type
     pnlMessages       : TPanel;
     pnlRawMessageData : TPanel;
     pnlRight          : TPanel;
-    pnlTextViewer     : TPanel;
     pnlWatches        : TPanel;
     splLeftHorizontal : TSplitter;
     splLeftVertical   : TSplitter;
@@ -79,17 +79,18 @@ type
     tsTextViewer      : TTabSheet;
     pnlMessageDetails : TGridPanel;
     pnlMessageType    : TPanel;
-    pnlTimeStamp      : TPanel;
     pnlValueName      : TPanel;
-    pnlValueType      : TPanel;
     pnlValue          : TPanel;
-    pnlValueExtra     : TPanel;
     edtMessageType    : TLabeledEdit;
-    edtTimeStamp      : TLabeledEdit;
     edtValueName      : TLabeledEdit;
-    edtValueType      : TLabeledEdit;
     edtValue          : TLabeledEdit;
-    pnlColor          : TPanel;
+    pnlTimeStamp: TPanel;
+    edtTimeStamp: TLabeledEdit;
+    pnlColor: TPanel;
+    pnlValueType: TPanel;
+    pnlTextViewer: TPanel;
+    edtValueType: TLabeledEdit;
+    tsValueList: TTabSheet;
     {$ENDREGION}
 
     procedure edtMessageFilterChange(Sender: TObject);
@@ -125,6 +126,7 @@ type
     FVKPressed       : Boolean;
     FSettings        : TMessageListSettings;
     FAutoSizeColumns : Boolean;
+    FValueList       : TValueList;
 
     {$REGION 'property access methods'}
     function GetManager: ILogViewerManager;
@@ -230,6 +232,7 @@ type
       Column   : TColumnIndex;
       var Kind : TVTHintKind
     );
+    function GetDisplayValuesSettings: TDisplayValuesSettings;
     {$ENDREGION}
 
   protected
@@ -287,6 +290,9 @@ type
     property Settings: TMessageListSettings
       read GetSettings;
 
+    property DisplayValuesSettings: TDisplayValuesSettings
+      read GetDisplayValuesSettings;
+
     property Form: TCustomForm
       read GetForm;
 
@@ -314,7 +320,7 @@ uses
   DDuce.Factories.VirtualTrees, DDuce.Editor.Factories,
   DDuce.Reflect, DDuce.Utils,
 
-  DDuce.ObjectInspector.zObjectInspector,
+  DDuce.ObjectInspector.zObjectInspector, DDuce.DynamicRecord,
 
   DSharp.Windows.ColumnDefinitions.ControlTemplate,
 
@@ -345,11 +351,12 @@ begin
   FLogQueue.OnReceiveMessage.Add(FLogQueueReceiveMessage);
   Caption := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
   FSettings.OnChanged.Add(FSettingsChanged);
-  //FLogTreeView.PopupMenu  := Manager.Menus.LogTreeViewerPopupMenu;
-  edtTimeStamp.Font.Color := TIMESTAMP_FONTCOLOR;
-  edtValueName.Font.Color := VALUENAME_FONTCOLOR;
-  edtValueType.Font.Color := VALUETYPE_FONTCOLOR;
-  edtValue.Font.Color     := VALUE_FONTCOLOR;
+  FLogTreeView.PopupMenu  := Manager.Menus.LogTreeViewerPopupMenu;
+
+  FValueList := TValueList.Create(Self);
+  FValueList.Parent := tsValueList;
+  FValueList.Align := alClient;
+
   ApplySettings;
 end;
 
@@ -371,13 +378,17 @@ begin
   FCallStackView := TLogViewerFactories.CreateCallStackView(
     Self,
     pnlCallStack,
-    FCallStack as IObjectList
+    FCallStack as IObjectList,
+    DisplayValuesSettings
   );
 end;
 
 procedure TfrmMessageList.CreateEditor;
 begin
-  FEditorView := TEditorFactories.CreateView(pnlTextViewer, Manager.EditorManager);
+  FEditorView := TEditorFactories.CreateView(
+    pnlTextViewer,
+    Manager.EditorManager
+  );
   FEditorView.Settings.EditorOptions.WordWrapEnabled := True;
 end;
 
@@ -458,7 +469,8 @@ begin
   FWatchesView := TLogViewerFactories.CreateWatchesView(
     Self,
     pnlLeftBottom,
-    FWatches
+    FWatches,
+    DisplayValuesSettings
   );
 end;
 {$ENDREGION}
@@ -467,6 +479,14 @@ end;
 function TfrmMessageList.GetActions: ILogViewerActions;
 begin
   Result := Manager as ILogViewerActions;
+end;
+
+function TfrmMessageList.GetDisplayValuesSettings: TDisplayValuesSettings;
+begin
+  if Assigned(Manager) and Assigned(Manager.Settings) then
+    Result := Manager.Settings.DisplayValuesSettings
+  else
+    Result := nil;
 end;
 
 function TfrmMessageList.GetForm: TCustomForm;
@@ -495,8 +515,22 @@ end;
 procedure TfrmMessageList.FLogTreeViewBeforeItemPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; ItemRect: TRect;
   var CustomDraw: Boolean);
+//var
+//  LN : TLogNode;
+//  DVS : TDisplayValuesSettings;
+//  S : string;
 begin
-//
+//  LN := Sender.GetNodeData<TLogNode>(Node);
+//  DVS := Manager.Settings.DisplayValuesSettings;
+//  if LN.MessageType in [lmtEnterMethod, lmtLeaveMethod] then
+//  begin
+    //CustomDraw := True;
+    //DVS.Tracing.AssignTo(TargetCanvas);
+    //TargetCanvas.Brush.Color := $00EEEEEE;
+//    TargetCanvas.FillRect(ItemRect);
+//    S := LN.Text;
+//    TargetCanvas.TextRect(ItemRect, S);
+  //end;
 end;
 
 procedure TfrmMessageList.FLogQueueReceiveMessage(Sender: TObject;
@@ -521,13 +555,16 @@ procedure TfrmMessageList.FLogTreeViewBeforeCellPaint(Sender: TBaseVirtualTree;
   CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
 var
   LN : TLogNode;
+  DVS : TDisplayValuesSettings;
 begin
   LN := Sender.GetNodeData<TLogNode>(Node);
-  if LN.MessageType in [lmtEnterMethod, lmtLeaveMethod] then
-  begin
-    TargetCanvas.Brush.Color := $00EEEEEE;
-    TargetCanvas.FillRect(CellRect);
-  end
+  DVS := Manager.Settings.DisplayValuesSettings;
+//  if LN.MessageType in [lmtEnterMethod, lmtLeaveMethod] then
+//  begin
+//    DVS.Tracing.AssignTo(TargetCanvas);
+//    //TargetCanvas.Brush.Color := $00EEEEEE;
+//    TargetCanvas.FillRect(CellRect);
+//  end
 end;
 
 procedure TfrmMessageList.FLogTreeViewFocusChanging(Sender: TBaseVirtualTree;
@@ -754,51 +791,55 @@ procedure TfrmMessageList.FLogTreeViewPaintText(Sender: TBaseVirtualTree;
   const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   TextType: TVSTTextType);
 var
-  LN : TLogNode;
+  LN  : TLogNode;
+  DVS : TDisplayValuesSettings;
 begin
   LN := Sender.GetNodeData<TLogNode>(Node);
   Guard.CheckNotNull(LN, 'ND');
+  DVS := Manager.Settings.DisplayValuesSettings;
+  if not Assigned(Manager) then
+    Exit;
   if Column = COLUMN_MAIN then
   begin
     case LN.MessageType of
       lmtInfo:
       begin
-        TargetCanvas.Font.Color := clBlue;
-        TargetCanvas.Font.Style := TargetCanvas.Font.Style + [fsBold];
+        DVS.Info.AssignTo(TargetCanvas.Font);
       end;
       lmtWarning:
       begin
-        TargetCanvas.Font.Color := clRed;
-        TargetCanvas.Font.Style := TargetCanvas.Font.Style + [fsBold];
+        DVS.Warning.AssignTo(TargetCanvas.Font);
       end;
       lmtError:
       begin
-        TargetCanvas.Font.Color := clRed;
-        TargetCanvas.Font.Style := TargetCanvas.Font.Style + [fsBold];
+        DVS.Error.AssignTo(TargetCanvas.Font);
       end;
       lmtValue, lmtComponent, lmtAlphaColor, lmtColor, lmtBitmap, lmtStrings,
       lmtObject, lmtPersistent, lmtInterface:
       begin
         TargetCanvas.Font.Color := clDkGray;
       end;
+      lmtEnterMethod, lmtLeaveMethod:
+      begin
+        DVS.Tracing.AssignTo(TargetCanvas.Font);
+      end;
     end;
   end
   else if Column = COLUMN_VALUENAME then
   begin
-    TargetCanvas.Font.Style := TargetCanvas.Font.Style + [fsBold];
+    DVS.ValueName.AssignTo(TargetCanvas.Font);
   end
   else if Column = COLUMN_VALUETYPE then
   begin
-    TargetCanvas.Font.Color := VALUETYPE_FONTCOLOR;
-    TargetCanvas.Font.Style := TargetCanvas.Font.Style + [fsBold];
+    DVS.ValueType.AssignTo(TargetCanvas.Font);
   end
   else if Column = COLUMN_VALUE then
   begin
-    TargetCanvas.Font.Color := VALUE_FONTCOLOR;
+    DVS.Value.AssignTo(TargetCanvas.Font);
   end
   else if Column = COLUMN_TIMESTAMP then
   begin
-    TargetCanvas.Font.Color := TIMESTAMP_FONTCOLOR;
+    DVS.TimeStamp.AssignTo(TargetCanvas.Font);
   end;
 end;
 {$ENDREGION}
@@ -895,6 +936,10 @@ begin
   chkAutoFilter.Checked := Settings.AutoFilterMessages;
   pnlLeft.Width         := Settings.LeftPanelWidth;
   pnlRight.Width        := Settings.RightPanelWidth;
+  DisplayValuesSettings.TimeStamp.AssignTo(edtTimeStamp.Font);
+  DisplayValuesSettings.ValueName.AssignTo(edtValueName.Font);
+  DisplayValuesSettings.ValueType.AssignTo(edtValueType.Font);
+  DisplayValuesSettings.Value.AssignTo(edtValue.Font);
   UpdateView;
 end;
 
@@ -978,6 +1023,7 @@ begin
   edtValueName.Text   := '';
   edtValueType.Text   := '';
   FEditorView.Clear;
+  FValueList.Clear;
   pnlColor.Color      := clBtnFace;
 end;
 
@@ -1068,7 +1114,25 @@ begin
     FCurrentMsg.Data := nil;
 
   case TLogMessageType(FCurrentMsg.MsgType) of
-    lmtWatch, lmtCounter:
+    lmtCounter:
+    begin
+      S := string(FCurrentMsg.Text);
+      I := S.IndexOf('=');
+      LName := Copy(S, 1, I);
+      LValue := Copy(S, I + 2, S.Length);
+      LType := 'Counter';
+      FWatches.Add(
+        LName,
+        LType,
+        LValue,
+        FMessageCount,
+        FCurrentMsg.TimeStamp,
+        True,
+        True
+      );
+      FWatchesView.UpdateView(FMessageCount);
+    end;
+    lmtWatch:
     begin
       S := string(FCurrentMsg.Text);
       I := S.IndexOf('=');
@@ -1085,7 +1149,7 @@ begin
         FMessageCount,
         FCurrentMsg.TimeStamp,
         True,
-        FCurrentMsg.MsgType = Integer(lmtCounter) // SkipOnNewValue
+        False
       );
       FWatchesView.UpdateView(FMessageCount);
     end;
@@ -1288,10 +1352,21 @@ begin
 end;
 
 procedure TfrmMessageList.UpdateValueDisplay(ALogNode: TLogNode);
+var
+  DR : DynamicRecord;
 begin
-  pgcMessageDetails.ActivePage := tsTextViewer;
   FEditorView.Text := ALogNode.Value;
   FEditorView.HighlighterName := 'TXT';
+  if ALogNode.Value.Contains('=') then
+  begin
+    pgcMessageDetails.ActivePage := tsValueList;
+    DR.FromString(ALogNode.Value);
+    FValueList.Data := DR;
+  end
+  else
+  begin
+    pgcMessageDetails.ActivePage := tsTextViewer;
+  end;
 end;
 
 procedure TfrmMessageList.UpdateView;

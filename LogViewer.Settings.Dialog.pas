@@ -16,13 +16,7 @@
 
 unit LogViewer.Settings.Dialog;
 
-{ Application settings. }
-
-{
-  View settings
-    Callstack
-    Watches
-}
+{ Application settings dialog. }
 
 interface
 
@@ -45,6 +39,7 @@ uses
 
 type
   TfrmLogViewerSettings = class(TForm)
+    {$REGION 'designer controls'}
     pnlConfigTree           : TPanel;
     pgcMain                 : TPageControl;
     tsWatches               : TTabSheet;
@@ -57,9 +52,9 @@ type
     aclMain                 : TActionList;
     actClose                : TAction;
     btnClose                : TButton;
-    btn2                    : TButton;
     tsDisplayValuesSettings : TTabSheet;
     tsAdvanced              : TTabSheet;
+    {$ENDREGION}
 
     procedure actCloseExecute(Sender: TObject);
 

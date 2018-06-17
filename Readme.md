@@ -18,6 +18,15 @@ A logviewer consists of
 - method callstack level display
 - message details
 
+Features currently supported:
+- Info/Warning and Error messages
+- Method tracking
+- Screenshot capture
+- Conditional logging
+- Checkpoints
+- Counters
+- Watches
+
 The sources depend on the following libraries and components:
   * [Spring4D](http://bitbucket.org/sglienke/spring4d)
   * [DSharp](http://bitbucket.org/sglienke/dsharp)

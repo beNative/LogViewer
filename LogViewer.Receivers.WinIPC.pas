@@ -39,10 +39,10 @@ type
   TWinIPChannelReceiver = class(TChannelReceiver, IChannelReceiver)
   private
      FIPCServer : TWinIPCServer;
-    function GetSettings: TWinIPCSettings;
 
   protected
     {$REGION 'property access methods'}
+    function GetSettings: TWinIPCSettings;
     procedure SetEnabled(const Value: Boolean); override;
     {$ENDREGION}
 

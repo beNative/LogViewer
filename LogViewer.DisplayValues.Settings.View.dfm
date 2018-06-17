@@ -20,8 +20,6 @@ object frmDisplayValuesSettings: TfrmDisplayValuesSettings
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitLeft = 248
-    ExplicitWidth = 226
   end
   object pnlLeft: TPanel
     Left = 0

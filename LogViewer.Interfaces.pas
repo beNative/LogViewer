@@ -71,6 +71,7 @@ type
     function GetName: string;
     procedure SetName(const Value: string);
     function GetOnNewLogQueue: IEvent<TLogQueueEvent>;
+    function GetQueueList: IDictionary<Integer, ILogQueue>;
     {$ENDREGION}
 
     function ToString: string;
@@ -80,6 +81,9 @@ type
 
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
+
+    property QueueList: IDictionary<Integer, ILogQueue>
+      read GetQueueList;
 
     property OnNewLogQueue: IEvent<TLogQueueEvent>
       read GetOnNewLogQueue;

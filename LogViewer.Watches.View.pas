@@ -32,7 +32,8 @@ uses
   DSharp.Windows.TreeViewPresenter, DSharp.Windows.ColumnDefinitions,
 
 
-  LogViewer.Messages.Data, LogViewer.Watches.Data;
+  LogViewer.Messages.Data, LogViewer.Watches.Data,
+  LogViewer.DisplayValues.Settings;
 
 type
   TfrmWatchesView = class(TForm)
@@ -41,10 +42,11 @@ type
     pnlWatchHistory : TPanel;
 
   private
-    FMessageId       : Int64;
-    FWatches         : TWatchList;
-    FVSTWatchValues  : TVirtualStringTree;
-    FVSTWatchHistory : TVirtualStringTree;
+    FMessageId             : Int64;
+    FWatches               : TWatchList;
+    FVSTWatchValues        : TVirtualStringTree;
+    FVSTWatchHistory       : TVirtualStringTree;
+    FDisplayValuesSettings : TDisplayValuesSettings;
 
     FWatchHistoryColumnDefinitions : IColumnDefinitions;
 
@@ -124,8 +126,9 @@ type
 
   public
     constructor Create(
-      AOwner   : TComponent;
-      AWatches : TWatchList
+      AOwner                 : TComponent;
+      AWatches               : TWatchList;
+      ADisplayValuesSettings : TDisplayValuesSettings
     ); reintroduce; virtual;
     procedure BeforeDestruction; override;
 
@@ -146,7 +149,7 @@ uses
 
   DSharp.Windows.ControlTemplates,
 
-  DDuce.Factories, DDuce.Factories.VirtualTrees,
+  DDuce.Factories.TreeViewPresenter, DDuce.Factories.VirtualTrees,
 
   LogViewer.Resources;
 
@@ -199,12 +202,14 @@ begin
   end;
 end;
 
-constructor TfrmWatchesView.Create(AOwner: TComponent; AWatches: TWatchList);
+constructor TfrmWatchesView.Create(AOwner: TComponent; AWatches: TWatchList;
+  ADisplayValuesSettings : TDisplayValuesSettings);
 begin
   inherited Create(AOwner);
   FWatches := AWatches;
   FWatches.OnUpdateWatch := FWatchesUpdateWatch;
   FWatches.OnNewWatch    := FWatchesNewWatch;
+  FDisplayValuesSettings := ADisplayValuesSettings;
   CreateObjects;
 end;
 
@@ -233,7 +238,7 @@ function TfrmWatchesView.FCDIdCustomDraw(Sender: TObject;
 begin
   if DrawMode = dmPaintText then
   begin
-    TargetCanvas.Font.Color := ID_FONTCOLOR;
+    FDisplayValuesSettings.Id.AssignTo(TargetCanvas.Font);
   end;
   Result := True;
 end;
@@ -245,7 +250,7 @@ function TfrmWatchesView.FCDNameCustomDraw(Sender: TObject;
 begin
   if DrawMode = dmPaintText then
   begin
-    TargetCanvas.Font.Style := TargetCanvas.Font.Style + [fsBold];
+    FDisplayValuesSettings.ValueName.AssignTo(TargetCanvas.Font);
   end;
   Result := True;
 end;
@@ -257,7 +262,7 @@ function TfrmWatchesView.FCDTimeStampCustomDraw(Sender: TObject;
 begin
   if DrawMode = dmPaintText then
   begin
-    TargetCanvas.Font.Color := TIMESTAMP_FONTCOLOR;
+    FDisplayValuesSettings.TimeStamp.AssignTo(TargetCanvas.Font);
   end;
   Result := True;
 end;
@@ -269,7 +274,7 @@ function TfrmWatchesView.FCDValueCustomDraw(Sender: TObject;
 begin
   if DrawMode = dmPaintText then
   begin
-    TargetCanvas.Font.Color := VALUE_FONTCOLOR;
+    FDisplayValuesSettings.Value.AssignTo(TargetCanvas.Font);
   end;
   Result := True;
 end;
@@ -292,8 +297,14 @@ function TfrmWatchesView.FCDTypeCustomDraw(Sender: TObject;
 begin
   if DrawMode = dmPaintText then
   begin
-    TargetCanvas.Font.Style := TargetCanvas.Font.Style + [fsBold];
-    TargetCanvas.Font.Color := VALUETYPE_FONTCOLOR;
+    if TWatch(Item).ValueType = 'Counter' then
+    begin
+      FDisplayValuesSettings.Counter.AssignTo(TargetCanvas.Font);
+    end
+    else
+    begin
+      FDisplayValuesSettings.ValueType.AssignTo(TargetCanvas.Font);
+    end;
   end;
   Result := True;
 end;
