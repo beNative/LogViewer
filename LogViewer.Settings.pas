@@ -83,7 +83,6 @@ type
     property DisplayValuesSettings: TDisplayValuesSettings
       read FDisplayValuesSettings;
 
-  published
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
   end;

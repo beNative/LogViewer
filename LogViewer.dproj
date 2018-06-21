@@ -111,7 +111,9 @@
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <AppEnableHighDPI>true</AppEnableHighDPI>
         <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName)</VerInfo_Keys>
-        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <DCC_IntegerOverflowCheck>true</DCC_IntegerOverflowCheck>
+        <DCC_RangeChecking>true</DCC_RangeChecking>
+        <DCC_DebugDCUs>true</DCC_DebugDCUs>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
@@ -356,8 +358,8 @@
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.Dashboard.View.Node.pas"/>
-        <DCCReference Include="..\..\libraries\dduce\Source\Modules\ValueList\DDuce.ValueList.pas"/>
-        <DCCReference Include="..\..\libraries\dduce\Source\Modules\ValueList\DDuce.ValueList.Node.pas"/>
+        <DCCReference Include="..\..\libraries\dduce\Source\Components\DDuce.Components.ValueList.Node.pas"/>
+        <DCCReference Include="..\..\libraries\dduce\Source\Components\DDuce.Components.ValueList.pas"/>
         <None Include="Readme.md"/>
         <BuildConfiguration Include="Debug">
             <Key>Cfg_2</Key>

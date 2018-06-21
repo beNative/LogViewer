@@ -161,11 +161,11 @@ function TChannelReceiver.GetOnNewLogQueue: IEvent<TLogQueueEvent>;
 begin
   Result := FOnNewLogQueue;
 end;
+
 function TChannelReceiver.GetQueueList: IDictionary<Integer, ILogQueue>;
 begin
   Result := FQueueList;
 end;
-
 {$ENDREGION}
 
 {$REGION 'event handlers'}

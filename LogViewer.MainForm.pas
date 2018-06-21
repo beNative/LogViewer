@@ -72,7 +72,7 @@ type
     FManager         : ILogViewerManager;
     FSettings        : TLogViewerSettings;
     FMainToolbar     : TToolBar;
-    FComPortSettings : TComPortSettings;
+    //FComPortSettings : TComPortSettings;
     FDashboard       : TfrmDashboard;
 
     procedure SettingsChanged(Sender: TObject);
@@ -158,7 +158,7 @@ begin
   FSettings.FormSettings.Assign(Self);
   FSettings.Save;
   FSettings.Free;
-  FComPortSettings.Free;
+  //FComPortSettings.Free;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}

@@ -156,7 +156,7 @@ begin
 //      LTextSize := Length(Item.ProcessName);
 //      FBuffer.WriteBuffer(Item.ProcessName[1], LTextSize);
       //ShowMessage(Item.ProcessInfo.ProcessName);
-    DoReceiveMessage(FBuffer, Item.ProcessId, 0, Item.ProcessName);
+    DoReceiveMessage(FBuffer, Item.ProcessId, 0, string(Item.ProcessName));
   end;
 end;
 {$ENDREGION}
@@ -250,7 +250,7 @@ begin
 
         LODSMessage.Id := FLastChildOrder;
         Inc(FLastChildOrder);
-        if Trim(LODSMessage.MsgText) <> '' then
+        if Trim(string(LODSMessage.MsgText)) <> '' then
         begin
           Queue(procedure
             begin

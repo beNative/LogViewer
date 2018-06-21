@@ -66,7 +66,7 @@ type
     FWinIPCSettingsForm        : TfrmWinIPCSettings;
     FWinODSSettingsForm        : TfrmWinODSSettings;
     FDisplayValuesSettingsForm : TfrmDisplayValuesSettings;
-    FEditor                    : IEditorView;
+    //FEditor                    : IEditorView;
 
     procedure FConfigTreeGetText(
       Sender       : TBaseVirtualTree;

@@ -22,10 +22,6 @@ interface
   log channel (IChannelReceiver receiver instance) }
 
 {
-  https://stackoverflow.com/questions/5365365/tree-like-datastructure-for-use-with-virtualtreeview
-}
-
-{
   TODO:
     - auto show message details, watches window and callstack (WinODS)
 }
@@ -40,7 +36,7 @@ uses
 
   Spring.Collections,
 
-  DDuce.Editor.Interfaces, DDuce.Logger.Interfaces, DDuce.ValueList,
+  DDuce.Editor.Interfaces, DDuce.Logger.Interfaces, DDuce.Components.ValueList,
 
   LogViewer.Messages.Data, LogViewer.Watches.Data, LogViewer.Watches.View,
   LogViewer.Interfaces, LogViewer.CallStack.Data, LogViewer.CallStack.View,
@@ -55,7 +51,12 @@ type
     edtHandleType     : TLabeledEdit;
     edtHeight         : TLabeledEdit;
     edtMessageFilter  : TLabeledEdit;
+    edtMessageType    : TLabeledEdit;
     edtPixelFormat    : TLabeledEdit;
+    edtTimeStamp      : TLabeledEdit;
+    edtValue          : TLabeledEdit;
+    edtValueName      : TLabeledEdit;
+    edtValueType      : TLabeledEdit;
     edtWidth          : TLabeledEdit;
     imgBitmap         : TImage;
     imlMessageTypes   : TImageList;
@@ -63,34 +64,29 @@ type
     pnlCallStack      : TPanel;
     pnlCallStackTitle : TPanel;
     pnlCallStackWatch : TPanel;
+    pnlColor          : TPanel;
     pnlFilter         : TPanel;
     pnlImageViewer    : TPanel;
     pnlLeft           : TPanel;
     pnlLeftBottom     : TPanel;
     pnlMessageContent : TPanel;
+    pnlMessageDetails : TGridPanel;
     pnlMessages       : TPanel;
+    pnlMessageType    : TPanel;
     pnlRawMessageData : TPanel;
     pnlRight          : TPanel;
+    pnlTextViewer     : TPanel;
+    pnlTimeStamp      : TPanel;
+    pnlValue          : TPanel;
+    pnlValueName      : TPanel;
+    pnlValueType      : TPanel;
     pnlWatches        : TPanel;
     splLeftHorizontal : TSplitter;
     splLeftVertical   : TSplitter;
     splVertical       : TSplitter;
     tsImageViewer     : TTabSheet;
     tsTextViewer      : TTabSheet;
-    pnlMessageDetails : TGridPanel;
-    pnlMessageType    : TPanel;
-    pnlValueName      : TPanel;
-    pnlValue          : TPanel;
-    edtMessageType    : TLabeledEdit;
-    edtValueName      : TLabeledEdit;
-    edtValue          : TLabeledEdit;
-    pnlTimeStamp: TPanel;
-    edtTimeStamp: TLabeledEdit;
-    pnlColor: TPanel;
-    pnlValueType: TPanel;
-    pnlTextViewer: TPanel;
-    edtValueType: TLabeledEdit;
-    tsValueList: TTabSheet;
+    tsValueList       : TTabSheet;
     {$ENDREGION}
 
     procedure edtMessageFilterChange(Sender: TObject);
@@ -351,7 +347,7 @@ begin
   FLogQueue.OnReceiveMessage.Add(FLogQueueReceiveMessage);
   Caption := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
   FSettings.OnChanged.Add(FSettingsChanged);
-  FLogTreeView.PopupMenu  := Manager.Menus.LogTreeViewerPopupMenu;
+  FLogTreeView.PopupMenu := Manager.Menus.LogTreeViewerPopupMenu;
 
   FValueList := TValueList.Create(Self);
   FValueList.Parent := tsValueList;
@@ -559,12 +555,12 @@ var
 begin
   LN := Sender.GetNodeData<TLogNode>(Node);
   DVS := Manager.Settings.DisplayValuesSettings;
-//  if LN.MessageType in [lmtEnterMethod, lmtLeaveMethod] then
-//  begin
-//    DVS.Tracing.AssignTo(TargetCanvas);
-//    //TargetCanvas.Brush.Color := $00EEEEEE;
-//    TargetCanvas.FillRect(CellRect);
-//  end
+  if LN.MessageType in [lmtEnterMethod, lmtLeaveMethod] then
+  begin
+    DVS.Tracing.AssignTo(TargetCanvas);
+    //TargetCanvas.Brush.Color := $00EEEEEE;
+    TargetCanvas.FillRect(CellRect);
+  end
 end;
 
 procedure TfrmMessageList.FLogTreeViewFocusChanging(Sender: TBaseVirtualTree;
@@ -677,6 +673,8 @@ begin
         CellText := 'Interface';
       lmtStrings:
         CellText := 'Strings';
+      lmtCheckpoint:
+        CellText := 'Checkpoint';
       else
         CellText := LN.Text
     end;
@@ -710,7 +708,6 @@ var
   LN : TLogNode; // class type
   I  : Integer;
   S  : string;
-  //A  : TArray<string>;
 begin
   LN := TLogNode.Create;
   Node.SetData(LN);
@@ -735,11 +732,6 @@ begin
         LN.ValueName := Copy(S, 1, I);
       LN.Text := '';
     end;
-    //lmtStrings:
-//    lmtComponent:
-//    begin
-//      LN.Text := '';
-//    end;
     lmtAlphaColor, lmtColor:
     begin
       S := string(FCurrentMsg.Text);
@@ -758,6 +750,14 @@ begin
     begin
       LN.Text := string(FCurrentMsg.Text);
     end;
+    lmtCheckpoint:
+    begin
+      S := string(FCurrentMsg.Text);
+      I := S.IndexOf('#');
+      LN.ValueName := Copy(S, 1, I);
+      LN.Value := Copy(S, I + 2, S.Length);
+      LN.ValueType := 'Checkpoint';
+    end
   end;
   //Show only what matches filter criterias
   Sender.IsVisible[Node] := (LN.MessageType in [lmtEnterMethod, lmtLeaveMethod]) or
@@ -822,6 +822,10 @@ begin
       lmtEnterMethod, lmtLeaveMethod:
       begin
         DVS.Tracing.AssignTo(TargetCanvas.Font);
+      end;
+      lmtCheckpoint:
+      begin
+        DVS.CheckPoint.AssignTo(TargetCanvas.Font);
       end;
     end;
   end
@@ -937,9 +941,13 @@ begin
   pnlLeft.Width         := Settings.LeftPanelWidth;
   pnlRight.Width        := Settings.RightPanelWidth;
   DisplayValuesSettings.TimeStamp.AssignTo(edtTimeStamp.Font);
+  edtTimeStamp.Alignment := DisplayValuesSettings.TimeStamp.HorizontalAlignment;
   DisplayValuesSettings.ValueName.AssignTo(edtValueName.Font);
+  edtValueName.Alignment := DisplayValuesSettings.ValueName.HorizontalAlignment;
   DisplayValuesSettings.ValueType.AssignTo(edtValueType.Font);
+  edtValueType.Alignment := DisplayValuesSettings.ValueType.HorizontalAlignment;
   DisplayValuesSettings.Value.AssignTo(edtValue.Font);
+  edtValue.Alignment := DisplayValuesSettings.Value.HorizontalAlignment;
   UpdateView;
 end;
 
@@ -1100,8 +1108,11 @@ begin
   AStream.ReadBuffer(FCurrentMsg.MsgType);
   AStream.ReadBuffer(FCurrentMsg.TimeStamp);
   AStream.ReadBuffer(LTextSize);
-  SetLength(FCurrentMsg.Text, LTextSize);
-  AStream.ReadBuffer(FCurrentMsg.Text[1], LTextSize);
+  if LTextSize > 0 then
+  begin
+    SetLength(FCurrentMsg.Text, LTextSize);
+    AStream.ReadBuffer(FCurrentMsg.Text[1], LTextSize);
+  end;
   AStream.ReadBuffer(LDataSize);
   if LDataSize > 0 then
   begin
@@ -1180,7 +1191,6 @@ begin
     if Parent.Focused then
       B := True;
   end;
-
   if B then
   begin
     Activate;
@@ -1297,7 +1307,7 @@ begin
     lmtEnterMethod, lmtLeaveMethod, lmtText,
     lmtInfo, lmtWarning, lmtError, lmtConditional:
       UpdateTextDisplay(ALogNode);
-    lmtValue, lmtObject, lmtPersistent, lmtInterface, lmtStrings:
+    lmtValue, lmtObject, lmtPersistent, lmtInterface, lmtStrings, lmtCheckpoint:
       UpdateValueDisplay(ALogNode);
   end;
   edtMessageType.Text := LogMessageTypeNameOf(ALogNode.MessageType);

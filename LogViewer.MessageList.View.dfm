@@ -74,12 +74,24 @@ object frmMessageList: TfrmMessageList
         Top = 138
         Width = 430
         Height = 608
-        ActivePage = tsTextViewer
+        ActivePage = tsValueList
         Align = alBottom
         Anchors = [akLeft, akTop, akRight, akBottom]
         TabOrder = 0
+        object tsValueList: TTabSheet
+          Caption = 'Value list'
+          ImageIndex = 2
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
+        end
         object tsTextViewer: TTabSheet
           Caption = 'Text viewer'
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object pnlTextViewer: TPanel
             AlignWithMargins = True
             Left = 3
@@ -96,6 +108,10 @@ object frmMessageList: TfrmMessageList
         object tsImageViewer: TTabSheet
           Caption = 'Image viewer'
           ImageIndex = 1
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object pnlImageViewer: TPanel
             Left = 0
             Top = 0
@@ -165,10 +181,6 @@ object frmMessageList: TfrmMessageList
               TabOrder = 3
             end
           end
-        end
-        object tsValueList: TTabSheet
-          Caption = 'Value list'
-          ImageIndex = 2
         end
       end
       object pnlMessageDetails: TGridPanel
@@ -564,7 +576,7 @@ object frmMessageList: TfrmMessageList
     Left = 607
     Top = 150
     Bitmap = {
-      494C010114001500E80010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010114001500F80010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

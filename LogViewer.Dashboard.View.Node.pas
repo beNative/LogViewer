@@ -145,8 +145,6 @@ begin
 end;
 
 procedure TDashboardNode.SetReceiver(const Value: IChannelReceiver);
-var
-  LQ : ILogQueue;
 begin
   if Value <> Receiver then
   begin

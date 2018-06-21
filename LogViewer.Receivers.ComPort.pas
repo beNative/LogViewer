@@ -59,7 +59,6 @@ type
     procedure SetEnabled(const Value: Boolean); override;
     {$ENDREGION}
 
-    function ToString: string; override;
 
     procedure DoReceiveMessage(
       AStream           : TStream;
@@ -79,10 +78,10 @@ type
       const AName : string;
       ASettings   : TComPortSettings
     ); reintroduce;
-
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 
+    function ToString: string; override;
   end;
 
 implementation

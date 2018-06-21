@@ -255,39 +255,39 @@ end;
 {$REGION 'protected methods'}
 procedure TfrmDashboard.InitializeTreeView;
 begin
-  FTreeView.OnBeforeCellPaint := FTreeViewBeforeCellPaint;
-  FTreeView.OnInitNode        := FTreeViewInitNode;
-  FTreeView.OnInitChildren    := FTreeViewInitChildren;
-  FTreeView.OnGetText         := FTreeViewGetText;
-  FTreeView.OnChecked         := FTreeViewChecked;
-  with FTreeView do
-  begin
-    with Header.Columns.Add do
-    begin
-      Color    := clWhite;
-      MaxWidth := 200;
-      MinWidth := 100;
-      Options  := [coAllowClick, coDraggable, coEnabled, coParentBidiMode,
-        coResizable, coShowDropMark, coVisible, coSmartResize, coAllowFocus,
-        coEditable];
-      Position := 0;
-      Indent   := 8;
-      Width    := 200;
-      Text := 'Name';
-    end;
-    with Header.Columns.Add do
-    begin
-      MaxWidth := 800;
-      MinWidth := 100;
-      Options  := [coAllowClick, coDraggable, coEnabled, coParentBidiMode,
-        coParentColor, coResizable, coShowDropMark, coVisible, coAutoSpring,
-        coSmartResize, coAllowFocus, coEditable];
-      Position := 1;
-      Width    := 100;
-      Text := 'Value';
-    end;
-    Header.MainColumn := 0;
-  end;
+//  FTreeView.OnBeforeCellPaint := FTreeViewBeforeCellPaint;
+//  FTreeView.OnInitNode        := FTreeViewInitNode;
+//  FTreeView.OnInitChildren    := FTreeViewInitChildren;
+//  FTreeView.OnGetText         := FTreeViewGetText;
+//  FTreeView.OnChecked         := FTreeViewChecked;
+//  with FTreeView do
+//  begin
+//    with Header.Columns.Add do
+//    begin
+//      Color    := clWhite;
+//      MaxWidth := 200;
+//      MinWidth := 100;
+//      Options  := [coAllowClick, coDraggable, coEnabled, coParentBidiMode,
+//        coResizable, coShowDropMark, coVisible, coSmartResize, coAllowFocus,
+//        coEditable];
+//      Position := 0;
+//      Indent   := 8;
+//      Width    := 200;
+//      Text := 'Name';
+//    end;
+//    with Header.Columns.Add do
+//    begin
+//      MaxWidth := 800;
+//      MinWidth := 100;
+//      Options  := [coAllowClick, coDraggable, coEnabled, coParentBidiMode,
+//        coParentColor, coResizable, coShowDropMark, coVisible, coAutoSpring,
+//        coSmartResize, coAllowFocus, coEditable];
+//      Position := 1;
+//      Width    := 100;
+//      Text := 'Value';
+//    end;
+//    Header.MainColumn := 0;
+//  end;
 
   //FTreeView.RootNodeCount := FManager.Receivers.Count;
 end;
@@ -297,7 +297,7 @@ begin
   chkWinIPCEnabled.Checked := FManager.Settings.WinIPCSettings.Enabled;
   chkWinODSEnabled.Checked := FManager.Settings.WinODSSettings.Enabled;
   chkZeroMQEnabled.Checked := FManager.Settings.ZeroMQSettings.Enabled;
-  //chkComPortEnabled.Checked := FManager.Settings.ComPortSettings.
+//  chkComPortEnabled.Checked := FManager.Settings.ComPortSettings.Enabled;
   FManager.Actions.UpdateActions;
 
   inherited UpdateActions;

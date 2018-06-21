@@ -31,15 +31,16 @@ uses
 
   DSharp.Windows.TreeViewPresenter, DSharp.Windows.ColumnDefinitions,
 
-
   LogViewer.Messages.Data, LogViewer.Watches.Data,
   LogViewer.DisplayValues.Settings;
 
 type
   TfrmWatchesView = class(TForm)
+    {$REGION 'designer controls'}
     pnlWatches      : TPanel;
     splHorizontal   : TSplitter;
     pnlWatchHistory : TPanel;
+    {$ENDREGION}
 
   private
     FMessageId             : Int64;

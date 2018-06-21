@@ -49,6 +49,7 @@ type
 
   protected
     procedure Changed;
+    procedure InitializeObjects;
 
   public
     procedure AfterConstruction; override;
@@ -100,42 +101,7 @@ implementation
 procedure TDisplayValuesSettings.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FTimeStamp := TTextFormatSettings.Create;
-  FTimeStamp.Name := 'TimeStamp';
-  FTimeStamp.OnChanged.Add(FormatSettingsChanged);
-  FValueName := TTextFormatSettings.Create;
-  FValueName.Name := 'ValueName';
-  FValueName.OnChanged.Add(FormatSettingsChanged);
-  FValueType := TTextFormatSettings.Create;
-  FValueType.Name := 'ValueType';
-  FValueType.OnChanged.Add(FormatSettingsChanged);
-  FValue := TTextFormatSettings.Create;
-  FValue.Name := 'Value';
-  FValue.OnChanged.Add(FormatSettingsChanged);
-  FId := TTextFormatSettings.Create;
-  FId.Name := 'Id';
-  FId.OnChanged.Add(FormatSettingsChanged);
-  FInfo := TTextFormatSettings.Create;
-  FInfo.Name := 'Info';
-  FInfo.OnChanged.Add(FormatSettingsChanged);
-  FWarning := TTextFormatSettings.Create;
-  FWarning.Name := 'Warning';
-  FWarning.OnChanged.Add(FormatSettingsChanged);
-  FError := TTextFormatSettings.Create;
-  FError.Name := 'Error';
-  FError.OnChanged.Add(FormatSettingsChanged);
-  FCheckPoint := TTextFormatSettings.Create;
-  FCheckPoint.Name := 'CheckPoint';
-  FCheckPoint.OnChanged.Add(FormatSettingsChanged);
-  FCounter := TTextFormatSettings.Create;
-  FCounter.Name := 'Counter';
-  FCounter.OnChanged.Add(FormatSettingsChanged);
-  FTracing := TTextFormatSettings.Create;
-  FTracing.Name := 'Tracing';
-  FTracing.OnChanged.Add(FormatSettingsChanged);
-  FConditional := TTextFormatSettings.Create;
-  FConditional.Name := 'Conditional';
-  FConditional.OnChanged.Add(FormatSettingsChanged);
+  InitializeObjects;
 end;
 
 procedure TDisplayValuesSettings.BeforeDestruction;
@@ -174,6 +140,77 @@ end;
 procedure TDisplayValuesSettings.FormatSettingsChanged(Sender: TObject);
 begin
   Changed;
+end;
+{$ENDREGION}
+
+{$REGION 'protected methods'}
+procedure TDisplayValuesSettings.InitializeObjects;
+begin
+  FTimeStamp               := TTextFormatSettings.Create;
+  FTimeStamp.Name          := 'TimeStamp';
+  FTimeStamp.Font.Color    := clBlue;
+  FTimeStamp.OnChanged.Add(FormatSettingsChanged);
+
+  FValueName               := TTextFormatSettings.Create;
+  FValueName.Name          := 'ValueName';
+  FValueName.Font.Color    := clMaroon;
+  FValueName.Font.Style    := [fsUnderline];
+  FValueName.OnChanged.Add(FormatSettingsChanged);
+
+  FValueType               := TTextFormatSettings.Create;
+  FValueType.Name          := 'ValueType';
+  FValueType.Font.Color    := clNavy;
+  FValueType.OnChanged.Add(FormatSettingsChanged);
+
+  FValue                   := TTextFormatSettings.Create;
+  FValue.Name              := 'Value';
+  FValue.Font.Color        := clBlack;
+  FValue.OnChanged.Add(FormatSettingsChanged);
+
+  FId                      := TTextFormatSettings.Create;
+  FId.Name                 := 'Id';
+  FId.Font.Color           := clGray;
+  FId.OnChanged.Add(FormatSettingsChanged);
+
+  FInfo                    := TTextFormatSettings.Create;
+  FInfo.Name               := 'Info';
+  FInfo.Font.Color         := clBlue;
+  FInfo.Font.Style         := [fsBold];
+  FInfo.OnChanged.Add(FormatSettingsChanged);
+
+  FWarning                 := TTextFormatSettings.Create;
+  FWarning.Font.Color      := clWebOrange;
+  FWarning.Font.Style      := [fsBold];
+  FWarning.Name            := 'Warning';
+  FWarning.OnChanged.Add(FormatSettingsChanged);
+
+  FError                   := TTextFormatSettings.Create;
+  FError.Name              := 'Error';
+  FError.Font.Color        := clRed;
+  FError.Font.Style        := [fsBold];
+  FError.OnChanged.Add(FormatSettingsChanged);
+
+  FConditional             := TTextFormatSettings.Create;
+  FConditional.Font.Color  := clTeal;
+  FConditional.Name        := 'Conditional';
+  FConditional.OnChanged.Add(FormatSettingsChanged);
+
+  FCheckPoint              := TTextFormatSettings.Create;
+  FCheckPoint.Name         := 'CheckPoint';
+  FCheckPoint.Font.Color   := clGreen;
+  FCheckPoint.Font.Style   := [fsBold];
+  FCheckPoint.OnChanged.Add(FormatSettingsChanged);
+
+  FCounter                 := TTextFormatSettings.Create;
+  FCounter.Name            := 'Counter';
+  FCounter.Font.Color      := clPurple;
+  FCounter.OnChanged.Add(FormatSettingsChanged);
+
+  FTracing                 := TTextFormatSettings.Create;
+  FTracing.Name            := 'Tracing';
+  FTracing.BackgroundColor := clWhite;
+  FTracing.OnChanged.Add(FormatSettingsChanged);
+
 end;
 {$ENDREGION}
 

@@ -193,8 +193,8 @@ uses
   LogViewer.DisplayValues.Settings in 'LogViewer.DisplayValues.Settings.pas',
   LogViewer.DisplayValues.Settings.View in 'LogViewer.DisplayValues.Settings.View.pas' {frmDisplayValuesSettings},
   LogViewer.Dashboard.View.Node in 'LogViewer.Dashboard.View.Node.pas',
-  DDuce.ValueList in '..\..\libraries\dduce\Source\Modules\ValueList\DDuce.ValueList.pas',
-  DDuce.ValueList.Node in '..\..\libraries\dduce\Source\Modules\ValueList\DDuce.ValueList.Node.pas';
+  DDuce.Components.ValueList.Node in '..\..\libraries\dduce\Source\Components\DDuce.Components.ValueList.Node.pas',
+  DDuce.Components.ValueList in '..\..\libraries\dduce\Source\Components\DDuce.Components.ValueList.pas';
 
 {$R *.res}
 
