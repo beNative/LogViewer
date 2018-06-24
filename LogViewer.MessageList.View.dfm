@@ -71,33 +71,26 @@ object frmMessageList: TfrmMessageList
       TabOrder = 1
       object pgcMessageDetails: TPageControl
         Left = 0
-        Top = 138
+        Top = 140
         Width = 430
-        Height = 608
-        ActivePage = tsValueList
+        Height = 606
+        ActivePage = tsImageViewer
         Align = alBottom
         Anchors = [akLeft, akTop, akRight, akBottom]
         TabOrder = 0
         object tsValueList: TTabSheet
           Caption = 'Value list'
           ImageIndex = 2
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
+          ExplicitHeight = 580
         end
         object tsTextViewer: TTabSheet
           Caption = 'Text viewer'
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object pnlTextViewer: TPanel
             AlignWithMargins = True
             Left = 3
             Top = 3
             Width = 416
-            Height = 574
+            Height = 572
             Align = alClient
             BevelOuter = bvNone
             Color = clWhite
@@ -108,15 +101,11 @@ object frmMessageList: TfrmMessageList
         object tsImageViewer: TTabSheet
           Caption = 'Image viewer'
           ImageIndex = 1
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object pnlImageViewer: TPanel
             Left = 0
             Top = 0
             Width = 422
-            Height = 580
+            Height = 578
             Align = alClient
             BevelOuter = bvNone
             ParentBackground = False
@@ -125,7 +114,7 @@ object frmMessageList: TfrmMessageList
               Left = 0
               Top = 73
               Width = 422
-              Height = 507
+              Height = 505
               Align = alBottom
               Anchors = [akLeft, akTop, akRight, akBottom]
               Center = True
@@ -187,7 +176,7 @@ object frmMessageList: TfrmMessageList
         Left = 0
         Top = 0
         Width = 430
-        Height = 138
+        Height = 140
         Align = alClient
         BevelOuter = bvNone
         ColumnCollection = <
@@ -237,17 +226,19 @@ object frmMessageList: TfrmMessageList
             Value = 20.000000000000000000
           end>
         TabOrder = 1
+        ExplicitHeight = 138
         object pnlMessageType: TPanel
           Left = 0
           Top = 0
           Width = 430
-          Height = 27
+          Height = 28
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
+          ExplicitHeight = 27
           DesignSize = (
             430
-            27)
+            28)
           object edtMessageType: TLabeledEdit
             Left = 81
             Top = 4
@@ -271,15 +262,17 @@ object frmMessageList: TfrmMessageList
         end
         object pnlValueName: TPanel
           Left = 0
-          Top = 27
+          Top = 28
           Width = 430
-          Height = 27
+          Height = 28
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 1
+          ExplicitTop = 27
+          ExplicitHeight = 27
           DesignSize = (
             430
-            27)
+            28)
           object edtValueName: TLabeledEdit
             Left = 80
             Top = 4
@@ -303,19 +296,21 @@ object frmMessageList: TfrmMessageList
         end
         object pnlValue: TPanel
           Left = 0
-          Top = 54
+          Top = 56
           Width = 430
-          Height = 27
+          Height = 28
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 2
+          ExplicitTop = 54
+          ExplicitHeight = 27
           DesignSize = (
             430
-            27)
+            28)
           object edtValue: TLabeledEdit
             Left = 80
             Top = 5
-            Width = 345
+            Width = 301
             Height = 21
             Anchors = [akLeft, akTop, akRight]
             EditLabel.Width = 30
@@ -331,22 +326,41 @@ object frmMessageList: TfrmMessageList
             ParentFont = False
             TabOrder = 0
           end
+          object pnlColor: TPanel
+            Left = 387
+            Top = 5
+            Width = 38
+            Height = 21
+            Anchors = [akTop, akRight]
+            BevelKind = bkFlat
+            BevelOuter = bvNone
+            Color = clGrayText
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = [fsBold]
+            ParentBackground = False
+            ParentFont = False
+            TabOrder = 1
+          end
         end
         object pnlTimeStamp: TPanel
           Left = 0
-          Top = 81
+          Top = 84
           Width = 430
-          Height = 27
+          Height = 28
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 3
+          ExplicitTop = 83
           DesignSize = (
             430
-            27)
+            28)
           object edtTimeStamp: TLabeledEdit
-            Left = 80
+            Left = 81
             Top = 4
-            Width = 345
+            Width = 343
             Height = 21
             Alignment = taCenter
             Anchors = [akLeft, akTop, akRight]
@@ -366,36 +380,20 @@ object frmMessageList: TfrmMessageList
             ParentFont = False
             TabOrder = 0
           end
-          object pnlColor: TPanel
-            Left = 105
-            Top = 115
-            Width = 38
-            Height = 21
-            Anchors = [akTop, akRight]
-            BevelKind = bkFlat
-            BevelOuter = bvNone
-            Color = clGrayText
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentBackground = False
-            ParentFont = False
-            TabOrder = 1
-          end
         end
         object pnlValueType: TPanel
           Left = 0
-          Top = 108
+          Top = 112
           Width = 430
-          Height = 30
+          Height = 28
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 4
+          ExplicitTop = 108
+          ExplicitHeight = 30
           DesignSize = (
             430
-            30)
+            28)
           object edtValueType: TLabeledEdit
             Left = 80
             Top = 5
@@ -576,7 +574,7 @@ object frmMessageList: TfrmMessageList
     Left = 607
     Top = 150
     Bitmap = {
-      494C010114001500F80010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010114001500FC0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

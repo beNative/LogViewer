@@ -550,7 +550,7 @@ procedure TfrmMessageList.FLogTreeViewBeforeCellPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
 var
-  LN : TLogNode;
+  LN  : TLogNode;
   DVS : TDisplayValuesSettings;
 begin
   LN := Sender.GetNodeData<TLogNode>(Node);
@@ -1013,9 +1013,9 @@ begin
   FEditorView.Clear;
   FCallStack.Clear;
   ClearMessageDetailsControls;
-  FMessageCount       := 0;
-  FLastNode           := nil;
-  FLastParent         := nil;
+  FMessageCount := 0;
+  FLastNode     := nil;
+  FLastParent   := nil;
 end;
 
 procedure TfrmMessageList.ClearMessageDetailsControls;
@@ -1116,8 +1116,8 @@ begin
   AStream.ReadBuffer(LDataSize);
   if LDataSize > 0 then
   begin
-    FCurrentMsg.Data := TMemoryStream.Create;
-    FCurrentMsg.Data.Size := 0;
+    FCurrentMsg.Data          := TMemoryStream.Create;
+    FCurrentMsg.Data.Size     := 0;
     FCurrentMsg.Data.Position := 0;
     FCurrentMsg.Data.CopyFrom(AStream, LDataSize);
   end
@@ -1183,7 +1183,7 @@ end;
 
 procedure TfrmMessageList.UpdateActions;
 var
-  B: Boolean;
+  B : Boolean;
 begin
   B := Focused;
   if not B and Assigned(Parent) then
@@ -1257,9 +1257,9 @@ begin
     S := Trim(ALogNode.Value);
   if ALogNode.MessageType = lmtAlphaColor then
     // First byte in Alphacolors is the transparancy channel
-    pnlColor.Color := AlphaColorToColor(StrToInt(S))
+    pnlColor.Color := AlphaColorToColor(S.ToInt64)
   else
-    pnlColor.Color := StrToInt(S);
+    pnlColor.Color := S.ToInteger;
 end;
 
 procedure TfrmMessageList.UpdateComponentDisplay(ALogNode: TLogNode);
@@ -1364,6 +1364,8 @@ end;
 procedure TfrmMessageList.UpdateValueDisplay(ALogNode: TLogNode);
 var
   DR : DynamicRecord;
+  SA : TArray<string>;
+  SL : TStringList;
 begin
   FEditorView.Text := ALogNode.Value;
   FEditorView.HighlighterName := 'TXT';
@@ -1371,6 +1373,21 @@ begin
   begin
     pgcMessageDetails.ActivePage := tsValueList;
     DR.FromString(ALogNode.Value);
+    FValueList.Data := DR;
+  end
+  else if ALogNode.Value.Contains(#13#10) then
+  begin
+    SL := TStringList.Create;
+    try
+       SL.Text := ALogNode.Value;
+       DR.FromArray<string>(SL.ToStringArray, True);
+    finally
+      SL.Free;
+
+    end;
+      //SetLength(SA,
+    pgcMessageDetails.ActivePage := tsValueList;
+    //DR.FromArray<string>(ALogNode.Value.To );
     FValueList.Data := DR;
   end
   else
