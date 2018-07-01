@@ -28,7 +28,15 @@ uses
 
   VirtualTrees,
 
-  LogViewer.Interfaces;
+  LogViewer.Interfaces, Vcl.ButtonGroup;
+
+  {
+    TODO:
+      - indicate amount of data received per channel
+      - editable treeview in which we can add nodes for every channel we want to
+        subscribe to.
+
+  }
 
 type
   TfrmDashboard = class(TForm)
@@ -39,6 +47,7 @@ type
     chkWinODSEnabled  : TCheckBox;
     chkZeroMQEnabled  : TCheckBox;
     pnlLogChannels    : TPanel;
+    bgMain: TButtonGroup;
     {$ENDREGION}
 
     procedure chkWinIPCEnabledClick(Sender: TObject);
@@ -109,6 +118,8 @@ uses
   DDuce.Factories.TreeViewPresenter, DDuce.Factories.VirtualTrees,
 
   DDuce.ObjectInspector.zObjectInspector,
+
+  LogViewer.Manager,
 
   LogViewer.Factories, LogViewer.Dashboard.View.Node;
 

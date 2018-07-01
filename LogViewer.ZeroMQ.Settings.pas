@@ -29,9 +29,12 @@ type
     FOnChanged : Event<TNotifyEvent>;
     FAddress   : string;
     FEnabled   : Boolean;
+    FPort      : Integer;
 
   protected
     {$REGION 'property access methods'}
+    function GetPort: Integer;
+    procedure SetPort(const Value: Integer);
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
     function GetOnChanged: IEvent<TNotifyEvent>;
@@ -47,6 +50,9 @@ type
     property Address: string
       read GetAddress write SetAddress;
 
+    property Port: Integer
+      read GetPort write SetPort;
+
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
 
@@ -61,6 +67,20 @@ implementation
 function TZeroMQSettings.GetOnChanged: IEvent<TNotifyEvent>;
 begin
   Result := FOnChanged;
+end;
+
+function TZeroMQSettings.GetPort: Integer;
+begin
+  Result := FPort;
+end;
+
+procedure TZeroMQSettings.SetPort(const Value: Integer);
+begin
+  if Value <> Port then
+  begin
+    FPort := Value;
+    Changed;
+  end;
 end;
 
 function TZeroMQSettings.GetAddress: string;
@@ -107,8 +127,9 @@ begin
   if Source is TZeroMQSettings then
   begin
     LSettings := TZeroMQSettings(Source);
-    Address  := LSettings.Address;
-    Enabled  := LSettings.Enabled;
+    Address   := LSettings.Address;
+    Port      := LSettings.Port;
+    Enabled   := LSettings.Enabled;
   end
   else
     inherited Assign(Source);

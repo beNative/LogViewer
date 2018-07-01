@@ -33,13 +33,18 @@ uses
   LogViewer.Factories, LogViewer.Manager, LogViewer.Settings,
   LogViewer.ComPort.Settings,
 
-  LogViewer.Dashboard.View;
+  LogViewer.Dashboard.View, System.Actions, Vcl.ActnList,
+  System.Win.TaskbarCore, Vcl.Taskbar, System.ImageList, Vcl.ImgList;
 
 type
   TfrmMain = class(TForm)
     sbrMain       : TStatusBar;
     ctMain        : TChromeTabs;
     pnlMainClient : TPanel;
+    tskbrMain: TTaskbar;
+    aclMain: TActionList;
+    actCenteInScreen: TAction;
+    imlMain: TImageList;
 
     procedure ctMainButtonAddClick(
       Sender      : TObject;
@@ -67,6 +72,7 @@ type
       var TabDropOptions : TTabDropOptions
     );
     procedure FormShortCut(var Msg: TWMKey; var Handled: Boolean);
+    procedure actCenteInScreenExecute(Sender: TObject);
 
   private
     FManager         : ILogViewerManager;
@@ -135,6 +141,11 @@ uses
 {$R *.dfm}
 
 {$REGION 'construction and destruction'}
+procedure TfrmMain.actCenteInScreenExecute(Sender: TObject);
+begin
+  Self.Position := poScreenCenter;
+end;
+
 procedure TfrmMain.AfterConstruction;
 begin
   inherited AfterConstruction;

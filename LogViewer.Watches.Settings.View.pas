@@ -58,12 +58,6 @@ begin
   FSettings := ASettings;
 end;
 
-procedure TfrmWatchSettings.UpdateActions;
-begin
-  inherited UpdateActions;
-  chkOnlyTrackChanges.Checked := FSettings.OnlyTrackChanges;
-end;
-
 procedure TfrmWatchSettings.BeforeDestruction;
 begin
   FSettings := nil;
@@ -75,6 +69,14 @@ end;
 procedure TfrmWatchSettings.chkOnlyTrackChangesClick(Sender: TObject);
 begin
   FSettings.OnlyTrackChanges := chkOnlyTrackChanges.Checked;
+end;
+{$ENDREGION}
+
+{$REGION 'protected methods'}
+procedure TfrmWatchSettings.UpdateActions;
+begin
+  inherited UpdateActions;
+  chkOnlyTrackChanges.Checked := FSettings.OnlyTrackChanges;
 end;
 {$ENDREGION}
 

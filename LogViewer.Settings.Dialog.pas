@@ -35,7 +35,7 @@ uses
 
   LogViewer.Comport.Settings.View, LogViewer.WinIPC.Settings.View,
   LogViewer.Watches.Settings.View, LogViewer.WinODS.Settings.View,
-  LogViewer.DisplayValues.Settings.View;
+  LogViewer.ZeroMQ.Settings.View, LogViewer.DisplayValues.Settings.View;
 
 type
   TfrmLogViewerSettings = class(TForm)
@@ -65,6 +65,7 @@ type
     FWatchSettingsForm         : TfrmWatchSettings;
     FWinIPCSettingsForm        : TfrmWinIPCSettings;
     FWinODSSettingsForm        : TfrmWinODSSettings;
+    FZeroMQSettingsForm        : TfrmZeroMQSettings;
     FDisplayValuesSettingsForm : TfrmDisplayValuesSettings;
     //FEditor                    : IEditorView;
 
@@ -234,6 +235,12 @@ begin
   FWinODSSettingsForm.Align       := alClient;
   FWinODSSettingsForm.BorderStyle := bsNone;
   FWinODSSettingsForm.Visible     := True;
+
+  FZeroMQSettingsForm := TfrmZeroMQSettings.Create(Self, FSettings.ZeroMQSettings);
+  FZeroMQSettingsForm.Parent      := tsZeroMQ;
+  FZeroMQSettingsForm.Align       := alClient;
+  FZeroMQSettingsForm.BorderStyle := bsNone;
+  FZeroMQSettingsForm.Visible     := True;
 
   FDisplayValuesSettingsForm := TfrmDisplayValuesSettings.Create(
     Self, FSettings.DisplayValuesSettings

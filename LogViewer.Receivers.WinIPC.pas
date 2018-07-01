@@ -109,7 +109,7 @@ end;
 procedure TWinIPChannelReceiver.FIPCServerMessage(Sender: TObject;
   ASourceId: Integer; AData: TStream);
 begin
-  DoReceiveMessage(AData, ASourceId, 0, GetExePathForProcess(ASourceId));
+  DoReceiveMessage(AData, ASourceId, 0, GetExenameForProcess(ASourceId));
 end;
 
 procedure TWinIPChannelReceiver.SettingsChanged(Sender: TObject);

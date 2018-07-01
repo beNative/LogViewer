@@ -198,7 +198,6 @@ begin
   FCheckPoint              := TTextFormatSettings.Create;
   FCheckPoint.Name         := 'CheckPoint';
   FCheckPoint.Font.Color   := clGreen;
-  FCheckPoint.Font.Style   := [fsBold];
   FCheckPoint.OnChanged.Add(FormatSettingsChanged);
 
   FCounter                 := TTextFormatSettings.Create;

@@ -59,7 +59,6 @@ type
     procedure SetEnabled(const Value: Boolean); override;
     {$ENDREGION}
 
-
     procedure DoReceiveMessage(
       AStream           : TStream;
       ASourceId         : Integer = 0;
@@ -67,6 +66,7 @@ type
       const ASourceName : string = ''
     ); override;
     procedure DoStringReceived(const AString: AnsiString);
+
     procedure SettingsChanged(Sender: TObject); override;
 
     property Settings: TComPortSettings

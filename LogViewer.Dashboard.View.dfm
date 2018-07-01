@@ -13,8 +13,8 @@ object frmDashboard: TfrmDashboard
   PixelsPerInch = 96
   TextHeight = 13
   object chkWinODSEnabled: TCheckBox
-    Left = 28
-    Top = 39
+    Left = 38
+    Top = 34
     Width = 106
     Height = 17
     Caption = 'WinODS enabled'
@@ -22,8 +22,8 @@ object frmDashboard: TfrmDashboard
     OnClick = chkWinODSEnabledClick
   end
   object chkWinIPCEnabled: TCheckBox
-    Left = 28
-    Top = 8
+    Left = 38
+    Top = 11
     Width = 97
     Height = 17
     Caption = 'WinIPC enabled'
@@ -31,8 +31,8 @@ object frmDashboard: TfrmDashboard
     OnClick = chkWinIPCEnabledClick
   end
   object chkZeroMQEnabled: TCheckBox
-    Left = 28
-    Top = 70
+    Left = 37
+    Top = 59
     Width = 154
     Height = 17
     Caption = 'ZeroMQ subscriber enabled'
@@ -50,13 +50,38 @@ object frmDashboard: TfrmDashboard
     TabOrder = 4
   end
   object chkComPortEnabled: TCheckBox
-    Left = 28
-    Top = 101
+    Left = 38
+    Top = 83
     Width = 106
     Height = 17
     Caption = 'COM port enabled'
     TabOrder = 3
     OnClick = chkComPortEnabledClick
+  end
+  object bgMain: TButtonGroup
+    Left = 8
+    Top = 8
+    Width = 26
+    BevelInner = bvNone
+    BevelOuter = bvNone
+    BorderStyle = bsNone
+    ButtonOptions = [gboFullSize, gboShowCaptions]
+    Enabled = False
+    Images = dmManager.imlMain
+    Items = <
+      item
+        ImageIndex = 28
+      end
+      item
+        ImageIndex = 28
+      end
+      item
+        ImageIndex = 6
+      end
+      item
+        ImageIndex = 24
+      end>
+    TabOrder = 5
   end
   object aclMain: TActionList
     Left = 352

@@ -24,9 +24,13 @@ interface
   A ZeroMQChannelReceiver can receive messages from multiple channels that are
   bound to one or more ZMQ publisher sockets.
 
+  In this setup the source application (sender of log messages) acts as a server
+  which binds to a ZeroMQ socket (publisher).
+  Multiple subscribers (TZeroMQChannelReceiver instances) can connect to the
+  same publisher.
+
   TODO:
     - list of connectionstrings to subscribe to?
-    - many optimizations are possible
 }
 
 uses
@@ -41,6 +45,7 @@ uses
 
 const
   ZQM_DEFAULT_ADDRESS = 'tcp://localhost:5555';
+  //ZQM_DEFAULT_ADDRESS = 'tcp://CIMDEVAPS01:5905';
 //  tcp://GANYMEDES:5555
 //  tcp://EUROPA:5555
 
@@ -100,7 +105,7 @@ begin
     FAddress := ZQM_DEFAULT_ADDRESS;
   FTimer          := TTimer.Create(nil);
   FTimer.OnTimer  := FTimerTimer;
-  FTimer.Interval := 50;
+  FTimer.Interval := 100;
   FZMQ            := TZeroMQ.Create;
   FZMQStream      := TStringStream.Create;
   Settings.OnChanged.Add(SettingsChanged);

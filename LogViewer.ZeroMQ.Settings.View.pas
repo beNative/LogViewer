@@ -21,17 +21,56 @@ interface
 uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
+
+  LogViewer.ZeroMQ.Settings;
 
 type
   TfrmZeroMQSettings = class(TForm)
     edtAddress : TEdit;
+    edtPort    : TEdit;
     lblAddress : TLabel;
+    lblPort    : TLabel;
+
+  private
+    FSettings : TZeroMQSettings;
+
+  protected
+    procedure UpdateActions; override;
+
+  public
+    constructor Create(
+      AOwner    : TComponent;
+      ASettings : TZeroMQSettings
+    ); reintroduce; virtual;
 
   end;
 
 implementation
 
 {$R *.dfm}
+
+uses
+  Spring;
+
+{$REGION 'construction and destruction'}
+constructor TfrmZeroMQSettings.Create(AOwner: TComponent;
+  ASettings: TZeroMQSettings);
+begin
+  inherited Create(AOwner);
+  Guard.CheckNotNull(ASettings, 'ASettings');
+  FSettings := ASettings;
+end;
+{$ENDREGION}
+
+{$REGION 'protected methods'}
+procedure TfrmZeroMQSettings.UpdateActions;
+begin
+  inherited UpdateActions;
+  edtAddress.Text := FSettings.Address;
+  edtPort.Text    := FSettings.Port.ToString;
+end;
+{$ENDREGION}
+
 
 end.

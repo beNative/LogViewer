@@ -33,6 +33,9 @@ type
   private
     FSettings : TWinIPCSettings;
 
+  protected
+    procedure UpdateActions; override;
+
   public
     constructor Create(
       AOwner    : TComponent;
@@ -58,6 +61,14 @@ constructor TfrmWinIPCSettings.Create(AOwner: TComponent;
 begin
   inherited Create(AOwner);
   FSettings := ASettings;
+end;
+
+{$ENDREGION}
+
+{$REGION 'protected methods'}
+procedure TfrmWinIPCSettings.UpdateActions;
+begin
+  inherited UpdateActions;
 end;
 {$ENDREGION}
 

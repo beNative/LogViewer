@@ -42,8 +42,8 @@ type
       AOwner    : TComponent;
       ASettings : TWinODSSettings
     ); reintroduce;
-
     procedure BeforeDestruction; override;
+
   end;
 
 implementation

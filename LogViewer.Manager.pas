@@ -73,7 +73,6 @@ type
     actValue              : TAction;
     actWarning            : TAction;
     imlMain               : TImageList;
-    imlMessageTypes       : TImageList;
     tmrPoll               : TTimer;
     ppmLogTreeViewer: TPopupMenu;
     ppmMessageTypes: TPopupMenu;
@@ -117,6 +116,9 @@ type
     procedure actValueExecute(Sender: TObject);
     procedure actWarningExecute(Sender: TObject);
     procedure actStartExecute(Sender: TObject);
+    procedure actObjectExecute(Sender: TObject);
+    procedure actPersistentExecute(Sender: TObject);
+    procedure actInterfaceExecute(Sender: TObject);
     {$ENDREGION}
 
   private
@@ -323,7 +325,7 @@ end;
 
 procedure TdmManager.actCustomDataExecute(Sender: TObject);
 begin
-//
+  UpdateVisibleMessageTypes(lmtCustomData, Sender);
 end;
 
 procedure TdmManager.actErrorExecute(Sender: TObject);
@@ -377,9 +379,19 @@ begin
   UpdateVisibleMessageTypes(lmtComponent, Sender);
 end;
 
+procedure TdmManager.actObjectExecute(Sender: TObject);
+begin
+  UpdateVisibleMessageTypes(lmtObject, Sender);
+end;
+
 procedure TdmManager.actOpenExecute(Sender: TObject);
 begin
 //
+end;
+
+procedure TdmManager.actPersistentExecute(Sender: TObject);
+begin
+  UpdateVisibleMessageTypes(lmtPersistent, Sender);
 end;
 
 procedure TdmManager.actSaveExecute(Sender: TObject);
@@ -458,6 +470,11 @@ end;
 procedure TdmManager.actInfoExecute(Sender: TObject);
 begin
   UpdateVisibleMessageTypes(lmtInfo, Sender);
+end;
+
+procedure TdmManager.actInterfaceExecute(Sender: TObject);
+begin
+  UpdateVisibleMessageTypes(lmtInterface, Sender);
 end;
 
 procedure TdmManager.actWarningExecute(Sender: TObject);
