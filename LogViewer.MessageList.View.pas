@@ -130,6 +130,7 @@ type
     function GetLogQueue: ILogQueue;
     function GetForm: TCustomForm;
     function GetSettings: TMessageListSettings;
+    function GetDisplayValuesSettings: TDisplayValuesSettings;
     {$ENDREGION}
 
     procedure FSettingsChanged(Sender: TObject);
@@ -141,9 +142,7 @@ type
       Data      : Pointer;
       var Abort : Boolean
     );
-
     procedure FLogTreeViewClick(Sender: TObject);
-
     procedure FLogTreeViewFocusChanged(
       Sender : TBaseVirtualTree;
       Node   : PVirtualNode;
@@ -228,7 +227,6 @@ type
       Column   : TColumnIndex;
       var Kind : TVTHintKind
     );
-    function GetDisplayValuesSettings: TDisplayValuesSettings;
     {$ENDREGION}
 
   protected
@@ -434,21 +432,21 @@ begin
   C.Options  := C.Options + [coSmartResize, coAutoSpring];
   C.Width    := 150;
   C.MinWidth := 100;
-  C.MaxWidth := 800;
+  C.MaxWidth := 2000;
 
   C := FLogTreeView.Header.Columns.Add;
   C.Text      := SType;
   C.Options   := C.Options + [coSmartResize, coAutoSpring];
   C.Width     := 150;
   C.MinWidth  := 50;
-  C.MaxWidth  := 800;
+  C.MaxWidth  := 2000;
 
   C := FLogTreeView.Header.Columns.Add;
   C.Text     := SValue;
   C.Options  := C.Options + [coAutoSpring];
   C.Width    := 150;
   C.MinWidth := 80;
-  C.MaxWidth := 1024;
+  C.MaxWidth := 2000;
 
   C := FLogTreeView.Header.Columns.Add;
   C.Text     := STimestamp;

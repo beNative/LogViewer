@@ -16,7 +16,7 @@
 
 unit LogViewer.LogQueue;
 
-{ Queues messages dispatched by a channel receiver. }
+{ Queues messages dispatched by a channel receiver instance. }
 
 interface
 

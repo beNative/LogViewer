@@ -1,8 +1,8 @@
 {
 	"FormSettings": {
-		"Left": 3108,
-		"Top": 398,
-		"Width": 1013,
+		"Left": 587,
+		"Top": 156,
+		"Width": 974,
 		"Height": 638,
 		"FormStyle": 0,
 		"WindowState": 0
@@ -11,17 +11,17 @@
 		"AutoScrollMessages": false,
 		"AutoFilterMessages": false,
 		"DynamicAutoSizeColumns": false,
-		"LeftPanelWidth": 100,
+		"LeftPanelWidth": 277,
 		"RightPanelWidth": 0
 	},
 	"WinODSSettings": {
 		"Enabled": false
 	},
 	"WinIPCSettings": {
-		"Enabled": false
+		"Enabled": true
 	},
 	"ZeroMQSettings": {
-		"Enabled": true
+		"Enabled": false
 	},
 	"DisplayValueSettings": {
 		"Id": {

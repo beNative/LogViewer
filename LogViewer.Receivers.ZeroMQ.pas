@@ -44,7 +44,7 @@ uses
   LogViewer.Interfaces,  LogViewer.Receivers.Base, LogViewer.ZeroMQ.Settings;
 
 const
-  ZQM_DEFAULT_ADDRESS = 'tcp://localhost:5555';
+  ZQM_DEFAULT_ADDRESS = 'tcp://192.168.0.226:5555';
   //ZQM_DEFAULT_ADDRESS = 'tcp://CIMDEVAPS01:5905';
 //  tcp://GANYMEDES:5555
 //  tcp://EUROPA:5555
@@ -105,7 +105,7 @@ begin
     FAddress := ZQM_DEFAULT_ADDRESS;
   FTimer          := TTimer.Create(nil);
   FTimer.OnTimer  := FTimerTimer;
-  FTimer.Interval := 100;
+  FTimer.Interval := 50;
   FZMQ            := TZeroMQ.Create;
   FZMQStream      := TStringStream.Create;
   Settings.OnChanged.Add(SettingsChanged);
@@ -152,7 +152,7 @@ procedure TZeroMQChannelReceiver.FTimerTimer(Sender: TObject);
 begin
   if Assigned(FPoll) then
   begin
-    while FPoll.PollOnce(50) > 0 do
+    while FPoll.PollOnce(10) > 0 do
       FPoll.FireEvents;
   end;
 end;

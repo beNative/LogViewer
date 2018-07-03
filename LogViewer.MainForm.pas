@@ -20,8 +20,10 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages,
-  System.SysUtils, System.Variants, System.Classes,
+  System.SysUtils, System.Variants, System.Classes, System.Actions,
+  System.ImageList, System.Win.TaskbarCore,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Vcl.ExtCtrls,
+  Vcl.Taskbar, Vcl.ActnList, Vcl.ImgList,
 
   ChromeTabs, ChromeTabsClasses, ChromeTabsTypes,
 
@@ -33,18 +35,17 @@ uses
   LogViewer.Factories, LogViewer.Manager, LogViewer.Settings,
   LogViewer.ComPort.Settings,
 
-  LogViewer.Dashboard.View, System.Actions, Vcl.ActnList,
-  System.Win.TaskbarCore, Vcl.Taskbar, System.ImageList, Vcl.ImgList;
+  LogViewer.Dashboard.View;
 
 type
   TfrmMain = class(TForm)
-    sbrMain       : TStatusBar;
-    ctMain        : TChromeTabs;
-    pnlMainClient : TPanel;
-    tskbrMain: TTaskbar;
-    aclMain: TActionList;
-    actCenteInScreen: TAction;
-    imlMain: TImageList;
+    sbrMain           : TStatusBar;
+    pnlMainClient     : TPanel;
+    tskbrMain         : TTaskbar;
+    aclMain           : TActionList;
+    actCenterToScreen : TAction;
+    imlMain           : TImageList;
+    ctMain: TChromeTabs;
 
     procedure ctMainButtonAddClick(
       Sender      : TObject;
@@ -72,16 +73,20 @@ type
       var TabDropOptions : TTabDropOptions
     );
     procedure FormShortCut(var Msg: TWMKey; var Handled: Boolean);
-    procedure actCenteInScreenExecute(Sender: TObject);
+    procedure actCenterToScreenExecute(Sender: TObject);
 
   private
-    FManager         : ILogViewerManager;
-    FSettings        : TLogViewerSettings;
-    FMainToolbar     : TToolBar;
-    //FComPortSettings : TComPortSettings;
-    FDashboard       : TfrmDashboard;
+    FManager     : ILogViewerManager;
+    FSettings    : TLogViewerSettings;
+    FMainToolbar : TToolBar;
+    FDashboard   : TfrmDashboard;
 
     procedure SettingsChanged(Sender: TObject);
+
+    procedure EventsAddLogViewer(
+      Sender     : TObject;
+      ALogViewer : ILogViewer
+    );
 
 //    procedure ProcessDroppedTab(
 //      Sender             : TObject;
@@ -98,11 +103,6 @@ type
     function GetMenus: ILogViewerMenus;
     function GetManager: ILogViewerManager;
     {$ENDREGION}
-
-    procedure EventsAddLogViewer(
-      Sender     : TObject;
-      ALogViewer : ILogViewer
-    );
 
     procedure CreateDashboardView;
 
@@ -141,7 +141,7 @@ uses
 {$R *.dfm}
 
 {$REGION 'construction and destruction'}
-procedure TfrmMain.actCenteInScreenExecute(Sender: TObject);
+procedure TfrmMain.actCenterToScreenExecute(Sender: TObject);
 begin
   Self.Position := poScreenCenter;
 end;
@@ -169,7 +169,6 @@ begin
   FSettings.FormSettings.Assign(Self);
   FSettings.Save;
   FSettings.Free;
-  //FComPortSettings.Free;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
@@ -210,13 +209,13 @@ begin
 //    LMessageViewer.Form.Caption,
 //    LMessageViewer.Receiver.Name
 //  ]);
-//  Handled := True;
+  Handled := True;
 end;
 
 procedure TfrmMain.ctMainButtonCloseTabClick(Sender: TObject; ATab: TChromeTab;
   var Close: Boolean);
 begin
-  Close := False;
+  Close := ATab.DisplayName <> 'Dashboard';
 end;
 
 procedure TfrmMain.ctMainNeedDragImageControl(Sender: TObject; ATab: TChromeTab;

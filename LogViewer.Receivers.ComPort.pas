@@ -22,7 +22,7 @@ unit LogViewer.Receivers.ComPort;
   For now the serial data is handled as:
     - a watch message if the text has a format like '%s=%s' (name-value pair
       with '=' as delimiter)
-    - a text message
+    - a text message otherwise
 }
 
 interface

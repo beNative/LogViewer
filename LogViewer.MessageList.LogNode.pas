@@ -16,7 +16,7 @@
 
 unit LogViewer.MessageList.LogNode;
 
-{ Datastructure holding the data to display extracted from the TLogMessage. }
+{ Datastructure holding the data to display extracted from each TLogMessage. }
 
 interface
 

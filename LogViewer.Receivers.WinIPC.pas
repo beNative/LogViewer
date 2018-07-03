@@ -20,10 +20,7 @@ interface
 
 { Receives logmessages through WinIPC (WM_COPYDATA) messages. }
 
-
-{ TODO :  Notification when a ProcessId/ProcessName does not exist anymore
-
-}
+{ TODO :  Notification when a ProcessId/ProcessName does not exist anymore }
 
 uses
   System.Classes,

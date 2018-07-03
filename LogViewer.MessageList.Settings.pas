@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-{  Settings associated with the messagelist viewer }
+{ Settings associated with the messagelist viewer }
 
 unit LogViewer.MessageList.Settings;
 
