@@ -3,7 +3,7 @@
         <ProjectGuid>{912C10C4-BCCE-431B-BD0C-9E42B4F09921}</ProjectGuid>
         <MainSource>LogViewer.dpr</MainSource>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Release</Config>
+        <Config Condition="'$(Config)'==''">Debug</Config>
         <TargetedPlatforms>1</TargetedPlatforms>
         <AppType>Application</AppType>
         <FrameworkType>VCL</FrameworkType>

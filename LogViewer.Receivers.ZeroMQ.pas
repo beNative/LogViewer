@@ -105,7 +105,7 @@ begin
     FAddress := ZQM_DEFAULT_ADDRESS;
   FTimer          := TTimer.Create(nil);
   FTimer.OnTimer  := FTimerTimer;
-  FTimer.Interval := 50;
+  FTimer.Interval := 100;
   FZMQ            := TZeroMQ.Create;
   FZMQStream      := TStringStream.Create;
   Settings.OnChanged.Add(SettingsChanged);
@@ -152,8 +152,10 @@ procedure TZeroMQChannelReceiver.FTimerTimer(Sender: TObject);
 begin
   if Assigned(FPoll) then
   begin
+    FTimer.Enabled := False;
     while FPoll.PollOnce(10) > 0 do
       FPoll.FireEvents;
+    FTimer.Enabled := True;
   end;
 end;
 {$ENDREGION}

@@ -951,8 +951,8 @@ end;
 
 procedure TfrmMessageList.AutoFitColumns;
 begin
-  FLogTreeView.Header.AutoFitColumns(False, smaUseColumnOption, -1, -1);
-  FAutoSizeColumns := True;
+//  FLogTreeView.Header.AutoFitColumns(False, smaUseColumnOption, -1, -1);
+//  FAutoSizeColumns := True;
 end;
 
 procedure TfrmMessageList.Activate;
