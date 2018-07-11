@@ -32,7 +32,8 @@ The sources depend on the following libraries and components:
   * [DSharp](http://bitbucket.org/sglienke/dsharp)
   * [Virtual treeview](http://github.com/Virtual-TreeView/Virtual-TreeView)
   * [DDuce](http://github.com/beNative/dduce)
-  * [ZeroMQ](http://github.com/zedalaye/Delphi-ZeroMQ)
+  * [ZeroMQ](http://github.com/beNative/Delphi-ZeroMQ)
+  * [zcontrols](http://github.com/beNative/zcontrols)
 
 Here a preliminary look of the application:
 
