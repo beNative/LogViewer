@@ -34,6 +34,8 @@ The sources depend on the following libraries and components:
   * [DDuce](http://github.com/beNative/dduce)
   * [ZeroMQ](http://github.com/beNative/Delphi-ZeroMQ)
   * [zcontrols](http://github.com/beNative/zcontrols)
+  * [TBCEditor](https://github.com/beNative/TBCEditor)
+  * [TChromeTabs](https://github.com/norgepaul/TChromeTabs)
 
 Here a preliminary look of the application:
 
