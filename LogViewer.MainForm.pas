@@ -39,13 +39,14 @@ uses
 
 type
   TfrmMain = class(TForm)
-    sbrMain           : TStatusBar;
-    pnlMainClient     : TPanel;
-    tskbrMain         : TTaskbar;
     aclMain           : TActionList;
     actCenterToScreen : TAction;
+    ctMain            : TChromeTabs;
     imlMain           : TImageList;
-    ctMain: TChromeTabs;
+    pnlMainClient     : TPanel;
+    sbrMain           : TStatusBar;
+    tskbrMain         : TTaskbar;
+    actShowVersion: TAction;
 
     procedure ctMainButtonAddClick(
       Sender      : TObject;
@@ -74,6 +75,7 @@ type
     );
     procedure FormShortCut(var Msg: TWMKey; var Handled: Boolean);
     procedure actCenterToScreenExecute(Sender: TObject);
+    procedure actShowVersionExecute(Sender: TObject);
 
   private
     FManager     : ILogViewerManager;
@@ -136,14 +138,50 @@ var
 implementation
 
 uses
+  Spring.Utils,
+
   DDuce.ObjectInspector.zObjectInspector;
 
 {$R *.dfm}
 
-{$REGION 'construction and destruction'}
-procedure TfrmMain.actCenterToScreenExecute(Sender: TObject);
+{$REGION 'non-interfaced routines'}
+procedure EnsureZMQLibExists;
+const
+  LIBZMQ = 'libzmq';
+var
+  LResStream  : TResourceStream;
+  LFileStream : TFileStream;
+  LPath       : string;
 begin
-  Self.Position := poScreenCenter;
+  LPath := Format('%s\%s.dll', [ExtractFileDir(ParamStr(0)), LIBZMQ]);
+  if not FileExists(LPath) then
+  begin
+    LResStream := TResourceStream.Create(HInstance, LIBZMQ, RT_RCDATA);
+    try
+      LFileStream := TFileStream.Create(LPath, fmCreate);
+      try
+        LFileStream.CopyFrom(LResStream, 0);
+      finally
+        LFileStream.Free;
+      end;
+    finally
+      LResStream.Free;
+    end;
+  end;
+end;
+{$ENDREGION}
+
+{$REGION 'construction and destruction'}
+procedure TfrmMain.actShowVersionExecute(Sender: TObject);
+const
+  LIBZMQ = 'libzmq';
+var
+  FVI : TFileVersionInfo;
+begin
+  FVI := TFileVersionInfo.GetVersionInfo(Format('%s\%s.dll', [ExtractFileDir(ParamStr(0)), LIBZMQ]));
+  ShowMessage(FVI.ToString);
+
+
 end;
 
 procedure TfrmMain.AfterConstruction;
@@ -170,6 +208,13 @@ begin
   FSettings.Save;
   FSettings.Free;
   inherited BeforeDestruction;
+end;
+{$ENDREGION}
+
+{$REGION 'action handlers'}
+procedure TfrmMain.actCenterToScreenExecute(Sender: TObject);
+begin
+  Self.Position := poScreenCenter;
 end;
 {$ENDREGION}
 
@@ -379,5 +424,8 @@ begin
   end;
 end;
 {$ENDREGION}
+
+initialization
+  EnsureZMQLibExists;
 
 end.

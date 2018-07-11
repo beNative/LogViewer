@@ -1,5 +1,7 @@
 program LogViewer;
 
+{$R *.dres}
+
 uses
   Forms,
   VirtualTrees,

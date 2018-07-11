@@ -951,8 +951,8 @@ end;
 
 procedure TfrmMessageList.AutoFitColumns;
 begin
-//  FLogTreeView.Header.AutoFitColumns(False, smaUseColumnOption, -1, -1);
-//  FAutoSizeColumns := True;
+  FLogTreeView.Header.AutoFitColumns(False, smaUseColumnOption, -1, -1);
+  FAutoSizeColumns := True;
 end;
 
 procedure TfrmMessageList.Activate;
@@ -1362,7 +1362,6 @@ end;
 procedure TfrmMessageList.UpdateValueDisplay(ALogNode: TLogNode);
 var
   DR : DynamicRecord;
-  SA : TArray<string>;
   SL : TStringList;
 begin
   FEditorView.Text := ALogNode.Value;
@@ -1381,11 +1380,8 @@ begin
        DR.FromArray<string>(SL.ToStringArray, True);
     finally
       SL.Free;
-
     end;
-      //SetLength(SA,
     pgcMessageDetails.ActivePage := tsValueList;
-    //DR.FromArray<string>(ALogNode.Value.To );
     FValueList.Data := DR;
   end
   else

@@ -34,8 +34,6 @@ object frmMain: TfrmMain
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitTop = 30
-    ExplicitHeight = 550
     object ctMain: TChromeTabs
       Left = 0
       Top = 0
@@ -365,7 +363,6 @@ object frmMain: TfrmMain
       LookAndFeel.ScrollButtons.Arrow.Disabled.OutlineAlpha = 255
       Align = alTop
       TabOrder = 0
-      ExplicitTop = 8
     end
   end
   object tskbrMain: TTaskbar
@@ -409,6 +406,9 @@ object frmMain: TfrmMain
           0000000000000000000000000000000000000000000000000000000000000000
           0000000000000000000000000000000000000000000000000000000000000000
           000000000000000000000000000000000000000000000000000000000000}
+      end
+      item
+        Action = actShowVersion
       end>
     TabProperties = []
     Left = 496
@@ -423,12 +423,16 @@ object frmMain: TfrmMain
       ImageIndex = 0
       OnExecute = actCenterToScreenExecute
     end
+    object actShowVersion: TAction
+      Caption = 'actShowVersion'
+      OnExecute = actShowVersionExecute
+    end
   end
   object imlMain: TImageList
     Left = 656
     Top = 304
     Bitmap = {
-      494C010101000800180010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C0101010008001C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

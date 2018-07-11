@@ -1,1 +1,1 @@
-libzmq RCDATA "libzmq.dll"
+libzmq RCDATA "Bin\\Win32\\libzmq.dll"

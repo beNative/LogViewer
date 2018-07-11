@@ -45,7 +45,6 @@ uses
 
 const
   ZQM_DEFAULT_ADDRESS = 'tcp://192.168.0.226:5555';
-  //ZQM_DEFAULT_ADDRESS = 'tcp://CIMDEVAPS01:5905';
 //  tcp://GANYMEDES:5555
 //  tcp://EUROPA:5555
 

@@ -210,6 +210,8 @@ object dmManager: TdmManager
     object actMessageTypesMenu: TAction
       Category = 'Menus'
       Caption = 'Message types'
+      ImageIndex = 15
+      OnExecute = actMessageTypesMenuExecute
     end
     object actStart: TAction
       Category = 'Commands'
@@ -247,7 +249,7 @@ object dmManager: TdmManager
     Left = 39
     Top = 22
     Bitmap = {
-      494C01011D004800440010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01011D0048004C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000008000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000C0D0C4F777C7AF01D1E1D770000000000000005151515660808
@@ -1316,6 +1318,7 @@ object dmManager: TdmManager
     Top = 120
   end
   object ppmMessageTypes: TPopupMenu
+    Images = imlMain
     Left = 200
     Top = 120
   end

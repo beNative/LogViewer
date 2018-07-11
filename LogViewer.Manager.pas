@@ -119,6 +119,7 @@ type
     procedure actObjectExecute(Sender: TObject);
     procedure actPersistentExecute(Sender: TObject);
     procedure actInterfaceExecute(Sender: TObject);
+    procedure actMessageTypesMenuExecute(Sender: TObject);
     {$ENDREGION}
 
   private
@@ -366,6 +367,11 @@ end;
 procedure TdmManager.actMemoryExecute(Sender: TObject);
 begin
   UpdateVisibleMessageTypes(lmtMemory, Sender);
+end;
+
+procedure TdmManager.actMessageTypesMenuExecute(Sender: TObject);
+begin
+//
 end;
 
 procedure TdmManager.actMethodTracesExecute(Sender: TObject);
