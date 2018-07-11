@@ -59,6 +59,8 @@ type
       APopupMenu        : TPopupMenu = nil
     ): TToolButton; overload;
 
+    class procedure OnDropdownMenuButtonClick(Sender: TObject);
+
   public
     procedure AfterConstruction; override;
 
@@ -135,6 +137,11 @@ begin
       CreateToolButton(AParent, FActions[AActionName], AStyle, APopupMenu);
 end;
 
+class procedure TLogViewerToolbarsFactory.OnDropdownMenuButtonClick(Sender: TObject);
+begin
+  (Sender as TToolButton).CheckMenuDropdown;
+end;
+
 function TLogViewerToolbarsFactory.CreateToolButton(AParent: TToolBar;
   AAction: TBasicAction; AStyle: TToolButtonStyle; APopupMenu: TPopupMenu)
   : TToolButton;
@@ -161,6 +168,7 @@ begin
     begin
       TB.Style        := tbsDropDown;
       TB.DropdownMenu := APopupMenu;
+      TB.OnClick      := OnDropdownMenuButtonClick;
     end;
     TB.Action := AAction;
   end;
@@ -179,9 +187,9 @@ begin
   Guard.CheckNotNull(AParent, 'AParent');
   TB := TToolBar.Create(AOwner);
   ApplyDefaultProperties(TB);
-  TB.Parent := AParent;
-  TB.Images := FActions.ActionList.Images;
-  TB.ButtonWidth:= 10;
+  TB.Parent           := AParent;
+  TB.Images           := FActions.ActionList.Images;
+  TB.ButtonWidth      := 10;
   TB.AllowTextButtons := True;
   CreateToolButton(TB, 'actToggleAlwaysOnTop');
   CreateToolButton(TB, 'actToggleFullScreen');
@@ -189,7 +197,12 @@ begin
   CreateToolButton(TB, 'actStop');
   CreateToolButton(TB, 'actClearMessages');
   CreateToolButton(TB);
-  CreateToolButton(TB, 'actMessageTypesMenu', tbsDropDown, FMenus.MessageTypesPopupMenu);
+  CreateToolButton(
+    TB,
+    'actMessageTypesMenu',
+    tbsDropDown,
+    FMenus.MessageTypesPopupMenu
+  );
 //  CreateToolButton(TB, 'actInfo', tbsDropDown);
 //  CreateToolButton(TB, 'actWarning', tbsTextButton);
 //  CreateToolButton(TB, 'actError', tbsTextButton);
@@ -216,10 +229,10 @@ begin
 //  CreateToolButton(TB);
 //  CreateToolButton(TB, 'actSetFocusToFilter');
 //  CreateToolButton(TB);
-//  CreateToolButton(TB, 'actCollapseAll', tbsTextButton);
-//  CreateToolButton(TB, 'actExpandAll', tbsTextButton);
-//  CreateToolButton(TB);
-//  CreateToolButton(TB, 'actAutoScrollMessages', tbsTextButton);
+  CreateToolButton(TB, 'actCollapseAll', tbsTextButton);
+  CreateToolButton(TB, 'actExpandAll', tbsTextButton);
+  CreateToolButton(TB);
+  CreateToolButton(TB, 'actAutoScrollMessages', tbsTextButton);
   Result := TB;
 end;
 {$ENDREGION}

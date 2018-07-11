@@ -47,6 +47,7 @@ type
     actCheckPoint         : TAction;
     actClearMessages      : TAction;
     actCollapseAll        : TAction;
+    actComponent          : TAction;
     actConditional        : TAction;
     actCustomData         : TAction;
     actError              : TAction;
@@ -57,15 +58,19 @@ type
     actGotoLast           : TAction;
     actHeapInfo           : TAction;
     actInfo               : TAction;
+    actInterface          : TAction;
     actMemory             : TAction;
+    actMessageTypesMenu   : TAction;
     actMethodTraces       : TAction;
-    actComponent: TAction;
+    actObject             : TAction;
     actOpen               : TAction;
+    actPersistent         : TAction;
     actSave               : TAction;
     actSelectAll          : TAction;
     actSelectNone         : TAction;
     actSetFocusToFilter   : TAction;
     actSettings           : TAction;
+    actStart              : TAction;
     actStop               : TAction;
     actStrings            : TAction;
     actToggleAlwaysOnTop  : TAction;
@@ -73,14 +78,8 @@ type
     actValue              : TAction;
     actWarning            : TAction;
     imlMain               : TImageList;
-    tmrPoll               : TTimer;
-    ppmLogTreeViewer: TPopupMenu;
-    ppmMessageTypes: TPopupMenu;
-    actMessageTypesMenu: TAction;
-    actStart: TAction;
-    actObject: TAction;
-    actPersistent: TAction;
-    actInterface: TAction;
+    ppmLogTreeViewer      : TPopupMenu;
+    ppmMessageTypes       : TPopupMenu;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -119,7 +118,6 @@ type
     procedure actObjectExecute(Sender: TObject);
     procedure actPersistentExecute(Sender: TObject);
     procedure actInterfaceExecute(Sender: TObject);
-    procedure actMessageTypesMenuExecute(Sender: TObject);
     {$ENDREGION}
 
   private
@@ -146,6 +144,7 @@ type
     procedure BuildMessageTypesPopupMenu;
 
   protected
+    {$REGION 'property access methods'}
     function GetEditorManager: IEditorManager;
     function GetCommands: ILogViewerCommands;
     function GetEvents: ILogViewerEvents;
@@ -154,8 +153,7 @@ type
     function GetReceivers: IList<IChannelReceiver>;
     function GetMessageTypesPopupMenu: TPopupMenu;
     function GetLogTreeViewerPopupMenu: TPopupMenu;
-
-    procedure ActiveViewChanged;
+    {$ENDREGION}
 
     function AsComponent: TComponent;
 
@@ -274,9 +272,9 @@ procedure TdmManager.BeforeDestruction;
 begin
   FreeAndNil(FCommands);
   FreeAndNil(FEvents);
-  FSettings := nil;
-  FEditorSettings := nil;
-  FEditorManager := nil;
+//  FSettings       := nil;
+//  FEditorSettings := nil;
+//  FEditorManager  := nil;
   inherited BeforeDestruction;
 end;
 
@@ -369,11 +367,6 @@ begin
   UpdateVisibleMessageTypes(lmtMemory, Sender);
 end;
 
-procedure TdmManager.actMessageTypesMenuExecute(Sender: TObject);
-begin
-//
-end;
-
 procedure TdmManager.actMethodTracesExecute(Sender: TObject);
 begin
   UpdateVisibleMessageTypes(lmtEnterMethod, Sender);
@@ -435,15 +428,13 @@ end;
 procedure TdmManager.actStartExecute(Sender: TObject);
 begin
   Commands.Start;
-  actStop.Enabled := True;
-  actStart.Enabled := False;
+  UpdateActions;
 end;
 
 procedure TdmManager.actStopExecute(Sender: TObject);
 begin
   Commands.Stop;
-  actStop.Enabled := False;
-  actStart.Enabled := True;
+  UpdateActions;
 end;
 
 procedure TdmManager.actStringsExecute(Sender: TObject);
@@ -530,8 +521,8 @@ begin
   if Assigned(Value) and (Value <> FActiveView) then
   begin
     FActiveView := Value;
+    UpdateActions;
 //    Events.DoActiveViewChange;
-    ActiveViewChanged;
   end;
 end;
 
@@ -673,6 +664,7 @@ begin
   actMessageTypesMenu.DisableIfNoHandler := False;
   MI := MessageTypesPopupMenu.Items;
   MI.Action := actMessageTypesMenu;
+
   AddMenuItem(MI, actInfo);
   AddMenuItem(MI, actWarning);
   AddMenuItem(MI, actError);
@@ -698,11 +690,6 @@ end;
 function TdmManager.AsComponent: TComponent;
 begin
   Result := Self;
-end;
-
-procedure TdmManager.ActiveViewChanged;
-begin
-  UpdateActions;
 end;
 
 procedure TdmManager.AddReceiver(AReceiver: IChannelReceiver);

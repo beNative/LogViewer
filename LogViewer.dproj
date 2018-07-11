@@ -174,14 +174,12 @@
         <DCCReference Include="LogViewer.MessageList.LogNode.pas"/>
         <DCCReference Include="LogViewer.Dashboard.View.pas">
             <Form>frmDashboard</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.Receivers.Base.pas"/>
         <DCCReference Include="LogViewer.LogQueue.pas"/>
         <DCCReference Include="LogViewer.DisplayValues.Settings.pas"/>
         <DCCReference Include="LogViewer.DisplayValues.Settings.View.pas">
             <Form>frmDisplayValuesSettings</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.Dashboard.View.Node.pas"/>
         <None Include="Readme.md"/>

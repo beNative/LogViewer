@@ -1,10 +1,10 @@
 object dmManager: TdmManager
   OldCreateOrder = False
-  Height = 403
-  Width = 616
+  Height = 152
+  Width = 213
   object aclMain: TActionList
     Images = imlMain
-    Left = 255
+    Left = 135
     Top = 22
     object actClearMessages: TAction
       Category = 'Commands'
@@ -204,14 +204,15 @@ object dmManager: TdmManager
     end
     object actAutoScrollMessages: TAction
       Category = 'Commands'
-      Caption = 'Auto scroll to last message'
+      Caption = 'Auto scroll'
+      Hint = 'Auto scroll to last message'
+      ImageIndex = 26
       OnExecute = actAutoScrollMessagesExecute
     end
     object actMessageTypesMenu: TAction
       Category = 'Menus'
       Caption = 'Message types'
       ImageIndex = 15
-      OnExecute = actMessageTypesMenuExecute
     end
     object actStart: TAction
       Category = 'Commands'
@@ -238,18 +239,12 @@ object dmManager: TdmManager
       OnExecute = actInterfaceExecute
     end
   end
-  object tmrPoll: TTimer
-    Enabled = False
-    Interval = 100
-    Left = 111
-    Top = 22
-  end
   object imlMain: TImageList
     ColorDepth = cd32Bit
     Left = 39
     Top = 22
     Bitmap = {
-      494C01011D0048004C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01011D004800500010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000008000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000C0D0C4F777C7AF01D1E1D770000000000000005151515660808
@@ -1314,12 +1309,12 @@ object dmManager: TdmManager
   end
   object ppmLogTreeViewer: TPopupMenu
     Images = imlMain
-    Left = 80
-    Top = 120
+    Left = 40
+    Top = 88
   end
   object ppmMessageTypes: TPopupMenu
     Images = imlMain
-    Left = 200
-    Top = 120
+    Left = 136
+    Top = 88
   end
 end

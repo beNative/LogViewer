@@ -41,12 +41,12 @@ type
   TfrmMain = class(TForm)
     aclMain           : TActionList;
     actCenterToScreen : TAction;
+    actShowVersion    : TAction;
     ctMain            : TChromeTabs;
     imlMain           : TImageList;
     pnlMainClient     : TPanel;
     sbrMain           : TStatusBar;
     tskbrMain         : TTaskbar;
-    actShowVersion: TAction;
 
     procedure ctMainButtonAddClick(
       Sender      : TObject;
@@ -199,6 +199,8 @@ begin
     Actions,
     Menus
   );
+  //FMainToolbar.
+  //TB.CheckMenuDropdown
   CreateDashboardView;
 end;
 
@@ -214,7 +216,10 @@ end;
 {$REGION 'action handlers'}
 procedure TfrmMain.actCenterToScreenExecute(Sender: TObject);
 begin
-  Self.Position := poScreenCenter;
+  WindowState := wsMinimized;
+  Top  := 0;
+  Left := 0;
+  WindowState := wsMaximized;
 end;
 {$ENDREGION}
 

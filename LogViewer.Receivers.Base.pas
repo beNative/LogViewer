@@ -58,10 +58,10 @@ type
       AManager    : ILogViewerManager;
       const AName : string
     ); reintroduce;
-
-    function ToString: string; override;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
+
+    function ToString: string; override;
 
     property Name: string
       read GetName write SetName;

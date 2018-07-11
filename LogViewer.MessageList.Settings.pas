@@ -51,6 +51,7 @@ type
     FLeftPanelWidth         : Integer;
     FRightPanelWidth        : Integer;
 
+  protected
     {$REGION 'property access methods'}
     function GetAutoScrollMessages: Boolean;
     procedure SetAutoScrollMessages(const Value: Boolean);
@@ -67,7 +68,6 @@ type
     procedure SetRightPanelWidth(const Value: Integer);
     {$ENDREGION}
 
-  protected
     procedure Changed;
 
   public

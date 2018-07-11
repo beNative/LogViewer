@@ -743,9 +743,22 @@ begin
       LN.Text := '';
     end;
     lmtEnterMethod, lmtLeaveMethod,
-    lmtInfo, lmtWarning, lmtError, lmtConditional,
+    lmtInfo, lmtWarning, lmtError, lmtConditional:
+    begin
+      LN.Text := string(FCurrentMsg.Text);
+    end;
     lmtText:
     begin
+      S := string(FCurrentMsg.Text);
+      I := S.IndexOf('(');
+      LN.ValueName := Copy(S, 1, I);
+      LN.Value := Copy(S, I + 3, S.Length); // ' = '
+//      if LN.Value.StartsWith(#13#10) then // multiline values
+//        LN.Value := Copy(LN.Value, 3, LN.Value.Length);
+      LN.ValueType := ExtractText(LN.ValueName, '(', ')');
+      I := S.IndexOf('(');
+      if I > 1 then
+        LN.ValueName := Copy(S, 1, I);
       LN.Text := string(FCurrentMsg.Text);
     end;
     lmtCheckpoint:
@@ -1127,9 +1140,9 @@ begin
     begin
       S := string(FCurrentMsg.Text);
       I := S.IndexOf('=');
-      LName := Copy(S, 1, I);
+      LName  := Copy(S, 1, I);
       LValue := Copy(S, I + 2, S.Length);
-      LType := 'Counter';
+      LType  := 'Counter';
       FWatches.Add(
         LName,
         LType,
@@ -1319,8 +1332,8 @@ end;
 procedure TfrmMessageList.UpdateTextDisplay(ALogNode: TLogNode);
 begin
   pgcMessageDetails.ActivePage := tsTextViewer;
-  FEditorView.Text := ALogNode.Text;
-  FEditorView.HighlighterName := 'TXT';
+  FEditorView.Text := ALogNode.Value;
+  FEditorView.HighlighterName := Trim(ALogNode.ValueName);
 end;
 
 procedure TfrmMessageList.UpdateTextStreamDisplay(ALogNode: TLogNode);
@@ -1376,8 +1389,8 @@ begin
   begin
     SL := TStringList.Create;
     try
-       SL.Text := ALogNode.Value;
-       DR.FromArray<string>(SL.ToStringArray, True);
+     SL.Text := ALogNode.Value;
+     DR.FromArray<string>(SL.ToStringArray, True);
     finally
       SL.Free;
     end;

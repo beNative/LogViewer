@@ -39,6 +39,12 @@ uses
 
 type
   TLogViewerFactories = class sealed
+
+  private
+     { forces drop down menu to be shown on pressing a toolbarbutton with
+       Style tbsDropDown }
+     class procedure OnDropdownMenuButtonClick(Sender: TObject);
+
   public
     class function CreateCallStackView(
       AOwner                 : TComponent;
@@ -111,6 +117,13 @@ uses
   LogViewer.Receivers.ZeroMQ, LogViewer.Receivers.ComPort,
   LogViewer.LogQueue;
 
+{$REGION 'private class methods'}
+class procedure TLogViewerFactories.OnDropdownMenuButtonClick(Sender: TObject);
+begin
+  (Sender as TToolButton).CheckMenuDropdown;
+end;
+{$ENDREGION}
+
 {$REGION 'public class methods'}
 class function TLogViewerFactories.CreateCallStackView(AOwner: TComponent;
   AParent: TWinControl; AData: IObjectList; ADisplayValuesSettings:
@@ -128,11 +141,17 @@ class function TLogViewerFactories.CreateMainToolbar(AOwner: TComponent;
   AMenus: ILogViewerMenus): TToolbar;
 var
   TBF : ILogViewerToolbarsFactory;
+  I   : Integer;
 begin
   Guard.CheckNotNull(AActions, 'AActions');
   Guard.CheckNotNull(AMenus, 'AMenus');
   TBF := TLogViewerToolbarsFactory.Create(AActions, AMenus);
   Result := TBF.CreateMainToolbar(AOwner, AParent);
+  for I := 0 to Result.ButtonCount - 1 do
+  begin
+    if Result.Buttons[I].Style = tbsDropDown then
+      Result.Buttons[I].OnClick := OnDropdownMenuButtonClick;
+  end;
 end;
 
 class function TLogViewerFactories.CreateManager(

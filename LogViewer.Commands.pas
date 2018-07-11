@@ -130,17 +130,19 @@ end;
 
 procedure TLogViewerCommands.Start;
 begin
-  if Assigned(Receiver) then
+  if Assigned(ActiveView) and Assigned(ActiveView.LogQueue) then
   begin
-    Receiver.Enabled := True;
+    ActiveView.LogQueue.Enabled := True;
+    //Receiver.Enabled := True;
   end;
 end;
 
 procedure TLogViewerCommands.Stop;
 begin
-  if Assigned(Receiver) then
+  if Assigned(ActiveView) and Assigned(ActiveView.LogQueue) then
   begin
-    Receiver.Enabled := False;
+    ActiveView.LogQueue.Enabled := False;
+    //Receiver.Enabled := False;
   end;
 end;
 

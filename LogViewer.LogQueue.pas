@@ -45,6 +45,9 @@ type
     function GetSourceName: string;
     {$ENDREGION}
 
+  protected
+    procedure DoReceiveMessage(AStream : TStream);
+
   public
     constructor Create(
       const AReceiver   : IChannelReceiver;
@@ -52,8 +55,6 @@ type
       const ASourceName : string
     );
     procedure BeforeDestruction; override;
-
-    procedure DoReceiveMessage(AStream : TStream);
 
     property SourceId: Integer
       read GetSourceId;

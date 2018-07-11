@@ -3,7 +3,9 @@ program LogViewer;
 {$R *.dres}
 
 uses
-  Forms,
+  Vcl.Themes,
+  Vcl.Styles,
+  Vcl.Forms,
   VirtualTrees,
   LogViewer.Watches.Data in 'LogViewer.Watches.Data.pas',
   LogViewer.Settings in 'LogViewer.Settings.pas',
@@ -44,9 +46,7 @@ uses
   LogViewer.LogQueue in 'LogViewer.LogQueue.pas',
   LogViewer.DisplayValues.Settings in 'LogViewer.DisplayValues.Settings.pas',
   LogViewer.DisplayValues.Settings.View in 'LogViewer.DisplayValues.Settings.View.pas' {frmDisplayValuesSettings},
-  LogViewer.Dashboard.View.Node in 'LogViewer.Dashboard.View.Node.pas',
-  Vcl.Themes,
-  Vcl.Styles;
+  LogViewer.Dashboard.View.Node in 'LogViewer.Dashboard.View.Node.pas';
 
 {$R *.res}
 
