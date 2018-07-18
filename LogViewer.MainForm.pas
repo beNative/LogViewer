@@ -46,7 +46,7 @@ type
     imlMain           : TImageList;
     pnlMainClient     : TPanel;
     sbrMain           : TStatusBar;
-    tskbrMain         : TTaskbar;
+    tskbrMain: TTaskbar;
 
     procedure ctMainButtonAddClick(
       Sender      : TObject;

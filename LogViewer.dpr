@@ -3,6 +3,7 @@ program LogViewer;
 {$R *.dres}
 
 uses
+  LeakCheck,
   Vcl.Themes,
   Vcl.Styles,
   Vcl.Forms,
@@ -51,7 +52,9 @@ uses
 {$R *.res}
 
 begin
-  ReportMemoryLeaksOnShutdown := True;
+  {$WARNINGS OFF}
+  ReportMemoryLeaksOnShutdown := DebugHook > 0;
+  {$WARNINGS ON}
   Application.Title := 'Log viewer';
   Application.Initialize;
   Application.CreateForm(TfrmMain, frmMain);

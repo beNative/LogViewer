@@ -1,6 +1,6 @@
 object dmManager: TdmManager
   OldCreateOrder = False
-  Height = 152
+  Height = 177
   Width = 213
   object aclMain: TActionList
     Images = imlMain
@@ -238,13 +238,18 @@ object dmManager: TdmManager
       ImageIndex = 13
       OnExecute = actInterfaceExecute
     end
+    object actAbout: TAction
+      Caption = 'About'
+      ImageIndex = 7
+      OnExecute = actAboutExecute
+    end
   end
   object imlMain: TImageList
     ColorDepth = cd32Bit
     Left = 39
     Top = 22
     Bitmap = {
-      494C01011D004800500010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01011D004800580010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000008000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000C0D0C4F777C7AF01D1E1D770000000000000005151515660808

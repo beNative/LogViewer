@@ -196,6 +196,7 @@ begin
   CreateToolButton(TB, 'actStart');
   CreateToolButton(TB, 'actStop');
   CreateToolButton(TB, 'actClearMessages');
+  CreateToolButton(TB, 'actAbout');
   CreateToolButton(TB);
   CreateToolButton(
     TB,

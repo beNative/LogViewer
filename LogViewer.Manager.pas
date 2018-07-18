@@ -30,7 +30,7 @@ uses
   DDuce.Editor.Interfaces,
 
   LogViewer.Interfaces, LogViewer.Settings, LogViewer.Events,
-  LogViewer.Commands;
+  LogViewer.Commands, System.Win.TaskbarCore, Vcl.Taskbar;
 
 type
   TdmManager = class(TDataModule, ILogViewerActions,
@@ -80,6 +80,7 @@ type
     imlMain               : TImageList;
     ppmLogTreeViewer      : TPopupMenu;
     ppmMessageTypes       : TPopupMenu;
+    actAbout: TAction;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -118,6 +119,7 @@ type
     procedure actObjectExecute(Sender: TObject);
     procedure actPersistentExecute(Sender: TObject);
     procedure actInterfaceExecute(Sender: TObject);
+    procedure actAboutExecute(Sender: TObject);
     {$ENDREGION}
 
   private
@@ -246,7 +248,7 @@ implementation
 uses
   Vcl.Forms,
 
-  DDuce.Editor.Factories,
+  DDuce.Editor.Factories, DDuce.AboutDialog,
 
   LogViewer.Factories, LogViewer.Resources,
   LogViewer.Settings.Dialog, LogViewer.MessageList.Settings;
@@ -286,6 +288,11 @@ end;
 {$ENDREGION}
 
 {$REGION 'action handlers'}
+procedure TdmManager.actAboutExecute(Sender: TObject);
+begin
+  ShowAboutDialog;
+end;
+
 procedure TdmManager.actAutoScrollMessagesExecute(Sender: TObject);
 begin
   FSettings.MessageListSettings.AutoScrollMessages :=
@@ -741,32 +748,31 @@ begin
   actAutoScrollMessages.Checked
     := FSettings.MessageListSettings.AutoScrollMessages;
   B := Assigned(ActiveView);
-  actStart.Enabled              := B and not ActiveView.LogQueue.Enabled;
-  actStop.Enabled               := B and not actStart.Enabled;
-  actBitmap.Enabled             := B;
-  actCallStack.Enabled          := B;
-  actCheckPoint.Enabled         := B;
-  actConditional.Enabled        := B;
-  actInfo.Enabled               := B;
-  actWarning.Enabled            := B;
-  actValue.Enabled              := B;
-  actError.Enabled              := B;
-  actMethodTraces.Enabled       := B;
-  actException.Enabled          := B;
-  actComponent.Enabled          := B;
-  actHeapInfo.Enabled           := B;
-  actCustomData.Enabled         := B;
-  actStrings.Enabled            := B;
-  actObject.Enabled             := B;
-  actPersistent.Enabled         := B;
-  actInterface.Enabled          := B;
-  actMemory.Enabled             := B;
-  actCollapseAll.Enabled        := B;
-  actExpandAll.Enabled          := B;
-  actAutoScrollMessages.Enabled := B;
-  actClearMessages.Enabled      := B;
-  actSelectAll.Enabled          := MLS.VisibleMessageTypes <> ALL_MESSAGES;
-  actSelectNone.Enabled         := MLS.VisibleMessageTypes <> [];
+  actStart.Enabled         := B and not ActiveView.LogQueue.Enabled;
+  actStop.Enabled          := B and not actStart.Enabled;
+  actBitmap.Enabled        := B;
+  actCallStack.Enabled     := B;
+  actCheckPoint.Enabled    := B;
+  actConditional.Enabled   := B;
+  actInfo.Enabled          := B;
+  actWarning.Enabled       := B;
+  actValue.Enabled         := B;
+  actError.Enabled         := B;
+  actMethodTraces.Enabled  := B;
+  actException.Enabled     := B;
+  actComponent.Enabled     := B;
+  actHeapInfo.Enabled      := B;
+  actCustomData.Enabled    := B;
+  actStrings.Enabled       := B;
+  actObject.Enabled        := B;
+  actPersistent.Enabled    := B;
+  actInterface.Enabled     := B;
+  actMemory.Enabled        := B;
+  actCollapseAll.Enabled   := B;
+  actExpandAll.Enabled     := B;
+  actClearMessages.Enabled := B;
+  actSelectAll.Enabled     := MLS.VisibleMessageTypes <> ALL_MESSAGES;
+  actSelectNone.Enabled    := MLS.VisibleMessageTypes <> [];
   actFilterMessages.Enabled :=
     not Settings.MessageListSettings.AutoFilterMessages;
   actToggleAlwaysOnTop.Checked := Settings.FormSettings.FormStyle = fsStayOnTop;
