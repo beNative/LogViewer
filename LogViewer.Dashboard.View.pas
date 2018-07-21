@@ -24,11 +24,11 @@ uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes, System.Actions,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  Vcl.ActnList,
+  Vcl.ActnList, Vcl.ButtonGroup,
 
   VirtualTrees,
 
-  LogViewer.Interfaces, Vcl.ButtonGroup;
+  LogViewer.Interfaces, LogViewer.Dashboard.View.Node;
 
   {
     TODO:
@@ -47,7 +47,7 @@ type
     chkWinODSEnabled  : TCheckBox;
     chkZeroMQEnabled  : TCheckBox;
     pnlLogChannels    : TPanel;
-    bgMain: TButtonGroup;
+    bgMain            : TButtonGroup;
     {$ENDREGION}
 
     procedure chkWinIPCEnabledClick(Sender: TObject);
@@ -64,6 +64,10 @@ type
       ParentNode,
       Node              : PVirtualNode;
       var InitialStates : TVirtualNodeInitStates
+    );
+    procedure FTreeViewFreeNode(
+      Sender : TBaseVirtualTree;
+      Node   : PVirtualNode
     );
     procedure FTreeViewInitChildren(
       Sender         : TBaseVirtualTree;
@@ -90,14 +94,16 @@ type
 
     procedure FTreeViewChecked(Sender: TBaseVirtualTree; Node: PVirtualNode);
 
-//    procedure FChannelReceiverNewLogQueue(
-//      Sender    : TObject;
-//      ALogQueue : ILogQueue
-//    );
+    procedure FChannelReceiverNewLogQueue(
+      Sender    : TObject;
+      ALogQueue : ILogQueue
+    );
 
   protected
     procedure InitializeTreeView;
     procedure UpdateActions; override;
+
+    procedure AddNodesToTree(AParent: PVirtualNode; ANode: TDashboardNode);
 
   public
     constructor Create(
@@ -105,6 +111,8 @@ type
       AManager : ILogViewerManager
     ); reintroduce; virtual;
     procedure AfterConstruction; override;
+    procedure BeforeDestruction; override;
+
 
   end;
 
@@ -121,7 +129,7 @@ uses
 
   LogViewer.Manager,
 
-  LogViewer.Factories, LogViewer.Dashboard.View.Node;
+  LogViewer.Factories;
 
 {$REGION 'construction and destruction'}
 constructor TfrmDashboard.Create(AOwner: TComponent;
@@ -132,6 +140,18 @@ begin
   FManager := AManager;
 end;
 
+procedure TfrmDashboard.AddNodesToTree(AParent: PVirtualNode;
+  ANode: TDashboardNode);
+var
+  LSubNode: TDashboardNode;
+  LVTNode : PVirtualNode;
+begin
+  LVTNode := FTreeView.AddChild(AParent, ANode);
+  ANode.VTNode := LVTNode;
+  for LSubNode in ANode.Nodes do
+    AddNodesToTree(LVTNode, LSubNode);
+end;
+
 procedure TfrmDashboard.AfterConstruction;
 var
   R : IChannelReceiver;
@@ -140,33 +160,30 @@ begin
   FTreeView := TVirtualStringTreeFactory.CreateTreeList(Self, pnlLogChannels);
   FTreeView.AlignWithMargins := False;
 
-  R := TLogViewerFactories.CreateWinIPCChannelReceiver(FManager);
-  FManager.AddReceiver(R);
-  //R.OnNewLogQueue.Add(FChannelReceiverNewLogQueue);
-  R.Enabled := FManager.Settings.WinIPCSettings.Enabled;
 
-//  R := TLogViewerFactories.CreateWinODSChannelReceiver(FManager);
-//  FManager.AddReceiver(R);
-//  R.Enabled := FManager.Settings.WinODSSettings.Enabled;
 
-  R := TLogViewerFactories.CreateZeroMQChannelReceiver(FManager);
-  FManager.AddReceiver(R);
-  //R.OnNewLogQueue.Add(FChannelReceiverNewLogQueue);
-  R.Enabled := FManager.Settings.ZeroMQSettings.Enabled;
-
-  //InitializeTreeView;
+  InitializeTreeView;
   //InspectComponent(FTreeView);
+end;
+
+procedure TfrmDashboard.BeforeDestruction;
+begin
+  FTreeView.Clear;
+  FTreeView.Free;
+  FManager := nil;
+  inherited BeforeDestruction;
 end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
 {$REGION 'FTreeView'}
-//procedure TfrmDashboard.FChannelReceiverNewLogQueue(Sender: TObject;
-//  ALogQueue: ILogQueue);
-//begin
+procedure TfrmDashboard.FChannelReceiverNewLogQueue(Sender: TObject;
+  ALogQueue: ILogQueue);
+begin
 //  FTreeView.Refresh;
 //  FTreeView.ReinitNode(FTreeView.RootNode, True);
-//end;
+
+end;
 
 procedure TfrmDashboard.FTreeViewBeforeCellPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
@@ -193,21 +210,43 @@ begin
   DN.Receiver.Enabled := Node.CheckState = csCheckedNormal;
 end;
 
+procedure TfrmDashboard.FTreeViewFreeNode(Sender: TBaseVirtualTree;
+  Node: PVirtualNode);
+var
+  DN : TDashboardNode;
+begin
+  DN := Sender.GetNodeData<TDashboardNode>(Node);
+  //owMessage(DN.Count.ToString);
+  DN.Free;
+
+end;
+
 procedure TfrmDashboard.FTreeViewGetText(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
   var CellText: string);
 var
   DN : TDashboardNode;
 begin
+  CellText := '';
   DN := Sender.GetNodeData<TDashboardNode>(Node);
   if Sender.GetNodeLevel(Node) = 0 then
   begin
-    CellText := DN.Receiver.Name;
+    if Column =  0 then
+      CellText := DN.Receiver.Name
+    else
+      CellText := '';
   end
   else
   begin
     if Assigned(DN.LogQueue) then
-      CellText := DN.LogQueue.SourceName;
+    begin
+      if Column =  1 then
+        CellText := DN.LogQueue.SourceName
+      else if Column =  2 then
+        CellText := DN.LogQueue.SourceId.ToString
+      else if Column =  3 then
+        CellText := DN.LogQueue.MessageCount.ToString;
+    end
   end;
 end;
 
@@ -230,15 +269,23 @@ end;
 
 procedure TfrmDashboard.FTreeViewInitNode(Sender: TBaseVirtualTree; ParentNode,
   Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
+var
+  DN : TDashboardNode;
 begin
-  if ParentNode = nil then
-    InitialStates := InitialStates + [ivsHasChildren, ivsExpanded];
-  Node.SetData<TDashboardNode>(TDashboardNode.Create(
-    Node, FManager.Receivers[Node.Index], nil)
-  );
-
-  if Sender.GetNodeLevel(Node) = 0 then
-    Node.CheckType := ctCheckBox;
+//  DN := Sender.GetNodeData<TDashboardNode>(Node);
+//  DN.Free;
+//
+//  if ParentNode = nil then
+//    InitialStates := InitialStates + [ivsHasChildren, ivsExpanded];
+//
+//  Node.SetData<TDashboardNode>(
+//    TDashboardNode.Create(Node, FTreeView, FManager.Receivers[Node.Index])
+//  );
+//  if Sender.GetNodeLevel(Node) = 0 then
+//  begin
+//    Node.CheckType := ctCheckBox;
+//    InitialStates := InitialStates + [ivsHasChildren, ivsExpanded];
+//  end;
 end;
 {$ENDREGION}
 
@@ -265,40 +312,86 @@ end;
 
 {$REGION 'protected methods'}
 procedure TfrmDashboard.InitializeTreeView;
+var
+  LNode : TDashboardNode;
+  R     : IChannelReceiver;
 begin
-//  FTreeView.OnBeforeCellPaint := FTreeViewBeforeCellPaint;
-//  FTreeView.OnInitNode        := FTreeViewInitNode;
-//  FTreeView.OnInitChildren    := FTreeViewInitChildren;
-//  FTreeView.OnGetText         := FTreeViewGetText;
-//  FTreeView.OnChecked         := FTreeViewChecked;
-//  with FTreeView do
-//  begin
-//    with Header.Columns.Add do
-//    begin
-//      Color    := clWhite;
-//      MaxWidth := 200;
-//      MinWidth := 100;
-//      Options  := [coAllowClick, coDraggable, coEnabled, coParentBidiMode,
-//        coResizable, coShowDropMark, coVisible, coSmartResize, coAllowFocus,
-//        coEditable];
-//      Position := 0;
-//      Indent   := 8;
-//      Width    := 200;
-//      Text := 'Name';
-//    end;
-//    with Header.Columns.Add do
-//    begin
-//      MaxWidth := 800;
-//      MinWidth := 100;
-//      Options  := [coAllowClick, coDraggable, coEnabled, coParentBidiMode,
-//        coParentColor, coResizable, coShowDropMark, coVisible, coAutoSpring,
-//        coSmartResize, coAllowFocus, coEditable];
-//      Position := 1;
-//      Width    := 100;
-//      Text := 'Value';
-//    end;
-//    Header.MainColumn := 0;
-//  end;
+  FTreeView.OnBeforeCellPaint := FTreeViewBeforeCellPaint;
+  //FTreeView.OnInitNode        := FTreeViewInitNode;
+  FTreeView.OnFreeNode        := FTreeViewFreeNode;
+  FTreeView.OnInitChildren    := FTreeViewInitChildren;
+  FTreeView.OnGetText         := FTreeViewGetText;
+  FTreeView.OnChecked         := FTreeViewChecked;
+  with FTreeView do
+  begin
+    with Header.Columns.Add do
+    begin
+      Color    := clWhite;
+      MaxWidth := 200;
+      MinWidth := 100;
+      Options  := [coAllowClick, coDraggable, coEnabled, coParentBidiMode,
+        coResizable, coShowDropMark, coVisible, coSmartResize, coAllowFocus,
+        coEditable];
+      Position := 0;
+      Indent   := 8;
+      Width    := 200;
+      Text := 'Name';
+    end;
+    with Header.Columns.Add do
+    begin
+      MaxWidth := 800;
+      MinWidth := 100;
+      Options  := [coAllowClick, coDraggable, coEnabled, coParentBidiMode,
+        coParentColor, coResizable, coShowDropMark, coVisible, coAutoSpring,
+        coSmartResize, coAllowFocus, coEditable];
+      Position := 1;
+      Width    := 100;
+      Text := 'Value';
+    end;
+    with Header.Columns.Add do
+    begin
+      MaxWidth := 800;
+      MinWidth := 100;
+      Options  := [coAllowClick, coDraggable, coEnabled, coParentBidiMode,
+        coParentColor, coResizable, coShowDropMark, coVisible, coAutoSpring,
+        coSmartResize, coAllowFocus, coEditable];
+      Position := 2;
+      Width    := 100;
+      Text := 'Id';
+    end;
+    with Header.Columns.Add do
+    begin
+      MaxWidth := 800;
+      MinWidth := 100;
+      Options  := [coAllowClick, coDraggable, coEnabled, coParentBidiMode,
+        coParentColor, coResizable, coShowDropMark, coVisible, coAutoSpring,
+        coSmartResize, coAllowFocus, coEditable];
+      Position := 3;
+      Width    := 100;
+      Text := 'Messagecount';
+    end;
+    Header.MainColumn := 0;
+  end;
+
+  R := TLogViewerFactories.CreateWinIPCChannelReceiver(FManager);
+  FManager.AddReceiver(R);
+  //R.OnNewLogQueue.Add(FChannelReceiverNewLogQueue);
+  R.Enabled := FManager.Settings.WinIPCSettings.Enabled;
+  LNode := TDashboardNode.Create(nil, FTreeView, R, nil);
+  AddNodesToTree(FTreeView.RootNode, LNode);
+
+//  R := TLogViewerFactories.CreateWinODSChannelReceiver(FManager);
+//  FManager.AddReceiver(R);
+//  R.Enabled := FManager.Settings.WinODSSettings.Enabled;
+
+  R := TLogViewerFactories.CreateZeroMQChannelReceiver(FManager);
+  FManager.AddReceiver(R);
+  //R.OnNewLogQueue.Add(FChannelReceiverNewLogQueue);
+  R.Enabled := FManager.Settings.ZeroMQSettings.Enabled;
+  LNode := TDashboardNode.Create(nil, FTreeView, R, nil);
+  AddNodesToTree(FTreeView.RootNode, LNode);
+
+
 
   //FTreeView.RootNodeCount := FManager.Receivers.Count;
 end;
@@ -308,12 +401,14 @@ begin
   chkWinIPCEnabled.Checked := FManager.Settings.WinIPCSettings.Enabled;
   chkWinODSEnabled.Checked := FManager.Settings.WinODSSettings.Enabled;
   chkZeroMQEnabled.Checked := FManager.Settings.ZeroMQSettings.Enabled;
-//  chkComPortEnabled.Checked := FManager.Settings.ComPortSettings.Enabled;
+  //chkComPortEnabled.Checked := FManager.Settings.ComPortSettings.Enabled;
   FManager.Actions.UpdateActions;
+  FTreeView.Invalidate;
 
   inherited UpdateActions;
 end;
 {$ENDREGION}
 
 end.
+
 

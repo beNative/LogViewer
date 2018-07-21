@@ -41,6 +41,7 @@ type
   )
     {$REGION 'designer controls'}
     aclMain               : TActionList;
+    actAbout              : TAction;
     actAutoScrollMessages : TAction;
     actBitmap             : TAction;
     actCallStack          : TAction;
@@ -80,7 +81,6 @@ type
     imlMain               : TImageList;
     ppmLogTreeViewer      : TPopupMenu;
     ppmMessageTypes       : TPopupMenu;
-    actAbout: TAction;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -274,6 +274,10 @@ procedure TdmManager.BeforeDestruction;
 begin
   FreeAndNil(FCommands);
   FreeAndNil(FEvents);
+//  FReceivers.Clear;
+//  FReceivers      := nil;
+//  FLogQueues      := nil;
+//  FViewList       := nil;
 //  FSettings       := nil;
 //  FEditorSettings := nil;
 //  FEditorManager  := nil;

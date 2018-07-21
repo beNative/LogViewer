@@ -133,7 +133,6 @@ begin
   if Assigned(ActiveView) and Assigned(ActiveView.LogQueue) then
   begin
     ActiveView.LogQueue.Enabled := True;
-    //Receiver.Enabled := True;
   end;
 end;
 
@@ -142,7 +141,6 @@ begin
   if Assigned(ActiveView) and Assigned(ActiveView.LogQueue) then
   begin
     ActiveView.LogQueue.Enabled := False;
-    //Receiver.Enabled := False;
   end;
 end;
 

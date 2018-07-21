@@ -128,12 +128,16 @@ type
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
     function GetSourceName: string;
+    function GetMessageCount: Int64;
     {$ENDREGION}
 
     procedure DoReceiveMessage(AStream : TStream);
 
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
+
+    property MessageCount: Int64
+      read GetMessageCount;
 
     property SourceId: Integer
       read GetSourceId;

@@ -35,6 +35,7 @@ type
     FSourceId         : Integer;
     FSourceName       : string;
     FEnabled          : Boolean;
+    FMessageCount     : Int64;
 
     {$REGION 'property access methods'}
     function GetSourceId: Integer;
@@ -43,6 +44,7 @@ type
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
     function GetSourceName: string;
+    function GetMessageCount: Int64;
     {$ENDREGION}
 
   protected
@@ -68,6 +70,9 @@ type
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
 
+    property MessageCount: Int64
+      read GetMessageCount;
+
     property OnReceiveMessage: IEvent<TReceiveMessageEvent>
       read GetOnReceiveMessage;
   end;
@@ -80,17 +85,17 @@ constructor TLogQueue.Create(const AReceiver: IChannelReceiver;
 begin
   inherited Create;
   FOnReceiveMessage.UseFreeNotification := False;
-  FReceiver := AReceiver;
-  FSourceId := ASourceId;
+  FReceiver   := AReceiver;
+  FSourceId   := ASourceId;
   FSourceName := ASourceName;
-  FEnabled  := True;
+  FEnabled    := True;
 end;
 
 procedure TLogQueue.BeforeDestruction;
 begin
   FOnReceiveMessage.Clear;
   FOnReceiveMessage := nil;
-  FReceiver := nil;
+  FReceiver         := nil;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
@@ -109,6 +114,11 @@ end;
 function TLogQueue.GetEnabled: Boolean;
 begin
   Result := FEnabled;
+end;
+
+function TLogQueue.GetMessageCount: Int64;
+begin
+  Result := FMessageCount;
 end;
 
 procedure TLogQueue.SetEnabled(const Value: Boolean);
@@ -131,7 +141,10 @@ end;
 procedure TLogQueue.DoReceiveMessage(AStream: TStream);
 begin
   if Enabled then
+  begin
+    Inc(FMessageCount);
     FOnReceiveMessage.Invoke(Self, AStream);
+  end;
 end;
 {$ENDREGION}
 

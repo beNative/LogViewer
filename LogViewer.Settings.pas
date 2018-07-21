@@ -112,14 +112,15 @@ end;
 
 procedure TLogViewerSettings.BeforeDestruction;
 begin
-  FreeAndNil(FFormSettings);
-  FreeAndNil(FMessageListSettings);
-  FreeAndNil(FWinODSSettings);
-  FreeAndNil(FWinIPCSettings);
-  FreeAndNil(FComPortSettings);
-  FreeAndNil(FZeroMQSettings);
-  FreeAndNil(FWatchSettings);
   FreeAndNil(FDisplayValuesSettings);
+  FreeAndNil(FWatchSettings);
+  FreeAndNil(FZeroMQSettings);
+  FreeAndNil(FComPortSettings);
+  FreeAndNil(FWinIPCSettings);
+  FreeAndNil(FWinODSSettings);
+  FreeAndNil(FMessageListSettings);
+  FFormSettings.OnChanged.Remove(FormSettingsChanged);
+  FreeAndNil(FFormSettings);
   inherited BeforeDestruction;
 end;
 {$ENDREGION}

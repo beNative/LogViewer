@@ -21,7 +21,7 @@ interface
 uses
   System.Classes,
 
-  Spring.Collections,
+  Spring, Spring.Collections,
 
   VirtualTrees,
 
@@ -41,13 +41,15 @@ uses
 type
   TDashboardNode = class
   private
-    FVTNode      : PVirtualNode;
-    FNodes       : IList<TDashboardNode>;
-    FReceiver    : IChannelReceiver;
-    FLogQueue    : ILogQueue;
+    FVTNode   : PVirtualNode;
+    FNodes    : Lazy<IList<TDashboardNode>>;
+    FReceiver : IChannelReceiver;
+    FLogQueue : ILogQueue;
+    FVTree    : TVirtualStringTree;
 
   protected
     {$REGION 'property access methods'}
+    function GetVTree: TVirtualStringTree;
     function GetCount: Integer;
     function GetLogQueue: ILogQueue;
     procedure SetLogQueue(const Value: ILogQueue);
@@ -61,16 +63,17 @@ type
   public
     constructor Create(
       AVTNode   : PVirtualNode;
+      AVTree    : TVirtualStringTree;
       AReceiver : IChannelReceiver;
       ALogQueue : ILogQueue = nil
     );
+    procedure BeforeDestruction; override;
 
     procedure FChannelReceiverNewLogQueue(
       Sender    : TObject;
       ALogQueue : ILogQueue
     );
 
-    procedure BeforeDestruction; override;
 
     property Nodes: IList<TDashboardNode>
       read GetNodes;
@@ -86,38 +89,44 @@ type
 
     property VTNode: PVirtualNode
       read GetVTNode write SetVTNode;
+
+    property VTree: TVirtualStringTree
+      read GetVTree;
   end;
 
 implementation
 
 {$REGION 'construction and destruction'}
 constructor TDashboardNode.Create(AVTNode: PVirtualNode;
-  AReceiver: IChannelReceiver; ALogQueue: ILogQueue);
+  AVTree: TVirtualStringTree; AReceiver: IChannelReceiver; ALogQueue: ILogQueue);
 begin
+  FNodes.Create(function: IList<TDashboardNode>
+    begin
+      Result := TCollections.CreateObjectList<TDashboardNode>(False);
+    end
+  );
   FVTNode   := AVTNode;
-  Receiver  := AReceiver;
+  FVTree    := AVTree;
+  if not Assigned(ALogQueue) then
+    Receiver  := AReceiver;
   FLogQueue := ALogQueue;
-end;
-
-procedure TDashboardNode.FChannelReceiverNewLogQueue(Sender: TObject;
-  ALogQueue: ILogQueue);
-begin
-  Nodes.Add(TDashboardNode.Create(nil, nil, ALogQueue));
 end;
 
 procedure TDashboardNode.BeforeDestruction;
 begin
-  FReceiver := nil;
+//  FVTree    := nil;
+//  FVTNode   := nil;
+//  FLogQueue := nil;
+//  FReceiver := nil;
   inherited BeforeDestruction;
-
 end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
 function TDashboardNode.GetCount: Integer;
 begin
-  if Assigned(FNodes) then
-    Result := FNodes.Count
+  if FNodes.IsValueCreated then
+    Result := Nodes.Count
   else
     Result := 0;
 end;
@@ -134,9 +143,7 @@ end;
 
 function TDashboardNode.GetNodes: IList<TDashboardNode>;
 begin
-  if not Assigned(FNodes) then
-    FNodes := TCollections.CreateObjectList<TDashboardNode>;
-  Result := FNodes;
+  Result := FNodes.Value;
 end;
 
 function TDashboardNode.GetReceiver: IChannelReceiver;
@@ -162,9 +169,32 @@ begin
   Result := FVTNode;
 end;
 
+function TDashboardNode.GetVTree: TVirtualStringTree;
+begin
+  Result := FVTree;
+end;
+
 procedure TDashboardNode.SetVTNode(const Value: PVirtualNode);
 begin
   FVTNode := Value;
+end;
+{$ENDREGION}
+
+{$REGION 'event handlers'}
+procedure TDashboardNode.FChannelReceiverNewLogQueue(Sender: TObject;
+  ALogQueue: ILogQueue);
+var
+  DN : TDashboardNode;
+begin
+  DN := TDashboardNode.Create(nil, FVTree, FReceiver, ALogQueue);
+  DN.VTNode := FVTree.AddChild(FVTNode, DN);
+  Nodes.Add(DN);
+
+
+
+//end;
+
+
 end;
 {$ENDREGION}
 

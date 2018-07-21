@@ -46,7 +46,10 @@ type
     imlMain           : TImageList;
     pnlMainClient     : TPanel;
     sbrMain           : TStatusBar;
-    tskbrMain: TTaskbar;
+    tskbrMain         : TTaskbar;
+
+    procedure actCenterToScreenExecute(Sender: TObject);
+    procedure actShowVersionExecute(Sender: TObject);
 
     procedure ctMainButtonAddClick(
       Sender      : TObject;
@@ -74,8 +77,6 @@ type
       var TabDropOptions : TTabDropOptions
     );
     procedure FormShortCut(var Msg: TWMKey; var Handled: Boolean);
-    procedure actCenterToScreenExecute(Sender: TObject);
-    procedure actShowVersionExecute(Sender: TObject);
 
   private
     FManager     : ILogViewerManager;
@@ -172,21 +173,13 @@ end;
 {$ENDREGION}
 
 {$REGION 'construction and destruction'}
-procedure TfrmMain.actShowVersionExecute(Sender: TObject);
-const
-  LIBZMQ = 'libzmq';
+procedure TfrmMain.AfterConstruction;
 var
   FVI : TFileVersionInfo;
 begin
-  FVI := TFileVersionInfo.GetVersionInfo(Format('%s\%s.dll', [ExtractFileDir(ParamStr(0)), LIBZMQ]));
-  ShowMessage(FVI.ToString);
-
-
-end;
-
-procedure TfrmMain.AfterConstruction;
-begin
   inherited AfterConstruction;
+  FVI := TFileVersionInfo.GetVersionInfo(Application.ExeName);
+  Caption := Format('%s %s', [FVI.ProductName, FVI.ProductVersion]);
   FSettings := TLogViewerFactories.CreateSettings;
   FSettings.Load;
   FManager := TLogViewerFactories.CreateManager(Self, FSettings);
@@ -208,7 +201,9 @@ procedure TfrmMain.BeforeDestruction;
 begin
   FSettings.FormSettings.Assign(Self);
   FSettings.Save;
+  FSettings.OnChanged.Remove(SettingsChanged);
   FSettings.Free;
+  Events.OnAddLogViewer.Remove(EventsAddLogViewer);
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
@@ -220,6 +215,18 @@ begin
   Top  := 0;
   Left := 0;
   WindowState := wsMaximized;
+end;
+
+procedure TfrmMain.actShowVersionExecute(Sender: TObject);
+const
+  LIBZMQ = 'libzmq';
+var
+  FVI : TFileVersionInfo;
+begin
+  FVI := TFileVersionInfo.GetVersionInfo(Format('%s\%s.dll', [ExtractFileDir(ParamStr(0)), LIBZMQ]));
+  ShowMessage(FVI.ToString);
+
+
 end;
 {$ENDREGION}
 

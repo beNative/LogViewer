@@ -97,9 +97,9 @@ end;
 
 procedure TChannelReceiver.BeforeDestruction;
 begin
+  FOnNewLogQueue.Clear;
   FQueueList.Clear;
   FQueueList := nil;
-  FOnNewLogQueue.Clear;
   inherited BeforeDestruction;
 end;
 

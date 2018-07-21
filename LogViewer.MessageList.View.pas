@@ -307,7 +307,7 @@ implementation
 
 uses
   System.StrUtils, System.UITypes, System.DateUtils, System.Math,
-  System.UIConsts,
+  System.UIConsts, System.Threading,
 
   Spring, Spring.Helpers,
 
@@ -347,9 +347,9 @@ begin
   FSettings.OnChanged.Add(FSettingsChanged);
   FLogTreeView.PopupMenu := Manager.Menus.LogTreeViewerPopupMenu;
 
-  FValueList := TValueList.Create(Self);
+  FValueList        := TValueList.Create(Self);
   FValueList.Parent := tsValueList;
-  FValueList.Align := alClient;
+  FValueList.Align  := alClient;
 
   ApplySettings;
 end;
@@ -970,8 +970,11 @@ end;
 
 procedure TfrmMessageList.AutoFitColumns;
 begin
-  FLogTreeView.Header.AutoFitColumns(False, smaUseColumnOption, -1, -1);
+  FLogTreeView.BeginUpdate;
+  //FLogTreeView.Header.AutoFitColumns(False, smaUseColumnOption, -1, -1);
+  FLogTreeView.Header.AutoFitColumns(False, smaUseColumnOption, 1, 2);
   FAutoSizeColumns := True;
+  FLogTreeView.EndUpdate;
 end;
 
 procedure TfrmMessageList.Activate;

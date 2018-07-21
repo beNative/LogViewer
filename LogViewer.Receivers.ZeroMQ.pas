@@ -43,8 +43,9 @@ uses
 
   LogViewer.Interfaces,  LogViewer.Receivers.Base, LogViewer.ZeroMQ.Settings;
 
-const
-  ZQM_DEFAULT_ADDRESS = 'tcp://192.168.0.226:5555';
+//const
+  //ZQM_DEFAULT_ADDRESS = 'tcp://192.168.0.226:5555';
+  //ZQM_DEFAULT_ADDRESS = 'tcp://192.168.0.226:*';
 //  tcp://GANYMEDES:5555
 //  tcp://EUROPA:5555
 
@@ -100,8 +101,8 @@ end;
 procedure TZeroMQChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
-  if FAddress = '' then
-    FAddress := ZQM_DEFAULT_ADDRESS;
+//  if FAddress = '' then
+//    FAddress := ZQM_DEFAULT_ADDRESS;
   FTimer          := TTimer.Create(nil);
   FTimer.OnTimer  := FTimerTimer;
   FTimer.Interval := 100;
@@ -175,6 +176,10 @@ var
   N : Integer;
 begin
   FSubscriber := FZMQ.Start(ZMQSocket.Subscriber);
+
+  //FAddress := Format('tcp://192.168.0.226:%d', [FSubscriber.GetPort]);
+  FAddress := FSubscriber.LastEndPoint;
+
   N := FSubscriber.Connect(FAddress);
   if N = 0 then
   begin

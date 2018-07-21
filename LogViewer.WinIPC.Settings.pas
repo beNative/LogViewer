@@ -39,7 +39,9 @@ type
     procedure Changed;
 
   public
+
     procedure Assign(Source: TPersistent); override;
+    procedure BeforeDestruction; override;
 
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
@@ -50,6 +52,14 @@ type
   end;
 
 implementation
+
+{$REGION 'construction and destruction'}
+procedure TWinIPCSettings.BeforeDestruction;
+begin
+  FOnChanged.Clear;
+  inherited BeforeDestruction;
+end;
+{$ENDREGION}
 
 {$REGION 'property access methods'}
 function TWinIPCSettings.GetEnabled: Boolean;
