@@ -111,7 +111,9 @@ begin
   inherited AfterConstruction;
   FOnChanged.UseFreeNotification := False;
   FVisibleMessageTypes := ALL_MESSAGES;
-  FWatchSettings := TWatchSettings.Create;
+  FLeftPanelWidth      := 250;
+  FRightPanelWidth     := 250;
+  FWatchSettings       := TWatchSettings.Create;
 end;
 
 procedure TMessageListSettings.BeforeDestruction;

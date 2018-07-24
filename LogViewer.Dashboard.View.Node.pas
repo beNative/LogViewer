@@ -74,7 +74,6 @@ type
       ALogQueue : ILogQueue
     );
 
-
     property Nodes: IList<TDashboardNode>
       read GetNodes;
 

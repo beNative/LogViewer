@@ -178,7 +178,7 @@ begin
   FSubscriber := FZMQ.Start(ZMQSocket.Subscriber);
 
   //FAddress := Format('tcp://192.168.0.226:%d', [FSubscriber.GetPort]);
-  FAddress := FSubscriber.LastEndPoint;
+  FAddress := 'tcp://localhost:5555';
 
   N := FSubscriber.Connect(FAddress);
   if N = 0 then

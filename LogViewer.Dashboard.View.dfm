@@ -2,7 +2,7 @@ object frmDashboard: TfrmDashboard
   Left = 0
   Top = 0
   ClientHeight = 557
-  ClientWidth = 460
+  ClientWidth = 829
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -42,12 +42,75 @@ object frmDashboard: TfrmDashboard
   object pnlLogChannels: TPanel
     Left = 0
     Top = 128
-    Width = 460
+    Width = 829
     Height = 429
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     BevelOuter = bvNone
     TabOrder = 4
+    ExplicitWidth = 460
+    object spl1: TSplitter
+      Left = 321
+      Top = 0
+      Width = 7
+      Height = 429
+      ExplicitLeft = 320
+    end
+    object pnlLeft: TPanel
+      Left = 0
+      Top = 0
+      Width = 321
+      Height = 429
+      Align = alLeft
+      BevelOuter = bvNone
+      TabOrder = 0
+    end
+    object pnlRight: TPanel
+      Left = 328
+      Top = 0
+      Width = 501
+      Height = 429
+      Align = alClient
+      BevelOuter = bvNone
+      TabOrder = 1
+      ExplicitLeft = 456
+      ExplicitTop = 120
+      ExplicitWidth = 185
+      ExplicitHeight = 41
+      object pgcMain: TPageControl
+        Left = 0
+        Top = 0
+        Width = 501
+        Height = 429
+        ActivePage = tsWinIPC
+        Align = alClient
+        Images = dmManager.imlMain
+        TabOrder = 0
+        object tsWinIPC: TTabSheet
+          Caption = 'WinIPC'
+          ImageIndex = 28
+          ExplicitTop = 24
+          ExplicitHeight = 401
+        end
+        object tsWinODS: TTabSheet
+          Caption = 'WinODS'
+          ImageIndex = 28
+          ExplicitTop = 24
+          ExplicitHeight = 401
+        end
+        object tsZeroMQ: TTabSheet
+          Caption = 'ZeroMQ'
+          ImageIndex = 6
+          ExplicitTop = 24
+          ExplicitHeight = 401
+        end
+        object tsCOMPort: TTabSheet
+          Caption = 'COMPort'
+          ImageIndex = 24
+          ExplicitLeft = 6
+        end
+      end
+    end
   end
   object chkComPortEnabled: TCheckBox
     Left = 38

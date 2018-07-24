@@ -28,7 +28,7 @@ uses
 
   VirtualTrees,
 
-  LogViewer.Interfaces, LogViewer.Dashboard.View.Node;
+  LogViewer.Interfaces, LogViewer.Dashboard.View.Node, Vcl.ComCtrls;
 
   {
     TODO:
@@ -48,6 +48,14 @@ type
     chkZeroMQEnabled  : TCheckBox;
     pnlLogChannels    : TPanel;
     bgMain            : TButtonGroup;
+    pnlLeft: TPanel;
+    spl1: TSplitter;
+    pnlRight: TPanel;
+    pgcMain: TPageControl;
+    tsWinIPC: TTabSheet;
+    tsWinODS: TTabSheet;
+    tsZeroMQ: TTabSheet;
+    tsCOMPort: TTabSheet;
     {$ENDREGION}
 
     procedure chkWinIPCEnabledClick(Sender: TObject);
@@ -157,11 +165,8 @@ var
   R : IChannelReceiver;
 begin
   inherited AfterConstruction;
-  FTreeView := TVirtualStringTreeFactory.CreateTreeList(Self, pnlLogChannels);
+  FTreeView := TVirtualStringTreeFactory.CreateTreeList(Self, pnlLeft);
   FTreeView.AlignWithMargins := False;
-
-
-
   InitializeTreeView;
   //InspectComponent(FTreeView);
 end;

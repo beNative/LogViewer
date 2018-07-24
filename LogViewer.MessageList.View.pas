@@ -470,6 +470,7 @@ begin
     Self,
     pnlLeftBottom,
     FWatches,
+    FSettings.WatchSettings,
     DisplayValuesSettings
   );
 end;

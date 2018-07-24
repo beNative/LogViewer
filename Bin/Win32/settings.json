@@ -1,18 +1,18 @@
 {
 	"FormSettings": {
-		"Left": 0,
-		"Top": 134,
-		"Width": 1989,
-		"Height": 1141,
+		"Left": 761,
+		"Top": 178,
+		"Width": 1201,
+		"Height": 614,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
 	"MessageListSettings": {
-		"AutoScrollMessages": true,
+		"AutoScrollMessages": false,
 		"AutoFilterMessages": false,
 		"DynamicAutoSizeColumns": false,
-		"LeftPanelWidth": 406,
-		"RightPanelWidth": 100
+		"LeftPanelWidth": 342,
+		"RightPanelWidth": 250
 	},
 	"WinODSSettings": {
 		"Enabled": false
@@ -21,7 +21,7 @@
 		"Enabled": true
 	},
 	"ZeroMQSettings": {
-		"Enabled": false
+		"Enabled": true
 	},
 	"DisplayValueSettings": {
 		"Id": {

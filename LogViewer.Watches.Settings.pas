@@ -23,14 +23,24 @@ uses
 
   Spring;
 
+const
+  DEFAULT_WATCH_HISTORY_PANEL_HEIGHT = 100;
+  DEFAULT_HEIGHT                     = 300;
+
 type
   TWatchSettings = class(TPersistent)
   private
-    FOnChanged        : Event<TNotifyEvent>;
-    FOnlyTrackChanges : Boolean;
+    FWatchHistoryPanelHeight : Integer;
+    FOnChanged               : Event<TNotifyEvent>;
+    FOnlyTrackChanges        : Boolean;
+    FHeight                  : Integer;
 
   protected
     {$REGION 'property access methods'}
+    function GetHeight: Integer;
+    procedure SetHeight(const Value: Integer);
+    function GetWatchHistoryPanelHeight: Integer;
+    procedure SetWatchHistoryPanelHeight(const Value: Integer);
     function GetOnChanged: IEvent<TNotifyEvent>;
     function GetOnlyTrackChanges: Boolean;
     procedure SetOnlyTrackChanges(const Value: Boolean);
@@ -42,6 +52,14 @@ type
     procedure AfterConstruction; override;
 
     procedure Assign(Source: TPersistent); override;
+
+    property WatchHistoryPanelHeight: Integer
+      read GetWatchHistoryPanelHeight write SetWatchHistoryPanelHeight
+      default DEFAULT_WATCH_HISTORY_PANEL_HEIGHT;
+
+    property Height: Integer
+      read GetHeight write SetHeight default DEFAULT_HEIGHT;
+
 
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
@@ -57,11 +75,26 @@ implementation
 procedure TWatchSettings.AfterConstruction;
 begin
   inherited AfterConstruction;
-
+  FHeight                  := DEFAULT_HEIGHT;
+  FWatchHistoryPanelHeight := DEFAULT_WATCH_HISTORY_PANEL_HEIGHT;
 end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
+function TWatchSettings.GetHeight: Integer;
+begin
+  Result := FHeight;
+end;
+
+procedure TWatchSettings.SetHeight(const Value: Integer);
+begin
+  if Value <> Height then
+  begin
+    FHeight := Value;
+    Changed;
+  end;
+end;
+
 function TWatchSettings.GetOnChanged: IEvent<TNotifyEvent>;
 begin
   Result := FOnChanged;
@@ -72,11 +105,26 @@ begin
   Result := FOnlyTrackChanges;
 end;
 
+
 procedure TWatchSettings.SetOnlyTrackChanges(const Value: Boolean);
 begin
   if Value <> OnlyTrackChanges then
   begin
     FOnlyTrackChanges := Value;
+    Changed;
+  end;
+end;
+
+function TWatchSettings.GetWatchHistoryPanelHeight: Integer;
+begin
+  Result := FWatchHistoryPanelHeight;
+end;
+
+procedure TWatchSettings.SetWatchHistoryPanelHeight(const Value: Integer);
+begin
+  if Value <> WatchHistoryPanelHeight then
+  begin
+    FWatchHistoryPanelHeight := Value;
     Changed;
   end;
 end;
@@ -96,8 +144,9 @@ var
 begin
   if Source is TWatchSettings then
   begin
-    LSettings := TWatchSettings(Source);
-    OnlyTrackChanges := LSettings.OnlyTrackChanges;
+    LSettings               := TWatchSettings(Source);
+    OnlyTrackChanges        := LSettings.OnlyTrackChanges;
+    WatchHistoryPanelHeight := LSettings.WatchHistoryPanelHeight;
   end
   else
     inherited Assign(Source);
