@@ -12,64 +12,38 @@ object frmDashboard: TfrmDashboard
   OldCreateOrder = False
   PixelsPerInch = 96
   TextHeight = 13
-  object chkWinODSEnabled: TCheckBox
-    Left = 38
-    Top = 34
-    Width = 106
-    Height = 17
-    Caption = 'WinODS enabled'
-    TabOrder = 1
-    OnClick = chkWinODSEnabledClick
-  end
-  object chkWinIPCEnabled: TCheckBox
-    Left = 38
-    Top = 11
-    Width = 97
-    Height = 17
-    Caption = 'WinIPC enabled'
-    TabOrder = 0
-    OnClick = chkWinIPCEnabledClick
-  end
-  object chkZeroMQEnabled: TCheckBox
-    Left = 37
-    Top = 59
-    Width = 154
-    Height = 17
-    Caption = 'ZeroMQ subscriber enabled'
-    TabOrder = 2
-    OnClick = chkZeroMQEnabledClick
-  end
   object pnlLogChannels: TPanel
     Left = 0
-    Top = 128
+    Top = 32
     Width = 829
-    Height = 429
+    Height = 525
     Align = alBottom
     Anchors = [akLeft, akTop, akRight, akBottom]
     BevelOuter = bvNone
-    TabOrder = 4
-    ExplicitWidth = 460
+    TabOrder = 0
     object spl1: TSplitter
-      Left = 321
+      Left = 505
       Top = 0
       Width = 7
-      Height = 429
+      Height = 525
       ExplicitLeft = 320
+      ExplicitHeight = 429
     end
     object pnlLeft: TPanel
       Left = 0
       Top = 0
-      Width = 321
-      Height = 429
+      Width = 505
+      Height = 525
       Align = alLeft
       BevelOuter = bvNone
       TabOrder = 0
+      ExplicitHeight = 429
     end
     object pnlRight: TPanel
-      Left = 328
+      Left = 512
       Top = 0
-      Width = 501
-      Height = 429
+      Width = 317
+      Height = 525
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 1
@@ -80,74 +54,82 @@ object frmDashboard: TfrmDashboard
       object pgcMain: TPageControl
         Left = 0
         Top = 0
-        Width = 501
-        Height = 429
-        ActivePage = tsWinIPC
+        Width = 317
+        Height = 525
+        ActivePage = tsZeroMQ
         Align = alClient
         Images = dmManager.imlMain
         TabOrder = 0
+        ExplicitWidth = 501
+        ExplicitHeight = 429
         object tsWinIPC: TTabSheet
           Caption = 'WinIPC'
           ImageIndex = 28
           ExplicitTop = 24
+          ExplicitWidth = 493
           ExplicitHeight = 401
         end
         object tsWinODS: TTabSheet
           Caption = 'WinODS'
           ImageIndex = 28
           ExplicitTop = 24
+          ExplicitWidth = 493
           ExplicitHeight = 401
         end
         object tsZeroMQ: TTabSheet
           Caption = 'ZeroMQ'
           ImageIndex = 6
           ExplicitTop = 24
+          ExplicitWidth = 493
           ExplicitHeight = 401
+          object edtAddress: TLabeledEdit
+            Left = 72
+            Top = 16
+            Width = 121
+            Height = 21
+            EditLabel.Width = 43
+            EditLabel.Height = 13
+            EditLabel.Caption = 'Address:'
+            LabelPosition = lpLeft
+            TabOrder = 0
+          end
+          object edtPort: TLabeledEdit
+            Left = 72
+            Top = 43
+            Width = 121
+            Height = 21
+            EditLabel.Width = 24
+            EditLabel.Height = 13
+            EditLabel.Caption = 'Port:'
+            LabelPosition = lpLeft
+            LabelSpacing = 20
+            TabOrder = 1
+          end
+          object btnAddZeroMQNode: TButton
+            Left = 74
+            Top = 70
+            Width = 119
+            Height = 25
+            Action = actAddZeroMQNode
+            TabOrder = 2
+          end
         end
         object tsCOMPort: TTabSheet
           Caption = 'COMPort'
           ImageIndex = 24
           ExplicitLeft = 6
+          ExplicitWidth = 493
+          ExplicitHeight = 400
         end
       end
     end
   end
-  object chkComPortEnabled: TCheckBox
-    Left = 38
-    Top = 83
-    Width = 106
-    Height = 17
-    Caption = 'COM port enabled'
-    TabOrder = 3
-    OnClick = chkComPortEnabledClick
-  end
-  object bgMain: TButtonGroup
-    Left = 8
-    Top = 8
-    Width = 26
-    BevelInner = bvNone
-    BevelOuter = bvNone
-    BorderStyle = bsNone
-    ButtonOptions = [gboFullSize, gboShowCaptions]
-    Enabled = False
-    Images = dmManager.imlMain
-    Items = <
-      item
-        ImageIndex = 28
-      end
-      item
-        ImageIndex = 28
-      end
-      item
-        ImageIndex = 6
-      end
-      item
-        ImageIndex = 24
-      end>
-    TabOrder = 5
-  end
   object aclMain: TActionList
     Left = 352
     Top = 40
+    object actAddZeroMQNode: TAction
+      Caption = 'Add ZeroMQ node'
+      OnExecute = actAddZeroMQNodeExecute
+    end
   end
 end

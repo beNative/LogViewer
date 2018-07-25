@@ -203,7 +203,7 @@ end;
 class function TLogViewerFactories.CreateWinIPCChannelReceiver(
   AManager: ILogViewerManager): IChannelReceiver;
 begin
-  Result := TWinIPChannelReceiver.Create(AManager, '');
+  Result := TWinIPCChannelReceiver.Create(AManager, '');
 end;
 
 class function TLogViewerFactories.CreateWinODSChannelReceiver(

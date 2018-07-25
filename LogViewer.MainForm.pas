@@ -181,7 +181,11 @@ begin
   FVI := TFileVersionInfo.GetVersionInfo(Application.ExeName);
   Caption := Format('%s %s', [FVI.ProductName, FVI.ProductVersion]);
   FSettings := TLogViewerFactories.CreateSettings;
-  FSettings.Load;
+  try
+    FSettings.Load;
+  except
+    // ignore it
+  end;
   FManager := TLogViewerFactories.CreateManager(Self, FSettings);
   Events.OnAddLogViewer.Add(EventsAddLogViewer);
   FSettings.FormSettings.AssignTo(Self);

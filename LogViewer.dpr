@@ -47,7 +47,8 @@ uses
   LogViewer.LogQueue in 'LogViewer.LogQueue.pas',
   LogViewer.DisplayValues.Settings in 'LogViewer.DisplayValues.Settings.pas',
   LogViewer.DisplayValues.Settings.View in 'LogViewer.DisplayValues.Settings.View.pas' {frmDisplayValuesSettings},
-  LogViewer.Dashboard.View.Node in 'LogViewer.Dashboard.View.Node.pas';
+  LogViewer.Dashboard.View.Node in 'LogViewer.Dashboard.View.Node.pas',
+  LogViewer.Receivers.ZeroMQ.Subscriber in 'LogViewer.Receivers.ZeroMQ.Subscriber.pas';
 
 {$R *.res}
 

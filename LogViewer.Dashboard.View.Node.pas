@@ -124,10 +124,10 @@ end;
 {$REGION 'property access methods'}
 function TDashboardNode.GetCount: Integer;
 begin
-  if FNodes.IsValueCreated then
+//  if FNodes.IsValueCreated then
     Result := Nodes.Count
-  else
-    Result := 0;
+//  else
+//    Result := 0;
 end;
 
 function TDashboardNode.GetLogQueue: ILogQueue;
@@ -168,15 +168,16 @@ begin
   Result := FVTNode;
 end;
 
+procedure TDashboardNode.SetVTNode(const Value: PVirtualNode);
+begin
+  FVTNode := Value;
+end;
+
 function TDashboardNode.GetVTree: TVirtualStringTree;
 begin
   Result := FVTree;
 end;
 
-procedure TDashboardNode.SetVTNode(const Value: PVirtualNode);
-begin
-  FVTNode := Value;
-end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}

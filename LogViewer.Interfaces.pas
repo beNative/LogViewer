@@ -76,6 +76,13 @@ type
 
     function ToString: string;
 
+    procedure DoReceiveMessage(
+      AStream           : TStream;
+      ASourceId         : Integer = 0;
+      AThreadId         : Integer = 0;
+      const ASourceName : string = ''
+    );
+
     property Name: string
       read GetName write SetName;
 
@@ -87,6 +94,14 @@ type
 
     property OnNewLogQueue: IEvent<TLogQueueEvent>
       read GetOnNewLogQueue;
+  end;
+
+  IAddSubscriber = interface
+  ['{266A3253-2B46-4A30-9DC5-1699E087A184}']
+    procedure AddSubcriber(
+      const AAddress : string;
+      const APort    : string
+    );
   end;
 
   ILogViewerActions = interface

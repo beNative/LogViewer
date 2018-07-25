@@ -189,6 +189,7 @@
             <Form>frmDisplayValuesSettings</Form>
         </DCCReference>
         <DCCReference Include="LogViewer.Dashboard.View.Node.pas"/>
+        <DCCReference Include="LogViewer.Receivers.ZeroMQ.Subscriber.pas"/>
         <None Include="Readme.md"/>
         <RcItem Include="Bin\Win32\libzmq.dll">
             <ContainerId>ResourceItem</ContainerId>
