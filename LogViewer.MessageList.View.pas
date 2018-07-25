@@ -1419,7 +1419,7 @@ end;
 
 procedure TfrmMessageList.UpdateView;
 begin
-  UpdateLogTreeView;
+//  UpdateLogTreeView;
 end;
 {$ENDREGION}
 end.

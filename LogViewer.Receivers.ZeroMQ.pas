@@ -41,9 +41,9 @@ uses
 
   ZeroMQ,
 
-  LogViewer.Interfaces,  LogViewer.Receivers.Base, LogViewer.ZeroMQ.Settings,
+  DDuce.DynamicRecord,
 
-  LogViewer.Receivers.ZeroMQ.Subscriber;
+  LogViewer.Interfaces,  LogViewer.Receivers.Base, LogViewer.ZeroMQ.Settings;
 
 //const
   //ZQM_DEFAULT_ADDRESS = 'tcp://192.168.0.226:5555';
@@ -58,14 +58,10 @@ uses
 // to a queue if it is enabled and is receiving messages.
 
 type
-  TZeroMQChannelReceiver = class(TChannelReceiver, IChannelReceiver,
-    IAddSubscriber
-  )
+  TZeroMQChannelReceiver = class(TChannelReceiver, IChannelReceiver)
   private
-    FZMQ         : IZeroMQ;
-    FTimer       : TTimer;
-    FAddress     : string;
-    FSubscribers : IList<TZMQSubscriber>;
+    FZMQ            : IZeroMQ;
+    FTimer          : TTimer;
 
   protected
     {$REGION 'property access methods'}
@@ -73,17 +69,15 @@ type
     procedure SetEnabled(const Value: Boolean); override;
     {$ENDREGION}
 
+    function AddSubscriber(AKeyValues : IDynamicRecord): Boolean; override;
+
     procedure FTimerTimer(Sender: TObject);
     procedure SettingsChanged(Sender: TObject); override;
-
-    procedure AddSubcriber(
-      const AAddress : string;
-      const APort    : string
-    );
 
   public
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
+
     property Settings: TZeroMQSettings
       read GetSettings;
 
@@ -92,33 +86,23 @@ type
 implementation
 
 uses
-  System.SysUtils;
+  System.SysUtils,
+
+  LogViewer.Receivers.ZeroMQ.Subscriber;
 
 {$REGION 'construction and destruction'}
-procedure TZeroMQChannelReceiver.AddSubcriber(const AAddress, APort: string);
-var
-  LSubscriber: TZMQSubscriber;
-begin
-  LSubscriber := TZMQSubscriber.Create(Self, FZMQ, AAddress, APort);
-  FSubscribers.Add(LSubscriber);
-end;
-
 procedure TZeroMQChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
-//  if FAddress = '' then
-//    FAddress := ZQM_DEFAULT_ADDRESS;
   FTimer          := TTimer.Create(nil);
   FTimer.OnTimer  := FTimerTimer;
   FTimer.Interval := 100;
   FZMQ            := TZeroMQ.Create;
   Settings.OnChanged.Add(SettingsChanged);
-  FSubscribers := TCollections.CreateObjectList<TZMQSubscriber>;
 end;
 
 procedure TZeroMQChannelReceiver.BeforeDestruction;
 begin
-///  CloseSubscriber;
   FTimer.Free;
   inherited BeforeDestruction;
 end;
@@ -145,22 +129,14 @@ end;
 
 procedure TZeroMQChannelReceiver.FTimerTimer(Sender: TObject);
 var
-  LSubscriber : TZMQSubscriber;
+  LSubscriber : ISubscriber;
 begin
   FTimer.Enabled := False;
-  for LSubscriber in FSubscribers do
+  for LSubscriber in SubscriberList do
   begin
     LSubscriber.Poll;
   end;
   FTimer.Enabled := True;
-
-//  if Assigned(FPoll) then
-//  begin
-//    FTimer.Enabled := False;
-//    while FPoll.PollOnce(10) > 0 do
-//      FPoll.FireEvents;
-//    FTimer.Enabled := True;
-//  end;
 end;
 {$ENDREGION}
 
@@ -207,6 +183,22 @@ begin
 end;
 
 *)
+{$ENDREGION}
+
+{$REGION 'protected methods'}
+function TZeroMQChannelReceiver.AddSubscriber(
+  AKeyValues: IDynamicRecord): Boolean;
+var
+  S : ISubscriber;
+begin
+  S := TZMQSubscriber.Create(
+    Self,
+    FZMQ ,
+    AKeyValues.ToString('Address'),
+    AKeyValues.ToString('Port')
+  );
+  SubscriberList.Add(S);
+end;
 {$ENDREGION}
 
 end.

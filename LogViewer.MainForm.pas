@@ -90,6 +90,10 @@ type
       Sender     : TObject;
       ALogViewer : ILogViewer
     );
+    procedure EventsActiveViewChange(
+      Sender     : TObject;
+      ALogViewer : ILogViewer
+    );
 
 //    procedure ProcessDroppedTab(
 //      Sender             : TObject;
@@ -188,6 +192,7 @@ begin
   end;
   FManager := TLogViewerFactories.CreateManager(Self, FSettings);
   Events.OnAddLogViewer.Add(EventsAddLogViewer);
+  Events.OnActiveViewChange.Add(EventsActiveViewChange);
   FSettings.FormSettings.AssignTo(Self);
   FSettings.OnChanged.Add(SettingsChanged);
   FMainToolbar := TLogViewerFactories.CreateMainToolbar(
@@ -208,6 +213,7 @@ begin
   FSettings.OnChanged.Remove(SettingsChanged);
   FSettings.Free;
   Events.OnAddLogViewer.Remove(EventsAddLogViewer);
+  Events.OnActiveViewChange.Remove(EventsActiveViewChange);
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
@@ -291,6 +297,21 @@ procedure TfrmMain.ctMainTabDragDrop(Sender: TObject; X, Y: Integer;
 begin
   // TODO: not working yet
   //ProcessDroppedTab(Sender, X, Y, DragTabObject, Cancelled, TabDropOptions);
+end;
+
+procedure TfrmMain.EventsActiveViewChange(Sender: TObject;
+  ALogViewer: ILogViewer);
+var
+  CT : TChromeTab;
+  I  : Integer;
+begin
+  for I := 0 to ctMain.Tabs.Count - 1 do
+  begin
+    CT := ctMain.Tabs[I];
+    if CT.Data = Pointer(ALogViewer) then
+      ctMain.ActiveTab := CT;
+  end;
+  ALogViewer.Form.Show;
 end;
 
 procedure TfrmMain.EventsAddLogViewer(Sender: TObject;

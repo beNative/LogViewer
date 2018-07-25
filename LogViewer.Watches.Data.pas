@@ -86,6 +86,8 @@ type
       AFirstId          : Int64;
       AOnlyTrackChanges : Boolean = False
     );
+    procedure BeforeDestruction; override;
+
 
     function AddValue(
       const AValue : string;
@@ -178,6 +180,13 @@ implementation
 
 {$REGION 'TWatch'}
 {$REGION 'construction and destruction'}
+procedure TWatch.BeforeDestruction;
+begin
+  FList.Clear;
+  inherited BeforeDestruction;
+
+end;
+
 constructor TWatch.Create(const AName: string; const AValueType: string;
   AFirstId: Int64; AOnlyTrackChanges: Boolean);
 begin

@@ -19,7 +19,7 @@ unit LogViewer.Dashboard.View.Node;
 interface
 
 uses
-  System.Classes,
+  System.Classes, System.Generics.Collections,
 
   Spring, Spring.Collections,
 
@@ -41,14 +41,17 @@ uses
 type
   TDashboardNode = class
   private
-    FVTNode   : PVirtualNode;
-    FNodes    : Lazy<IList<TDashboardNode>>;
-    FReceiver : IChannelReceiver;
-    FLogQueue : ILogQueue;
-    FVTree    : TVirtualStringTree;
+    FVTNode     : PVirtualNode;
+    FNodes      : Lazy<IList<TDashboardNode>>;
+    FReceiver   : IChannelReceiver;
+    FLogQueue   : ILogQueue;
+    FSubscriber : ISubscriber;
+    FVTree      : TVirtualStringTree;
 
   protected
     {$REGION 'property access methods'}
+    function GetSubscriber: ISubscriber;
+    procedure SetSubscriber(const Value: ISubscriber);
     function GetVTree: TVirtualStringTree;
     function GetCount: Integer;
     function GetLogQueue: ILogQueue;
@@ -62,16 +65,24 @@ type
 
   public
     constructor Create(
-      AVTNode   : PVirtualNode;
-      AVTree    : TVirtualStringTree;
-      AReceiver : IChannelReceiver;
-      ALogQueue : ILogQueue = nil
+      AVTNode     : PVirtualNode;
+      AVTree      : TVirtualStringTree;
+      AReceiver   : IChannelReceiver;
+      ASubscriber : ISubscriber = nil;
+      ALogQueue   : ILogQueue = nil
     );
     procedure BeforeDestruction; override;
 
-    procedure FChannelReceiverNewLogQueue(
-      Sender    : TObject;
-      ALogQueue : ILogQueue
+    procedure FReceiverSubscriberListChanged(
+      Sender     : TObject;
+      const Item : ISubscriber;
+      Action     : TCollectionChangedAction
+    );
+
+    procedure FReceiverLogQueueListChanged(
+      Sender     : TObject;
+      const Item : ILogQueue;
+      Action     : TCollectionChangedAction
     );
 
     property Nodes: IList<TDashboardNode>
@@ -86,6 +97,9 @@ type
     property LogQueue: ILogQueue
       read GetLogQueue write SetLogQueue;
 
+    property Subscriber: ISubscriber
+      read GetSubscriber write SetSubscriber;
+
     property VTNode: PVirtualNode
       read GetVTNode write SetVTNode;
 
@@ -95,9 +109,13 @@ type
 
 implementation
 
+uses
+  System.SysUtils;
+
 {$REGION 'construction and destruction'}
 constructor TDashboardNode.Create(AVTNode: PVirtualNode;
-  AVTree: TVirtualStringTree; AReceiver: IChannelReceiver; ALogQueue: ILogQueue);
+  AVTree: TVirtualStringTree; AReceiver: IChannelReceiver;
+  ASubscriber: ISubscriber; ALogQueue: ILogQueue);
 begin
   FNodes.Create(function: IList<TDashboardNode>
     begin
@@ -106,9 +124,10 @@ begin
   );
   FVTNode   := AVTNode;
   FVTree    := AVTree;
-  if not Assigned(ALogQueue) then
+  if not Assigned(ALogQueue) and not Assigned(ASubscriber) then
     Receiver  := AReceiver;
-  FLogQueue := ALogQueue;
+  FLogQueue   := ALogQueue;
+  FSubscriber := ASubscriber;
 end;
 
 procedure TDashboardNode.BeforeDestruction;
@@ -124,10 +143,10 @@ end;
 {$REGION 'property access methods'}
 function TDashboardNode.GetCount: Integer;
 begin
-//  if FNodes.IsValueCreated then
+  if FNodes.IsValueCreated then
     Result := Nodes.Count
-//  else
-//    Result := 0;
+  else
+    Result := 0;
 end;
 
 function TDashboardNode.GetLogQueue: ILogQueue;
@@ -158,9 +177,20 @@ begin
     FReceiver := Value;
     if Assigned(FReceiver) then
     begin
-      FReceiver.OnNewLogQueue.Add(FChannelReceiverNewLogQueue);
+      FReceiver.LogQueueList.OnValueChanged.Add(FReceiverLogQueueListChanged);
+      FReceiver.SubscriberList.OnChanged.Add(FReceiverSubscriberListChanged);
     end;
   end;
+end;
+
+function TDashboardNode.GetSubscriber: ISubscriber;
+begin
+  Result := FSubscriber;
+end;
+
+procedure TDashboardNode.SetSubscriber(const Value: ISubscriber);
+begin
+  FSubscriber := Value;
 end;
 
 function TDashboardNode.GetVTNode: PVirtualNode;
@@ -177,25 +207,55 @@ function TDashboardNode.GetVTree: TVirtualStringTree;
 begin
   Result := FVTree;
 end;
-
 {$ENDREGION}
 
 {$REGION 'event handlers'}
-procedure TDashboardNode.FChannelReceiverNewLogQueue(Sender: TObject;
-  ALogQueue: ILogQueue);
+procedure TDashboardNode.FReceiverLogQueueListChanged(Sender: TObject;
+  const Item : ILogQueue; Action: TCollectionChangedAction);
 var
   DN : TDashboardNode;
 begin
-  DN := TDashboardNode.Create(nil, FVTree, FReceiver, ALogQueue);
-  DN.VTNode := FVTree.AddChild(FVTNode, DN);
-  Nodes.Add(DN);
+  if Action = caAdded then
+  begin
+    for DN in Nodes do
+    begin
+      if Item.SourceName.Contains(DN.Subscriber.Port)
+      and Item.SourceName.Contains(DN.Subscriber.Address) then
+        DN.FLogQueue := Item;
 
 
+    end;
 
-//end;
-
-
+    //DN := TDashboardNode.Create(nil, FVTree, FReceiver, nil, Item);
+    //DN.VTNode := FVTree.AddChild(FVTNode, DN);
+    //Nodes.Add(DN);
+  end;
 end;
+
+procedure TDashboardNode.FReceiverSubscriberListChanged(Sender: TObject;
+  const Item: ISubscriber; Action: TCollectionChangedAction);
+var
+  DN : TDashboardNode;
+begin
+  if Action = caAdded then
+  begin
+    DN := TDashboardNode.Create(nil, FVTree, FReceiver, Item);
+    DN.VTNode := FVTree.AddChild(FVTNode, DN);
+
+   DN.VTNode.CheckType := ctCheckBox;
+  if Item.Enabled then
+    DN.VTNode.CheckState := csCheckedNormal
+  else
+    DN.VTNode.CheckState := csUncheckedNormal;
+
+
+    Nodes.Add(DN);
+  end;
+end;
+
 {$ENDREGION}
 
 end.
+
+//[dcc32 Error] LogViewer.Dashboard.View.Node.pas(216): E2010 Incompatible types: 'ILogQueue' and
+//'System.Generics.Collections.TPair<System.Integer,LogViewer.Interfaces.ILogQueue>'

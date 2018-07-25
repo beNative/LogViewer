@@ -28,24 +28,30 @@ uses
 type
   TLogViewerEvents = class(TInterfaceBase, ILogViewerEvents) // no refcount
   private
-    FManager        : ILogViewerManager;
-    FOnAddLogViewer : Event<TLogViewerEvent>;
-    FOnAddReceiver  : Event<TChannelReceiverEvent>;
+    FManager            : ILogViewerManager;
+    FOnAddLogViewer     : Event<TLogViewerEvent>;
+    FOnAddReceiver      : Event<TChannelReceiverEvent>;
+    FOnActiveViewChange : Event<TLogViewerEvent>;
 
   protected
     {$REGION 'property access methods'}
+    function GetOnActiveViewChange: IEvent<TLogViewerEvent>;
     function GetOnAddLogViewer: IEvent<TLogViewerEvent>;
     function GetOnAddReceiver: IEvent<TChannelReceiverEvent>;
     {$ENDREGION}
 
     {$REGION 'event dispatch methods'}
     procedure DoAddLogViewer(ALogViewer: ILogViewer); virtual;
+    procedure DoActiveViewChange(ALogViewer: ILogViewer); virtual;
     procedure DoAddReceiver(AReceiver: IChannelReceiver); virtual;
     {$ENDREGION}
 
   public
     constructor Create(AManager: ILogViewerManager);
     procedure BeforeDestruction; override;
+
+    property OnActiveViewChange: IEvent<TLogViewerEvent>
+      read GetOnActiveViewChange;
 
     property OnAddLogViewer: IEvent<TLogViewerEvent>
       read GetOnAddLogViewer;
@@ -70,6 +76,11 @@ end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
+function TLogViewerEvents.GetOnActiveViewChange: IEvent<TLogViewerEvent>;
+begin
+  Result := FOnActiveViewChange;
+end;
+
 function TLogViewerEvents.GetOnAddLogViewer: IEvent<TLogViewerEvent>;
 begin
   Result := FOnAddLogViewer;
@@ -82,6 +93,11 @@ end;
 {$ENDREGION}
 
 {$REGION 'event dispatch methods'}
+procedure TLogViewerEvents.DoActiveViewChange(ALogViewer: ILogViewer);
+begin
+  FOnActiveViewChange.Invoke(Self, ALogViewer);
+end;
+
 procedure TLogViewerEvents.DoAddLogViewer(ALogViewer: ILogViewer);
 begin
   FOnAddLogViewer.Invoke(Self, ALogViewer);

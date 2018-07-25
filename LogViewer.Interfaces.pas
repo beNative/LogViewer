@@ -26,7 +26,7 @@ uses
 
   Spring, Spring.Collections,
 
-  DDuce.Editor.Interfaces,
+  DDuce.Editor.Interfaces, DDuce.DynamicRecord,
 
   LogViewer.Settings, LogViewer.ComPort.Settings;
 
@@ -38,11 +38,6 @@ type
   TReceiveMessageEvent = procedure(
     Sender    : TObject;
     AStream   : TStream
-  ) of object;
-
-  TLogQueueEvent = procedure(
-    Sender    : TObject;
-    ALogQueue : ILogQueue
   ) of object;
 
   TLogViewerEvent = procedure(
@@ -63,6 +58,26 @@ type
       read GetSettings;
   end;
 
+  ISubscriber = interface
+  ['{49CFDB5B-6A74-4352-9877-EF6E73776938}']
+    {$REGION 'property access methods'}
+    function GetAddress: string;
+    function GetPort: string;
+    function GetEnabled: Boolean;
+    procedure SetEnabled(const Value: Boolean);
+    {$ENDREGION}
+    procedure Poll;
+
+    property Address: string
+      read GetAddress;
+
+    property Port: string
+      read GetPort;
+
+    property Enabled: Boolean
+      read GetEnabled write SetEnabled;
+  end;
+
   IChannelReceiver = interface
   ['{7C96D7BD-3D10-4A9A-90AF-43E755859B37}']
     {$REGION 'property access methods'}
@@ -70,8 +85,8 @@ type
     procedure SetEnabled(const Value: Boolean);
     function GetName: string;
     procedure SetName(const Value: string);
-    function GetOnNewLogQueue: IEvent<TLogQueueEvent>;
-    function GetQueueList: IDictionary<Integer, ILogQueue>;
+    function GetLogQueueList: IDictionary<Integer, ILogQueue>;
+    function GetSubscriberList: IList<ISubscriber>;
     {$ENDREGION}
 
     function ToString: string;
@@ -83,25 +98,19 @@ type
       const ASourceName : string = ''
     );
 
+    function AddSubscriber(AKeyValues: IDynamicRecord): Boolean;
+
     property Name: string
       read GetName write SetName;
 
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
 
-    property QueueList: IDictionary<Integer, ILogQueue>
-      read GetQueueList;
+    property LogQueueList: IDictionary<Integer, ILogQueue>
+      read GetLogQueueList;
 
-    property OnNewLogQueue: IEvent<TLogQueueEvent>
-      read GetOnNewLogQueue;
-  end;
-
-  IAddSubscriber = interface
-  ['{266A3253-2B46-4A30-9DC5-1699E087A184}']
-    procedure AddSubcriber(
-      const AAddress : string;
-      const APort    : string
-    );
+    property SubscriberList: IList<ISubscriber>
+      read GetSubscriberList;
   end;
 
   ILogViewerActions = interface
@@ -193,10 +202,15 @@ type
     {$REGION 'property access methods'}
     function GetOnAddLogViewer: IEvent<TLogViewerEvent>;
     function GetOnAddReceiver: IEvent<TChannelReceiverEvent>;
+    function GetOnActiveViewChange: IEvent<TLogViewerEvent>;
     {$ENDREGION}
 
+    procedure DoActiveViewChange(ALogViewer: ILogViewer);
     procedure DoAddLogViewer(ALogViewer: ILogViewer);
     procedure DoAddReceiver(AReceiver: IChannelReceiver);
+
+    property OnActiveViewChange: IEvent<TLogViewerEvent>
+      read GetOnActiveViewChange;
 
     property OnAddReceiver: IEvent<TChannelReceiverEvent>
       read GetOnAddReceiver;

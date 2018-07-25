@@ -23,26 +23,28 @@ uses
 
   Spring, Spring.Collections,
 
+  DDuce.DynamicRecord,
+
   LogViewer.Interfaces;
 
 type
   TChannelReceiver = class(TInterfacedObject, IChannelReceiver)
   private
-    FEnabled       : Boolean;
-    FName          : string;
-    FQueueList     : IDictionary<Integer, ILogQueue>;
-    FOnNewLogQueue : Event<TLogQueueEvent>;
-    FManager       : ILogViewerManager;
+    FEnabled        : Boolean;
+    FName           : string;
+    FLogQueueList   : IDictionary<Integer, ILogQueue>;
+    FSubscriberList : IList<ISubscriber>;
+    FManager        : ILogViewerManager;
 
   protected
     {$REGION 'property access methods'}
     function GetManager: ILogViewerManager;
-    function GetOnNewLogQueue: IEvent<TLogQueueEvent>;
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean); virtual;
     function GetName: string;
     procedure SetName(const Value: string);
-    function GetQueueList: IDictionary<Integer, ILogQueue>;
+    function GetLogQueueList: IDictionary<Integer, ILogQueue>;
+    function GetSubscriberList: IList<ISubscriber>;
     {$ENDREGION}
 
     procedure SettingsChanged(Sender: TObject); virtual;
@@ -61,6 +63,8 @@ type
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 
+    function AddSubscriber(AKeyValues : IDynamicRecord): Boolean; virtual;
+
     function ToString: string; override;
 
     property Name: string
@@ -72,11 +76,12 @@ type
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
 
-    property QueueList: IDictionary<Integer, ILogQueue>
-      read GetQueueList;
+    property LogQueueList: IDictionary<Integer, ILogQueue>
+      read GetLogQueueList;
 
-    property OnNewLogQueue: IEvent<TLogQueueEvent>
-      read GetOnNewLogQueue;
+    property SubscriberList: IList<ISubscriber>
+      read GetSubscriberList;
+
   end;
 
 implementation
@@ -86,20 +91,22 @@ uses
 
   DDuce.Utils.Winapi,
 
-  LogViewer.Factories;
+  LogViewer.Factories, LogViewer.Receivers.ZeroMQ.Subscriber;
 
 {$REGION 'construction and destruction'}
 procedure TChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FQueueList := TCollections.CreateDictionary<Integer, ILogQueue>;
+  FLogQueueList   := TCollections.CreateDictionary<Integer, ILogQueue>;
+  FSubscriberList := TCollections.CreateInterfaceList<ISubscriber>;
 end;
 
 procedure TChannelReceiver.BeforeDestruction;
 begin
-  FOnNewLogQueue.Clear;
-  FQueueList.Clear;
-  FQueueList := nil;
+  FLogQueueList.Clear;
+  FLogQueueList := nil;
+  FSubscriberList.Clear;
+  FSubscriberList := nil;
   inherited BeforeDestruction;
 end;
 
@@ -122,11 +129,10 @@ procedure TChannelReceiver.DoReceiveMessage(AStream: TStream; ASourceId: Integer
 var
   LLogQueue : ILogQueue;
 begin
-  if not FQueueList.TryGetValue(ASourceId, LLogQueue) then
+  if not FLogQueueList.TryGetValue(ASourceId, LLogQueue) then
   begin
     LLogQueue := TLogViewerFactories.CreateLogQueue(Self, ASourceId, ASourceName);
-    FQueueList.AddOrSetValue(ASourceId, LLogQueue);
-    FOnNewLogQueue.Invoke(Self, LLogQueue);
+    FLogQueueList.AddOrSetValue(ASourceId, LLogQueue);
   end;
   LLogQueue.DoReceiveMessage(AStream);
 end;
@@ -158,14 +164,14 @@ begin
   FName := Value;
 end;
 
-function TChannelReceiver.GetOnNewLogQueue: IEvent<TLogQueueEvent>;
+function TChannelReceiver.GetLogQueueList: IDictionary<Integer, ILogQueue>;
 begin
-  Result := FOnNewLogQueue;
+  Result := FLogQueueList;
 end;
 
-function TChannelReceiver.GetQueueList: IDictionary<Integer, ILogQueue>;
+function TChannelReceiver.GetSubscriberList: IList<ISubscriber>;
 begin
-  Result := FQueueList;
+  Result := FSubscriberList;
 end;
 {$ENDREGION}
 
@@ -173,6 +179,13 @@ end;
 procedure TChannelReceiver.SettingsChanged(Sender: TObject);
 begin
 //
+end;
+{$ENDREGION}
+
+{$REGION 'protected methods'}
+function TChannelReceiver.AddSubscriber(AKeyValues: IDynamicRecord): Boolean;
+begin
+  Result := False;
 end;
 {$ENDREGION}
 

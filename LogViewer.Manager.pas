@@ -22,6 +22,7 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.Actions, System.ImageList,
+  System.Generics.Collections,
   Vcl.ExtCtrls, Vcl.ImgList, Vcl.Controls, Vcl.ActnList, Vcl.Menus,
 
   Spring, Spring.Collections,
@@ -159,9 +160,10 @@ type
 
     function AsComponent: TComponent;
 
-    procedure ReceiverNewLogQueue(
-      Sender    : TObject;
-      ALogQueue : ILogQueue
+    procedure FReceiverLogQueueListChanged(
+      Sender     : TObject;
+      const Item : ILogQueue;
+      Action     : TCollectionChangedAction
     );
 
     procedure UpdateVisibleMessageTypes(
@@ -533,8 +535,8 @@ begin
   begin
     FActiveView := Value;
     UpdateActions;
-//    Events.DoActiveViewChange;
   end;
+  Events.DoActiveViewChange(FActiveView);
 end;
 
 function TdmManager.GetItem(AName: string): TCustomAction;
@@ -586,10 +588,14 @@ end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
-procedure TdmManager.ReceiverNewLogQueue(Sender: TObject; ALogQueue: ILogQueue);
+procedure TdmManager.FReceiverLogQueueListChanged(Sender: TObject;
+  const Item: ILogQueue; Action: TCollectionChangedAction);
 begin
-  FLogQueues.Add(ALogQueue);
-  AddView(TLogViewerFactories.CreateLogViewer(Self, ALogQueue));
+  if Action = caAdded then
+  begin
+    FLogQueues.Add(Item);
+    AddView(TLogViewerFactories.CreateLogViewer(Self, Item));
+  end;
 end;
 {$ENDREGION}
 
@@ -708,7 +714,7 @@ begin
   Guard.CheckNotNull(AReceiver, 'AReceiver');
   FReceivers.Add(AReceiver);
   Events.DoAddReceiver(AReceiver);
-  AReceiver.OnNewLogQueue.Add(ReceiverNewLogQueue);
+  AReceiver.LogQueueList.OnValueChanged.Add(FReceiverLogQueueListChanged);
 end;
 
 procedure TdmManager.AddView(ALogViewer: ILogViewer);
@@ -781,6 +787,9 @@ begin
     not Settings.MessageListSettings.AutoFilterMessages;
   actToggleAlwaysOnTop.Checked := Settings.FormSettings.FormStyle = fsStayOnTop;
   actToggleFullscreen.Checked := Settings.FormSettings.WindowState = wsMaximized;
+  if B then
+    ActiveView.UpdateView;
+
 end;
 
 procedure TdmManager.UpdateVisibleMessageTypes(

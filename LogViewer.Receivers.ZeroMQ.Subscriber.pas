@@ -28,7 +28,7 @@ uses
   LogViewer.Interfaces;
 
 type
-  TZMQSubscriber = class(TInterfacedObject)
+  TZMQSubscriber = class(TInterfacedObject, ISubscriber)
   private
     FReceiver   : Weak<IChannelReceiver>; // weak reference!
     FZMQ        : IZeroMQ;
@@ -37,9 +37,26 @@ type
     FAddress    : string;
     FPort       : string;
     FZMQStream  : TStringStream;
+    FEnabled    : Boolean;
+
+    procedure CreateSubscriber;
+    procedure RemoveSubscriber;
 
   protected
-    procedure CreateSubscriber;
+    function GetEnabled: Boolean;
+    procedure SetEnabled(const Value: Boolean);
+    function GetAddress: string;
+    function GetPort: string;
+    procedure Poll;
+
+    property Address: string
+      read GetAddress;
+
+    property Port: string
+      read GetPort;
+
+    property Enabled: Boolean
+      read GetEnabled write SetEnabled;
 
   public
     constructor Create(
@@ -51,7 +68,6 @@ type
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 
-    procedure Poll;
   end;
 
 implementation
@@ -87,6 +103,35 @@ begin
 end;
 {$ENDREGION}
 
+{$REGION 'property access methods'}
+function TZMQSubscriber.GetAddress: string;
+begin
+  Result := FAddress;
+end;
+
+function TZMQSubscriber.GetEnabled: Boolean;
+begin
+  Result := FEnabled;
+end;
+
+procedure TZMQSubscriber.SetEnabled(const Value: Boolean);
+begin
+  if Value <> Enabled then
+  begin
+    FEnabled := Value;
+    if FEnabled then
+      FSubscriber.Subscribe('')
+    else
+      FSubscriber.UnSubscribe('');
+  end;
+end;
+
+function TZMQSubscriber.GetPort: string;
+begin
+  Result := FPort;
+end;
+{$ENDREGION}
+
 {$REGION 'protected methods'}
 procedure TZMQSubscriber.CreateSubscriber;
 begin
@@ -105,12 +150,24 @@ begin
     end
   );
 end;
+{$ENDREGION}
 
+{$REGION 'protected methods'}
 procedure TZMQSubscriber.Poll;
 begin
-  while FPoll.PollOnce(10) > 0 do
-    FPoll.FireEvents;
+  if Enabled then
+  begin
+    while FPoll.PollOnce(10) > 0 do
+      FPoll.FireEvents;
+  end;
 end;
+
+procedure TZMQSubscriber.RemoveSubscriber;
+begin
+  FSubscriber := nil;
+  FPoll       := nil;
+end;
+
 {$ENDREGION}
 
 end.
