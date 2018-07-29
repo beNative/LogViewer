@@ -36,6 +36,7 @@ The sources depend on the following libraries and components:
   * [zcontrols](http://github.com/beNative/zcontrols)
   * [TBCEditor](https://github.com/beNative/TBCEditor)
   * [TChromeTabs](https://github.com/norgepaul/TChromeTabs)
+  * [Ararat Synapse](https://sourceforge.net/projects/synalist/)
 
 Here a preliminary look of the application:
 
