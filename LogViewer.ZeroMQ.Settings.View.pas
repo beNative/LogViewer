@@ -31,6 +31,7 @@ type
     edtPort    : TEdit;
     lblAddress : TLabel;
     lblPort    : TLabel;
+    mmoSubscriptions: TMemo;
 
   private
     FSettings : TZeroMQSettings;

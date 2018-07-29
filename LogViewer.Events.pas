@@ -65,6 +65,7 @@ implementation
 {$REGION 'construction and destruction'}
 constructor TLogViewerEvents.Create(AManager: ILogViewerManager);
 begin
+  Guard.CheckNotNull(AManager, 'AManager');
   FManager := AManager;
 end;
 

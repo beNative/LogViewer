@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.Receivers.ZeroMQ.Subscriber;
+unit LogViewer.Subscribers.ZeroMQ;
 
 interface
 
@@ -25,46 +25,32 @@ uses
 
   Spring,
 
-  LogViewer.Interfaces;
+  LogViewer.Interfaces, LogViewer.Subscribers.Base;
 
 type
-  TZMQSubscriber = class(TInterfacedObject, ISubscriber)
+  TZMQSubscriber = class(TSubscriber, ISubscriber)
   private
-    FReceiver   : Weak<IChannelReceiver>; // weak reference!
     FZMQ        : IZeroMQ;
     FSubscriber : IZMQPair;
     FPoll       : IZMQPoll;
-    FAddress    : string;
-    FPort       : string;
     FZMQStream  : TStringStream;
-    FEnabled    : Boolean;
 
-    procedure CreateSubscriber;
-    procedure RemoveSubscriber;
+    procedure CreateSubscriberSocket(const AEndPoint: string);
 
   protected
-    function GetEnabled: Boolean;
-    procedure SetEnabled(const Value: Boolean);
-    function GetAddress: string;
-    function GetPort: string;
+    {$REGION 'property access methods'}
+    procedure SetEnabled(const Value: Boolean); override;
+    {$ENDREGION}
+
     procedure Poll;
-
-    property Address: string
-      read GetAddress;
-
-    property Port: string
-      read GetPort;
-
-    property Enabled: Boolean
-      read GetEnabled write SetEnabled;
 
   public
     constructor Create(
-      AReceiver : IChannelReceiver;
-      AZMQ      : IZeroMQ;
-      AAddress  : string;
-      APort     : string
-    );
+      AReceiver       : IChannelReceiver;
+      AZMQ            : IZeroMQ;
+      const AEndPoint : string;
+      AEnabled        : Boolean
+    ); reintroduce;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 
@@ -76,6 +62,15 @@ uses
   System.SysUtils;
 
 {$REGION 'construction and destruction'}
+constructor TZMQSubscriber.Create(AReceiver: IChannelReceiver; AZMQ: IZeroMQ;
+  const AEndPoint: string; AEnabled: Boolean);
+begin
+  inherited Create(AReceiver, 0, AEndPoint, '', False);
+  FZMQ      := AZMQ;
+  CreateSubscriberSocket(AEndPoint);
+  Enabled := AEnabled;
+end;
+
 procedure TZMQSubscriber.AfterConstruction;
 begin
   inherited AfterConstruction;
@@ -85,65 +80,39 @@ end;
 procedure TZMQSubscriber.BeforeDestruction;
 begin
   FZMQStream.Free;
-  FReceiver   := nil;
   FPoll       := nil;
   FSubscriber := nil;
   FZMQ        := nil;
   inherited BeforeDestruction;
 end;
 
-constructor TZMQSubscriber.Create(AReceiver: IChannelReceiver; AZMQ: IZeroMQ;
-  AAddress, APort: string);
-begin
-  FReceiver := AReceiver;
-  FZMQ      := AZMQ;
-  FAddress  := AAddress;
-  FPort     := APort;
-  CreateSubscriber;
-end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
-function TZMQSubscriber.GetAddress: string;
-begin
-  Result := FAddress;
-end;
-
-function TZMQSubscriber.GetEnabled: Boolean;
-begin
-  Result := FEnabled;
-end;
-
 procedure TZMQSubscriber.SetEnabled(const Value: Boolean);
 begin
   if Value <> Enabled then
   begin
-    FEnabled := Value;
-    if FEnabled then
+    inherited SetEnabled(Value);
+    if Value then
       FSubscriber.Subscribe('')
     else
       FSubscriber.UnSubscribe('');
   end;
 end;
-
-function TZMQSubscriber.GetPort: string;
-begin
-  Result := FPort;
-end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
-procedure TZMQSubscriber.CreateSubscriber;
+procedure TZMQSubscriber.CreateSubscriberSocket(const AEndPoint: string);
 begin
   FSubscriber := FZMQ.Start(ZMQSocket.Subscriber);
-  FSubscriber.Connect(Format('tcp://%s:%s', [FAddress, FPort]));
-  FSubscriber.Subscribe('');
+  FSubscriber.Connect(AEndPoint);
   FPoll := FZMQ.Poller;
   FPoll.RegisterPair(FSubscriber, [PollEvent.PollIn],
     procedure(Event: PollEvents)
     begin
       FZMQStream.WriteString(FSubscriber.ReceiveString);
-      FReceiver.Target.DoReceiveMessage(
+      Receiver.DoReceiveMessage(
         FZMQStream, Integer(FSubscriber), 0, FSubscriber.LastEndPoint
       );
       FZMQStream.Clear;
@@ -161,13 +130,6 @@ begin
       FPoll.FireEvents;
   end;
 end;
-
-procedure TZMQSubscriber.RemoveSubscriber;
-begin
-  FSubscriber := nil;
-  FPoll       := nil;
-end;
-
 {$ENDREGION}
 
 end.

@@ -32,7 +32,6 @@ uses
 
 type
   ILogViewer       = interface;
-  ILogQueue        = interface;
   IChannelReceiver = interface;
 
   TReceiveMessageEvent = procedure(
@@ -61,21 +60,38 @@ type
   ISubscriber = interface
   ['{49CFDB5B-6A74-4352-9877-EF6E73776938}']
     {$REGION 'property access methods'}
-    function GetAddress: string;
-    function GetPort: string;
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
+    function GetKey: string;
+    function GetReceiver: IChannelReceiver;
+    function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
+    function GetSourceId: Integer;
+    function GetSourceName: string;
+    function GetMessageCount: Int64;
     {$ENDREGION}
     procedure Poll;
+    procedure DoReceiveMessage(AStream : TStream);
 
-    property Address: string
-      read GetAddress;
-
-    property Port: string
-      read GetPort;
+    property Key: string
+      read GetKey;
 
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
+
+    property OnReceiveMessage: IEvent<TReceiveMessageEvent>
+      read GetOnReceiveMessage;
+
+    property MessageCount: Int64
+      read GetMessageCount;
+
+    property Receiver: IChannelReceiver
+      read GetReceiver;
+
+    property SourceId: Integer
+      read GetSourceId;
+
+    property SourceName: string
+      read GetSourceName;
   end;
 
   IChannelReceiver = interface
@@ -85,8 +101,7 @@ type
     procedure SetEnabled(const Value: Boolean);
     function GetName: string;
     procedure SetName(const Value: string);
-    function GetLogQueueList: IDictionary<Integer, ILogQueue>;
-    function GetSubscriberList: IList<ISubscriber>;
+    function GetSubscriberList: IDictionary<Integer, ISubscriber>;
     {$ENDREGION}
 
     function ToString: string;
@@ -98,18 +113,13 @@ type
       const ASourceName : string = ''
     );
 
-    function AddSubscriber(AKeyValues: IDynamicRecord): Boolean;
-
     property Name: string
       read GetName write SetName;
 
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
 
-    property LogQueueList: IDictionary<Integer, ILogQueue>
-      read GetLogQueueList;
-
-    property SubscriberList: IList<ISubscriber>
+    property SubscriberList: IDictionary<Integer, ISubscriber>
       read GetSubscriberList;
   end;
 
@@ -143,43 +153,10 @@ type
       read GetMessageTypesPopupMenu;
   end;
 
-  ILogQueue = interface
-  ['{5F95008B-07B9-4092-8DA2-DCA9FD20B26E}']
-    {$REGION 'property access methods'}
-    function GetSourceId: Integer;
-    function GetReceiver: IChannelReceiver;
-    function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
-    function GetEnabled: Boolean;
-    procedure SetEnabled(const Value: Boolean);
-    function GetSourceName: string;
-    function GetMessageCount: Int64;
-    {$ENDREGION}
-
-    procedure DoReceiveMessage(AStream : TStream);
-
-    property Enabled: Boolean
-      read GetEnabled write SetEnabled;
-
-    property MessageCount: Int64
-      read GetMessageCount;
-
-    property SourceId: Integer
-      read GetSourceId;
-
-    property SourceName: string
-      read GetSourceName;
-
-    property Receiver : IChannelReceiver
-      read GetReceiver;
-
-    property OnReceiveMessage: IEvent<TReceiveMessageEvent>
-      read GetOnReceiveMessage;
-  end;
-
   ILogViewer = interface
   ['{C1DF2E26-4507-4B35-94E1-19A36775633F}']
     {$REGION 'property access methods'}
-    function GetLogQueue: ILogQueue;
+    function GetSubscriber: ISubscriber;
     function GetForm: TCustomForm;
     {$ENDREGION}
 
@@ -190,8 +167,8 @@ type
     procedure CollapseAll;
     procedure ExpandAll;
 
-    property LogQueue: ILogQueue
-      read GetLogQueue;
+    property Subscriber: ISubscriber
+      read GetSubscriber;
 
    property Form: TCustomForm
       read GetForm;

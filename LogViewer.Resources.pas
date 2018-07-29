@@ -114,6 +114,8 @@ const
     logtree. }
   MAX_TEXTLENGTH_VALUECOLUMN = 80;
 
+  LOGVIEWER_ZMQ_PORT : Integer = 42134;
+
 implementation
 
 end.

@@ -60,6 +60,9 @@ type
 
 implementation
 
+uses
+  DDuce.Logger;
+
 {$REGION 'construction and destruction'}
 constructor TLogViewerCommands.Create(AManager: ILogViewerManager);
 begin
@@ -81,7 +84,7 @@ end;
 function TLogViewerCommands.GetReceiver: IChannelReceiver;
 begin
   if Assigned(ActiveView) then
-    Result := ActiveView.LogQueue.Receiver
+    Result := ActiveView.Subscriber.Receiver
   else
     Result := nil;
 end;
@@ -130,17 +133,17 @@ end;
 
 procedure TLogViewerCommands.Start;
 begin
-  if Assigned(ActiveView) and Assigned(ActiveView.LogQueue) then
+  if Assigned(ActiveView) and Assigned(ActiveView.Subscriber) then
   begin
-    ActiveView.LogQueue.Enabled := True;
+    ActiveView.Subscriber.Enabled := True;
   end;
 end;
 
 procedure TLogViewerCommands.Stop;
 begin
-  if Assigned(ActiveView) and Assigned(ActiveView.LogQueue) then
+  if Assigned(ActiveView) and Assigned(ActiveView.Subscriber) then
   begin
-    ActiveView.LogQueue.Enabled := False;
+    ActiveView.Subscriber.Enabled := False;
   end;
 end;
 

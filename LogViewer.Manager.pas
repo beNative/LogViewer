@@ -31,7 +31,7 @@ uses
   DDuce.Editor.Interfaces,
 
   LogViewer.Interfaces, LogViewer.Settings, LogViewer.Events,
-  LogViewer.Commands, System.Win.TaskbarCore, Vcl.Taskbar;
+  LogViewer.Commands;
 
 type
   TdmManager = class(TDataModule, ILogViewerActions,
@@ -130,7 +130,7 @@ type
     FActiveView     : ILogViewer;
     FViewList       : IList<ILogViewer>;
     FReceivers      : IList<IChannelReceiver>;
-    FLogQueues      : IList<ILogQueue>;
+    FSubscribers    : IList<ISubscriber>;
     FEditorManager  : IEditorManager;
     FEditorSettings : IEditorSettings;
 
@@ -160,9 +160,9 @@ type
 
     function AsComponent: TComponent;
 
-    procedure FReceiverLogQueueListChanged(
+    procedure FReceiverSubscriberListChanged(
       Sender     : TObject;
-      const Item : ILogQueue;
+      const Item : ISubscriber;
       Action     : TCollectionChangedAction
     );
 
@@ -250,9 +250,9 @@ implementation
 uses
   Vcl.Forms,
 
-  DDuce.Editor.Factories, DDuce.AboutDialog,
+  DDuce.Editor.Factories, DDuce.AboutDialog, DDuce.Logger,
 
-  LogViewer.Factories, LogViewer.Resources,
+  LogViewer.Factories, LogViewer.Resources, DDuce.Logger.Channels.ZeroMQ,
   LogViewer.Settings.Dialog, LogViewer.MessageList.Settings;
 
 {$R *.dfm}
@@ -264,7 +264,7 @@ begin
   FEvents         := TLogViewerEvents.Create(Self);
   FCommands       := TLogViewerCommands.Create(Self);
   FReceivers      := TCollections.CreateInterfaceList<IChannelReceiver>;
-  FLogQueues      := TCollections.CreateInterfaceList<ILogQueue>;
+  FSubscribers    := TCollections.CreateInterfaceList<ISubscriber>;
   FViewList       := TCollections.CreateInterfaceList<ILogViewer>;
   FEditorSettings := TEditorFactories.CreateSettings(Self, 'settings.xml');
   FEditorManager  := TEditorFactories.CreateManager(Self, FEditorSettings);
@@ -274,15 +274,16 @@ end;
 
 procedure TdmManager.BeforeDestruction;
 begin
+  Logger.Track(Self, 'BeforeDestruction');
   FreeAndNil(FCommands);
   FreeAndNil(FEvents);
-//  FReceivers.Clear;
-//  FReceivers      := nil;
-//  FLogQueues      := nil;
-//  FViewList       := nil;
-//  FSettings       := nil;
-//  FEditorSettings := nil;
-//  FEditorManager  := nil;
+  FReceivers.Clear;
+  FReceivers      := nil;
+  FSubscribers      := nil;
+  FViewList       := nil;
+  FSettings       := nil;
+  FEditorSettings := nil;
+  FEditorManager  := nil;
   inherited BeforeDestruction;
 end;
 
@@ -588,12 +589,12 @@ end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
-procedure TdmManager.FReceiverLogQueueListChanged(Sender: TObject;
-  const Item: ILogQueue; Action: TCollectionChangedAction);
+procedure TdmManager.FReceiverSubscriberListChanged(Sender: TObject;
+  const Item: ISubscriber; Action: TCollectionChangedAction);
 begin
   if Action = caAdded then
   begin
-    FLogQueues.Add(Item);
+    FSubscribers.Add(Item);
     AddView(TLogViewerFactories.CreateLogViewer(Self, Item));
   end;
 end;
@@ -714,16 +715,16 @@ begin
   Guard.CheckNotNull(AReceiver, 'AReceiver');
   FReceivers.Add(AReceiver);
   Events.DoAddReceiver(AReceiver);
-  AReceiver.LogQueueList.OnValueChanged.Add(FReceiverLogQueueListChanged);
+  AReceiver.SubscriberList.OnValueChanged.Add(FReceiverSubscriberListChanged);
 end;
 
 procedure TdmManager.AddView(ALogViewer: ILogViewer);
 begin
   Guard.CheckNotNull(ALogViewer, 'ALogViewer');
   FViewList.Add(ALogViewer);
-  if not FReceivers.Contains(ALogViewer.LogQueue.Receiver) then
+  if not FReceivers.Contains(ALogViewer.Subscriber.Receiver) then
   begin
-    FReceivers.Add(ALogViewer.LogQueue.Receiver);
+    FReceivers.Add(ALogViewer.Subscriber.Receiver);
   end;
   Events.DoAddLogViewer(ALogViewer);
   FActiveView := ALogViewer;
@@ -758,7 +759,7 @@ begin
   actAutoScrollMessages.Checked
     := FSettings.MessageListSettings.AutoScrollMessages;
   B := Assigned(ActiveView);
-  actStart.Enabled         := B and not ActiveView.LogQueue.Enabled;
+  actStart.Enabled         := B and not ActiveView.Subscriber.Enabled;
   actStop.Enabled          := B and not actStart.Enabled;
   actBitmap.Enabled        := B;
   actCallStack.Enabled     := B;
@@ -789,7 +790,7 @@ begin
   actToggleFullscreen.Checked := Settings.FormSettings.WindowState = wsMaximized;
   if B then
     ActiveView.UpdateView;
-
+  Logger.IncCounter('UpdateActions');
 end;
 
 procedure TdmManager.UpdateVisibleMessageTypes(
@@ -813,5 +814,9 @@ begin
   end;
 end;
 {$ENDREGION}
+
+initialization
+
+
 
 end.

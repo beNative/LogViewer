@@ -106,12 +106,13 @@ type
     FCounter : Integer;
 
   private
+    FUpdate          : Boolean;
     FMessageCount    : Int64;
     FCurrentMsg      : TLogMessage;
     FCallStack       : IList<TCallStackData>;
     FWatches         : TWatchList;
     FLogTreeView     : TVirtualStringTree;
-    FLogQueue        : ILogQueue;
+    FSubscriber      : ISubscriber;
     FCallStackView   : TfrmCallStackView;
     FWatchesView     : TfrmWatchesView;
     FManager         : ILogViewerManager;
@@ -127,7 +128,7 @@ type
     {$REGION 'property access methods'}
     function GetManager: ILogViewerManager;
     function GetActions: ILogViewerActions;
-    function GetLogQueue: ILogQueue;
+    function GetSubscriber: ISubscriber;
     function GetForm: TCustomForm;
     function GetSettings: TMessageListSettings;
     function GetDisplayValuesSettings: TDisplayValuesSettings;
@@ -227,10 +228,15 @@ type
       Column   : TColumnIndex;
       var Kind : TVTHintKind
     );
+    procedure FLogTreeViewHotChange(
+      Sender  : TBaseVirtualTree;
+      OldNode : PVirtualNode;
+      NewNode : PVirtualNode
+    );
     {$ENDREGION}
 
   protected
-    procedure FLogQueueReceiveMessage(
+    procedure FSubscriberReceiveMessage(
       Sender  : TObject;
       AStream : TStream
     );
@@ -278,8 +284,8 @@ type
     property Actions: ILogViewerActions
       read GetActions;
 
-    property LogQueue: ILogQueue
-      read GetLogQueue;
+    property Subscriber: ISubscriber
+      read GetSubscriber;
 
     property Settings: TMessageListSettings
       read GetSettings;
@@ -292,10 +298,10 @@ type
 
   public
     constructor Create(
-      AOwner    : TComponent;
-      AManager  : ILogViewerManager;
-      ALogQueue : ILogQueue;
-      ASettings : TMessageListSettings
+      AOwner      : TComponent;
+      AManager    : ILogViewerManager;
+      ASubscriber : ISubscriber;
+      ASettings   : TMessageListSettings
     ); reintroduce; virtual;
 
     procedure BeforeDestruction; override;
@@ -324,10 +330,10 @@ uses
 
 {$REGION 'construction and destruction'}
 constructor TfrmMessageList.Create(AOwner: TComponent; AManager
-  : ILogViewerManager; ALogQueue : ILogQueue; ASettings: TMessageListSettings);
+  : ILogViewerManager; ASubscriber: ISubscriber; ASettings: TMessageListSettings);
 begin
   inherited Create(AOwner);
-  FLogQueue := ALogQueue;
+  FSubscriber := ASubscriber;
   FManager  := AManager;
   FSettings := ASettings;
 end;
@@ -342,7 +348,7 @@ begin
   CreateLogTreeView;
   CreateWatchesView;
   CreateCallStackView;
-  FLogQueue.OnReceiveMessage.Add(FLogQueueReceiveMessage);
+  FSubscriber.OnReceiveMessage.Add(FSubscriberReceiveMessage);
   Caption := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
   FSettings.OnChanged.Add(FSettingsChanged);
   FLogTreeView.PopupMenu := Manager.Menus.LogTreeViewerPopupMenu;
@@ -358,9 +364,9 @@ procedure TfrmMessageList.BeforeDestruction;
 begin
   FSettings.LeftPanelWidth  := pnlLeft.Width;
   FSettings.RightPanelWidth := pnlRight.Width;
-  FLogQueue.OnReceiveMessage.Remove(FLogQueueReceiveMessage);
+  FSubscriber.OnReceiveMessage.Remove(FSubscriberReceiveMessage);
   FSettings.OnChanged.Remove(FSettingsChanged);
-  FLogQueue := nil;
+  FSubscriber := nil;
   FManager  := nil;
   FSettings := nil;
   inherited BeforeDestruction;
@@ -412,6 +418,8 @@ begin
   FLogTreeView.OnFocusChanged    := FLogTreeViewFocusChanged;
   FLogTreeView.OnFocusChanging   := FLogTreeViewFocusChanging;
   FLogTreeView.OnClick           := FLogTreeViewClick;
+
+  FLogTreeView.OnHotChange       := FLogTreeViewHotChange;
 
   FLogTreeView.OnInitNode        := FLogTreeViewInitNode;
   FLogTreeView.OnFreeNode        := FLogTreeViewFreeNode;
@@ -500,9 +508,9 @@ begin
   Result := FManager;
 end;
 
-function TfrmMessageList.GetLogQueue: ILogQueue;
+function TfrmMessageList.GetSubscriber: ISubscriber;
 begin
-  Result := FLogQueue;
+  Result := FSubscriber;
 end;
 
 function TfrmMessageList.GetSettings: TMessageListSettings;
@@ -534,7 +542,7 @@ begin
   //end;
 end;
 
-procedure TfrmMessageList.FLogQueueReceiveMessage(Sender: TObject;
+procedure TfrmMessageList.FSubscriberReceiveMessage(Sender: TObject;
   AStream: TStream);
 begin
   ProcessMessage(AStream);
@@ -704,6 +712,23 @@ begin
   begin
     if YearOf(LN.TimeStamp) = YearOf(Now) then // sanity check
       CellText := FormatDateTime('hh:nn:ss:zzz',  LN.TimeStamp);
+  end;
+end;
+
+procedure TfrmMessageList.FLogTreeViewHotChange(Sender: TBaseVirtualTree;
+  OldNode, NewNode: PVirtualNode);
+var
+  LN1 : TLogNode;
+  LN2 : TLogNode;
+  N   : Int64;
+begin
+  LN1 := Sender.GetNodeData<TLogNode>(NewNode);
+  LN2 := Sender.GetNodeData<TLogNode>(Sender.FocusedNode);
+  if Assigned(LN1) and Assigned(LN2) then
+  begin
+    N := MilliSecondsBetween(LN1.TimeStamp, LN2.TimeStamp);
+    pnlMessageContent.Caption := Format('Delta = %d ms', [N]);
+    //Sender.Hint := Format('Delta = %d ms', [N]);
   end;
 end;
 
@@ -1037,6 +1062,7 @@ begin
   FMessageCount := 0;
   FLastNode     := nil;
   FLastParent   := nil;
+  FUpdate := True;
 end;
 
 procedure TfrmMessageList.ClearMessageDetailsControls;
@@ -1200,27 +1226,33 @@ begin
     FLogTreeView.FocusedNode := FLogTreeView.GetLast;
     FLogTreeView.Selected[FLogTreeView.FocusedNode] := True;
   end;
+  FUpdate := True;
 end;
 
 procedure TfrmMessageList.UpdateActions;
 var
   B : Boolean;
 begin
-  B := Focused;
-  if not B and Assigned(Parent) then
+  if FUpdate then
   begin
-    if Parent.Focused then
-      B := True;
-  end;
-  if B then
-  begin
-    Activate;
-  end;
-  if Assigned(Actions) then
-    Actions.UpdateActions;
+    B := Focused;
+    if not B and Assigned(Parent) then
+    begin
+      if Parent.Focused then
+        B := True;
+    end;
+    if B then
+    begin
+      Activate;
+    end;
+    UpdateLogTreeView;
+    if Assigned(Actions) then
+      Actions.UpdateActions;
 
-  if Settings.DynamicAutoSizeColumns and not FAutoSizeColumns then
-    AutoFitColumns;
+    if Settings.DynamicAutoSizeColumns and not FAutoSizeColumns then
+      AutoFitColumns;
+    FUpdate := False;
+  end;
 
   inherited UpdateActions;
 end;
@@ -1340,8 +1372,8 @@ begin
 end;
 
 procedure TfrmMessageList.UpdateTextDisplay(ALogNode: TLogNode);
-var
-  S : string;
+//var
+//  S : string;
 begin
   pgcMessageDetails.ActivePage := tsTextViewer;
   FEditorView.Text := ALogNode.Value;
@@ -1419,7 +1451,7 @@ end;
 
 procedure TfrmMessageList.UpdateView;
 begin
-//  UpdateLogTreeView;
+  FUpdate := True;
 end;
 {$ENDREGION}
 end.

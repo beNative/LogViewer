@@ -64,14 +64,16 @@ type
     FBuffer           : TMemoryStream;
     FODSQueue         : IQueue<TODSMessage>;
     //FODSThread        : TODSThread;
-    function GetSettings: TWinODSSettings;
 
-  protected
     procedure FODSQueueChanged(
       Sender     : TObject;
       const Item : TODSMessage;
       Action     : TCollectionChangedAction
     );
+
+  protected
+    function GetSettings: TWinODSSettings;
+
     procedure SettingsChanged(Sender: TObject); override;
 
   public

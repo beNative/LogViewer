@@ -49,6 +49,12 @@ type
       AData     : TStream
     );
 
+    function CreateSubscriber(
+      ASourceId         : Integer;
+      AThreadId         : Integer;
+      const ASourceName : string
+    ): ISubscriber; override;
+
     procedure SettingsChanged(Sender: TObject); override;
 
   public
@@ -65,7 +71,9 @@ implementation
 uses
   System.SysUtils,
 
-  DDuce.Utils, DDuce.Utils.Winapi;
+  DDuce.Utils, DDuce.Utils.Winapi,
+
+  LogViewer.Subscribers.WinIPC;
 
 {$REGION 'construction and destruction'}
 procedure TWinIPCChannelReceiver.AfterConstruction;
@@ -82,6 +90,12 @@ begin
   FIPCServer.Active := False;
   FIPCServer.Free;
   inherited BeforeDestruction;
+end;
+
+function TWinIPCChannelReceiver.CreateSubscriber(ASourceId, AThreadId: Integer;
+  const ASourceName: string): ISubscriber;
+begin
+  Result := TWinIPCSubscriber.Create(Self, ASourceId, '', ASourceName, True);
 end;
 {$ENDREGION}
 

@@ -4,10 +4,14 @@ program LogViewer;
 
 uses
   LeakCheck,
+  System.SysUtils,
   Vcl.Themes,
   Vcl.Styles,
   Vcl.Forms,
   VirtualTrees,
+  DDuce.Logger,
+  DDuce.Logger.Interfaces,
+  DDuce.Logger.Channels.ZeroMQ,
   LogViewer.Watches.Data in 'LogViewer.Watches.Data.pas',
   LogViewer.Settings in 'LogViewer.Settings.pas',
   LogViewer.MessageList.View in 'LogViewer.MessageList.View.pas' {frmMessageList},
@@ -44,11 +48,13 @@ uses
   LogViewer.MessageList.LogNode in 'LogViewer.MessageList.LogNode.pas',
   LogViewer.Dashboard.View in 'LogViewer.Dashboard.View.pas' {frmDashboard},
   LogViewer.Receivers.Base in 'LogViewer.Receivers.Base.pas',
-  LogViewer.LogQueue in 'LogViewer.LogQueue.pas',
   LogViewer.DisplayValues.Settings in 'LogViewer.DisplayValues.Settings.pas',
   LogViewer.DisplayValues.Settings.View in 'LogViewer.DisplayValues.Settings.View.pas' {frmDisplayValuesSettings},
   LogViewer.Dashboard.View.Node in 'LogViewer.Dashboard.View.Node.pas',
-  LogViewer.Receivers.ZeroMQ.Subscriber in 'LogViewer.Receivers.ZeroMQ.Subscriber.pas';
+  LogViewer.Subscribers.ZeroMQ in 'LogViewer.Subscribers.ZeroMQ.pas',
+  LogViewer.Subscribers.ComPort in 'LogViewer.Subscribers.ComPort.pas',
+  LogViewer.Subscribers.WinIPC in 'LogViewer.Subscribers.WinIPC.pas',
+  LogViewer.Subscribers.Base in 'LogViewer.Subscribers.Base.pas';
 
 {$R *.res}
 
@@ -56,9 +62,17 @@ begin
   {$WARNINGS OFF}
   ReportMemoryLeaksOnShutdown := DebugHook > 0;
   {$WARNINGS ON}
-  Application.Title := 'Log viewer';
   Application.Initialize;
+  Application.Title := 'Log viewer';
   Application.CreateForm(TfrmMain, frmMain);
+  Logger.Channels.Add(
+    TZeroMQChannel.Create(Format('tcp://*:%d', [LOGVIEWER_ZMQ_PORT]))
+  );
+  Logger.Clear;
+  Logger.Info('LogViewer Started.');
   Application.Run;
+
+
 end.
+
 

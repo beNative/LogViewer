@@ -26,13 +26,15 @@ uses
 type
   TZeroMQSettings = class(TPersistent)
   private
-    FOnChanged : Event<TNotifyEvent>;
-    FAddress   : string;
-    FEnabled   : Boolean;
-    FPort      : Integer;
+    FOnChanged     : Event<TNotifyEvent>;
+    FAddress       : string;
+    FEnabled       : Boolean;
+    FPort          : Integer;
+    FSubscriptions : TStrings;
 
   protected
     {$REGION 'property access methods'}
+    function GetSubscriptions: TStrings;
     function GetPort: Integer;
     procedure SetPort(const Value: Integer);
     function GetEnabled: Boolean;
@@ -46,6 +48,11 @@ type
 
   public
     procedure Assign(Source: TPersistent); override;
+    procedure AfterConstruction; override;
+    procedure BeforeDestruction; override;
+
+    property Subscriptions: TStrings
+      read GetSubscriptions;
 
     property Address: string
       read GetAddress write SetAddress;
@@ -63,6 +70,21 @@ type
 
 implementation
 
+{$REGION 'construction and destruction'}
+procedure TZeroMQSettings.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  FSubscriptions := TStringList.Create;
+end;
+
+procedure TZeroMQSettings.BeforeDestruction;
+begin
+  FSubscriptions.Free;
+  inherited BeforeDestruction;
+end;
+
+{$ENDREGION}
+
 {$REGION 'property access methods'}
 function TZeroMQSettings.GetOnChanged: IEvent<TNotifyEvent>;
 begin
@@ -72,6 +94,11 @@ end;
 function TZeroMQSettings.GetPort: Integer;
 begin
   Result := FPort;
+end;
+
+function TZeroMQSettings.GetSubscriptions: TStrings;
+begin
+  Result := FSubscriptions;
 end;
 
 procedure TZeroMQSettings.SetPort(const Value: Integer);

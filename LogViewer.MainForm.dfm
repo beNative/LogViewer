@@ -57,7 +57,7 @@ object frmMain: TfrmMain
       Options.Display.AddButton.Height = 14
       Options.Display.AddButton.Width = 40
       Options.Display.AddButton.ShowPlusSign = True
-      Options.Display.AddButton.Visibility = avRightFloating
+      Options.Display.AddButton.Visibility = avNone
       Options.Display.AddButton.HorizontalOffsetFloating = -3
       Options.Display.ScrollButtonLeft.Offsets.Vertical = 10
       Options.Display.ScrollButtonLeft.Offsets.Horizontal = 1
@@ -367,8 +367,8 @@ object frmMain: TfrmMain
   end
   object aclMain: TActionList
     Images = imlMain
-    Left = 384
-    Top = 304
+    Left = 120
+    Top = 48
     object actCenterToScreen: TAction
       Caption = 'Center to screen'
       Hint = 'Center form on main screen.'
@@ -381,10 +381,10 @@ object frmMain: TfrmMain
     end
   end
   object imlMain: TImageList
-    Left = 656
-    Top = 304
+    Left = 208
+    Top = 48
     Bitmap = {
-      494C010101000800300010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000800400010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -1141,7 +1141,7 @@ object frmMain: TfrmMain
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000000000000000000000000000000000000000000}
     TabProperties = []
-    Left = 40
-    Top = 152
+    Left = 32
+    Top = 48
   end
 end

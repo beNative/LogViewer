@@ -20,6 +20,7 @@ interface
 
 uses
   System.Classes, System.Generics.Collections,
+  Vcl.Forms,
 
   Spring, Spring.Collections,
 
@@ -44,9 +45,9 @@ type
     FVTNode     : PVirtualNode;
     FNodes      : Lazy<IList<TDashboardNode>>;
     FReceiver   : IChannelReceiver;
-    FLogQueue   : ILogQueue;
     FSubscriber : ISubscriber;
     FVTree      : TVirtualStringTree;
+    FTreeForm   : TForm; // form owning the treeview control
 
   protected
     {$REGION 'property access methods'}
@@ -54,8 +55,6 @@ type
     procedure SetSubscriber(const Value: ISubscriber);
     function GetVTree: TVirtualStringTree;
     function GetCount: Integer;
-    function GetLogQueue: ILogQueue;
-    procedure SetLogQueue(const Value: ILogQueue);
     function GetReceiver: IChannelReceiver;
     procedure SetReceiver(const Value: IChannelReceiver);
     function GetNodes: IList<TDashboardNode>;
@@ -68,8 +67,7 @@ type
       AVTNode     : PVirtualNode;
       AVTree      : TVirtualStringTree;
       AReceiver   : IChannelReceiver;
-      ASubscriber : ISubscriber = nil;
-      ALogQueue   : ILogQueue = nil
+      ASubscriber : ISubscriber = nil
     );
     procedure BeforeDestruction; override;
 
@@ -79,10 +77,9 @@ type
       Action     : TCollectionChangedAction
     );
 
-    procedure FReceiverLogQueueListChanged(
-      Sender     : TObject;
-      const Item : ILogQueue;
-      Action     : TCollectionChangedAction
+    procedure FSubscriberReceiveMessage(
+      Sender    : TObject;
+      AStream   : TStream
     );
 
     property Nodes: IList<TDashboardNode>
@@ -93,9 +90,6 @@ type
 
     property Receiver: IChannelReceiver
       read GetReceiver write SetReceiver;
-
-    property LogQueue: ILogQueue
-      read GetLogQueue write SetLogQueue;
 
     property Subscriber: ISubscriber
       read GetSubscriber write SetSubscriber;
@@ -110,12 +104,14 @@ type
 implementation
 
 uses
-  System.SysUtils;
+  System.SysUtils,
+
+  DDuce.Logger, DDuce.Utils;
 
 {$REGION 'construction and destruction'}
 constructor TDashboardNode.Create(AVTNode: PVirtualNode;
   AVTree: TVirtualStringTree; AReceiver: IChannelReceiver;
-  ASubscriber: ISubscriber; ALogQueue: ILogQueue);
+  ASubscriber: ISubscriber);
 begin
   FNodes.Create(function: IList<TDashboardNode>
     begin
@@ -124,18 +120,21 @@ begin
   );
   FVTNode   := AVTNode;
   FVTree    := AVTree;
-  if not Assigned(ALogQueue) and not Assigned(ASubscriber) then
+  if Assigned(FVTree) and Assigned(FVTree.Owner) and (FVTree.Owner is TForm) then
+    FTreeForm := TForm(FVTree.Owner);
+  if not Assigned(ASubscriber) then
     Receiver  := AReceiver;
-  FLogQueue   := ALogQueue;
-  FSubscriber := ASubscriber;
+  Subscriber := ASubscriber;
 end;
 
 procedure TDashboardNode.BeforeDestruction;
 begin
-//  FVTree    := nil;
-//  FVTNode   := nil;
-//  FLogQueue := nil;
-//  FReceiver := nil;
+  Logger.Track(Self, 'BeforeDestruction');
+  FVTree      := nil;
+  FVTNode     := nil;
+  FReceiver   := nil;
+  FSubscriber := nil;
+  FTreeForm   := nil;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
@@ -147,16 +146,6 @@ begin
     Result := Nodes.Count
   else
     Result := 0;
-end;
-
-function TDashboardNode.GetLogQueue: ILogQueue;
-begin
-  Result := FLogQueue;
-end;
-
-procedure TDashboardNode.SetLogQueue(const Value: ILogQueue);
-begin
-  FLogQueue := Value;
 end;
 
 function TDashboardNode.GetNodes: IList<TDashboardNode>;
@@ -177,8 +166,7 @@ begin
     FReceiver := Value;
     if Assigned(FReceiver) then
     begin
-      FReceiver.LogQueueList.OnValueChanged.Add(FReceiverLogQueueListChanged);
-      FReceiver.SubscriberList.OnChanged.Add(FReceiverSubscriberListChanged);
+      FReceiver.SubscriberList.OnValueChanged.Add(FReceiverSubscriberListChanged);
     end;
   end;
 end;
@@ -191,6 +179,10 @@ end;
 procedure TDashboardNode.SetSubscriber(const Value: ISubscriber);
 begin
   FSubscriber := Value;
+  if Assigned(FSubscriber) then
+  begin
+    FSubscriber.OnReceiveMessage.Add(FSubscriberReceiveMessage);
+  end;
 end;
 
 function TDashboardNode.GetVTNode: PVirtualNode;
@@ -210,52 +202,43 @@ end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
-procedure TDashboardNode.FReceiverLogQueueListChanged(Sender: TObject;
-  const Item : ILogQueue; Action: TCollectionChangedAction);
-var
-  DN : TDashboardNode;
-begin
-  if Action = caAdded then
-  begin
-    for DN in Nodes do
-    begin
-      if Item.SourceName.Contains(DN.Subscriber.Port)
-      and Item.SourceName.Contains(DN.Subscriber.Address) then
-        DN.FLogQueue := Item;
-
-
-    end;
-
-    //DN := TDashboardNode.Create(nil, FVTree, FReceiver, nil, Item);
-    //DN.VTNode := FVTree.AddChild(FVTNode, DN);
-    //Nodes.Add(DN);
-  end;
-end;
-
 procedure TDashboardNode.FReceiverSubscriberListChanged(Sender: TObject;
   const Item: ISubscriber; Action: TCollectionChangedAction);
 var
   DN : TDashboardNode;
 begin
+
   if Action = caAdded then
   begin
+//    for DN in Nodes do
+//    begin
+//      if Item.SourceName.Contains(DN.Subscriber.Port)
+//      and Item.SourceName.Contains(DN.Subscriber.Address) then
+//        DN.FLogQueue := Item;
+//    end;
+
     DN := TDashboardNode.Create(nil, FVTree, FReceiver, Item);
     DN.VTNode := FVTree.AddChild(FVTNode, DN);
-
-   DN.VTNode.CheckType := ctCheckBox;
-  if Item.Enabled then
-    DN.VTNode.CheckState := csCheckedNormal
-  else
-    DN.VTNode.CheckState := csUncheckedNormal;
-
-
+    DN.VTNode.CheckType := ctCheckBox;
+    if Item.Enabled then
+      DN.VTNode.CheckState := csCheckedNormal
+    else
+      DN.VTNode.CheckState := csUncheckedNormal;
     Nodes.Add(DN);
+    FVTree.FullExpand;
   end;
 end;
 
+procedure TDashboardNode.FSubscriberReceiveMessage(Sender: TObject;
+  AStream: TStream);
+begin
+  // this is a optimalisation to redraw treeview nodes only when needed.
+  if Assigned(FTreeForm) and ContainsFocus(FTreeForm) then
+  begin
+    FVTree.InvalidateNode(FVTNode);
+  end;
+end;
 {$ENDREGION}
 
 end.
 
-//[dcc32 Error] LogViewer.Dashboard.View.Node.pas(216): E2010 Incompatible types: 'ILogQueue' and
-//'System.Generics.Collections.TPair<System.Integer,LogViewer.Interfaces.ILogQueue>'

@@ -319,15 +319,15 @@ procedure TfrmMain.EventsAddLogViewer(Sender: TObject;
 var
   S : string;
 begin
-  ALogViewer.LogQueue.Enabled := True;
+  ALogViewer.Subscriber.Enabled := True;
   ALogViewer.Form.Parent := pnlMainClient;
-  S := ExtractFileName(ALogViewer.LogQueue.SourceName);
+  S := ExtractFileName(ALogViewer.Subscriber.SourceName);
   ctMain.Tabs.Add;
   ctMain.ActiveTab.Data := Pointer(ALogViewer);
   ctMain.ActiveTab.Caption :=
     Format('%s (%d %s)', [
-      ALogViewer.LogQueue.Receiver.ToString,
-      ALogViewer.LogQueue.SourceId,
+      ALogViewer.Subscriber.Receiver.ToString,
+      ALogViewer.Subscriber.SourceId,
       S
     ]);
 
@@ -431,7 +431,7 @@ end;
 procedure TfrmMain.UpdateStatusBar;
 begin
   if Assigned(Manager) and Assigned(Manager.ActiveView) then
-    sbrMain.SimpleText := Manager.ActiveView.LogQueue.SourceName
+    sbrMain.SimpleText := Manager.ActiveView.Subscriber.SourceName
   else
     sbrMain.SimpleText := '';
 end;

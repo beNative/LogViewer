@@ -3,7 +3,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
   Top = 0
   Caption = 'Settings'
   ClientHeight = 373
-  ClientWidth = 784
+  ClientWidth = 799
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -27,80 +27,62 @@ object frmLogViewerSettings: TfrmLogViewerSettings
   object pgcMain: TPageControl
     Left = 201
     Top = 0
-    Width = 583
+    Width = 598
     Height = 332
-    ActivePage = tsDisplayValuesSettings
+    ActivePage = tsComport
     Align = alClient
     Style = tsFlatButtons
     TabOrder = 1
+    ExplicitWidth = 583
     object tsWatches: TTabSheet
       Caption = 'Watches'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 856
     end
     object tsCallstack: TTabSheet
       Caption = 'Callstack'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 575
     end
     object tsWinIPC: TTabSheet
       Caption = 'WinIPC'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 575
     end
     object tsWinODS: TTabSheet
       Caption = 'OutputDebugString API'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 575
     end
     object tsComport: TTabSheet
       Caption = 'Serial port'
       ImageIndex = 4
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 575
     end
     object tsZeroMQ: TTabSheet
       Caption = 'ZeroMQ'
       ImageIndex = 5
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 575
     end
     object tsDisplayValuesSettings: TTabSheet
       Caption = 'DisplayValuesSettings'
       ImageIndex = 6
+      ExplicitWidth = 575
     end
     object tsAdvanced: TTabSheet
       Caption = 'Advanced'
       ImageIndex = 7
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 856
     end
   end
   object pnlBottom: TPanel
     Left = 0
     Top = 332
-    Width = 784
+    Width = 799
     Height = 41
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 2
+    ExplicitWidth = 784
     object btnClose: TButton
       Left = 660
       Top = 6

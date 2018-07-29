@@ -32,6 +32,8 @@ uses
 
   Spring.Collections,
 
+  ZeroMQ,
+
   LogViewer.CallStack.View, LogViewer.Watches.View,
   LogViewer.Watches.Data, LogViewer.Messages.Data, LogViewer.MessageList.View,
   LogViewer.Interfaces, LogViewer.Manager, LogViewer.Settings,
@@ -63,9 +65,9 @@ type
     ): TfrmWatchesView;
 
     class function CreateLogViewer(
-      AManager  : ILogViewerManager;
-      ALogQueue : ILogQueue;
-      AParent   : TWinControl = nil
+      AManager    : ILogViewerManager;
+      ASubscriber : ISubscriber;
+      AParent     : TWinControl = nil
     ): TfrmMessageList;
 
     class function CreateManager(
@@ -83,28 +85,29 @@ type
       AMenus   : ILogViewerMenus
     ): TToolbar;
 
-    class function CreateComPortChannelReceiver(
+    class function CreateComPortReceiver(
       AManager  : ILogViewerManager;
       ASettings : TComPortSettings
     ): IChannelReceiver;
 
-    class function CreateWinIPCChannelReceiver(
+    class function CreateWinIPCReceiver(
       AManager : ILogViewerManager
     ): IChannelReceiver;
 
-    class function CreateWinODSChannelReceiver(
+    class function CreateWinODSReceiver(
       AManager : ILogViewerManager
     ): IChannelReceiver;
 
-    class function CreateZeroMQChannelReceiver(
-      AManager : ILogViewerManager
+    class function CreateZeroMQReceiver(
+      AManager : ILogViewerManager;
+      AZMQ     : IZeroMQ
     ): IChannelReceiver;
 
-    class function CreateLogQueue(
-      AReceiver         : IChannelReceiver;
-      ASourceId         : Integer;
-      const ASourceName : string
-    ): ILogQueue;
+//    class function CreateLogQueue(
+//      AReceiver         : IChannelReceiver;
+//      ASourceId         : Integer;
+//      const ASourceName : string
+//    ): ILogQueue;
   end;
 
 implementation
@@ -116,8 +119,7 @@ uses
 
   LogViewer.Factories.Toolbars,
   LogViewer.Receivers.WinIPC, LogViewer.Receivers.WinODS,
-  LogViewer.Receivers.ZeroMQ, LogViewer.Receivers.ComPort,
-  LogViewer.LogQueue;
+  LogViewer.Receivers.ZeroMQ, LogViewer.Receivers.ComPort;
 
 {$REGION 'private class methods'}
 class procedure TLogViewerFactories.OnDropdownMenuButtonClick(Sender: TObject);
@@ -162,19 +164,19 @@ begin
   Result := TdmManager.Create(AOwner, ASettings);
 end;
 
-class function TLogViewerFactories.CreateLogQueue(AReceiver: IChannelReceiver;
-  ASourceId: Integer; const ASourceName : string): ILogQueue;
-begin
-  Result := TLogQueue.Create(AReceiver, ASourceId, ASourceName);
-end;
+//class function TLogViewerFactories.CreateLogQueue(AReceiver: IChannelReceiver;
+//  ASourceId: Integer; const ASourceName : string): ILogQueue;
+//begin
+//  Result := TLogQueue.Create(AReceiver, ASourceId, ASourceName);
+//end;
 
 class function TLogViewerFactories.CreateLogViewer(AManager: ILogViewerManager;
-  ALogQueue: ILogQueue; AParent: TWinControl): TfrmMessageList;
+  ASubscriber: ISubscriber; AParent: TWinControl): TfrmMessageList;
 begin
   Result := TfrmMessageList.Create(
     Application,
     AManager,
-    ALogQueue,
+    ASubscriber,
     AManager.Settings.MessageListSettings
   );
   Result.Parent      := AParent;
@@ -200,28 +202,28 @@ begin
   Result.Visible     := True;
 end;
 
-class function TLogViewerFactories.CreateWinIPCChannelReceiver(
+class function TLogViewerFactories.CreateWinIPCReceiver(
   AManager: ILogViewerManager): IChannelReceiver;
 begin
-  Result := TWinIPCChannelReceiver.Create(AManager, '');
+  Result := TWinIPCChannelReceiver.Create(AManager, 'WinIPC');
 end;
 
-class function TLogViewerFactories.CreateWinODSChannelReceiver(
+class function TLogViewerFactories.CreateWinODSReceiver(
   AManager: ILogViewerManager): IChannelReceiver;
 begin
-  Result := TWinODSChannelReceiver.Create(AManager, '');
+  Result := TWinODSChannelReceiver.Create(AManager, 'WinODS');
 end;
 
-class function TLogViewerFactories.CreateZeroMQChannelReceiver(
-  AManager: ILogViewerManager): IChannelReceiver;
+class function TLogViewerFactories.CreateZeroMQReceiver(
+  AManager: ILogViewerManager; AZMQ: IZeroMQ): IChannelReceiver;
 begin
-  Result := TZeroMQChannelReceiver.Create(AManager, '');
+  Result := TZeroMQChannelReceiver.Create(AManager, AZMQ, 'ZeroMQ');
 end;
 
-class function TLogViewerFactories.CreateComPortChannelReceiver(
+class function TLogViewerFactories.CreateComPortReceiver(
   AManager: ILogViewerManager; ASettings: TComPortSettings): IChannelReceiver;
 begin
-  Result := TComPortChannelReceiver.Create(AManager, '', ASettings);
+  Result := TComPortChannelReceiver.Create(AManager, 'COMPort', ASettings);
 end;
 {$ENDREGION}
 

@@ -1,8 +1,8 @@
 object frmZeroMQSettings: TfrmZeroMQSettings
   Left = 0
   Top = 0
-  ClientHeight = 65
-  ClientWidth = 184
+  ClientHeight = 307
+  ClientWidth = 313
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -10,6 +10,9 @@ object frmZeroMQSettings: TfrmZeroMQSettings
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  DesignSize = (
+    313
+    307)
   PixelsPerInch = 96
   TextHeight = 13
   object lblAddress: TLabel
@@ -41,5 +44,14 @@ object frmZeroMQSettings: TfrmZeroMQSettings
     Width = 121
     Height = 21
     TabOrder = 1
+  end
+  object mmoSubscriptions: TMemo
+    Left = 8
+    Top = 72
+    Width = 297
+    Height = 227
+    Anchors = [akLeft, akTop, akRight, akBottom]
+    TabOrder = 2
+    ExplicitWidth = 292
   end
 end
