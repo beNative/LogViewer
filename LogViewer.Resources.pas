@@ -99,7 +99,9 @@ const
     lmtCustomData,
     lmtWatch,
     lmtCounter,
-    lmtText
+    lmtText,
+    lmtScreenShot,
+    lmtDataSet
   ];
 
   // message viewer

@@ -30,13 +30,18 @@ uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes, System.ImageList,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
-  Vcl.ExtCtrls, Vcl.Buttons, Vcl.ComCtrls, Vcl.ImgList,
+  Vcl.ExtCtrls, Vcl.Buttons, Vcl.ComCtrls, Vcl.ImgList, Vcl.Grids, Vcl.DBGrids,
+  Data.DB,
+
+  FireDAC.Comp.Client, FireDAC.Stan.Intf, FireDAC.Comp.DataSet,
+  FireDAC.Stan.StorageBin,
 
   VirtualTrees,
 
   Spring.Collections,
 
   DDuce.Editor.Interfaces, DDuce.Logger.Interfaces, DDuce.Components.ValueList,
+  DDuce.Components.DBGridView,
 
   LogViewer.Messages.Data, LogViewer.Watches.Data, LogViewer.Watches.View,
   LogViewer.Interfaces, LogViewer.CallStack.Data, LogViewer.CallStack.View,
@@ -58,7 +63,6 @@ type
     edtValueName      : TLabeledEdit;
     edtValueType      : TLabeledEdit;
     edtWidth          : TLabeledEdit;
-    imgBitmap         : TImage;
     imlMessageTypes   : TImageList;
     pgcMessageDetails : TPageControl;
     pnlCallStack      : TPanel;
@@ -87,6 +91,10 @@ type
     tsImageViewer     : TTabSheet;
     tsTextViewer      : TTabSheet;
     tsValueList       : TTabSheet;
+    sbxImage: TScrollBox;
+    imgBitmap: TImage;
+    tsDataSet: TTabSheet;
+    dscMain: TDataSource;
     {$ENDREGION}
 
     procedure edtMessageFilterChange(Sender: TObject);
@@ -124,6 +132,8 @@ type
     FSettings        : TMessageListSettings;
     FAutoSizeColumns : Boolean;
     FValueList       : TValueList;
+    FDataSet         : TFDMemTable;
+    FDBGridView      : TDBGridView;
 
     {$REGION 'property access methods'}
     function GetManager: ILogViewerManager;
@@ -254,6 +264,7 @@ type
     procedure UpdateMessageDetails(ALogNode: TLogNode);
     procedure UpdateComponentDisplay(ALogNode: TLogNode);
     procedure UpdateBitmapDisplay(ALogNode: TLogNode);
+    procedure UpdateDataSetDisplay(ALogNode: TLogNode);
     procedure UpdateTextDisplay(ALogNode: TLogNode);
     procedure UpdateTextStreamDisplay(ALogNode: TLogNode);
     procedure UpdateColorDisplay(ALogNode: TLogNode);
@@ -318,7 +329,7 @@ uses
   Spring, Spring.Helpers,
 
   DDuce.Factories.VirtualTrees, DDuce.Editor.Factories,
-  DDuce.Reflect, DDuce.Utils,
+  DDuce.Reflect, DDuce.Utils, DDuce.Factories.GridView,
 
   DDuce.ObjectInspector.zObjectInspector, DDuce.DynamicRecord,
 
@@ -356,6 +367,9 @@ begin
   FValueList        := TValueList.Create(Self);
   FValueList.Parent := tsValueList;
   FValueList.Align  := alClient;
+
+  FDataSet := TFDMemTable.Create(Self);
+  FDBGridView := TGridViewFactory.CreateDBGridView(Self, tsDataSet, dscMain);
 
   ApplySettings;
 end;
@@ -761,6 +775,12 @@ begin
       if I > 1 then
         LN.ValueName := Copy(S, 1, I);
       LN.Text := '';
+    end;
+    lmtDataSet:
+    begin
+      LN.ValueName := FCurrentMsg.Text;
+      LN.ValueType := 'TDataSet';
+
     end;
     lmtAlphaColor, lmtColor:
     begin
@@ -1339,6 +1359,16 @@ begin
   end;
 end;
 
+procedure TfrmMessageList.UpdateDataSetDisplay(ALogNode: TLogNode);
+begin
+  pgcMessageDetails.ActivePage := tsDataSet;
+  FDataSet.Active := False;
+  ALogNode.MessageData.Position := 0;
+  FDataSet.LoadFromStream(ALogNode.MessageData);
+  dscMain.DataSet := FDataSet;
+  FDBGridView.AutoSizeCols;
+end;
+
 procedure TfrmMessageList.UpdateMessageDetails(ALogNode: TLogNode);
 begin
   ClearMessageDetailsControls;
@@ -1362,6 +1392,8 @@ begin
       UpdateTextDisplay(ALogNode);
     lmtValue, lmtObject, lmtPersistent, lmtInterface, lmtStrings, lmtCheckpoint:
       UpdateValueDisplay(ALogNode);
+    lmtDataSet:
+      UpdateDataSetDisplay(ALogNode);
   end;
   edtMessageType.Text := LogMessageTypeNameOf(ALogNode.MessageType);
   edtTimeStamp.Text   :=

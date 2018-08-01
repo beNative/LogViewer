@@ -112,6 +112,11 @@ begin
   Result := FEnabled;
 end;
 
+procedure TSubscriber.SetEnabled(const Value: Boolean);
+begin
+  FEnabled := Value;
+end;
+
 function TSubscriber.GetKey: string;
 begin
   Result := FKey;
@@ -125,11 +130,6 @@ end;
 function TSubscriber.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
 begin
   Result := FOnReceiveMessage;
-end;
-
-procedure TSubscriber.SetEnabled(const Value: Boolean);
-begin
-  FEnabled := Value;
 end;
 
 function TSubscriber.GetReceiver: IChannelReceiver;

@@ -47,9 +47,10 @@ type
     procedure Changed;
 
   public
-    procedure Assign(Source: TPersistent); override;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
+
+    procedure Assign(Source: TPersistent); override;
 
     property Subscriptions: TStrings
       read GetSubscriptions;
@@ -82,7 +83,6 @@ begin
   FSubscriptions.Free;
   inherited BeforeDestruction;
 end;
-
 {$ENDREGION}
 
 {$REGION 'property access methods'}

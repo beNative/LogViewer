@@ -88,7 +88,6 @@ type
     );
     procedure BeforeDestruction; override;
 
-
     function AddValue(
       const AValue : string;
       AId          : Int64;

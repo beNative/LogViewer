@@ -103,11 +103,6 @@ type
       AZMQ     : IZeroMQ
     ): IChannelReceiver;
 
-//    class function CreateLogQueue(
-//      AReceiver         : IChannelReceiver;
-//      ASourceId         : Integer;
-//      const ASourceName : string
-//    ): ILogQueue;
   end;
 
 implementation
@@ -163,12 +158,6 @@ class function TLogViewerFactories.CreateManager(
 begin
   Result := TdmManager.Create(AOwner, ASettings);
 end;
-
-//class function TLogViewerFactories.CreateLogQueue(AReceiver: IChannelReceiver;
-//  ASourceId: Integer; const ASourceName : string): ILogQueue;
-//begin
-//  Result := TLogQueue.Create(AReceiver, ASourceId, ASourceName);
-//end;
 
 class function TLogViewerFactories.CreateLogViewer(AManager: ILogViewerManager;
   ASubscriber: ISubscriber; AParent: TWinControl): TfrmMessageList;

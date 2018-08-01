@@ -42,7 +42,7 @@ type
     procedure SetEnabled(const Value: Boolean); override;
     {$ENDREGION}
 
-    procedure Poll;
+    procedure Poll; override;
 
   public
     constructor Create(

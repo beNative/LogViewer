@@ -204,27 +204,6 @@ begin
     tbsDropDown,
     FMenus.MessageTypesPopupMenu
   );
-//  CreateToolButton(TB, 'actInfo', tbsDropDown);
-//  CreateToolButton(TB, 'actWarning', tbsTextButton);
-//  CreateToolButton(TB, 'actError', tbsTextButton);
-//  CreateToolButton(TB, 'actConditional', tbsTextButton);
-//  CreateToolButton(TB, 'actEcxeption', tbsTextButton);
-//  CreateToolButton(TB);
-//  CreateToolButton(TB, 'actCheckPoint', tbsTextButton);
-//  //CreateToolButton(TB, 'actCallStack', tbsTextButton);
-//  CreateToolButton(TB);
-//  CreateToolButton(TB, 'actValue', tbsTextButton);
-//  CreateToolButton(TB, 'actStrings', tbsTextButton);
-//  CreateToolButton(TB, 'actComponent', tbsTextButton);
-//  CreateToolButton(TB, 'actObject', tbsTextButton);
-//  CreateToolButton(TB, 'actPersistent', tbsTextButton);
-//  CreateToolButton(TB, 'actInterface', tbsTextButton);
-//  CreateToolButton(TB, 'actBitmap', tbsTextButton);
-//  //CreateToolButton(TB, 'actMemory', tbsTextButton);
-//  //CreateToolButton(TB, 'actHeapInfo', tbsTextButton);
-//  CreateToolButton(TB, 'actCustomData', tbsTextButton);
-////  CreateToolButton(TB);
-//  CreateToolButton(TB, 'actMethodTraces', tbsTextButton);
 //  CreateToolButton(TB);
 //  CreateToolButton(TB, 'actFilterMessages');
 //  CreateToolButton(TB);

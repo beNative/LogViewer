@@ -74,24 +74,16 @@ object frmMessageList: TfrmMessageList
         Top = 97
         Width = 430
         Height = 624
-        ActivePage = tsValueList
+        ActivePage = tsDataSet
         Align = alClient
         Style = tsFlatButtons
         TabOrder = 0
         object tsValueList: TTabSheet
           Caption = 'Value list'
           ImageIndex = 2
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
         end
         object tsTextViewer: TTabSheet
           Caption = 'Text viewer'
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object pnlTextViewer: TPanel
             AlignWithMargins = True
             Left = 3
@@ -108,10 +100,6 @@ object frmMessageList: TfrmMessageList
         object tsImageViewer: TTabSheet
           Caption = 'Image viewer'
           ImageIndex = 1
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object pnlImageViewer: TPanel
             Left = 0
             Top = 0
@@ -121,18 +109,6 @@ object frmMessageList: TfrmMessageList
             BevelOuter = bvNone
             ParentBackground = False
             TabOrder = 0
-            object imgBitmap: TImage
-              Left = 0
-              Top = 60
-              Width = 422
-              Height = 533
-              Align = alBottom
-              Anchors = [akLeft, akTop, akRight, akBottom]
-              Center = True
-              IncrementalDisplay = True
-              Proportional = True
-              ExplicitHeight = 509
-            end
             object edtWidth: TLabeledEdit
               Left = 64
               Top = 6
@@ -177,7 +153,40 @@ object frmMessageList: TfrmMessageList
               LabelPosition = lpLeft
               TabOrder = 3
             end
+            object sbxImage: TScrollBox
+              Left = 0
+              Top = 72
+              Width = 422
+              Height = 521
+              HorzScrollBar.Smooth = True
+              HorzScrollBar.Tracking = True
+              VertScrollBar.Smooth = True
+              VertScrollBar.Tracking = True
+              Align = alBottom
+              Anchors = [akLeft, akTop, akRight, akBottom]
+              BevelInner = bvNone
+              BevelKind = bkFlat
+              BorderStyle = bsNone
+              Color = clWhite
+              ParentColor = False
+              TabOrder = 4
+              object imgBitmap: TImage
+                Left = 3
+                Top = 3
+                Width = 420
+                Height = 519
+                AutoSize = True
+                IncrementalDisplay = True
+                Proportional = True
+              end
+            end
           end
+        end
+        object tsDataSet: TTabSheet
+          Caption = 'DataSet'
+          ImageIndex = 3
+          ExplicitLeft = 6
+          ExplicitTop = 21
         end
       end
       object pnlMessageDetails: TGridPanel
@@ -595,7 +604,7 @@ object frmMessageList: TfrmMessageList
     Left = 607
     Top = 150
     Bitmap = {
-      494C0101140019004C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010114001900500010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -1393,5 +1402,9 @@ object frmMessageList: TfrmMessageList
       000000008000000000008001800180010000C003C001E0070000C003C003FFFF
       0000F00FE00FFFFF0000F81FF83FFFFF00000000000000000000000000000000
       000000000000}
+  end
+  object dscMain: TDataSource
+    Left = 1264
+    Top = 328
   end
 end

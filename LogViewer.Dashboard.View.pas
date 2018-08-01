@@ -23,8 +23,9 @@ interface
 uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes, System.Actions,
+  System.UITypes, System.ImageList,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  Vcl.ActnList, Vcl.ButtonGroup, Vcl.ComCtrls,
+  Vcl.ActnList, Vcl.ButtonGroup, Vcl.ComCtrls, Vcl.ImgList,
 
   VirtualTrees,
 
@@ -32,8 +33,8 @@ uses
 
   synaser,
 
-  LogViewer.Interfaces, LogViewer.Dashboard.View.Node, LogViewer.ComPort.Settings.View,
-  System.ImageList, Vcl.ImgList;
+  LogViewer.Interfaces, LogViewer.Dashboard.View.Node,
+  LogViewer.ComPort.Settings.View;
 
   {
     TODO:
@@ -166,9 +167,9 @@ implementation
 uses
   Spring, Spring.Collections,
 
-  DDuce.Utils.Winapi, DDuce.Logger,
+  DDuce.Utils, DDuce.Utils.Winapi, DDuce.Logger,
   DDuce.Factories.TreeViewPresenter, DDuce.Factories.VirtualTrees,
-  DDuce.ObjectInspector.zObjectInspector,  DDuce.Utils,
+  DDuce.ObjectInspector.zObjectInspector,
 
   LogViewer.Manager, LogViewer.Factories, LogViewer.Resources,
   LogViewer.Subscribers.ZeroMQ;

@@ -61,7 +61,7 @@ type
 implementation
 
 uses
-  System.SysUtils, System.StrUtils,
+  System.SysUtils, System.AnsiStrings,
 
   DDuce.Logger.Interfaces;
 
