@@ -5,7 +5,7 @@ messages from.
 
 * Windows IPC (using WM_COPY messages)
 * Windows OutputDebugString API
-* ZeroMQ (PUB/SUB socket)
+* [ZeroMQ](https://github.com/zeromq/libzmq) (PUB/SUB socket)
 * Serial port
 * Spring4D logging API
 
@@ -36,6 +36,7 @@ The sources depend on the following libraries and components:
   * [zcontrols](http://github.com/beNative/zcontrols)
   * [TBCEditor](https://github.com/beNative/TBCEditor)
   * [TChromeTabs](https://github.com/norgepaul/TChromeTabs)
+  * [Ararat Synapse](https://sourceforge.net/projects/synalist/)
 
 Here a preliminary look of the application:
 
