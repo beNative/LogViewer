@@ -91,10 +91,10 @@ type
     tsImageViewer     : TTabSheet;
     tsTextViewer      : TTabSheet;
     tsValueList       : TTabSheet;
-    sbxImage: TScrollBox;
-    imgBitmap: TImage;
-    tsDataSet: TTabSheet;
-    dscMain: TDataSource;
+    sbxImage          : TScrollBox;
+    imgBitmap         : TImage;
+    tsDataSet         : TTabSheet;
+    dscMain           : TDataSource;
     {$ENDREGION}
 
     procedure edtMessageFilterChange(Sender: TObject);
@@ -109,6 +109,7 @@ type
       Shift   : TShiftState
     );
     procedure chkAutoFilterClick(Sender: TObject);
+    procedure pnlMessagesClick(Sender: TObject);
 
   private class var
     FCounter : Integer;
@@ -668,8 +669,18 @@ begin
     begin
       ImageIndex := Integer(ND.MessageType);
     end
+    else if ND.MessageType = lmtDataSet then
+    begin
+      ImageIndex := 20;
+    end
+    else if ND.MessageType = lmtText then
+    begin
+      ImageIndex := 8;
+    end
     else
+    begin
       ImageIndex := 0;
+    end;
   end;
 end;
 
@@ -685,23 +696,29 @@ begin
   begin
     case LN.MessageType of
       lmtValue:
-        CellText := 'Value';
+        CellText := SValue;
       lmtAlphaColor, lmtColor:
-        CellText := 'Color';
+        CellText := SColor;
       lmtBitmap:
-        CellText := 'Bitmap';
+        CellText := SBitmap;
       lmtComponent:
-        CellText := 'Component';
+        CellText := SComponent;
       lmtObject:
-        CellText := 'Object';
+        CellText := SObject;
       lmtPersistent:
-        CellText := 'Persistent';
+        CellText := SPersistent;
       lmtInterface:
-        CellText := 'Interface';
+        CellText := SInterface;
       lmtStrings:
-        CellText := 'Strings';
+        CellText := SStrings;
       lmtCheckpoint:
-        CellText := 'Checkpoint';
+        CellText := SCheckpoint;
+      lmtDataSet:
+        CellText := SDataSet;
+      lmtScreenShot:
+        CellText := SScreenShot;
+      lmtText:
+        CellText := SText;
       else
         CellText := LN.Text
     end;
@@ -752,6 +769,7 @@ var
   LN : TLogNode; // class type
   I  : Integer;
   S  : string;
+  SL : TStringList;
 begin
   LN := TLogNode.Create;
   Node.SetData(LN);
@@ -761,8 +779,7 @@ begin
   LN.VTNode      := Node;
   LN.Id          := FMessageCount;
   case LN.MessageType of
-    lmtValue, lmtComponent, lmtStrings, lmtBitmap, lmtPersistent, lmtObject,
-    lmtInterface:
+    lmtValue, lmtComponent, lmtStrings, lmtPersistent, lmtObject, lmtInterface:
     begin
       S := string(FCurrentMsg.Text);
       I := S.IndexOf('=');
@@ -781,6 +798,11 @@ begin
       LN.ValueName := FCurrentMsg.Text;
       LN.ValueType := 'TDataSet';
 
+    end;
+    lmtBitmap, lmtScreenShot:
+    begin
+      LN.ValueName := FCurrentMsg.Text;
+      LN.ValueType := 'TBitmap';
     end;
     lmtAlphaColor, lmtColor:
     begin
@@ -801,17 +823,24 @@ begin
     end;
     lmtText:
     begin
-      S := string(FCurrentMsg.Text);
-      I := S.IndexOf('(');
-      LN.ValueName := Copy(S, 1, I);
-      LN.Value := Copy(S, I + 3, S.Length); // ' = '
-//      if LN.Value.StartsWith(#13#10) then // multiline values
-//        LN.Value := Copy(LN.Value, 3, LN.Value.Length);
-      LN.ValueType := ExtractText(LN.ValueName, '(', ')');
-      I := S.IndexOf('(');
-      if I > 1 then
-        LN.ValueName := Copy(S, 1, I);
-      LN.Text := string(FCurrentMsg.Text);
+      SL := TStringList.Create;
+      try
+        SL.Text := string(FCurrentMsg.Text);
+        if SL.Count > 0 then
+        begin
+          S := SL[0];
+          I := S.IndexOf('(');
+          if I > 1 then
+          begin
+            LN.ValueName := Copy(S, 1, I);
+            LN.ValueType := ExtractText(S, '(', ')');
+          end;
+          SL.Delete(0);
+        end;
+        LN.Value := SL.Text;
+      finally
+        SL.Free;
+      end;
     end;
     lmtCheckpoint:
     begin
@@ -1097,9 +1126,10 @@ begin
   edtTimeStamp.Text   := '';
   edtValueName.Text   := '';
   edtValueType.Text   := '';
+  pnlColor.Color      := clBtnFace;
+  FDataSet.Active     := False;
   FEditorView.Clear;
   FValueList.Clear;
-  pnlColor.Color      := clBtnFace;
 end;
 
 procedure TfrmMessageList.CollapseAll;
@@ -1136,6 +1166,11 @@ begin
     FLogTreeView.FocusedNode := FLogTreeView.GetLast;
     FLogTreeView.Selected[FLogTreeView.FocusedNode] := True;
   end;
+end;
+
+procedure TfrmMessageList.pnlMessagesClick(Sender: TObject);
+begin
+
 end;
 
 { Reads the received message stream from the active logchannel . }
@@ -1362,7 +1397,6 @@ end;
 procedure TfrmMessageList.UpdateDataSetDisplay(ALogNode: TLogNode);
 begin
   pgcMessageDetails.ActivePage := tsDataSet;
-  FDataSet.Active := False;
   ALogNode.MessageData.Position := 0;
   FDataSet.LoadFromStream(ALogNode.MessageData);
   dscMain.DataSet := FDataSet;
@@ -1404,14 +1438,14 @@ begin
 end;
 
 procedure TfrmMessageList.UpdateTextDisplay(ALogNode: TLogNode);
-//var
-//  S : string;
+var
+  S : string;
 begin
   pgcMessageDetails.ActivePage := tsTextViewer;
   FEditorView.Text := ALogNode.Value;
-//  S := Trim(ALogNode.ValueName);
-//  if S <> '' then
-//   FEditorView.HighlighterName := S;
+  S := Trim(ALogNode.ValueName);
+  if S <> '' then
+   FEditorView.HighlighterName := S;
 end;
 
 procedure TfrmMessageList.UpdateTextStreamDisplay(ALogNode: TLogNode);

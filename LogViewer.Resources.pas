@@ -73,6 +73,17 @@ resourcestring
   SValue       = 'Value';
   STimestamp   = 'Timestamp';
   SProcessName = 'ProcessName';
+  SColor       = 'Color';
+  SBitmap      = 'Bitmap';
+  SComponent   = 'Component';
+  SObject      = 'Object';
+  SPersistent  = 'Persistent';
+  SInterface   = 'Interface';
+  SStrings     = 'Strings';
+  SCheckpoint  = 'Checkpoint';
+  SDataSet     = 'DataSet';
+  SScreenShot  = 'ScreenShot';
+  SText        = 'Text';
 
 const
   ALL_MESSAGES = [
