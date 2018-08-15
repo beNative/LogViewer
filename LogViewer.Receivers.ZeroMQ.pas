@@ -112,6 +112,7 @@ end;
 
 procedure TZeroMQChannelReceiver.BeforeDestruction;
 begin
+  FTimer.Enabled := False;
   FTimer.Free;
   inherited BeforeDestruction;
 end;
@@ -152,6 +153,7 @@ end;
 procedure TZeroMQChannelReceiver.FTimerTimer(Sender: TObject);
 var
   LSubscriber : ISubscriber;
+  I           : Integer;
 begin
   FTimer.Enabled := False;
   for LSubscriber in SubscriberList.Values do

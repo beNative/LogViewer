@@ -330,7 +330,7 @@ uses
   Spring, Spring.Helpers,
 
   DDuce.Factories.VirtualTrees, DDuce.Editor.Factories,
-  DDuce.Reflect, DDuce.Utils, DDuce.Factories.GridView,
+  DDuce.Reflect, DDuce.Utils, DDuce.Factories.GridView, DDuce.Logger,
 
   DDuce.ObjectInspector.zObjectInspector, DDuce.DynamicRecord,
 
@@ -377,13 +377,14 @@ end;
 
 procedure TfrmMessageList.BeforeDestruction;
 begin
+  Logger.Track(Self, 'BeforeDestruction');
   FSettings.LeftPanelWidth  := pnlLeft.Width;
   FSettings.RightPanelWidth := pnlRight.Width;
   FSubscriber.OnReceiveMessage.Remove(FSubscriberReceiveMessage);
   FSettings.OnChanged.Remove(FSettingsChanged);
   FSubscriber := nil;
-  FManager  := nil;
-  FSettings := nil;
+  FManager    := nil;
+  FSettings   := nil;
   inherited BeforeDestruction;
 end;
 
@@ -464,18 +465,18 @@ begin
   C.MaxWidth := 2000;
 
   C := FLogTreeView.Header.Columns.Add;
-  C.Text      := SType;
-  C.Options   := C.Options + [coSmartResize, coAutoSpring];
-  C.Width     := 150;
-  C.MinWidth  := 50;
-  C.MaxWidth  := 2000;
-
-  C := FLogTreeView.Header.Columns.Add;
   C.Text     := SValue;
   C.Options  := C.Options + [coAutoSpring];
   C.Width    := 150;
   C.MinWidth := 80;
   C.MaxWidth := 2000;
+
+  C := FLogTreeView.Header.Columns.Add;
+  C.Text      := SType;
+  C.Options   := C.Options + [coSmartResize, coAutoSpring];
+  C.Width     := 100;
+  C.MinWidth  := 0;
+  C.MaxWidth  := 2000;
 
   C := FLogTreeView.Header.Columns.Add;
   C.Text     := STimestamp;
@@ -851,10 +852,6 @@ begin
       LN.ValueType := 'Checkpoint';
     end
   end;
-  //Show only what matches filter criterias
-  Sender.IsVisible[Node] := (LN.MessageType in [lmtEnterMethod, lmtLeaveMethod]) or
-      (LN.MessageType in Settings.VisibleMessageTypes);
-    //and IsWild(Text, FTitleFilter, True));
 end;
 
 procedure TfrmMessageList.FLogTreeViewFreeNode(Sender: TBaseVirtualTree;
@@ -911,9 +908,13 @@ begin
       begin
         TargetCanvas.Font.Color := clDkGray;
       end;
-      lmtEnterMethod, lmtLeaveMethod:
+      lmtEnterMethod:
       begin
-        DVS.Tracing.AssignTo(TargetCanvas.Font);
+        DVS.Enter.AssignTo(TargetCanvas.Font);
+      end;
+      lmtLeaveMethod:
+      begin
+        DVS.Leave.AssignTo(TargetCanvas.Font);
       end;
       lmtCheckpoint:
       begin
@@ -1045,11 +1046,13 @@ end;
 
 procedure TfrmMessageList.AutoFitColumns;
 begin
-  FLogTreeView.BeginUpdate;
+  Logger.Track(Self, 'AutoFitColumns');
+//  FLogTreeView.BeginUpdate;
   //FLogTreeView.Header.AutoFitColumns(False, smaUseColumnOption, -1, -1);
-  FLogTreeView.Header.AutoFitColumns(False, smaUseColumnOption, 1, 2);
+  //FLogTreeView.Header.AutoFitColumns(False, smaUseColumnOption, 1, 2);
+  FLogTreeView.Header.AutoFitColumns(False, smaAllColumns, 1, 2);
   FAutoSizeColumns := True;
-  FLogTreeView.EndUpdate;
+  //FLogTreeView.EndUpdate;
 end;
 
 procedure TfrmMessageList.Activate;
@@ -1478,7 +1481,7 @@ begin
   FLogTreeView.BeginUpdate;
   try
     FLogTreeView.IterateSubtree(nil, FLogTreeViewFilterCallback, nil);
-    FLogTreeView.Header.AutoFitColumns;
+    AutoFitColumns;
   finally
     FLogTreeView.EndUpdate;
   end;

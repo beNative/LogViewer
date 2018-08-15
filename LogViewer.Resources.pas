@@ -119,8 +119,8 @@ const
 const
   COLUMN_MAIN      = 0;
   COLUMN_VALUENAME = 1;
-  COLUMN_VALUETYPE = 2;
-  COLUMN_VALUE     = 3;
+  COLUMN_VALUE     = 2;
+  COLUMN_VALUETYPE = 3;
   COLUMN_TIMESTAMP = 4;
 
   { max. amount of characters allowed to be displayed in the value column of the

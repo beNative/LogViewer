@@ -59,7 +59,9 @@ type
 implementation
 
 uses
-  System.SysUtils;
+  System.SysUtils,
+
+  DDuce.Logger;
 
 {$REGION 'construction and destruction'}
 constructor TZMQSubscriber.Create(AReceiver: IChannelReceiver; AZMQ: IZeroMQ;
@@ -127,7 +129,9 @@ begin
   if Enabled then
   begin
     while FPoll.PollOnce(10) > 0 do
+    begin
       FPoll.FireEvents;
+    end;
   end;
 end;
 {$ENDREGION}

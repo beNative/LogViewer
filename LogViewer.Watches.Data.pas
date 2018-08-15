@@ -177,13 +177,17 @@ type
 
 implementation
 
+uses
+  DDuce.Logger;
+
 {$REGION 'TWatch'}
 {$REGION 'construction and destruction'}
 procedure TWatch.BeforeDestruction;
 begin
-  FList.Clear;
+  Logger.Track(Self, 'BeforeDestruction');
+//  FList.Clear;
+//  FList := nil;
   inherited BeforeDestruction;
-
 end;
 
 constructor TWatch.Create(const AName: string; const AValueType: string;

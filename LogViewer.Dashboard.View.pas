@@ -195,14 +195,15 @@ end;
 
 procedure TfrmDashboard.BeforeDestruction;
 begin
+  Logger.Track(Self, 'BeforeDestruction');
   FTreeView.Clear;
   FTreeView.Free;
-  FZeroMQReceiver := nil;
-  FWinIPCReceiver := nil;
-  FWinODSReceiver := nil;
+  FZeroMQReceiver  := nil;
+  FWinIPCReceiver  := nil;
+  FWinODSReceiver  := nil;
   FComPortReceiver := nil;
-  FManager := nil;
-  FZeroMQ  := nil;
+  FManager         := nil;
+  FZeroMQ          := nil;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}

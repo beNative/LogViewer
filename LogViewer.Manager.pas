@@ -279,7 +279,7 @@ begin
   FreeAndNil(FEvents);
   FReceivers.Clear;
   FReceivers      := nil;
-  FSubscribers      := nil;
+  FSubscribers    := nil;
   FViewList       := nil;
   FSettings       := nil;
   FEditorSettings := nil;

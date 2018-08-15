@@ -87,9 +87,9 @@ implementation
 uses
   System.SysUtils,
 
-  DDuce.Utils.Winapi,
+  DDuce.Utils.Winapi, DDuce.Logger,
 
-  LogViewer.Factories, LogViewer.Subscribers.ZeroMQ;
+  LogViewer.Factories;
 
 {$REGION 'construction and destruction'}
 procedure TChannelReceiver.AfterConstruction;
@@ -100,6 +100,7 @@ end;
 
 procedure TChannelReceiver.BeforeDestruction;
 begin
+  Logger.Track(Self, 'BeforeDestruction');
   FSubscriberList.Clear;
   FSubscriberList := nil;
   inherited BeforeDestruction;

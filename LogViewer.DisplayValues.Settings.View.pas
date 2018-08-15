@@ -111,6 +111,8 @@ begin
   FList.Add(FSettings.CheckPoint);
   FList.Add(FSettings.Counter);
   FList.Add(FSettings.Tracing);
+  FList.Add(FSettings.Enter);
+  FList.Add(FSettings.Leave);
   FList.Add(FSettings.Conditional);
 
   CDS                  := TFactories.CreateColumnDefinitions;

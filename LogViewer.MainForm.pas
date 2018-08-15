@@ -145,7 +145,7 @@ implementation
 uses
   Spring.Utils,
 
-  DDuce.ObjectInspector.zObjectInspector;
+  DDuce.ObjectInspector.zObjectInspector, DDuce.Logger;
 
 {$R *.dfm}
 
@@ -208,6 +208,7 @@ end;
 
 procedure TfrmMain.BeforeDestruction;
 begin
+  Logger.Track(Self, 'BeforeDestruction');
   FSettings.FormSettings.Assign(Self);
   FSettings.Save;
   FSettings.OnChanged.Remove(SettingsChanged);

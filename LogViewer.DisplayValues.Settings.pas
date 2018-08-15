@@ -40,6 +40,8 @@ type
     FCheckPoint  : TTextFormatSettings;
     FCounter     : TTextFormatSettings;
     FTracing     : TTextFormatSettings;
+    FEnter       : TTextFormatSettings;
+    FLeave       : TTextFormatSettings;
     FConditional : TTextFormatSettings;
     FOnChanged   : Event<TNotifyEvent>;
 
@@ -91,6 +93,12 @@ type
     property Tracing: TTextFormatSettings
       read FTracing;
 
+    property Enter: TTextFormatSettings
+      read FEnter;
+
+    property Leave: TTextFormatSettings
+      read FLeave;
+
     property Conditional: TTextFormatSettings
       read FConditional;
   end;
@@ -118,6 +126,8 @@ begin
   FCounter.Free;
   FTracing.Free;
   FConditional.Free;
+  FEnter.Free;
+  FLeave.Free;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
@@ -205,11 +215,25 @@ begin
   FCounter.Font.Color      := clPurple;
   FCounter.OnChanged.Add(FormatSettingsChanged);
 
+  // used when collapsed (TODO)
   FTracing                 := TTextFormatSettings.Create;
   FTracing.Name            := 'Tracing';
-  FTracing.BackgroundColor := clWhite;
+  FTracing.BackgroundColor := clSilver;
   FTracing.OnChanged.Add(FormatSettingsChanged);
 
+  // used when expanded
+  FEnter                   := TTextFormatSettings.Create;
+  FEnter.Font.Color        := clGreen;
+  FEnter.BackgroundColor   := clSilver;
+  FEnter.Name              := 'Enter';
+  FEnter.OnChanged.Add(FormatSettingsChanged);
+
+  // used when expanded
+  FLeave                   := TTextFormatSettings.Create;
+  FLeave.Name              := 'Leave';
+  FLeave.Font.Color        := clRed;
+  FLeave.BackgroundColor   := clSilver;
+  FLeave.OnChanged.Add(FormatSettingsChanged);  
 end;
 {$ENDREGION}
 

@@ -306,16 +306,23 @@ begin
   CD.ValuePropertyName := 'Name';
   CD.HintPropertyName  := CD.ValuePropertyName;
   CD.OnCustomDraw      := FCDNameCustomDraw;
-  CD                   := CDS.Add('ValueType');
-  CD.ValuePropertyName := 'ValueType';
-  CD.HintPropertyName  := CD.ValuePropertyName;
-  CD.OnCustomDraw      := FCDTypeCustomDraw;
+
   CD                   := CDS.Add('Value');
   CD.ValuePropertyName := 'Value';
   CD.HintPropertyName  := CD.ValuePropertyName;
-  CD.AutoSize          := True; // Test
+  CD.MinWidth          := 50;
   CD.OnCustomDraw      := FCDValueCustomDraw;
+
+  CD                   := CDS.Add('ValueType');
+  CD.ValuePropertyName := 'ValueType';
+  CD.HintPropertyName  := CD.ValuePropertyName;
+  CD.Caption           := 'Type';
+  CD.MinWidth          := 0;
+  CD.AutoSize          := True;
+  CD.OnCustomDraw      := FCDTypeCustomDraw;
+
   CD                   := CDS.Add('TimeStamp');
+  CD.MinWidth          := 80;
   CD.Width             := 80;
   CD.ValuePropertyName := 'TimeStamp';
   CD.HintPropertyName  := CD.ValuePropertyName;
@@ -329,11 +336,13 @@ begin
   CD.HintPropertyName  := CD.ValuePropertyName;
   CD.Width             := 50;
   CD.OnCustomDraw      := FCDIdCustomDraw;
+
   CD                   := FWatchHistoryColumnDefinitions.Add('Value');
   CD.ValuePropertyName := 'Value';
   CD.HintPropertyName  := CD.ValuePropertyName;
   CD.AutoSize          := True; // Test
   CD.OnCustomDraw      := FCDValueCustomDraw;
+
   CD                   := FWatchHistoryColumnDefinitions.Add('Timestamp');
   CD.ValuePropertyName := 'TimeStamp';
   CD.HintPropertyName  := CD.ValuePropertyName;

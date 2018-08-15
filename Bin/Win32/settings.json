@@ -1,1 +1,148 @@
-{"FormSettings": {"Left": 288,"Top": 40,"Width": 1689,"Height": 978,"FormStyle": 0,"WindowState": 0},"MessageListSettings": {"AutoScrollMessages": ,"AutoFilterMessages": ,"DynamicAutoSizeColumns": ,"LeftPanelWidth": 341,"RightPanelWidth": 451},"WinODSSettings": {"Enabled": },"WinIPCSettings": {"Enabled": },"ZeroMQSettings": {"Enabled": },"DisplayValueSettings": {"Id": {"BackgroundColor": 0,"FontName": "Tahoma","FontColor": 8421504,"FontSize": 8,"FontStyle": "","WordWrap": ,"HorizontalAlignment": 0,"VerticalAlignment": 0},"Info": {"BackgroundColor": 0,"FontName": "Tahoma","FontColor": 16711680,"FontSize": 8,"FontStyle": "fsBold","WordWrap": ,"HorizontalAlignment": 0,"VerticalAlignment": 0},"Warning": {"BackgroundColor": 0,"FontName": "Tahoma","FontColor": 42495,"FontSize": 8,"FontStyle": "fsBold","WordWrap": ,"HorizontalAlignment": 0,"VerticalAlignment": 0},"Error": {"BackgroundColor": 0,"FontName": "Tahoma","FontColor": 255,"FontSize": 8,"FontStyle": "fsBold","WordWrap": ,"HorizontalAlignment": 0,"VerticalAlignment": 0},"TimeStamp": {"BackgroundColor": 0,"FontName": "Tahoma","FontColor": 16711680,"FontSize": 8,"FontStyle": "","WordWrap": ,"HorizontalAlignment": 0,"VerticalAlignment": 0},"ValueName": {"BackgroundColor": 0,"FontName": "Tahoma","FontColor": 128,"FontSize": 8,"FontStyle": "fsUnderline","WordWrap": ,"HorizontalAlignment": 0,"VerticalAlignment": 0},"ValueType": {"BackgroundColor": 0,"FontName": "Tahoma","FontColor": 8388608,"FontSize": 8,"FontStyle": "","WordWrap": ,"HorizontalAlignment": 0,"VerticalAlignment": 0},"Value": {"BackgroundColor": 0,"FontName": "Tahoma","FontColor": 0,"FontSize": 8,"FontStyle": "","WordWrap": ,"HorizontalAlignment": 0,"VerticalAlignment": 0},"CheckPoint": {"BackgroundColor": 0,"FontName": "Tahoma","FontColor": 32768,"FontSize": 8,"FontStyle": "","WordWrap": ,"HorizontalAlignment": 0,"VerticalAlignment": 0},"Counter": {"BackgroundColor": 0,"FontName": "Tahoma","FontColor": 8388736,"FontSize": 8,"FontStyle": "","WordWrap": ,"HorizontalAlignment": 0,"VerticalAlignment": 0},"Tracing": {"BackgroundColor": 16777215,"FontName": "Tahoma","FontColor": -16777208,"FontSize": 8,"FontStyle": "","WordWrap": ,"HorizontalAlignment": 0,"VerticalAlignment": 0},"Conditional": {"BackgroundColor": 0,"FontName": "Tahoma","FontColor": 8421376,"FontSize": 8,"FontStyle": "","WordWrap": ,"HorizontalAlignment": 0,"VerticalAlignment": 0}}}
+{
+	"FormSettings": {
+		"Left": 423,
+		"Top": 102,
+		"Width": 1851,
+		"Height": 905,
+		"FormStyle": 0,
+		"WindowState": 0
+	},
+	"MessageListSettings": {
+		"AutoScrollMessages": true,
+		"AutoFilterMessages": false,
+		"DynamicAutoSizeColumns": false,
+		"LeftPanelWidth": 340,
+		"RightPanelWidth": 410
+	},
+	"WinODSSettings": {
+		"Enabled": false
+	},
+	"WinIPCSettings": {
+		"Enabled": false
+	},
+	"ZeroMQSettings": {
+		"Enabled": false
+	},
+	"DisplayValueSettings": {
+		"Id": {
+			"BackgroundColor": 0,
+			"FontName": "Tahoma",
+			"FontColor": 8421504,
+			"FontSize": 8,
+			"FontStyle": "",
+			"WordWrap": false,
+			"HorizontalAlignment": 0,
+			"VerticalAlignment": 0
+		},
+		"Info": {
+			"BackgroundColor": 0,
+			"FontName": "Tahoma",
+			"FontColor": 16711680,
+			"FontSize": 8,
+			"FontStyle": "fsBold",
+			"WordWrap": false,
+			"HorizontalAlignment": 0,
+			"VerticalAlignment": 0
+		},
+		"Warning": {
+			"BackgroundColor": 0,
+			"FontName": "Tahoma",
+			"FontColor": 42495,
+			"FontSize": 8,
+			"FontStyle": "fsBold",
+			"WordWrap": false,
+			"HorizontalAlignment": 0,
+			"VerticalAlignment": 0
+		},
+		"Error": {
+			"BackgroundColor": 0,
+			"FontName": "Tahoma",
+			"FontColor": 255,
+			"FontSize": 8,
+			"FontStyle": "fsBold",
+			"WordWrap": false,
+			"HorizontalAlignment": 0,
+			"VerticalAlignment": 0
+		},
+		"TimeStamp": {
+			"BackgroundColor": 0,
+			"FontName": "Tahoma",
+			"FontColor": 16711680,
+			"FontSize": 8,
+			"FontStyle": "",
+			"WordWrap": false,
+			"HorizontalAlignment": 0,
+			"VerticalAlignment": 0
+		},
+		"ValueName": {
+			"BackgroundColor": 0,
+			"FontName": "Tahoma",
+			"FontColor": 128,
+			"FontSize": 8,
+			"FontStyle": "fsUnderline",
+			"WordWrap": false,
+			"HorizontalAlignment": 0,
+			"VerticalAlignment": 0
+		},
+		"ValueType": {
+			"BackgroundColor": 0,
+			"FontName": "Tahoma",
+			"FontColor": 8388608,
+			"FontSize": 8,
+			"FontStyle": "",
+			"WordWrap": false,
+			"HorizontalAlignment": 0,
+			"VerticalAlignment": 0
+		},
+		"Value": {
+			"BackgroundColor": 0,
+			"FontName": "Tahoma",
+			"FontColor": 0,
+			"FontSize": 8,
+			"FontStyle": "",
+			"WordWrap": false,
+			"HorizontalAlignment": 0,
+			"VerticalAlignment": 0
+		},
+		"CheckPoint": {
+			"BackgroundColor": 0,
+			"FontName": "Tahoma",
+			"FontColor": 32768,
+			"FontSize": 8,
+			"FontStyle": "",
+			"WordWrap": false,
+			"HorizontalAlignment": 0,
+			"VerticalAlignment": 0
+		},
+		"Counter": {
+			"BackgroundColor": 0,
+			"FontName": "Tahoma",
+			"FontColor": 8388736,
+			"FontSize": 8,
+			"FontStyle": "",
+			"WordWrap": false,
+			"HorizontalAlignment": 0,
+			"VerticalAlignment": 0
+		},
+		"Tracing": {
+			"BackgroundColor": 16777215,
+			"FontName": "Tahoma",
+			"FontColor": -16777208,
+			"FontSize": 8,
+			"FontStyle": "",
+			"WordWrap": false,
+			"HorizontalAlignment": 0,
+			"VerticalAlignment": 0
+		},
+		"Conditional": {
+			"BackgroundColor": 0,
+			"FontName": "Tahoma",
+			"FontColor": 8421376,
+			"FontSize": 8,
+			"FontStyle": "",
+			"WordWrap": false,
+			"HorizontalAlignment": 0,
+			"VerticalAlignment": 0
+		}
+	}
+}

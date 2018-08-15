@@ -71,8 +71,6 @@ begin
   Logger.Clear;
   Logger.Info('LogViewer Started.');
   Application.Run;
-
-
 end.
 
 
