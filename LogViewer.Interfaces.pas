@@ -158,6 +158,7 @@ type
     {$REGION 'property access methods'}
     function GetSubscriber: ISubscriber;
     function GetForm: TCustomForm;
+    function GetIsActiveView: Boolean;
     {$ENDREGION}
 
     procedure Clear;
@@ -166,6 +167,9 @@ type
     procedure GotoLast;
     procedure CollapseAll;
     procedure ExpandAll;
+
+    property IsActiveView: Boolean
+      read GetIsActiveView;
 
     property Subscriber: ISubscriber
       read GetSubscriber;

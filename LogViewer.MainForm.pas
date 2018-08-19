@@ -286,6 +286,11 @@ procedure TfrmMain.ctMainButtonCloseTabClick(Sender: TObject; ATab: TChromeTab;
   var Close: Boolean);
 begin
   Close := ATab.DisplayName <> 'Dashboard';
+  if Close then
+  begin
+    Manager.Views.Delete(Manager.Views.IndexOf(ILogViewer(ATab.Data)));
+    UpdateTabs;
+  end;
 end;
 
 procedure TfrmMain.ctMainNeedDragImageControl(Sender: TObject; ATab: TChromeTab;
@@ -446,20 +451,26 @@ var
   MV : ILogViewer;
   CT : TChromeTab;
 begin
-  if Manager.Views.Count = 1 then
-  begin
-    ctMain.Visible := False;
-  end
-  else
-  begin
-    ctMain.BeginUpdate;
+  Logger.Track('TfrmMain.UpdateTabs');
+  ctMain.BeginUpdate;
+  try
     ctMain.Tabs.Clear;
-    for MV in Manager.Views do
+    ctMain.Tabs.Add;
+    ctMain.ActiveTab.Data        := Pointer(FDashboard);
+    ctMain.ActiveTab.Caption     := 'Dashboard';
+    ctMain.ActiveTab.DisplayName := 'Dashboard';
+    ctMain.ActiveTab.Pinned      := True;
+
+    if Manager.Views.Count > 0 then
     begin
-      CT := ctMain.Tabs.Add;
-      CT.Data := Pointer(MV);
+      for MV in Manager.Views do
+      begin
+        CT := ctMain.Tabs.Add;
+        CT.Data := Pointer(MV);
+      end;
+      ctMain.Visible := True;
     end;
-    ctMain.Visible := True;
+  finally
     ctMain.EndUpdate;
   end;
 end;

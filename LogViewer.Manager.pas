@@ -85,6 +85,7 @@ type
     actDataSet: TAction;
     actAction: TAction;
     actCounter: TAction;
+    actText: TAction;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -128,6 +129,7 @@ type
     procedure actActionExecute(Sender: TObject);
     procedure actDataSetExecute(Sender: TObject);
     procedure actCounterExecute(Sender: TObject);
+    procedure actTextExecute(Sender: TObject);
     {$ENDREGION}
 
   private
@@ -484,6 +486,11 @@ begin
   UpdateVisibleMessageTypes(lmtStrings, Sender);
 end;
 
+procedure TdmManager.actTextExecute(Sender: TObject);
+begin
+  UpdateVisibleMessageTypes(lmtText, Sender);
+end;
+
 procedure TdmManager.actToggleAlwaysOnTopExecute(Sender: TObject);
 var
   A : TAction;
@@ -721,6 +728,7 @@ begin
   AddMenuItem(MI, actBitmap);
   AddMenuItem(MI, actStrings);
   AddMenuItem(MI, actDataSet);
+  AddMenuItem(MI, actText);
   AddMenuItem(MI, actCustomData);
   AddMenuItem(MI);
   AddMenuItem(MI, actMethodTraces);

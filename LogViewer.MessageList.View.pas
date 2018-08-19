@@ -146,6 +146,7 @@ type
     function GetForm: TCustomForm;
     function GetSettings: TMessageListSettings;
     function GetDisplayValuesSettings: TDisplayValuesSettings;
+    function GetIsActiveView: Boolean;
     {$ENDREGION}
 
     procedure FSettingsChanged(Sender: TObject);
@@ -293,6 +294,9 @@ type
     procedure GotoFirst;
     procedure GotoLast;
 
+    property IsActiveView: Boolean
+      read GetIsActiveView;
+
     property Manager: ILogViewerManager
       read GetManager;
 
@@ -321,6 +325,7 @@ type
 
     procedure BeforeDestruction; override;
     procedure AfterConstruction; override;
+    procedure EnsureIsActiveViewIfFocused;
 
   end;
 
@@ -522,6 +527,12 @@ begin
   Result := Self;
 end;
 
+function TfrmMessageList.GetIsActiveView: Boolean;
+begin
+  Result := Assigned(Manager.ActiveView)
+    and (Manager.ActiveView = (Self as ILogViewer));
+end;
+
 function TfrmMessageList.GetManager: ILogViewerManager;
 begin
   Result := FManager;
@@ -575,7 +586,9 @@ end;
 
 procedure TfrmMessageList.FLogTreeViewClick(Sender: TObject);
 begin
-  AutoFitColumns;
+  FUpdate := True;
+  FAutoSizeColumns := False;
+//  AutoFitColumns;
 end;
 
 procedure TfrmMessageList.FLogTreeViewBeforeCellPaint(Sender: TBaseVirtualTree;
@@ -1058,16 +1071,16 @@ begin
   edtValueType.Alignment := DisplayValuesSettings.ValueType.HorizontalAlignment;
   DisplayValuesSettings.Value.AssignTo(edtValue.Font);
   edtValue.Alignment := DisplayValuesSettings.Value.HorizontalAlignment;
-  UpdateView;
+  FUpdate := True;
 end;
 
 procedure TfrmMessageList.AutoFitColumns;
 begin
   Logger.Track(Self, 'AutoFitColumns');
-  FLogTreeView.BeginUpdate;
+  //FLogTreeView.BeginUpdate;
   FLogTreeView.Header.AutoFitColumns(False, smaAllColumns, 1, 2);
   FAutoSizeColumns := True;
-  FLogTreeView.EndUpdate;
+  //FLogTreeView.EndUpdate;
 end;
 
 procedure TfrmMessageList.Activate;
@@ -1113,7 +1126,11 @@ begin
     begin
       FLogTreeView.Expanded[FLastParent] := True;
     end;
-    FAutoSizeColumns := False;
+    if AutoScroll then
+      FAutoSizeColumns := False
+    else
+     FAutoSizeColumns := True;
+
   finally
     FLogTreeView.EndUpdate;
   end;
@@ -1153,11 +1170,33 @@ end;
 procedure TfrmMessageList.CollapseAll;
 begin
   FLogTreeView.FullCollapse;
+  FUpdate := True;
+  FAutoSizeColumns := False;
 end;
 
 procedure TfrmMessageList.ExpandAll;
 begin
   FLogTreeView.FullExpand;
+  FUpdate := True;
+  FAutoSizeColumns := False;
+end;
+
+{ Makes sure the active view is the current view when it is focused. }
+
+procedure TfrmMessageList.EnsureIsActiveViewIfFocused;
+var
+  B : Boolean;
+begin
+  B := Focused;
+  if not B and Assigned(Parent) then
+  begin
+    if Parent.Focused then
+      B := True;
+  end;
+  if B then
+  begin
+    Activate;
+  end;
 end;
 
 procedure TfrmMessageList.GotoFirst;
@@ -1170,6 +1209,8 @@ begin
   begin
     FLogTreeView.FocusedNode := FLogTreeView.GetFirst;
     FLogTreeView.Selected[FLogTreeView.FocusedNode] := True;
+    FUpdate := True;
+    FAutoSizeColumns := False;
   end;
 end;
 
@@ -1183,6 +1224,8 @@ begin
   begin
     FLogTreeView.FocusedNode := FLogTreeView.GetLast;
     FLogTreeView.Selected[FLogTreeView.FocusedNode] := True;
+    FUpdate := True;
+    FAutoSizeColumns := False;
   end;
 end;
 
@@ -1297,30 +1340,17 @@ begin
 end;
 
 procedure TfrmMessageList.UpdateActions;
-var
-  B : Boolean;
 begin
-  if FUpdate then
+  EnsureIsActiveViewIfFocused;
+  if IsActiveView and FUpdate then
   begin
-    B := Focused;
-    if not B and Assigned(Parent) then
-    begin
-      if Parent.Focused then
-        B := True;
-    end;
-    if B then
-    begin
-      Activate;
-    end;
     UpdateLogTreeView;
     if Assigned(Actions) then
+    begin
       Actions.UpdateActions;
-
-    if Settings.DynamicAutoSizeColumns and not FAutoSizeColumns then
-      AutoFitColumns;
+    end;
     FUpdate := False;
   end;
-
   inherited UpdateActions;
 end;
 
@@ -1490,7 +1520,9 @@ begin
   FLogTreeView.BeginUpdate;
   try
     FLogTreeView.IterateSubtree(nil, FLogTreeViewFilterCallback, nil);
-    AutoFitColumns;
+    //if Settings.DynamicAutoSizeColumns (*and not FAutoSizeColumns*) then
+    if not FAutoSizeColumns then
+      AutoFitColumns;
   finally
     FLogTreeView.EndUpdate;
   end;
@@ -1527,9 +1559,12 @@ begin
   end;
 end;
 
+{ Force an update of the view display. }
+
 procedure TfrmMessageList.UpdateView;
 begin
   FUpdate := True;
+  FAutoSizeColumns := False;
 end;
 {$ENDREGION}
 end.
