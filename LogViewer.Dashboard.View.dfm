@@ -1,7 +1,7 @@
 object frmDashboard: TfrmDashboard
   Left = 0
   Top = 0
-  ClientHeight = 557
+  ClientHeight = 686
   ClientWidth = 829
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -16,50 +16,56 @@ object frmDashboard: TfrmDashboard
     Left = 0
     Top = 30
     Width = 829
-    Height = 527
+    Height = 656
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitHeight = 527
     object splVertical: TSplitter
-      Left = 513
+      Left = 309
       Top = 0
       Width = 7
-      Height = 527
-      Align = alRight
+      Height = 656
       ExplicitLeft = -6
       ExplicitHeight = 525
+    end
+    object pnlRight: TPanel
+      Left = 316
+      Top = 0
+      Width = 513
+      Height = 656
+      Align = alClient
+      BevelOuter = bvNone
+      TabOrder = 0
+      ExplicitLeft = 308
+      ExplicitTop = 6
+      ExplicitHeight = 527
     end
     object pnlLeft: TPanel
       Left = 0
       Top = 0
-      Width = 513
-      Height = 527
-      Align = alClient
-      BevelOuter = bvNone
-      TabOrder = 0
-    end
-    object pnlRight: TPanel
-      Left = 520
-      Top = 0
       Width = 309
-      Height = 527
+      Height = 656
       Margins.Left = 0
       Margins.Top = 0
       Margins.Right = 0
       Margins.Bottom = 0
-      Align = alRight
+      Align = alLeft
       BevelOuter = bvNone
       TabOrder = 1
+      ExplicitLeft = 520
+      ExplicitHeight = 527
       object pgcMain: TPageControl
         Left = 0
         Top = 0
         Width = 309
-        Height = 527
-        ActivePage = tsWinIPC
+        Height = 656
+        ActivePage = tsZeroMQ
         Align = alClient
         MultiLine = True
         Style = tsFlatButtons
         TabOrder = 0
+        ExplicitHeight = 527
         object tsWinIPC: TTabSheet
           Margins.Left = 0
           Margins.Top = 0
@@ -67,9 +73,10 @@ object frmDashboard: TfrmDashboard
           Margins.Bottom = 0
           Caption = 'WinIPC'
           ImageIndex = 28
+          ExplicitHeight = 496
           object chkAutoSubscribeWinIPC: TCheckBox
-            Left = 3
-            Top = 3
+            Left = 0
+            Top = 43
             Width = 282
             Height = 17
             Caption = 'Auto subscribe to source when messages are detected.'
@@ -77,36 +84,66 @@ object frmDashboard: TfrmDashboard
             State = cbChecked
             TabOrder = 0
           end
+          object pnlWinIPCTitle: TPanel
+            Left = 0
+            Top = 0
+            Width = 301
+            Height = 25
+            Align = alTop
+            BevelOuter = bvNone
+            Caption = 'Windows IPC'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clGray
+            Font.Height = -16
+            Font.Name = 'Segoe UI'
+            Font.Style = []
+            ParentBackground = False
+            ParentFont = False
+            TabOrder = 1
+            ExplicitTop = 8
+          end
         end
         object tsWinODS: TTabSheet
           Caption = 'WinODS'
           ImageIndex = 28
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
+          ExplicitHeight = 496
           object chkAutoSubscribeWinODS: TCheckBox
-            Left = 3
-            Top = 3
+            Left = 1
+            Top = 51
             Width = 282
             Height = 17
             Caption = 'Auto subscribe to source when messages are detected.'
             TabOrder = 0
           end
+          object pnlWinODSTitle: TPanel
+            Left = 0
+            Top = 0
+            Width = 301
+            Height = 25
+            Align = alTop
+            BevelOuter = bvNone
+            Caption = 'Windows OuputDebugString '
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clGray
+            Font.Height = -16
+            Font.Name = 'Segoe UI'
+            Font.Style = []
+            ParentBackground = False
+            ParentFont = False
+            TabOrder = 1
+            ExplicitTop = 8
+          end
         end
         object tsZeroMQ: TTabSheet
           Caption = 'ZeroMQ'
           ImageIndex = 6
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
+          ExplicitHeight = 496
           DesignSize = (
             301
-            496)
+            625)
           object edtAddress: TLabeledEdit
-            Left = 48
-            Top = 3
+            Left = 52
+            Top = 31
             Width = 121
             Height = 21
             Alignment = taCenter
@@ -124,8 +161,8 @@ object frmDashboard: TfrmDashboard
             OnExit = edtAddressExit
           end
           object edtPort: TLabeledEdit
-            Left = 48
-            Top = 30
+            Left = 52
+            Top = 58
             Width = 121
             Height = 21
             Alignment = taCenter
@@ -143,34 +180,34 @@ object frmDashboard: TfrmDashboard
             TabOrder = 1
           end
           object btnAddZeroMQNode: TButton
-            Left = 175
-            Top = 3
+            Left = 179
+            Top = 31
             Width = 119
             Height = 48
             Action = actAddZeroMQNode
             TabOrder = 2
           end
           object btnAddZMQNodeLocalHost: TButton
-            Left = 48
-            Top = 57
+            Left = 52
+            Top = 85
             Width = 246
             Height = 25
             Action = actAddZMQNodeLocalHost
             TabOrder = 3
           end
           object btnAddZMQNodeForLogViewer: TButton
-            Left = 48
-            Top = 85
+            Left = 52
+            Top = 113
             Width = 246
             Height = 25
             Action = actAddZMQNodeForLogViewer
             TabOrder = 4
           end
           object mmoZMQEndPoints: TMemo
-            Left = 48
-            Top = 144
+            Left = 52
+            Top = 172
             Width = 246
-            Height = 352
+            Height = 453
             Anchors = [akLeft, akTop, akRight, akBottom]
             BevelInner = bvNone
             BevelKind = bkFlat
@@ -178,21 +215,54 @@ object frmDashboard: TfrmDashboard
             TabOrder = 5
           end
           object btnSubscribeToList: TButton
-            Left = 48
-            Top = 113
+            Left = 52
+            Top = 141
             Width = 246
             Height = 25
             Action = actSubscribeToList
             TabOrder = 6
           end
+          object pnlZeroMQTitle: TPanel
+            Left = 0
+            Top = 0
+            Width = 301
+            Height = 25
+            Align = alTop
+            BevelOuter = bvNone
+            Caption = 'ZeroMQ'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clGray
+            Font.Height = -16
+            Font.Name = 'Segoe UI'
+            Font.Style = []
+            ParentBackground = False
+            ParentFont = False
+            TabOrder = 7
+            ExplicitTop = 8
+          end
         end
         object tsCOMPort: TTabSheet
           Caption = 'COMPort'
           ImageIndex = 24
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
+          ExplicitHeight = 496
+          object pnlCOMPortTitle: TPanel
+            Left = 0
+            Top = 0
+            Width = 301
+            Height = 25
+            Align = alTop
+            BevelOuter = bvNone
+            Caption = 'COM port'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clGray
+            Font.Height = -16
+            Font.Name = 'Segoe UI'
+            Font.Style = []
+            ParentBackground = False
+            ParentFont = False
+            TabOrder = 0
+            ExplicitTop = 8
+          end
         end
       end
     end
@@ -243,7 +313,7 @@ object frmDashboard: TfrmDashboard
     Left = 408
     Top = 288
     Bitmap = {
-      494C010103000500080010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101030005000C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000C0D0C4F777C7AF01D1E1D770000000000000005151515660808

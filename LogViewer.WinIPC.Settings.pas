@@ -16,6 +16,8 @@
 
 unit LogViewer.WinIPC.Settings;
 
+{ Persistable settings for WinIPC receivers. }
+
 interface
 
 uses

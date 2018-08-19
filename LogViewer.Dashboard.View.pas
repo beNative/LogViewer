@@ -56,9 +56,9 @@ type
     edtAddress                : TLabeledEdit;
     edtPort                   : TLabeledEdit;
     pgcMain                   : TPageControl;
-    pnlLeft                   : TPanel;
+    pnlRight: TPanel;
     pnlLogChannels            : TPanel;
-    pnlRight                  : TPanel;
+    pnlLeft: TPanel;
     pnlTop                    : TPanel;
     splVertical               : TSplitter;
     tsCOMPort                 : TTabSheet;
@@ -73,6 +73,10 @@ type
     btnSubscribeToList: TButton;
     chkAutoSubscribeWinIPC: TCheckBox;
     chkAutoSubscribeWinODS: TCheckBox;
+    pnlWinIPCTitle: TPanel;
+    pnlWinODSTitle: TPanel;
+    pnlZeroMQTitle: TPanel;
+    pnlCOMPortTitle: TPanel;
     {$ENDREGION}
 
     procedure actAddZeroMQNodeExecute(Sender: TObject);
@@ -186,7 +190,7 @@ end;
 procedure TfrmDashboard.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FTreeView := TVirtualStringTreeFactory.CreateTreeList(Self, pnlLeft);
+  FTreeView := TVirtualStringTreeFactory.CreateTreeList(Self, pnlRight);
   FTreeView.AlignWithMargins := False;
   InitializeTreeView;
   InitializeControls;

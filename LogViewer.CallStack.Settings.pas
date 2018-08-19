@@ -16,6 +16,8 @@
 
 unit LogViewer.CallStack.Settings;
 
+{ Persistable settings for callstack display. }
+
 interface
 
 uses

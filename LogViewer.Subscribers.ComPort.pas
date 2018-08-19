@@ -16,6 +16,8 @@
 
 unit LogViewer.Subscribers.ComPort;
 
+{ ComPort subscriber data. }
+
 interface
 
 uses

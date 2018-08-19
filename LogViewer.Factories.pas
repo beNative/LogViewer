@@ -16,6 +16,11 @@
 
 unit LogViewer.Factories;
 
+{ Factories for main application modules. }
+
+interface
+
+{$REGION 'documentation'}
 { Factories for all modules used in the application:
     - Callstack view
     - Watches view
@@ -23,8 +28,7 @@ unit LogViewer.Factories;
     - Manager instance
     - Settings
 }
-
-interface
+{$ENDREGION}
 
 uses
   System.Classes,

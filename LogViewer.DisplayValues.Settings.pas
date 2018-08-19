@@ -16,6 +16,8 @@
 
 unit LogViewer.DisplayValues.Settings;
 
+{ Persistable settings for display values. }
+
 interface
 
 uses
@@ -43,6 +45,7 @@ type
     FEnter       : TTextFormatSettings;
     FLeave       : TTextFormatSettings;
     FConditional : TTextFormatSettings;
+    FAction      : TTextFormatSettings;
     FOnChanged   : Event<TNotifyEvent>;
 
     function GetOnChanged: IEvent<TNotifyEvent>;
@@ -101,6 +104,9 @@ type
 
     property Conditional: TTextFormatSettings
       read FConditional;
+
+    property Action: TTextFormatSettings
+      read FAction;
   end;
 
 implementation
@@ -126,6 +132,7 @@ begin
   FCounter.Free;
   FTracing.Free;
   FConditional.Free;
+  FAction.Free;
   FEnter.Free;
   FLeave.Free;
   inherited BeforeDestruction;
@@ -214,6 +221,11 @@ begin
   FCounter.Name            := 'Counter';
   FCounter.Font.Color      := clPurple;
   FCounter.OnChanged.Add(FormatSettingsChanged);
+
+  FAction                 := TTextFormatSettings.Create;
+  FAction.Name            := 'Action';
+  FAction.Font.Color      := clMaroon;
+  FAction.OnChanged.Add(FormatSettingsChanged);
 
   // used when collapsed (TODO)
   FTracing                 := TTextFormatSettings.Create;

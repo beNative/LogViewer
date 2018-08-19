@@ -16,8 +16,11 @@
 
 unit LogViewer.Receivers.ZeroMQ;
 
+{ ZeroMQ channel receiver. }
+
 interface
 
+{$REGION 'documentation'}
 { Receives logmessages from one or more ZMQ publisher through a subscriber
   socket.
 
@@ -29,9 +32,16 @@ interface
   Multiple subscribers (TZeroMQChannelReceiver instances) can connect to the
   same publisher.
 
+  REMARKS:
+    - communication with ZeroMQ sockets is asynchronious. So the source
+      application is never blocked as all messages are queued.
+    - when the receiver cannot keep up with the publisher, messages are thrown
+      away by the ZeroMQ subscriber.
+
   TODO:
     - list of connectionstrings to subscribe to?
 }
+{$ENDREGION}
 
 uses
   System.Classes,

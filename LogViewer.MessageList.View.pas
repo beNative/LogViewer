@@ -16,15 +16,9 @@
 
 unit LogViewer.MessageList.View;
 
+{ Log message viewer. }
+
 interface
-
-{ Message viewer responsible for displaying all messages from an associated
-  log channel (IChannelReceiver receiver instance) }
-
-{
-  TODO:
-    - auto show message details, watches window and callstack (WinODS)
-}
 
 uses
   Winapi.Windows, Winapi.Messages,
@@ -47,6 +41,16 @@ uses
   LogViewer.Interfaces, LogViewer.CallStack.Data, LogViewer.CallStack.View,
   LogViewer.MessageList.Settings, LogViewer.MessageList.LogNode,
   LogViewer.DisplayValues.Settings;
+
+{$REGION 'documentation'}
+{ Message viewer responsible for displaying all messages from an associated
+  log channel (IChannelReceiver receiver instance) }
+
+{
+  TODO:
+    - auto show message details, watches window and callstack (WinODS)
+}
+{$ENDREGION}
 
 type
   TfrmMessageList = class(TForm, ILogViewer)
@@ -109,7 +113,6 @@ type
       Shift   : TShiftState
     );
     procedure chkAutoFilterClick(Sender: TObject);
-    procedure pnlMessagesClick(Sender: TObject);
 
   private class var
     FCounter : Integer;
@@ -674,6 +677,10 @@ begin
     begin
       ImageIndex := 20;
     end
+    else if ND.MessageType = lmtAction then
+    begin
+      ImageIndex := 21;
+    end
     else if ND.MessageType = lmtText then
     begin
       ImageIndex := 8;
@@ -720,6 +727,8 @@ begin
         CellText := SScreenShot;
       lmtText:
         CellText := SText;
+      lmtAction:
+        CellText := SAction;
       else
         CellText := LN.Text
     end;
@@ -798,7 +807,11 @@ begin
     begin
       LN.ValueName := FCurrentMsg.Text;
       LN.ValueType := 'TDataSet';
-
+    end;
+    lmtAction:
+    begin
+      LN.ValueName := FCurrentMsg.Text;
+      LN.ValueType := 'TAction';
     end;
     lmtBitmap, lmtScreenShot:
     begin
@@ -919,6 +932,10 @@ begin
       lmtCheckpoint:
       begin
         DVS.CheckPoint.AssignTo(TargetCanvas.Font);
+      end;
+      lmtAction:
+      begin
+        DVS.Action.AssignTo(TargetCanvas.Font);
       end;
     end;
   end
@@ -1047,12 +1064,10 @@ end;
 procedure TfrmMessageList.AutoFitColumns;
 begin
   Logger.Track(Self, 'AutoFitColumns');
-//  FLogTreeView.BeginUpdate;
-  //FLogTreeView.Header.AutoFitColumns(False, smaUseColumnOption, -1, -1);
-  //FLogTreeView.Header.AutoFitColumns(False, smaUseColumnOption, 1, 2);
+  FLogTreeView.BeginUpdate;
   FLogTreeView.Header.AutoFitColumns(False, smaAllColumns, 1, 2);
   FAutoSizeColumns := True;
-  //FLogTreeView.EndUpdate;
+  FLogTreeView.EndUpdate;
 end;
 
 procedure TfrmMessageList.Activate;
@@ -1171,11 +1186,6 @@ begin
   end;
 end;
 
-procedure TfrmMessageList.pnlMessagesClick(Sender: TObject);
-begin
-
-end;
-
 { Reads the received message stream from the active logchannel . }
 
 {
@@ -1276,15 +1286,14 @@ begin
     else
     begin
       AddMessageToTree(FCurrentMsg);
+      if Settings.AutoScrollMessages then
+      begin
+        FLogTreeView.FocusedNode := FLogTreeView.GetLast;
+        FLogTreeView.Selected[FLogTreeView.FocusedNode] := True;
+      end;
+      FUpdate := True;
     end;
   end; // case
-
-  if Settings.AutoScrollMessages then
-  begin
-    FLogTreeView.FocusedNode := FLogTreeView.GetLast;
-    FLogTreeView.Selected[FLogTreeView.FocusedNode] := True;
-  end;
-  FUpdate := True;
 end;
 
 procedure TfrmMessageList.UpdateActions;

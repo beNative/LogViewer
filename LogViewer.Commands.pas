@@ -16,8 +16,7 @@
 
 unit LogViewer.Commands;
 
-{ Handles execution of user commands on the active view. Typically these
-  commands are called from actions. }
+{ Handles execution of user commands on the active view (called from actions). }
 
 interface
 

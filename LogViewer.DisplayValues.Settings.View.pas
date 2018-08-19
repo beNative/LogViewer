@@ -16,6 +16,8 @@
 
 unit LogViewer.DisplayValues.Settings.View;
 
+{ Settings view for display values configuration. }
+
 interface
 
 uses

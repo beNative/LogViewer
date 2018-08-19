@@ -16,6 +16,8 @@
 
 unit LogViewer.Subscribers.Base;
 
+{ Base class for subscribers implementing ISubscriber. }
+
 interface
 
 uses

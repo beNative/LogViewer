@@ -16,7 +16,7 @@
 
 unit LogViewer.Watches.View;
 
-{ View showing watch values and value history. }
+{ View displaying watch values and value history as a master-detail. }
 
 interface
 
@@ -55,6 +55,7 @@ type
 
     function GetSelectedWatch: TWatch;
 
+    {$REGION 'event handlers'}
     procedure FWatchesUpdateWatch(const AName, AValue: string);
     procedure FWatchesNewWatch(const AName: string; AId: Int64);
     procedure FTVPWatchValuesSelectionChanged(Sender: TObject);
@@ -113,6 +114,7 @@ type
       DrawMode        : TDrawMode;
       Selected        : Boolean
     ): Boolean;
+    {$ENDREGION}
 
     procedure ConnectWatchHistoryCDEvents;
     procedure ConnectWatchValuesCDEvents;

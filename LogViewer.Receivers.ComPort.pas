@@ -16,14 +16,7 @@
 
 unit LogViewer.Receivers.ComPort;
 
-{ Receives data from a serial port. The data is queued as a TLogMessage
-  compatible stream.
-
-  For now the serial data is handled as:
-    - a watch message if the text has a format like '%s=%s' (name-value pair
-      with '=' as delimiter)
-    - a text message otherwise
-}
+{ COM port channel receiver. }
 
 interface
 
@@ -36,6 +29,17 @@ uses
   synaser,
 
   LogViewer.Interfaces, LogViewer.Receivers.Base, LogViewer.ComPort.Settings;
+
+{$REGION 'documentation'}
+{ Receives data from a serial port. The data is queued as a TLogMessage
+  compatible stream.
+
+  For now the serial data is handled as:
+    - a watch message if the text has a format like '%s=%s' (name-value pair
+      with '=' as delimiter)
+    - a text message otherwise
+}
+{$ENDREGION}
 
 type
   TComPortChannelReceiver = class(TChannelReceiver, IChannelReceiver)

@@ -16,12 +16,16 @@
 
 unit LogViewer.Settings.Dialog.ConfigNode;
 
+{ Node datastructure used in the settings dialog. }
+
 interface
 
+{$REGION 'documentation'}
 {
   See this topic for more information:
   https://stackoverflow.com/questions/5365365/tree-like-datastructure-for-use-with-virtualtreeview
 }
+{$ENDREGION}
 
 uses
   Vcl.ComCtrls,

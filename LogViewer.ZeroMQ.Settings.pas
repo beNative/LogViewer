@@ -16,6 +16,8 @@
 
 unit LogViewer.ZeroMQ.Settings;
 
+{ Persistable settings for ZeroMQ receivers. }
+
 interface
 
 uses

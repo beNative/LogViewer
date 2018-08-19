@@ -16,6 +16,8 @@
 
 unit LogViewer.WinODS.Settings;
 
+{ Persistable settings for WinODS receivers. }
+
 interface
 
 uses

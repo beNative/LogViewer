@@ -16,6 +16,8 @@
 
 unit LogViewer.Subscribers.WinIPC;
 
+{ WinIPC subscriber data. }
+
 interface
 
 uses

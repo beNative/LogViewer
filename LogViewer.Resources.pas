@@ -16,6 +16,8 @@
 
 unit LogViewer.Resources;
 
+{ Application constants and resource strings. }
+
 interface
 
 uses
@@ -84,6 +86,7 @@ resourcestring
   SDataSet     = 'DataSet';
   SScreenShot  = 'ScreenShot';
   SText        = 'Text';
+  SAction      = 'Action';
 
 const
   ALL_MESSAGES = [
@@ -112,7 +115,8 @@ const
     lmtCounter,
     lmtText,
     lmtScreenShot,
-    lmtDataSet
+    lmtDataSet,
+    lmtAction
   ];
 
   // message viewer
@@ -127,7 +131,7 @@ const
     logtree. }
   MAX_TEXTLENGTH_VALUECOLUMN = 80;
 
-  LOGVIEWER_ZMQ_PORT : Integer = 42134;
+  LOGVIEWER_ZMQ_PORT : Integer = 42134; // port used for internal debugging
 
 implementation
 

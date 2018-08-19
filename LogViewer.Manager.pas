@@ -16,9 +16,9 @@
 
 unit LogViewer.Manager;
 
-interface
-
 { Manages all application modules. }
+
+interface
 
 uses
   System.SysUtils, System.Classes, System.Actions, System.ImageList,
@@ -82,6 +82,9 @@ type
     imlMain               : TImageList;
     ppmLogTreeViewer      : TPopupMenu;
     ppmMessageTypes       : TPopupMenu;
+    actDataSet: TAction;
+    actAction: TAction;
+    actCounter: TAction;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -121,6 +124,10 @@ type
     procedure actPersistentExecute(Sender: TObject);
     procedure actInterfaceExecute(Sender: TObject);
     procedure actAboutExecute(Sender: TObject);
+    procedure aclMainExecute(Action: TBasicAction; var Handled: Boolean);
+    procedure actActionExecute(Sender: TObject);
+    procedure actDataSetExecute(Sender: TObject);
+    procedure actCounterExecute(Sender: TObject);
     {$ENDREGION}
 
   private
@@ -250,9 +257,10 @@ implementation
 uses
   Vcl.Forms,
 
-  DDuce.Editor.Factories, DDuce.AboutDialog, DDuce.Logger,
+  DDuce.Editor.Factories, DDuce.AboutDialog,
+  DDuce.Logger, DDuce.Logger.Channels.ZeroMQ,
 
-  LogViewer.Factories, LogViewer.Resources, DDuce.Logger.Channels.ZeroMQ,
+  LogViewer.Factories, LogViewer.Resources,
   LogViewer.Settings.Dialog, LogViewer.MessageList.Settings;
 
 {$R *.dfm}
@@ -295,9 +303,19 @@ end;
 {$ENDREGION}
 
 {$REGION 'action handlers'}
+procedure TdmManager.aclMainExecute(Action: TBasicAction; var Handled: Boolean);
+begin
+  Logger.Action(Action);
+end;
+
 procedure TdmManager.actAboutExecute(Sender: TObject);
 begin
   ShowAboutDialog;
+end;
+
+procedure TdmManager.actActionExecute(Sender: TObject);
+begin
+  UpdateVisibleMessageTypes(lmtAction, Sender);
 end;
 
 procedure TdmManager.actAutoScrollMessagesExecute(Sender: TObject);
@@ -336,9 +354,19 @@ begin
   UpdateVisibleMessageTypes(lmtConditional, Sender);
 end;
 
+procedure TdmManager.actCounterExecute(Sender: TObject);
+begin
+  UpdateVisibleMessageTypes(lmtCounter, Sender);
+end;
+
 procedure TdmManager.actCustomDataExecute(Sender: TObject);
 begin
   UpdateVisibleMessageTypes(lmtCustomData, Sender);
+end;
+
+procedure TdmManager.actDataSetExecute(Sender: TObject);
+begin
+  UpdateVisibleMessageTypes(lmtDataSet, Sender);
 end;
 
 procedure TdmManager.actErrorExecute(Sender: TObject);
@@ -692,9 +720,11 @@ begin
   AddMenuItem(MI, actValue);
   AddMenuItem(MI, actBitmap);
   AddMenuItem(MI, actStrings);
+  AddMenuItem(MI, actDataSet);
   AddMenuItem(MI, actCustomData);
   AddMenuItem(MI);
   AddMenuItem(MI, actMethodTraces);
+  AddMenuItem(MI, actAction);
   AddMenuItem(MI);
   AddMenuItem(MI, actHeapInfo);
   AddMenuItem(MI, actCallStack);
@@ -816,7 +846,5 @@ end;
 {$ENDREGION}
 
 initialization
-
-
 
 end.

@@ -16,6 +16,8 @@
 
 unit LogViewer.MainForm;
 
+{ Application main form. }
+
 interface
 
 uses

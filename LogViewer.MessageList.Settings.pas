@@ -14,10 +14,13 @@
   limitations under the License.
 }
 
-{ Settings associated with the messagelist viewer }
-
 unit LogViewer.MessageList.Settings;
 
+{ Persistable settings associated with the messagelist viewer. }
+
+interface
+
+{$REGION 'documentation'}
 { TODO:
    - column settings for
         - TimeStamp columns
@@ -25,8 +28,7 @@ unit LogViewer.MessageList.Settings;
         - Value columns
    - default filtered messages
  }
-
-interface
+{$ENDREGION}
 
 uses
   System.Classes,

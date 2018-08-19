@@ -16,6 +16,8 @@
 
 unit LogViewer.Factories.Toolbars;
 
+{ Application toolbar factories. }
+
 interface
 
 uses

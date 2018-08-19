@@ -16,6 +16,8 @@
 
 unit LogViewer.Receivers.Base;
 
+{ Base class for all channel receivers (implementing IChannelReceiver). }
+
 interface
 
 uses

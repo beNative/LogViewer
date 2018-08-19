@@ -16,13 +16,17 @@
 
 unit LogViewer.Receivers.WinODS;
 
+{ WinODS channel receiver. }
+
+interface
+
+{$REGION 'documentation'}
 { Receives messages posted by the OutputDebugString Windows API routine. The
   OutputDebugString messages are fetched in a thread and queued as TLogMessage
   compatible stream. }
 
 { TODO :  Notification when a ProcessId/ProcessName does not exist anymore }
-
-interface
+{$ENDREGION}
 
 uses
   Winapi.Windows, Winapi.Messages,

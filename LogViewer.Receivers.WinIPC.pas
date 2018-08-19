@@ -16,11 +16,19 @@
 
 unit LogViewer.Receivers.WinIPC;
 
+{ WinIPC channel receiver. }
+
 interface
 
-{ Receives logmessages through WinIPC (WM_COPYDATA) messages. }
+{$REGION 'documentation'}
+{ Receives logmessages through WinIPC (WM_COPYDATA) messages.
+
+  The communication with the message source is synchronous, so when the source
+  application sends a message, it blocks until it is received by the receiver.
+}
 
 { TODO :  Notification when a ProcessId/ProcessName does not exist anymore }
+{$ENDREGION}
 
 uses
   System.Classes,

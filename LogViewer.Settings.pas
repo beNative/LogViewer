@@ -16,7 +16,7 @@
 
 unit LogViewer.Settings;
 
-{ Application settings data. }
+{ Persistable application settings. }
 
 interface
 
