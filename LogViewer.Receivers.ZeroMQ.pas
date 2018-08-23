@@ -107,6 +107,7 @@ implementation
 
 uses
   System.SysUtils,
+  Vcl.Forms,
 
   LogViewer.Subscribers.ZeroMQ;
 
@@ -163,7 +164,6 @@ end;
 procedure TZeroMQChannelReceiver.FTimerTimer(Sender: TObject);
 var
   LSubscriber : ISubscriber;
-  I           : Integer;
 begin
   FTimer.Enabled := False;
   for LSubscriber in SubscriberList.Values do

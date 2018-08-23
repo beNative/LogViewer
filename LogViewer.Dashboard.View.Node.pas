@@ -205,7 +205,9 @@ end;
 procedure TDashboardNode.FReceiverSubscriberListChanged(Sender: TObject;
   const Item: ISubscriber; Action: TCollectionChangedAction);
 var
-  DN : TDashboardNode;
+  DN      : TDashboardNode;
+  LDelete : TDashboardNode;
+  I       : Integer;
 begin
 
   if Action = caAdded then
@@ -226,6 +228,17 @@ begin
       DN.VTNode.CheckState := csUncheckedNormal;
     Nodes.Add(DN);
     FVTree.FullExpand;
+  end
+  else if Action = caRemoved then
+  begin
+    for I := 0 to Nodes.Count - 1 do
+    begin
+      DN := Nodes[I];
+      if DN.Subscriber = Item then
+        LDelete := DN;
+    end;
+    if Assigned(LDelete) then
+      Nodes.Remove(LDelete);
   end;
 end;
 

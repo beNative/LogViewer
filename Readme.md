@@ -26,6 +26,8 @@ Features currently supported:
 - Checkpoints
 - Counters
 - Watches
+- Datasets
+- Actions
 
 The sources depend on the following libraries and components:
   * [Spring4D](http://bitbucket.org/sglienke/spring4d)

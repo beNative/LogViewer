@@ -25,6 +25,10 @@ interface
 
   The communication with the message source is synchronous, so when the source
   application sends a message, it blocks until it is received by the receiver.
+
+  REMARK:
+   - the sending application and the logviewer need to be started with the same
+     windows user credentials.
 }
 
 { TODO :  Notification when a ProcessId/ProcessName does not exist anymore }

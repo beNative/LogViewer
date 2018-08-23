@@ -97,6 +97,12 @@ type
       ALogViewer : ILogViewer
     );
 
+    procedure ViewsChanged(
+      Sender     : TObject;
+      const Item : ILogViewer;
+      Action     : TCollectionChangedAction
+    );
+
 //    procedure ProcessDroppedTab(
 //      Sender             : TObject;
 //      X, Y               : Integer;
@@ -115,7 +121,6 @@ type
 
     procedure CreateDashboardView;
 
-    procedure UpdateTabs;
     procedure UpdateStatusBar;
     procedure UpdateActions; override;
 
@@ -193,6 +198,7 @@ begin
     // ignore it
   end;
   FManager := TLogViewerFactories.CreateManager(Self, FSettings);
+  //Manager.Views.OnChanged.Add(
   Events.OnAddLogViewer.Add(EventsAddLogViewer);
   Events.OnActiveViewChange.Add(EventsActiveViewChange);
   FSettings.FormSettings.AssignTo(Self);
@@ -203,8 +209,6 @@ begin
     Actions,
     Menus
   );
-  //FMainToolbar.
-  //TB.CheckMenuDropdown
   CreateDashboardView;
 end;
 
@@ -289,7 +293,6 @@ begin
   if Close then
   begin
     Manager.Views.Delete(Manager.Views.IndexOf(ILogViewer(ATab.Data)));
-    UpdateTabs;
   end;
 end;
 
@@ -444,36 +447,15 @@ begin
     sbrMain.SimpleText := '';
 end;
 
-{ not in use yet }
-
-procedure TfrmMain.UpdateTabs;
-var
-  MV : ILogViewer;
-  CT : TChromeTab;
+procedure TfrmMain.ViewsChanged(Sender: TObject; const Item: ILogViewer;
+  Action: TCollectionChangedAction);
 begin
-  Logger.Track('TfrmMain.UpdateTabs');
-  ctMain.BeginUpdate;
-  try
-    ctMain.Tabs.Clear;
-    ctMain.Tabs.Add;
-    ctMain.ActiveTab.Data        := Pointer(FDashboard);
-    ctMain.ActiveTab.Caption     := 'Dashboard';
-    ctMain.ActiveTab.DisplayName := 'Dashboard';
-    ctMain.ActiveTab.Pinned      := True;
+  if Action = caRemoved then
+  begin
 
-    if Manager.Views.Count > 0 then
-    begin
-      for MV in Manager.Views do
-      begin
-        CT := ctMain.Tabs.Add;
-        CT.Data := Pointer(MV);
-      end;
-      ctMain.Visible := True;
-    end;
-  finally
-    ctMain.EndUpdate;
   end;
 end;
+
 {$ENDREGION}
 
 initialization

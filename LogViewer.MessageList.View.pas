@@ -390,6 +390,8 @@ begin
   FSettings.RightPanelWidth := pnlRight.Width;
   FSubscriber.OnReceiveMessage.Remove(FSubscriberReceiveMessage);
   FSettings.OnChanged.Remove(FSettingsChanged);
+  FSubscriber.Receiver.SubscriberList.Remove(FSubscriber.SourceId);
+
   FSubscriber := nil;
   FManager    := nil;
   FSettings   := nil;
@@ -789,10 +791,11 @@ end;
 procedure TfrmMessageList.FLogTreeViewInitNode(Sender: TBaseVirtualTree;
   ParentNode, Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
 var
-  LN : TLogNode; // class type
-  I  : Integer;
-  S  : string;
-  SL : TStringList;
+  LN    : TLogNode; // class type
+  I     : Integer;
+  S     : string;
+  SL    : TStringList;
+  LText : string;
 begin
   LN := TLogNode.Create;
   Node.SetData(LN);
@@ -801,10 +804,11 @@ begin
   LN.MessageType := TLogMessageType(FCurrentMsg.MsgType);
   LN.VTNode      := Node;
   LN.Id          := FMessageCount;
+  LText          := string(FCurrentMsg.Text);
   case LN.MessageType of
     lmtValue, lmtComponent, lmtStrings, lmtPersistent, lmtObject, lmtInterface:
     begin
-      S := string(FCurrentMsg.Text);
+      S := LText;
       I := S.IndexOf('=');
       LN.ValueName := Copy(S, 1, I);
       LN.Value := Copy(S, I + 3, S.Length); // ' = '
@@ -818,17 +822,17 @@ begin
     end;
     lmtDataSet:
     begin
-      LN.ValueName := FCurrentMsg.Text;
+      LN.ValueName := LText;
       LN.ValueType := 'TDataSet';
     end;
     lmtAction:
     begin
-      LN.ValueName := FCurrentMsg.Text;
+      LN.ValueName := LText;
       LN.ValueType := 'TAction';
     end;
     lmtBitmap, lmtScreenShot:
     begin
-      LN.ValueName := FCurrentMsg.Text;
+      LN.ValueName := LText;
       LN.ValueType := 'TBitmap';
     end;
     lmtAlphaColor, lmtColor:
@@ -1264,6 +1268,9 @@ begin
   Inc(FMessageCount);
   AStream.Seek(0, soFromBeginning);
   AStream.ReadBuffer(FCurrentMsg.MsgType);
+  AStream.ReadBuffer(FCurrentMsg.LogLevel);
+  AStream.ReadBuffer(FCurrentMsg.Reserved1);
+  AStream.ReadBuffer(FCurrentMsg.Reserved2);
   AStream.ReadBuffer(FCurrentMsg.TimeStamp);
   AStream.ReadBuffer(LTextSize);
   if LTextSize > 0 then

@@ -406,9 +406,7 @@ begin
     begin
       ImageIndex := 0
     end;
-
   end;
-
 end;
 
 procedure TfrmDashboard.FTreeViewGetText(Sender: TBaseVirtualTree;

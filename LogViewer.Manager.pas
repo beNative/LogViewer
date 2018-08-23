@@ -139,7 +139,7 @@ type
     FActiveView     : ILogViewer;
     FViewList       : IList<ILogViewer>;
     FReceivers      : IList<IChannelReceiver>;
-    FSubscribers    : IList<ISubscriber>;
+    //FSubscribers    : IList<ISubscriber>;
     FEditorManager  : IEditorManager;
     FEditorSettings : IEditorSettings;
 
@@ -274,7 +274,7 @@ begin
   FEvents         := TLogViewerEvents.Create(Self);
   FCommands       := TLogViewerCommands.Create(Self);
   FReceivers      := TCollections.CreateInterfaceList<IChannelReceiver>;
-  FSubscribers    := TCollections.CreateInterfaceList<ISubscriber>;
+  //FSubscribers    := TCollections.CreateInterfaceList<ISubscriber>;
   FViewList       := TCollections.CreateInterfaceList<ILogViewer>;
   FEditorSettings := TEditorFactories.CreateSettings(Self, 'settings.xml');
   FEditorManager  := TEditorFactories.CreateManager(Self, FEditorSettings);
@@ -289,7 +289,7 @@ begin
   FreeAndNil(FEvents);
   FReceivers.Clear;
   FReceivers      := nil;
-  FSubscribers    := nil;
+  //FSubscribers    := nil;
   FViewList       := nil;
   FSettings       := nil;
   FEditorSettings := nil;
@@ -629,7 +629,7 @@ procedure TdmManager.FReceiverSubscriberListChanged(Sender: TObject;
 begin
   if Action = caAdded then
   begin
-    FSubscribers.Add(Item);
+    //FSubscribers.Add(Item);
     AddView(TLogViewerFactories.CreateLogViewer(Self, Item));
   end;
 end;

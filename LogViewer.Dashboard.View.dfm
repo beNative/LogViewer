@@ -20,7 +20,6 @@ object frmDashboard: TfrmDashboard
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitHeight = 527
     object splVertical: TSplitter
       Left = 309
       Top = 0
@@ -37,9 +36,6 @@ object frmDashboard: TfrmDashboard
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
-      ExplicitLeft = 308
-      ExplicitTop = 6
-      ExplicitHeight = 527
     end
     object pnlLeft: TPanel
       Left = 0
@@ -53,8 +49,6 @@ object frmDashboard: TfrmDashboard
       Align = alLeft
       BevelOuter = bvNone
       TabOrder = 1
-      ExplicitLeft = 520
-      ExplicitHeight = 527
       object pgcMain: TPageControl
         Left = 0
         Top = 0
@@ -65,7 +59,6 @@ object frmDashboard: TfrmDashboard
         MultiLine = True
         Style = tsFlatButtons
         TabOrder = 0
-        ExplicitHeight = 527
         object tsWinIPC: TTabSheet
           Margins.Left = 0
           Margins.Top = 0
@@ -73,7 +66,6 @@ object frmDashboard: TfrmDashboard
           Margins.Bottom = 0
           Caption = 'WinIPC'
           ImageIndex = 28
-          ExplicitHeight = 496
           object chkAutoSubscribeWinIPC: TCheckBox
             Left = 0
             Top = 43
@@ -100,13 +92,11 @@ object frmDashboard: TfrmDashboard
             ParentBackground = False
             ParentFont = False
             TabOrder = 1
-            ExplicitTop = 8
           end
         end
         object tsWinODS: TTabSheet
           Caption = 'WinODS'
           ImageIndex = 28
-          ExplicitHeight = 496
           object chkAutoSubscribeWinODS: TCheckBox
             Left = 1
             Top = 51
@@ -131,13 +121,11 @@ object frmDashboard: TfrmDashboard
             ParentBackground = False
             ParentFont = False
             TabOrder = 1
-            ExplicitTop = 8
           end
         end
         object tsZeroMQ: TTabSheet
           Caption = 'ZeroMQ'
           ImageIndex = 6
-          ExplicitHeight = 496
           DesignSize = (
             301
             625)
@@ -238,13 +226,11 @@ object frmDashboard: TfrmDashboard
             ParentBackground = False
             ParentFont = False
             TabOrder = 7
-            ExplicitTop = 8
           end
         end
         object tsCOMPort: TTabSheet
           Caption = 'COMPort'
           ImageIndex = 24
-          ExplicitHeight = 496
           object pnlCOMPortTitle: TPanel
             Left = 0
             Top = 0
@@ -261,7 +247,6 @@ object frmDashboard: TfrmDashboard
             ParentBackground = False
             ParentFont = False
             TabOrder = 0
-            ExplicitTop = 8
           end
         end
       end
@@ -313,7 +298,7 @@ object frmDashboard: TfrmDashboard
     Left = 408
     Top = 288
     Bitmap = {
-      494C0101030005000C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010103000500100010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000C0D0C4F777C7AF01D1E1D770000000000000005151515660808
