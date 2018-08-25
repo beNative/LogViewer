@@ -47,8 +47,12 @@ type
     ctMain            : TChromeTabs;
     imlMain           : TImageList;
     pnlMainClient     : TPanel;
-    sbrMain           : TStatusBar;
     tskbrMain         : TTaskbar;
+    pnlStatusBar: TPanel;
+    pnlStatusBarGrid: TGridPanel;
+    pnlSourceName: TPanel;
+    pnlMessageCount: TPanel;
+    pnlDelta: TPanel;
 
     procedure actCenterToScreenExecute(Sender: TObject);
     procedure actShowVersionExecute(Sender: TObject);
@@ -440,11 +444,23 @@ begin
 end;
 
 procedure TfrmMain.UpdateStatusBar;
+var
+  N : Integer;
 begin
   if Assigned(Manager) and Assigned(Manager.ActiveView) then
-    sbrMain.SimpleText := Manager.ActiveView.Subscriber.SourceName
+  begin
+    pnlSourceName.Caption := Manager.ActiveView.Subscriber.SourceName;
+    N := Manager.ActiveView.MilliSecondsBetweenSelection;
+    if N <> -1 then
+      pnlDelta.Caption := Format('Delta: %d', [N])
+    else
+      pnlDelta.Caption := '';
+  end
   else
-    sbrMain.SimpleText := '';
+  begin
+    pnlSourceName.Caption := '';
+    pnlDelta.Caption      := '';
+  end;
 end;
 
 procedure TfrmMain.ViewsChanged(Sender: TObject; const Item: ILogViewer;

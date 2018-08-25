@@ -1,9 +1,9 @@
 {
 	"FormSettings": {
-		"Left": 960,
-		"Top": 157,
-		"Width": 1290,
-		"Height": 687,
+		"Left": 514,
+		"Top": 74,
+		"Width": 1322,
+		"Height": 625,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -11,7 +11,7 @@
 		"AutoScrollMessages": false,
 		"AutoFilterMessages": false,
 		"DynamicAutoSizeColumns": false,
-		"LeftPanelWidth": 340,
+		"LeftPanelWidth": 343,
 		"RightPanelWidth": 345
 	},
 	"WinODSSettings": {
@@ -86,7 +86,7 @@
 		},
 		"ValueType": {
 			"BackgroundColor": 0,
-			"FontName": "Tahoma",
+			"FontName": "Consolas",
 			"FontColor": 8388608,
 			"FontSize": 8,
 			"FontStyle": "",
