@@ -43,6 +43,7 @@ type
     {$REGION 'designer controls'}
     aclMain               : TActionList;
     actAbout              : TAction;
+    actAction             : TAction;
     actAutoScrollMessages : TAction;
     actBitmap             : TAction;
     actCallStack          : TAction;
@@ -51,7 +52,9 @@ type
     actCollapseAll        : TAction;
     actComponent          : TAction;
     actConditional        : TAction;
+    actCounter            : TAction;
     actCustomData         : TAction;
+    actDataSet            : TAction;
     actError              : TAction;
     actException          : TAction;
     actExpandAll          : TAction;
@@ -75,6 +78,7 @@ type
     actStart              : TAction;
     actStop               : TAction;
     actStrings            : TAction;
+    actText               : TAction;
     actToggleAlwaysOnTop  : TAction;
     actToggleFullscreen   : TAction;
     actValue              : TAction;
@@ -82,10 +86,7 @@ type
     imlMain               : TImageList;
     ppmLogTreeViewer      : TPopupMenu;
     ppmMessageTypes       : TPopupMenu;
-    actDataSet: TAction;
-    actAction: TAction;
-    actCounter: TAction;
-    actText: TAction;
+    actScreenshot: TAction;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -130,6 +131,7 @@ type
     procedure actDataSetExecute(Sender: TObject);
     procedure actCounterExecute(Sender: TObject);
     procedure actTextExecute(Sender: TObject);
+    procedure actScreenshotExecute(Sender: TObject);
     {$ENDREGION}
 
   private
@@ -139,7 +141,6 @@ type
     FActiveView     : ILogViewer;
     FViewList       : IList<ILogViewer>;
     FReceivers      : IList<IChannelReceiver>;
-    //FSubscribers    : IList<ISubscriber>;
     FEditorManager  : IEditorManager;
     FEditorSettings : IEditorSettings;
 
@@ -274,7 +275,6 @@ begin
   FEvents         := TLogViewerEvents.Create(Self);
   FCommands       := TLogViewerCommands.Create(Self);
   FReceivers      := TCollections.CreateInterfaceList<IChannelReceiver>;
-  //FSubscribers    := TCollections.CreateInterfaceList<ISubscriber>;
   FViewList       := TCollections.CreateInterfaceList<ILogViewer>;
   FEditorSettings := TEditorFactories.CreateSettings(Self, 'settings.xml');
   FEditorManager  := TEditorFactories.CreateManager(Self, FEditorSettings);
@@ -289,7 +289,6 @@ begin
   FreeAndNil(FEvents);
   FReceivers.Clear;
   FReceivers      := nil;
-  //FSubscribers    := nil;
   FViewList       := nil;
   FSettings       := nil;
   FEditorSettings := nil;
@@ -442,6 +441,11 @@ begin
 //
 end;
 
+procedure TdmManager.actScreenshotExecute(Sender: TObject);
+begin
+  UpdateVisibleMessageTypes(lmtScreenShot, Sender);
+end;
+
 procedure TdmManager.actSelectAllExecute(Sender: TObject);
 begin
 //
@@ -454,7 +458,7 @@ end;
 
 procedure TdmManager.actSetFocusToFilterExecute(Sender: TObject);
 begin
-//
+  Commands.SetFocusToFilter;
 end;
 
 procedure TdmManager.actSettingsExecute(Sender: TObject);
@@ -629,7 +633,6 @@ procedure TdmManager.FReceiverSubscriberListChanged(Sender: TObject;
 begin
   if Action = caAdded then
   begin
-    //FSubscribers.Add(Item);
     AddView(TLogViewerFactories.CreateLogViewer(Self, Item));
   end;
 end;
@@ -794,12 +797,18 @@ begin
   actCustomData.Checked   := lmtCustomData in MLS.VisibleMessageTypes;
   actStrings.Checked      := lmtStrings in MLS.VisibleMessageTypes;
   actMemory.Checked       := lmtMemory in MLS.VisibleMessageTypes;
+  actText.Checked         := lmtText in MLS.VisibleMessageTypes;
+  actDataSet.Checked      := lmtDataSet in MLS.VisibleMessageTypes;
+  actAction.Checked       := lmtAction in MLS.VisibleMessageTypes;
   actAutoScrollMessages.Checked
     := FSettings.MessageListSettings.AutoScrollMessages;
   B := Assigned(ActiveView);
   actStart.Enabled         := B and not ActiveView.Subscriber.Enabled;
   actStop.Enabled          := B and not actStart.Enabled;
   actBitmap.Enabled        := B;
+  actAction.Enabled        := B;
+  actText.Enabled          := B;
+  actDataSet.Enabled       := B;
   actCallStack.Enabled     := B;
   actCheckPoint.Enabled    := B;
   actConditional.Enabled   := B;

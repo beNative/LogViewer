@@ -159,6 +159,7 @@ type
     function GetSubscriber: ISubscriber;
     function GetForm: TCustomForm;
     function GetIsActiveView: Boolean;
+    function GetMilliSecondsBetweenSelection: Integer;
     {$ENDREGION}
 
     procedure Clear;
@@ -167,6 +168,9 @@ type
     procedure GotoLast;
     procedure CollapseAll;
     procedure ExpandAll;
+    procedure SetFocusToFilter;
+    procedure SelectAll;
+    procedure ClearSelection;
 
     property IsActiveView: Boolean
       read GetIsActiveView;
@@ -174,8 +178,11 @@ type
     property Subscriber: ISubscriber
       read GetSubscriber;
 
-   property Form: TCustomForm
+    property Form: TCustomForm
       read GetForm;
+
+     property MilliSecondsBetweenSelection: Integer
+      read GetMilliSecondsBetweenSelection;
   end;
 
   ILogViewerEvents = interface
@@ -210,6 +217,9 @@ type
     procedure ExpandAll;
     procedure GotoFirst;
     procedure GotoLast;
+    procedure SetFocusToFilter;
+    procedure SelectAll;
+    procedure ClearSelection;
   end;
 
   ILogViewerManager = interface

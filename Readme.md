@@ -40,6 +40,6 @@ The sources depend on the following libraries and components:
   * [TChromeTabs](https://github.com/norgepaul/TChromeTabs)
   * [Ararat Synapse](https://sourceforge.net/projects/synalist/)
 
-Here a preliminary look of the application:
+Here is a preliminary look of the application:
 
 ![LogViewer](https://github.com/beNative/LogViewer/blob/master/Wiki/LogViewer_30-11-2017%2021-35-21.png)

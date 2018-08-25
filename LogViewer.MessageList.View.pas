@@ -139,6 +139,8 @@ type
     FDataSet         : TFDMemTable;
     FDBGridView      : TDBGridView;
 
+    FMiliSecondsBetweenSelection : Integer;
+
     {$REGION 'property access methods'}
     function GetManager: ILogViewerManager;
     function GetActions: ILogViewerActions;
@@ -248,6 +250,7 @@ type
       OldNode : PVirtualNode;
       NewNode : PVirtualNode
     );
+    function GetMilliSecondsBetweenSelection: Integer;
     {$ENDREGION}
 
   protected
@@ -286,6 +289,9 @@ type
 
     procedure CollapseAll;
     procedure ExpandAll;
+    procedure SetFocusToFilter;
+    procedure SelectAll;
+    procedure ClearSelection;
 
     procedure Activate; override;
     procedure UpdateActions; override;
@@ -314,6 +320,9 @@ type
 
     property Form: TCustomForm
       read GetForm;
+
+    property MilliSecondsBetweenSelection: Integer
+      read GetMilliSecondsBetweenSelection;
 
   public
     constructor Create(
@@ -362,6 +371,7 @@ procedure TfrmMessageList.AfterConstruction;
 begin
   inherited AfterConstruction;
   Inc(FCounter);
+  FMiliSecondsBetweenSelection := -1;
   btnFilterMessages.Action := FManager.Actions.Items['actFilterMessages'];
   FExpandParents           := False;
   CreateEditor;
@@ -540,6 +550,11 @@ begin
   Result := FManager;
 end;
 
+function TfrmMessageList.GetMilliSecondsBetweenSelection: Integer;
+begin
+  Result := FMiliSecondsBetweenSelection;
+end;
+
 function TfrmMessageList.GetSubscriber: ISubscriber;
 begin
   Result := FSubscriber;
@@ -646,15 +661,17 @@ var
   B  : Boolean;
 begin
   LN := Sender.GetNodeData<TLogNode>(Node);
-  Guard.CheckNotNull(LN, 'LogNode');
-  B := LN.MessageType in Settings.VisibleMessageTypes;
-  if edtMessageFilter.Text <> '' then
-    B := B and
-      (ContainsText(LN.Text, edtMessageFilter.Text) or
-       ContainsText(LN.ValueName, edtMessageFilter.Text) or
-       ContainsText(LN.Value, edtMessageFilter.Text));
-
-  Sender.IsVisible[Node] := B;
+//  Guard.CheckNotNull(LN, 'LogNode');
+  if Assigned(LN) then
+  begin
+    B := LN.MessageType in Settings.VisibleMessageTypes;
+    if edtMessageFilter.Text <> '' then
+      B := B and
+        (ContainsText(LN.Text, edtMessageFilter.Text) or
+         ContainsText(LN.ValueName, edtMessageFilter.Text) or
+         ContainsText(LN.Value, edtMessageFilter.Text));
+    Sender.IsVisible[Node] := B;
+  end;
 end;
 
 procedure TfrmMessageList.FLogTreeViewGetHint(Sender: TBaseVirtualTree;
@@ -782,10 +799,11 @@ begin
   LN2 := Sender.GetNodeData<TLogNode>(Sender.FocusedNode);
   if Assigned(LN1) and Assigned(LN2) then
   begin
-    N := MilliSecondsBetween(LN1.TimeStamp, LN2.TimeStamp);
-    pnlMessageContent.Caption := Format('Delta = %d ms', [N]);
-    //Sender.Hint := Format('Delta = %d ms', [N]);
-  end;
+    FMiliSecondsBetweenSelection :=
+      MilliSecondsBetween(LN1.TimeStamp, LN2.TimeStamp);
+  end
+  else
+    FMiliSecondsBetweenSelection := -1;
 end;
 
 procedure TfrmMessageList.FLogTreeViewInitNode(Sender: TBaseVirtualTree;
@@ -1344,6 +1362,22 @@ begin
       FUpdate := True;
     end;
   end; // case
+end;
+
+procedure TfrmMessageList.SelectAll;
+begin
+  FLogTreeView.SelectAll(False);
+end;
+
+procedure TfrmMessageList.ClearSelection;
+begin
+  FLogTreeView.ClearSelection;
+end;
+
+procedure TfrmMessageList.SetFocusToFilter;
+begin
+  if edtMessageFilter.CanFocus then
+    edtMessageFilter.SetFocus;
 end;
 
 procedure TfrmMessageList.UpdateActions;

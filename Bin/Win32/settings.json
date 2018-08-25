@@ -1,14 +1,14 @@
 {
 	"FormSettings": {
-		"Left": 960,
+		"Left": 248,
 		"Top": 157,
-		"Width": 1290,
-		"Height": 687,
+		"Width": 1169,
+		"Height": 625,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
 	"MessageListSettings": {
-		"AutoScrollMessages": false,
+		"AutoScrollMessages": true,
 		"AutoFilterMessages": false,
 		"DynamicAutoSizeColumns": false,
 		"LeftPanelWidth": 340,

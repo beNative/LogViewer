@@ -18,22 +18,15 @@ object frmMain: TfrmMain
   OnShortCut = FormShortCut
   PixelsPerInch = 96
   TextHeight = 13
-  object sbrMain: TStatusBar
-    Left = 0
-    Top = 580
-    Width = 997
-    Height = 19
-    Panels = <>
-    SimplePanel = True
-  end
   object pnlMainClient: TPanel
     Left = 0
     Top = 0
     Width = 997
-    Height = 580
+    Height = 576
     Align = alClient
     BevelOuter = bvNone
-    TabOrder = 1
+    TabOrder = 0
+    ExplicitHeight = 580
     object ctMain: TChromeTabs
       Left = 0
       Top = 0
@@ -365,6 +358,95 @@ object frmMain: TfrmMain
       TabOrder = 0
     end
   end
+  object pnlStatusBar: TPanel
+    Left = 0
+    Top = 576
+    Width = 997
+    Height = 23
+    Align = alBottom
+    BevelOuter = bvNone
+    TabOrder = 1
+    object pnlStatusBarGrid: TGridPanel
+      Left = 0
+      Top = 0
+      Width = 997
+      Height = 23
+      Align = alClient
+      BevelOuter = bvNone
+      ColumnCollection = <
+        item
+          Value = 20.000000000000000000
+        end
+        item
+          Value = 20.000000000000000000
+        end
+        item
+          Value = 20.000000000000000000
+        end
+        item
+          Value = 20.000000000000000000
+        end
+        item
+          Value = 20.000000000000000000
+        end>
+      ControlCollection = <
+        item
+          Column = 0
+          Control = pnlSourceName
+          Row = 0
+        end
+        item
+          Column = 1
+          Control = pnlMessageCount
+          Row = 0
+        end
+        item
+          Column = 2
+          Control = pnlDelta
+          Row = 0
+        end>
+      ExpandStyle = emAddColumns
+      RowCollection = <
+        item
+          Value = 100.000000000000000000
+        end>
+      TabOrder = 0
+      ExplicitLeft = 408
+      ExplicitTop = -8
+      ExplicitWidth = 185
+      ExplicitHeight = 41
+      object pnlSourceName: TPanel
+        Left = 0
+        Top = 0
+        Width = 199
+        Height = 23
+        Align = alClient
+        BevelKind = bkFlat
+        BevelOuter = bvNone
+        TabOrder = 0
+      end
+      object pnlMessageCount: TPanel
+        Left = 199
+        Top = 0
+        Width = 199
+        Height = 23
+        Align = alClient
+        BevelKind = bkFlat
+        BevelOuter = bvNone
+        TabOrder = 1
+      end
+      object pnlDelta: TPanel
+        Left = 398
+        Top = 0
+        Width = 199
+        Height = 23
+        Align = alClient
+        BevelKind = bkFlat
+        BevelOuter = bvNone
+        TabOrder = 2
+      end
+    end
+  end
   object aclMain: TActionList
     Images = imlMain
     Left = 120
@@ -384,7 +466,7 @@ object frmMain: TfrmMain
     Left = 208
     Top = 48
     Bitmap = {
-      494C010101000800400010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000500040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

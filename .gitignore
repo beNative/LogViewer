@@ -17,3 +17,5 @@
 *.stat
 *.db
 *.skincfg
+/__recovery
+/*.cbk
