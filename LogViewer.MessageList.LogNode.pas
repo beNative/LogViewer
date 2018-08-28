@@ -49,8 +49,11 @@ type
     FValueType   : string;
     FValue       : string;
     FMessageType : TLogMessageType;
+    FLogLevel    : Byte;
     FMessageData : TStream; // binary data stream for bitmaps, etc.
     FTimeStamp   : TDateTime;
+    function GetLogLevel: Byte;
+    procedure SetLogLevel(const Value: Byte);
 
   protected
     {$REGION 'property access methods'}
@@ -83,6 +86,9 @@ type
 
     property Nodes: IList<TLogNode>
       read GetNodes;
+
+    property LogLevel: Byte
+      read GetLogLevel write SetLogLevel;
 
     property Text: string
       read GetText write SetText;
@@ -132,6 +138,16 @@ end;
 procedure TLogNode.SetId(const Value: Int64);
 begin
   FId := Value;
+end;
+
+function TLogNode.GetLogLevel: Byte;
+begin
+  Result := FLogLevel;
+end;
+
+procedure TLogNode.SetLogLevel(const Value: Byte);
+begin
+  FLogLevel := Value;
 end;
 
 function TLogNode.GetMessageData: TStream;

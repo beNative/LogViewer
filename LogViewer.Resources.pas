@@ -121,11 +121,12 @@ const
 
   // message viewer
 const
-  COLUMN_MAIN      = 0;
-  COLUMN_VALUENAME = 1;
-  COLUMN_VALUE     = 2;
-  COLUMN_VALUETYPE = 3;
-  COLUMN_TIMESTAMP = 4;
+  COLUMN_LEVEL     = 0;
+  COLUMN_MAIN      = 1;
+  COLUMN_VALUENAME = 2;
+  COLUMN_VALUE     = 3;
+  COLUMN_VALUETYPE = 4;
+  COLUMN_TIMESTAMP = 5;
 
   { max. amount of characters allowed to be displayed in the value column of the
     logtree. }
