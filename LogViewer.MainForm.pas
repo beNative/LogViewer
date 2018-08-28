@@ -51,8 +51,9 @@ type
     pnlStatusBar: TPanel;
     pnlStatusBarGrid: TGridPanel;
     pnlSourceName: TPanel;
-    pnlMessageCount: TPanel;
     pnlDelta: TPanel;
+    pnlMessageCount: TPanel;
+    pnlChannelStatus: TPanel;
 
     procedure actCenterToScreenExecute(Sender: TObject);
     procedure actShowVersionExecute(Sender: TObject);
@@ -452,14 +453,21 @@ begin
     pnlSourceName.Caption := Manager.ActiveView.Subscriber.SourceName;
     N := Manager.ActiveView.MilliSecondsBetweenSelection;
     if N <> -1 then
-      pnlDelta.Caption := Format('Delta: %d', [N])
+    begin
+      pnlDelta.Color := clSkyBlue;
+      pnlDelta.Caption := Format('Delta: %d ms', [N]);
+    end
     else
+    begin
+      pnlDelta.Color := clBtnFace;
       pnlDelta.Caption := '';
+    end;
   end
   else
   begin
     pnlSourceName.Caption := '';
     pnlDelta.Caption      := '';
+    pnlDelta.Color := clBtnFace;
   end;
 end;
 

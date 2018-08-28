@@ -375,19 +375,19 @@ object frmMain: TfrmMain
       BevelOuter = bvNone
       ColumnCollection = <
         item
-          Value = 20.000000000000000000
+          Value = 39.960652613296650000
         end
         item
-          Value = 20.000000000000000000
+          Value = 15.009836846675840000
         end
         item
-          Value = 20.000000000000000000
+          Value = 15.009836846675840000
         end
         item
-          Value = 20.000000000000000000
+          Value = 15.009836846675840000
         end
         item
-          Value = 20.000000000000000000
+          Value = 15.009836846675840000
         end>
       ControlCollection = <
         item
@@ -397,12 +397,17 @@ object frmMain: TfrmMain
         end
         item
           Column = 1
-          Control = pnlMessageCount
+          Control = pnlDelta
           Row = 0
         end
         item
           Column = 2
-          Control = pnlDelta
+          Control = pnlMessageCount
+          Row = 0
+        end
+        item
+          Column = 3
+          Control = pnlChannelStatus
           Row = 0
         end>
       ExpandStyle = emAddColumns
@@ -415,35 +420,58 @@ object frmMain: TfrmMain
       ExplicitTop = -8
       ExplicitWidth = 185
       ExplicitHeight = 41
+      DesignSize = (
+        997
+        23)
       object pnlSourceName: TPanel
         Left = 0
         Top = 0
-        Width = 199
+        Width = 398
         Height = 23
         Align = alClient
-        BevelKind = bkFlat
         BevelOuter = bvNone
         TabOrder = 0
-      end
-      object pnlMessageCount: TPanel
-        Left = 199
-        Top = 0
-        Width = 199
-        Height = 23
-        Align = alClient
-        BevelKind = bkFlat
-        BevelOuter = bvNone
-        TabOrder = 1
+        ExplicitWidth = 199
       end
       object pnlDelta: TPanel
         Left = 398
         Top = 0
-        Width = 199
+        Width = 149
         Height = 23
         Align = alClient
-        BevelKind = bkFlat
+        BevelOuter = bvNone
+        Color = clSkyBlue
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clBlue
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+        ParentBackground = False
+        ParentFont = False
+        TabOrder = 1
+        ExplicitWidth = 199
+      end
+      object pnlMessageCount: TPanel
+        Left = 547
+        Top = 0
+        Width = 149
+        Height = 23
+        Align = alClient
         BevelOuter = bvNone
         TabOrder = 2
+        ExplicitLeft = 718
+        ExplicitTop = 6
+      end
+      object pnlChannelStatus: TPanel
+        Left = 696
+        Top = 0
+        Width = 149
+        Height = 23
+        Anchors = []
+        BevelOuter = bvNone
+        TabOrder = 3
+        ExplicitLeft = 408
+        ExplicitTop = -8
       end
     end
   end

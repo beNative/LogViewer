@@ -473,6 +473,13 @@ begin
   C := FLogTreeView.Header.Columns.Add;
   C.Text     := '';
   C.Options  := C.Options + [coFixed];
+  C.Width    := 10;
+  C.MinWidth := 10;
+  C.MaxWidth := 10;
+
+  C := FLogTreeView.Header.Columns.Add;
+  C.Text     := '';
+  C.Options  := C.Options + [coFixed];
   C.Width    := 120;
   C.MinWidth := 120;
   C.MaxWidth := 150;
@@ -732,7 +739,11 @@ var
 begin
   LN := Sender.GetNodeData<TLogNode>(Node);
   Guard.CheckNotNull(LN, 'ND');
-  if Column = COLUMN_MAIN then
+  if Column = COLUMN_LEVEL then
+  begin
+    CellText := LN.LogLevel.ToString;
+  end
+  else if Column = COLUMN_MAIN then
   begin
     case LN.MessageType of
       lmtValue:
@@ -821,6 +832,7 @@ begin
   LN.TimeStamp   := FCurrentMsg.TimeStamp;
   LN.MessageType := TLogMessageType(FCurrentMsg.MsgType);
   LN.VTNode      := Node;
+  LN.LogLevel    := FCurrentMsg.LogLevel;
   LN.Id          := FMessageCount;
   LText          := string(FCurrentMsg.Text);
   case LN.MessageType of
