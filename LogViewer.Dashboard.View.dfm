@@ -66,6 +66,10 @@ object frmDashboard: TfrmDashboard
           Margins.Bottom = 0
           Caption = 'WinIPC'
           ImageIndex = 28
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object chkAutoSubscribeWinIPC: TCheckBox
             Left = 0
             Top = 43
@@ -97,6 +101,10 @@ object frmDashboard: TfrmDashboard
         object tsWinODS: TTabSheet
           Caption = 'WinODS'
           ImageIndex = 28
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object chkAutoSubscribeWinODS: TCheckBox
             Left = 1
             Top = 51
@@ -231,6 +239,10 @@ object frmDashboard: TfrmDashboard
         object tsCOMPort: TTabSheet
           Caption = 'COMPort'
           ImageIndex = 24
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object pnlCOMPortTitle: TPanel
             Left = 0
             Top = 0
@@ -298,7 +310,7 @@ object frmDashboard: TfrmDashboard
     Left = 408
     Top = 288
     Bitmap = {
-      494C010103000500100010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010103000500140010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000C0D0C4F777C7AF01D1E1D770000000000000005151515660808

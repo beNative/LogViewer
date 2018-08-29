@@ -140,8 +140,6 @@ type
     FDBGridView                  : TDBGridView;
     FMiliSecondsBetweenSelection : Integer;
 
-    FMiliSecondsBetweenSelection : Integer;
-
     {$REGION 'property access methods'}
     function GetManager: ILogViewerManager;
     function GetActions: ILogViewerActions;
@@ -395,11 +393,17 @@ end;
 procedure TfrmMessageList.BeforeDestruction;
 begin
   Logger.Track(Self, 'BeforeDestruction');
+  FSubscriber.OnReceiveMessage.Clear;
+
+  FreeAndNil(FWatchesView);
+  FreeAndNil(FWatches);
   FSettings.LeftPanelWidth  := pnlLeft.Width;
   FSettings.RightPanelWidth := pnlRight.Width;
-  FSubscriber.OnReceiveMessage.Remove(FSubscriberReceiveMessage);
+//  FSubscriber.OnReceiveMessage.Remove(FSubscriberReceiveMessage);
   FSettings.OnChanged.Remove(FSettingsChanged);
+
   FSubscriber.Receiver.SubscriberList.Remove(FSubscriber.SourceId);
+
 
   FSubscriber := nil;
   FManager    := nil;
@@ -472,6 +476,8 @@ begin
   C := FLogTreeView.Header.Columns.Add;
   C.Text     := '';
   C.Options  := C.Options + [coFixed];
+  C.Margin   := 0;
+  C.Spacing  := 0;
   C.Width    := 10;
   C.MinWidth := 10;
   C.MaxWidth := 10;
@@ -511,6 +517,7 @@ begin
   C.MaxWidth := 80;
 
   FLogTreeView.Header.AutoSizeIndex := 3;
+  FLogTreeView.Header.MainColumn    := 1;
 end;
 
 procedure TfrmMessageList.CreateWatchesView;
@@ -586,13 +593,13 @@ begin
 //  DVS := Manager.Settings.DisplayValuesSettings;
 //  if LN.MessageType in [lmtEnterMethod, lmtLeaveMethod] then
 //  begin
-    //CustomDraw := True;
-    //DVS.Tracing.AssignTo(TargetCanvas);
-    //TargetCanvas.Brush.Color := $00EEEEEE;
+//    CustomDraw := True;
+//    DVS.Tracing.AssignTo(TargetCanvas);
+//    TargetCanvas.Brush.Color := $00EEEEEE;
 //    TargetCanvas.FillRect(ItemRect);
 //    S := LN.Text;
 //    TargetCanvas.TextRect(ItemRect, S);
-  //end;
+//  end;
 end;
 
 procedure TfrmMessageList.FSubscriberReceiveMessage(Sender: TObject;
@@ -628,7 +635,18 @@ begin
     DVS.Tracing.AssignTo(TargetCanvas);
     //TargetCanvas.Brush.Color := $00EEEEEE;
     TargetCanvas.FillRect(CellRect);
-  end
+  end;
+  if Column = COLUMN_LEVEL then
+  begin
+//    if LN.MessageType in [lmtEnterMethod, lmtLeaveMethod] then
+//      TargetCanvas.Brush.Color := $00EEEEEE
+//    else if LN.MessageType = lmtValue then
+//      TargetCanvas.Brush.Color := clGreen
+//    else if LN.MessageType = lmtObject then
+//      TargetCanvas.Brush.Color := clYellow;
+    TargetCanvas.FillRect(CellRect);
+  end;
+
 end;
 
 procedure TfrmMessageList.FLogTreeViewFocusChanging(Sender: TBaseVirtualTree;
@@ -986,6 +1004,11 @@ begin
       end;
     end;
   end
+  else if Column = COLUMN_LEVEL then
+  begin
+    TargetCanvas.Font.Color := clDkGray;
+    TargetCanvas.Font.Size := 6;
+  end
   else if Column = COLUMN_VALUENAME then
   begin
     DVS.ValueName.AssignTo(TargetCanvas.Font);
@@ -1110,7 +1133,7 @@ end;
 
 procedure TfrmMessageList.AutoFitColumns;
 begin
-  Logger.Track(Self, 'AutoFitColumns');
+//  Logger.Track(Self, 'AutoFitColumns');
   FLogTreeView.Header.AutoFitColumns(False, smaAllColumns, 1, 2);
   FAutoSizeColumns := True;
 end;
@@ -1170,11 +1193,11 @@ end;
 
 procedure TfrmMessageList.Clear;
 begin
-  FLogTreeView.Clear;
+  ClearMessageDetailsControls;
   FWatches.Clear;
   FEditorView.Clear;
   FCallStack.Clear;
-  ClearMessageDetailsControls;
+  FLogTreeView.Clear;
   FMessageCount := 0;
   FLastNode     := nil;
   FLastParent   := nil;

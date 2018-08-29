@@ -185,8 +185,7 @@ uses
 procedure TWatch.BeforeDestruction;
 begin
   Logger.Track(Self, 'BeforeDestruction');
-//  FList.Clear;
-//  FList := nil;
+  FList := nil;
   inherited BeforeDestruction;
 end;
 

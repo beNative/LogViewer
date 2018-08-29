@@ -46,6 +46,8 @@ type
     procedure DoAddReceiver(AReceiver: IChannelReceiver); virtual;
     {$ENDREGION}
 
+    procedure Clear;
+
   public
     constructor Create(AManager: ILogViewerManager);
     procedure BeforeDestruction; override;
@@ -62,6 +64,9 @@ type
 
 implementation
 
+uses
+  DDuce.Logger;
+
 {$REGION 'construction and destruction'}
 constructor TLogViewerEvents.Create(AManager: ILogViewerManager);
 begin
@@ -71,6 +76,8 @@ end;
 
 procedure TLogViewerEvents.BeforeDestruction;
 begin
+  Logger.Track('TLogViewerEvents.BeforeDestruction');
+  Clear;
   FManager := nil;
   inherited BeforeDestruction;
 end;
@@ -107,6 +114,15 @@ end;
 procedure TLogViewerEvents.DoAddReceiver(AReceiver: IChannelReceiver);
 begin
   FOnAddReceiver.Invoke(Self, AReceiver);
+end;
+{$ENDREGION}
+
+{$REGION 'protected methods'}
+procedure TLogViewerEvents.Clear;
+begin
+  FOnAddLogViewer.Clear;
+  FOnAddReceiver.Clear;
+  FOnActiveViewChange.Clear;
 end;
 {$ENDREGION}
 

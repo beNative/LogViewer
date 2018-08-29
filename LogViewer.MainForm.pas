@@ -48,11 +48,11 @@ type
     imlMain           : TImageList;
     pnlMainClient     : TPanel;
     tskbrMain         : TTaskbar;
-    pnlStatusBar: TPanel;
-    pnlStatusBarGrid: TGridPanel;
-    pnlSourceName: TPanel;
-    pnlMessageCount: TPanel;
-    pnlDelta: TPanel;
+    pnlStatusBar      : TPanel;
+    pnlStatusBarGrid  : TGridPanel;
+    pnlSourceName     : TPanel;
+    pnlMessageCount   : TPanel;
+    pnlDelta          : TPanel;
 
     procedure actCenterToScreenExecute(Sender: TObject);
     procedure actShowVersionExecute(Sender: TObject);
@@ -217,14 +217,17 @@ begin
 end;
 
 procedure TfrmMain.BeforeDestruction;
+var
+  CR: IChannelReceiver;
 begin
   Logger.Track(Self, 'BeforeDestruction');
+  for CR in Manager.Receivers do
+    CR.Enabled := False;
+  Events.Clear;
   FSettings.FormSettings.Assign(Self);
   FSettings.Save;
   FSettings.OnChanged.Remove(SettingsChanged);
   FSettings.Free;
-  Events.OnAddLogViewer.Remove(EventsAddLogViewer);
-  Events.OnActiveViewChange.Remove(EventsActiveViewChange);
   inherited BeforeDestruction;
 end;
 {$ENDREGION}

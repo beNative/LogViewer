@@ -88,6 +88,9 @@ type
 
 implementation
 
+uses
+  DDuce.Logger;
+
 {$REGION 'construction and destruction'}
 constructor TSubscriber.Create(AReceiver: IChannelReceiver; ASourceId: Integer;
   const AKey, ASourceName: string; AEnabled: Boolean);
@@ -103,6 +106,8 @@ end;
 
 procedure TSubscriber.BeforeDestruction;
 begin
+  Logger.Track('TSubscriber.BeforeDestruction');
+  FOnReceiveMessage.Clear;
   FReceiver := nil;
   inherited BeforeDestruction;
 end;

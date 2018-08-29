@@ -71,6 +71,7 @@ type
     actOpen               : TAction;
     actPersistent         : TAction;
     actSave               : TAction;
+    actScreenshot         : TAction;
     actSelectAll          : TAction;
     actSelectNone         : TAction;
     actSetFocusToFilter   : TAction;
@@ -86,7 +87,6 @@ type
     imlMain               : TImageList;
     ppmLogTreeViewer      : TPopupMenu;
     ppmMessageTypes       : TPopupMenu;
-    actScreenshot: TAction;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -285,10 +285,8 @@ end;
 procedure TdmManager.BeforeDestruction;
 begin
   Logger.Track(Self, 'BeforeDestruction');
-  FreeAndNil(FCommands);
   FreeAndNil(FEvents);
-  FReceivers.Clear;
-  FReceivers      := nil;
+  FreeAndNil(FCommands);
   FViewList       := nil;
   FSettings       := nil;
   FEditorSettings := nil;

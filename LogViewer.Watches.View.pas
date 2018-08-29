@@ -154,6 +154,7 @@ uses
   DSharp.Windows.ControlTemplates,
 
   DDuce.Factories.TreeViewPresenter, DDuce.Factories.VirtualTrees,
+  DDuce.Logger,
 
   LogViewer.Resources;
 
@@ -182,9 +183,9 @@ end;
 
 procedure TfrmWatchesView.BeforeDestruction;
 begin
+  Logger.Track('TfrmWatchesView.BeforeDestruction');
   FSettings.WatchHistoryPanelHeight := pnlWatchHistory.Height;
   FSettings.Height                  := Height;
-  FWatches.Free;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}

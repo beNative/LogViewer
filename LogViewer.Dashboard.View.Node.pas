@@ -130,6 +130,7 @@ end;
 procedure TDashboardNode.BeforeDestruction;
 begin
   Logger.Track(Self, 'BeforeDestruction');
+
   FVTree      := nil;
   FVTNode     := nil;
   FReceiver   := nil;
@@ -231,14 +232,17 @@ begin
   end
   else if Action = caRemoved then
   begin
-    for I := 0 to Nodes.Count - 1 do
+    if FNodes.IsValueCreated then
     begin
-      DN := Nodes[I];
-      if DN.Subscriber = Item then
-        LDelete := DN;
+      for I := 0 to Nodes.Count - 1 do
+      begin
+        DN := Nodes[I];
+        if DN.Subscriber = Item then
+          LDelete := DN;
+      end;
+      if Assigned(LDelete) then
+        Nodes.Remove(LDelete);
     end;
-    if Assigned(LDelete) then
-      Nodes.Remove(LDelete);
   end;
 end;
 

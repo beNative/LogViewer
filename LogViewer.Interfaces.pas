@@ -197,6 +197,8 @@ type
     procedure DoAddLogViewer(ALogViewer: ILogViewer);
     procedure DoAddReceiver(AReceiver: IChannelReceiver);
 
+    procedure Clear;  
+
     property OnActiveViewChange: IEvent<TLogViewerEvent>
       read GetOnActiveViewChange;
 

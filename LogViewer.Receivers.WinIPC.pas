@@ -83,7 +83,7 @@ implementation
 uses
   System.SysUtils,
 
-  DDuce.Utils, DDuce.Utils.Winapi,
+  DDuce.Utils, DDuce.Utils.Winapi, DDuce.Logger,
 
   LogViewer.Subscribers.WinIPC;
 
@@ -99,6 +99,7 @@ end;
 
 procedure TWinIPCChannelReceiver.BeforeDestruction;
 begin
+  Logger.Track('TWinIPCChannelReceiver.BeforeDestruction');
   FIPCServer.Active := False;
   FIPCServer.Free;
   inherited BeforeDestruction;
