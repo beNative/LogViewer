@@ -241,7 +241,10 @@ begin
           LDelete := DN;
       end;
       if Assigned(LDelete) then
+      begin
         Nodes.Remove(LDelete);
+        FVTree.InvalidateNode(FVTNode);
+      end;
     end;
   end;
 end;

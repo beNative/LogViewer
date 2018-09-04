@@ -57,10 +57,6 @@ type
     procedure actCenterToScreenExecute(Sender: TObject);
     procedure actShowVersionExecute(Sender: TObject);
 
-    procedure ctMainButtonAddClick(
-      Sender      : TObject;
-      var Handled : Boolean
-    );
     procedure ctMainButtonCloseTabClick(
       Sender    : TObject;
       ATab      : TChromeTab;
@@ -273,26 +269,6 @@ begin
   end;
 end;
 
-procedure TfrmMain.ctMainButtonAddClick(Sender: TObject; var Handled: Boolean);
-//var
-//  LMessageViewer : ILogViewer;
-//  LTab           : TChromeTab;
-begin
-//  LMessageViewer := TLogViewerFactories.CreateMessagesView(
-//    FManager,
-//    pnlMainClient,
-//    FMessageViewer.Receiver
-//  );
-//  Manager.AddView(LMessageViewer);
-//  LTab := ctMain.Tabs.Add;
-//  LTab.Data := Pointer(LMessageViewer);
-//  LTab.Caption := Format('%s-%s', [
-//    LMessageViewer.Form.Caption,
-//    LMessageViewer.Receiver.Name
-//  ]);
-  Handled := True;
-end;
-
 procedure TfrmMain.ctMainButtonCloseTabClick(Sender: TObject; ATab: TChromeTab;
   var Close: Boolean);
 begin
@@ -474,7 +450,6 @@ begin
 
   end;
 end;
-
 {$ENDREGION}
 
 initialization

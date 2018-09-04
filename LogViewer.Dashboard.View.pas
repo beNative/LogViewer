@@ -27,6 +27,8 @@ uses
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
   Vcl.ActnList, Vcl.ButtonGroup, Vcl.ComCtrls, Vcl.ImgList,
 
+  Spring.Collections,
+
   VirtualTrees,
 
   ZeroMQ,
@@ -132,6 +134,12 @@ type
       Column : TColumnIndex
     );
 
+    procedure FReceiverSubscriberListChanged(
+      Sender     : TObject;
+      const AKey       : Integer;
+      Action     : TCollectionChangedAction
+    );
+
     procedure FTreeViewGetImageIndex(
       Sender         : TBaseVirtualTree;
       Node           : PVirtualNode;
@@ -140,11 +148,6 @@ type
       var Ghosted    : Boolean;
       var ImageIndex : TImageIndex
     );
-
-//    procedure FChannelReceiverNewLogQueue(
-//      Sender    : TObject;
-//      ALogQueue : ILogQueue
-//    );
 
   protected
     procedure InitializeTreeView;
@@ -169,7 +172,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Spring, Spring.Collections,
+  Spring,
 
   DDuce.Utils, DDuce.Utils.Winapi, DDuce.Logger,
   DDuce.Factories.TreeViewPresenter, DDuce.Factories.VirtualTrees,
@@ -300,6 +303,12 @@ end;
 
 {$REGION 'event handlers'}
 {$REGION 'FTreeView'}
+procedure TfrmDashboard.FReceiverSubscriberListChanged(Sender: TObject; const AKey       : Integer;
+  Action: TCollectionChangedAction);
+begin
+  FTreeView.Refresh;
+end;
+
 procedure TfrmDashboard.FTreeViewBeforeCellPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
@@ -514,6 +523,7 @@ begin
 
   FZeroMQReceiver := TLogViewerFactories.CreateZeroMQReceiver(FManager, FZeroMQ);
   FManager.AddReceiver(FZeroMQReceiver);
+  FZeroMQReceiver.SubscriberList.OnKeyChanged.Add(FReceiverSubscriberListChanged);
   //R.OnNewLogQueue.Add(FChannelReceiverNewLogQueue);
   FZeroMQReceiver.Enabled := FManager.Settings.ZeroMQSettings.Enabled;
   LNode := TDashboardNode.Create(nil, FTreeView, FZeroMQReceiver, nil);

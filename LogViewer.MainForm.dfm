@@ -32,7 +32,6 @@ object frmMain: TfrmMain
       Width = 997
       Height = 29
       OnActiveTabChanged = ctMainActiveTabChanged
-      OnButtonAddClick = ctMainButtonAddClick
       OnButtonCloseTabClick = ctMainButtonCloseTabClick
       OnNeedDragImageControl = ctMainNeedDragImageControl
       ActiveTabIndex = -1
@@ -420,10 +419,6 @@ object frmMain: TfrmMain
         BevelKind = bkFlat
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 199
-        ExplicitHeight = 23
       end
       object pnlMessageCount: TPanel
         AlignWithMargins = True
@@ -435,10 +430,6 @@ object frmMain: TfrmMain
         BevelKind = bkFlat
         BevelOuter = bvNone
         TabOrder = 1
-        ExplicitLeft = 199
-        ExplicitTop = 0
-        ExplicitWidth = 199
-        ExplicitHeight = 23
       end
       object pnlDelta: TPanel
         AlignWithMargins = True
@@ -451,10 +442,6 @@ object frmMain: TfrmMain
         BevelOuter = bvNone
         ParentBackground = False
         TabOrder = 2
-        ExplicitLeft = 398
-        ExplicitTop = 0
-        ExplicitWidth = 199
-        ExplicitHeight = 23
       end
     end
   end

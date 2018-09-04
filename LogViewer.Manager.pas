@@ -176,6 +176,12 @@ type
       Action     : TCollectionChangedAction
     );
 
+    procedure FViewListChanged(
+      Sender     : TObject;
+      const Item : ILogViewer;
+      Action     : TCollectionChangedAction
+    );
+
     procedure UpdateVisibleMessageTypes(
       const AMessageType : TLogMessageType;
       const Sender       : TObject;
@@ -276,6 +282,7 @@ begin
   FCommands       := TLogViewerCommands.Create(Self);
   FReceivers      := TCollections.CreateInterfaceList<IChannelReceiver>;
   FViewList       := TCollections.CreateInterfaceList<ILogViewer>;
+  FViewList.OnChanged.Add(FViewListChanged);
   FEditorSettings := TEditorFactories.CreateSettings(Self, 'settings.xml');
   FEditorManager  := TEditorFactories.CreateManager(Self, FEditorSettings);
   BuildMessageTypesPopupMenu;
@@ -634,6 +641,16 @@ begin
     AddView(TLogViewerFactories.CreateLogViewer(Self, Item));
   end;
 end;
+
+procedure TdmManager.FViewListChanged(Sender: TObject; const Item: ILogViewer;
+  Action: TCollectionChangedAction);
+begin
+  if Action = caRemoved then
+  begin
+    Item.Subscriber.Receiver.SubscriberList.Remove(Item.Subscriber.SourceId);
+  end;
+end;
+
 {$ENDREGION}
 
 {$REGION 'private methods'}
