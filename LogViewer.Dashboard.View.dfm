@@ -14,34 +14,42 @@ object frmDashboard: TfrmDashboard
   TextHeight = 13
   object pnlLogChannels: TPanel
     Left = 0
-    Top = 30
+    Top = 0
     Width = 829
-    Height = 656
+    Height = 686
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitTop = 30
+    ExplicitHeight = 656
     object splVertical: TSplitter
       Left = 309
       Top = 0
       Width = 7
-      Height = 656
+      Height = 686
       ExplicitLeft = -6
       ExplicitHeight = 525
     end
     object pnlRight: TPanel
+      AlignWithMargins = True
       Left = 316
-      Top = 0
-      Width = 513
-      Height = 656
+      Top = 3
+      Width = 510
+      Height = 683
+      Margins.Left = 0
+      Margins.Bottom = 0
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
+      ExplicitLeft = 319
+      ExplicitTop = 1
+      ExplicitWidth = 513
     end
     object pnlLeft: TPanel
       Left = 0
       Top = 0
       Width = 309
-      Height = 656
+      Height = 686
       Margins.Left = 0
       Margins.Top = 0
       Margins.Right = 0
@@ -49,16 +57,18 @@ object frmDashboard: TfrmDashboard
       Align = alLeft
       BevelOuter = bvNone
       TabOrder = 1
+      ExplicitHeight = 656
       object pgcMain: TPageControl
         Left = 0
         Top = 0
         Width = 309
-        Height = 656
-        ActivePage = tsZeroMQ
+        Height = 686
+        ActivePage = tsWinIPC
         Align = alClient
         MultiLine = True
         Style = tsFlatButtons
         TabOrder = 0
+        ExplicitHeight = 656
         object tsWinIPC: TTabSheet
           Margins.Left = 0
           Margins.Top = 0
@@ -66,10 +76,7 @@ object frmDashboard: TfrmDashboard
           Margins.Bottom = 0
           Caption = 'WinIPC'
           ImageIndex = 28
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
+          ExplicitHeight = 625
           object chkAutoSubscribeWinIPC: TCheckBox
             Left = 0
             Top = 43
@@ -101,10 +108,7 @@ object frmDashboard: TfrmDashboard
         object tsWinODS: TTabSheet
           Caption = 'WinODS'
           ImageIndex = 28
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
+          ExplicitHeight = 625
           object chkAutoSubscribeWinODS: TCheckBox
             Left = 1
             Top = 51
@@ -134,9 +138,10 @@ object frmDashboard: TfrmDashboard
         object tsZeroMQ: TTabSheet
           Caption = 'ZeroMQ'
           ImageIndex = 6
+          ExplicitHeight = 625
           DesignSize = (
             301
-            625)
+            655)
           object edtAddress: TLabeledEdit
             Left = 52
             Top = 31
@@ -203,12 +208,13 @@ object frmDashboard: TfrmDashboard
             Left = 52
             Top = 172
             Width = 246
-            Height = 453
+            Height = 483
             Anchors = [akLeft, akTop, akRight, akBottom]
             BevelInner = bvNone
             BevelKind = bkFlat
             BorderStyle = bsNone
             TabOrder = 5
+            ExplicitHeight = 453
           end
           object btnSubscribeToList: TButton
             Left = 52
@@ -239,10 +245,7 @@ object frmDashboard: TfrmDashboard
         object tsCOMPort: TTabSheet
           Caption = 'COMPort'
           ImageIndex = 24
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
+          ExplicitHeight = 625
           object pnlCOMPortTitle: TPanel
             Left = 0
             Top = 0
@@ -262,23 +265,6 @@ object frmDashboard: TfrmDashboard
           end
         end
       end
-    end
-  end
-  object pnlTop: TPanel
-    Left = 0
-    Top = 0
-    Width = 829
-    Height = 30
-    Align = alTop
-    BevelOuter = bvNone
-    TabOrder = 1
-    object btnInspectTreeview: TButton
-      Left = 5
-      Top = 3
-      Width = 145
-      Height = 25
-      Action = actInspectTreeview
-      TabOrder = 0
     end
   end
   object aclMain: TActionList
@@ -307,8 +293,8 @@ object frmDashboard: TfrmDashboard
   end
   object imlMain: TImageList
     ColorDepth = cd32Bit
-    Left = 408
-    Top = 288
+    Left = 328
+    Top = 112
     Bitmap = {
       494C0101030005002C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010

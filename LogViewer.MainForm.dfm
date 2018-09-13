@@ -20,12 +20,14 @@ object frmMain: TfrmMain
   TextHeight = 13
   object pnlMainClient: TPanel
     Left = 0
-    Top = 0
+    Top = 30
     Width = 997
-    Height = 576
+    Height = 546
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitTop = 0
+    ExplicitHeight = 576
     object ctMain: TChromeTabs
       Left = 0
       Top = 0
@@ -445,6 +447,16 @@ object frmMain: TfrmMain
       end
     end
   end
+  object pnlTop: TPanel
+    Left = 0
+    Top = 0
+    Width = 997
+    Height = 30
+    Align = alTop
+    BevelOuter = bvNone
+    TabOrder = 2
+    ExplicitTop = -6
+  end
   object aclMain: TActionList
     Images = imlMain
     Left = 120
@@ -464,7 +476,7 @@ object frmMain: TfrmMain
     Left = 208
     Top = 48
     Bitmap = {
-      494C0101010005000C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000500180010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

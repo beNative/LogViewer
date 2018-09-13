@@ -48,10 +48,10 @@ type
     );
 
     function CreateToolButton(
-       AParent    : TToolBar;
-       AAction    : TBasicAction = nil;
-       AStyle     : TToolButtonStyle = tbsButton;
-       APopupMenu : TPopupMenu = nil
+      AParent    : TToolBar;
+      AAction    : TBasicAction = nil;
+      AStyle     : TToolButtonStyle = tbsButton;
+      APopupMenu : TPopupMenu = nil
     ): TToolButton; overload;
 
     function CreateToolButton(
@@ -72,8 +72,13 @@ type
     );
 
     function CreateMainToolbar(
-        AOwner  : TComponent;
-        AParent : TWinControl
+      AOwner  : TComponent;
+      AParent : TWinControl
+    ): TToolbar;
+
+    function CreateRightTopToolbar(
+      AOwner  : TComponent;
+      AParent : TWinControl
     ): TToolbar;
 
     property EdgeBorders: TEdgeBorders
@@ -193,12 +198,10 @@ begin
   TB.Images           := FActions.ActionList.Images;
   TB.ButtonWidth      := 10;
   TB.AllowTextButtons := True;
-  CreateToolButton(TB, 'actToggleAlwaysOnTop');
-  CreateToolButton(TB, 'actToggleFullScreen');
-  CreateToolButton(TB, 'actStart');
-  CreateToolButton(TB, 'actStop');
-  CreateToolButton(TB, 'actClearMessages');
-  CreateToolButton(TB, 'actAbout');
+  CreateToolButton(TB, 'actStart', tbsTextButton);
+  CreateToolButton(TB, 'actStop', tbsTextButton);
+  CreateToolButton(TB);
+  CreateToolButton(TB, 'actClearMessages', tbsTextButton);
   CreateToolButton(TB);
   CreateToolButton(
     TB,
@@ -206,7 +209,7 @@ begin
     tbsDropDown,
     FMenus.MessageTypesPopupMenu
   );
-//  CreateToolButton(TB);
+  CreateToolButton(TB);
 //  CreateToolButton(TB, 'actFilterMessages');
 //  CreateToolButton(TB);
 //  CreateToolButton(TB, 'actSetFocusToFilter');
@@ -215,8 +218,31 @@ begin
   CreateToolButton(TB, 'actExpandAll', tbsTextButton);
   CreateToolButton(TB);
   CreateToolButton(TB, 'actAutoScrollMessages', tbsTextButton);
+  CreateToolButton(TB);
+  CreateToolButton(TB, 'actSettings', tbsTextButton);
   Result := TB;
 end;
+
+function TLogViewerToolbarsFactory.CreateRightTopToolbar(AOwner: TComponent;
+  AParent: TWinControl): TToolbar;
+var
+  TB : TToolbar;
+begin
+  Guard.CheckNotNull(AOwner, 'AOwner');
+  Guard.CheckNotNull(AParent, 'AParent');
+  TB := TToolBar.Create(AOwner);
+  ApplyDefaultProperties(TB);
+  TB.Parent           := AParent;
+  TB.Images           := FActions.ActionList.Images;
+  TB.ButtonWidth      := 10;
+  TB.AllowTextButtons := True;
+  CreateToolButton(TB, 'actAbout');
+  CreateToolButton(TB);
+  CreateToolButton(TB, 'actToggleFullscreen');
+  CreateToolButton(TB, 'actToggleAlwaysOnTop');
+  Result := TB;
+end;
+
 {$ENDREGION}
 
 end.

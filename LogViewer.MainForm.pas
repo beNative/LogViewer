@@ -37,7 +37,7 @@ uses
   LogViewer.Factories, LogViewer.Manager, LogViewer.Settings,
   LogViewer.ComPort.Settings,
 
-  LogViewer.Dashboard.View;
+  LogViewer.Dashboard.View, Vcl.ToolWin;
 
 type
   TfrmMain = class(TForm)
@@ -46,13 +46,14 @@ type
     actShowVersion    : TAction;
     ctMain            : TChromeTabs;
     imlMain           : TImageList;
+    pnlDelta          : TPanel;
     pnlMainClient     : TPanel;
-    tskbrMain         : TTaskbar;
+    pnlMessageCount   : TPanel;
+    pnlSourceName     : TPanel;
     pnlStatusBar      : TPanel;
     pnlStatusBarGrid  : TGridPanel;
-    pnlSourceName     : TPanel;
-    pnlMessageCount   : TPanel;
-    pnlDelta          : TPanel;
+    pnlTop            : TPanel;
+    tskbrMain         : TTaskbar;
 
     procedure actCenterToScreenExecute(Sender: TObject);
     procedure actShowVersionExecute(Sender: TObject);
@@ -70,13 +71,6 @@ type
     procedure ctMainActiveTabChanged(
       Sender : TObject;
       ATab   : TChromeTab
-    );
-    procedure ctMainTabDragDrop(
-      Sender             : TObject;
-      X, Y               : Integer;
-      DragTabObject      : IDragTabObject;
-      Cancelled          : Boolean;
-      var TabDropOptions : TTabDropOptions
     );
     procedure FormShortCut(var Msg: TWMKey; var Handled: Boolean);
 
@@ -96,20 +90,6 @@ type
       Sender     : TObject;
       ALogViewer : ILogViewer
     );
-
-//    procedure ViewsChanged(
-//      Sender     : TObject;
-//      const Item : ILogViewer;
-//      Action     : TCollectionChangedAction
-//    );
-
-//    procedure ProcessDroppedTab(
-//      Sender             : TObject;
-//      X, Y               : Integer;
-//      DragTabObject      : IDragTabObject;
-//      Cancelled          : Boolean;
-//      var TabDropOptions : TTabDropOptions
-//    );
 
   protected
     {$REGION 'property access methods'}
@@ -198,14 +178,13 @@ begin
     // ignore it
   end;
   FManager := TLogViewerFactories.CreateManager(Self, FSettings);
-  //Manager.Views.OnChanged.Add(
   Events.OnAddLogViewer.Add(EventsAddLogViewer);
   Events.OnActiveViewChange.Add(EventsActiveViewChange);
   FSettings.FormSettings.AssignTo(Self);
   FSettings.OnChanged.Add(SettingsChanged);
   FMainToolbar := TLogViewerFactories.CreateMainToolbar(
     FManager.AsComponent,
-    Self,
+    pnlTop,
     Actions,
     Menus
   );
@@ -247,8 +226,6 @@ var
 begin
   FVI := TFileVersionInfo.GetVersionInfo(Format('%s\%s.dll', [ExtractFileDir(ParamStr(0)), LIBZMQ]));
   ShowMessage(FVI.ToString);
-
-
 end;
 {$ENDREGION}
 
@@ -289,14 +266,6 @@ procedure TfrmMain.ctMainNeedDragImageControl(Sender: TObject; ATab: TChromeTab;
   var DragControl: TWinControl);
 begin
   DragControl := pnlMainClient;
-end;
-
-procedure TfrmMain.ctMainTabDragDrop(Sender: TObject; X, Y: Integer;
-  DragTabObject: IDragTabObject; Cancelled: Boolean;
-  var TabDropOptions: TTabDropOptions);
-begin
-  // TODO: not working yet
-  //ProcessDroppedTab(Sender, X, Y, DragTabObject, Cancelled, TabDropOptions);
 end;
 
 procedure TfrmMain.EventsActiveViewChange(Sender: TObject;
@@ -384,43 +353,6 @@ begin
   FDashboard.Show;
 end;
 
-{ Handles the drop operation of a dragged tab. }
-
-//procedure TfrmMain.ProcessDroppedTab(Sender: TObject; X, Y: Integer;
-//  DragTabObject: IDragTabObject; Cancelled: Boolean;
-//  var TabDropOptions: TTabDropOptions);
-//var
-//  WinX, WinY: Integer;
-//  NewForm   : TForm;
-//begin
-//  // Make sure that the drag drop hasn't been cancelled and that
-//  // we are not dropping on a TChromeTab control
-//  if (not Cancelled) and
-//    (DragTabObject.SourceControl <> DragTabObject.DockControl) and
-//    (DragTabObject.DockControl = nil) then
-//  begin
-//    // Find the drop position
-//    WinX := Mouse.CursorPos.X - DragTabObject.DragCursorOffset.X -
-//      ((Width - ClientWidth) div 2);
-//    WinY := Mouse.CursorPos.Y - DragTabObject.DragCursorOffset.Y -
-//      (Height - ClientHeight) + ((Width - ClientWidth) div 2);
-//
-//    // Create a new form
-//    NewForm := TForm.Create(Application);
-//
-//    // Set the new form position
-//    NewForm.Position := poDesigned;
-//    NewForm.Left     := WinX;
-//    NewForm.Top      := WinY;
-//
-//    // Show the form
-//    NewForm.Show;
-//
-//    // Remove the original tab
-//    TabDropOptions := [tdDeleteDraggedTab];
-//  end;
-//end;
-
 procedure TfrmMain.UpdateActions;
 begin
   inherited UpdateActions;
@@ -432,31 +364,22 @@ procedure TfrmMain.UpdateStatusBar;
 var
   N : Integer;
 begin
-//  if Assigned(Manager) and Assigned(Manager.ActiveView)
-//    and Assigned(Manager.ActiveView.Subscriber) then
-//  begin
-//    pnlSourceName.Caption := Manager.ActiveView.Subscriber.SourceName;
-//    N := Manager.ActiveView.MilliSecondsBetweenSelection;
-//    if N <> -1 then
-//      pnlDelta.Caption := Format('Delta: %d', [N])
-//    else
-//      pnlDelta.Caption := '';
-//  end
-//  else
-//  begin
-//    pnlSourceName.Caption := '';
-//    pnlDelta.Caption      := '';
-//  end;
+  if Assigned(Manager) and Assigned(Manager.ActiveView)
+    and Assigned(Manager.ActiveView.Subscriber) then
+  begin
+    pnlSourceName.Caption := Manager.ActiveView.Subscriber.SourceName;
+    N := Manager.ActiveView.MilliSecondsBetweenSelection;
+    if N <> -1 then
+      pnlDelta.Caption := Format('Delta: %d', [N])
+    else
+      pnlDelta.Caption := '';
+  end
+  else
+  begin
+    pnlSourceName.Caption := '';
+    pnlDelta.Caption      := '';
+  end;
 end;
-
-//procedure TfrmMain.ViewsChanged(Sender: TObject; const Item: ILogViewer;
-//  Action: TCollectionChangedAction);
-//begin
-//  if Action = caRemoved then
-//  begin
-//
-//  end;
-//end;
 {$ENDREGION}
 
 initialization

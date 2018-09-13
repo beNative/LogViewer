@@ -35,7 +35,8 @@ uses
 
   LogViewer.Comport.Settings.View, LogViewer.WinIPC.Settings.View,
   LogViewer.Watches.Settings.View, LogViewer.WinODS.Settings.View,
-  LogViewer.ZeroMQ.Settings.View, LogViewer.DisplayValues.Settings.View;
+  LogViewer.ZeroMQ.Settings.View, LogViewer.DisplayValues.Settings.View,
+  System.ImageList, Vcl.ImgList;
 
 type
   TfrmLogViewerSettings = class(TForm)
@@ -54,9 +55,17 @@ type
     btnClose                : TButton;
     tsDisplayValuesSettings : TTabSheet;
     tsAdvanced              : TTabSheet;
+    imlMain: TImageList;
+    actApply: TAction;
+    actCancel: TAction;
+    btnClose1: TButton;
+    btnCancel: TButton;
+    spl1: TSplitter;
     {$ENDREGION}
 
     procedure actCloseExecute(Sender: TObject);
+    procedure actApplyExecute(Sender: TObject);
+    procedure actCancelExecute(Sender: TObject);
 
   private
     FConfigTree                : TVirtualStringTree;
@@ -120,6 +129,8 @@ begin
 end;
 
 procedure TfrmLogViewerSettings.AfterConstruction;
+var
+  I : Integer;
 begin
   inherited AfterConstruction;
   CreateSettingsForms;
@@ -129,9 +140,15 @@ begin
   FConfigTree.OnFocusChanged := FConfigTreeFocusChanged;
   FConfigTree.TreeOptions.PaintOptions :=
     FConfigTree.TreeOptions.PaintOptions + [toShowTreeLines];
+  FConfigTree.Margins.Right := 0;
 
   FConfigTree.NodeDataSize := SizeOf(TConfigNode);
   BuildConfigNodes;
+  for I := 0 to pgcMain.PageCount - 1 do
+  begin
+    pgcMain.Pages[I].TabVisible := False;
+  end;
+  pgcMain.ActivePage := tsDisplayValuesSettings;
 end;
 
 procedure TfrmLogViewerSettings.BeforeDestruction;
@@ -173,6 +190,16 @@ end;
 {$ENDREGION}
 
 {$REGION 'action handlers'}
+procedure TfrmLogViewerSettings.actApplyExecute(Sender: TObject);
+begin
+// TODO
+end;
+
+procedure TfrmLogViewerSettings.actCancelExecute(Sender: TObject);
+begin
+// TODO
+end;
+
 procedure TfrmLogViewerSettings.actCloseExecute(Sender: TObject);
 begin
   Close;
@@ -198,6 +225,7 @@ var
 begin
   LNode := TConfigNode.Create('View settings');
   AddNodesToTree(nil, LNode);
+  AddNodesToTree(LNode.VTNode, TConfigNode.Create('Display settings', tsDisplayValuesSettings));
   AddNodesToTree(LNode.VTNode, TConfigNode.Create('Watches', tsWatches));
   AddNodesToTree(LNode.VTNode, TConfigNode.Create('Callstack', tsCallstack));
   LNode := TConfigNode.Create('Channel settings');
@@ -208,6 +236,7 @@ begin
   AddNodesToTree(LNode.VTNode, TConfigNode.Create('ZeroMQ', tsZeroMQ));
   LNode := TConfigNode.Create('General settings');
   AddNodesToTree(nil, LNode);
+  FConfigTree.FullExpand;
 end;
 
 procedure TfrmLogViewerSettings.CreateSettingsForms;

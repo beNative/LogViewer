@@ -41,6 +41,7 @@ type
   TfrmDisplayValuesSettings = class(TForm)
     pnlRight : TPanel;
     pnlLeft  : TPanel;
+    splVertical: TSplitter;
 
   private
     FSettings      : TDisplayValuesSettings;
@@ -97,9 +98,11 @@ begin
   FSettings   := ASettings;
   FSettings.OnChanged.Add(FFormatSettingsChanged);
   FInspector  := TzObjectInspectorFactory.Create(Self, pnlRight);
+  FInspector.AlignWithMargins := False;
 
   FListViewer := TVirtualStringTreeFactory.CreateList(Self, pnlLeft);
   FListViewer.Header.AutoSizeIndex := 0;
+  FListViewer.AlignWithMargins := False;
 
   FList := TCollections.CreateObjectList<TTextFormatSettings>(False);
   FList.Add(FSettings.TimeStamp);

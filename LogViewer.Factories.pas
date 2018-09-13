@@ -87,7 +87,7 @@ type
       AParent  : TWinControl;
       AActions : ILogViewerActions;
       AMenus   : ILogViewerMenus
-    ): TToolbar;
+    ): TToolBar;
 
     class function CreateComPortReceiver(
       AManager  : ILogViewerManager;
@@ -141,20 +141,26 @@ end;
 
 class function TLogViewerFactories.CreateMainToolbar(AOwner: TComponent;
   AParent: TWinControl; AActions: ILogViewerActions;
-  AMenus: ILogViewerMenus): TToolbar;
+  AMenus: ILogViewerMenus): TToolBar;
 var
   TBF : ILogViewerToolbarsFactory;
   I   : Integer;
+  TB  : TToolBar;
 begin
   Guard.CheckNotNull(AActions, 'AActions');
   Guard.CheckNotNull(AMenus, 'AMenus');
   TBF := TLogViewerToolbarsFactory.Create(AActions, AMenus);
-  Result := TBF.CreateMainToolbar(AOwner, AParent);
-  for I := 0 to Result.ButtonCount - 1 do
+  TB := TBF.CreateRightTopToolbar(AOwner, AParent);
+  TB.Align := alRight;
+  TB.AutoSize := True;
+  TB := TBF.CreateMainToolbar(AOwner, AParent);
+  for I := 0 to TB.ButtonCount - 1 do
   begin
-    if Result.Buttons[I].Style = tbsDropDown then
-      Result.Buttons[I].OnClick := OnDropdownMenuButtonClick;
+    if TB.Buttons[I].Style = tbsDropDown then
+      TB.Buttons[I].OnClick := OnDropdownMenuButtonClick;
   end;
+  TB.Align := alClient;
+  Result := TB;
 end;
 
 class function TLogViewerFactories.CreateManager(

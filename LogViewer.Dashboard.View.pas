@@ -54,14 +54,12 @@ type
     actInspectTreeview        : TAction;
     btnAddZeroMQNode          : TButton;
     btnAddZMQNodeLocalHost    : TButton;
-    btnInspectTreeview        : TButton;
     edtAddress                : TLabeledEdit;
     edtPort                   : TLabeledEdit;
     pgcMain                   : TPageControl;
     pnlRight: TPanel;
     pnlLogChannels            : TPanel;
     pnlLeft: TPanel;
-    pnlTop                    : TPanel;
     splVertical               : TSplitter;
     tsCOMPort                 : TTabSheet;
     tsWinIPC                  : TTabSheet;
@@ -157,11 +155,6 @@ type
       Column         : TColumnIndex;
       var Ghosted    : Boolean;
       var ImageIndex : TImageIndex
-    );
-    procedure FReceiverSubscriberListChanged(
-      Sender     : TObject;
-      const AKey : Integer;
-      Action     : TCollectionChangedAction
     );
 
   protected
@@ -318,15 +311,6 @@ end;
 
 {$REGION 'event handlers'}
 {$REGION 'FTreeView'}
-procedure TfrmDashboard.FReceiverSubscriberListChanged(Sender: TObject;
-  const AKey: Integer; Action: TCollectionChangedAction);
-begin
-//  Logger.Track('TfrmDashboard.FReceiverSubscriberListChanged');
-//  Logger.Send('AKey', AKey);
-//  Logger.Send('Action', TValue.From(Action));
-//  FTreeView.Refresh;
-end;
-
 procedure TfrmDashboard.FTreeViewBeforeCellPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
@@ -466,17 +450,17 @@ begin
     end
     else
     begin
-//      if Assigned(DN.Subscriber) then
-//      begin
-//        if Column =  0 then
-//          CellText := DN.Subscriber.SourceName
-//        else if Column =  1 then
-//          CellText := DN.Subscriber.Key
-//        else if Column =  2 then
-//          CellText := DN.Subscriber.SourceId.ToString
-//        else if Column =  3 then
-//          CellText := DN.Subscriber.MessageCount.ToString;
-//      end
+      if Assigned(DN.Subscriber) then
+      begin
+        if Column =  0 then
+          CellText := DN.Subscriber.SourceName
+        else if Column =  1 then
+          CellText := DN.Subscriber.Key
+        else if Column =  2 then
+          CellText := DN.Subscriber.SourceId.ToString
+        else if Column =  3 then
+          CellText := DN.Subscriber.MessageCount.ToString;
+      end
     end;
   end;
 end;
@@ -532,9 +516,7 @@ begin
       FZeroMQNode.Nodes.Remove(AKey);
     end;
   end;
-//
 end;
-
 {$ENDREGION}
 
 procedure TfrmDashboard.edtAddressExit(Sender: TObject);
@@ -562,8 +544,7 @@ begin
   FWinIPCReceiver := TLogViewerFactories.CreateWinIPCReceiver(FManager);
   FManager.AddReceiver(FWinIPCReceiver);
   FWinIPCReceiver.SubscriberList.OnKeyChanged.Add(FWinIPCReceiverSubscriberListChanged);
-  //FWinIPCReceiver.Enabled := FManager.Settings.WinIPCSettings.Enabled;
-  FWinIPCReceiver.Enabled := True;
+  FWinIPCReceiver.Enabled := FManager.Settings.WinIPCSettings.Enabled;
   FWinIPCNode := TDashboardNode.Create(nil, FTreeView, FWinIPCReceiver, nil);
   AddNodesToTree(FTreeView.RootNode, FWinIPCNode);
   FWinIPCNode.VTNode.CheckType := ctCheckBox;
@@ -621,6 +602,7 @@ begin
     Self, FManager.Settings.ComPortSettings
   );
   AssignFormParent(FComPortSettingsForm, tsCOMPort);
+  pgcMain.ActivePage := tsWinIPC;
 end;
 
 procedure TfrmDashboard.InitializeTreeView;
@@ -693,7 +675,7 @@ end;
 
 procedure TfrmDashboard.UpdateActions;
 begin
-//  FManager.Actions.UpdateActions;  // optimize for performance
+  FManager.Actions.UpdateActions;  // optimize for performance
   inherited UpdateActions;
 end;
 {$ENDREGION}

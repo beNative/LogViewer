@@ -189,7 +189,7 @@ begin
   FSubscriber := Value;
   if Assigned(Subscriber) then
   begin
-    //Subscriber.OnReceiveMessage.Add(FSubscriberReceiveMessage);
+    Subscriber.OnReceiveMessage.Add(FSubscriberReceiveMessage);
   end;
 end;
 

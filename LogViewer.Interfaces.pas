@@ -279,6 +279,11 @@ type
       AOwner  : TComponent;
       AParent : TWinControl
     ): TToolbar;
+
+    function CreateRightTopToolbar(
+      AOwner  : TComponent;
+      AParent : TWinControl
+    ): TToolbar;
   end;
 
 implementation

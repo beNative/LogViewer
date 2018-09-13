@@ -12,14 +12,22 @@ object frmDisplayValuesSettings: TfrmDisplayValuesSettings
   OldCreateOrder = False
   PixelsPerInch = 96
   TextHeight = 13
-  object pnlRight: TPanel
+  object splVertical: TSplitter
     Left = 145
     Top = 0
-    Width = 329
+    Width = 7
+    Height = 204
+  end
+  object pnlRight: TPanel
+    Left = 152
+    Top = 0
+    Width = 322
     Height = 204
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitLeft = 145
+    ExplicitWidth = 329
   end
   object pnlLeft: TPanel
     Left = 0
