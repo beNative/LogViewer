@@ -82,9 +82,13 @@ implementation
 {$R *.dfm}
 
 uses
+  Spring,
+
   DSharp.Windows.ControlTemplates,
 
-  DDuce.Factories.TreeViewPresenter, DDuce.Factories.VirtualTrees;
+  DDuce.Factories.TreeViewPresenter, DDuce.Factories.VirtualTrees,
+
+  DDuce.Logger;
 
 {$REGION 'construction and destruction'}
 constructor TfrmCallStackView.Create(AOwner: TComponent; AData: IObjectList;
@@ -94,6 +98,8 @@ var
   CD  : TColumnDefinition;
 begin
   inherited Create(AOwner);
+  Guard.CheckNotNull(AData, 'AData');
+  Guard.CheckNotNull(ADisplayValuesSettings, 'ADisplayValuesSettings');
   FDisplayValuesSettings := ADisplayValuesSettings;
   FCallStack := AData;
   FCallStack.OnChanged.Add(FCallStackChanged);
@@ -121,6 +127,7 @@ end;
 
 procedure TfrmCallStackView.BeforeDestruction;
 begin
+  Logger.Track(Self, 'BeforeDestruction');
   FCallStack.OnChanged.Remove(FCallStackChanged);
   FCallStack := nil;
   FDisplayValuesSettings := nil;
@@ -168,7 +175,6 @@ begin
   end;
   Result := True;
 end;
-
 {$ENDREGION}
 
 end.

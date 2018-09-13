@@ -36,8 +36,6 @@ type
     procedure Changed;
 
   public
-    procedure AfterConstruction; override;
-
     procedure Assign(Source: TPersistent); override;
 
     property OnChanged: IEvent<TNotifyEvent>
@@ -45,14 +43,6 @@ type
   end;
 
 implementation
-
-{$REGION 'construction and destruction'}
-procedure TCallStackSettings.AfterConstruction;
-begin
-  inherited;
-
-end;
-{$ENDREGION}
 
 {$REGION 'property access methods'}
 function TCallStackSettings.GetOnChanged: IEvent<TNotifyEvent>;

@@ -78,7 +78,7 @@ type
   protected
     function GetSettings: TWinODSSettings;
 
-    procedure SettingsChanged(Sender: TObject); override;
+    procedure SettingsChanged(Sender: TObject);
 
   public
     procedure AfterConstruction; override;

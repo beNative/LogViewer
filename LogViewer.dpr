@@ -3,6 +3,7 @@ program LogViewer;
 {$R *.dres}
 
 uses
+  LeakCheck,
   System.SysUtils,
   Vcl.Themes,
   Vcl.Styles,

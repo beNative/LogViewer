@@ -50,6 +50,7 @@ type
     function GetSettings: TComPortSettings;
 
     procedure FPollTimerTimer(Sender: TObject);
+    procedure SettingsChanged(Sender: TObject);
 
   protected
     {$REGION 'property access methods'}
@@ -140,6 +141,11 @@ begin
     LSubscriber.Poll;
   end;
   FPollTimer.Enabled := True;
+end;
+
+procedure TComPortChannelReceiver.SettingsChanged(Sender: TObject);
+begin
+//
 end;
 {$ENDREGION}
 

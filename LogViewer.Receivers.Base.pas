@@ -18,6 +18,9 @@ unit LogViewer.Receivers.Base;
 
 { Base class for all channel receivers (implementing IChannelReceiver). }
 
+{ A IChannelReceiver instance maintains a dictionary of subscribers
+  (ISubscriber) with SourceId as the key. }
+
 interface
 
 uses
@@ -52,7 +55,6 @@ type
       AThreadId         : Integer;
       const ASourceName : string
     ): ISubscriber; virtual;
-    procedure SettingsChanged(Sender: TObject); virtual;
     procedure DoReceiveMessage(
       AStream           : TStream;
       ASourceId         : Integer = 0;
@@ -103,6 +105,10 @@ end;
 procedure TChannelReceiver.BeforeDestruction;
 begin
   Logger.Track(Self, 'BeforeDestruction');
+  Logger.AddCheckPoint;
+  FSubscriberList.OnChanged.Clear;
+  FSubscriberList.OnValueChanged.Clear;
+  FSubscriberList.OnKeyChanged.Clear;
   FSubscriberList.Clear;
   FSubscriberList := nil;
   inherited BeforeDestruction;
@@ -125,7 +131,6 @@ function TChannelReceiver.CreateSubscriber(ASourceId: Integer; AThreadId: Intege
 begin
   Result := nil;
 end;
-
 {$ENDREGION}
 
 {$REGION 'event dispatch methods'}
@@ -136,6 +141,7 @@ var
 begin
   if not FSubscriberList.TryGetValue(ASourceId, LSubscriber) then
   begin
+    Logger.Info('CreateSubscriber(%d, %d, %s)', [ASourceId, AThreadId, ASourceName]);
     LSubscriber := CreateSubscriber(ASourceId, AThreadId, ASourceName);
     FSubscriberList.AddOrSetValue(ASourceId, LSubscriber);
   end;
@@ -172,13 +178,6 @@ end;
 function TChannelReceiver.GetSubscriberList: IDictionary<Integer, ISubscriber>;
 begin
   Result := FSubscriberList;
-end;
-{$ENDREGION}
-
-{$REGION 'event handlers'}
-procedure TChannelReceiver.SettingsChanged(Sender: TObject);
-begin
-//
 end;
 {$ENDREGION}
 

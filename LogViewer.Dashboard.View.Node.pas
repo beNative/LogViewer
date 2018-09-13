@@ -16,6 +16,8 @@
 
 unit LogViewer.Dashboard.View.Node;
 
+{ Node data structure for the Dashboard treeview. }
+
 interface
 
 uses
@@ -43,9 +45,10 @@ type
   TDashboardNode = class
   private
     FVTNode     : PVirtualNode;
-    FNodes      : Lazy<IList<TDashboardNode>>;
+    //FNodes      : Lazy<IList<TDashboardNode>>;
+    FNodes      : IDictionary<Integer, TDashboardNode>;
     FReceiver   : IChannelReceiver;
-    FSubscriber : ISubscriber;
+    FSubscriber : Weak<ISubscriber>;
     FVTree      : TVirtualStringTree;
     FTreeForm   : TForm; // form owning the treeview control
 
@@ -57,7 +60,7 @@ type
     function GetCount: Integer;
     function GetReceiver: IChannelReceiver;
     procedure SetReceiver(const Value: IChannelReceiver);
-    function GetNodes: IList<TDashboardNode>;
+    function GetNodes: IDictionary<Integer, TDashboardNode>;
     function GetVTNode: PVirtualNode;
     procedure SetVTNode(const Value: PVirtualNode);
     {$ENDREGION}
@@ -76,13 +79,12 @@ type
       const Item : ISubscriber;
       Action     : TCollectionChangedAction
     );
-
     procedure FSubscriberReceiveMessage(
       Sender    : TObject;
       AStream   : TStream
     );
 
-    property Nodes: IList<TDashboardNode>
+    property Nodes: IDictionary<Integer, TDashboardNode>
       read GetNodes;
 
     property Count: Integer
@@ -113,13 +115,14 @@ constructor TDashboardNode.Create(AVTNode: PVirtualNode;
   AVTree: TVirtualStringTree; AReceiver: IChannelReceiver;
   ASubscriber: ISubscriber);
 begin
-  FNodes.Create(function: IList<TDashboardNode>
-    begin
-      Result := TCollections.CreateObjectList<TDashboardNode>(False);
-    end
-  );
-  FVTNode   := AVTNode;
-  FVTree    := AVTree;
+//  FNodes.Create(function: IList<TDashboardNode>
+//    begin
+//      Result := TCollections.CreateObjectList<TDashboardNode>;//(False);
+//    end
+//  );
+  FNodes := TCollections.CreateDictionary<Integer, TDashboardNode>;
+  FVTNode := AVTNode;
+  FVTree  := AVTree;
   if Assigned(FVTree) and Assigned(FVTree.Owner) and (FVTree.Owner is TForm) then
     FTreeForm := TForm(FVTree.Owner);
   if not Assigned(ASubscriber) then
@@ -130,10 +133,11 @@ end;
 procedure TDashboardNode.BeforeDestruction;
 begin
   Logger.Track(Self, 'BeforeDestruction');
-
   FVTree      := nil;
   FVTNode     := nil;
+  //Logger.SendInterface('FReceiver', FReceiver);
   FReceiver   := nil;
+  //Logger.SendInterface('FSubscriber', FSubscriber);
   FSubscriber := nil;
   FTreeForm   := nil;
   inherited BeforeDestruction;
@@ -143,20 +147,22 @@ end;
 {$REGION 'property access methods'}
 function TDashboardNode.GetCount: Integer;
 begin
-  if FNodes.IsValueCreated then
+  //if FNodes.IsValueCreated then
     Result := Nodes.Count
-  else
-    Result := 0;
+//  else
+//    Result := 0;
 end;
 
-function TDashboardNode.GetNodes: IList<TDashboardNode>;
+function TDashboardNode.GetNodes: IDictionary<Integer, TDashboardNode>;
 begin
-  Result := FNodes.Value;
+  //Result := FNodes.Value;
+  Result := FNodes;
 end;
 
 function TDashboardNode.GetReceiver: IChannelReceiver;
 begin
   Result := FReceiver;
+  //Result := FReceiver.Target;
 end;
 
 procedure TDashboardNode.SetReceiver(const Value: IChannelReceiver);
@@ -165,24 +171,25 @@ begin
   begin
     Nodes.Clear;
     FReceiver := Value;
-    if Assigned(FReceiver) then
+    if Assigned(Receiver) then
     begin
-      FReceiver.SubscriberList.OnValueChanged.Add(FReceiverSubscriberListChanged);
+      Receiver.SubscriberList.OnValueChanged.Add(FReceiverSubscriberListChanged);
     end;
   end;
 end;
 
 function TDashboardNode.GetSubscriber: ISubscriber;
 begin
-  Result := FSubscriber;
+  //Result := FSubscriber;
+  Result := FSubscriber.Target;
 end;
 
 procedure TDashboardNode.SetSubscriber(const Value: ISubscriber);
 begin
   FSubscriber := Value;
-  if Assigned(FSubscriber) then
+  if Assigned(Subscriber) then
   begin
-    FSubscriber.OnReceiveMessage.Add(FSubscriberReceiveMessage);
+    //Subscriber.OnReceiveMessage.Add(FSubscriberReceiveMessage);
   end;
 end;
 
@@ -210,16 +217,8 @@ var
   LDelete : TDashboardNode;
   I       : Integer;
 begin
-
   if Action = caAdded then
   begin
-//    for DN in Nodes do
-//    begin
-//      if Item.SourceName.Contains(DN.Subscriber.Port)
-//      and Item.SourceName.Contains(DN.Subscriber.Address) then
-//        DN.FLogQueue := Item;
-//    end;
-
     DN := TDashboardNode.Create(nil, FVTree, FReceiver, Item);
     DN.VTNode := FVTree.AddChild(FVTNode, DN);
     DN.VTNode.CheckType := ctCheckBox;
@@ -227,26 +226,36 @@ begin
       DN.VTNode.CheckState := csCheckedNormal
     else
       DN.VTNode.CheckState := csUncheckedNormal;
-    Nodes.Add(DN);
+    Nodes.Add(Item.SourceId, DN);
     FVTree.FullExpand;
   end
-  else if Action = caRemoved then
-  begin
-    if FNodes.IsValueCreated then
-    begin
-      for I := 0 to Nodes.Count - 1 do
-      begin
-        DN := Nodes[I];
-        if DN.Subscriber = Item then
-          LDelete := DN;
-      end;
-      if Assigned(LDelete) then
-      begin
-        Nodes.Remove(LDelete);
-        FVTree.InvalidateNode(FVTNode);
-      end;
-    end;
-  end;
+//  else if Action = caRemoved then
+//  begin
+//    //if FNodes.IsValueCreated then
+//    begin
+//    //  Logger.Send('ReceiverSubscriberCount',  Receiver.SubscriberList.Count);
+//      //FVTree.ReinitNode(FVTree.RootNode, True);
+//      if Assigned(Nodes) then
+//      begin
+//        for I := 0 to Nodes.Count - 1 do
+//        begin
+//          DN := Nodes[I];
+//          //Logger.SendObject(DN);
+//          if Assigned(DN.Subscriber) and (DN.Subscriber = Item) then
+//            LDelete := DN;
+//        end;
+//        if Assigned(LDelete) then
+//        begin
+//          //DN.Subscriber := nil;
+//          FVTree.DeleteNode(LDelete.VTNode);
+//          //Nodes.Remove(LDelete);
+//
+//          //FVTree.ReinitNode(FVTree.RootNode, True);
+//          //FVTree. InvalidateNode(FVTNode);
+//        end;
+//      end;
+//    end;
+//  end;
 end;
 
 procedure TDashboardNode.FSubscriberReceiveMessage(Sender: TObject;

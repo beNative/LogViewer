@@ -32,7 +32,7 @@ uses
 
   VirtualTrees,
 
-  Spring.Collections,
+  Spring, Spring.Collections,
 
   DDuce.Editor.Interfaces, DDuce.Logger.Interfaces, DDuce.Components.ValueList,
   DDuce.Components.DBGridView,
@@ -113,6 +113,7 @@ type
       Shift   : TShiftState
     );
     procedure chkAutoFilterClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
 
   private class var
     FCounter : Integer;
@@ -343,7 +344,7 @@ uses
   System.StrUtils, System.UITypes, System.DateUtils, System.Math,
   System.UIConsts, System.Threading,
 
-  Spring, Spring.Helpers,
+  Spring.Helpers,
 
   DDuce.Factories.VirtualTrees, DDuce.Editor.Factories, DDuce.Reflect,
   DDuce.Utils, DDuce.Factories.GridView, DDuce.Logger,
@@ -359,9 +360,12 @@ constructor TfrmMessageList.Create(AOwner: TComponent; AManager
   : ILogViewerManager; ASubscriber: ISubscriber; ASettings: TMessageListSettings);
 begin
   inherited Create(AOwner);
+  Guard.CheckNotNull(AManager, 'AManager');
+  Guard.CheckNotNull(ASubscriber, 'ASubscriber');
+  Guard.CheckNotNull(ASettings, 'ASettings');
+  FManager    := AManager;
   FSubscriber := ASubscriber;
-  FManager  := AManager;
-  FSettings := ASettings;
+  FSettings   := ASettings;
 end;
 
 procedure TfrmMessageList.AfterConstruction;
@@ -375,9 +379,11 @@ begin
   CreateLogTreeView;
   CreateWatchesView;
   CreateCallStackView;
-  FSubscriber.OnReceiveMessage.Add(FSubscriberReceiveMessage);
   Caption := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
+
+  Subscriber.OnReceiveMessage.Add(FSubscriberReceiveMessage);
   FSettings.OnChanged.Add(FSettingsChanged);
+
   FLogTreeView.PopupMenu := Manager.Menus.LogTreeViewerPopupMenu;
 
   FValueList        := TValueList.Create(Self);
@@ -393,21 +399,17 @@ end;
 procedure TfrmMessageList.BeforeDestruction;
 begin
   Logger.Track(Self, 'BeforeDestruction');
-  FSubscriber.OnReceiveMessage.Clear;
-
-  FreeAndNil(FWatchesView);
-  FreeAndNil(FWatches);
   FSettings.LeftPanelWidth  := pnlLeft.Width;
   FSettings.RightPanelWidth := pnlRight.Width;
-//  FSubscriber.OnReceiveMessage.Remove(FSubscriberReceiveMessage);
-  FSettings.OnChanged.Remove(FSettingsChanged);
-
-  FSubscriber.Receiver.SubscriberList.Remove(FSubscriber.SourceId);
-
+  Subscriber.OnReceiveMessage.Remove(FSubscriberReceiveMessage);
 
   FSubscriber := nil;
-  FManager    := nil;
-  FSettings   := nil;
+  FSettings.OnChanged.Remove(FSettingsChanged);
+  FSettings := nil;
+  FreeAndNil(FWatches);
+  FreeAndNIl(FWatchesView);
+  FreeAndNil(FCallStackView);
+
   inherited BeforeDestruction;
 end;
 
@@ -821,7 +823,6 @@ procedure TfrmMessageList.FLogTreeViewHotChange(Sender: TBaseVirtualTree;
 var
   LN1 : TLogNode;
   LN2 : TLogNode;
-  N   : Int64;
 begin
   LN1 := Sender.GetNodeData<TLogNode>(NewNode);
   LN2 := Sender.GetNodeData<TLogNode>(Sender.FocusedNode);
@@ -1111,6 +1112,11 @@ end;
 procedure TfrmMessageList.FSettingsChanged(Sender: TObject);
 begin
   ApplySettings;
+end;
+
+procedure TfrmMessageList.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := caFree;
 end;
 {$ENDREGION}
 

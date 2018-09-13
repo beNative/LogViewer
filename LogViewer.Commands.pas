@@ -68,12 +68,16 @@ uses
 {$REGION 'construction and destruction'}
 constructor TLogViewerCommands.Create(AManager: ILogViewerManager);
 begin
+  inherited Create;
+  Guard.CheckNotNull(AManager, 'AManager');
   FManager := AManager;
 end;
 
 procedure TLogViewerCommands.BeforeDestruction;
 begin
+  Logger.Track(Self, 'BeforeDestruction');
   FManager := nil;
+  inherited BeforeDestruction;
 end;
 {$ENDREGION}
 

@@ -11,6 +11,7 @@ object frmMessageList: TfrmMessageList
   Font.Style = []
   OldCreateOrder = False
   ShowHint = True
+  OnClose = FormClose
   PixelsPerInch = 96
   TextHeight = 13
   object splVertical: TSplitter
@@ -74,7 +75,7 @@ object frmMessageList: TfrmMessageList
         Top = 97
         Width = 430
         Height = 624
-        ActivePage = tsDataSet
+        ActivePage = tsTextViewer
         Align = alClient
         Style = tsFlatButtons
         TabOrder = 0
@@ -88,10 +89,6 @@ object frmMessageList: TfrmMessageList
         end
         object tsTextViewer: TTabSheet
           Caption = 'Text viewer'
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object pnlTextViewer: TPanel
             AlignWithMargins = True
             Left = 3
@@ -618,7 +615,7 @@ object frmMessageList: TfrmMessageList
     Left = 607
     Top = 150
     Bitmap = {
-      494C010116001900100010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010116001900240010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

@@ -80,7 +80,7 @@ type
     {$ENDREGION}
 
     procedure FTimerTimer(Sender: TObject);
-    procedure SettingsChanged(Sender: TObject); override;
+    procedure SettingsChanged(Sender: TObject);
 
     function CreateSubscriber(
       ASourceId         : Integer;

@@ -86,6 +86,7 @@ type
     procedure actInspectTreeviewExecute(Sender: TObject);
     procedure actAddZMQNodeForLogViewerExecute(Sender: TObject);
     procedure actSubscribeToListExecute(Sender: TObject);
+
     procedure edtAddressExit(Sender: TObject);
 
   private
@@ -96,6 +97,10 @@ type
     FWinIPCReceiver      : IChannelReceiver;
     FComPortReceiver     : IChannelReceiver;
     FWinODSReceiver      : IChannelReceiver;
+    FZeroMQNode          : TDashboardNode;
+    FWinIPCNode          : TDashboardNode;
+    FComPortNode         : TDashboardNode;
+    FWinODSNode          : TDashboardNode;
     FComPortSettingsForm : TfrmComPortSettings;
 
     procedure FTreeViewFreeNode(
@@ -134,9 +139,14 @@ type
       Column : TColumnIndex
     );
 
-    procedure FReceiverSubscriberListChanged(
+    procedure FWinIPCReceiverSubscriberListChanged(
       Sender     : TObject;
-      const AKey       : Integer;
+      const AKey : Integer;
+      Action     : TCollectionChangedAction
+    );
+    procedure FZeroMQReceiverSubscriberListChanged(
+      Sender     : TObject;
+      const AKey : Integer;
       Action     : TCollectionChangedAction
     );
 
@@ -147,6 +157,11 @@ type
       Column         : TColumnIndex;
       var Ghosted    : Boolean;
       var ImageIndex : TImageIndex
+    );
+    procedure FReceiverSubscriberListChanged(
+      Sender     : TObject;
+      const AKey : Integer;
+      Action     : TCollectionChangedAction
     );
 
   protected
@@ -303,10 +318,13 @@ end;
 
 {$REGION 'event handlers'}
 {$REGION 'FTreeView'}
-procedure TfrmDashboard.FReceiverSubscriberListChanged(Sender: TObject; const AKey       : Integer;
-  Action: TCollectionChangedAction);
+procedure TfrmDashboard.FReceiverSubscriberListChanged(Sender: TObject;
+  const AKey: Integer; Action: TCollectionChangedAction);
 begin
-  FTreeView.Refresh;
+//  Logger.Track('TfrmDashboard.FReceiverSubscriberListChanged');
+//  Logger.Send('AKey', AKey);
+//  Logger.Send('Action', TValue.From(Action));
+//  FTreeView.Refresh;
 end;
 
 procedure TfrmDashboard.FTreeViewBeforeCellPaint(Sender: TBaseVirtualTree;
@@ -390,8 +408,16 @@ procedure TfrmDashboard.FTreeViewFreeNode(Sender: TBaseVirtualTree;
 var
   DN : TDashboardNode;
 begin
+  Logger.Track(Self, 'FTreeViewFreeNode');
+  if not Assigned(Node) then
+    Exit;
+
   DN := Sender.GetNodeData<TDashboardNode>(Node);
-  DN.Free;
+  if Assigned(DN) then
+  begin
+    Logger.SendObject('DN', DN);
+    DN.Free;
+  end;
 end;
 
 procedure TfrmDashboard.FTreeViewGetImageIndex(Sender: TBaseVirtualTree;
@@ -425,31 +451,32 @@ var
   DN : TDashboardNode;
 begin
   CellText := '';
+  if not Assigned(Node) then
+   Exit;
+
   DN := Sender.GetNodeData<TDashboardNode>(Node);
-  if Sender.GetNodeLevel(Node) = 0 then
+  if Assigned(DN) then
   begin
-    if Column =  0 then
-      CellText := DN.Receiver.Name
-    else
-      CellText := '';
-  end
-  else
-  begin
-    if Assigned(DN.Subscriber) then
+    if Sender.GetNodeLevel(Node) = 0 then
     begin
       if Column =  0 then
-        CellText := DN.Subscriber.SourceName
-      else if Column =  2 then
-        CellText := DN.Subscriber.SourceId.ToString
-      else if Column =  3 then
-        CellText := DN.Subscriber.MessageCount.ToString;
+        CellText := DN.Receiver.Name
+      else
+        CellText := '';
     end
-    else if Assigned(DN.Subscriber) then
+    else
     begin
-      if Column =  1 then
-        CellText := DN.Subscriber.Key
-//      else if Column =  2 then
-//        CellText := DN.Subscriber.Port
+//      if Assigned(DN.Subscriber) then
+//      begin
+//        if Column =  0 then
+//          CellText := DN.Subscriber.SourceName
+//        else if Column =  1 then
+//          CellText := DN.Subscriber.Key
+//        else if Column =  2 then
+//          CellText := DN.Subscriber.SourceId.ToString
+//        else if Column =  3 then
+//          CellText := DN.Subscriber.MessageCount.ToString;
+//      end
     end;
   end;
 end;
@@ -464,20 +491,56 @@ begin
   ChildCount := DN.Count;
   if ChildCount > 0 then
   begin
-    for N in DN.Nodes do
+    for N in DN.Nodes.Values do
     begin
       N.VTNode := Sender.AddChild(Node, N);
     end;
   end;
 end;
 
+procedure TfrmDashboard.FWinIPCReceiverSubscriberListChanged(Sender: TObject;
+  const AKey: Integer; Action: TCollectionChangedAction);
+var
+  DN      : TDashboardNode;
+  LDelete : TDashboardNode;
+begin
+  LDelete := nil;
+  if Action = caRemoved then
+  begin
+    LDelete := FWinIPCNode.Nodes.GetValueOrDefault(AKey);
+    if Assigned(LDelete) then
+    begin
+      FTreeView.DeleteNode(LDelete.VTNode);
+      FWinIPCNode.Nodes.Remove(AKey);
+    end;
+  end;
+end;
+
+procedure TfrmDashboard.FZeroMQReceiverSubscriberListChanged(Sender: TObject;
+  const AKey: Integer; Action: TCollectionChangedAction);
+var
+  DN      : TDashboardNode;
+  LDelete : TDashboardNode;
+begin
+  LDelete := nil;
+  if Action = caRemoved then
+  begin
+    LDelete := FZeroMQNode.Nodes.GetValueOrDefault(AKey);
+    if Assigned(LDelete) then
+    begin
+      FTreeView.DeleteNode(LDelete.VTNode);
+      FZeroMQNode.Nodes.Remove(AKey);
+    end;
+  end;
+//
+end;
+
 {$ENDREGION}
-//procedure TfrmDashboard.FChannelReceiverNewLogQueue(Sender: TObject;
-//  ALogQueue: ILogQueue);
-//begin
-//  FTreeView.Refresh;
-//  FTreeView.ReinitNode(FTreeView.RootNode, True);
-//end;
+
+procedure TfrmDashboard.edtAddressExit(Sender: TObject);
+begin
+  edtAddress.Hint := GetIP(edtAddress.Text);
+end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
@@ -489,26 +552,25 @@ var
 begin
   LVTNode := FTreeView.AddChild(AParent, ANode);
   ANode.VTNode := LVTNode;
-  for LSubNode in ANode.Nodes do
+  for LSubNode in ANode.Nodes.Values do
     AddNodesToTree(LVTNode, LSubNode);
 end;
 
 procedure TfrmDashboard.CreateChannelReceivers;
-var
-  LNode : TDashboardNode;
 begin
   FZeroMQ := TZeroMQ.Create;
   FWinIPCReceiver := TLogViewerFactories.CreateWinIPCReceiver(FManager);
   FManager.AddReceiver(FWinIPCReceiver);
-  //R.OnNewLogQueue.Add(FChannelReceiverNewLogQueue);
-  FWinIPCReceiver.Enabled := FManager.Settings.WinIPCSettings.Enabled;
-  LNode := TDashboardNode.Create(nil, FTreeView, FWinIPCReceiver, nil);
-  AddNodesToTree(FTreeView.RootNode, LNode);
-  LNode.VTNode.CheckType := ctCheckBox;
+  FWinIPCReceiver.SubscriberList.OnKeyChanged.Add(FWinIPCReceiverSubscriberListChanged);
+  //FWinIPCReceiver.Enabled := FManager.Settings.WinIPCSettings.Enabled;
+  FWinIPCReceiver.Enabled := True;
+  FWinIPCNode := TDashboardNode.Create(nil, FTreeView, FWinIPCReceiver, nil);
+  AddNodesToTree(FTreeView.RootNode, FWinIPCNode);
+  FWinIPCNode.VTNode.CheckType := ctCheckBox;
   if FWinIPCReceiver.Enabled then
-    LNode.VTNode.CheckState := csCheckedNormal
+    FWinIPCNode.VTNode.CheckState := csCheckedNormal
   else
-    LNode.VTNode.CheckState := csUncheckedNormal;
+    FWinIPCNode.VTNode.CheckState := csUncheckedNormal;
 
 //  FWinODSReceiver := TLogViewerFactories.CreateWinODSReceiver(FManager);
 //  FManager.AddReceiver(FWinODSReceiver);
@@ -523,34 +585,28 @@ begin
 
   FZeroMQReceiver := TLogViewerFactories.CreateZeroMQReceiver(FManager, FZeroMQ);
   FManager.AddReceiver(FZeroMQReceiver);
-  FZeroMQReceiver.SubscriberList.OnKeyChanged.Add(FReceiverSubscriberListChanged);
-  //R.OnNewLogQueue.Add(FChannelReceiverNewLogQueue);
+  FZeroMQReceiver.SubscriberList.OnKeyChanged.Add(FZeroMQReceiverSubscriberListChanged);
   FZeroMQReceiver.Enabled := FManager.Settings.ZeroMQSettings.Enabled;
-  LNode := TDashboardNode.Create(nil, FTreeView, FZeroMQReceiver, nil);
-  AddNodesToTree(FTreeView.RootNode, LNode);
-  LNode.VTNode.CheckType := ctCheckBox;
+  FZeroMQNode := TDashboardNode.Create(nil, FTreeView, FZeroMQReceiver, nil);
+  AddNodesToTree(FTreeView.RootNode, FZeroMQNode);
+  FZeroMQNode.VTNode.CheckType := ctCheckBox;
   if FZeroMQReceiver.Enabled then
-    LNode.VTNode.CheckState := csCheckedNormal
+    FZeroMQNode.VTNode.CheckState := csCheckedNormal
   else
-    LNode.VTNode.CheckState := csUncheckedNormal;
+    FZeroMQNode.VTNode.CheckState := csUncheckedNormal;
 
   FComPortReceiver := TLogViewerFactories.CreateComPortReceiver(
     FManager,FManager.Settings.ComPortSettings
   );
   FManager.AddReceiver(FComPortReceiver);
   //FComPortReceiver.Enabled := FManager.Settings.ComPortSettings.Enabled;
-  LNode := TDashboardNode.Create(nil, FTreeView, FComPortReceiver, nil);
-  AddNodesToTree(FTreeView.RootNode, LNode);
-  LNode.VTNode.CheckType := ctCheckBox;
-  if FComPortReceiver.Enabled then
-    LNode.VTNode.CheckState := csCheckedNormal
-  else
-    LNode.VTNode.CheckState := csUncheckedNormal;
-end;
-
-procedure TfrmDashboard.edtAddressExit(Sender: TObject);
-begin
-  edtAddress.Hint := GetIP(edtAddress.Text);
+//  FComPortNode := TDashboardNode.Create(nil, FTreeView, FComPortReceiver, nil);
+//  AddNodesToTree(FTreeView.RootNode, FComPortNode);
+//  FComPortNode.VTNode.CheckType := ctCheckBox;
+//  if FComPortReceiver.Enabled then
+//    FComPortNode.VTNode.CheckState := csCheckedNormal
+//  else
+//    FComPortNode.VTNode.CheckState := csUncheckedNormal;
 end;
 
 procedure TfrmDashboard.InitializeControls;

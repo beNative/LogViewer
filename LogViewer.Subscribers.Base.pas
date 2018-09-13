@@ -30,7 +30,7 @@ uses
 type
   TSubscriber = class(TInterfacedObject, ISubscriber)
   private
-    FReceiver         : Weak<IChannelReceiver>; // weak reference!
+    FReceiver         : Weak<IChannelReceiver>; // weak reference
     FOnReceiveMessage : Event<TReceiveMessageEvent>;
     FEnabled          : Boolean;
     FMessageCount     : Int64;
@@ -106,7 +106,9 @@ end;
 
 procedure TSubscriber.BeforeDestruction;
 begin
-  Logger.Track('TSubscriber.BeforeDestruction');
+  Logger.Track(Self, 'BeforeDestruction');
+  Logger.Send('SourceId', SourceId);
+  Logger.Send('SourceName', SourceName);
   FOnReceiveMessage.Clear;
   FReceiver := nil;
   inherited BeforeDestruction;

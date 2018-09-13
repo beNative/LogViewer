@@ -1,9 +1,9 @@
 {
 	"FormSettings": {
-		"Left": 593,
-		"Top": 213,
-		"Width": 1385,
-		"Height": 784,
+		"Left": 531,
+		"Top": 159,
+		"Width": 1755,
+		"Height": 712,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -11,8 +11,8 @@
 		"AutoScrollMessages": false,
 		"AutoFilterMessages": true,
 		"DynamicAutoSizeColumns": false,
-		"LeftPanelWidth": 343,
-		"RightPanelWidth": 345
+		"LeftPanelWidth": 484,
+		"RightPanelWidth": 496
 	},
 	"WinODSSettings": {
 		"Enabled": false

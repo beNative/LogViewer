@@ -240,6 +240,7 @@ type
     {$ENDREGION}
 
     procedure AddView(ALogViewer: ILogViewer);
+    function DeleteView(AView: ILogViewer): Boolean;
     procedure AddReceiver(AReceiver: IChannelReceiver);
 
     function AsComponent: TComponent;

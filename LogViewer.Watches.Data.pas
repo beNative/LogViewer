@@ -31,15 +31,15 @@ uses
   Spring.Collections;
 
 type
-  TUpdateWatchEvent = procedure (
-    const AName  : string;
-    const AValue : string
-  ) of object;
-
-  TNewWatchEvent = procedure (
-    const AName : string;
-    AId         : Int64
-  ) of object;
+//  TUpdateWatchEvent = procedure (
+//    const AName  : string;
+//    const AValue : string
+//  ) of object;
+//
+//  TNewWatchEvent = procedure (
+//    const AName : string;
+//    AId         : Int64
+//  ) of object;
 
   TWatchValue = class
   private
@@ -134,8 +134,8 @@ type
   TWatchList = class
   private
     FList          : IList<TWatch>;
-    FOnNewWatch    : TNewWatchEvent;
-    FOnUpdateWatch : TUpdateWatchEvent;
+//    FOnNewWatch    : TNewWatchEvent;
+//    FOnUpdateWatch : TUpdateWatchEvent;
 
     function GetCount: Integer;
     function GetItems(AValue: Integer): TWatch;
@@ -166,13 +166,11 @@ type
     property Count: Integer
       read GetCount;
 
-    // not used yet
-    property OnUpdateWatch: TUpdateWatchEvent
-      read FOnUpdateWatch write FOnUpdateWatch;
-
-    // not used yet
-    property OnNewWatch: TNewWatchEvent
-      read FOnNewWatch write FOnNewWatch;
+//    property OnUpdateWatch: TUpdateWatchEvent
+//      read FOnUpdateWatch write FOnUpdateWatch;
+//
+//    property OnNewWatch: TNewWatchEvent
+//      read FOnNewWatch write FOnNewWatch;
   end;
 
 implementation
@@ -185,6 +183,7 @@ uses
 procedure TWatch.BeforeDestruction;
 begin
   Logger.Track(Self, 'BeforeDestruction');
+  FList.Clear;
   FList := nil;
   inherited BeforeDestruction;
 end;
@@ -348,8 +347,8 @@ begin
   if I = -1 then
   begin
     I := FList.Add(TWatch.Create(AName, AValueType, AId, AOnlyTrackChanges));
-    if not ASkipOnNewWatchEvent then
-      FOnNewWatch(AName, I);
+//    if not ASkipOnNewWatchEvent then
+//      FOnNewWatch(AName, I);
   end;
   FList[I].AddValue(AValue, AId, ATimeStamp);
 end;
@@ -360,17 +359,17 @@ begin
 end;
 
 procedure TWatchList.Update(AId: Integer);
-var
-  W : TWatch;
+//var
+//  W : TWatch;
 begin
-  if Assigned(FOnUpdateWatch) then
-  begin
-    for W in FList do
-    begin
-      if W.Find(AId) then
-        FOnUpdateWatch(W.Name, W.Value);
-    end;
-  end;
+//  if Assigned(FOnUpdateWatch) then
+//  begin
+//    for W in FList do
+//    begin
+//      if W.Find(AId) then
+//        FOnUpdateWatch(W.Name, W.Value);
+//    end;
+//  end;
 end;
 {$ENDREGION}
 {$ENDREGION}

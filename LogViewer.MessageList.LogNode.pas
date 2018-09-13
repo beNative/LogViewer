@@ -52,11 +52,11 @@ type
     FLogLevel    : Byte;
     FMessageData : TStream; // binary data stream for bitmaps, etc.
     FTimeStamp   : TDateTime;
-    function GetLogLevel: Byte;
-    procedure SetLogLevel(const Value: Byte);
 
   protected
     {$REGION 'property access methods'}
+    function GetLogLevel: Byte;
+    procedure SetLogLevel(const Value: Byte);
     function GetMessageData: TStream;
     procedure SetMessageData(const Value: TStream);
     function GetTimeStamp: TDateTime;

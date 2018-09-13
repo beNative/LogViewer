@@ -169,6 +169,7 @@ type
     {$ENDREGION}
 
     function AsComponent: TComponent;
+    function DeleteView(AView: ILogViewer): Boolean;
 
     procedure FReceiverSubscriberListChanged(
       Sender     : TObject;
@@ -294,7 +295,16 @@ begin
   Logger.Track(Self, 'BeforeDestruction');
   FreeAndNil(FEvents);
   FreeAndNil(FCommands);
+//  Logger.SendInterface('FReceivers', FReceivers);
+//  Logger.SendInterface('FReceivers', FReceivers);
+//  Logger.SendInterface('FViewList', FViewList);
+  FViewList.OnChanged.Clear;
+  FViewList.Clear;
+
+  FReceivers.Clear;
+//  Logger.SendInterface('FViewList', FViewList);
   FViewList       := nil;
+  FReceivers      := nil;
   FSettings       := nil;
   FEditorSettings := nil;
   FEditorManager  := nil;
@@ -305,6 +315,31 @@ constructor TdmManager.Create(AOwner: TComponent; ASettings: TLogViewerSettings)
 begin
   inherited Create(AOwner);
   FSettings := ASettings;
+end;
+
+function TdmManager.DeleteView(AView: ILogViewer): Boolean;
+var
+  I : Integer;
+  V : ILogViewer;
+  S : ISubscriber;
+begin
+  Logger.Track(Self, 'DeleteView');
+  if Assigned(AView) then
+  begin
+    I := FViewList.IndexOf(AView);
+//    if ActiveView = AView then // select a new active view
+//    begin
+//      V := Views[I];
+//      V.Activate
+//    end;
+    S := AView.Subscriber;
+    S.Receiver.SubscriberList.Remove(S.SourceId);
+    FViewList[I].Form.Close; // instance still exists after closing
+    FViewList.Delete(I); // automatically frees the instance
+    Result := True;
+  end
+  else
+    Result := False;
 end;
 {$ENDREGION}
 
@@ -647,10 +682,10 @@ procedure TdmManager.FViewListChanged(Sender: TObject; const Item: ILogViewer;
 begin
   if Action = caRemoved then
   begin
-    Item.Subscriber.Receiver.SubscriberList.Remove(Item.Subscriber.SourceId);
+//    Logger.Info('Subscriber %d removed', [Item.Subscriber.SourceId]);
+//    Item.Subscriber.Receiver.SubscriberList.Remove(Item.Subscriber.SourceId);
   end;
 end;
-
 {$ENDREGION}
 
 {$REGION 'private methods'}
@@ -853,6 +888,9 @@ begin
   if B then
     ActiveView.UpdateView;
   Logger.IncCounter('UpdateActions');
+  Logger.Watch('ViewCount', FViewList.Count);
+  Logger.Watch('ReceiverCount', FReceivers.Count);
+
 end;
 
 procedure TdmManager.UpdateVisibleMessageTypes(

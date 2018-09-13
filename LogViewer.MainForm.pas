@@ -97,11 +97,11 @@ type
       ALogViewer : ILogViewer
     );
 
-    procedure ViewsChanged(
-      Sender     : TObject;
-      const Item : ILogViewer;
-      Action     : TCollectionChangedAction
-    );
+//    procedure ViewsChanged(
+//      Sender     : TObject;
+//      const Item : ILogViewer;
+//      Action     : TCollectionChangedAction
+//    );
 
 //    procedure ProcessDroppedTab(
 //      Sender             : TObject;
@@ -217,13 +217,15 @@ var
   CR: IChannelReceiver;
 begin
   Logger.Track(Self, 'BeforeDestruction');
+  //FDashboard.Close;
   for CR in Manager.Receivers do
     CR.Enabled := False;
-  Events.Clear;
+  //Events.Clear;
   FSettings.FormSettings.Assign(Self);
   FSettings.Save;
   FSettings.OnChanged.Remove(SettingsChanged);
   FSettings.Free;
+  //FManager := nil;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
@@ -271,11 +273,15 @@ end;
 
 procedure TfrmMain.ctMainButtonCloseTabClick(Sender: TObject; ATab: TChromeTab;
   var Close: Boolean);
+var
+  V : ILogViewer;
 begin
   Close := ATab.DisplayName <> 'Dashboard';
   if Close then
   begin
-    Manager.Views.Delete(Manager.Views.IndexOf(ILogViewer(ATab.Data)));
+    V := ILogViewer(ATab.Data);
+    Manager.DeleteView(V);
+    //V.Form.Close;
   end;
 end;
 
@@ -426,30 +432,31 @@ procedure TfrmMain.UpdateStatusBar;
 var
   N : Integer;
 begin
-  if Assigned(Manager) and Assigned(Manager.ActiveView) then
-  begin
-    pnlSourceName.Caption := Manager.ActiveView.Subscriber.SourceName;
-    N := Manager.ActiveView.MilliSecondsBetweenSelection;
-    if N <> -1 then
-      pnlDelta.Caption := Format('Delta: %d', [N])
-    else
-      pnlDelta.Caption := '';
-  end
-  else
-  begin
-    pnlSourceName.Caption := '';
-    pnlDelta.Caption      := '';
-  end;
+//  if Assigned(Manager) and Assigned(Manager.ActiveView)
+//    and Assigned(Manager.ActiveView.Subscriber) then
+//  begin
+//    pnlSourceName.Caption := Manager.ActiveView.Subscriber.SourceName;
+//    N := Manager.ActiveView.MilliSecondsBetweenSelection;
+//    if N <> -1 then
+//      pnlDelta.Caption := Format('Delta: %d', [N])
+//    else
+//      pnlDelta.Caption := '';
+//  end
+//  else
+//  begin
+//    pnlSourceName.Caption := '';
+//    pnlDelta.Caption      := '';
+//  end;
 end;
 
-procedure TfrmMain.ViewsChanged(Sender: TObject; const Item: ILogViewer;
-  Action: TCollectionChangedAction);
-begin
-  if Action = caRemoved then
-  begin
-
-  end;
-end;
+//procedure TfrmMain.ViewsChanged(Sender: TObject; const Item: ILogViewer;
+//  Action: TCollectionChangedAction);
+//begin
+//  if Action = caRemoved then
+//  begin
+//
+//  end;
+//end;
 {$ENDREGION}
 
 initialization

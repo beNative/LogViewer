@@ -164,8 +164,8 @@ constructor TfrmWatchesView.Create(AOwner: TComponent; AWatches: TWatchList;
 begin
   inherited Create(AOwner);
   FWatches := AWatches;
-  FWatches.OnUpdateWatch := FWatchesUpdateWatch;
-  FWatches.OnNewWatch    := FWatchesNewWatch;
+//  FWatches.OnUpdateWatch := FWatchesUpdateWatch;
+//  FWatches.OnNewWatch    := FWatchesNewWatch;
   FSettings              := ASettings;
   FDisplayValuesSettings := ADisplayValuesSettings;
   CreateObjects;
@@ -183,9 +183,10 @@ end;
 
 procedure TfrmWatchesView.BeforeDestruction;
 begin
-  Logger.Track('TfrmWatchesView.BeforeDestruction');
+  Logger.Track(Self, 'BeforeDestruction');
   FSettings.WatchHistoryPanelHeight := pnlWatchHistory.Height;
   FSettings.Height                  := Height;
+  FWatches := nil;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}

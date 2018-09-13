@@ -67,7 +67,7 @@ type
       const ASourceName : string
     ): ISubscriber; override;
 
-    procedure SettingsChanged(Sender: TObject); override;
+    procedure SettingsChanged(Sender: TObject);
 
   public
     procedure AfterConstruction; override;
@@ -99,7 +99,6 @@ end;
 
 procedure TWinIPCChannelReceiver.BeforeDestruction;
 begin
-  Logger.Track('TWinIPCChannelReceiver.BeforeDestruction');
   FIPCServer.Active := False;
   FIPCServer.Free;
   inherited BeforeDestruction;
