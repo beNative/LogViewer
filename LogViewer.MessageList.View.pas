@@ -399,14 +399,19 @@ end;
 procedure TfrmMessageList.BeforeDestruction;
 begin
   Logger.Track(Self, 'BeforeDestruction');
-  FSettings.LeftPanelWidth  := pnlLeft.Width;
-  FSettings.RightPanelWidth := pnlRight.Width;
-  Subscriber.OnReceiveMessage.Remove(FSubscriberReceiveMessage);
-
-  FSubscriber := nil;
+  if Assigned(FSettings) then
+  begin
+    FSettings.LeftPanelWidth  := pnlLeft.Width;
+    FSettings.RightPanelWidth := pnlRight.Width;
+    FSettings.OnChanged.Remove(FSettingsChanged);
+    FSettings := nil;
+  end;
+  if Assigned(FSubscriber) then
+  begin
+    FSubscriber.OnReceiveMessage.Remove(FSubscriberReceiveMessage);
+    FSubscriber := nil;
+  end;
   FCallStack  := nil;
-  FSettings.OnChanged.Remove(FSettingsChanged);
-  FSettings := nil;
   FEditorView := nil;
   FreeAndNil(FWatches);
   FreeAndNIl(FWatchesView);

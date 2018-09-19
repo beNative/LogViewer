@@ -12,7 +12,7 @@
 		"AutoFilterMessages": true,
 		"DynamicAutoSizeColumns": false,
 		"LeftPanelWidth": 382,
-		"RightPanelWidth": 521
+		"RightPanelWidth": 420
 	},
 	"WinODSSettings": {
 		"Enabled": false
