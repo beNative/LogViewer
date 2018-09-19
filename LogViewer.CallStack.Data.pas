@@ -23,8 +23,9 @@ interface
 type
   TCallStackData = class
   private
-    FTitle : string;
-    FLevel : Integer;
+    FTitle    : string;
+    FLevel    : Integer;
+    FDuration : Integer;
 
   public
     property Level: Integer
@@ -32,6 +33,9 @@ type
 
     property Title: string
       read FTitle write FTitle;
+
+    property Duration: Integer
+      read FDuration write FDuration;
   end;
 
 implementation

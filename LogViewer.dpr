@@ -54,7 +54,8 @@ uses
   LogViewer.Subscribers.ZeroMQ in 'LogViewer.Subscribers.ZeroMQ.pas',
   LogViewer.Subscribers.ComPort in 'LogViewer.Subscribers.ComPort.pas',
   LogViewer.Subscribers.WinIPC in 'LogViewer.Subscribers.WinIPC.pas',
-  LogViewer.Subscribers.Base in 'LogViewer.Subscribers.Base.pas';
+  LogViewer.Subscribers.Base in 'LogViewer.Subscribers.Base.pas',
+  uTotalCpuUsagePct in 'uTotalCpuUsagePct.pas';
 
 {$R *.res}
 

@@ -139,6 +139,11 @@ procedure TChannelReceiver.DoReceiveMessage(AStream: TStream; ASourceId: Integer
 var
   LSubscriber : ISubscriber;
 begin
+  Logger.Track(Self, 'DoReceiveMessage');
+  Logger.Send('AStream', AStream);
+  Logger.Send('ASourceId', ASourceId);
+  Logger.Send('AThreadId', AThreadId);
+  Logger.Send('ASourceName', ASourceName);
   if not FSubscriberList.TryGetValue(ASourceId, LSubscriber) then
   begin
     Logger.Info('CreateSubscriber(%d, %d, %s)', [ASourceId, AThreadId, ASourceName]);

@@ -55,19 +55,19 @@
         <SanitizedProjectName>LogViewer</SanitizedProjectName>
         <DCC_Namespace>Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap;Web;Soap;BCEditor;$(DCC_Namespace)</DCC_Namespace>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.8.1.52;ProductName=LogViewer;ProductVersion=1.8.1;LegalCopyright=2013 - 2018 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.8.4.63;ProductName=LogViewer;ProductVersion=1.8.4;LegalCopyright=2013 - 2018 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
         <DCC_ExeOutput>.\Bin\$(Platform)</DCC_ExeOutput>
         <DCC_DcuOutput>.\Lib\$(Platform)\$(Config)</DCC_DcuOutput>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Debug>true</VerInfo_Debug>
         <VerInfo_MinorVer>8</VerInfo_MinorVer>
-        <VerInfo_Build>52</VerInfo_Build>
-        <VerInfo_Release>1</VerInfo_Release>
+        <VerInfo_Build>63</VerInfo_Build>
+        <VerInfo_Release>4</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
         <BT_BuildType>Debug</BT_BuildType>
-        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.8.1.52;ProductName=LogViewer;ProductVersion=1.8.1;ProgramID=com.embarcadero.$(MSBuildProjectName);LegalCopyright=2013 - 2018 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.8.4.63;ProductName=LogViewer;ProductVersion=1.8.4;ProgramID=com.embarcadero.$(MSBuildProjectName);LegalCopyright=2013 - 2018 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <Icon_MainIcon>LogViewer_Icon2.ico</Icon_MainIcon>
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
@@ -90,21 +90,21 @@
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <AppEnableHighDPI>true</AppEnableHighDPI>
-        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.8.1.52;ProductName=LogViewer;ProductVersion=1.8.1;ProgramID=com.embarcadero.$(MSBuildProjectName);LegalCopyright=2013 - 2018 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.8.4.63;ProductName=LogViewer;ProductVersion=1.8.4;ProgramID=com.embarcadero.$(MSBuildProjectName);LegalCopyright=2013 - 2018 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
         <DCC_Optimize>false</DCC_Optimize>
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
-        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.8.1.52;ProductName=LogViewer;ProductVersion=1.8.1;LegalCopyright=2013 - 2018 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.8.4.63;ProductName=LogViewer;ProductVersion=1.8.4;LegalCopyright=2013 - 2018 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
         <VerInfo_MinorVer>8</VerInfo_MinorVer>
-        <VerInfo_Build>52</VerInfo_Build>
-        <VerInfo_Release>1</VerInfo_Release>
+        <VerInfo_Build>63</VerInfo_Build>
+        <VerInfo_Release>4</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <AppEnableHighDPI>true</AppEnableHighDPI>
-        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.8.1.52;ProductName=LogViewer;ProductVersion=1.8.1;ProgramID=com.embarcadero.$(MSBuildProjectName);LegalCopyright=2013 - 2018 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.8.4.63;ProductName=LogViewer;ProductVersion=1.8.4;ProgramID=com.embarcadero.$(MSBuildProjectName);LegalCopyright=2013 - 2018 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
         <DCC_IntegerOverflowCheck>true</DCC_IntegerOverflowCheck>
         <DCC_RangeChecking>true</DCC_RangeChecking>
         <DCC_DebugDCUs>true</DCC_DebugDCUs>
@@ -183,6 +183,7 @@
         <DCCReference Include="LogViewer.Subscribers.ComPort.pas"/>
         <DCCReference Include="LogViewer.Subscribers.WinIPC.pas"/>
         <DCCReference Include="LogViewer.Subscribers.Base.pas"/>
+        <DCCReference Include="uTotalCpuUsagePct.pas"/>
         <None Include="Readme.md"/>
         <RcItem Include="Bin\Win32\libzmq.dll">
             <ContainerId>ResourceItem</ContainerId>

@@ -138,7 +138,9 @@ end;
 function TZeroMQChannelReceiver.CreateSubscriber(ASourceId, AThreadId: Integer;
   const ASourceName: string): ISubscriber;
 begin
-  Result := TZMQSubscriber.Create(Self, FZMQ, '', False);
+  Result := TZMQSubscriber.Create(
+    Self, FZMQ, '', ASourceId, '', ASourceName, False
+  );
 end;
 {$ENDREGION}
 

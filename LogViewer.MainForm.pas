@@ -25,19 +25,21 @@ uses
   System.SysUtils, System.Variants, System.Classes, System.Actions,
   System.ImageList, System.Win.TaskbarCore,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Vcl.ExtCtrls,
-  Vcl.Taskbar, Vcl.ActnList, Vcl.ImgList,
+  Vcl.Taskbar, Vcl.ActnList, Vcl.ImgList, Vcl.ToolWin,
 
   ChromeTabs, ChromeTabsClasses, ChromeTabsTypes,
 
   Spring,
 
-  DDuce.Settings.TextFormat,
+  DDuce.Settings.TextFormat, DDuce.Utils,
 
   LogViewer.Interfaces,
   LogViewer.Factories, LogViewer.Manager, LogViewer.Settings,
   LogViewer.ComPort.Settings,
 
-  LogViewer.Dashboard.View, Vcl.ToolWin;
+  LogViewer.Dashboard.View,
+
+  kcontrols, kprogress;
 
 type
   TfrmMain = class(TForm)
@@ -46,14 +48,15 @@ type
     actShowVersion    : TAction;
     ctMain            : TChromeTabs;
     imlMain           : TImageList;
-    pnlDelta          : TPanel;
     pnlMainClient     : TPanel;
-    pnlMessageCount   : TPanel;
-    pnlSourceName     : TPanel;
     pnlStatusBar      : TPanel;
-    pnlStatusBarGrid  : TGridPanel;
     pnlTop            : TPanel;
     tskbrMain         : TTaskbar;
+    tmrPoll           : TTimer;
+    pnlSourceName: TPanel;
+    pnlDelta: TPanel;
+    pbrCPU: TKPercentProgressBar;
+    pnlMessageCount: TPanel;
 
     procedure actCenterToScreenExecute(Sender: TObject);
     procedure actShowVersionExecute(Sender: TObject);
@@ -73,6 +76,7 @@ type
       ATab   : TChromeTab
     );
     procedure FormShortCut(var Msg: TWMKey; var Handled: Boolean);
+    procedure tmrPollTimer(Sender: TObject);
 
   private
     FManager     : ILogViewerManager;
@@ -91,6 +95,11 @@ type
       ALogViewer : ILogViewer
     );
 
+    procedure DrawPanelText(
+      APanel      : TPanel;
+      const AText : string
+    );
+
   protected
     {$REGION 'property access methods'}
     function GetEvents: ILogViewerEvents;
@@ -103,6 +112,9 @@ type
 
     procedure UpdateStatusBar;
     procedure UpdateActions; override;
+
+    procedure OptimizeWidth(APanel: TPanel);
+    procedure OptimizeStatusBarPanelWidths;
 
   public
     procedure AfterConstruction; override;
@@ -132,7 +144,9 @@ implementation
 uses
   Spring.Utils,
 
-  DDuce.ObjectInspector.zObjectInspector, DDuce.Logger;
+  DDuce.ObjectInspector.zObjectInspector, DDuce.Logger,
+
+  uTotalCpuUsagePct;
 
 {$R *.dfm}
 
@@ -238,6 +252,10 @@ begin
   begin
     FDashboard.Show;
     FDashboard.SetFocus;
+    pnlSourceName.Caption   := '';
+    pnlMessageCount.Caption := '';
+    pnlDelta.Caption        := '';
+    OptimizeStatusBarPanelWidths;
   end
   else if Assigned(ATab.Data) then
   begin
@@ -245,6 +263,8 @@ begin
     MV.Form.Show;
     MV.Form.SetFocus;
     Manager.ActiveView := MV;
+    UpdateStatusBar;
+    OptimizeStatusBarPanelWidths;
   end;
 end;
 
@@ -266,6 +286,28 @@ procedure TfrmMain.ctMainNeedDragImageControl(Sender: TObject; ATab: TChromeTab;
   var DragControl: TWinControl);
 begin
   DragControl := pnlMainClient;
+end;
+
+procedure TfrmMain.DrawPanelText(APanel: TPanel; const AText: string);
+var
+  LCanvas : Shared<TControlCanvas>;
+  LBitmap : Shared<TBitmap>;
+  LWidth  : Integer;
+  X       : Integer;
+begin
+  LBitmap := TBitmap.Create;
+  LBitmap.Value.SetSize(APanel.Width, APanel.Height);
+  LBitmap.Value.Canvas.Brush.Color := APanel.Color;
+  LBitmap.Value.Canvas.FillRect(LBitmap.Value.Canvas.ClipRect);
+  LWidth := DrawFormattedText(
+    LBitmap.Value.Canvas.ClipRect,
+    LBitmap.Value.Canvas,
+    AText
+  );
+  X := (APanel.Width - LWidth) div 2;
+  LCanvas := TControlCanvas.Create;
+  LCanvas.Value.Control := APanel;
+  LCanvas.Value.Draw(X, 0, LBitmap);
 end;
 
 procedure TfrmMain.EventsActiveViewChange(Sender: TObject;
@@ -299,14 +341,20 @@ begin
       ALogViewer.Subscriber.SourceId,
       S
     ]);
-
   ALogViewer.Form.Show;
+//  UpdateStatusBar;
+//  OptimizeStatusBarPanelWidths;
 end;
 
 procedure TfrmMain.SettingsChanged(Sender: TObject);
 begin
   FormStyle   := FSettings.FormSettings.FormStyle;
   WindowState := FSettings.FormSettings.WindowState;
+end;
+
+procedure TfrmMain.tmrPollTimer(Sender: TObject);
+begin
+  pbrCPU.Position := Round(GetProcessCpuUsagePct(GetCurrentProcessId));
 end;
 
 procedure TfrmMain.FormShortCut(var Msg: TWMKey; var Handled: Boolean);
@@ -360,24 +408,68 @@ begin
   //UpdateTabs;
 end;
 
-procedure TfrmMain.UpdateStatusBar;
-var
-  N : Integer;
+procedure TfrmMain.OptimizeStatusBarPanelWidths;
 begin
-  if Assigned(Manager) and Assigned(Manager.ActiveView)
-    and Assigned(Manager.ActiveView.Subscriber) then
+  OptimizeWidth(pnlSourceName);
+end;
+
+procedure TfrmMain.OptimizeWidth(APanel: TPanel);
+var
+  S: string;
+begin
+  S := APanel.Caption;
+  if Trim(S) <> '' then
   begin
-    pnlSourceName.Caption := Manager.ActiveView.Subscriber.SourceName;
-    N := Manager.ActiveView.MilliSecondsBetweenSelection;
-    if N <> -1 then
-      pnlDelta.Caption := Format('Delta: %d', [N])
-    else
-      pnlDelta.Caption := '';
+    APanel.Width := GetTextWidth(APanel.Caption, APanel.Font) + 10;
+    APanel.BevelKind := bkFlat;
+    APanel.AlignWithMargins := True;
   end
   else
   begin
-    pnlSourceName.Caption := '';
-    pnlDelta.Caption      := '';
+    APanel.BevelKind := bkNone;
+    APanel.Width := 0;
+    APanel.AlignWithMargins := False;
+  end;
+end;
+
+procedure TfrmMain.UpdateStatusBar;
+var
+  N  : Integer;
+  S  : string;
+begin
+  if Assigned(ctMain.ActiveTab) and Assigned(Manager) and Assigned(Manager.ActiveView)
+    and Assigned(Manager.ActiveView.Subscriber)
+    and (ctMain.ActiveTab.Caption <> 'Dashboard') then
+  begin
+    pnlSourceName.Caption := Format('%s (%d)', [
+      Manager.ActiveView.Subscriber.SourceName,
+      Manager.ActiveView.Subscriber.SourceId
+    ]);
+    N := Manager.ActiveView.MilliSecondsBetweenSelection;
+    if N <> -1 then
+    begin
+      pnlDelta.Caption := Format('Delta: %dms', [N]);
+      pnlDelta.Color := clWhite;
+      pnlDelta.BevelKind := bkFlat;
+    end
+    else
+    begin
+      pnlDelta.Caption := '';
+      pnlDelta.Color := clBtnFace;
+      pnlDelta.BevelKind := bkNone;
+    end;
+    S := Format(
+      '<b>%d</b></x>',
+      [Manager.ActiveView.Subscriber.MessageCount]
+    );
+    DrawPanelText(pnlMessageCount, S);
+  end
+  else
+  begin
+    pnlSourceName.Caption   := '';
+    pnlMessageCount.Caption := '';
+    pnlDelta.Caption        := '';
+    OptimizeStatusBarPanelWidths;
   end;
 end;
 {$ENDREGION}

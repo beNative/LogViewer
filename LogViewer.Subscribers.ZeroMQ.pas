@@ -46,11 +46,14 @@ type
 
   public
     constructor Create(
-      AReceiver       : IChannelReceiver;
-      AZMQ            : IZeroMQ;
-      const AEndPoint : string;
-      AEnabled        : Boolean
-    ); reintroduce;
+      AReceiver         : IChannelReceiver;
+      AZMQ              : IZeroMQ;
+      const AEndPoint   : string;
+      ASourceId         : Integer;
+      const AKey        : string;
+      const ASourceName : string;
+      AEnabled          : Boolean
+    ); reintroduce; virtual;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 
@@ -64,11 +67,14 @@ uses
   DDuce.Logger;
 
 {$REGION 'construction and destruction'}
+
 constructor TZMQSubscriber.Create(AReceiver: IChannelReceiver; AZMQ: IZeroMQ;
-  const AEndPoint: string; AEnabled: Boolean);
+  const AEndPoint: string; ASourceId: Integer; const AKey: string;
+  const ASourceName: string; AEnabled: Boolean);
 begin
-  inherited Create(AReceiver, 0, AEndPoint, '', False);
-  FZMQ      := AZMQ;
+  inherited Create(AReceiver, ASourceId, AKey, ASourceName, False);
+  Guard.CheckNotNull(AZMQ, 'AZMQ');
+  FZMQ    := AZMQ;
   CreateSubscriberSocket(AEndPoint);
   Enabled := AEnabled;
 end;
@@ -87,7 +93,6 @@ begin
   FZMQ        := nil;
   inherited BeforeDestruction;
 end;
-
 {$ENDREGION}
 
 {$REGION 'property access methods'}
@@ -110,7 +115,9 @@ begin
   FSubscriber := FZMQ.Start(ZMQSocket.Subscriber);
   FSubscriber.Connect(AEndPoint);
   FPoll := FZMQ.Poller;
-  FPoll.RegisterPair(FSubscriber, [PollEvent.PollIn],
+  FPoll.RegisterPair(
+    FSubscriber,
+    [PollEvent.PollIn],
     procedure(Event: PollEvents)
     begin
       FZMQStream.WriteString(FSubscriber.ReceiveString);

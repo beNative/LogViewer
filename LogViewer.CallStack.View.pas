@@ -66,6 +66,16 @@ type
       DrawMode        : TDrawMode;
       Selected        : Boolean
     ): Boolean;
+    function FCDDurationCustomDraw(
+      Sender          : TObject;
+      ColumnDefinition: TColumnDefinition;
+      Item            : TObject;
+      TargetCanvas    : TCanvas;
+      CellRect        : TRect;
+      ImageList       : TCustomImageList;
+      DrawMode        : TDrawMode;
+      Selected        : Boolean
+    ): Boolean;
 
   public
     constructor Create(
@@ -116,6 +126,11 @@ begin
   CD.HintPropertyName  := CD.ValuePropertyName;
   CD.OnCustomDraw      := FCDTitleCustomDraw;
   CD.AutoSize          := True;
+  CD                   := CDS.Add('Duration');
+  CD.ValuePropertyName := 'Duration';
+  CD.HintPropertyName  := CD.ValuePropertyName;
+  CD.OnCustomDraw      := FCDDurationCustomDraw;
+  CD.AutoSize          := True;
   FTVPCallStack := TFactories.CreateTreeViewPresenter(
     Self,
     FVSTCallStack,
@@ -141,6 +156,18 @@ procedure TfrmCallStackView.FCallStackChanged(Sender: TObject;
 begin
   FTVPCallStack.Refresh;
   FTVPCallStack.TreeView.Header.AutoFitColumns;
+end;
+
+function TfrmCallStackView.FCDDurationCustomDraw(Sender: TObject;
+  ColumnDefinition: TColumnDefinition; Item: TObject; TargetCanvas: TCanvas;
+  CellRect: TRect; ImageList: TCustomImageList; DrawMode: TDrawMode;
+  Selected: Boolean): Boolean;
+begin
+  if DrawMode = dmPaintText then
+  begin
+    FDisplayValuesSettings.TimeStamp.AssignTo(TargetCanvas.Font);
+  end;
+  Result := True;
 end;
 
 function TfrmCallStackView.FCDLevelCustomDraw(Sender: TObject;

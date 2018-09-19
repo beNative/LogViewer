@@ -151,8 +151,6 @@ type
     function GetIsActiveView: Boolean;
     {$ENDREGION}
 
-    procedure FSettingsChanged(Sender: TObject);
-
     {$REGION 'FLogTreeView event handlers'}
     procedure FLogTreeViewFilterCallback(
       Sender    : TBaseVirtualTree;
@@ -253,6 +251,9 @@ type
     function GetMilliSecondsBetweenSelection: Integer;
     {$ENDREGION}
 
+    procedure FSettingsChanged(Sender: TObject);
+    procedure EnsureIsActiveViewIfFocused;
+
   protected
     procedure FSubscriberReceiveMessage(
       Sender  : TObject;
@@ -268,7 +269,7 @@ type
 
     procedure AddMessageToTree(const AMessage: TLogMessage);
 
-    procedure UpdateCallStack(ALogNode: TLogNode);
+    procedure UpdateCallStackDisplay(ALogNode: TLogNode);
     procedure UpdateMessageDetails(ALogNode: TLogNode);
     procedure UpdateComponentDisplay(ALogNode: TLogNode);
     procedure UpdateBitmapDisplay(ALogNode: TLogNode);
@@ -334,7 +335,6 @@ type
 
     procedure BeforeDestruction; override;
     procedure AfterConstruction; override;
-    procedure EnsureIsActiveViewIfFocused;
 
   end;
 
@@ -374,7 +374,7 @@ begin
   Inc(FCounter);
   FMiliSecondsBetweenSelection := -1;
   btnFilterMessages.Action := FManager.Actions.Items['actFilterMessages'];
-  FExpandParents           := False;
+  FExpandParents           := True;
   CreateEditor;
   CreateLogTreeView;
   CreateWatchesView;
@@ -390,7 +390,7 @@ begin
   FValueList.Parent := tsValueList;
   FValueList.Align  := alClient;
 
-  FDataSet := TFDMemTable.Create(Self);
+  FDataSet    := TFDMemTable.Create(Self);
   FDBGridView := TGridViewFactory.CreateDBGridView(Self, tsDataSet, dscMain);
 
   ApplySettings;
@@ -404,11 +404,16 @@ begin
   Subscriber.OnReceiveMessage.Remove(FSubscriberReceiveMessage);
 
   FSubscriber := nil;
+  FCallStack  := nil;
   FSettings.OnChanged.Remove(FSettingsChanged);
   FSettings := nil;
+  FEditorView := nil;
   FreeAndNil(FWatches);
   FreeAndNIl(FWatchesView);
   FreeAndNil(FCallStackView);
+  FreeAndNil(FLogTreeView);
+  FreeAndNil(FDataSet);
+  FreeAndNil(FDBGridView);
 
   inherited BeforeDestruction;
 end;
@@ -582,6 +587,81 @@ end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
+{$REGION 'edtMessageFilter'}
+procedure TfrmMessageList.edtMessageFilterChange(Sender: TObject);
+begin
+  if edtMessageFilter.Text <> '' then
+  begin
+    edtMessageFilter.Font.Style := [fsBold];
+    edtMessageFilter.Color := clYellow;
+  end
+  else
+  begin
+    edtMessageFilter.Font.Style := [];
+    edtMessageFilter.Color := clWhite;
+  end;
+
+  if Settings.AutoFilterMessages then
+    UpdateLogTreeView;
+end;
+
+procedure TfrmMessageList.edtMessageFilterKeyDown(Sender: TObject;
+  var Key: Word; Shift: TShiftState);
+var
+  A : Boolean;
+  B : Boolean;
+  C : Boolean;
+  D : Boolean;
+  E : Boolean;
+  F : Boolean;
+  G : Boolean;
+  H : Boolean;
+begin
+  // SHIFTED and ALTED keycombinations
+  A := (ssAlt in Shift) or (ssShift in Shift);
+  { Single keys that need to be handled by the edit control like all displayable
+    characters but also HOME and END }
+  B := (Key in VK_EDIT_KEYS) and (Shift = []);
+  { CTRL-keycombinations that need to be handled by the edit control like
+    CTRL-C for clipboard copy. }
+  C := (Key in VK_CTRL_EDIT_KEYS) {and (Shift = [ssCtrlOS])};
+  { SHIFT-keycombinations that need to be handled by the edit control for
+    uppercase characters but also eg. SHIFT-HOME for selections. }
+  D := (Key in VK_SHIFT_EDIT_KEYS) and (Shift = [ssShift]);
+  { Only CTRL key is pressed. }
+  E := (Key = VK_CONTROL) {and (Shift = [ssCtrlOS])};
+  { Only SHIFT key is pressed. }
+  F := (Key = VK_SHIFT) and (Shift = [ssShift]);
+  { Only (left) ALT key is pressed. }
+  G := (Key = VK_MENU) and (Shift = [ssAlt]);
+  { ESCAPE }
+  H := Key = VK_ESCAPE;
+  if not (A or B or C or D or E or F or G or H) then
+  begin
+    FVKPressed := True;
+    Key := 0;
+  end
+  { Prevents jumping to the application's main menu which happens by default
+    if ALT is pressed. }
+  else if G then
+  begin
+    Key := 0;
+  end;
+end;
+
+procedure TfrmMessageList.edtMessageFilterKeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if FVKPressed and FLogTreeView.Enabled then
+  begin
+    FLogTreeView.Perform(WM_KEYDOWN, Key, 0);
+    if Visible and FLogTreeView.CanFocus then
+      FLogTreeView.SetFocus;
+  end;
+  FVKPressed := False;
+end;
+{$ENDREGION}
+
 {$REGION 'FLogTreeView'}
 procedure TfrmMessageList.FLogTreeViewBeforeItemPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; ItemRect: TRect;
@@ -602,12 +682,6 @@ begin
 //    S := LN.Text;
 //    TargetCanvas.TextRect(ItemRect, S);
 //  end;
-end;
-
-procedure TfrmMessageList.FSubscriberReceiveMessage(Sender: TObject;
-  AStream: TStream);
-begin
-  ProcessMessage(AStream);
 end;
 
 procedure TfrmMessageList.FLogTreeViewAfterItemPaint(Sender: TBaseVirtualTree;
@@ -648,7 +722,6 @@ begin
 //      TargetCanvas.Brush.Color := clYellow;
     TargetCanvas.FillRect(CellRect);
   end;
-
 end;
 
 procedure TfrmMessageList.FLogTreeViewFocusChanging(Sender: TBaseVirtualTree;
@@ -666,7 +739,7 @@ begin
   begin
     LN := Sender.GetNodeData<TLogNode>(NewNode);
     Guard.CheckNotNull(LN, 'LogNode');
-    UpdateCallStack(LN);
+    UpdateCallStackDisplay(LN);
   end;
 end;
 
@@ -1029,94 +1102,45 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION 'edtMessageFilter'}
-procedure TfrmMessageList.edtMessageFilterChange(Sender: TObject);
-begin
-  if edtMessageFilter.Text <> '' then
-  begin
-    edtMessageFilter.Font.Style := [fsBold];
-    edtMessageFilter.Color := clYellow;
-  end
-  else
-  begin
-    edtMessageFilter.Font.Style := [];
-    edtMessageFilter.Color := clWhite;
-  end;
-
-  if Settings.AutoFilterMessages then
-    UpdateLogTreeView;
-end;
-
-procedure TfrmMessageList.edtMessageFilterKeyDown(Sender: TObject;
-  var Key: Word; Shift: TShiftState);
-var
-  A : Boolean;
-  B : Boolean;
-  C : Boolean;
-  D : Boolean;
-  E : Boolean;
-  F : Boolean;
-  G : Boolean;
-  H : Boolean;
-begin
-  // SHIFTED and ALTED keycombinations
-  A := (ssAlt in Shift) or (ssShift in Shift);
-  { Single keys that need to be handled by the edit control like all displayable
-    characters but also HOME and END }
-  B := (Key in VK_EDIT_KEYS) and (Shift = []);
-  { CTRL-keycombinations that need to be handled by the edit control like
-    CTRL-C for clipboard copy. }
-  C := (Key in VK_CTRL_EDIT_KEYS) {and (Shift = [ssCtrlOS])};
-  { SHIFT-keycombinations that need to be handled by the edit control for
-    uppercase characters but also eg. SHIFT-HOME for selections. }
-  D := (Key in VK_SHIFT_EDIT_KEYS) and (Shift = [ssShift]);
-  { Only CTRL key is pressed. }
-  E := (Key = VK_CONTROL) {and (Shift = [ssCtrlOS])};
-  { Only SHIFT key is pressed. }
-  F := (Key = VK_SHIFT) and (Shift = [ssShift]);
-  { Only (left) ALT key is pressed. }
-  G := (Key = VK_MENU) and (Shift = [ssAlt]);
-  { ESCAPE }
-  H := Key = VK_ESCAPE;
-  if not (A or B or C or D or E or F or G or H) then
-  begin
-    FVKPressed := True;
-    Key := 0;
-  end
-  { Prevents jumping to the application's main menu which happens by default
-    if ALT is pressed. }
-  else if G then
-  begin
-    Key := 0;
-  end;
-end;
-
-procedure TfrmMessageList.edtMessageFilterKeyUp(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-begin
-  if FVKPressed and FLogTreeView.Enabled then
-  begin
-    FLogTreeView.Perform(WM_KEYDOWN, Key, 0);
-    if Visible and FLogTreeView.CanFocus then
-      FLogTreeView.SetFocus;
-  end;
-  FVKPressed := False;
-end;
-{$ENDREGION}
-
 procedure TfrmMessageList.chkAutoFilterClick(Sender: TObject);
 begin
   Settings.AutoFilterMessages := (Sender as TCheckBox).Checked;
+end;
+
+procedure TfrmMessageList.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Action := caFree;
+end;
+
+procedure TfrmMessageList.FSubscriberReceiveMessage(Sender: TObject;
+  AStream: TStream);
+begin
+  ProcessMessage(AStream);
 end;
 
 procedure TfrmMessageList.FSettingsChanged(Sender: TObject);
 begin
   ApplySettings;
 end;
+{$ENDREGION}
 
-procedure TfrmMessageList.FormClose(Sender: TObject; var Action: TCloseAction);
+{$REGION 'private methods'}
+{ Makes sure the active view is the current view when it is focused. }
+
+procedure TfrmMessageList.EnsureIsActiveViewIfFocused;
+var
+  B : Boolean;
 begin
-  Action := caFree;
+  B := Focused;
+  if not B and Assigned(Parent) then
+  begin
+    if Parent.Focused then
+      B := True;
+  end;
+  if B then
+  begin
+    Activate;
+  end;
 end;
 {$ENDREGION}
 
@@ -1148,6 +1172,7 @@ procedure TfrmMessageList.Activate;
 begin
   inherited Activate;
   Manager.ActiveView := Self as ILogViewer;
+  Manager.EditorManager.ActiveView := FEditorView;
 end;
 
 { Parses message data from the TLogMessage record. }
@@ -1197,19 +1222,6 @@ begin
   end;
 end;
 
-procedure TfrmMessageList.Clear;
-begin
-  ClearMessageDetailsControls;
-  FWatches.Clear;
-  FEditorView.Clear;
-  FCallStack.Clear;
-  FLogTreeView.Clear;
-  FMessageCount := 0;
-  FLastNode     := nil;
-  FLastParent   := nil;
-  FUpdate := True;
-end;
-
 procedure TfrmMessageList.ClearMessageDetailsControls;
 begin
   imgBitmap.Picture   := nil;
@@ -1226,68 +1238,6 @@ begin
   FDataSet.Active     := False;
   FEditorView.Clear;
   FValueList.Clear;
-end;
-
-procedure TfrmMessageList.CollapseAll;
-begin
-  FLogTreeView.FullCollapse;
-  FUpdate := True;
-  FAutoSizeColumns := False;
-end;
-
-procedure TfrmMessageList.ExpandAll;
-begin
-  FLogTreeView.FullExpand;
-  FUpdate := True;
-  FAutoSizeColumns := False;
-end;
-
-{ Makes sure the active view is the current view when it is focused. }
-
-procedure TfrmMessageList.EnsureIsActiveViewIfFocused;
-var
-  B : Boolean;
-begin
-  B := Focused;
-  if not B and Assigned(Parent) then
-  begin
-    if Parent.Focused then
-      B := True;
-  end;
-  if B then
-  begin
-    Activate;
-  end;
-end;
-
-procedure TfrmMessageList.GotoFirst;
-begin
-  if FWatchesView.HasFocus then
-  begin
-    FWatchesView.GotoFirst;
-  end
-  else
-  begin
-    FLogTreeView.FocusedNode := FLogTreeView.GetFirst;
-    FLogTreeView.Selected[FLogTreeView.FocusedNode] := True;
-    FUpdate := True;
-    FAutoSizeColumns := False;
-  end;
-end;
-
-procedure TfrmMessageList.GotoLast;
-begin
-  if FWatchesView.HasFocus then
-  begin
-    FWatchesView.GotoLast;
-  end
-  else
-  begin
-    FLogTreeView.FocusedNode := FLogTreeView.GetLast;
-    FLogTreeView.Selected[FLogTreeView.FocusedNode] := True;
-    FUpdate := True;
-    FAutoSizeColumns := False;
-  end;
 end;
 
 { Reads the received message stream from the active logchannel . }
@@ -1403,9 +1353,18 @@ begin
   end; // case
 end;
 
-procedure TfrmMessageList.SelectAll;
+{$REGION 'Commands'}
+procedure TfrmMessageList.Clear;
 begin
-  FLogTreeView.SelectAll(False);
+  ClearMessageDetailsControls;
+  FWatches.Clear;
+  FEditorView.Clear;
+  FCallStack.Clear;
+  FLogTreeView.Clear;
+  FMessageCount := 0;
+  FLastNode     := nil;
+  FLastParent   := nil;
+  FUpdate       := True;
 end;
 
 procedure TfrmMessageList.ClearSelection;
@@ -1413,27 +1372,63 @@ begin
   FLogTreeView.ClearSelection;
 end;
 
+procedure TfrmMessageList.CollapseAll;
+begin
+  FLogTreeView.FullCollapse;
+  FUpdate := True;
+  FAutoSizeColumns := False;
+end;
+
+procedure TfrmMessageList.ExpandAll;
+begin
+  FLogTreeView.FullExpand;
+  FUpdate := True;
+  FAutoSizeColumns := False;
+end;
+
+procedure TfrmMessageList.GotoFirst;
+begin
+  if FWatchesView.HasFocus then
+  begin
+    FWatchesView.GotoFirst;
+  end
+  else
+  begin
+    FLogTreeView.FocusedNode := FLogTreeView.GetFirst;
+    FLogTreeView.Selected[FLogTreeView.FocusedNode] := True;
+    FUpdate := True;
+    FAutoSizeColumns := False;
+  end;
+end;
+
+procedure TfrmMessageList.GotoLast;
+begin
+  if FWatchesView.HasFocus then
+  begin
+    FWatchesView.GotoLast;
+  end
+  else
+  begin
+    FLogTreeView.FocusedNode := FLogTreeView.GetLast;
+    FLogTreeView.Selected[FLogTreeView.FocusedNode] := True;
+    FUpdate := True;
+    FAutoSizeColumns := False;
+  end;
+end;
+
+procedure TfrmMessageList.SelectAll;
+begin
+  FLogTreeView.SelectAll(False);
+end;
+
 procedure TfrmMessageList.SetFocusToFilter;
 begin
   if edtMessageFilter.CanFocus then
     edtMessageFilter.SetFocus;
 end;
+{$ENDREGION}
 
-procedure TfrmMessageList.UpdateActions;
-begin
-  EnsureIsActiveViewIfFocused;
-  if IsActiveView and FUpdate then
-  begin
-    UpdateLogTreeView;
-    if Assigned(Actions) then
-    begin
-      Actions.UpdateActions;
-    end;
-    FUpdate := False;
-  end;
-  inherited UpdateActions;
-end;
-
+{$REGION 'Display updating'}
 procedure TfrmMessageList.UpdateBitmapDisplay(ALogNode: TLogNode);
 begin
   if Assigned(ALogNode.MessageData) then
@@ -1451,7 +1446,7 @@ begin
   end;
 end;
 
-procedure TfrmMessageList.UpdateCallStack(ALogNode: TLogNode);
+procedure TfrmMessageList.UpdateCallStackDisplay(ALogNode: TLogNode);
 var
   I   : Integer;
   CSD : TCallStackData;
@@ -1638,8 +1633,24 @@ begin
     pgcMessageDetails.ActivePage := tsTextViewer;
   end;
 end;
+{$ENDREGION}
 
-{ Force an update of the view display. }
+procedure TfrmMessageList.UpdateActions;
+begin
+  EnsureIsActiveViewIfFocused;
+  if IsActiveView and FUpdate then
+  begin
+    UpdateLogTreeView;
+    if Assigned(Actions) then
+    begin
+      Actions.UpdateActions;
+    end;
+    FUpdate := False;
+  end;
+  inherited UpdateActions;
+end;
+
+{ Force an update of the message viewer. }
 
 procedure TfrmMessageList.UpdateView;
 begin

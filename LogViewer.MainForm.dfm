@@ -5,6 +5,7 @@ object frmMain: TfrmMain
   ClientHeight = 599
   ClientWidth = 997
   Color = clBtnFace
+  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -22,12 +23,10 @@ object frmMain: TfrmMain
     Left = 0
     Top = 30
     Width = 997
-    Height = 546
+    Height = 549
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitTop = 0
-    ExplicitHeight = 576
     object ctMain: TChromeTabs
       Left = 0
       Top = 0
@@ -360,91 +359,84 @@ object frmMain: TfrmMain
   end
   object pnlStatusBar: TPanel
     Left = 0
-    Top = 576
+    Top = 579
     Width = 997
-    Height = 23
+    Height = 20
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 1
-    object pnlStatusBarGrid: TGridPanel
-      Left = 0
-      Top = 0
-      Width = 997
-      Height = 23
-      Align = alClient
+    object pnlSourceName: TPanel
+      AlignWithMargins = True
+      Left = 1
+      Top = 1
+      Width = 224
+      Height = 18
+      Margins.Left = 1
+      Margins.Top = 1
+      Margins.Right = 1
+      Margins.Bottom = 1
+      Align = alLeft
+      BevelKind = bkFlat
       BevelOuter = bvNone
-      ColumnCollection = <
-        item
-          Value = 20.000000000000000000
-        end
-        item
-          Value = 20.000000000000000000
-        end
-        item
-          Value = 20.000000000000000000
-        end
-        item
-          Value = 20.000000000000000000
-        end
-        item
-          Value = 20.000000000000000000
-        end>
-      ControlCollection = <
-        item
-          Column = 0
-          Control = pnlSourceName
-          Row = 0
-        end
-        item
-          Column = 1
-          Control = pnlMessageCount
-          Row = 0
-        end
-        item
-          Column = 2
-          Control = pnlDelta
-          Row = 0
-        end>
-      ExpandStyle = emAddColumns
-      RowCollection = <
-        item
-          Value = 100.000000000000000000
-        end>
       TabOrder = 0
-      object pnlSourceName: TPanel
-        AlignWithMargins = True
-        Left = 3
-        Top = 3
-        Width = 193
-        Height = 17
-        Align = alClient
-        BevelKind = bkFlat
-        BevelOuter = bvNone
-        TabOrder = 0
-      end
-      object pnlMessageCount: TPanel
-        AlignWithMargins = True
-        Left = 202
-        Top = 3
-        Width = 193
-        Height = 17
-        Align = alClient
-        BevelKind = bkFlat
-        BevelOuter = bvNone
-        TabOrder = 1
-      end
-      object pnlDelta: TPanel
-        AlignWithMargins = True
-        Left = 401
-        Top = 3
-        Width = 193
-        Height = 17
-        Align = alClient
-        BevelKind = bkFlat
-        BevelOuter = bvNone
-        ParentBackground = False
-        TabOrder = 2
-      end
+    end
+    object pnlDelta: TPanel
+      AlignWithMargins = True
+      Left = 291
+      Top = 1
+      Width = 100
+      Height = 18
+      Margins.Left = 1
+      Margins.Top = 1
+      Margins.Right = 1
+      Margins.Bottom = 1
+      Align = alLeft
+      BevelKind = bkFlat
+      BevelOuter = bvNone
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBlue
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
+      ParentBackground = False
+      ParentFont = False
+      TabOrder = 1
+      ExplicitLeft = 279
+    end
+    object pbrCPU: TKPercentProgressBar
+      AlignWithMargins = True
+      Left = 946
+      Top = 1
+      Width = 50
+      Height = 18
+      Hint = 'CPU load'
+      Margins.Left = 1
+      Margins.Top = 1
+      Margins.Right = 1
+      Margins.Bottom = 1
+      Align = alRight
+      BarColor = clGreen
+      Border = True
+      Color = clWhite
+      Frame = False
+      Min = 0
+      Max = 100
+    end
+    object pnlMessageCount: TPanel
+      AlignWithMargins = True
+      Left = 227
+      Top = 1
+      Width = 62
+      Height = 18
+      Margins.Left = 1
+      Margins.Top = 1
+      Margins.Right = 1
+      Margins.Bottom = 1
+      Align = alLeft
+      BevelKind = bkFlat
+      BevelOuter = bvNone
+      ShowCaption = False
+      TabOrder = 3
     end
   end
   object pnlTop: TPanel
@@ -455,7 +447,6 @@ object frmMain: TfrmMain
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 2
-    ExplicitTop = -6
   end
   object aclMain: TActionList
     Images = imlMain
@@ -476,7 +467,7 @@ object frmMain: TfrmMain
     Left = 208
     Top = 48
     Bitmap = {
-      494C010101000500180010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000500200010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -1235,5 +1226,11 @@ object frmMain: TfrmMain
     TabProperties = []
     Left = 32
     Top = 48
+  end
+  object tmrPoll: TTimer
+    Interval = 500
+    OnTimer = tmrPollTimer
+    Left = 496
+    Top = 304
   end
 end

@@ -1,9 +1,9 @@
 {
 	"FormSettings": {
-		"Left": 483,
-		"Top": 256,
-		"Width": 1498,
-		"Height": 722,
+		"Left": 545,
+		"Top": 142,
+		"Width": 1524,
+		"Height": 728,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -11,8 +11,8 @@
 		"AutoScrollMessages": false,
 		"AutoFilterMessages": true,
 		"DynamicAutoSizeColumns": false,
-		"LeftPanelWidth": 411,
-		"RightPanelWidth": 496
+		"LeftPanelWidth": 382,
+		"RightPanelWidth": 521
 	},
 	"WinODSSettings": {
 		"Enabled": false
@@ -99,7 +99,7 @@
 			"FontName": "Tahoma",
 			"FontColor": 0,
 			"FontSize": 8,
-			"FontStyle": "",
+			"FontStyle": "fsBold",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
@@ -109,7 +109,7 @@
 			"FontName": "Tahoma",
 			"FontColor": 32768,
 			"FontSize": 8,
-			"FontStyle": "",
+			"FontStyle": "fsBold",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
@@ -119,7 +119,7 @@
 			"FontName": "Tahoma",
 			"FontColor": 8388736,
 			"FontSize": 8,
-			"FontStyle": "",
+			"FontStyle": "fsBold",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0

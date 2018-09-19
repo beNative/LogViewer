@@ -259,6 +259,7 @@ type
     ); reintroduce; virtual;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
+    destructor Destroy; override;
 
   end;
 
@@ -295,19 +296,6 @@ begin
   Logger.Track(Self, 'BeforeDestruction');
   FreeAndNil(FEvents);
   FreeAndNil(FCommands);
-//  Logger.SendInterface('FReceivers', FReceivers);
-//  Logger.SendInterface('FReceivers', FReceivers);
-//  Logger.SendInterface('FViewList', FViewList);
-  FViewList.OnChanged.Clear;
-  FViewList.Clear;
-
-  FReceivers.Clear;
-//  Logger.SendInterface('FViewList', FViewList);
-  FViewList       := nil;
-  FReceivers      := nil;
-  FSettings       := nil;
-  FEditorSettings := nil;
-  FEditorManager  := nil;
   inherited BeforeDestruction;
 end;
 
@@ -330,8 +318,11 @@ begin
 //    if ActiveView = AView then // select a new active view
 //    begin
 //      V := Views[I];
-//      V.Activate
+//      V.Activate;
 //    end;
+    if ActiveView = AView then
+      FActiveView := nil;
+
     S := AView.Subscriber;
     S.Receiver.SubscriberList.Remove(S.SourceId);
     FViewList[I].Form.Close; // instance still exists after closing
@@ -341,6 +332,18 @@ begin
   else
     Result := False;
 end;
+destructor TdmManager.Destroy;
+begin
+  Logger.Track(Self, 'Destroy');
+  FActiveView     := nil;
+  FViewList       := nil;
+  FReceivers      := nil;
+  FSettings       := nil;
+  FEditorSettings := nil;
+  FEditorManager  := nil;
+  inherited Destroy;
+end;
+
 {$ENDREGION}
 
 {$REGION 'action handlers'}
@@ -811,10 +814,12 @@ end;
 
 procedure TdmManager.AddView(ALogViewer: ILogViewer);
 begin
+  Logger.Track(Self, 'AddView');
   Guard.CheckNotNull(ALogViewer, 'ALogViewer');
   FViewList.Add(ALogViewer);
   if not FReceivers.Contains(ALogViewer.Subscriber.Receiver) then
   begin
+    Logger.Info('FReceivers.Add(ALogViewer.Subscriber.Receiver);');
     FReceivers.Add(ALogViewer.Subscriber.Receiver);
   end;
   Events.DoAddLogViewer(ALogViewer);
@@ -852,7 +857,7 @@ begin
   actAction.Checked       := lmtAction in MLS.VisibleMessageTypes;
   actAutoScrollMessages.Checked
     := FSettings.MessageListSettings.AutoScrollMessages;
-  B := Assigned(ActiveView);
+  B := Assigned(ActiveView) and Assigned(ActiveView.Subscriber);
   actStart.Enabled         := B and not ActiveView.Subscriber.Enabled;
   actStop.Enabled          := B and not actStart.Enabled;
   actBitmap.Enabled        := B;
@@ -890,7 +895,6 @@ begin
   Logger.IncCounter('UpdateActions');
   Logger.Watch('ViewCount', FViewList.Count);
   Logger.Watch('ReceiverCount', FReceivers.Count);
-
 end;
 
 procedure TdmManager.UpdateVisibleMessageTypes(

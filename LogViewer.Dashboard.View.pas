@@ -57,9 +57,9 @@ type
     edtAddress                : TLabeledEdit;
     edtPort                   : TLabeledEdit;
     pgcMain                   : TPageControl;
-    pnlRight: TPanel;
+    pnlRight                  : TPanel;
     pnlLogChannels            : TPanel;
-    pnlLeft: TPanel;
+    pnlLeft                   : TPanel;
     splVertical               : TSplitter;
     tsCOMPort                 : TTabSheet;
     tsWinIPC                  : TTabSheet;
@@ -68,15 +68,15 @@ type
     actAddZMQNodeForLogViewer : TAction;
     btnAddZMQNodeForLogViewer : TButton;
     imlMain                   : TImageList;
-    mmoZMQEndPoints: TMemo;
-    actSubscribeToList: TAction;
-    btnSubscribeToList: TButton;
-    chkAutoSubscribeWinIPC: TCheckBox;
-    chkAutoSubscribeWinODS: TCheckBox;
-    pnlWinIPCTitle: TPanel;
-    pnlWinODSTitle: TPanel;
-    pnlZeroMQTitle: TPanel;
-    pnlCOMPortTitle: TPanel;
+    mmoZMQEndPoints           : TMemo;
+    actSubscribeToList        : TAction;
+    btnSubscribeToList        : TButton;
+    chkAutoSubscribeWinIPC    : TCheckBox;
+    chkAutoSubscribeWinODS    : TCheckBox;
+    pnlWinIPCTitle            : TPanel;
+    pnlWinODSTitle            : TPanel;
+    pnlZeroMQTitle            : TPanel;
+    pnlCOMPortTitle           : TPanel;
     {$ENDREGION}
 
     procedure actAddZeroMQNodeExecute(Sender: TObject);
@@ -232,6 +232,9 @@ begin
     FZeroMQReceiver,
     FZeroMQ,
     Format('tcp://%s:%s', [edtAddress.Text, edtPort.Text]),
+    Integer(S),
+    '',
+    'Source',
     FZeroMQReceiver.Enabled
   );
   FZeroMQReceiver.SubscriberList.Add(0, S);
@@ -251,6 +254,9 @@ begin
         FZeroMQReceiver,
         FZeroMQ,
         Format('tcp://%s:%s', [SL[0], IntToStr(LOGVIEWER_ZMQ_PORT)]),
+        GetCurrentProcessId,
+        '',
+        Application.ExeName,
         FZeroMQReceiver.Enabled
       );
       Logger.Channels.Clear;
@@ -275,6 +281,9 @@ begin
         FZeroMQReceiver,
         FZeroMQ,
         Format('tcp://%s:%s', [SL[0], '5555']),
+        0,
+        '',
+        'localhost source',
         FZeroMQReceiver.Enabled
       );
       FZeroMQReceiver.SubscriberList.Add(0, S);
@@ -300,6 +309,9 @@ begin
       FZeroMQReceiver,
       FZeroMQ,
       S,
+      0,
+      '',
+      '',
       FZeroMQReceiver.Enabled
     );
     LSub.Enabled := True;
@@ -363,6 +375,10 @@ procedure TfrmDashboard.FTreeViewFocusChanged(Sender: TBaseVirtualTree;
 var
   DN : TDashboardNode;
 begin
+  if not Assigned(Node) then
+  begin
+    Exit;
+  end;
   if Sender.GetNodeLevel(Node) = 0 then
   begin
     DN := Sender.GetNodeData<TDashboardNode>(Node);
@@ -488,7 +504,6 @@ var
   DN      : TDashboardNode;
   LDelete : TDashboardNode;
 begin
-  LDelete := nil;
   if Action = caRemoved then
   begin
     LDelete := FWinIPCNode.Nodes.GetValueOrDefault(AKey);
@@ -503,10 +518,8 @@ end;
 procedure TfrmDashboard.FZeroMQReceiverSubscriberListChanged(Sender: TObject;
   const AKey: Integer; Action: TCollectionChangedAction);
 var
-  DN      : TDashboardNode;
   LDelete : TDashboardNode;
 begin
-  LDelete := nil;
   if Action = caRemoved then
   begin
     LDelete := FZeroMQNode.Nodes.GetValueOrDefault(AKey);
@@ -675,7 +688,7 @@ end;
 
 procedure TfrmDashboard.UpdateActions;
 begin
-  FManager.Actions.UpdateActions;  // optimize for performance
+//  FManager.Actions.UpdateActions;  // optimize for performance
   inherited UpdateActions;
 end;
 {$ENDREGION}
