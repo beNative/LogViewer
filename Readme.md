@@ -34,6 +34,8 @@ Features currently supported:
 - Actions
 - Up to 255 logging levels
 
+A mindmap with an overview of the application: [LogViewer.xmind](https://github.com/beNative/LogViewer/blob/master/Documents/LogViewer.xmind)
+
 The sources depend on the following libraries and components:
   * [Spring4D](http://bitbucket.org/sglienke/spring4d)
   * [DSharp](http://bitbucket.org/sglienke/dsharp)
