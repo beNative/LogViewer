@@ -9,7 +9,7 @@ messages from.
 * Serial port
 * Spring4D logging API
 
-Each of these receivers supports multiple channels which can be displayed in
+Each of these receivers support multiple subscribers for which messages can be displayed in
 a dedicated logviewer.
 
 A logviewer consists of
@@ -40,6 +40,6 @@ The sources depend on the following libraries and components:
   * [TChromeTabs](https://github.com/norgepaul/TChromeTabs)
   * [Ararat Synapse](https://sourceforge.net/projects/synalist/)
 
-Here is a preliminary look of the application:
+Here is a preliminary look of the application (2018/09/22):
 
 ![LogViewer](https://github.com/beNative/LogViewer/blob/master/Wiki/LogViewer_22-09-2018%2013-21-07.png)
