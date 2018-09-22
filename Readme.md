@@ -24,7 +24,7 @@ a dedicated logviewer.
 - Conditional logging
 - Checkpoints
 - Counters
-- Watches
+- Watches + value history support
 - Datasets
 - Bitmaps
 - Objects
