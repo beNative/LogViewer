@@ -2,8 +2,8 @@
 
 LogViewer is a general purpose message viewer for log messages that supports multiple source types to receive messages from.
 
-* Windows {OutputDebugString} API
-* Windows IPC (using WM_COPY messages)
+* Windows ``OutputDebugString`` API
+* Windows IPC (using ``WM_COPY`` messages)
 * [ZeroMQ](https://github.com/zeromq/libzmq) (PUB/SUB socket) for logging over the network
 * Serial port
 * Spring4D logging API 
