@@ -1,13 +1,12 @@
 # LogViewer
 
-A general purpose logviewer that supports multiple source types to receive
-messages from.
+A general purpose logviewer that supports multiple source types to receive messages from.
 
-* Windows IPC (using WM_COPY messages)
 * Windows OutputDebugString API
-* [ZeroMQ](https://github.com/zeromq/libzmq) (PUB/SUB socket)
+* Windows IPC (using WM_COPY messages)
+* [ZeroMQ](https://github.com/zeromq/libzmq) (PUB/SUB socket) for logging over the network
 * Serial port
-* Spring4D logging API
+* Spring4D logging API 
 
 Each of these receivers support multiple subscribers for which messages can be displayed in
 a dedicated logviewer.
@@ -27,7 +26,13 @@ Features currently supported:
 - Counters
 - Watches
 - Datasets
+- Bitmaps
+- Objects
+- Components
+- Native value types with type information
+- Text with suppport for multiple highlighters
 - Actions
+- Up to 255 logging levels
 
 The sources depend on the following libraries and components:
   * [Spring4D](http://bitbucket.org/sglienke/spring4d)
