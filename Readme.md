@@ -38,7 +38,7 @@ a dedicated logviewer.
 A mindmap with an overview of the application: [LogViewer.xmind](https://github.com/beNative/LogViewer/blob/master/Documents/LogViewer.xmind)
 
 ## Libraries used
-The sources depend on the following libraries and components:
+The Object Pascal (Delphi) sources depend on the following open source libraries and components:
   * [Spring4D](http://bitbucket.org/sglienke/spring4d)
   * [DSharp](http://bitbucket.org/sglienke/dsharp)
   * [Virtual treeview](http://github.com/Virtual-TreeView/Virtual-TreeView)
