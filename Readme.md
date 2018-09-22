@@ -1,6 +1,6 @@
 # LogViewer
 
-LogViewer is a general purpose logviewer that supports multiple source types to receive messages from.
+LogViewer is a general purpose message viewer for log messages that supports multiple source types to receive messages from.
 
 * Windows OutputDebugString API
 * Windows IPC (using WM_COPY messages)
