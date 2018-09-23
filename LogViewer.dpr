@@ -55,7 +55,7 @@ uses
   LogViewer.Subscribers.ComPort in 'LogViewer.Subscribers.ComPort.pas',
   LogViewer.Subscribers.WinIPC in 'LogViewer.Subscribers.WinIPC.pas',
   LogViewer.Subscribers.Base in 'LogViewer.Subscribers.Base.pas',
-  uTotalCpuUsagePct in 'uTotalCpuUsagePct.pas';
+  LogViewer.Subscribers.WinODS in 'LogViewer.Subscribers.WinODS.pas';
 
 {$R *.res}
 

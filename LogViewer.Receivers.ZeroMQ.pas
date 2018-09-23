@@ -68,7 +68,7 @@ uses
 // to a queue if it is enabled and is receiving messages.
 
 type
-  TZeroMQChannelReceiver = class(TChannelReceiver, IChannelReceiver)
+  TZeroMQChannelReceiver = class(TChannelReceiver, IChannelReceiver, IZMQ)
   private
     FTimer : TTimer;
     FZMQ   : IZeroMQ;

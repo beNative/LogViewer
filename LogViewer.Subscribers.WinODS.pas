@@ -14,17 +14,21 @@
   limitations under the License.
 }
 
-unit LogViewer.Subscribers.WinIPC;
+unit LogViewer.Subscribers.WinODS;
 
-{ WinIPC subscriber. }
+{ WinODS subscriber. }
 
 interface
 
 uses
+  System.Classes,
+
+  Spring,
+
   LogViewer.Interfaces, LogViewer.Subscribers.Base;
 
 type
-  TWinIPCSubscriber = class(TSubscriber, ISubscriber, IWinIPC)
+  TWinODSSubscriber = class(TSubscriber, ISubscriber, IWinODS)
   end;
 
 implementation

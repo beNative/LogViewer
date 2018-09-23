@@ -144,9 +144,7 @@ implementation
 uses
   Spring.Utils,
 
-  DDuce.ObjectInspector.zObjectInspector, DDuce.Logger,
-
-  uTotalCpuUsagePct;
+  DDuce.ObjectInspector.zObjectInspector, DDuce.Logger, DDuce.Utils.Winapi;
 
 {$R *.dfm}
 

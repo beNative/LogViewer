@@ -119,6 +119,19 @@ const
     lmtAction
   ];
 
+  // channel receiver names
+const
+  RECEIVERNAME_WINIPC  = 'WinIPC';
+  RECEIVERNAME_WINODS  = 'WinODS';
+  RECEIVERNAME_ZEROMQ  = 'ZeroMQ';
+  RECEIVERNAME_COMPORT = 'ComPort';
+
+resourcestring
+  SReceiverCaptionWinIPC  = 'Windows IPC receiver';
+  SReceiverCaptionWinODS  = 'Windows API OutputDebugString receiver';
+  SReceiverCaptionZeroMQ  = 'ZeroMQ subscription receiver';
+  SReceiverCaptionComPort = 'ComPort receiver';
+
   // message viewer
 const
   COLUMN_LEVEL     = 0;

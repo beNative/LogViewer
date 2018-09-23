@@ -767,6 +767,10 @@ begin
   AddMenuItem(MI, actBitmap);
   AddMenuItem(MI, actStrings);
   AddMenuItem(MI, actDataSet);
+  AddMenuItem(MI, actObject);
+  AddMenuItem(MI, actInterface);
+  AddMenuItem(MI, actPersistent);
+  AddMenuItem(MI, actComponent);
   AddMenuItem(MI, actText);
   AddMenuItem(MI, actCustomData);
   AddMenuItem(MI);

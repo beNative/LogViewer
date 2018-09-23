@@ -31,15 +31,15 @@ uses
   Spring.Collections;
 
 type
-//  TUpdateWatchEvent = procedure (
-//    const AName  : string;
-//    const AValue : string
-//  ) of object;
-//
-//  TNewWatchEvent = procedure (
-//    const AName : string;
-//    AId         : Int64
-//  ) of object;
+  TUpdateWatchEvent = procedure(
+    const AName  : string;
+    const AValue : string
+  ) of object;
+
+  TNewWatchEvent = procedure(
+    const AName  : string;
+    const AIndex : Integer // index in watchlist
+  ) of object;
 
   TWatchValue = class
   private
@@ -60,8 +60,8 @@ type
 
   TWatch = class
   private
-    FFirstId          : Int64;
-    FCurrentId        : Int64;
+    FFirstId          : Int64; // first message id
+    FCurrentIndex     : Integer;
     FName             : string;
     FValueType        : string;
     FList             : IList<TWatchValue>;
@@ -70,7 +70,7 @@ type
     {$REGION 'property access methods'}
     function GetCount: Integer;
     function GetValue:string;
-    function GetValues(AId: Int64): string;
+    function GetValues(AIndex: Integer): string;
     function GetTimeStamp: TDateTime;
     function GetList: IList<TWatchValue>;
     function GetCurrentWatchValue: TWatchValue;
@@ -90,10 +90,10 @@ type
 
     function AddValue(
       const AValue : string;
-      AId          : Int64;
+      AIndex          : Int64;
       ATimeStamp   : TDateTime
     ): Boolean;
-    function Find(AId: Int64): Boolean;
+    function Locate(const AId: Int64): Boolean;
 
     { Watch history list. }
     property List: IList<TWatchValue>
@@ -115,7 +115,7 @@ type
     property TimeStamp: TDateTime
       read GetTimeStamp;
 
-    property Values[AId: Int64]: string
+    property Values[AIndex: Integer]: string
       read GetValues; default;
 
     { History list count. }
@@ -134,12 +134,16 @@ type
   TWatchList = class
   private
     FList          : IList<TWatch>;
-//    FOnNewWatch    : TNewWatchEvent;
-//    FOnUpdateWatch : TUpdateWatchEvent;
+    FOnNewWatch    : TNewWatchEvent;
+    FOnUpdateWatch : TUpdateWatchEvent;
 
     function GetCount: Integer;
     function GetItems(AValue: Integer): TWatch;
     function GetList: IList<TWatch>;
+
+  protected
+    procedure DoUpdateWatch(const AName: string; const AValue: string);
+    procedure DoNewWatch(const AName: string; const AIndex: Integer);
 
   public
     procedure AfterConstruction; override;
@@ -155,7 +159,7 @@ type
       ASkipOnNewWatchEvent : Boolean = False // used for counter support
     );
     procedure Clear;
-    procedure Update(AId: Integer);
+    procedure Update(const AIndex: Integer);
 
     property List: IList<TWatch>
       read GetList;
@@ -166,11 +170,11 @@ type
     property Count: Integer
       read GetCount;
 
-//    property OnUpdateWatch: TUpdateWatchEvent
-//      read FOnUpdateWatch write FOnUpdateWatch;
-//
-//    property OnNewWatch: TNewWatchEvent
-//      read FOnNewWatch write FOnNewWatch;
+    property OnUpdateWatch: TUpdateWatchEvent
+      read FOnUpdateWatch write FOnUpdateWatch;
+
+    property OnNewWatch: TNewWatchEvent
+      read FOnNewWatch write FOnNewWatch;
   end;
 
 implementation
@@ -202,7 +206,7 @@ end;
 {$REGION 'property access methods'}
 function TWatch.GetValue: string;
 begin
-  Result := FList[FCurrentId].Value;
+  Result := FList[FCurrentIndex].Value;
 end;
 
 function TWatch.GetCount: Integer;
@@ -213,7 +217,7 @@ end;
 function TWatch.GetCurrentWatchValue: TWatchValue;
 begin
   if FList.Count > 0 then
-    Result := FList[FCurrentId]
+    Result := FList[FCurrentIndex]
   else
     Result := nil;
 end;
@@ -225,12 +229,12 @@ end;
 
 function TWatch.GetTimeStamp: TDateTime;
 begin
-  Result := FList[FCurrentId].TimeStamp;
+  Result := FList[FCurrentIndex].TimeStamp;
 end;
 
-function TWatch.GetValues(AId: Int64): string;
+function TWatch.GetValues(AIndex: Integer): string;
 begin
-  Result := FList[AId].Value;
+  Result := FList[AIndex].Value;
 end;
 
 function TWatch.GetValueType: string;
@@ -250,7 +254,7 @@ end;
 {$ENDREGION}
 
 {$REGION 'public methods'}
-function TWatch.AddValue(const AValue: string; AId: Int64; ATimeStamp:
+function TWatch.AddValue(const AValue: string; AIndex: Int64; ATimeStamp:
   TDateTime): Boolean;
 var
   Item : TWatchValue;
@@ -265,7 +269,7 @@ begin
   if B then
   begin
     Item := TWatchValue.Create;
-    Item.Id        := AId;
+    Item.Id        := AIndex;
     Item.Value     := AValue;
     Item.TimeStamp := ATimeStamp;
     FList.Add(Item);
@@ -275,7 +279,9 @@ begin
     Result := False;
 end;
 
-function TWatch.Find(AId: Int64): Boolean;
+{ Locate current watchvalue for a given message Id.  }
+
+function TWatch.Locate(const AId: Int64): Boolean;
 var
   I : Integer;
 begin
@@ -287,7 +293,7 @@ begin
     if AId >= FList[I].Id then
     begin
       Result := True;
-      FCurrentId := I;
+      FCurrentIndex := I;
       Exit;
     end;
   end;
@@ -321,6 +327,20 @@ begin
 end;
 {$ENDREGION}
 
+{$REGION 'protected methods'}
+procedure TWatchList.DoNewWatch(const AName: string; const AIndex: Integer);
+begin
+  if Assigned(FOnNewWatch) then
+    FOnNewWatch(AName, AIndex);
+end;
+
+procedure TWatchList.DoUpdateWatch(const AName, AValue: string);
+begin
+  if Assigned(FOnUpdateWatch) then
+    FOnUpdateWatch(AName, AValue);
+end;
+{$ENDREGION}
+
 {$REGION 'public methods'}
 function TWatchList.IndexOf(const AName: string): Integer;
 var
@@ -347,8 +367,8 @@ begin
   if I = -1 then
   begin
     I := FList.Add(TWatch.Create(AName, AValueType, AId, AOnlyTrackChanges));
-//    if not ASkipOnNewWatchEvent then
-//      FOnNewWatch(AName, I);
+    if not ASkipOnNewWatchEvent then
+      DoNewWatch(AName, I);
   end;
   FList[I].AddValue(AValue, AId, ATimeStamp);
 end;
@@ -358,18 +378,17 @@ begin
   FList.Clear;
 end;
 
-procedure TWatchList.Update(AId: Integer);
-//var
-//  W : TWatch;
+procedure TWatchList.Update(const AIndex: Integer);
+var
+  W : TWatch;
 begin
-//  if Assigned(FOnUpdateWatch) then
-//  begin
-//    for W in FList do
-//    begin
-//      if W.Find(AId) then
-//        FOnUpdateWatch(W.Name, W.Value);
-//    end;
-//  end;
+  for W in FList do
+  begin
+    if W.Locate(AIndex) then
+    begin
+      DoUpdateWatch(W.Name, W.Value);
+    end;
+  end;
 end;
 {$ENDREGION}
 {$ENDREGION}

@@ -28,7 +28,7 @@ uses
   LogViewer.Interfaces, LogViewer.ComPort.Settings, LogViewer.Subscribers.Base;
 
 type
-  TComPortSubscriber = class(TSubscriber)
+  TComPortSubscriber = class(TSubscriber, ISubscriber, IComPort)
   private
     FSettings   : TComPortSettings;
     FSerialPort : TBlockSerial;

@@ -25,7 +25,7 @@ uses
   System.SysUtils, System.Variants, System.Classes, System.Actions,
   System.UITypes, System.ImageList,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  Vcl.ActnList, Vcl.ButtonGroup, Vcl.ComCtrls, Vcl.ImgList,
+  Vcl.ActnList, Vcl.ButtonGroup, Vcl.ComCtrls, Vcl.ImgList, Vcl.Menus,
 
   Spring.Collections,
 
@@ -50,33 +50,36 @@ type
     {$REGION 'designer controls'}
     aclMain                   : TActionList;
     actAddZeroMQNode          : TAction;
+    actAddZMQNodeForLogViewer : TAction;
     actAddZMQNodeLocalHost    : TAction;
+    actCloseSubscriber        : TAction;
     actInspectTreeview        : TAction;
+    actSubscribeToList        : TAction;
     btnAddZeroMQNode          : TButton;
+    btnAddZMQNodeForLogViewer : TButton;
     btnAddZMQNodeLocalHost    : TButton;
+    btnSubscribeToList        : TButton;
+    chkAutoSubscribeWinIPC    : TCheckBox;
+    chkAutoSubscribeWinODS    : TCheckBox;
     edtAddress                : TLabeledEdit;
     edtPort                   : TLabeledEdit;
+    imlMain                   : TImageList;
+    mmoZMQEndPoints           : TMemo;
+    mniCloseSsubscriber       : TMenuItem;
     pgcMain                   : TPageControl;
-    pnlRight                  : TPanel;
-    pnlLogChannels            : TPanel;
+    pnlCOMPortTitle           : TPanel;
     pnlLeft                   : TPanel;
+    pnlLogChannels            : TPanel;
+    pnlRight                  : TPanel;
+    pnlWinIPCTitle            : TPanel;
+    pnlWinODSTitle            : TPanel;
+    pnlZeroMQTitle            : TPanel;
+    ppmMain                   : TPopupMenu;
     splVertical               : TSplitter;
     tsCOMPort                 : TTabSheet;
     tsWinIPC                  : TTabSheet;
     tsWinODS                  : TTabSheet;
     tsZeroMQ                  : TTabSheet;
-    actAddZMQNodeForLogViewer : TAction;
-    btnAddZMQNodeForLogViewer : TButton;
-    imlMain                   : TImageList;
-    mmoZMQEndPoints           : TMemo;
-    actSubscribeToList        : TAction;
-    btnSubscribeToList        : TButton;
-    chkAutoSubscribeWinIPC    : TCheckBox;
-    chkAutoSubscribeWinODS    : TCheckBox;
-    pnlWinIPCTitle            : TPanel;
-    pnlWinODSTitle            : TPanel;
-    pnlZeroMQTitle            : TPanel;
-    pnlCOMPortTitle           : TPanel;
     {$ENDREGION}
 
     procedure actAddZeroMQNodeExecute(Sender: TObject);
@@ -86,6 +89,7 @@ type
     procedure actSubscribeToListExecute(Sender: TObject);
 
     procedure edtAddressExit(Sender: TObject);
+    procedure actCloseSubscriberExecute(Sender: TObject);
 
   private
     FManager             : ILogViewerManager;
@@ -117,7 +121,6 @@ type
       TextType     : TVSTTextType;
       var CellText : string
     );
-
     procedure FTreeViewBeforeCellPaint(
       Sender          : TBaseVirtualTree;
       TargetCanvas    : TCanvas;
@@ -128,13 +131,19 @@ type
       var ContentRect : TRect
     );
     procedure FTreeViewDblClick(Sender: TObject);
-
     procedure FTreeViewChecked(Sender: TBaseVirtualTree; Node: PVirtualNode);
-
     procedure FTreeViewFocusChanged(
       Sender : TBaseVirtualTree;
       Node   : PVirtualNode;
       Column : TColumnIndex
+    );
+    procedure FTreeViewGetImageIndex(
+      Sender         : TBaseVirtualTree;
+      Node           : PVirtualNode;
+      Kind           : TVTImageKind;
+      Column         : TColumnIndex;
+      var Ghosted    : Boolean;
+      var ImageIndex : TImageIndex
     );
 
     procedure FWinIPCReceiverSubscriberListChanged(
@@ -147,14 +156,10 @@ type
       const AKey : Integer;
       Action     : TCollectionChangedAction
     );
-
-    procedure FTreeViewGetImageIndex(
-      Sender         : TBaseVirtualTree;
-      Node           : PVirtualNode;
-      Kind           : TVTImageKind;
-      Column         : TColumnIndex;
-      var Ghosted    : Boolean;
-      var ImageIndex : TImageIndex
+    procedure FWinODSReceiverSubscriberListChanged(
+      Sender     : TObject;
+      const AKey : Integer;
+      Action     : TCollectionChangedAction
     );
 
   protected
@@ -293,6 +298,11 @@ begin
   end;
 end;
 
+procedure TfrmDashboard.actCloseSubscriberExecute(Sender: TObject);
+begin
+//
+end;
+
 procedure TfrmDashboard.actInspectTreeviewExecute(Sender: TObject);
 begin
   InspectComponent(FTreeView);
@@ -385,19 +395,19 @@ begin
   end
   else
     DN := Sender.GetNodeData<TDashboardNode>(Node.Parent);
-  if DN.Receiver.Name = 'WinIPC' then
+  if Supports(DN.Receiver, IWinIPC) then
   begin
     pgcMain.ActivePage := tsWinIPC;
   end
-  else if DN.Receiver.Name = 'ZeroMQ' then
+  else if Supports(DN.Receiver, IZMQ) then
   begin
     pgcMain.ActivePage := tsZeroMQ;
   end
-  else if DN.Receiver.Name = 'WinODS' then
+  else if Supports(DN.Receiver, IWinODS) then
   begin
     pgcMain.ActivePage := tsWinODS;
   end
-  else if DN.Receiver.Name = 'COMPort' then
+  else if Supports(DN.Receiver, IComPort) then
   begin
     pgcMain.ActivePage := tsCOMPort;
   end;
@@ -460,7 +470,7 @@ begin
     if Sender.GetNodeLevel(Node) = 0 then
     begin
       if Column =  0 then
-        CellText := DN.Receiver.Name
+        CellText := DN.Caption
       else
         CellText := '';
     end
@@ -469,7 +479,7 @@ begin
       if Assigned(DN.Subscriber) then
       begin
         if Column =  0 then
-          CellText := DN.Subscriber.SourceName
+          CellText := DN.Caption
         else if Column =  1 then
           CellText := DN.Subscriber.Key
         else if Column =  2 then
@@ -501,7 +511,6 @@ end;
 procedure TfrmDashboard.FWinIPCReceiverSubscriberListChanged(Sender: TObject;
   const AKey: Integer; Action: TCollectionChangedAction);
 var
-  DN      : TDashboardNode;
   LDelete : TDashboardNode;
 begin
   if Action = caRemoved then
@@ -511,6 +520,22 @@ begin
     begin
       FTreeView.DeleteNode(LDelete.VTNode);
       FWinIPCNode.Nodes.Remove(AKey);
+    end;
+  end;
+end;
+
+procedure TfrmDashboard.FWinODSReceiverSubscriberListChanged(Sender: TObject;
+  const AKey: Integer; Action: TCollectionChangedAction);
+var
+  LDelete : TDashboardNode;
+begin
+  if Action = caRemoved then
+  begin
+    LDelete := FWinODSNode.Nodes.GetValueOrDefault(AKey);
+    if Assigned(LDelete) then
+    begin
+      FTreeView.DeleteNode(LDelete.VTNode);
+      FWinODSNode.Nodes.Remove(AKey);
     end;
   end;
 end;
@@ -566,16 +591,17 @@ begin
   else
     FWinIPCNode.VTNode.CheckState := csUncheckedNormal;
 
-//  FWinODSReceiver := TLogViewerFactories.CreateWinODSReceiver(FManager);
-//  FManager.AddReceiver(FWinODSReceiver);
-//  FWinODSReceiver.Enabled := FManager.Settings.WinODSSettings.Enabled;
-//  LNode := TDashboardNode.Create(nil, FTreeView, FWinODSReceiver, nil);
-//  AddNodesToTree(FTreeView.RootNode, LNode);
-//  LNode.VTNode.CheckType := ctCheckBox;
-//  if FWinODSReceiver.Enabled then
-//    LNode.VTNode.CheckState := csCheckedNormal
-//  else
-//    LNode.VTNode.CheckState := csUncheckedNormal;
+  FWinODSReceiver := TLogViewerFactories.CreateWinODSReceiver(FManager);
+  FManager.AddReceiver(FWinODSReceiver);
+  FWinODSReceiver.SubscriberList.OnKeyChanged.Add(FWinODSReceiverSubscriberListChanged);
+  FWinODSReceiver.Enabled := FManager.Settings.WinODSSettings.Enabled;
+  FWinODSNode := TDashboardNode.Create(nil, FTreeView, FWinODSReceiver, nil);
+  AddNodesToTree(FTreeView.RootNode, FWinODSNode);
+  FWinODSNode.VTNode.CheckType := ctCheckBox;
+  if FWinODSReceiver.Enabled then
+    FWinODSNode.VTNode.CheckState := csCheckedNormal
+  else
+    FWinODSNode.VTNode.CheckState := csUncheckedNormal;
 
   FZeroMQReceiver := TLogViewerFactories.CreateZeroMQReceiver(FManager, FZeroMQ);
   FManager.AddReceiver(FZeroMQReceiver);
@@ -594,13 +620,13 @@ begin
   );
   FManager.AddReceiver(FComPortReceiver);
   //FComPortReceiver.Enabled := FManager.Settings.ComPortSettings.Enabled;
-//  FComPortNode := TDashboardNode.Create(nil, FTreeView, FComPortReceiver, nil);
-//  AddNodesToTree(FTreeView.RootNode, FComPortNode);
-//  FComPortNode.VTNode.CheckType := ctCheckBox;
-//  if FComPortReceiver.Enabled then
-//    FComPortNode.VTNode.CheckState := csCheckedNormal
-//  else
-//    FComPortNode.VTNode.CheckState := csUncheckedNormal;
+  FComPortNode := TDashboardNode.Create(nil, FTreeView, FComPortReceiver, nil);
+  AddNodesToTree(FTreeView.RootNode, FComPortNode);
+  FComPortNode.VTNode.CheckType := ctCheckBox;
+  if FComPortReceiver.Enabled then
+    FComPortNode.VTNode.CheckState := csCheckedNormal
+  else
+    FComPortNode.VTNode.CheckState := csUncheckedNormal;
 end;
 
 procedure TfrmDashboard.InitializeControls;

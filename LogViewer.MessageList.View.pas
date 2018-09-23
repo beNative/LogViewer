@@ -57,48 +57,39 @@ type
     {$REGION 'designer controls'}
     btnFilterMessages : TButton;
     chkAutoFilter     : TCheckBox;
+    dscMain           : TDataSource;
     edtHandleType     : TLabeledEdit;
     edtHeight         : TLabeledEdit;
     edtMessageFilter  : TLabeledEdit;
-    edtMessageType    : TLabeledEdit;
     edtPixelFormat    : TLabeledEdit;
-    edtTimeStamp      : TLabeledEdit;
-    edtValue          : TLabeledEdit;
-    edtValueName      : TLabeledEdit;
-    edtValueType      : TLabeledEdit;
     edtWidth          : TLabeledEdit;
+    imgBitmap         : TImage;
     imlMessageTypes   : TImageList;
+    pgc1              : TPageControl;
     pgcMessageDetails : TPageControl;
     pnlCallStack      : TPanel;
     pnlCallStackTitle : TPanel;
     pnlCallStackWatch : TPanel;
-    pnlColor          : TPanel;
     pnlFilter         : TPanel;
     pnlImageViewer    : TPanel;
     pnlLeft           : TPanel;
     pnlLeftBottom     : TPanel;
     pnlMessageContent : TPanel;
-    pnlMessageDetails : TGridPanel;
     pnlMessages       : TPanel;
-    pnlMessageType    : TPanel;
     pnlRawMessageData : TPanel;
     pnlRight          : TPanel;
     pnlTextViewer     : TPanel;
-    pnlTimeStamp      : TPanel;
-    pnlValue          : TPanel;
-    pnlValueName      : TPanel;
-    pnlValueType      : TPanel;
     pnlWatches        : TPanel;
+    sbxImage          : TScrollBox;
     splLeftHorizontal : TSplitter;
     splLeftVertical   : TSplitter;
     splVertical       : TSplitter;
+    tsDataSet         : TTabSheet;
     tsImageViewer     : TTabSheet;
+    tsMessageView     : TTabSheet;
+    tsRawData         : TTabSheet;
     tsTextViewer      : TTabSheet;
     tsValueList       : TTabSheet;
-    sbxImage          : TScrollBox;
-    imgBitmap         : TImage;
-    tsDataSet         : TTabSheet;
-    dscMain           : TDataSource;
     {$ENDREGION}
 
     procedure edtMessageFilterChange(Sender: TObject);
@@ -386,9 +377,11 @@ begin
 
   FLogTreeView.PopupMenu := Manager.Menus.LogTreeViewerPopupMenu;
 
-  FValueList        := TValueList.Create(Self);
-  FValueList.Parent := tsValueList;
-  FValueList.Align  := alClient;
+  FValueList            := TValueList.Create(Self);
+  FValueList.Parent     := tsValueList;
+  FValueList.Align      := alClient;
+  FValueList.ShowHeader := False;
+  FValueList.Editable   := False;
 
   FDataSet    := TFDMemTable.Create(Self);
   FDBGridView := TGridViewFactory.CreateDBGridView(Self, tsDataSet, dscMain);
@@ -1155,14 +1148,14 @@ begin
   chkAutoFilter.Checked := Settings.AutoFilterMessages;
   pnlLeft.Width         := Settings.LeftPanelWidth;
   pnlRight.Width        := Settings.RightPanelWidth;
-  DisplayValuesSettings.TimeStamp.AssignTo(edtTimeStamp.Font);
-  edtTimeStamp.Alignment := DisplayValuesSettings.TimeStamp.HorizontalAlignment;
-  DisplayValuesSettings.ValueName.AssignTo(edtValueName.Font);
-  edtValueName.Alignment := DisplayValuesSettings.ValueName.HorizontalAlignment;
-  DisplayValuesSettings.ValueType.AssignTo(edtValueType.Font);
-  edtValueType.Alignment := DisplayValuesSettings.ValueType.HorizontalAlignment;
-  DisplayValuesSettings.Value.AssignTo(edtValue.Font);
-  edtValue.Alignment := DisplayValuesSettings.Value.HorizontalAlignment;
+//  DisplayValuesSettings.TimeStamp.AssignTo(edtTimeStamp.Font);
+//  edtTimeStamp.Alignment := DisplayValuesSettings.TimeStamp.HorizontalAlignment;
+//  DisplayValuesSettings.ValueName.AssignTo(edtValueName.Font);
+//  edtValueName.Alignment := DisplayValuesSettings.ValueName.HorizontalAlignment;
+//  DisplayValuesSettings.ValueType.AssignTo(edtValueType.Font);
+//  edtValueType.Alignment := DisplayValuesSettings.ValueType.HorizontalAlignment;
+//  DisplayValuesSettings.Value.AssignTo(edtValue.Font);
+//  edtValue.Alignment := DisplayValuesSettings.Value.HorizontalAlignment;
   FUpdate := True;
 end;
 
@@ -1232,14 +1225,14 @@ begin
   imgBitmap.Picture   := nil;
   edtWidth.Text       := '';
   edtHeight.Text      := '';
-  edtValue.Text       := '';
   edtPixelFormat.Text := '';
   edtHandleType.Text  := '';
-  edtMessageType.Text := '';
-  edtTimeStamp.Text   := '';
-  edtValueName.Text   := '';
-  edtValueType.Text   := '';
-  pnlColor.Color      := clBtnFace;
+//  edtValue.Text       := '';
+//  edtMessageType.Text := '';
+//  edtTimeStamp.Text   := '';
+//  edtValueName.Text   := '';
+//  edtValueType.Text   := '';
+//  pnlColor.Color      := clBtnFace;
   FDataSet.Active     := False;
   FEditorView.Clear;
   FValueList.Clear;
@@ -1438,6 +1431,10 @@ procedure TfrmMessageList.UpdateBitmapDisplay(ALogNode: TLogNode);
 begin
   if Assigned(ALogNode.MessageData) then
   begin
+    tsValueList.TabVisible   := False;
+    tsImageViewer.TabVisible := False;
+    tsDataSet.TabVisible     := False;
+    tsTextViewer.TabVisible  := False;
     ALogNode.MessageData.Position := 0;
     imgBitmap.Picture.Bitmap.LoadFromStream(ALogNode.MessageData);
     pgcMessageDetails.ActivePage := tsImageViewer;
@@ -1485,11 +1482,11 @@ begin
   end
   else
     S := Trim(ALogNode.Value);
-  if ALogNode.MessageType = lmtAlphaColor then
-    // First byte in Alphacolors is the transparancy channel
-    pnlColor.Color := AlphaColorToColor(S.ToInt64)
-  else
-    pnlColor.Color := S.ToInteger;
+//  if ALogNode.MessageType = lmtAlphaColor then
+//    // First byte in Alphacolors is the transparancy channel
+//    pnlColor.Color := AlphaColorToColor(S.ToInt64)
+//  else
+//    pnlColor.Color := S.ToInteger;
 end;
 
 procedure TfrmMessageList.UpdateComponentDisplay(ALogNode: TLogNode);
@@ -1500,6 +1497,10 @@ begin
   begin
     LStream := TStringStream.Create('', TEncoding.ANSI);
     try
+      tsValueList.TabVisible   := False;
+      tsImageViewer.TabVisible := False;
+      tsDataSet.TabVisible     := False;
+      tsTextViewer.TabVisible  := False;
       pgcMessageDetails.ActivePage := tsTextViewer;
       ALogNode.MessageData.Position := 0;
       ObjectBinaryToText(ALogNode.MessageData, LStream);
@@ -1518,6 +1519,10 @@ end;
 
 procedure TfrmMessageList.UpdateDataSetDisplay(ALogNode: TLogNode);
 begin
+  tsValueList.TabVisible   := False;
+  tsImageViewer.TabVisible := False;
+  tsDataSet.TabVisible     := False;
+  tsTextViewer.TabVisible  := False;
   pgcMessageDetails.ActivePage := tsDataSet;
   ALogNode.MessageData.Position := 0;
   FDataSet.LoadFromStream(ALogNode.MessageData);
@@ -1551,21 +1556,25 @@ begin
     lmtDataSet:
       UpdateDataSetDisplay(ALogNode);
   end;
-  edtMessageType.Text := LogMessageTypeNameOf(ALogNode.MessageType);
-  edtTimeStamp.Text   :=
-    FormatDateTime('dd:mm:yyyy hh:nn:ss:zzz', ALogNode.TimeStamp);
-  edtValue.Text       := ALogNode.Value;
-  edtValueName.Text   := ALogNode.ValueName;
-  edtValueType.Text   := ALogNode.ValueType;
+//  edtMessageType.Text := LogMessageTypeNameOf(ALogNode.MessageType);
+//  edtTimeStamp.Text   :=
+//    FormatDateTime('dd:mm:yyyy hh:nn:ss:zzz', ALogNode.TimeStamp);
+//  edtValue.Text       := ALogNode.Value;
+//  edtValueName.Text   := ALogNode.ValueName;
+//  edtValueType.Text   := ALogNode.ValueType;
 end;
 
 procedure TfrmMessageList.UpdateTextDisplay(ALogNode: TLogNode);
 var
   S : string;
 begin
+  tsValueList.TabVisible   := True;
+  tsTextViewer.TabVisible  := True;
+  tsImageViewer.TabVisible := False;
+  tsDataSet.TabVisible     := False;
   pgcMessageDetails.ActivePage := tsTextViewer;
   FEditorView.Text := ALogNode.Value;
-  S := Trim(ALogNode.ValueName);
+  S := Trim(ALogNode.ValueType);
   if S <> '' then
    FEditorView.HighlighterName := S;
 end;
@@ -1574,15 +1583,20 @@ procedure TfrmMessageList.UpdateTextStreamDisplay(ALogNode: TLogNode);
 var
   LStream : TStringStream;
 begin
+  tsValueList.TabVisible   := True;
+  tsImageViewer.TabVisible := False;
+  tsDataSet.TabVisible     := False;
   if ALogNode.MessageData = nil then
   begin
     FEditorView.Text := '';
+    tsTextViewer.TabVisible  := False;
   end
   else
   begin
     ALogNode.MessageData.Position := 0;
     LStream := TStringStream.Create('', TEncoding.ANSI);
     try
+      tsTextViewer.TabVisible  := True;
       pgcMessageDetails.ActivePage := tsTextViewer;
       LStream.Position := 0;
       LStream.CopyFrom(ALogNode.MessageData, ALogNode.MessageData.Size);

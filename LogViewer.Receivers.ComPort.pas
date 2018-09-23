@@ -42,7 +42,7 @@ uses
 {$ENDREGION}
 
 type
-  TComPortChannelReceiver = class(TChannelReceiver, IChannelReceiver)
+  TComPortChannelReceiver = class(TChannelReceiver, IChannelReceiver, IComPort)
   private
     FPollTimer  : TTimer;
     FSettings   : TComPortSettings;
@@ -96,8 +96,8 @@ begin
   inherited AfterConstruction;
   FPollTimer := TTimer.Create(nil);
   FPollTimer.Interval := 100;
-  FPollTimer.Enabled := False;
-  FPollTimer.OnTimer := FPollTimerTimer;
+  FPollTimer.Enabled  := False;
+  FPollTimer.OnTimer  := FPollTimerTimer;
   FSettings.OnChanged.Add(SettingsChanged);
 end;
 

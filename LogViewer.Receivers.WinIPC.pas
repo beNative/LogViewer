@@ -45,7 +45,7 @@ uses
   LogViewer.Receivers.Base, LogViewer.Interfaces, LogViewer.WinIPC.Settings;
 
 type
-  TWinIPCChannelReceiver = class(TChannelReceiver, IChannelReceiver)
+  TWinIPCChannelReceiver = class(TChannelReceiver, IChannelReceiver, IWinIPC)
   private
      FIPCServer : TWinIPCServer;
 

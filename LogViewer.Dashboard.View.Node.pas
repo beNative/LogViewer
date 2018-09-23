@@ -45,12 +45,12 @@ type
   TDashboardNode = class
   private
     FVTNode     : PVirtualNode;
-    //FNodes      : Lazy<IList<TDashboardNode>>;
-    FNodes      : IDictionary<Integer, TDashboardNode>;
+    FNodes      : Lazy<IDictionary<Integer, TDashboardNode>>;
     FReceiver   : IChannelReceiver;
     FSubscriber : Weak<ISubscriber>;
     FVTree      : TVirtualStringTree;
     FTreeForm   : TForm; // form owning the treeview control
+    FCaption    : string;
 
   protected
     {$REGION 'property access methods'}
@@ -63,14 +63,15 @@ type
     function GetNodes: IDictionary<Integer, TDashboardNode>;
     function GetVTNode: PVirtualNode;
     procedure SetVTNode(const Value: PVirtualNode);
+    function GetCaption: string;
     {$ENDREGION}
 
   public
     constructor Create(
-      AVTNode     : PVirtualNode;
-      AVTree      : TVirtualStringTree;
-      AReceiver   : IChannelReceiver;
-      ASubscriber : ISubscriber = nil
+      AVTNode        : PVirtualNode;
+      AVTree         : TVirtualStringTree;
+      AReceiver      : IChannelReceiver;
+      ASubscriber    : ISubscriber = nil
     );
     procedure BeforeDestruction; override;
 
@@ -90,6 +91,9 @@ type
     property Count: Integer
       read GetCount;
 
+    property Caption: string
+      read GetCaption;
+
     property Receiver: IChannelReceiver
       read GetReceiver write SetReceiver;
 
@@ -108,26 +112,49 @@ implementation
 uses
   System.SysUtils,
 
-  DDuce.Logger, DDuce.Utils;
+  DDuce.Logger, DDuce.Utils,
+
+  LogViewer.Resources;
 
 {$REGION 'construction and destruction'}
 constructor TDashboardNode.Create(AVTNode: PVirtualNode;
   AVTree: TVirtualStringTree; AReceiver: IChannelReceiver;
   ASubscriber: ISubscriber);
 begin
-//  FNodes.Create(function: IList<TDashboardNode>
-//    begin
-//      Result := TCollections.CreateObjectList<TDashboardNode>;//(False);
-//    end
-//  );
-  FNodes := TCollections.CreateDictionary<Integer, TDashboardNode>;
+  FNodes.Create(function: IDictionary<Integer, TDashboardNode>
+    begin
+      Result := TCollections.CreateDictionary<Integer, TDashboardNode>;
+    end
+  );
   FVTNode := AVTNode;
   FVTree  := AVTree;
   if Assigned(FVTree) and Assigned(FVTree.Owner) and (FVTree.Owner is TForm) then
     FTreeForm := TForm(FVTree.Owner);
   if not Assigned(ASubscriber) then
-    Receiver  := AReceiver;
+  begin
+    Receiver := AReceiver;
+    if Supports(Receiver, IWinIPC) then
+    begin
+      FCaption := SReceiverCaptionWinIPC;
+    end
+    else if Supports(Receiver, IZMQ) then
+    begin
+      FCaption := SReceiverCaptionZeroMQ;
+    end
+    else if Supports(Receiver, IWinODS) then
+    begin
+      FCaption := SReceiverCaptionWinODS;
+    end
+    else if Supports(Receiver, IComPort) then
+    begin
+      FCaption := SReceiverCaptionComPort;
+    end;
+  end;
   Subscriber := ASubscriber;
+  if Assigned(Subscriber) then
+  begin
+    FCaption := Subscriber.SourceName;
+  end;
 end;
 
 procedure TDashboardNode.BeforeDestruction;
@@ -135,9 +162,7 @@ begin
   Logger.Track(Self, 'BeforeDestruction');
   FVTree      := nil;
   FVTNode     := nil;
-  //Logger.SendInterface('FReceiver', FReceiver);
   FReceiver   := nil;
-  //Logger.SendInterface('FSubscriber', FSubscriber);
   FSubscriber := nil;
   FTreeForm   := nil;
   inherited BeforeDestruction;
@@ -145,24 +170,27 @@ end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
+function TDashboardNode.GetCaption: string;
+begin
+  Result := FCaption;
+end;
+
 function TDashboardNode.GetCount: Integer;
 begin
-  //if FNodes.IsValueCreated then
+  if FNodes.IsValueCreated then
     Result := Nodes.Count
-//  else
-//    Result := 0;
+  else
+    Result := 0;
 end;
 
 function TDashboardNode.GetNodes: IDictionary<Integer, TDashboardNode>;
 begin
-  //Result := FNodes.Value;
-  Result := FNodes;
+  Result := FNodes.Value;
 end;
 
 function TDashboardNode.GetReceiver: IChannelReceiver;
 begin
   Result := FReceiver;
-  //Result := FReceiver.Target;
 end;
 
 procedure TDashboardNode.SetReceiver(const Value: IChannelReceiver);
@@ -180,7 +208,6 @@ end;
 
 function TDashboardNode.GetSubscriber: ISubscriber;
 begin
-  //Result := FSubscriber;
   Result := FSubscriber.Target;
 end;
 

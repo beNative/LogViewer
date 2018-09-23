@@ -2,7 +2,7 @@ object frmMessageList: TfrmMessageList
   Left = 0
   Top = 0
   ClientHeight = 746
-  ClientWidth = 1366
+  ClientWidth = 1173
   Color = clWhite
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -15,7 +15,7 @@ object frmMessageList: TfrmMessageList
   PixelsPerInch = 96
   TextHeight = 13
   object splVertical: TSplitter
-    Left = 930
+    Left = 737
     Top = 0
     Width = 6
     Height = 746
@@ -35,7 +35,7 @@ object frmMessageList: TfrmMessageList
     ExplicitHeight = 806
   end
   object pnlRight: TPanel
-    Left = 936
+    Left = 743
     Top = 0
     Width = 430
     Height = 746
@@ -70,396 +70,155 @@ object frmMessageList: TfrmMessageList
       BevelOuter = bvNone
       ParentBackground = False
       TabOrder = 1
-      object pgcMessageDetails: TPageControl
-        Left = 0
-        Top = 97
-        Width = 430
-        Height = 624
-        ActivePage = tsTextViewer
-        Align = alClient
-        Style = tsFlatButtons
-        TabOrder = 0
-        object tsValueList: TTabSheet
-          Caption = 'Value list'
-          ImageIndex = 2
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
-        end
-        object tsTextViewer: TTabSheet
-          Caption = 'Text viewer'
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
-          object pnlTextViewer: TPanel
-            AlignWithMargins = True
-            Left = 3
-            Top = 3
-            Width = 416
-            Height = 587
-            Align = alClient
-            BevelOuter = bvNone
-            Color = clWhite
-            ParentBackground = False
-            TabOrder = 0
-          end
-        end
-        object tsImageViewer: TTabSheet
-          Caption = 'Image viewer'
-          ImageIndex = 1
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
-          object pnlImageViewer: TPanel
-            Left = 0
-            Top = 0
-            Width = 422
-            Height = 593
-            Align = alClient
-            BevelOuter = bvNone
-            ParentBackground = False
-            TabOrder = 0
-            object edtWidth: TLabeledEdit
-              Left = 64
-              Top = 6
-              Width = 73
-              Height = 21
-              EditLabel.Width = 32
-              EditLabel.Height = 13
-              EditLabel.Caption = 'Width:'
-              LabelPosition = lpLeft
-              TabOrder = 0
-            end
-            object edtPixelFormat: TLabeledEdit
-              Left = 64
-              Top = 33
-              Width = 73
-              Height = 21
-              EditLabel.Width = 61
-              EditLabel.Height = 13
-              EditLabel.Caption = 'Pixel format:'
-              LabelPosition = lpLeft
-              TabOrder = 1
-            end
-            object edtHandleType: TLabeledEdit
-              Left = 224
-              Top = 33
-              Width = 73
-              Height = 21
-              EditLabel.Width = 62
-              EditLabel.Height = 13
-              EditLabel.Caption = 'Handle type:'
-              LabelPosition = lpLeft
-              TabOrder = 2
-            end
-            object edtHeight: TLabeledEdit
-              Left = 224
-              Top = 6
-              Width = 73
-              Height = 21
-              EditLabel.Width = 35
-              EditLabel.Height = 13
-              EditLabel.Caption = 'Height:'
-              LabelPosition = lpLeft
-              TabOrder = 3
-            end
-            object sbxImage: TScrollBox
-              Left = 0
-              Top = 72
-              Width = 422
-              Height = 521
-              HorzScrollBar.Smooth = True
-              HorzScrollBar.Tracking = True
-              VertScrollBar.Smooth = True
-              VertScrollBar.Tracking = True
-              Align = alBottom
-              Anchors = [akLeft, akTop, akRight, akBottom]
-              BevelInner = bvNone
-              BevelKind = bkFlat
-              BorderStyle = bsNone
-              Color = clWhite
-              ParentColor = False
-              TabOrder = 4
-              object imgBitmap: TImage
-                Left = 3
-                Top = 3
-                Width = 420
-                Height = 519
-                AutoSize = True
-                IncrementalDisplay = True
-                Proportional = True
-              end
-            end
-          end
-        end
-        object tsDataSet: TTabSheet
-          Caption = 'DataSet'
-          ImageIndex = 3
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
-        end
-      end
-      object pnlMessageDetails: TGridPanel
+      object pgc1: TPageControl
         Left = 0
         Top = 0
         Width = 430
-        Height = 97
-        Align = alTop
-        BevelOuter = bvNone
-        ColumnCollection = <
-          item
-            Value = 100.000000000000000000
-          end>
-        ControlCollection = <
-          item
-            Column = 0
-            Control = pnlMessageType
-            Row = 0
-          end
-          item
-            Column = 0
-            Control = pnlValueName
-            Row = 1
-          end
-          item
-            Column = 0
-            Control = pnlValue
-            Row = 2
-          end
-          item
-            Column = 0
-            Control = pnlTimeStamp
-            Row = 3
-          end
-          item
-            Column = 0
-            Control = pnlValueType
-            Row = 4
-          end>
-        Font.Charset = ANSI_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Style = []
-        ParentFont = False
-        RowCollection = <
-          item
-            SizeStyle = ssAbsolute
-            Value = 18.000000000000000000
-          end
-          item
-            SizeStyle = ssAbsolute
-            Value = 18.000000000000000000
-          end
-          item
-            SizeStyle = ssAbsolute
-            Value = 18.000000000000000000
-          end
-          item
-            SizeStyle = ssAbsolute
-            Value = 18.000000000000000000
-          end
-          item
-            SizeStyle = ssAbsolute
-            Value = 18.000000000000000000
-          end>
-        TabOrder = 1
-        object pnlMessageType: TPanel
-          Left = 0
-          Top = 0
-          Width = 430
-          Height = 18
-          Align = alClient
-          BevelOuter = bvNone
-          TabOrder = 0
-          DesignSize = (
-            430
-            18)
-          object edtMessageType: TLabeledEdit
-            Left = 81
-            Top = 2
-            Width = 344
-            Height = 14
-            Alignment = taCenter
-            Anchors = [akLeft, akTop, akRight]
-            BevelInner = bvNone
-            BorderStyle = bsNone
-            EditLabel.Width = 71
-            EditLabel.Height = 13
-            EditLabel.Caption = 'Message type:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clGreen
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            LabelPosition = lpLeft
-            LabelSpacing = 2
-            ParentFont = False
+        Height = 721
+        ActivePage = tsMessageView
+        Align = alClient
+        TabOrder = 0
+        object tsMessageView: TTabSheet
+          Caption = 'Messageview'
+          object pgcMessageDetails: TPageControl
+            Left = 0
+            Top = 0
+            Width = 422
+            Height = 693
+            ActivePage = tsValueList
+            Align = alClient
+            MultiLine = True
             TabOrder = 0
+            TabPosition = tpBottom
+            object tsValueList: TTabSheet
+              Caption = 'Value list'
+              ImageIndex = 2
+            end
+            object tsTextViewer: TTabSheet
+              Caption = 'Text viewer'
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
+              object pnlTextViewer: TPanel
+                AlignWithMargins = True
+                Left = 3
+                Top = 3
+                Width = 408
+                Height = 661
+                Align = alClient
+                BevelOuter = bvNone
+                Color = clWhite
+                ParentBackground = False
+                TabOrder = 0
+              end
+            end
+            object tsImageViewer: TTabSheet
+              Caption = 'Image viewer'
+              ImageIndex = 1
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
+              object pnlImageViewer: TPanel
+                Left = 0
+                Top = 0
+                Width = 414
+                Height = 667
+                Align = alClient
+                BevelOuter = bvNone
+                ParentBackground = False
+                TabOrder = 0
+                object edtWidth: TLabeledEdit
+                  Left = 64
+                  Top = 6
+                  Width = 73
+                  Height = 21
+                  EditLabel.Width = 32
+                  EditLabel.Height = 13
+                  EditLabel.Caption = 'Width:'
+                  LabelPosition = lpLeft
+                  TabOrder = 0
+                end
+                object edtPixelFormat: TLabeledEdit
+                  Left = 64
+                  Top = 33
+                  Width = 73
+                  Height = 21
+                  EditLabel.Width = 61
+                  EditLabel.Height = 13
+                  EditLabel.Caption = 'Pixel format:'
+                  LabelPosition = lpLeft
+                  TabOrder = 1
+                end
+                object edtHandleType: TLabeledEdit
+                  Left = 224
+                  Top = 33
+                  Width = 73
+                  Height = 21
+                  EditLabel.Width = 62
+                  EditLabel.Height = 13
+                  EditLabel.Caption = 'Handle type:'
+                  LabelPosition = lpLeft
+                  TabOrder = 2
+                end
+                object edtHeight: TLabeledEdit
+                  Left = 224
+                  Top = 6
+                  Width = 73
+                  Height = 21
+                  EditLabel.Width = 35
+                  EditLabel.Height = 13
+                  EditLabel.Caption = 'Height:'
+                  LabelPosition = lpLeft
+                  TabOrder = 3
+                end
+                object sbxImage: TScrollBox
+                  Left = 0
+                  Top = 72
+                  Width = 414
+                  Height = 595
+                  HorzScrollBar.Smooth = True
+                  HorzScrollBar.Tracking = True
+                  VertScrollBar.Smooth = True
+                  VertScrollBar.Tracking = True
+                  Align = alBottom
+                  Anchors = [akLeft, akTop, akRight, akBottom]
+                  BevelInner = bvNone
+                  BevelKind = bkFlat
+                  BorderStyle = bsNone
+                  Color = clWhite
+                  ParentColor = False
+                  TabOrder = 4
+                  object imgBitmap: TImage
+                    Left = 3
+                    Top = 3
+                    Width = 420
+                    Height = 519
+                    AutoSize = True
+                    IncrementalDisplay = True
+                    Proportional = True
+                  end
+                end
+              end
+            end
+            object tsDataSet: TTabSheet
+              Caption = 'DataSet'
+              ImageIndex = 3
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
+            end
           end
         end
-        object pnlValueName: TPanel
-          Left = 0
-          Top = 18
-          Width = 430
-          Height = 18
-          Align = alClient
-          BevelOuter = bvNone
-          TabOrder = 1
-          DesignSize = (
-            430
-            18)
-          object edtValueName: TLabeledEdit
-            Left = 80
-            Top = 2
-            Width = 345
-            Height = 14
-            Alignment = taCenter
-            Anchors = [akLeft, akTop, akRight]
-            BevelInner = bvNone
-            BorderStyle = bsNone
-            EditLabel.Width = 31
-            EditLabel.Height = 13
-            EditLabel.Caption = 'Name:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            LabelPosition = lpLeft
-            LabelSpacing = 2
-            ParentFont = False
-            TabOrder = 0
-          end
-        end
-        object pnlValue: TPanel
-          Left = 0
-          Top = 36
-          Width = 430
-          Height = 18
-          Align = alClient
-          BevelOuter = bvNone
-          TabOrder = 2
-          DesignSize = (
-            430
-            18)
-          object edtValue: TLabeledEdit
-            Left = 80
-            Top = 2
-            Width = 301
-            Height = 14
-            Alignment = taCenter
-            Anchors = [akLeft, akTop, akRight]
-            BevelInner = bvNone
-            BorderStyle = bsNone
-            EditLabel.Width = 30
-            EditLabel.Height = 13
-            EditLabel.Caption = 'Value:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            LabelPosition = lpLeft
-            LabelSpacing = 2
-            ParentFont = False
-            TabOrder = 0
-          end
-          object pnlColor: TPanel
-            Left = 385
-            Top = 2
-            Width = 40
-            Height = 14
-            Anchors = [akTop, akRight]
-            BevelKind = bkFlat
-            BevelOuter = bvNone
-            Color = clGrayText
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentBackground = False
-            ParentFont = False
-            TabOrder = 1
-          end
-        end
-        object pnlTimeStamp: TPanel
-          Left = 0
-          Top = 54
-          Width = 430
-          Height = 18
-          Align = alClient
-          BevelOuter = bvNone
-          TabOrder = 3
-          DesignSize = (
-            430
-            18)
-          object edtTimeStamp: TLabeledEdit
-            Left = 81
-            Top = 2
-            Width = 343
-            Height = 14
-            Alignment = taCenter
-            Anchors = [akLeft, akTop, akRight]
-            AutoSize = False
-            BevelInner = bvNone
-            BorderStyle = bsNone
-            EditLabel.Width = 55
-            EditLabel.Height = 13
-            EditLabel.Caption = 'Timestamp:'
-            EditLabel.Layout = tlCenter
-            EditLabel.WordWrap = True
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            LabelPosition = lpLeft
-            LabelSpacing = 2
-            ParentFont = False
-            TabOrder = 0
-          end
-        end
-        object pnlValueType: TPanel
-          Left = 0
-          Top = 72
-          Width = 430
-          Height = 18
-          Align = alClient
-          BevelOuter = bvNone
-          TabOrder = 4
-          DesignSize = (
-            430
-            18)
-          object edtValueType: TLabeledEdit
-            Left = 81
-            Top = 2
-            Width = 344
-            Height = 14
-            Alignment = taCenter
-            Anchors = [akLeft, akTop, akRight]
-            AutoSize = False
-            BevelInner = bvNone
-            BorderStyle = bsNone
-            EditLabel.Width = 28
-            EditLabel.Height = 13
-            EditLabel.Caption = 'Type:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            LabelPosition = lpLeft
-            LabelSpacing = 2
-            ParentFont = False
-            TabOrder = 0
-          end
+        object tsRawData: TTabSheet
+          Caption = 'Raw message data'
+          ImageIndex = 1
+          ExplicitLeft = 6
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
         end
       end
     end
@@ -553,7 +312,7 @@ object frmMessageList: TfrmMessageList
   object pnlMessages: TPanel
     Left = 359
     Top = 0
-    Width = 571
+    Width = 378
     Height = 746
     Align = alClient
     BevelOuter = bvNone
@@ -564,19 +323,19 @@ object frmMessageList: TfrmMessageList
     object pnlFilter: TPanel
       Left = 0
       Top = 0
-      Width = 571
+      Width = 378
       Height = 25
       Align = alTop
       BevelOuter = bvNone
       ParentBackground = False
       TabOrder = 0
       DesignSize = (
-        571
+        378
         25)
       object edtMessageFilter: TLabeledEdit
         Left = 88
         Top = 2
-        Width = 302
+        Width = 109
         Height = 21
         Alignment = taCenter
         Anchors = [akLeft, akTop, akRight]
@@ -591,7 +350,7 @@ object frmMessageList: TfrmMessageList
         OnKeyUp = edtMessageFilterKeyUp
       end
       object btnFilterMessages: TButton
-        Left = 473
+        Left = 280
         Top = 0
         Width = 98
         Height = 25
@@ -601,7 +360,7 @@ object frmMessageList: TfrmMessageList
         TabOrder = 1
       end
       object chkAutoFilter: TCheckBox
-        Left = 396
+        Left = 203
         Top = 4
         Width = 71
         Height = 17
@@ -619,7 +378,7 @@ object frmMessageList: TfrmMessageList
     Left = 607
     Top = 150
     Bitmap = {
-      494C0101160019002C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010116001900340010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

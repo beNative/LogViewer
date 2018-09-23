@@ -63,11 +63,11 @@ type
   end;
 
 type
-  TWinODSChannelReceiver = class(TChannelReceiver, IChannelReceiver)
+  TWinODSChannelReceiver = class(TChannelReceiver, IChannelReceiver, IWinODS)
   private
     FBuffer           : TMemoryStream;
     FODSQueue         : IQueue<TODSMessage>;
-    //FODSThread        : TODSThread;
+    FODSThread        : TODSThread;
 
     procedure FODSQueueChanged(
       Sender     : TObject;
@@ -79,6 +79,10 @@ type
     function GetSettings: TWinODSSettings;
 
     procedure SettingsChanged(Sender: TObject);
+    function CreateSubscriber(ASourceId: Integer; AThreadId: Integer;
+      const ASourceName: string): ISubscriber; override;
+
+
 
   public
     procedure AfterConstruction; override;
@@ -100,7 +104,7 @@ uses
 
   DDuce.Logger.Interfaces, DDuce.Utils.WinApi,
 
-  LogViewer.WinIPC.Settings;
+  LogViewer.Subscribers.WinODS;
 
 {$REGION 'construction and destruction'}
 procedure TWinODSChannelReceiver.AfterConstruction;
@@ -109,17 +113,22 @@ begin
   FBuffer := TMemoryStream.Create;
   FODSQueue := TCollections.CreateQueue<TODSMessage>(True);
   FODSQueue.OnChanged.Add(FODSQueueChanged);
-  //FODSThread := TODSThread.Create(FODSQueue);
+  FODSThread := TODSThread.Create(FODSQueue);
   Settings.OnChanged.Add(SettingsChanged);
 end;
 
 procedure TWinODSChannelReceiver.BeforeDestruction;
 begin
-  //FODSThread.Terminate;
+  FODSThread.Terminate;
   FBuffer.Free;
   FODSQueue.Clear;
-  //FODSThread.Free;
+  FODSThread.Free;
   inherited BeforeDestruction;
+end;
+function TWinODSChannelReceiver.CreateSubscriber(ASourceId, AThreadId: Integer;
+  const ASourceName: string): ISubscriber;
+begin
+  Result := TWinODSSubscriber.Create(Self, ASourceId, '', ASourceName, True);
 end;
 {$ENDREGION}
 
@@ -142,16 +151,22 @@ const
   ZERO_BUF : Integer = 0;
 var
   LTextSize : Integer;
-  LMsgType  : Integer;
+  LMsgType  : Byte;
+  LDummy    : Byte;
 //  LDataSize : Integer;
 begin
+  LDummy := 0;
   if Enabled and (Action = caAdded) then
   begin
     FBuffer.Clear;
+    Item.MsgText := #13#10 + Item.MsgText;
     LMsgType := Integer(lmtText);
     LTextSize := Length(Item.MsgText);
     FBuffer.Seek(0, soFromBeginning);
     FBuffer.WriteBuffer(LMsgType);
+    FBuffer.WriteBuffer(LDummy);
+    FBuffer.WriteBuffer(LDummy);
+    FBuffer.WriteBuffer(LDummy);
     FBuffer.WriteBuffer(Item.TimeStamp);
     FBuffer.WriteBuffer(LTextSize);
     FBuffer.WriteBuffer(Item.MsgText[1], LTextSize);

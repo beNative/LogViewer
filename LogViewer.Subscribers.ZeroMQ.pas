@@ -28,7 +28,7 @@ uses
   LogViewer.Interfaces, LogViewer.Subscribers.Base;
 
 type
-  TZMQSubscriber = class(TSubscriber, ISubscriber)
+  TZMQSubscriber = class(TSubscriber, ISubscriber, IZMQ)
   private
     FZMQ        : IZeroMQ;
     FSubscriber : IZMQPair;
@@ -67,7 +67,6 @@ uses
   DDuce.Logger;
 
 {$REGION 'construction and destruction'}
-
 constructor TZMQSubscriber.Create(AReceiver: IChannelReceiver; AZMQ: IZeroMQ;
   const AEndPoint: string; ASourceId: Integer; const AKey: string;
   const ASourceName: string; AEnabled: Boolean);

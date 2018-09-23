@@ -116,7 +116,7 @@ uses
 
   Spring,
 
-  LogViewer.Factories.Toolbars,
+  LogViewer.Resources, LogViewer.Factories.Toolbars,
   LogViewer.Receivers.WinIPC, LogViewer.Receivers.WinODS,
   LogViewer.Receivers.ZeroMQ, LogViewer.Receivers.ComPort;
 
@@ -204,25 +204,27 @@ end;
 class function TLogViewerFactories.CreateWinIPCReceiver(
   AManager: ILogViewerManager): IChannelReceiver;
 begin
-  Result := TWinIPCChannelReceiver.Create(AManager, 'WinIPC');
+  Result := TWinIPCChannelReceiver.Create(AManager, RECEIVERNAME_WINIPC);
 end;
 
 class function TLogViewerFactories.CreateWinODSReceiver(
   AManager: ILogViewerManager): IChannelReceiver;
 begin
-  Result := TWinODSChannelReceiver.Create(AManager, 'WinODS');
+  Result := TWinODSChannelReceiver.Create(AManager, RECEIVERNAME_WINODS);
 end;
 
 class function TLogViewerFactories.CreateZeroMQReceiver(
   AManager: ILogViewerManager; AZMQ: IZeroMQ): IChannelReceiver;
 begin
-  Result := TZeroMQChannelReceiver.Create(AManager, AZMQ, 'ZeroMQ');
+  Result := TZeroMQChannelReceiver.Create(AManager, AZMQ, RECEIVERNAME_ZEROMQ);
 end;
 
 class function TLogViewerFactories.CreateComPortReceiver(
   AManager: ILogViewerManager; ASettings: TComPortSettings): IChannelReceiver;
 begin
-  Result := TComPortChannelReceiver.Create(AManager, 'COMPort', ASettings);
+  Result := TComPortChannelReceiver.Create(
+    AManager, RECEIVERNAME_COMPORT, ASettings
+  );
 end;
 {$ENDREGION}
 

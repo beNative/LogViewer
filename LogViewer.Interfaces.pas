@@ -123,6 +123,22 @@ type
       read GetSubscriberList;
   end;
 
+  IZMQ = interface
+  ['{89F150A7-414B-4C81-BC08-40227768D317}']
+  end;
+
+  IWinIPC = interface
+  ['{CE3BF275-B51C-491E-8DBE-1CA0E8816035}']
+  end;
+
+  IWinODS = interface
+  ['{71CED15C-E2E5-4708-A34F-5BAE4D918A3D}']
+  end;
+
+  IComPort = interface
+  ['{456C6CFE-8BC8-4ED4-B087-1C8116B5A84A}']
+  end;
+
   ILogViewerActions = interface
   ['{73B2BDA9-4098-49A3-95D7-E837EC129FE4}']
     {$REGION 'property access methods'}

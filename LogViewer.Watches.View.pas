@@ -56,8 +56,6 @@ type
     function GetSelectedWatch: TWatch;
 
     {$REGION 'event handlers'}
-    procedure FWatchesUpdateWatch(const AName, AValue: string);
-    procedure FWatchesNewWatch(const AName: string; AId: Int64);
     procedure FTVPWatchValuesSelectionChanged(Sender: TObject);
     function FCDTimeStampGetText(
       Sender           : TObject;
@@ -164,8 +162,6 @@ constructor TfrmWatchesView.Create(AOwner: TComponent; AWatches: TWatchList;
 begin
   inherited Create(AOwner);
   FWatches := AWatches;
-//  FWatches.OnUpdateWatch := FWatchesUpdateWatch;
-//  FWatches.OnNewWatch    := FWatchesNewWatch;
   FSettings              := ASettings;
   FDisplayValuesSettings := ADisplayValuesSettings;
   CreateObjects;
@@ -283,17 +279,6 @@ end;
 procedure TfrmWatchesView.FTVPWatchValuesSelectionChanged(Sender: TObject);
 begin
   UpdateWatchHistory;
-end;
-
-procedure TfrmWatchesView.FWatchesNewWatch(const AName: string;
-  AId: Int64);
-begin
-  //
-end;
-
-procedure TfrmWatchesView.FWatchesUpdateWatch(const AName, AValue: string);
-begin
-//
 end;
 {$ENDREGION}
 
