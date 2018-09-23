@@ -1,35 +1,44 @@
 # LogViewer
 
-A general purpose logviewer that supports multiple source types to receive
-messages from.
+LogViewer is a general purpose message viewer for log messages with support for multiple sources to receive messages from.
 
-* Windows IPC (using WM_COPY messages)
-* Windows OutputDebugString API
-* [ZeroMQ](https://github.com/zeromq/libzmq) (PUB/SUB socket)
+* Windows ``OutputDebugString`` API
+* Windows IPC (using ``WM_COPY`` messages)
+* [ZeroMQ](https://github.com/zeromq/libzmq) (`PUB`/`SUB` socket) for logging over the network
 * Serial port
-* Spring4D logging API
+* Spring4D logging API 
 
-Each of these receivers supports multiple channels which can be displayed in
+Each of these receivers support multiple subscribers for which messages can be displayed in
 a dedicated logviewer.
 
-A logviewer consists of
+## General layout
 - the main log treeview
 - watches with history
 - method callstack level display
 - message details
 
-Features currently supported:
+## Features currently supported
 - Info/Warning and Error messages
 - Method tracking
 - Screenshot capture
 - Conditional logging
 - Checkpoints
 - Counters
-- Watches
+- Watches + value history support
 - Datasets
+- Bitmaps
+- Objects
+- Components
+- Native value types with type information
+- Text with suppport for multiple highlighters
 - Actions
+- Up to 255 logging levels
 
-The sources depend on the following libraries and components:
+## Overview
+A mindmap with an overview of the application: [LogViewer.xmind](https://github.com/beNative/LogViewer/blob/master/Documents/LogViewer.xmind)
+
+## Libraries used
+The Object Pascal (Delphi) sources depend on the following open source libraries and components:
   * [Spring4D](http://bitbucket.org/sglienke/spring4d)
   * [DSharp](http://bitbucket.org/sglienke/dsharp)
   * [Virtual treeview](http://github.com/Virtual-TreeView/Virtual-TreeView)
@@ -40,6 +49,7 @@ The sources depend on the following libraries and components:
   * [TChromeTabs](https://github.com/norgepaul/TChromeTabs)
   * [Ararat Synapse](https://sourceforge.net/projects/synalist/)
 
-Here is a preliminary look of the application:
+## Screenshots
+Here is a preliminary look of the application (2018/09/22):
 
-![LogViewer](https://github.com/beNative/LogViewer/blob/master/Wiki/LogViewer_30-11-2017%2021-35-21.png)
+![LogViewer](https://github.com/beNative/LogViewer/blob/master/Wiki/LogViewer_22-09-2018%2013-21-07.png)
