@@ -40,6 +40,11 @@ type
     FSubscriberList : IDictionary<Integer, ISubscriber>;
     FManager        : ILogViewerManager;
 
+  class var
+    FProcesses : Lazy<IDictionary<UInt32, string>>;
+
+    class function GetProcesses: IDictionary<UInt32, string>; static;
+
   protected
     {$REGION 'property access methods'}
     function GetManager: ILogViewerManager;
@@ -63,6 +68,8 @@ type
     ); virtual;
 
   public
+    class constructor Create;
+    class destructor Destroy;
     constructor Create(
       AManager    : ILogViewerManager;
       const AName : string
@@ -84,6 +91,9 @@ type
     property SubscriberList: IDictionary<Integer, ISubscriber>
       read GetSubscriberList;
 
+    class property Processes: IDictionary<UInt32, string>
+      read GetProcesses;
+
   end;
 
 implementation
@@ -99,7 +109,7 @@ uses
 procedure TChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FSubscriberList := TCollections.CreateDictionary<Integer, ISubscriber>;
+  FSubscriberList :=  TCollections.CreateDictionary<Integer, ISubscriber>;
 end;
 
 procedure TChannelReceiver.BeforeDestruction;
@@ -126,6 +136,15 @@ begin
     Name := AName;
 end;
 
+class constructor TChannelReceiver.Create;
+begin
+  FProcesses.Create(function: IDictionary<UInt32, string>
+    begin
+      Result := TCollections.CreateDictionary<UInt32, string>;
+    end
+  );
+end;
+
 function TChannelReceiver.CreateSubscriber(ASourceId: Integer; AThreadId: Integer;
   const ASourceName : string): ISubscriber;
 begin
@@ -134,6 +153,11 @@ end;
 {$ENDREGION}
 
 {$REGION 'event dispatch methods'}
+class destructor TChannelReceiver.Destroy;
+begin
+  FProcesses := nil;
+end;
+
 procedure TChannelReceiver.DoReceiveMessage(AStream: TStream; ASourceId: Integer;
   AThreadId: Integer; const ASourceName : string);
 var
@@ -173,6 +197,11 @@ end;
 function TChannelReceiver.GetName: string;
 begin
   Result := FName;
+end;
+
+class function TChannelReceiver.GetProcesses: IDictionary<UInt32, string>;
+begin
+  Result := FProcesses.Value;
 end;
 
 procedure TChannelReceiver.SetName(const Value: string);

@@ -70,12 +70,12 @@ object frmMessageList: TfrmMessageList
       BevelOuter = bvNone
       ParentBackground = False
       TabOrder = 1
-      object pgc1: TPageControl
+      object pgcMessageData: TPageControl
         Left = 0
         Top = 0
         Width = 430
         Height = 721
-        ActivePage = tsMessageView
+        ActivePage = tsRawData
         Align = alClient
         TabOrder = 0
         object tsMessageView: TTabSheet
@@ -93,13 +93,11 @@ object frmMessageList: TfrmMessageList
             object tsValueList: TTabSheet
               Caption = 'Value list'
               ImageIndex = 2
+              ExplicitLeft = 2
+              ExplicitTop = 0
             end
             object tsTextViewer: TTabSheet
               Caption = 'Text viewer'
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object pnlTextViewer: TPanel
                 AlignWithMargins = True
                 Left = 3
@@ -116,10 +114,6 @@ object frmMessageList: TfrmMessageList
             object tsImageViewer: TTabSheet
               Caption = 'Image viewer'
               ImageIndex = 1
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object pnlImageViewer: TPanel
                 Left = 0
                 Top = 0
@@ -205,20 +199,12 @@ object frmMessageList: TfrmMessageList
             object tsDataSet: TTabSheet
               Caption = 'DataSet'
               ImageIndex = 3
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
             end
           end
         end
         object tsRawData: TTabSheet
           Caption = 'Raw message data'
           ImageIndex = 1
-          ExplicitLeft = 6
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
         end
       end
     end
@@ -378,7 +364,7 @@ object frmMessageList: TfrmMessageList
     Left = 607
     Top = 150
     Bitmap = {
-      494C010116001900340010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010116001900380010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

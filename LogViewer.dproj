@@ -122,7 +122,6 @@
         <DCCReference Include="LogViewer.Receivers.WinIPC.pas"/>
         <DCCReference Include="LogViewer.Receivers.ZeroMQ.pas"/>
         <DCCReference Include="LogViewer.Interfaces.pas"/>
-        <DCCReference Include="LogViewer.Receivers.WinODS.pas"/>
         <DCCReference Include="uCustomImageDrawHook.pas"/>
         <DCCReference Include="LogViewer.Resources.pas"/>
         <DCCReference Include="LogViewer.MainForm.pas">
@@ -184,6 +183,11 @@
         <DCCReference Include="LogViewer.Subscribers.WinIPC.pas"/>
         <DCCReference Include="LogViewer.Subscribers.Base.pas"/>
         <DCCReference Include="LogViewer.Subscribers.WinODS.pas"/>
+        <DCCReference Include="LogViewer.ValueList.View.pas">
+            <Form>frmValueList</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="LogViewer.Receivers.WinODS.pas"/>
         <None Include="Readme.md"/>
         <RcItem Include="Bin\Win32\libzmq.dll">
             <ContainerId>ResourceItem</ContainerId>

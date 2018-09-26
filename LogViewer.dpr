@@ -19,7 +19,6 @@ uses
   LogViewer.Receivers.WinIPC in 'LogViewer.Receivers.WinIPC.pas',
   LogViewer.Receivers.ZeroMQ in 'LogViewer.Receivers.ZeroMQ.pas',
   LogViewer.Interfaces in 'LogViewer.Interfaces.pas',
-  LogViewer.Receivers.WinODS in 'LogViewer.Receivers.WinODS.pas',
   uCustomImageDrawHook in 'uCustomImageDrawHook.pas',
   LogViewer.Resources in 'LogViewer.Resources.pas',
   LogViewer.MainForm in 'LogViewer.MainForm.pas' {frmMain},
@@ -55,7 +54,9 @@ uses
   LogViewer.Subscribers.ComPort in 'LogViewer.Subscribers.ComPort.pas',
   LogViewer.Subscribers.WinIPC in 'LogViewer.Subscribers.WinIPC.pas',
   LogViewer.Subscribers.Base in 'LogViewer.Subscribers.Base.pas',
-  LogViewer.Subscribers.WinODS in 'LogViewer.Subscribers.WinODS.pas';
+  LogViewer.Subscribers.WinODS in 'LogViewer.Subscribers.WinODS.pas',
+  LogViewer.ValueList.View in 'LogViewer.ValueList.View.pas' {frmValueList},
+  LogViewer.Receivers.WinODS in 'LogViewer.Receivers.WinODS.pas';
 
 {$R *.res}
 

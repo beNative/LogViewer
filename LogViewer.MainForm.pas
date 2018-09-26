@@ -43,6 +43,7 @@ uses
 
 type
   TfrmMain = class(TForm)
+    {$REGION 'designer controls'}
     aclMain           : TActionList;
     actCenterToScreen : TAction;
     actShowVersion    : TAction;
@@ -53,10 +54,12 @@ type
     pnlTop            : TPanel;
     tskbrMain         : TTaskbar;
     tmrPoll           : TTimer;
-    pnlSourceName: TPanel;
-    pnlDelta: TPanel;
-    pbrCPU: TKPercentProgressBar;
-    pnlMessageCount: TPanel;
+    pnlSourceName     : TPanel;
+    pnlDelta          : TPanel;
+    pbrCPU            : TKPercentProgressBar;
+    pnlMessageCount   : TPanel;
+    pnlMemory: TPanel;
+    {$ENDREGION}
 
     procedure actCenterToScreenExecute(Sender: TObject);
     procedure actShowVersionExecute(Sender: TObject);
@@ -208,6 +211,7 @@ var
   CR: IChannelReceiver;
 begin
   Logger.Track(Self, 'BeforeDestruction');
+  tmrPoll.Enabled := False;
   //FDashboard.Close;
   for CR in Manager.Receivers do
     CR.Enabled := False;
@@ -216,7 +220,7 @@ begin
   FSettings.Save;
   FSettings.OnChanged.Remove(SettingsChanged);
   FSettings.Free;
-  //FManager := nil;
+  FManager := nil;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
@@ -353,6 +357,7 @@ end;
 procedure TfrmMain.tmrPollTimer(Sender: TObject);
 begin
   pbrCPU.Position := Round(GetProcessCpuUsagePct(GetCurrentProcessId));
+  pnlMemory.Caption := FormatBytes(MemoryUsed);
 end;
 
 procedure TfrmMain.FormShortCut(var Msg: TWMKey; var Handled: Boolean);

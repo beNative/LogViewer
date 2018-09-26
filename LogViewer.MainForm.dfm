@@ -371,6 +371,7 @@ object frmMain: TfrmMain
       Top = 1
       Width = 224
       Height = 18
+      Hint = 'Source'
       Margins.Left = 1
       Margins.Top = 1
       Margins.Right = 1
@@ -384,7 +385,7 @@ object frmMain: TfrmMain
       AlignWithMargins = True
       Left = 291
       Top = 1
-      Width = 100
+      Width = 110
       Height = 18
       Margins.Left = 1
       Margins.Top = 1
@@ -401,7 +402,6 @@ object frmMain: TfrmMain
       ParentBackground = False
       ParentFont = False
       TabOrder = 1
-      ExplicitLeft = 279
     end
     object pbrCPU: TKPercentProgressBar
       AlignWithMargins = True
@@ -428,6 +428,7 @@ object frmMain: TfrmMain
       Top = 1
       Width = 62
       Height = 18
+      Hint = 'Messages received'
       Margins.Left = 1
       Margins.Top = 1
       Margins.Right = 1
@@ -437,6 +438,29 @@ object frmMain: TfrmMain
       BevelOuter = bvNone
       ShowCaption = False
       TabOrder = 3
+    end
+    object pnlMemory: TPanel
+      AlignWithMargins = True
+      Left = 888
+      Top = 1
+      Width = 56
+      Height = 18
+      Hint = 'Memory used'
+      Margins.Left = 1
+      Margins.Top = 1
+      Margins.Right = 1
+      Margins.Bottom = 1
+      Align = alRight
+      BevelKind = bkFlat
+      BevelOuter = bvNone
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clBlack
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentBackground = False
+      ParentFont = False
+      TabOrder = 4
     end
   end
   object pnlTop: TPanel
@@ -467,7 +491,7 @@ object frmMain: TfrmMain
     Left = 208
     Top = 48
     Bitmap = {
-      494C010101000500200010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C0101010005002C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

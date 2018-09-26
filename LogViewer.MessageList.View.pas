@@ -39,8 +39,8 @@ uses
 
   LogViewer.Messages.Data, LogViewer.Watches.Data, LogViewer.Watches.View,
   LogViewer.Interfaces, LogViewer.CallStack.Data, LogViewer.CallStack.View,
-  LogViewer.MessageList.Settings, LogViewer.MessageList.LogNode,
-  LogViewer.DisplayValues.Settings;
+  LogViewer.ValueList.View, LogViewer.MessageList.Settings,
+  LogViewer.MessageList.LogNode, LogViewer.DisplayValues.Settings;
 
 {$REGION 'documentation'}
 { Message viewer responsible for displaying all messages from an associated
@@ -65,7 +65,7 @@ type
     edtWidth          : TLabeledEdit;
     imgBitmap         : TImage;
     imlMessageTypes   : TImageList;
-    pgc1              : TPageControl;
+    pgcMessageData    : TPageControl;
     pgcMessageDetails : TPageControl;
     pnlCallStack      : TPanel;
     pnlCallStackTitle : TPanel;
@@ -127,7 +127,7 @@ type
     FVKPressed                   : Boolean;
     FSettings                    : TMessageListSettings;
     FAutoSizeColumns             : Boolean;
-    FValueList                   : TValueList;
+    FValueList                   : TfrmValueList;
     FDataSet                     : TFDMemTable;
     FDBGridView                  : TDBGridView;
     FMiliSecondsBetweenSelection : Integer;
@@ -278,6 +278,7 @@ type
     procedure CreateEditor;
     procedure CreateCallStackView;
     procedure CreateWatchesView;
+    procedure CreateValueListView;
 
     procedure CollapseAll;
     procedure ExpandAll;
@@ -323,9 +324,8 @@ type
       ASubscriber : ISubscriber;
       ASettings   : TMessageListSettings
     ); reintroduce; virtual;
-
-    procedure BeforeDestruction; override;
     procedure AfterConstruction; override;
+    procedure BeforeDestruction; override;
 
   end;
 
@@ -333,7 +333,7 @@ implementation
 
 uses
   System.StrUtils, System.UITypes, System.DateUtils, System.Math,
-  System.UIConsts, System.Threading,
+  System.UIConsts,
 
   Spring.Helpers,
 
@@ -370,18 +370,22 @@ begin
   CreateLogTreeView;
   CreateWatchesView;
   CreateCallStackView;
+  // CreateValueListView;
+
+  tsRawData.TabVisible      := False;
+  tsMessageView.TabVisible  := False;
+  pgcMessageData.ActivePage := tsMessageView;
+  tsValueList.TabVisible    := False;
+  tsImageViewer.TabVisible  := False;
+  tsDataSet.TabVisible      := False;
+  tsTextViewer.TabVisible   := False;
+
   Caption := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
 
   Subscriber.OnReceiveMessage.Add(FSubscriberReceiveMessage);
   FSettings.OnChanged.Add(FSettingsChanged);
 
   FLogTreeView.PopupMenu := Manager.Menus.LogTreeViewerPopupMenu;
-
-  FValueList            := TValueList.Create(Self);
-  FValueList.Parent     := tsValueList;
-  FValueList.Align      := alClient;
-  FValueList.ShowHeader := False;
-  FValueList.Editable   := False;
 
   FDataSet    := TFDMemTable.Create(Self);
   FDBGridView := TGridViewFactory.CreateDBGridView(Self, tsDataSet, dscMain);
@@ -406,13 +410,13 @@ begin
   end;
   FCallStack  := nil;
   FEditorView := nil;
+  FreeAndNil(FValueList);
   FreeAndNil(FWatches);
   FreeAndNIl(FWatchesView);
   FreeAndNil(FCallStackView);
   FreeAndNil(FLogTreeView);
   FreeAndNil(FDataSet);
   FreeAndNil(FDBGridView);
-
   inherited BeforeDestruction;
 end;
 
@@ -453,30 +457,23 @@ begin
 
   FLogTreeView.NodeDataSize := SizeOf(TLogNode);
   FLogTreeView.Images       := imlMessageTypes;
+  FLogTreeView.HintMode     := hmHint;
 
   FLogTreeView.OnBeforeItemPaint := FLogTreeViewBeforeItemPaint;
   FLogTreeView.OnAfterItemPaint  := FLogTreeViewAfterItemPaint;
-
   FLogTreeView.OnBeforeCellPaint := FLogTreeViewBeforeCellPaint;
-
   FLogTreeView.OnFocusChanged    := FLogTreeViewFocusChanged;
   FLogTreeView.OnFocusChanging   := FLogTreeViewFocusChanging;
   FLogTreeView.OnClick           := FLogTreeViewClick;
-
   FLogTreeView.OnHotChange       := FLogTreeViewHotChange;
-
   FLogTreeView.OnInitNode        := FLogTreeViewInitNode;
   FLogTreeView.OnFreeNode        := FLogTreeViewFreeNode;
-
   FLogTreeView.OnGetHint         := FLogTreeViewGetHint;
   FLogTreeView.OnGetHintKind     := FLogTreeViewGetHintKind;
-
   FLogTreeView.OnGetText         := FLogTreeViewGetText;
   FLogTreeView.OnPaintText       := FLogTreeViewPaintText;
   FLogTreeView.OnGetImageIndex   := FLogTreeViewGetImageIndex;
-
   FLogTreeView.OnKeyPress        := FLogTreeViewKeyPress;
-  FLogTreeView.HintMode          := hmHint;
 
   C := FLogTreeView.Header.Columns.Add;
   C.Text     := '';
@@ -523,6 +520,12 @@ begin
 
   FLogTreeView.Header.AutoSizeIndex := 3;
   FLogTreeView.Header.MainColumn    := 1;
+end;
+
+procedure TfrmMessageList.CreateValueListView;
+begin
+  FValueList := TfrmValueList.Create(Self);
+  AssignFormParent(FValueList, tsValueList);
 end;
 
 procedure TfrmMessageList.CreateWatchesView;
@@ -1227,27 +1230,25 @@ begin
   edtHeight.Text      := '';
   edtPixelFormat.Text := '';
   edtHandleType.Text  := '';
-//  edtValue.Text       := '';
-//  edtMessageType.Text := '';
-//  edtTimeStamp.Text   := '';
-//  edtValueName.Text   := '';
-//  edtValueType.Text   := '';
-//  pnlColor.Color      := clBtnFace;
   FDataSet.Active     := False;
   FEditorView.Clear;
-  FValueList.Clear;
+  if Assigned(FValueList) then
+    FValueList.Clear;
 end;
 
 { Reads the received message stream from the active logchannel . }
 
 {
    Message layout in stream
-     1. Message type (4 byte)          => TLogMessage.MsgType (TLogMessageType)
-     2. Timestamp    (8 byte)          => TLogMessage.TimeStamp
-     3. Text size    (4 byte)
-     4. Text         (variable size)   => TLogMessage.Text
-     5. Data size    (4 byte)
-     6. Data         (variable size)   => TLogMessage.Data
+     1. Message type (1 byte)          => TLogMessage.MsgType (TLogMessageType)
+     2. Log level    (1 byte)
+     3. Reserved     (1 byte)
+     4. Reserved     (1 byte)
+     5. Timestamp    (8 byte)          => TLogMessage.TimeStamp
+     6. Text size    (4 byte)
+     7. Text         (variable size)   => TLogMessage.Text
+     8. Data size    (4 byte)
+     9. Data         (variable size)   => TLogMessage.Data
 
     TLogMessage = packed record
       MsgType   : Integer; // (TLogMessageType)
@@ -1568,8 +1569,8 @@ procedure TfrmMessageList.UpdateTextDisplay(ALogNode: TLogNode);
 var
   S : string;
 begin
-  tsValueList.TabVisible   := True;
-  tsTextViewer.TabVisible  := True;
+  tsValueList.TabVisible   := False; //
+  tsTextViewer.TabVisible  := False;
   tsImageViewer.TabVisible := False;
   tsDataSet.TabVisible     := False;
   pgcMessageDetails.ActivePage := tsTextViewer;
@@ -1583,21 +1584,20 @@ procedure TfrmMessageList.UpdateTextStreamDisplay(ALogNode: TLogNode);
 var
   LStream : TStringStream;
 begin
-  tsValueList.TabVisible   := True;
+  tsValueList.TabVisible   := False;
   tsImageViewer.TabVisible := False;
   tsDataSet.TabVisible     := False;
+  tsTextViewer.TabVisible  := False;
+  pgcMessageDetails.ActivePage := tsTextViewer;
   if ALogNode.MessageData = nil then
   begin
     FEditorView.Text := '';
-    tsTextViewer.TabVisible  := False;
   end
   else
   begin
     ALogNode.MessageData.Position := 0;
     LStream := TStringStream.Create('', TEncoding.ANSI);
     try
-      tsTextViewer.TabVisible  := True;
-      pgcMessageDetails.ActivePage := tsTextViewer;
       LStream.Position := 0;
       LStream.CopyFrom(ALogNode.MessageData, ALogNode.MessageData.Size);
       LStream.Position := 0;
@@ -1623,34 +1623,35 @@ begin
 end;
 
 procedure TfrmMessageList.UpdateValueDisplay(ALogNode: TLogNode);
-var
-  DR : DynamicRecord;
-  SL : TStringList;
+//var
+//  DR : DynamicRecord;
+//  SL : TStringList;
 begin
   FEditorView.Text := ALogNode.Value;
-  FEditorView.HighlighterName := 'TXT';
-  if ALogNode.Value.Contains('=') then
-  begin
-    pgcMessageDetails.ActivePage := tsValueList;
-    DR.FromString(ALogNode.Value);
-    FValueList.Data := DR;
-  end
-  else if ALogNode.Value.Contains(#13#10) then
-  begin
-    SL := TStringList.Create;
-    try
-     SL.Text := ALogNode.Value;
-     DR.FromArray<string>(SL.ToStringArray, True);
-    finally
-      SL.Free;
-    end;
-    pgcMessageDetails.ActivePage := tsValueList;
-    FValueList.Data := DR;
-  end
-  else
-  begin
-    pgcMessageDetails.ActivePage := tsTextViewer;
-  end;
+  FEditorView.HighlighterName  := 'INI';
+  pgcMessageDetails.ActivePage := tsTextViewer;
+//  if ALogNode.Value.Contains('=') then
+//  begin
+//    pgcMessageDetails.ActivePage := tsValueList;
+//    DR.FromString(ALogNode.Value);
+//    FValueList.Data := DR;
+//  end
+//  else if ALogNode.Value.Contains(#13#10) then
+//  begin
+//    SL := TStringList.Create;
+//    try
+//     SL.Text := ALogNode.Value;
+//     DR.FromArray<string>(SL.ToStringArray, True);
+//    finally
+//      SL.Free;
+//    end;
+//    pgcMessageDetails.ActivePage := tsValueList;
+//    FValueList.Data := DR;
+//  end
+//  else
+//  begin
+//    pgcMessageDetails.ActivePage := tsTextViewer;
+//  end;
 end;
 {$ENDREGION}
 

@@ -131,8 +131,15 @@ end;
 {$REGION 'event handlers'}
 procedure TWinIPCChannelReceiver.FIPCServerMessage(Sender: TObject;
   ASourceId: Integer; AData: TStream);
+var
+  LProcessName : string;
 begin
-  DoReceiveMessage(AData, ASourceId, 0, GetExenameForProcess(ASourceId));
+  if not Processes.TryGetValue(ASourceId, LProcessName) then
+  begin
+    LProcessName := GetExenameForProcess(ASourceId);
+    Processes.AddOrSetValue(ASourceId, LProcessName);
+  end;
+  DoReceiveMessage(AData, ASourceId, 0, LProcessName);
 end;
 
 procedure TWinIPCChannelReceiver.SettingsChanged(Sender: TObject);

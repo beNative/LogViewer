@@ -20,69 +20,102 @@ unit LogViewer.Receivers.WinODS;
 
 interface
 
-{$REGION 'documentation'}
-{ Receives messages posted by the OutputDebugString Windows API routine. The
-  OutputDebugString messages are fetched in a thread and queued as TLogMessage
-  compatible stream. }
-
-{ TODO :  Notification when a ProcessId/ProcessName does not exist anymore }
-{$ENDREGION}
-
 uses
-  Winapi.Windows, Winapi.Messages,
-  System.Classes, System.SysUtils,
-
-  LogViewer.Interfaces,
+  Winapi.Windows,
+  System.Classes,
 
   Spring, Spring.Collections,
 
-  LogViewer.Receivers.Base, LogViewer.WinODS.Settings;
+  LogViewer.Interfaces, LogViewer.Receivers.Base, LogViewer.WinODS.Settings;
+
+{
+      https://stackoverflow.com/questions/
+        509498/in-delphi-is-outputdebugstring-thread-safe?rq=1
+
+  When OutputDebugString() is called by an application, it takes these steps.
+  Note that a failure at any point abandons the whole thing and treats the
+  debugging request as a no-op (the string isn't sent anywhere).
+
+  1. Open DBWinMutex and wait until we have exclusive access to it.
+  2. Map the DBWIN_BUFFER segment into memory: if it's not found, there is no
+     debugger running so the entire request is ignored.
+  3. Open the DBWIN_BUFFER_READY and DBWIN_DATA_READY events. As with the shared
+     memory segment, missing objects mean that no debugger is available.
+  4. Wait for the DBWIN_BUFFER_READY event to be signaled: this says that the
+     memory buffer is no longer in use. Most of the time, this event will be
+     signaled immediately when it's examined, but it won't wait longer than 10
+     seconds for the buffer to become ready (a timeout abandons the request).
+  5. Copy up to about 4kbytes of data to the memory buffer, and store the
+     current process ID there as well. Always put a NUL byte at the end of the
+     string.
+  6. Tell the debugger that the buffer is ready by setting the DBWIN_DATA_READY
+     event. The debugger takes it from there.
+  7. Release the mutex
+  8. Close the Event and Section objects, though we keep the handle to the mutex
+     around for later.
+}
 
 type
-  TODSMessage = class
-    Id          : UInt32;
-    TimeStamp   : TDateTime;
-    MsgText     : AnsiString; // ODS messages are always AnsiStrings.
-    ProcessId   : Integer;
-    ProcessName : UTF8String;
+  PDbWinBuffer = ^DbWinBuffer;
+  DbWinBuffer = record
+    dwProcessId: DWORD;
+    data: array[0..(4096-sizeof(DWORD))-1] of AnsiChar;
   end;
 
-  { Thread instance that captures OutputDebugString content }
+  TODSMessageReceivedEvent = procedure(
+    const AString : AnsiString;
+    AProcessId    : UInt32
+  ) of object;
 
-  TODSThread = class(TThread)
+  TWinDebugMonitor = class
   private
-    FLastChildOrder   : UInt32;
-    FODSQueue         : IQueue<TODSMessage>;
-    FCloseEventHandle : THandle;
+    FOnMessageReceived: TODSMessageReceivedEvent;
+    m_hDBWinMutex: THandle;
+    m_hDBMonBuffer: THandle;
+    m_hEventBufferReady: THandle;
+    m_hEventDataReady: THandle;
+
+    m_hWinDebugMonitorThread: THandle;
+    m_bWinDebugMonStopped: Boolean;
+    m_pDBBuffer: PDbWinBuffer;
+
+    function Initialize: DWORD;
+    procedure Uninitialize;
+    function WinDebugMonitorProcess: DWORD;
 
   protected
-    procedure Execute; override;
+    procedure DoMessageReceived(
+      const AString : AnsiString;
+      AProcessId    : UInt32
+    );
 
   public
-    constructor Create(AODSQueue: IQueue<TODSMessage>);
+    constructor Create;
+    destructor Destroy; override;
+
+    property OnMessageReceived : TODSMessageReceivedEvent
+      read FOnMessageReceived write FOnMessageReceived;
+
+    procedure OutputWinDebugString(const str: PAnsiChar); virtual;
   end;
 
 type
   TWinODSChannelReceiver = class(TChannelReceiver, IChannelReceiver, IWinODS)
   private
-    FBuffer           : TMemoryStream;
-    FODSQueue         : IQueue<TODSMessage>;
-    FODSThread        : TODSThread;
+     FDebugMonitor : TWinDebugMonitor;
+     FBuffer       : TMemoryStream;
 
-    procedure FODSQueueChanged(
-      Sender     : TObject;
-      const Item : TODSMessage;
-      Action     : TCollectionChangedAction
-    );
-
-  protected
     function GetSettings: TWinODSSettings;
 
     procedure SettingsChanged(Sender: TObject);
+
+    procedure FDebugMonitorMessageReceived(
+      const AString : AnsiString;
+      AProcessId    : UInt32
+    );
+
     function CreateSubscriber(ASourceId: Integer; AThreadId: Integer;
       const ASourceName: string): ISubscriber; override;
-
-
 
   public
     procedure AfterConstruction; override;
@@ -90,204 +123,275 @@ type
 
     property Settings: TWinODSSettings
       read GetSettings;
-
   end;
 
 implementation
 
 uses
-  Winapi.PsAPI, Winapi.TlHelp32,
-  System.SyncObjs,
-  Vcl.Dialogs,
+  System.SysUtils,
 
   Spring.Helpers,
 
-  DDuce.Logger.Interfaces, DDuce.Utils.WinApi,
+  DDuce.Logger.Interfaces, DDuce.Utils.Winapi,
 
   LogViewer.Subscribers.WinODS;
 
-{$REGION 'construction and destruction'}
+
+{$REGION 'TWinDebugMonitor'}
+// ----------------------------------------------------------------------------
+//  PROPERTIES OF OBJECTS
+// ----------------------------------------------------------------------------
+//  NAME        |   DBWinMutex      DBWIN_BUFFER_READY      DBWIN_DATA_READY
+// ----------------------------------------------------------------------------
+//  TYPE        |   Mutex           Event                   Event
+//  ACCESS      |   All             All                     Sync
+//  INIT STATE  |   ?               Signaled                Nonsignaled
+//  PROPERTY    |   ?               Auto-Reset              Auto-Reset
+// ----------------------------------------------------------------------------
+
+constructor TWinDebugMonitor.Create;
+begin
+  inherited;
+  if Initialize() <> 0 then begin
+    OutputDebugString('TWinDebugMonitor.Initialize failed.'#10);
+  end;
+end;
+
+destructor TWinDebugMonitor.Destroy;
+begin
+  Uninitialize;
+  inherited;
+end;
+
+procedure TWinDebugMonitor.DoMessageReceived(const AString: AnsiString;
+  AProcessId: UInt32);
+begin
+  if Assigned(FOnMessageReceived) then
+    FOnMessageReceived(AString, AProcessId);
+end;
+
+procedure TWinDebugMonitor.OutputWinDebugString(const str: PAnsiChar);
+begin
+end;
+
+function WinDebugMonitorThread(pData: Pointer): DWORD; stdcall;
+var
+  _Self: TWinDebugMonitor;
+begin
+  _Self := TWinDebugMonitor(pData);
+
+  if _Self <> nil then begin
+    while not _Self.m_bWinDebugMonStopped do begin
+      _Self.WinDebugMonitorProcess;
+    end;
+  end;
+
+  Result := 0;
+end;
+
+function TWinDebugMonitor.Initialize: DWORD;
+var
+  LThreadId : DWORD;
+begin
+  SetLastError(0);
+
+  // Mutex: DBWin
+  // ---------------------------------------------------------
+  m_hDBWinMutex := OpenMutex(MUTEX_ALL_ACCESS, FALSE, 'DBWinMutex');
+  if m_hDBWinMutex = 0 then
+  begin
+    m_hDBWinMutex := CreateMutex(nil, LongBool(1), 'DBWinMutex');
+//    Result := GetLastError;
+//    Exit;
+  end;
+
+  // Event: buffer ready
+  // ---------------------------------------------------------
+  m_hEventBufferReady := OpenEvent(EVENT_ALL_ACCESS, FALSE, 'DBWIN_BUFFER_READY');
+  if m_hEventBufferReady = 0 then begin
+    m_hEventBufferReady := CreateEvent(nil, FALSE, TRUE, 'DBWIN_BUFFER_READY');
+    if m_hEventBufferReady = 0 then begin
+      Result := GetLastError;
+      Exit;
+    end;
+  end;
+
+  // Event: data ready
+  // ---------------------------------------------------------
+  m_hEventDataReady := OpenEvent(SYNCHRONIZE, FALSE, 'DBWIN_DATA_READY');
+  if m_hEventDataReady = 0 then begin
+    m_hEventDataReady := CreateEvent(nil, FALSE, FALSE, 'DBWIN_DATA_READY');
+    if m_hEventDataReady = 0 then begin
+      Result := GetLastError;
+    end;
+  end;
+
+  // Shared memory
+  // ---------------------------------------------------------
+  m_hDBMonBuffer := OpenFileMapping(FILE_MAP_READ, FALSE, 'DBWIN_BUFFER');
+  if m_hDBMonBuffer = 0 then begin
+  begin
+    m_hDBMonBuffer := CreateFileMapping(INVALID_HANDLE_VALUE, nil, PAGE_READWRITE, 0, SizeOf(DbWinBuffer), 'DBWIN_BUFFER');
+    if m_hDBMonBuffer = 0 then begin
+      Result := GetLastError;
+      Exit;
+    end;
+  end;
+
+  m_pDBBuffer := PDbWinBuffer(MapViewOfFile(m_hDBMonBuffer, SECTION_MAP_READ, 0, 0, 0));
+  if m_pDBBuffer = nil then begin
+    Result := GetLastError;
+    Exit;
+  end;
+
+  // Monitoring thread
+  // ---------------------------------------------------------
+  m_bWinDebugMonStopped := False;
+
+  m_hWinDebugMonitorThread := CreateThread(nil, 0, @WinDebugMonitorThread, Pointer(Self), 0, LThreadId);
+  if m_hWinDebugMonitorThread = 0 then begin
+    m_bWinDebugMonStopped := True;
+    Result := GetLastError;
+    Exit;
+  end;
+
+  // set monitor thread priority to highest
+  // ---------------------------------------------------------
+  SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
+  SetThreadPriority(m_hWinDebugMonitorThread, THREAD_PRIORITY_TIME_CRITICAL);
+
+  Result := 0;
+  end;
+end;
+
+procedure TWinDebugMonitor.Uninitialize;
+begin
+  if m_hWinDebugMonitorThread <> 0 then begin
+    m_bWinDebugMonStopped := True;
+    WaitForSingleObject(m_hWinDebugMonitorThread, INFINITE);
+    CloseHandle(m_hWinDebugMonitorThread);
+    m_hWinDebugMonitorThread := 0;
+  end;
+
+  if m_hDBWinMutex <> 0 then begin
+    CloseHandle(m_hDBWinMutex);
+    m_hDBWinMutex := 0;
+  end;
+
+  if m_pDBBuffer <> nil then begin
+    UnmapViewOfFile(m_pDBBuffer);
+    m_pDBBuffer := nil;
+  end;
+
+  if m_hDBMonBuffer <> 0 then begin
+    CloseHandle(m_hDBMonBuffer);
+    m_hDBMonBuffer := 0;
+  end;
+
+  if m_hEventBufferReady <> 0  then begin
+    CloseHandle(m_hEventBufferReady);
+    m_hEventBufferReady := 0;
+  end;
+
+  if m_hEventDataReady <> 0 then begin
+    CloseHandle(m_hEventDataReady);
+    m_hEventDataReady := 0;
+  end;
+end;
+
+function TWinDebugMonitor.WinDebugMonitorProcess: DWORD;
+const
+  TIMEOUT_WIN_DEBUG = 100;
+begin
+  // wait for data ready
+  Result := WaitForSingleObject(m_hEventDataReady, TIMEOUT_WIN_DEBUG);
+
+  if Result = WAIT_OBJECT_0 then
+  begin
+  //  OutputWinDebugString(m_pDBBuffer^.data);
+
+    TThread.CurrentThread.Queue(
+      TThread.CurrentThread,
+      procedure
+      begin
+        DoMessageReceived(m_pDBBuffer^.data, m_pDBBuffer.dwProcessId);
+      end
+    );
+    // signal buffer ready
+    SetEvent(m_hEventBufferReady);
+  end;
+end;
+{$ENDREGION}
+
+
+{$REGION 'TWinODSChannelReceiver'}
 procedure TWinODSChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
   FBuffer := TMemoryStream.Create;
-  FODSQueue := TCollections.CreateQueue<TODSMessage>(True);
-  FODSQueue.OnChanged.Add(FODSQueueChanged);
-  FODSThread := TODSThread.Create(FODSQueue);
+  FDebugMonitor := TWinDebugMonitor.Create;
+  FDebugMonitor.OnMessageReceived := FDebugMonitorMessageReceived;
+
   Settings.OnChanged.Add(SettingsChanged);
 end;
 
 procedure TWinODSChannelReceiver.BeforeDestruction;
 begin
-  FODSThread.Terminate;
+  FDebugMonitor.Free;
   FBuffer.Free;
-  FODSQueue.Clear;
-  FODSThread.Free;
   inherited BeforeDestruction;
 end;
+
 function TWinODSChannelReceiver.CreateSubscriber(ASourceId, AThreadId: Integer;
   const ASourceName: string): ISubscriber;
 begin
   Result := TWinODSSubscriber.Create(Self, ASourceId, '', ASourceName, True);
 end;
-{$ENDREGION}
 
-{$REGION 'property access methods'}
-function TWinODSChannelReceiver.GetSettings: TWinODSSettings;
-begin
-  Result := Manager.Settings.WinODSSettings;
-end;
-{$ENDREGION}
-
-{$REGION 'event handlers'}
-procedure TWinODSChannelReceiver.SettingsChanged(Sender: TObject);
-begin
-  Enabled := Settings.Enabled;
-end;
-
-procedure TWinODSChannelReceiver.FODSQueueChanged(Sender: TObject;
-  const Item: TODSMessage; Action: TCollectionChangedAction);
+procedure TWinODSChannelReceiver.FDebugMonitorMessageReceived(
+  const AString: AnsiString; AProcessId: UInt32);
 const
   ZERO_BUF : Integer = 0;
 var
-  LTextSize : Integer;
-  LMsgType  : Byte;
-  LDummy    : Byte;
-//  LDataSize : Integer;
+  LTextSize    : Integer;
+  LText        : AnsiString;
+  LMsgType     : Byte;
+  LDummy       : Byte;
+  LProcessName : string;
 begin
   LDummy := 0;
-  if Enabled and (Action = caAdded) then
   begin
     FBuffer.Clear;
-    Item.MsgText := #13#10 + Item.MsgText;
+    LText := #13#10 + AString; //??
     LMsgType := Integer(lmtText);
-    LTextSize := Length(Item.MsgText);
+    LTextSize := Length(LText);
     FBuffer.Seek(0, soFromBeginning);
     FBuffer.WriteBuffer(LMsgType);
     FBuffer.WriteBuffer(LDummy);
     FBuffer.WriteBuffer(LDummy);
     FBuffer.WriteBuffer(LDummy);
-    FBuffer.WriteBuffer(Item.TimeStamp);
+    FBuffer.WriteBuffer(Now);
     FBuffer.WriteBuffer(LTextSize);
-    FBuffer.WriteBuffer(Item.MsgText[1], LTextSize);
-//      LDataSize := SizeOf(Item.ProcessInfo);
-//      FBuffer.WriteBuffer(LDataSize, SizeOf(Integer));
-//      FBuffer.WriteBuffer(Item.ProcessInfo, LDataSize);
+    FBuffer.WriteBuffer(LText[1], LTextSize);
     FBuffer.WriteBuffer(ZERO_BUF);
-//      LTextSize := Length(Item.ProcessName);
-//      FBuffer.WriteBuffer(Item.ProcessName[1], LTextSize);
-      //ShowMessage(Item.ProcessInfo.ProcessName);
-    DoReceiveMessage(FBuffer, Item.ProcessId, 0, string(Item.ProcessName));
-  end;
-end;
-{$ENDREGION}
-
-{$REGION 'TODSThread'}
-{$REGION 'construction and destruction'}
-constructor TODSThread.Create(AODSQueue: IQueue<TODSMessage>);
-begin
-  inherited Create;
-  FODSQueue := AODSQueue;
-  FCloseEventHandle := CreateEvent(nil, True, False, nil);
-end;
-{$ENDREGION}
-
-{$REGION 'protected methods'}
-procedure TODSThread.Execute;
-var
-  LAckEvent         : THandle;
-  LReadyEvent       : THandle;
-  LSharedFile       : THandle;
-  LSharedMem        : Pointer;
-  LReturnCode       : DWORD;
-  LODSMessage       : TODSMessage;
-  LHandlesToWaitFor : array [0..1] of THandle;
-  SA                : SECURITY_ATTRIBUTES;
-  SD                : SECURITY_DESCRIPTOR;
-begin
-  SA.nLength              := SizeOf(SECURITY_ATTRIBUTES);
-  SA.bInheritHandle       := TRUE;
-  SA.lpSecurityDescriptor := @SD;
-
-  if not InitializeSecurityDescriptor(@SD, SECURITY_DESCRIPTOR_REVISION) then
-    Exit;
-
-  if not SetSecurityDescriptorDacl(@SD, TRUE, nil { (PACL)NULL } , False) then
-    Exit;
-
-  LAckEvent := CreateEvent(@SA, False, TRUE, 'DBWIN_BUFFER_READY');
-  if LAckEvent = 0 then
-    Exit;
-
-  LReadyEvent := CreateEvent(@SA, False, False, 'DBWIN_DATA_READY');
-  if LReadyEvent = 0 then
-    Exit;
-
-  LSharedFile := CreateFileMapping(
-    THandle(-1),
-    @SA,
-    PAGE_READWRITE,
-    0,
-    4096,
-    'DBWIN_BUFFER'
-  );
-  if LSharedFile = 0 then
-    Exit;
-
-  LSharedMem := MapViewOfFile(LSharedFile, FILE_MAP_READ, 0, 0, 512);
-  if not Assigned(LSharedMem) then
-    Exit;
-
-  while not Terminated do
-  begin
-    LHandlesToWaitFor[0] := FCloseEventHandle;
-    LHandlesToWaitFor[1] := LReadyEvent;
-
-    SetEvent(LAckEvent);
-    LReturnCode := WaitForMultipleObjects(
-      2,
-      @LHandlesToWaitFor,
-      False { bWaitAll },
-      3000 { INFINITE }
-    );
-
-    case LReturnCode of
-      WAIT_TIMEOUT:
-        Continue;
-      WAIT_OBJECT_0:
-        Break;
-      WAIT_OBJECT_0 + 1:
-      begin
-        LODSMessage             := TODSMessage.Create;
-        LODSMessage.TimeStamp   := Now;
-        LODSMessage.ProcessId   := LPDWORD(LSharedMem)^;
-        //'$' + inttohex (pThisPid^,2)
-//        LODSMessage.ProcessName :=
-//          UTF8String(GetExenameForProcess(LODSMessage.ProcessId));
-        // The native version of OutputDebugString is ASCII. result is always
-        // AnsiString
-        LODSMessage.MsgText :=
-          AnsiString(PAnsiChar(LSharedMem) + SizeOf(DWORD));
-
-        LODSMessage.Id := FLastChildOrder;
-        Inc(FLastChildOrder);
-        if Trim(string(LODSMessage.MsgText)) <> '' then
-        begin
-          Queue(procedure
-            begin
-              FODSQueue.Enqueue(LODSMessage);
-            end
-          );
-        end;
-      end;
-      WAIT_FAILED:
-        Continue;
+    if not Processes.TryGetValue(AProcessId, LProcessName) then
+    begin
+      LProcessName := GetExenameForProcess(AProcessId);
+      Processes.AddOrSetValue(AProcessId, LProcessName);
     end;
+    DoReceiveMessage(FBuffer, AProcessId, 0, LProcessName);
   end;
-  UnmapViewOfFile(LSharedMem);
-  CloseHandle(LSharedFile);
 end;
-{$ENDREGION}
+
+function TWinODSChannelReceiver.GetSettings: TWinODSSettings;
+begin
+  Result := Manager.Settings.WinODSSettings;
+end;
+
+procedure TWinODSChannelReceiver.SettingsChanged(Sender: TObject);
+begin
+  Enabled := Settings.Enabled;
+end;
 {$ENDREGION}
 
 end.
