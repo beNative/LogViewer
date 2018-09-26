@@ -353,11 +353,28 @@ procedure TfrmDashboard.FTreeViewChecked(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 var
   DN : TDashboardNode;
+  B  : Boolean;
 begin
   DN := Sender.GetNodeData<TDashboardNode>(Node);
   if Sender.GetNodeLevel(Node) = 0 then
   begin
-    DN.Receiver.Enabled := Node.CheckState = csCheckedNormal;
+    B := Node.CheckState = csCheckedNormal;
+    if Supports(DN.Receiver, IWinIPC) then
+    begin
+      FManager.Settings.WinIPCSettings.Enabled := B;
+    end
+    else if Supports(DN.Receiver, IZMQ) then
+    begin
+      FManager.Settings.ZeroMQSettings.Enabled := B;
+    end
+    else if Supports(DN.Receiver, IWinODS) then
+    begin
+      FManager.Settings.WinODSSettings.Enabled := B;
+    end
+    else if Supports(DN.Receiver, IComPort) then
+    begin
+      //FManager.Settings.ComPortSettings.
+    end;
   end
   else
   begin

@@ -56,10 +56,10 @@ uses
 }
 
 type
-  PDbWinBuffer = ^DbWinBuffer;
-  DbWinBuffer = record
-    dwProcessId: DWORD;
-    data: array[0..(4096-sizeof(DWORD))-1] of AnsiChar;
+  PDBWinBuffer = ^TDBWinBuffer;
+  TDBWinBuffer = record
+    ProcessId : DWORD;
+    Data      : array[0..(4096-sizeof(DWORD))-1] of AnsiChar;
   end;
 
   TODSMessageReceivedEvent = procedure(
@@ -69,14 +69,14 @@ type
 
   TWinDebugMonitor = class
   private
-    FOnMessageReceived       : TODSMessageReceivedEvent;
-    m_hDBWinMutex            : THandle;
-    m_hDBMonBuffer           : THandle;
-    m_hEventBufferReady      : THandle;
-    m_hEventDataReady        : THandle;
-    m_hWinDebugMonitorThread : THandle;
-    m_bWinDebugMonStopped    : Boolean;
-    m_pDBBuffer              : PDbWinBuffer;
+    FOnMessageReceived      : TODSMessageReceivedEvent;
+    FHDBWinMutex            : THandle;
+    FHDBMonBuffer           : THandle;
+    FHEventBufferReady      : THandle;
+    FHEventDataReady        : THandle;
+    FHWinDebugMonitorThread : THandle;
+    FWinDebugMonStopped     : Boolean;
+    FPDBBuffer              : PDBWinBuffer;
 
     function Initialize: DWORD;
     procedure Uninitialize;
@@ -180,7 +180,7 @@ begin
 
   if WDB <> nil then
   begin
-    while not WDB.m_bWinDebugMonStopped do
+    while not WDB.FWinDebugMonStopped do
     begin
       WDB.WinDebugMonitorProcess;
     end;
@@ -197,11 +197,11 @@ begin
 
   // Mutex: DBWin
   // ---------------------------------------------------------
-  m_hDBWinMutex := OpenMutex(MUTEX_ALL_ACCESS, False, 'DBWin');
-  if m_hDBWinMutex = 0 then
+  FHDBWinMutex := OpenMutex(MUTEX_ALL_ACCESS, False, 'DBWin');
+  if FHDBWinMutex = 0 then
   begin
-    m_hDBWinMutex := CreateMutex(nil, LongBool(1), 'DBWin');
-    if m_hDBWinMutex = 0 then
+    FHDBWinMutex := CreateMutex(nil, LongBool(1), 'DBWin');
+    if FHDBWinMutex = 0 then
     begin
       Result := GetLastError;
       Exit;
@@ -210,10 +210,12 @@ begin
 
   // Event: buffer ready
   // ---------------------------------------------------------
-  m_hEventBufferReady := OpenEvent(EVENT_ALL_ACCESS, False, 'DBWIN_BUFFER_READY');
-  if m_hEventBufferReady = 0 then begin
-    m_hEventBufferReady := CreateEvent(nil, False, TRUE, 'DBWIN_BUFFER_READY');
-    if m_hEventBufferReady = 0 then begin
+  FHEventBufferReady := OpenEvent(EVENT_ALL_ACCESS, False, 'DBWIN_BUFFER_READY');
+  if FHEventBufferReady = 0 then
+  begin
+    FHEventBufferReady := CreateEvent(nil, False, TRUE, 'DBWIN_BUFFER_READY');
+    if FHEventBufferReady = 0 then
+    begin
       Result := GetLastError;
       Exit;
     end;
@@ -221,84 +223,112 @@ begin
 
   // Event: data ready
   // ---------------------------------------------------------
-  m_hEventDataReady := OpenEvent(SYNCHRONIZE, False, 'DBWIN_DATA_READY');
-  if m_hEventDataReady = 0 then begin
-    m_hEventDataReady := CreateEvent(nil, False, False, 'DBWIN_DATA_READY');
-    if m_hEventDataReady = 0 then begin
+  FHEventDataReady := OpenEvent(SYNCHRONIZE, False, 'DBWIN_DATA_READY');
+  if FHEventDataReady = 0 then
+  begin
+    FHEventDataReady := CreateEvent(nil, False, False, 'DBWIN_DATA_READY');
+    if FHEventDataReady = 0 then
+    begin
       Result := GetLastError;
     end;
   end;
 
   // Shared memory
   // ---------------------------------------------------------
-  m_hDBMonBuffer := OpenFileMapping(FILE_MAP_READ, False, 'DBWIN_BUFFER');
-  if m_hDBMonBuffer = 0 then begin
+  FHDBMonBuffer := OpenFileMapping(FILE_MAP_READ, False, 'DBWIN_BUFFER');
+  if FHDBMonBuffer = 0 then
   begin
-    m_hDBMonBuffer := CreateFileMapping(INVALID_HANDLE_VALUE, nil, PAGE_READWRITE, 0, SizeOf(DbWinBuffer), 'DBWIN_BUFFER');
-    if m_hDBMonBuffer = 0 then begin
+    begin
+      FHDBMonBuffer := CreateFileMapping(
+        INVALID_HANDLE_VALUE,
+        nil,
+        PAGE_READWRITE,
+        0,
+        SizeOf(TDBWinBuffer),
+        'DBWIN_BUFFER'
+      );
+      if FHDBMonBuffer = 0 then
+      begin
+        Result := GetLastError;
+        Exit;
+      end;
+    end;
+
+    FPDBBuffer := PDBWinBuffer(
+      MapViewOfFile(FHDBMonBuffer, SECTION_MAP_READ, 0, 0, 0)
+    );
+    if FPDBBuffer = nil then
+    begin
       Result := GetLastError;
       Exit;
     end;
-  end;
 
-  m_pDBBuffer := PDbWinBuffer(MapViewOfFile(m_hDBMonBuffer, SECTION_MAP_READ, 0, 0, 0));
-  if m_pDBBuffer = nil then begin
-    Result := GetLastError;
-    Exit;
-  end;
+    // Monitoring thread
+    // ---------------------------------------------------------
+    FWinDebugMonStopped := False;
 
-  // Monitoring thread
-  // ---------------------------------------------------------
-  m_bWinDebugMonStopped := False;
+    FHWinDebugMonitorThread := CreateThread(
+      nil,
+      0,
+      @WinDebugMonitorThread,
+      Pointer(Self),
+      0,
+      LThreadId
+    );
+    if FHWinDebugMonitorThread = 0 then
+    begin
+      FWinDebugMonStopped := True;
+      Result := GetLastError;
+      Exit;
+    end;
 
-  m_hWinDebugMonitorThread := CreateThread(nil, 0, @WinDebugMonitorThread, Pointer(Self), 0, LThreadId);
-  if m_hWinDebugMonitorThread = 0 then begin
-    m_bWinDebugMonStopped := True;
-    Result := GetLastError;
-    Exit;
-  end;
+    // set monitor thread priority to highest
+    // ---------------------------------------------------------
+    SetPriorityClass(GetCurrentProcess, REALTIME_PRIORITY_CLASS);
+    SetThreadPriority(FHWinDebugMonitorThread, THREAD_PRIORITY_TIME_CRITICAL);
 
-  // set monitor thread priority to highest
-  // ---------------------------------------------------------
-  SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
-  SetThreadPriority(m_hWinDebugMonitorThread, THREAD_PRIORITY_TIME_CRITICAL);
-
-  Result := 0;
+    Result := 0;
   end;
 end;
 
 procedure TWinDebugMonitor.Uninitialize;
 begin
-  if m_hWinDebugMonitorThread <> 0 then begin
-    m_bWinDebugMonStopped := True;
-    WaitForSingleObject(m_hWinDebugMonitorThread, INFINITE);
-    CloseHandle(m_hWinDebugMonitorThread);
-    m_hWinDebugMonitorThread := 0;
+  if FHWinDebugMonitorThread <> 0 then
+  begin
+    FWinDebugMonStopped := True;
+    WaitForSingleObject(FHWinDebugMonitorThread, INFINITE);
+    CloseHandle(FHWinDebugMonitorThread);
+    FHWinDebugMonitorThread := 0;
   end;
 
-  if m_hDBWinMutex <> 0 then begin
-    CloseHandle(m_hDBWinMutex);
-    m_hDBWinMutex := 0;
+  if FHDBWinMutex <> 0 then
+  begin
+    CloseHandle(FHDBWinMutex);
+    FHDBWinMutex := 0;
   end;
 
-  if m_pDBBuffer <> nil then begin
-    UnmapViewOfFile(m_pDBBuffer);
-    m_pDBBuffer := nil;
+  if FPDBBuffer <> nil then
+  begin
+    UnmapViewOfFile(FPDBBuffer);
+    FPDBBuffer := nil;
   end;
 
-  if m_hDBMonBuffer <> 0 then begin
-    CloseHandle(m_hDBMonBuffer);
-    m_hDBMonBuffer := 0;
+  if FHDBMonBuffer <> 0 then
+  begin
+    CloseHandle(FHDBMonBuffer);
+    FHDBMonBuffer := 0;
   end;
 
-  if m_hEventBufferReady <> 0  then begin
-    CloseHandle(m_hEventBufferReady);
-    m_hEventBufferReady := 0;
+  if FHEventBufferReady <> 0  then
+  begin
+    CloseHandle(FHEventBufferReady);
+    FHEventBufferReady := 0;
   end;
 
-  if m_hEventDataReady <> 0 then begin
-    CloseHandle(m_hEventDataReady);
-    m_hEventDataReady := 0;
+  if FHEventDataReady <> 0 then
+  begin
+    CloseHandle(FHEventDataReady);
+    FHEventDataReady := 0;
   end;
 end;
 
@@ -307,7 +337,7 @@ const
   TIMEOUT_WIN_DEBUG = 100;
 begin
   // wait for data ready
-  Result := WaitForSingleObject(m_hEventDataReady, TIMEOUT_WIN_DEBUG);
+  Result := WaitForSingleObject(FHEventDataReady, TIMEOUT_WIN_DEBUG);
 
   if Result = WAIT_OBJECT_0 then
   begin
@@ -315,11 +345,11 @@ begin
       TThread.CurrentThread,
       procedure
       begin
-        DoMessageReceived(m_pDBBuffer^.data, m_pDBBuffer.dwProcessId);
+        DoMessageReceived(FPDBBuffer^.Data, FPDBBuffer.ProcessId);
       end
     );
     // signal buffer ready
-    SetEvent(m_hEventBufferReady);
+    SetEvent(FHEventBufferReady);
   end;
 end;
 {$ENDREGION}
@@ -365,7 +395,7 @@ begin
     LDummy := 0;
     begin
       FBuffer.Clear;
-      LText := #13#10 + AString; //??
+      LText := #13#10 + AString;
       LMsgType := Integer(lmtText);
       LTextSize := Length(LText);
       FBuffer.Seek(0, soFromBeginning);
