@@ -69,15 +69,14 @@ type
 
   TWinDebugMonitor = class
   private
-    FOnMessageReceived: TODSMessageReceivedEvent;
-    m_hDBWinMutex: THandle;
-    m_hDBMonBuffer: THandle;
-    m_hEventBufferReady: THandle;
-    m_hEventDataReady: THandle;
-
-    m_hWinDebugMonitorThread: THandle;
-    m_bWinDebugMonStopped: Boolean;
-    m_pDBBuffer: PDbWinBuffer;
+    FOnMessageReceived       : TODSMessageReceivedEvent;
+    m_hDBWinMutex            : THandle;
+    m_hDBMonBuffer           : THandle;
+    m_hEventBufferReady      : THandle;
+    m_hEventDataReady        : THandle;
+    m_hWinDebugMonitorThread : THandle;
+    m_bWinDebugMonStopped    : Boolean;
+    m_pDBBuffer              : PDbWinBuffer;
 
     function Initialize: DWORD;
     procedure Uninitialize;
@@ -95,8 +94,6 @@ type
 
     property OnMessageReceived : TODSMessageReceivedEvent
       read FOnMessageReceived write FOnMessageReceived;
-
-    procedure OutputWinDebugString(const str: PAnsiChar); virtual;
   end;
 
 type
@@ -114,8 +111,12 @@ type
       AProcessId    : UInt32
     );
 
-    function CreateSubscriber(ASourceId: Integer; AThreadId: Integer;
-      const ASourceName: string): ISubscriber; override;
+  protected
+    function CreateSubscriber(
+      ASourceId         : UInt32;
+      AThreadId         : UInt32;
+      const ASourceName : string
+    ): ISubscriber; override;
 
   public
     procedure AfterConstruction; override;
@@ -152,7 +153,8 @@ uses
 constructor TWinDebugMonitor.Create;
 begin
   inherited;
-  if Initialize() <> 0 then begin
+  if Initialize <> 0 then
+  begin
     OutputDebugString('TWinDebugMonitor.Initialize failed.'#10);
   end;
 end;
@@ -170,19 +172,17 @@ begin
     FOnMessageReceived(AString, AProcessId);
 end;
 
-procedure TWinDebugMonitor.OutputWinDebugString(const str: PAnsiChar);
-begin
-end;
-
 function WinDebugMonitorThread(pData: Pointer): DWORD; stdcall;
 var
-  _Self: TWinDebugMonitor;
+  WDB : TWinDebugMonitor;
 begin
-  _Self := TWinDebugMonitor(pData);
+  WDB := TWinDebugMonitor(pData);
 
-  if _Self <> nil then begin
-    while not _Self.m_bWinDebugMonStopped do begin
-      _Self.WinDebugMonitorProcess;
+  if WDB <> nil then
+  begin
+    while not WDB.m_bWinDebugMonStopped do
+    begin
+      WDB.WinDebugMonitorProcess;
     end;
   end;
 
@@ -197,19 +197,22 @@ begin
 
   // Mutex: DBWin
   // ---------------------------------------------------------
-  m_hDBWinMutex := OpenMutex(MUTEX_ALL_ACCESS, FALSE, 'DBWinMutex');
+  m_hDBWinMutex := OpenMutex(MUTEX_ALL_ACCESS, False, 'DBWin');
   if m_hDBWinMutex = 0 then
   begin
-    m_hDBWinMutex := CreateMutex(nil, LongBool(1), 'DBWinMutex');
-//    Result := GetLastError;
-//    Exit;
+    m_hDBWinMutex := CreateMutex(nil, LongBool(1), 'DBWin');
+    if m_hDBWinMutex = 0 then
+    begin
+      Result := GetLastError;
+      Exit;
+    end;
   end;
 
   // Event: buffer ready
   // ---------------------------------------------------------
-  m_hEventBufferReady := OpenEvent(EVENT_ALL_ACCESS, FALSE, 'DBWIN_BUFFER_READY');
+  m_hEventBufferReady := OpenEvent(EVENT_ALL_ACCESS, False, 'DBWIN_BUFFER_READY');
   if m_hEventBufferReady = 0 then begin
-    m_hEventBufferReady := CreateEvent(nil, FALSE, TRUE, 'DBWIN_BUFFER_READY');
+    m_hEventBufferReady := CreateEvent(nil, False, TRUE, 'DBWIN_BUFFER_READY');
     if m_hEventBufferReady = 0 then begin
       Result := GetLastError;
       Exit;
@@ -218,9 +221,9 @@ begin
 
   // Event: data ready
   // ---------------------------------------------------------
-  m_hEventDataReady := OpenEvent(SYNCHRONIZE, FALSE, 'DBWIN_DATA_READY');
+  m_hEventDataReady := OpenEvent(SYNCHRONIZE, False, 'DBWIN_DATA_READY');
   if m_hEventDataReady = 0 then begin
-    m_hEventDataReady := CreateEvent(nil, FALSE, FALSE, 'DBWIN_DATA_READY');
+    m_hEventDataReady := CreateEvent(nil, False, False, 'DBWIN_DATA_READY');
     if m_hEventDataReady = 0 then begin
       Result := GetLastError;
     end;
@@ -228,7 +231,7 @@ begin
 
   // Shared memory
   // ---------------------------------------------------------
-  m_hDBMonBuffer := OpenFileMapping(FILE_MAP_READ, FALSE, 'DBWIN_BUFFER');
+  m_hDBMonBuffer := OpenFileMapping(FILE_MAP_READ, False, 'DBWIN_BUFFER');
   if m_hDBMonBuffer = 0 then begin
   begin
     m_hDBMonBuffer := CreateFileMapping(INVALID_HANDLE_VALUE, nil, PAGE_READWRITE, 0, SizeOf(DbWinBuffer), 'DBWIN_BUFFER');
@@ -308,8 +311,6 @@ begin
 
   if Result = WAIT_OBJECT_0 then
   begin
-  //  OutputWinDebugString(m_pDBBuffer^.data);
-
     TThread.CurrentThread.Queue(
       TThread.CurrentThread,
       procedure
@@ -342,7 +343,7 @@ begin
   inherited BeforeDestruction;
 end;
 
-function TWinODSChannelReceiver.CreateSubscriber(ASourceId, AThreadId: Integer;
+function TWinODSChannelReceiver.CreateSubscriber(ASourceId, AThreadId: UInt32;
   const ASourceName: string): ISubscriber;
 begin
   Result := TWinODSSubscriber.Create(Self, ASourceId, '', ASourceName, True);
@@ -359,27 +360,30 @@ var
   LDummy       : Byte;
   LProcessName : string;
 begin
-  LDummy := 0;
+  if Enabled then
   begin
-    FBuffer.Clear;
-    LText := #13#10 + AString; //??
-    LMsgType := Integer(lmtText);
-    LTextSize := Length(LText);
-    FBuffer.Seek(0, soFromBeginning);
-    FBuffer.WriteBuffer(LMsgType);
-    FBuffer.WriteBuffer(LDummy);
-    FBuffer.WriteBuffer(LDummy);
-    FBuffer.WriteBuffer(LDummy);
-    FBuffer.WriteBuffer(Now);
-    FBuffer.WriteBuffer(LTextSize);
-    FBuffer.WriteBuffer(LText[1], LTextSize);
-    FBuffer.WriteBuffer(ZERO_BUF);
-    if not Processes.TryGetValue(AProcessId, LProcessName) then
+    LDummy := 0;
     begin
-      LProcessName := GetExenameForProcess(AProcessId);
-      Processes.AddOrSetValue(AProcessId, LProcessName);
+      FBuffer.Clear;
+      LText := #13#10 + AString; //??
+      LMsgType := Integer(lmtText);
+      LTextSize := Length(LText);
+      FBuffer.Seek(0, soFromBeginning);
+      FBuffer.WriteBuffer(LMsgType);
+      FBuffer.WriteBuffer(LDummy);
+      FBuffer.WriteBuffer(LDummy);
+      FBuffer.WriteBuffer(LDummy);
+      FBuffer.WriteBuffer(Now);
+      FBuffer.WriteBuffer(LTextSize);
+      FBuffer.WriteBuffer(LText[1], LTextSize);
+      FBuffer.WriteBuffer(ZERO_BUF);
+      if not Processes.TryGetValue(AProcessId, LProcessName) then
+      begin
+        LProcessName := GetExenameForProcess(AProcessId);
+        Processes.AddOrSetValue(AProcessId, LProcessName);
+      end;
+      DoReceiveMessage(FBuffer, AProcessId, 0, LProcessName);
     end;
-    DoReceiveMessage(FBuffer, AProcessId, 0, LProcessName);
   end;
 end;
 

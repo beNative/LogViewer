@@ -25,7 +25,7 @@ uses
   System.SysUtils, System.Variants, System.Classes, System.Actions,
   System.UITypes, System.ImageList,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  Vcl.ActnList, Vcl.ButtonGroup, Vcl.ComCtrls, Vcl.ImgList, Vcl.Menus,
+  Vcl.ActnList, Vcl.ComCtrls, Vcl.ImgList, Vcl.Menus,
 
   Spring.Collections,
 
@@ -35,7 +35,7 @@ uses
 
   synaser,
 
-  LogViewer.Interfaces, LogViewer.Dashboard.View.Node,
+  LogViewer.Interfaces, LogViewer.Dashboard.Node,
   LogViewer.ComPort.Settings.View;
 
   {
@@ -148,17 +148,17 @@ type
 
     procedure FWinIPCReceiverSubscriberListChanged(
       Sender     : TObject;
-      const AKey : Integer;
+      const AKey : UInt32;
       Action     : TCollectionChangedAction
     );
     procedure FZeroMQReceiverSubscriberListChanged(
       Sender     : TObject;
-      const AKey : Integer;
+      const AKey : UInt32;
       Action     : TCollectionChangedAction
     );
     procedure FWinODSReceiverSubscriberListChanged(
       Sender     : TObject;
-      const AKey : Integer;
+      const AKey : UInt32;
       Action     : TCollectionChangedAction
     );
 
@@ -509,7 +509,7 @@ begin
 end;
 
 procedure TfrmDashboard.FWinIPCReceiverSubscriberListChanged(Sender: TObject;
-  const AKey: Integer; Action: TCollectionChangedAction);
+  const AKey: UInt32; Action: TCollectionChangedAction);
 var
   LDelete : TDashboardNode;
 begin
@@ -525,7 +525,7 @@ begin
 end;
 
 procedure TfrmDashboard.FWinODSReceiverSubscriberListChanged(Sender: TObject;
-  const AKey: Integer; Action: TCollectionChangedAction);
+  const AKey: UInt32; Action: TCollectionChangedAction);
 var
   LDelete : TDashboardNode;
 begin
@@ -541,7 +541,7 @@ begin
 end;
 
 procedure TfrmDashboard.FZeroMQReceiverSubscriberListChanged(Sender: TObject;
-  const AKey: Integer; Action: TCollectionChangedAction);
+  const AKey: UInt32; Action: TCollectionChangedAction);
 var
   LDelete : TDashboardNode;
 begin

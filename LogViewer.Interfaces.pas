@@ -65,7 +65,7 @@ type
     function GetKey: string;
     function GetReceiver: IChannelReceiver;
     function GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
-    function GetSourceId: Integer;
+    function GetSourceId: UInt32;
     function GetSourceName: string;
     function GetMessageCount: Int64;
     {$ENDREGION}
@@ -87,7 +87,7 @@ type
     property Receiver: IChannelReceiver
       read GetReceiver;
 
-    property SourceId: Integer
+    property SourceId: UInt32
       read GetSourceId;
 
     property SourceName: string
@@ -101,15 +101,15 @@ type
     procedure SetEnabled(const Value: Boolean);
     function GetName: string;
     procedure SetName(const Value: string);
-    function GetSubscriberList: IDictionary<Integer, ISubscriber>;
+    function GetSubscriberList: IDictionary<UInt32, ISubscriber>;
     {$ENDREGION}
 
     function ToString: string;
 
     procedure DoReceiveMessage(
       AStream           : TStream;
-      ASourceId         : Integer = 0;
-      AThreadId         : Integer = 0;
+      ASourceId         : UInt32 = 0;
+      AThreadId         : UInt32 = 0;
       const ASourceName : string = ''
     );
 
@@ -119,7 +119,7 @@ type
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
 
-    property SubscriberList: IDictionary<Integer, ISubscriber>
+    property SubscriberList: IDictionary<UInt32, ISubscriber>
       read GetSubscriberList;
   end;
 

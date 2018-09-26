@@ -57,13 +57,13 @@ type
 
     procedure FIPCServerMessage(
       Sender    : TObject;
-      ASourceId : Integer;
+      ASourceId : UInt32;
       AData     : TStream
     );
 
     function CreateSubscriber(
-      ASourceId         : Integer;
-      AThreadId         : Integer;
+      ASourceId         : UInt32;
+      AThreadId         : UInt32;
       const ASourceName : string
     ): ISubscriber; override;
 
@@ -104,7 +104,7 @@ begin
   inherited BeforeDestruction;
 end;
 
-function TWinIPCChannelReceiver.CreateSubscriber(ASourceId, AThreadId: Integer;
+function TWinIPCChannelReceiver.CreateSubscriber(ASourceId, AThreadId: UInt32;
   const ASourceName: string): ISubscriber;
 begin
   Result := TWinIPCSubscriber.Create(Self, ASourceId, '', ASourceName, True);
@@ -130,7 +130,7 @@ end;
 
 {$REGION 'event handlers'}
 procedure TWinIPCChannelReceiver.FIPCServerMessage(Sender: TObject;
-  ASourceId: Integer; AData: TStream);
+  ASourceId: UInt32; AData: TStream);
 var
   LProcessName : string;
 begin

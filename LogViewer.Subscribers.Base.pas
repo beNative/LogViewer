@@ -34,7 +34,7 @@ type
     FOnReceiveMessage : Event<TReceiveMessageEvent>;
     FEnabled          : Boolean;
     FMessageCount     : Int64;
-    FSourceId         : Integer;
+    FSourceId         : UInt32;
     FSourceName       : string;
     FKey              : string;
 
@@ -46,7 +46,7 @@ type
     function GetReceiver: IChannelReceiver;
     function GetEnabled: Boolean; virtual;
     procedure SetEnabled(const Value: Boolean); virtual;
-    function GetSourceId: Integer;
+    function GetSourceId: UInt32;
     function GetSourceName: string;
     {$ENDREGION}
 
@@ -65,7 +65,7 @@ type
     property MessageCount: Int64
       read GetMessageCount;
 
-    property SourceId: Integer
+    property SourceId: UInt32
       read GetSourceId;
 
     property SourceName: string
@@ -146,7 +146,7 @@ begin
   Result := FReceiver.Target;
 end;
 
-function TSubscriber.GetSourceId: Integer;
+function TSubscriber.GetSourceId: UInt32;
 begin
   Result := FSourceId;
 end;

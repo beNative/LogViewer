@@ -49,14 +49,16 @@ uses
   LogViewer.Receivers.Base in 'LogViewer.Receivers.Base.pas',
   LogViewer.DisplayValues.Settings in 'LogViewer.DisplayValues.Settings.pas',
   LogViewer.DisplayValues.Settings.View in 'LogViewer.DisplayValues.Settings.View.pas' {frmDisplayValuesSettings},
-  LogViewer.Dashboard.View.Node in 'LogViewer.Dashboard.View.Node.pas',
+  LogViewer.Dashboard.Node in 'LogViewer.Dashboard.Node.pas',
   LogViewer.Subscribers.ZeroMQ in 'LogViewer.Subscribers.ZeroMQ.pas',
   LogViewer.Subscribers.ComPort in 'LogViewer.Subscribers.ComPort.pas',
   LogViewer.Subscribers.WinIPC in 'LogViewer.Subscribers.WinIPC.pas',
   LogViewer.Subscribers.Base in 'LogViewer.Subscribers.Base.pas',
   LogViewer.Subscribers.WinODS in 'LogViewer.Subscribers.WinODS.pas',
   LogViewer.ValueList.View in 'LogViewer.ValueList.View.pas' {frmValueList},
-  LogViewer.Receivers.WinODS in 'LogViewer.Receivers.WinODS.pas';
+  LogViewer.Receivers.WinODS in 'LogViewer.Receivers.WinODS.pas',
+  LogViewer.MessageFilter.View in 'LogViewer.MessageFilter.View.pas' {frmMessageFilter},
+  LogViewer.MessageFilter.Node in 'LogViewer.MessageFilter.Node.pas';
 
 {$R *.res}
 

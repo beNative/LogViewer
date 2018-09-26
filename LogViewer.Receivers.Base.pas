@@ -37,7 +37,7 @@ type
   private
     FEnabled        : Boolean;
     FName           : string;
-    FSubscriberList : IDictionary<Integer, ISubscriber>;
+    FSubscriberList : IDictionary<UInt32, ISubscriber>;
     FManager        : ILogViewerManager;
 
   class var
@@ -52,18 +52,18 @@ type
     procedure SetEnabled(const Value: Boolean); virtual;
     function GetName: string;
     procedure SetName(const Value: string);
-    function GetSubscriberList: IDictionary<Integer, ISubscriber>;
+    function GetSubscriberList: IDictionary<UInt32, ISubscriber>;
     {$ENDREGION}
 
     function CreateSubscriber(
-      ASourceId         : Integer;
-      AThreadId         : Integer;
+      ASourceId         : UInt32;
+      AThreadId         : UInt32;
       const ASourceName : string
     ): ISubscriber; virtual;
     procedure DoReceiveMessage(
       AStream           : TStream;
-      ASourceId         : Integer = 0;
-      AThreadId         : Integer = 0;
+      ASourceId         : UInt32 = 0;
+      AThreadId         : UInt32 = 0;
       const ASourceName : string = ''
     ); virtual;
 
@@ -88,7 +88,7 @@ type
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
 
-    property SubscriberList: IDictionary<Integer, ISubscriber>
+    property SubscriberList: IDictionary<UInt32, ISubscriber>
       read GetSubscriberList;
 
     class property Processes: IDictionary<UInt32, string>
@@ -109,7 +109,7 @@ uses
 procedure TChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FSubscriberList :=  TCollections.CreateDictionary<Integer, ISubscriber>;
+  FSubscriberList :=  TCollections.CreateDictionary<UInt32, ISubscriber>;
 end;
 
 procedure TChannelReceiver.BeforeDestruction;
@@ -145,7 +145,7 @@ begin
   );
 end;
 
-function TChannelReceiver.CreateSubscriber(ASourceId: Integer; AThreadId: Integer;
+function TChannelReceiver.CreateSubscriber(ASourceId: UInt32; AThreadId: UInt32;
   const ASourceName : string): ISubscriber;
 begin
   Result := nil;
@@ -158,8 +158,8 @@ begin
   FProcesses := nil;
 end;
 
-procedure TChannelReceiver.DoReceiveMessage(AStream: TStream; ASourceId: Integer;
-  AThreadId: Integer; const ASourceName : string);
+procedure TChannelReceiver.DoReceiveMessage(AStream: TStream; ASourceId: UInt32;
+  AThreadId: UInt32; const ASourceName : string);
 var
   LSubscriber : ISubscriber;
 begin
@@ -209,7 +209,7 @@ begin
   FName := Value;
 end;
 
-function TChannelReceiver.GetSubscriberList: IDictionary<Integer, ISubscriber>;
+function TChannelReceiver.GetSubscriberList: IDictionary<UInt32, ISubscriber>;
 begin
   Result := FSubscriberList;
 end;
