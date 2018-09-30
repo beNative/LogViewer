@@ -2,7 +2,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
   Left = 0
   Top = 0
   Caption = 'Settings'
-  ClientHeight = 328
+  ClientHeight = 331
   ClientWidth = 617
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -15,109 +15,119 @@ object frmLogViewerSettings: TfrmLogViewerSettings
   Position = poMainFormCenter
   PixelsPerInch = 96
   TextHeight = 13
-  object spl1: TSplitter
+  object splVertical: TSplitter
     Left = 207
     Top = 0
     Width = 6
-    Height = 287
+    Height = 301
+    ExplicitHeight = 287
   end
   object pnlConfigTree: TPanel
     AlignWithMargins = True
     Left = 3
     Top = 3
     Width = 201
-    Height = 281
+    Height = 295
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitHeight = 281
   end
   object pgcMain: TPageControl
     AlignWithMargins = True
     Left = 213
     Top = 3
     Width = 401
-    Height = 281
+    Height = 295
     Margins.Left = 0
-    ActivePage = tsDisplayValuesSettings
+    ActivePage = tsComport
     Align = alClient
     Style = tsButtons
     TabOrder = 1
+    ExplicitHeight = 281
     object tsWatches: TTabSheet
       Caption = 'Watches'
+      ExplicitHeight = 250
     end
     object tsCallstack: TTabSheet
       Caption = 'Callstack'
       ImageIndex = 1
+      ExplicitHeight = 250
     end
     object tsWinIPC: TTabSheet
       Caption = 'WinIPC'
       ImageIndex = 2
+      ExplicitHeight = 250
     end
     object tsWinODS: TTabSheet
       Caption = 'OutputDebugString API'
       ImageIndex = 3
+      ExplicitHeight = 250
     end
     object tsComport: TTabSheet
       Caption = 'Serial port'
       ImageIndex = 4
+      ExplicitHeight = 250
     end
     object tsZeroMQ: TTabSheet
       Caption = 'ZeroMQ'
       ImageIndex = 5
+      ExplicitHeight = 250
     end
     object tsDisplayValuesSettings: TTabSheet
       Caption = 'DisplayValuesSettings'
       ImageIndex = 6
+      ExplicitHeight = 250
     end
     object tsAdvanced: TTabSheet
       Caption = 'Advanced'
       ImageIndex = 7
-      ExplicitLeft = 0
-      ExplicitTop = 24
-      ExplicitWidth = 0
-      ExplicitHeight = 253
+      ExplicitHeight = 250
     end
   end
   object pnlBottom: TPanel
     Left = 0
-    Top = 287
+    Top = 301
     Width = 617
-    Height = 41
+    Height = 30
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 2
     DesignSize = (
       617
-      41)
+      30)
     object btnClose: TButton
       Left = 463
-      Top = 12
+      Top = 1
       Width = 150
       Height = 25
       Action = actClose
       Anchors = [akRight, akBottom]
       Images = imlMain
       TabOrder = 0
+      ExplicitTop = 12
     end
     object btnClose1: TButton
       Left = 151
-      Top = 12
+      Top = 1
       Width = 150
       Height = 25
       Action = actApply
       Anchors = [akRight, akBottom]
       Images = imlMain
       TabOrder = 1
+      ExplicitTop = 12
     end
     object btnCancel: TButton
       Left = 307
-      Top = 12
+      Top = 1
       Width = 150
       Height = 25
       Action = actCancel
       Anchors = [akRight, akBottom]
       Images = imlMain
       TabOrder = 2
+      ExplicitTop = 12
     end
   end
   object aclMain: TActionList
@@ -145,7 +155,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Left = 464
     Top = 192
     Bitmap = {
-      494C010103000800180010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101030008001C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

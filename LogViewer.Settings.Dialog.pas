@@ -21,10 +21,10 @@ unit LogViewer.Settings.Dialog;
 interface
 
 uses
-  System.SysUtils, System.Variants, System.Classes,
+  System.SysUtils, System.Variants, System.Classes, System.ImageList,
   System.Actions,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls,
-  Vcl.ComCtrls, Vcl.ActnList, Vcl.StdCtrls,
+  Vcl.ComCtrls, Vcl.ActnList, Vcl.StdCtrls, Vcl.ImgList,
 
   VirtualTrees,
 
@@ -35,8 +35,7 @@ uses
 
   LogViewer.Comport.Settings.View, LogViewer.WinIPC.Settings.View,
   LogViewer.Watches.Settings.View, LogViewer.WinODS.Settings.View,
-  LogViewer.ZeroMQ.Settings.View, LogViewer.DisplayValues.Settings.View,
-  System.ImageList, Vcl.ImgList;
+  LogViewer.ZeroMQ.Settings.View, LogViewer.DisplayValues.Settings.View;
 
 type
   TfrmLogViewerSettings = class(TForm)
@@ -55,12 +54,12 @@ type
     btnClose                : TButton;
     tsDisplayValuesSettings : TTabSheet;
     tsAdvanced              : TTabSheet;
-    imlMain: TImageList;
-    actApply: TAction;
-    actCancel: TAction;
-    btnClose1: TButton;
-    btnCancel: TButton;
-    spl1: TSplitter;
+    imlMain                 : TImageList;
+    actApply                : TAction;
+    actCancel               : TAction;
+    btnClose1               : TButton;
+    btnCancel               : TButton;
+    splVertical             : TSplitter;
     {$ENDREGION}
 
     procedure actCloseExecute(Sender: TObject);
@@ -138,6 +137,7 @@ begin
   FConfigTree.OnGetText      := FConfigTreeGetText;
   FConfigTree.OnFreeNode     := FConfigTreeFreeNode;
   FConfigTree.OnFocusChanged := FConfigTreeFocusChanged;
+  FConfigTree.Header.Options := FConfigTree.Header.Options - [hoVisible];
   FConfigTree.TreeOptions.PaintOptions :=
     FConfigTree.TreeOptions.PaintOptions + [toShowTreeLines];
   FConfigTree.Margins.Right := 0;
