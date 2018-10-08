@@ -25,7 +25,7 @@ uses
 
   synaser,
 
-  LogViewer.Interfaces, LogViewer.ComPort.Settings, LogViewer.Subscribers.Base;
+  LogViewer.Interfaces, LogViewer.Subscribers.Base, LogViewer.ComPort.Settings;
 
 type
   TComPortSubscriber = class(TSubscriber, ISubscriber, IComPort)
@@ -52,8 +52,12 @@ type
 
   public
     constructor Create(
-      AReceiver : IChannelReceiver;
-      ASettings : TComPortSettings
+      const AReceiver   : IChannelReceiver;
+      ASourceId         : Integer;
+      const AKey        : string;
+      const ASourceName : string;
+      AEnabled          : Boolean;
+      ASettings         : TComPortSettings
     ); reintroduce;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
@@ -68,10 +72,11 @@ uses
   DDuce.Logger.Interfaces;
 
 {$REGION 'construction and destruction'}
-constructor TComPortSubscriber.Create(AReceiver: IChannelReceiver;
-  ASettings: TComPortSettings);
+constructor TComPortSubscriber.Create(const AReceiver: IChannelReceiver;
+  ASourceId: Integer; const AKey: string; const ASourceName: string;
+  AEnabled: Boolean; ASettings: TComPortSettings);
 begin
-  inherited Create(AReceiver, 0, '', '', True);
+  inherited Create(AReceiver, ASourceId, AKey, ASourceName, AEnabled);
   FSettings := TComPortSettings.Create;
   FSettings.Assign(ASettings);
   FSettings.OnChanged.Add(SettingsChanged);
@@ -113,7 +118,7 @@ begin
   end
   else
   begin
-    if FSerialPort.InstanceActive then
+    if Assigned(FSerialPort) and FSerialPort.InstanceActive then
       FSerialPort.CloseSocket;
   end;
 end;
@@ -201,8 +206,10 @@ begin
   inherited Poll;
   while FSerialPort.WaitingDataEx <> 0 do
   begin
-    S := Trim(FSerialPort.RecvTerminated(10, #10));
-    DoStringReceived(S);
+    S := FSerialPort.RecvPacket(500); // 50ms timeout
+    //S := Trim(FSerialPort.RecvTerminated(10, #10));
+    if Trim(S) <> '' then
+      DoStringReceived(S);
   end;
 end;
 {$ENDREGION}

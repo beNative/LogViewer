@@ -76,7 +76,7 @@ type
 
   public
     constructor Create(
-      AReceiver         : IChannelReceiver;
+      const AReceiver   : IChannelReceiver;
       ASourceId         : Integer;
       const AKey        : string;
       const ASourceName : string;
@@ -92,8 +92,8 @@ uses
   DDuce.Logger;
 
 {$REGION 'construction and destruction'}
-constructor TSubscriber.Create(AReceiver: IChannelReceiver; ASourceId: Integer;
-  const AKey, ASourceName: string; AEnabled: Boolean);
+constructor TSubscriber.Create(const AReceiver: IChannelReceiver;
+  ASourceId: Integer; const AKey, ASourceName: string; AEnabled: Boolean);
 begin
   inherited Create;
   Guard.CheckNotNull(AReceiver, 'AReceiver');
@@ -143,7 +143,7 @@ end;
 
 function TSubscriber.GetReceiver: IChannelReceiver;
 begin
-  Result := FReceiver.Target;
+  Exit(FReceiver);
 end;
 
 function TSubscriber.GetSourceId: UInt32;

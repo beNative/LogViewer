@@ -66,7 +66,7 @@ type
 implementation
 
 uses
-  DDuce.Utils.WinApi;
+  DDuce.Utils.Winapi;
 
 {$REGION 'property access methods'}
 function TWinODSSettings.GetEnabled: Boolean;

@@ -19,12 +19,17 @@ unit LogViewer.Receivers.Base;
 { Base class for all channel receivers (implementing IChannelReceiver). }
 
 { A IChannelReceiver instance maintains a dictionary of subscribers
-  (ISubscriber) with SourceId as the key. }
+  (ISubscriber) with SourceId as the key.
+
+  TChannelReceiver has a class property Processes that keeps track of
+  (Windows) ProcessId/ProcessName pairs.
+  }
 
 interface
 
 uses
   System.Classes,
+  Vcl.ExtCtrls,
 
   Spring, Spring.Collections,
 
@@ -39,11 +44,13 @@ type
     FName           : string;
     FSubscriberList : IDictionary<UInt32, ISubscriber>;
     FManager        : ILogViewerManager;
+    FPollTimer      : Lazy<TTimer>;
 
   class var
     FProcesses : Lazy<IDictionary<UInt32, string>>;
 
     class function GetProcesses: IDictionary<UInt32, string>; static;
+    function GetPollTimer: TTimer;
 
   protected
     {$REGION 'property access methods'}
@@ -54,6 +61,8 @@ type
     procedure SetName(const Value: string);
     function GetSubscriberList: IDictionary<UInt32, ISubscriber>;
     {$ENDREGION}
+
+    procedure PollTimerTimer(Sender: TObject);
 
     function CreateSubscriber(
       ASourceId         : UInt32;
@@ -67,9 +76,13 @@ type
       const ASourceName : string = ''
     ); virtual;
 
+    property PollTimer: TTimer
+      read GetPollTimer;
+
   public
     class constructor Create;
     class destructor Destroy;
+
     constructor Create(
       AManager    : ILogViewerManager;
       const AName : string
@@ -106,16 +119,31 @@ uses
   LogViewer.Factories;
 
 {$REGION 'construction and destruction'}
+class constructor TChannelReceiver.Create;
+begin
+  FProcesses.Create(function: IDictionary<UInt32, string>
+    begin
+      Result := TCollections.CreateDictionary<UInt32, string>;
+    end
+  );
+end;
+
 procedure TChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
   FSubscriberList :=  TCollections.CreateDictionary<UInt32, ISubscriber>;
+  FPollTimer.Create(function: TTimer
+    begin
+      Result := TTimer.Create(nil);
+    end
+  );
 end;
 
 procedure TChannelReceiver.BeforeDestruction;
 begin
   Logger.Track(Self, 'BeforeDestruction');
-  Logger.AddCheckPoint;
+  if FPollTimer.IsValueCreated then
+    FPollTimer.Value.Free;
   FSubscriberList.OnChanged.Clear;
   FSubscriberList.OnValueChanged.Clear;
   FSubscriberList.OnKeyChanged.Clear;
@@ -127,6 +155,7 @@ end;
 constructor TChannelReceiver.Create(AManager: ILogViewerManager;
   const AName: string);
 begin
+  Guard.CheckNotNull(AManager, 'AManager');
   FManager := AManager;
   if AName = '' then
   begin
@@ -134,15 +163,6 @@ begin
   end
   else
     Name := AName;
-end;
-
-class constructor TChannelReceiver.Create;
-begin
-  FProcesses.Create(function: IDictionary<UInt32, string>
-    begin
-      Result := TCollections.CreateDictionary<UInt32, string>;
-    end
-  );
 end;
 
 function TChannelReceiver.CreateSubscriber(ASourceId: UInt32; AThreadId: UInt32;
@@ -199,6 +219,11 @@ begin
   Result := FName;
 end;
 
+function TChannelReceiver.GetPollTimer: TTimer;
+begin
+  Result := FPollTimer.Value;
+end;
+
 class function TChannelReceiver.GetProcesses: IDictionary<UInt32, string>;
 begin
   Result := FProcesses.Value;
@@ -212,6 +237,23 @@ end;
 function TChannelReceiver.GetSubscriberList: IDictionary<UInt32, ISubscriber>;
 begin
   Result := FSubscriberList;
+end;
+{$ENDREGION}
+
+{$REGION 'event handlers'}
+procedure TChannelReceiver.PollTimerTimer(Sender: TObject);
+var
+  LSubscriber : ISubscriber;
+begin
+  PollTimer.Enabled := False;
+  try
+    for LSubscriber in SubscriberList.Values do
+    begin
+      LSubscriber.Poll;
+    end;
+  finally
+    PollTimer.Enabled := True;
+  end;
 end;
 {$ENDREGION}
 

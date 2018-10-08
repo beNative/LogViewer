@@ -55,23 +55,10 @@ uses
 
   LogViewer.Interfaces,  LogViewer.Receivers.Base, LogViewer.ZeroMQ.Settings;
 
-//const
-  //ZQM_DEFAULT_ADDRESS = 'tcp://192.168.0.226:5555';
-  //ZQM_DEFAULT_ADDRESS = 'tcp://192.168.0.226:*';
-//  tcp://GANYMEDES:5555
-//  tcp://EUROPA:5555
-
-// LogQueue is always filled with messages of the same kind, and is not specific
-// for a Receiver instance.
-
-// Here the subscribers are stored in a specific list, and they only will write
-// to a queue if it is enabled and is receiving messages.
-
 type
   TZeroMQChannelReceiver = class(TChannelReceiver, IChannelReceiver, IZMQ)
   private
-    FTimer : TTimer;
-    FZMQ   : IZeroMQ;
+    FZMQ : IZeroMQ;
 
   protected
     {$REGION 'property access methods'}
@@ -79,7 +66,6 @@ type
     procedure SetEnabled(const Value: Boolean); override;
     {$ENDREGION}
 
-    procedure FTimerTimer(Sender: TObject);
     procedure SettingsChanged(Sender: TObject);
 
     function CreateSubscriber(
@@ -90,7 +76,6 @@ type
 
   public
     procedure AfterConstruction; override;
-    procedure BeforeDestruction; override;
 
     constructor Create(
       AManager    : ILogViewerManager;
@@ -115,17 +100,9 @@ uses
 procedure TZeroMQChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FTimer          := TTimer.Create(nil);
-  FTimer.OnTimer  := FTimerTimer;
-  FTimer.Interval := 100;
+  PollTimer.OnTimer  := PollTimerTimer;
+  PollTimer.Interval := Settings.PollingInterval;
   Settings.OnChanged.Add(SettingsChanged);
-end;
-
-procedure TZeroMQChannelReceiver.BeforeDestruction;
-begin
-  FTimer.Enabled := False;
-  FTimer.Free;
-  inherited BeforeDestruction;
 end;
 
 constructor TZeroMQChannelReceiver.Create(AManager: ILogViewerManager; AZMQ:
@@ -148,7 +125,7 @@ end;
 procedure TZeroMQChannelReceiver.SetEnabled(const Value: Boolean);
 begin
   inherited SetEnabled(Value);
-  FTimer.Enabled := Value;
+  PollTimer.Enabled := Value;
 end;
 
 function TZeroMQChannelReceiver.GetSettings: TZeroMQSettings;
@@ -161,18 +138,6 @@ end;
 procedure TZeroMQChannelReceiver.SettingsChanged(Sender: TObject);
 begin
   Enabled := Settings.Enabled;
-end;
-
-procedure TZeroMQChannelReceiver.FTimerTimer(Sender: TObject);
-var
-  LSubscriber : ISubscriber;
-begin
-  FTimer.Enabled := False;
-  for LSubscriber in SubscriberList.Values do
-  begin
-    LSubscriber.Poll;
-  end;
-  FTimer.Enabled := True;
 end;
 {$ENDREGION}
 

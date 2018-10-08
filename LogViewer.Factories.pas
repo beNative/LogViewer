@@ -46,7 +46,6 @@ uses
 
 type
   TLogViewerFactories = class sealed
-
   private
      { forces drop down menu to be shown on pressing a toolbarbutton with
        Style tbsDropDown }
@@ -222,9 +221,7 @@ end;
 class function TLogViewerFactories.CreateComPortReceiver(
   AManager: ILogViewerManager; ASettings: TComPortSettings): IChannelReceiver;
 begin
-  Result := TComPortChannelReceiver.Create(
-    AManager, RECEIVERNAME_COMPORT, ASettings
-  );
+  Result := TComPortChannelReceiver.Create(AManager, RECEIVERNAME_COMPORT);
 end;
 {$ENDREGION}
 

@@ -44,30 +44,27 @@ uses
 type
   TComPortChannelReceiver = class(TChannelReceiver, IChannelReceiver, IComPort)
   private
-    FPollTimer  : TTimer;
-    FSettings   : TComPortSettings;
-
-    function GetSettings: TComPortSettings;
-
-    procedure FPollTimerTimer(Sender: TObject);
     procedure SettingsChanged(Sender: TObject);
 
   protected
     {$REGION 'property access methods'}
+    function GetSettings: TComPortSettings;
     procedure SetEnabled(const Value: Boolean); override;
     {$ENDREGION}
+
+    procedure UpdateSubscribers;
 
     property Settings: TComPortSettings
       read GetSettings;
 
   public
-    constructor Create(
-      AManager    : ILogViewerManager;
-      const AName : string;
-      ASettings   : TComPortSettings
-    ); reintroduce;
     procedure AfterConstruction; override;
-    procedure BeforeDestruction; override;
+
+    function CreateSubscriber(
+      ASourceId         : UInt32;
+      AThreadId         : UInt32;
+      const ASourceName : string
+    ): ISubscriber; override;
 
     function ToString: string; override;
   end;
@@ -77,36 +74,18 @@ implementation
 uses
   System.SysUtils, System.AnsiStrings,
 
-  DDuce.Logger.Interfaces,
+  DDuce.Logger.Interfaces, DDuce.Logger,
 
   LogViewer.Subscribers.ComPort;
 
 {$REGION 'construction and destruction'}
-constructor TComPortChannelReceiver.Create(AManager: ILogViewerManager;
-  const AName : string; ASettings: TComPortSettings);
-begin
-  inherited Create(AManager, AName);
-  Guard.CheckNotNull(ASettings, 'ASettings');
-  FSettings := TComPortSettings.Create;
-  FSettings.Assign(ASettings);
-end;
-
 procedure TComPortChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FPollTimer := TTimer.Create(nil);
-  FPollTimer.Interval := 100;
-  FPollTimer.Enabled  := False;
-  FPollTimer.OnTimer  := FPollTimerTimer;
-  FSettings.OnChanged.Add(SettingsChanged);
-end;
-
-procedure TComPortChannelReceiver.BeforeDestruction;
-begin
-  FSettings.OnChanged.Remove(SettingsChanged);
-  FPollTimer.Free;
-  FSettings.Free;
-  inherited BeforeDestruction;
+  Settings.OnChanged.Add(SettingsChanged);
+  PollTimer.Interval := Settings.PollingInterval;
+  PollTimer.Enabled  := False;
+  PollTimer.OnTimer  := PollTimerTimer;
 end;
 {$ENDREGION}
 
@@ -116,43 +95,71 @@ begin
   inherited SetEnabled(Value);
   if Value then
   begin
-    FPollTimer.Enabled := True;
+    UpdateSubscribers;
+    PollTimer.Enabled := True;
   end
   else
   begin
-    FPollTimer.Enabled := False;
+    PollTimer.Enabled := False;
   end;
 end;
 
 function TComPortChannelReceiver.GetSettings: TComPortSettings;
 begin
-  Result := FSettings;
+  Result := Manager.Settings.ComPortSettings;
 end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
-procedure TComPortChannelReceiver.FPollTimerTimer(Sender: TObject);
-var
-  LSubscriber : ISubscriber;
-begin
-  FPollTimer.Enabled := False;
-  for LSubscriber in SubscriberList.Values do
-  begin
-    LSubscriber.Poll;
-  end;
-  FPollTimer.Enabled := True;
-end;
-
 procedure TComPortChannelReceiver.SettingsChanged(Sender: TObject);
 begin
-//
+  PollTimer.Interval := Settings.PollingInterval;
 end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
+procedure TComPortChannelReceiver.UpdateSubscribers;
+var
+  I  : Integer;
+  SL : Shared<TStringList>;
+  S  : ISubscriber;
+begin
+  SL := TStringList.Create;
+  SL.Value.CommaText := GetSerialPortNames;
+  for I := 0 to SL.Value.Count - 1 do
+  begin
+    S := CreateSubscriber(I, 0, SL.Value[I]);
+    if Assigned(S) then
+      SubscriberList.AddOrSetValue(I, S);
+  end;
+end;
+{$ENDREGION}
+
+{$REGION 'public methods'}
 function TComPortChannelReceiver.ToString: string;
 begin
 //
+end;
+
+function TComPortChannelReceiver.CreateSubscriber(ASourceId, AThreadId: UInt32;
+  const ASourceName: string): ISubscriber;
+begin
+  Settings.Port := ASourceName;
+  if ASourceName <> '' then
+  begin
+    Result := TComPortSubscriber.Create(
+      Self,
+      ASourceId,
+      ASourceName,
+      ASourceName,
+      False,
+      Settings
+    );
+  end
+  else
+  begin
+    Result := nil;
+  end;
 end;
 {$ENDREGION}
 

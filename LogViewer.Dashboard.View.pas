@@ -59,8 +59,6 @@ type
     btnAddZMQNodeForLogViewer : TButton;
     btnAddZMQNodeLocalHost    : TButton;
     btnSubscribeToList        : TButton;
-    chkAutoSubscribeWinIPC    : TCheckBox;
-    chkAutoSubscribeWinODS    : TCheckBox;
     edtAddress                : TLabeledEdit;
     edtPort                   : TLabeledEdit;
     imlMain                   : TImageList;
@@ -157,6 +155,11 @@ type
       Action     : TCollectionChangedAction
     );
     procedure FWinODSReceiverSubscriberListChanged(
+      Sender     : TObject;
+      const AKey : UInt32;
+      Action     : TCollectionChangedAction
+    );
+    procedure FComPortReceiverSubscriberListChanged(
       Sender     : TObject;
       const AKey : UInt32;
       Action     : TCollectionChangedAction
@@ -572,6 +575,22 @@ begin
     end;
   end;
 end;
+
+procedure TfrmDashboard.FComPortReceiverSubscriberListChanged(Sender: TObject;
+  const AKey: UInt32; Action: TCollectionChangedAction);
+var
+  LDelete : TDashboardNode;
+begin
+  if Action = caRemoved then
+  begin
+    LDelete := FComPortNode.Nodes.GetValueOrDefault(AKey);
+    if Assigned(LDelete) then
+    begin
+      FTreeView.DeleteNode(LDelete.VTNode);
+      FComPortNode.Nodes.Remove(AKey);
+    end;
+  end;
+end;
 {$ENDREGION}
 
 procedure TfrmDashboard.edtAddressExit(Sender: TObject);
@@ -636,6 +655,7 @@ begin
     FManager,FManager.Settings.ComPortSettings
   );
   FManager.AddReceiver(FComPortReceiver);
+  FComPortReceiver.SubscriberList.OnKeyChanged.Add(FComPortReceiverSubscriberListChanged);
   //FComPortReceiver.Enabled := FManager.Settings.ComPortSettings.Enabled;
   FComPortNode := TDashboardNode.Create(nil, FTreeView, FComPortReceiver, nil);
   AddNodesToTree(FTreeView.RootNode, FComPortNode);
@@ -644,6 +664,7 @@ begin
     FComPortNode.VTNode.CheckState := csCheckedNormal
   else
     FComPortNode.VTNode.CheckState := csUncheckedNormal;
+  FComPortReceiver.Enabled := True;
 end;
 
 procedure TfrmDashboard.InitializeControls;

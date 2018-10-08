@@ -68,12 +68,12 @@ begin
   {$WARNINGS ON}
   Application.Initialize;
   Application.Title := 'Log viewer';
-  Application.CreateForm(TfrmMain, frmMain);
   Logger.Channels.Add(
     TZeroMQChannel.Create(Format('tcp://*:%d', [LOGVIEWER_ZMQ_PORT]))
   );
   Logger.Clear;
   Logger.Info('LogViewer Started.');
+  Application.CreateForm(TfrmMain, frmMain);
   Application.Run;
 end.
 

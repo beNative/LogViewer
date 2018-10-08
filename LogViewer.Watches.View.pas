@@ -63,54 +63,54 @@ type
       Item             : TObject
     ): string;
     function FCDTimeStampCustomDraw(
-      Sender          : TObject;
-      ColumnDefinition: TColumnDefinition;
-      Item            : TObject;
-      TargetCanvas    : TCanvas;
-      CellRect        : TRect;
-      ImageList       : TCustomImageList;
-      DrawMode        : TDrawMode;
-      Selected        : Boolean
+      Sender           : TObject;
+      ColumnDefinition : TColumnDefinition;
+      Item             : TObject;
+      TargetCanvas     : TCanvas;
+      CellRect         : TRect;
+      ImageList        : TCustomImageList;
+      DrawMode         : TDrawMode;
+      Selected         : Boolean
     ): Boolean;
     function FCDTypeCustomDraw(
-      Sender          : TObject;
-      ColumnDefinition: TColumnDefinition;
-      Item            : TObject;
-      TargetCanvas    : TCanvas;
-      CellRect        : TRect;
-      ImageList       : TCustomImageList;
-      DrawMode        : TDrawMode;
-      Selected        : Boolean
+      Sender           : TObject;
+      ColumnDefinition : TColumnDefinition;
+      Item             : TObject;
+      TargetCanvas     : TCanvas;
+      CellRect         : TRect;
+      ImageList        : TCustomImageList;
+      DrawMode         : TDrawMode;
+      Selected         : Boolean
     ): Boolean;
     function FCDValueCustomDraw(
-      Sender          : TObject;
-      ColumnDefinition: TColumnDefinition;
-      Item            : TObject;
-      TargetCanvas    : TCanvas;
-      CellRect        : TRect;
-      ImageList       : TCustomImageList;
-      DrawMode        : TDrawMode;
-      Selected        : Boolean
+      Sender           : TObject;
+      ColumnDefinition : TColumnDefinition;
+      Item             : TObject;
+      TargetCanvas     : TCanvas;
+      CellRect         : TRect;
+      ImageList        : TCustomImageList;
+      DrawMode         : TDrawMode;
+      Selected         : Boolean
     ): Boolean;
     function FCDNameCustomDraw(
-      Sender          : TObject;
-      ColumnDefinition: TColumnDefinition;
-      Item            : TObject;
-      TargetCanvas    : TCanvas;
-      CellRect        : TRect;
-      ImageList       : TCustomImageList;
-      DrawMode        : TDrawMode;
-      Selected        : Boolean
+      Sender           : TObject;
+      ColumnDefinition : TColumnDefinition;
+      Item             : TObject;
+      TargetCanvas     : TCanvas;
+      CellRect         : TRect;
+      ImageList        : TCustomImageList;
+      DrawMode         : TDrawMode;
+      Selected         : Boolean
     ): Boolean;
     function FCDIdCustomDraw(
-      Sender          : TObject;
-      ColumnDefinition: TColumnDefinition;
-      Item            : TObject;
-      TargetCanvas    : TCanvas;
-      CellRect        : TRect;
-      ImageList       : TCustomImageList;
-      DrawMode        : TDrawMode;
-      Selected        : Boolean
+      Sender           : TObject;
+      ColumnDefinition : TColumnDefinition;
+      Item             : TObject;
+      TargetCanvas     : TCanvas;
+      CellRect         : TRect;
+      ImageList        : TCustomImageList;
+      DrawMode         : TDrawMode;
+      Selected         : Boolean
     ): Boolean;
     {$ENDREGION}
 

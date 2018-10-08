@@ -1251,7 +1251,10 @@ end;
      9. Data         (variable size)   => TLogMessage.Data
 
     TLogMessage = packed record
-      MsgType   : Integer; // (TLogMessageType)
+      MsgType   : Byte; // (TLogMessageType)
+      Level     : Byte;
+      Reserved  : Byte;
+      Reserved  : Byte;
       TimeStamp : TDateTime;
       Text      : UTF8String;
       Data      : TStream;
@@ -1569,15 +1572,15 @@ procedure TfrmMessageList.UpdateTextDisplay(ALogNode: TLogNode);
 var
   S : string;
 begin
-  tsValueList.TabVisible   := False; //
+  tsValueList.TabVisible   := False;
   tsTextViewer.TabVisible  := False;
   tsImageViewer.TabVisible := False;
   tsDataSet.TabVisible     := False;
   pgcMessageDetails.ActivePage := tsTextViewer;
   FEditorView.Text := ALogNode.Value;
   S := Trim(ALogNode.ValueType);
-  if S <> '' then
-   FEditorView.HighlighterName := S;
+//  if S <> '' then
+//   FEditorView.HighlighterName := S;
 end;
 
 procedure TfrmMessageList.UpdateTextStreamDisplay(ALogNode: TLogNode);

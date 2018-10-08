@@ -2,7 +2,7 @@ object frmMessageList: TfrmMessageList
   Left = 0
   Top = 0
   ClientHeight = 746
-  ClientWidth = 1173
+  ClientWidth = 1008
   Color = clWhite
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -15,7 +15,7 @@ object frmMessageList: TfrmMessageList
   PixelsPerInch = 96
   TextHeight = 13
   object splVertical: TSplitter
-    Left = 737
+    Left = 677
     Top = 0
     Width = 6
     Height = 746
@@ -26,28 +26,30 @@ object frmMessageList: TfrmMessageList
     ExplicitHeight = 806
   end
   object splLeftVertical: TSplitter
-    Left = 353
+    Left = 313
     Top = 0
     Width = 6
     Height = 746
     Color = clBtnFace
     ParentColor = False
+    ExplicitLeft = 353
     ExplicitHeight = 806
   end
   object pnlRight: TPanel
-    Left = 743
+    Left = 683
     Top = 0
-    Width = 430
+    Width = 325
     Height = 746
     Align = alRight
     BevelOuter = bvNone
     Constraints.MinWidth = 100
     ParentBackground = False
     TabOrder = 0
+    ExplicitLeft = 848
     object pnlMessageContent: TPanel
       Left = 0
       Top = 0
-      Width = 430
+      Width = 325
       Height = 25
       Align = alTop
       BevelOuter = bvNone
@@ -60,69 +62,89 @@ object frmMessageList: TfrmMessageList
       ParentBackground = False
       ParentFont = False
       TabOrder = 0
+      ExplicitWidth = 430
     end
     object pnlRawMessageData: TPanel
       Left = 0
       Top = 25
-      Width = 430
+      Width = 325
       Height = 721
       Align = alClient
       BevelOuter = bvNone
       ParentBackground = False
       TabOrder = 1
+      ExplicitWidth = 430
       object pgcMessageData: TPageControl
         Left = 0
         Top = 0
-        Width = 430
+        Width = 325
         Height = 721
-        ActivePage = tsRawData
+        ActivePage = tsMessageView
         Align = alClient
         TabOrder = 0
+        ExplicitWidth = 430
         object tsMessageView: TTabSheet
           Caption = 'Messageview'
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 422
+          ExplicitHeight = 0
           object pgcMessageDetails: TPageControl
             Left = 0
             Top = 0
-            Width = 422
+            Width = 317
             Height = 693
             ActivePage = tsValueList
             Align = alClient
             MultiLine = True
             TabOrder = 0
             TabPosition = tpBottom
+            ExplicitWidth = 422
             object tsValueList: TTabSheet
               Caption = 'Value list'
               ImageIndex = 2
               ExplicitLeft = 2
               ExplicitTop = 0
+              ExplicitWidth = 414
+              ExplicitHeight = 0
             end
             object tsTextViewer: TTabSheet
               Caption = 'Text viewer'
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 414
+              ExplicitHeight = 0
               object pnlTextViewer: TPanel
                 AlignWithMargins = True
                 Left = 3
                 Top = 3
-                Width = 408
+                Width = 303
                 Height = 661
                 Align = alClient
                 BevelOuter = bvNone
                 Color = clWhite
                 ParentBackground = False
                 TabOrder = 0
+                ExplicitWidth = 408
               end
             end
             object tsImageViewer: TTabSheet
               Caption = 'Image viewer'
               ImageIndex = 1
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 414
+              ExplicitHeight = 0
               object pnlImageViewer: TPanel
                 Left = 0
                 Top = 0
-                Width = 414
+                Width = 309
                 Height = 667
                 Align = alClient
                 BevelOuter = bvNone
                 ParentBackground = False
                 TabOrder = 0
+                ExplicitWidth = 414
                 object edtWidth: TLabeledEdit
                   Left = 64
                   Top = 6
@@ -170,7 +192,7 @@ object frmMessageList: TfrmMessageList
                 object sbxImage: TScrollBox
                   Left = 0
                   Top = 72
-                  Width = 414
+                  Width = 309
                   Height = 595
                   HorzScrollBar.Smooth = True
                   HorzScrollBar.Tracking = True
@@ -184,6 +206,7 @@ object frmMessageList: TfrmMessageList
                   Color = clWhite
                   ParentColor = False
                   TabOrder = 4
+                  ExplicitWidth = 414
                   object imgBitmap: TImage
                     Left = 3
                     Top = 3
@@ -199,12 +222,20 @@ object frmMessageList: TfrmMessageList
             object tsDataSet: TTabSheet
               Caption = 'DataSet'
               ImageIndex = 3
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 414
+              ExplicitHeight = 0
             end
           end
         end
         object tsRawData: TTabSheet
           Caption = 'Raw message data'
           ImageIndex = 1
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 422
+          ExplicitHeight = 0
         end
       end
     end
@@ -212,7 +243,7 @@ object frmMessageList: TfrmMessageList
   object pnlLeft: TPanel
     Left = 0
     Top = 0
-    Width = 353
+    Width = 313
     Height = 746
     Align = alLeft
     BevelOuter = bvNone
@@ -221,38 +252,41 @@ object frmMessageList: TfrmMessageList
     object pnlCallStackWatch: TPanel
       Left = 0
       Top = 0
-      Width = 353
+      Width = 313
       Height = 746
       Align = alClient
       BevelOuter = bvNone
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
+      ExplicitWidth = 353
       object splLeftHorizontal: TSplitter
         Left = 0
         Top = 137
-        Width = 353
+        Width = 313
         Height = 6
         Cursor = crVSplit
         Align = alTop
         Color = clBtnFace
         ParentColor = False
         ExplicitTop = 184
+        ExplicitWidth = 353
       end
       object pnlLeftBottom: TPanel
         Left = 0
         Top = 143
-        Width = 353
+        Width = 313
         Height = 603
         Align = alClient
         BevelOuter = bvNone
         Caption = 'pnlLeftBottom'
         ShowCaption = False
         TabOrder = 1
+        ExplicitWidth = 353
         object pnlWatches: TPanel
           Left = 0
           Top = 0
-          Width = 353
+          Width = 313
           Height = 25
           Align = alTop
           BevelOuter = bvNone
@@ -265,20 +299,22 @@ object frmMessageList: TfrmMessageList
           ParentBackground = False
           ParentFont = False
           TabOrder = 0
+          ExplicitWidth = 353
         end
       end
       object pnlCallStack: TPanel
         Left = 0
         Top = 0
-        Width = 353
+        Width = 313
         Height = 137
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 0
+        ExplicitWidth = 353
         object pnlCallStackTitle: TPanel
           Left = 0
           Top = 0
-          Width = 353
+          Width = 313
           Height = 25
           Align = alTop
           BevelOuter = bvNone
@@ -291,14 +327,15 @@ object frmMessageList: TfrmMessageList
           ParentBackground = False
           ParentFont = False
           TabOrder = 0
+          ExplicitWidth = 353
         end
       end
     end
   end
   object pnlMessages: TPanel
-    Left = 359
+    Left = 319
     Top = 0
-    Width = 378
+    Width = 358
     Height = 746
     Align = alClient
     BevelOuter = bvNone
@@ -306,22 +343,25 @@ object frmMessageList: TfrmMessageList
     Color = clWhite
     ParentBackground = False
     TabOrder = 2
+    ExplicitLeft = 359
+    ExplicitWidth = 378
     object pnlFilter: TPanel
       Left = 0
       Top = 0
-      Width = 378
+      Width = 358
       Height = 25
       Align = alTop
       BevelOuter = bvNone
       ParentBackground = False
       TabOrder = 0
+      ExplicitWidth = 378
       DesignSize = (
-        378
+        358
         25)
       object edtMessageFilter: TLabeledEdit
         Left = 88
         Top = 2
-        Width = 109
+        Width = 89
         Height = 21
         Alignment = taCenter
         Anchors = [akLeft, akTop, akRight]
@@ -334,9 +374,10 @@ object frmMessageList: TfrmMessageList
         OnChange = edtMessageFilterChange
         OnKeyDown = edtMessageFilterKeyDown
         OnKeyUp = edtMessageFilterKeyUp
+        ExplicitWidth = 109
       end
       object btnFilterMessages: TButton
-        Left = 280
+        Left = 260
         Top = 0
         Width = 98
         Height = 25
@@ -344,9 +385,10 @@ object frmMessageList: TfrmMessageList
         Caption = 'Filter messages'
         Default = True
         TabOrder = 1
+        ExplicitLeft = 280
       end
       object chkAutoFilter: TCheckBox
-        Left = 203
+        Left = 183
         Top = 4
         Width = 71
         Height = 17
@@ -356,6 +398,7 @@ object frmMessageList: TfrmMessageList
         State = cbChecked
         TabOrder = 2
         OnClick = chkAutoFilterClick
+        ExplicitLeft = 203
       end
     end
   end
@@ -364,7 +407,7 @@ object frmMessageList: TfrmMessageList
     Left = 607
     Top = 150
     Bitmap = {
-      494C010116001900380010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010116001900440010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

@@ -27,15 +27,20 @@ uses
 
 type
   TZeroMQSettings = class(TPersistent)
+  const
+    DEFAULT_POLLING_INTERVAL = 100;
   private
-    FOnChanged     : Event<TNotifyEvent>;
-    FAddress       : string;
-    FEnabled       : Boolean;
-    FPort          : Integer;
-    FSubscriptions : TStrings;
+    FOnChanged       : Event<TNotifyEvent>;
+    FAddress         : string;
+    FEnabled         : Boolean;
+    FPort            : Integer;
+    FSubscriptions   : TStrings;
+    FPollingInterval : Integer;
 
   protected
     {$REGION 'property access methods'}
+    function GetPollingInterval: Integer;
+    procedure SetPollingInterval(const Value: Integer);
     function GetSubscriptions: TStrings;
     function GetPort: Integer;
     procedure SetPort(const Value: Integer);
@@ -66,6 +71,10 @@ type
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
 
+    property PollingInterval: Integer // in ms
+      read GetPollingInterval write SetPollingInterval
+      default DEFAULT_POLLING_INTERVAL;
+
   published
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
@@ -77,7 +86,8 @@ implementation
 procedure TZeroMQSettings.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FSubscriptions := TStringList.Create;
+  FSubscriptions   := TStringList.Create;
+  FPollingInterval := DEFAULT_POLLING_INTERVAL;
 end;
 
 procedure TZeroMQSettings.BeforeDestruction;
@@ -101,6 +111,20 @@ end;
 function TZeroMQSettings.GetSubscriptions: TStrings;
 begin
   Result := FSubscriptions;
+end;
+
+function TZeroMQSettings.GetPollingInterval: Integer;
+begin
+  Result := FPollingInterval;
+end;
+
+procedure TZeroMQSettings.SetPollingInterval(const Value: Integer);
+begin
+  if Value <> PollingInterval then
+  begin
+    FPollingInterval := Value;
+    Changed;
+  end;
 end;
 
 procedure TZeroMQSettings.SetPort(const Value: Integer);

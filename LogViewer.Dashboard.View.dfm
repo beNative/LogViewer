@@ -69,16 +69,6 @@ object frmDashboard: TfrmDashboard
           Margins.Bottom = 0
           Caption = 'WinIPC'
           ImageIndex = 28
-          object chkAutoSubscribeWinIPC: TCheckBox
-            Left = 0
-            Top = 43
-            Width = 282
-            Height = 17
-            Caption = 'Auto subscribe to source when messages are detected.'
-            Checked = True
-            State = cbChecked
-            TabOrder = 0
-          end
           object pnlWinIPCTitle: TPanel
             Left = 0
             Top = 0
@@ -94,24 +84,12 @@ object frmDashboard: TfrmDashboard
             Font.Style = []
             ParentBackground = False
             ParentFont = False
-            TabOrder = 1
+            TabOrder = 0
           end
         end
         object tsWinODS: TTabSheet
           Caption = 'WinODS'
           ImageIndex = 28
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 655
-          object chkAutoSubscribeWinODS: TCheckBox
-            Left = 1
-            Top = 51
-            Width = 282
-            Height = 17
-            Caption = 'Auto subscribe to source when messages are detected.'
-            TabOrder = 0
-          end
           object pnlWinODSTitle: TPanel
             Left = 0
             Top = 0
@@ -127,7 +105,7 @@ object frmDashboard: TfrmDashboard
             Font.Style = []
             ParentBackground = False
             ParentFont = False
-            TabOrder = 1
+            TabOrder = 0
           end
         end
         object tsZeroMQ: TTabSheet
@@ -208,7 +186,6 @@ object frmDashboard: TfrmDashboard
             BevelKind = bkFlat
             BorderStyle = bsNone
             TabOrder = 5
-            ExplicitHeight = 483
           end
           object btnSubscribeToList: TButton
             Left = 52
@@ -239,10 +216,6 @@ object frmDashboard: TfrmDashboard
         object tsCOMPort: TTabSheet
           Caption = 'COMPort'
           ImageIndex = 24
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 655
           object pnlCOMPortTitle: TPanel
             Left = 0
             Top = 0
@@ -297,7 +270,7 @@ object frmDashboard: TfrmDashboard
     Left = 328
     Top = 112
     Bitmap = {
-      494C010103000500440010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010103000500480010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000C0D0C4F777C7AF01D1E1D770000000000000005151515660808

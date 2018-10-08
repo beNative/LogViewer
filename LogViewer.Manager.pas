@@ -301,7 +301,7 @@ end;
 function TdmManager.DeleteView(AView: ILogViewer): Boolean;
 var
   I : Integer;
-  V : ILogViewer;
+  //V : ILogViewer;
   S : ISubscriber;
 begin
   Logger.Track(Self, 'DeleteView');

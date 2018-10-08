@@ -16,6 +16,8 @@
 
 unit LogViewer.ComPort.Settings.View;
 
+{ ComPort configuration view. }
+
 interface
 
 uses
