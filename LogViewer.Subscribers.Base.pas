@@ -46,7 +46,7 @@ type
     function GetReceiver: IChannelReceiver;
     function GetEnabled: Boolean; virtual;
     procedure SetEnabled(const Value: Boolean); virtual;
-    function GetSourceId: UInt32;
+    function GetSourceId: UInt32; virtual;
     function GetSourceName: string;
     {$ENDREGION}
 
@@ -165,6 +165,7 @@ end;
 
 procedure TSubscriber.DoReceiveMessage(AStream: TStream);
 begin
+  Guard.CheckNotNull(AStream, 'AStream');
   if Enabled then
   begin
     Inc(FMessageCount);

@@ -115,9 +115,9 @@ end;
 function TZeroMQChannelReceiver.CreateSubscriber(ASourceId, AThreadId: UInt32;
   const ASourceName: string): ISubscriber;
 begin
-  Result := TZMQSubscriber.Create(
-    Self, FZMQ, '', ASourceId, '', ASourceName, False
-  );
+//  Result := TZMQSubscriber.Create(
+//    Self, FZMQ, '', ASourceId, '', ASourceName, False
+//  );
 end;
 {$ENDREGION}
 
@@ -137,7 +137,8 @@ end;
 {$REGION 'event handlers'}
 procedure TZeroMQChannelReceiver.SettingsChanged(Sender: TObject);
 begin
-  Enabled := Settings.Enabled;
+  Enabled            := Settings.Enabled;
+  PollTimer.Interval := Settings.PollingInterval;
 end;
 {$ENDREGION}
 

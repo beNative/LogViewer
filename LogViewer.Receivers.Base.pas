@@ -23,7 +23,7 @@ unit LogViewer.Receivers.Base;
 
   TChannelReceiver has a class property Processes that keeps track of
   (Windows) ProcessId/ProcessName pairs.
-  }
+}
 
 interface
 
@@ -50,10 +50,10 @@ type
     FProcesses : Lazy<IDictionary<UInt32, string>>;
 
     class function GetProcesses: IDictionary<UInt32, string>; static;
-    function GetPollTimer: TTimer;
 
   protected
     {$REGION 'property access methods'}
+    function GetPollTimer: TTimer;
     function GetManager: ILogViewerManager;
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean); virtual;
@@ -183,6 +183,7 @@ procedure TChannelReceiver.DoReceiveMessage(AStream: TStream; ASourceId: UInt32;
 var
   LSubscriber : ISubscriber;
 begin
+  Guard.CheckNotNull(AStream, 'AStream');
   Logger.Track(Self, 'DoReceiveMessage');
   Logger.Send('AStream', AStream);
   Logger.Send('ASourceId', ASourceId);

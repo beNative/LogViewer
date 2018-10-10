@@ -234,31 +234,33 @@ end;
 {$REGION 'action handlers'}
 procedure TfrmDashboard.actAddZeroMQNodeExecute(Sender: TObject);
 var
-  S : ISubscriber;
+  LSubscriber : ISubscriber;
+  LEndPoint   : string;
 begin
-  S := TZMQSubscriber.Create(
+  LEndPoint   := Format('tcp://%s:%s', [edtAddress.Text, edtPort.Text]);
+  LSubscriber := TZMQSubscriber.Create(
     FZeroMQReceiver,
     FZeroMQ,
-    Format('tcp://%s:%s', [edtAddress.Text, edtPort.Text]),
-    Integer(S),
-    '',
-    'Source',
+    LEndPoint,
+    0,
+    LEndPoint,
+    LEndPoint,
     FZeroMQReceiver.Enabled
   );
-  FZeroMQReceiver.SubscriberList.Add(0, S);
+  FZeroMQReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
 end;
 
 procedure TfrmDashboard.actAddZMQNodeForLogViewerExecute(Sender: TObject);
 var
-  SL : TStringList;
-  S  : ISubscriber;
+  SL           : TStringList;
+  LSubscriber  : ISubscriber;
 begin
   SL := TStringList.Create;
   try
     GetIPAddresses(SL);
     if SL.Count > 0 then
     begin
-      S := TZMQSubscriber.Create(
+      LSubscriber := TZMQSubscriber.Create(
         FZeroMQReceiver,
         FZeroMQ,
         Format('tcp://%s:%s', [SL[0], IntToStr(LOGVIEWER_ZMQ_PORT)]),
@@ -268,7 +270,7 @@ begin
         FZeroMQReceiver.Enabled
       );
       Logger.Channels.Clear;
-      FZeroMQReceiver.SubscriberList.Add(0, S);
+      FZeroMQReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
     end;
   finally
     SL.Free;
@@ -277,15 +279,15 @@ end;
 
 procedure TfrmDashboard.actAddZMQNodeLocalHostExecute(Sender: TObject);
 var
-  SL : TStringList;
-  S  : ISubscriber;
+  SL          : TStringList;
+  LSubscriber : ISubscriber;
 begin
   SL := TStringList.Create;
   try
     GetIPAddresses(SL);
     if SL.Count > 0 then
     begin
-      S := TZMQSubscriber.Create(
+      LSubscriber := TZMQSubscriber.Create(
         FZeroMQReceiver,
         FZeroMQ,
         Format('tcp://%s:%s', [SL[0], '5555']),
@@ -294,7 +296,7 @@ begin
         'localhost source',
         FZeroMQReceiver.Enabled
       );
-      FZeroMQReceiver.SubscriberList.Add(0, S);
+      FZeroMQReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
     end;
   finally
     SL.Free;

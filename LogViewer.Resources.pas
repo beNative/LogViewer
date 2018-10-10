@@ -16,7 +16,7 @@
 
 unit LogViewer.Resources;
 
-{ Application constants and resource strings. }
+{ Application wide type definitions, constants and resource strings. }
 
 interface
 
