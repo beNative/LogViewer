@@ -112,7 +112,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION 'protected methods'}
+{$REGION 'private methods'}
 { Creates a ZMQ subscriber socket, connects it to the given endpoint and
   registers a dedicated poller to handle incomming messages. }
 

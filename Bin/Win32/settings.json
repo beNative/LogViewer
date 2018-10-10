@@ -1,8 +1,8 @@
 {
 	"FormSettings": {
-		"Left": 422,
-		"Top": 254,
-		"Width": 1571,
+		"Left": 630,
+		"Top": 235,
+		"Width": 1536,
 		"Height": 812,
 		"FormStyle": 0,
 		"WindowState": 0
@@ -11,17 +11,19 @@
 		"AutoScrollMessages": false,
 		"AutoFilterMessages": true,
 		"DynamicAutoSizeColumns": false,
-		"LeftPanelWidth": 382,
+		"LeftPanelWidth": 389,
 		"RightPanelWidth": 276
 	},
 	"WinODSSettings": {
-		"Enabled": true
+		"Enabled": false
 	},
 	"WinIPCSettings": {
-		"Enabled": true
+		"Enabled": false
 	},
 	"ZeroMQSettings": {
-		"Enabled": true
+		"Enabled": true,
+		"PollingInterval": 100,
+		"Subscriptions": "Default=tcp://localhost:5555\r\nSpecial=tcp://localhost:4194\r\n"
 	},
 	"DisplayValueSettings": {
 		"Id": {

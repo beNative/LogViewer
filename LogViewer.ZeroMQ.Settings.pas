@@ -16,7 +16,7 @@
 
 unit LogViewer.ZeroMQ.Settings;
 
-{ Persistable settings for ZeroMQ receivers. }
+{ Persistable settings for ZeroMQ receiver. }
 
 interface
 
@@ -31,9 +31,7 @@ type
     DEFAULT_POLLING_INTERVAL = 100;
   private
     FOnChanged       : Event<TNotifyEvent>;
-    FAddress         : string;
     FEnabled         : Boolean;
-    FPort            : Integer;
     FSubscriptions   : TStrings;
     FPollingInterval : Integer;
 
@@ -42,13 +40,9 @@ type
     function GetPollingInterval: Integer;
     procedure SetPollingInterval(const Value: Integer);
     function GetSubscriptions: TStrings;
-    function GetPort: Integer;
-    procedure SetPort(const Value: Integer);
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
     function GetOnChanged: IEvent<TNotifyEvent>;
-    function GetAddress: string;
-    procedure SetAddress(const Value: string);
     {$ENDREGION}
 
     procedure Changed;
@@ -59,25 +53,19 @@ type
 
     procedure Assign(Source: TPersistent); override;
 
-    property Subscriptions: TStrings
-      read GetSubscriptions;
-
-    property Address: string
-      read GetAddress write SetAddress;
-
-    property Port: Integer
-      read GetPort write SetPort;
-
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
+
+  published
+    property Enabled: Boolean
+      read GetEnabled write SetEnabled;
 
     property PollingInterval: Integer // in ms
       read GetPollingInterval write SetPollingInterval
       default DEFAULT_POLLING_INTERVAL;
 
-  published
-    property Enabled: Boolean
-      read GetEnabled write SetEnabled;
+    property Subscriptions: TStrings
+      read GetSubscriptions;
   end;
 
 implementation
@@ -103,11 +91,6 @@ begin
   Result := FOnChanged;
 end;
 
-function TZeroMQSettings.GetPort: Integer;
-begin
-  Result := FPort;
-end;
-
 function TZeroMQSettings.GetSubscriptions: TStrings;
 begin
   Result := FSubscriptions;
@@ -123,29 +106,6 @@ begin
   if Value <> PollingInterval then
   begin
     FPollingInterval := Value;
-    Changed;
-  end;
-end;
-
-procedure TZeroMQSettings.SetPort(const Value: Integer);
-begin
-  if Value <> Port then
-  begin
-    FPort := Value;
-    Changed;
-  end;
-end;
-
-function TZeroMQSettings.GetAddress: string;
-begin
-  Result := FAddress;
-end;
-
-procedure TZeroMQSettings.SetAddress(const Value: string);
-begin
-  if Value <> Address then
-  begin
-    FAddress := Value;
     Changed;
   end;
 end;
@@ -179,10 +139,10 @@ var
 begin
   if Source is TZeroMQSettings then
   begin
-    LSettings := TZeroMQSettings(Source);
-    Address   := LSettings.Address;
-    Port      := LSettings.Port;
-    Enabled   := LSettings.Enabled;
+    LSettings       := TZeroMQSettings(Source);
+    Enabled         := LSettings.Enabled;
+    PollingInterval := LSettings.PollingInterval;
+    FSubscriptions.Assign(LSettings.Subscriptions);
   end
   else
     inherited Assign(Source);

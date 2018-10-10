@@ -193,6 +193,7 @@ function TWinDebugMonitor.Initialize: DWORD;
 var
   LThreadId : DWORD;
 begin
+  Result := 0;
   SetLastError(0);
 
   // Mutex: DBWin

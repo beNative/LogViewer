@@ -27,17 +27,10 @@ uses
 
 type
   TfrmZeroMQSettings = class(TForm)
-    edtAddress : TEdit;
-    edtPort    : TEdit;
-    lblAddress : TLabel;
-    lblPort    : TLabel;
-    mmoSubscriptions: TMemo;
+    mmoSubscriptions : TMemo;
 
   private
     FSettings : TZeroMQSettings;
-
-  protected
-    procedure UpdateActions; override;
 
   public
     constructor Create(
@@ -63,15 +56,5 @@ begin
   FSettings := ASettings;
 end;
 {$ENDREGION}
-
-{$REGION 'protected methods'}
-procedure TfrmZeroMQSettings.UpdateActions;
-begin
-  inherited UpdateActions;
-  edtAddress.Text := FSettings.Address;
-  edtPort.Text    := FSettings.Port.ToString;
-end;
-{$ENDREGION}
-
 
 end.

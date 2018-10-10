@@ -166,6 +166,7 @@ object frmDashboard: TfrmDashboard
             Width = 246
             Height = 25
             Action = actAddZMQNodeLocalHost
+            Caption = 'Subscribe to default localhost socket'
             TabOrder = 3
           end
           object btnAddZMQNodeForLogViewer: TButton
@@ -253,11 +254,11 @@ object frmDashboard: TfrmDashboard
       OnExecute = actInspectTreeviewExecute
     end
     object actAddZMQNodeForLogViewer: TAction
-      Caption = 'Subscribe to logviewer'
+      Caption = 'Subscribe to local logviewer instance'
       OnExecute = actAddZMQNodeForLogViewerExecute
     end
     object actSubscribeToList: TAction
-      Caption = 'Subscribe to list'
+      Caption = 'Subscribe to list of endpoints'
       OnExecute = actSubscribeToListExecute
     end
     object actCloseSubscriber: TAction

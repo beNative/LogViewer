@@ -83,6 +83,9 @@ type
     class constructor Create;
     class destructor Destroy;
 
+    class property Processes: IDictionary<UInt32, string>
+      read GetProcesses;
+
     constructor Create(
       AManager    : ILogViewerManager;
       const AName : string
@@ -103,10 +106,6 @@ type
 
     property SubscriberList: IDictionary<UInt32, ISubscriber>
       read GetSubscriberList;
-
-    class property Processes: IDictionary<UInt32, string>
-      read GetProcesses;
-
   end;
 
 implementation
@@ -118,7 +117,7 @@ uses
 
   LogViewer.Factories;
 
-{$REGION 'construction and destruction'}
+{$REGION 'class construction and destruction'}
 class constructor TChannelReceiver.Create;
 begin
   FProcesses.Create(function: IDictionary<UInt32, string>
@@ -128,6 +127,20 @@ begin
   );
 end;
 
+class destructor TChannelReceiver.Destroy;
+begin
+  FProcesses := nil;
+end;
+{$ENDREGION}
+
+{$REGION 'class property access methods'}
+class function TChannelReceiver.GetProcesses: IDictionary<UInt32, string>;
+begin
+  Result := FProcesses.Value;
+end;
+{$ENDREGION}
+
+{$REGION 'construction and destruction'}
 procedure TChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
@@ -173,11 +186,6 @@ end;
 {$ENDREGION}
 
 {$REGION 'event dispatch methods'}
-class destructor TChannelReceiver.Destroy;
-begin
-  FProcesses := nil;
-end;
-
 procedure TChannelReceiver.DoReceiveMessage(AStream: TStream; ASourceId: UInt32;
   AThreadId: UInt32; const ASourceName : string);
 var
@@ -223,11 +231,6 @@ end;
 function TChannelReceiver.GetPollTimer: TTimer;
 begin
   Result := FPollTimer.Value;
-end;
-
-class function TChannelReceiver.GetProcesses: IDictionary<UInt32, string>;
-begin
-  Result := FProcesses.Value;
 end;
 
 procedure TChannelReceiver.SetName(const Value: string);

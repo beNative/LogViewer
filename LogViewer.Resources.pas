@@ -145,7 +145,8 @@ const
     logtree. }
   MAX_TEXTLENGTH_VALUECOLUMN = 80;
 
-  LOGVIEWER_ZMQ_PORT : Integer = 42134; // port used for internal debugging
+  { TCP port used for debugging another LogViewer instance using ZMQ. }
+  LOGVIEWER_ZMQ_PORT : Integer = 42134;
 
 implementation
 

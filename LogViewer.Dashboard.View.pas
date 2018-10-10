@@ -315,22 +315,24 @@ end;
 
 procedure TfrmDashboard.actSubscribeToListExecute(Sender: TObject);
 var
-  S    : string;
-  LSub : ISubscriber;
+  LEndPoint   : string;
+  I           : Integer;
+  LSubscriber : ISubscriber;
 begin
-  for S in mmoZMQEndPoints.Lines do
+  for I := 0 to mmoZMQEndPoints.Lines.Count - 1 do
   begin
-    LSub := TZMQSubscriber.Create(
+    LEndPoint := mmoZMQEndPoints.Lines.ValueFromIndex[I];
+    LSubscriber := TZMQSubscriber.Create(
       FZeroMQReceiver,
       FZeroMQ,
-      S,
+      LEndPoint,
       0,
-      '',
-      '',
+      LEndPoint,
+      LEndPoint,
       FZeroMQReceiver.Enabled
     );
-    LSub.Enabled := True;
-    FZeroMQReceiver.SubscriberList.Add(0, LSub);
+    LSubscriber.Enabled := True;
+    FZeroMQReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
   end;
   FManager.Settings.ZeroMQSettings.Subscriptions.Assign(mmoZMQEndPoints.Lines);
 end;
@@ -682,6 +684,8 @@ begin
   );
   AssignFormParent(FComPortSettingsForm, tsCOMPort);
   pgcMain.ActivePage := tsWinIPC;
+
+  mmoZMQEndPoints.Lines.Assign(FManager.Settings.ZeroMQSettings.Subscriptions);
 end;
 
 procedure TfrmDashboard.InitializeTreeView;
