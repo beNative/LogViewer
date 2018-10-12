@@ -25,7 +25,7 @@ uses
   System.SysUtils, System.Variants, System.Classes, System.Actions,
   System.UITypes, System.ImageList,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  Vcl.ActnList, Vcl.ComCtrls, Vcl.ImgList, Vcl.Menus,
+  Vcl.ActnList, Vcl.ComCtrls, Vcl.ImgList, Vcl.Menus, Vcl.Grids, Vcl.ValEdit,
 
   Spring.Collections,
 
@@ -49,20 +49,15 @@ type
   TfrmDashboard = class(TForm)
     {$REGION 'designer controls'}
     aclMain                   : TActionList;
-    actAddZeroMQNode          : TAction;
     actAddZMQNodeForLogViewer : TAction;
     actAddZMQNodeLocalHost    : TAction;
     actCloseSubscriber        : TAction;
     actInspectTreeview        : TAction;
     actSubscribeToList        : TAction;
-    btnAddZeroMQNode          : TButton;
     btnAddZMQNodeForLogViewer : TButton;
     btnAddZMQNodeLocalHost    : TButton;
     btnSubscribeToList        : TButton;
-    edtAddress                : TLabeledEdit;
-    edtPort                   : TLabeledEdit;
     imlMain                   : TImageList;
-    mmoZMQEndPoints           : TMemo;
     mniCloseSsubscriber       : TMenuItem;
     pgcMain                   : TPageControl;
     pnlCOMPortTitle           : TPanel;
@@ -78,15 +73,15 @@ type
     tsWinIPC                  : TTabSheet;
     tsWinODS                  : TTabSheet;
     tsZeroMQ                  : TTabSheet;
+    lstZeroMQ                 : TValueListEditor;
+    lbl1                      : TLabel;
+    lbl2                      : TLabel;
     {$ENDREGION}
 
-    procedure actAddZeroMQNodeExecute(Sender: TObject);
     procedure actAddZMQNodeLocalHostExecute(Sender: TObject);
     procedure actInspectTreeviewExecute(Sender: TObject);
     procedure actAddZMQNodeForLogViewerExecute(Sender: TObject);
     procedure actSubscribeToListExecute(Sender: TObject);
-
-    procedure edtAddressExit(Sender: TObject);
     procedure actCloseSubscriberExecute(Sender: TObject);
 
   private
@@ -232,41 +227,27 @@ end;
 {$ENDREGION}
 
 {$REGION 'action handlers'}
-procedure TfrmDashboard.actAddZeroMQNodeExecute(Sender: TObject);
-var
-  LSubscriber : ISubscriber;
-  LEndPoint   : string;
-begin
-  LEndPoint   := Format('tcp://%s:%s', [edtAddress.Text, edtPort.Text]);
-  LSubscriber := TZMQSubscriber.Create(
-    FZeroMQReceiver,
-    FZeroMQ,
-    LEndPoint,
-    0,
-    LEndPoint,
-    LEndPoint,
-    FZeroMQReceiver.Enabled
-  );
-  FZeroMQReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
-end;
-
 procedure TfrmDashboard.actAddZMQNodeForLogViewerExecute(Sender: TObject);
 var
   SL           : TStringList;
   LSubscriber  : ISubscriber;
+  LEndPoint    : string;
+  LName        : string;
 begin
   SL := TStringList.Create;
   try
     GetIPAddresses(SL);
     if SL.Count > 0 then
     begin
+      LEndPoint := Format('tcp://%s:%s', [SL[0], IntToStr(LOGVIEWER_ZMQ_PORT)]);
+      LName     := Application.ExeName;
       LSubscriber := TZMQSubscriber.Create(
         FZeroMQReceiver,
         FZeroMQ,
-        Format('tcp://%s:%s', [SL[0], IntToStr(LOGVIEWER_ZMQ_PORT)]),
+        LEndPoint,
         GetCurrentProcessId,
-        '',
-        Application.ExeName,
+        LEndPoint,
+        LName,
         FZeroMQReceiver.Enabled
       );
       Logger.Channels.Clear;
@@ -281,19 +262,23 @@ procedure TfrmDashboard.actAddZMQNodeLocalHostExecute(Sender: TObject);
 var
   SL          : TStringList;
   LSubscriber : ISubscriber;
+  LEndPoint   : string;
+  LName       : string;
 begin
   SL := TStringList.Create;
   try
     GetIPAddresses(SL);
     if SL.Count > 0 then
     begin
+      LEndPoint := Format('tcp://%s:%s', [SL[0], '5555']);
+      LName     := 'localhost';
       LSubscriber := TZMQSubscriber.Create(
         FZeroMQReceiver,
         FZeroMQ,
-        Format('tcp://%s:%s', [SL[0], '5555']),
+        LEndPoint,
         0,
-        '',
-        'localhost source',
+        LEndPoint,
+        LName,
         FZeroMQReceiver.Enabled
       );
       FZeroMQReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
@@ -315,26 +300,31 @@ end;
 
 procedure TfrmDashboard.actSubscribeToListExecute(Sender: TObject);
 var
-  LEndPoint   : string;
   I           : Integer;
   LSubscriber : ISubscriber;
+  LStrings    : TStrings;
+  LEndPoint   : string;
+  LName       : string;
 begin
-  for I := 0 to mmoZMQEndPoints.Lines.Count - 1 do
+  FZeroMQReceiver.SubscriberList.Clear;
+  LStrings := lstZeroMQ.Strings;
+  for I := 0 to LStrings.Count - 1 do
   begin
-    LEndPoint := mmoZMQEndPoints.Lines.ValueFromIndex[I];
+    LEndPoint := LStrings.ValueFromIndex[I];
+    LName     := LStrings.Names[I];
     LSubscriber := TZMQSubscriber.Create(
       FZeroMQReceiver,
       FZeroMQ,
       LEndPoint,
       0,
       LEndPoint,
-      LEndPoint,
+      LName,
       FZeroMQReceiver.Enabled
     );
     LSubscriber.Enabled := True;
     FZeroMQReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
   end;
-  FManager.Settings.ZeroMQSettings.Subscriptions.Assign(mmoZMQEndPoints.Lines);
+  FManager.Settings.ZeroMQSettings.Subscriptions.Assign(LStrings);
 end;
 {$ENDREGION}
 
@@ -503,7 +493,7 @@ begin
       if Assigned(DN.Subscriber) then
       begin
         if Column =  0 then
-          CellText := DN.Caption
+          CellText := DN.Subscriber.SourceName
         else if Column =  1 then
           CellText := DN.Subscriber.Key
         else if Column =  2 then
@@ -596,11 +586,6 @@ begin
   end;
 end;
 {$ENDREGION}
-
-procedure TfrmDashboard.edtAddressExit(Sender: TObject);
-begin
-  edtAddress.Hint := GetIP(edtAddress.Text);
-end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
@@ -668,7 +653,7 @@ begin
     FComPortNode.VTNode.CheckState := csCheckedNormal
   else
     FComPortNode.VTNode.CheckState := csUncheckedNormal;
-  FComPortReceiver.Enabled := True;
+  FComPortReceiver.Enabled := False;
 end;
 
 procedure TfrmDashboard.InitializeControls;
@@ -685,7 +670,7 @@ begin
   AssignFormParent(FComPortSettingsForm, tsCOMPort);
   pgcMain.ActivePage := tsWinIPC;
 
-  mmoZMQEndPoints.Lines.Assign(FManager.Settings.ZeroMQSettings.Subscriptions);
+  lstZeroMQ.Strings.Assign(FManager.Settings.ZeroMQSettings.Subscriptions);
 end;
 
 procedure TfrmDashboard.InitializeTreeView;

@@ -31,7 +31,7 @@ object frmMain: TfrmMain
       Left = 0
       Top = 0
       Width = 997
-      Height = 29
+      Height = 25
       OnActiveTabChanged = ctMainActiveTabChanged
       OnButtonCloseTabClick = ctMainButtonCloseTabClick
       OnNeedDragImageControl = ctMainNeedDragImageControl
@@ -71,13 +71,13 @@ object frmMain: TfrmMain
       Options.Display.Tabs.ContentOffsetLeft = 15
       Options.Display.Tabs.ContentOffsetRight = 22
       Options.Display.Tabs.OffsetLeft = 5
-      Options.Display.Tabs.OffsetTop = 6
+      Options.Display.Tabs.OffsetTop = 0
       Options.Display.Tabs.OffsetRight = 5
       Options.Display.Tabs.OffsetBottom = 0
-      Options.Display.Tabs.MinWidth = 120
-      Options.Display.Tabs.MaxWidth = 400
+      Options.Display.Tabs.MinWidth = 150
+      Options.Display.Tabs.MaxWidth = 800
       Options.Display.Tabs.TabWidthFromContent = True
-      Options.Display.Tabs.PinnedWidth = 150
+      Options.Display.Tabs.PinnedWidth = 100
       Options.Display.Tabs.ImageOffsetLeft = 15
       Options.Display.Tabs.TextTrimType = tttNone
       Options.Display.Tabs.Orientation = toTop
@@ -491,7 +491,7 @@ object frmMain: TfrmMain
     Left = 208
     Top = 48
     Bitmap = {
-      494C0101010005002C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000500340010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

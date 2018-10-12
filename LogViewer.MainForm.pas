@@ -280,7 +280,6 @@ begin
   begin
     V := ILogViewer(ATab.Data);
     Manager.DeleteView(V);
-    //V.Form.Close;
   end;
 end;
 
@@ -338,10 +337,10 @@ begin
   ctMain.Tabs.Add;
   ctMain.ActiveTab.Data := Pointer(ALogViewer);
   ctMain.ActiveTab.Caption :=
-    Format('%s (%d %s)', [
+    Format('%s (%s, %d)      . ', [
       ALogViewer.Subscriber.Receiver.ToString,
-      ALogViewer.Subscriber.SourceId,
-      S
+      S,
+      ALogViewer.Subscriber.SourceId
     ]);
   ALogViewer.Form.Show;
 //  UpdateStatusBar;
@@ -356,7 +355,7 @@ end;
 
 procedure TfrmMain.tmrPollTimer(Sender: TObject);
 begin
-  pbrCPU.Position := Round(GetProcessCpuUsagePct(GetCurrentProcessId));
+  pbrCPU.Position   := Round(GetProcessCpuUsagePct(GetCurrentProcessId));
   pnlMemory.Caption := FormatBytes(MemoryUsed);
 end;
 

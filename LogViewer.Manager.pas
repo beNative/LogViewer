@@ -179,7 +179,7 @@ type
 
     procedure UpdateVisibleMessageTypes(
       const AMessageType : TLogMessageType;
-      const Sender       : TObject;
+      const ASender      : TObject;
       const AToggle      : Boolean = True
     );
 
@@ -885,7 +885,7 @@ begin
 end;
 
 procedure TdmManager.UpdateVisibleMessageTypes(
-  const AMessageType: TLogMessageType; const Sender: TObject;
+  const AMessageType: TLogMessageType; const ASender: TObject;
   const AToggle: Boolean);
 var
   A   : TAction;
@@ -894,7 +894,7 @@ begin
   MLS := Settings.MessageListSettings;
   if Assigned(FActiveView) then
   begin
-    A := Sender as TAction;
+    A := ASender as TAction;
     if AToggle then
       A.Checked := not A.Checked;
     if A.Checked then

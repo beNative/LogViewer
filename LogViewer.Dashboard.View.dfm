@@ -1,8 +1,8 @@
 object frmDashboard: TfrmDashboard
   Left = 0
   Top = 0
-  ClientHeight = 418
-  ClientWidth = 829
+  ClientHeight = 421
+  ClientWidth = 917
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -15,36 +15,38 @@ object frmDashboard: TfrmDashboard
   object pnlLogChannels: TPanel
     Left = 0
     Top = 0
-    Width = 829
-    Height = 418
+    Width = 917
+    Height = 421
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
     object splVertical: TSplitter
-      Left = 309
+      Left = 305
       Top = 0
       Width = 7
-      Height = 418
-      ExplicitLeft = -6
-      ExplicitHeight = 525
+      Height = 421
+      ExplicitLeft = 437
     end
     object pnlRight: TPanel
       AlignWithMargins = True
-      Left = 316
+      Left = 312
       Top = 3
-      Width = 510
-      Height = 415
+      Width = 602
+      Height = 418
       Margins.Left = 0
       Margins.Bottom = 0
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
+      ExplicitLeft = 331
+      ExplicitTop = 2
+      ExplicitWidth = 586
     end
     object pnlLeft: TPanel
       Left = 0
       Top = 0
-      Width = 309
-      Height = 418
+      Width = 305
+      Height = 421
       Margins.Left = 0
       Margins.Top = 0
       Margins.Right = 0
@@ -55,11 +57,17 @@ object frmDashboard: TfrmDashboard
       object pgcMain: TPageControl
         Left = 0
         Top = 0
-        Width = 309
-        Height = 418
-        ActivePage = tsZeroMQ
+        Width = 305
+        Height = 421
+        ActivePage = tsWinIPC
         Align = alClient
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clGrayText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
         MultiLine = True
+        ParentFont = False
         Style = tsFlatButtons
         TabOrder = 0
         object tsWinIPC: TTabSheet
@@ -69,10 +77,34 @@ object frmDashboard: TfrmDashboard
           Margins.Bottom = 0
           Caption = 'WinIPC'
           ImageIndex = 28
+          ExplicitWidth = 301
+          object lbl1: TLabel
+            AlignWithMargins = True
+            Left = 3
+            Top = 28
+            Width = 291
+            Height = 362
+            Align = alClient
+            Caption = 
+              'Messages are exchanged between the source application and LogVie' +
+              'wer using WM_COPY Windows messages. These messages have a specif' +
+              'ic signature and payload that is recognized by LogViewer. '#13#10#13#10'Th' +
+              'e messages are sent from the originating process using the SendM' +
+              'essage method from the Windows API. The SendMessage function cal' +
+              'ls the window procedure for the specified window and does not re' +
+              'turn until the window procedure has processed the message. This ' +
+              'means that each message the application logs is always in sync w' +
+              'ith LogViewer. As a result this method is slower than receivers ' +
+              'based on queueuing.'#13#10#13#10'A new node is automatically created when ' +
+              'a process is detected that sends compatible log messages.'#13#10
+            WordWrap = True
+            ExplicitWidth = 287
+            ExplicitHeight = 221
+          end
           object pnlWinIPCTitle: TPanel
             Left = 0
             Top = 0
-            Width = 301
+            Width = 297
             Height = 25
             Align = alTop
             BevelOuter = bvNone
@@ -85,19 +117,52 @@ object frmDashboard: TfrmDashboard
             ParentBackground = False
             ParentFont = False
             TabOrder = 0
+            ExplicitWidth = 301
           end
         end
         object tsWinODS: TTabSheet
           Caption = 'WinODS'
           ImageIndex = 28
+          ExplicitWidth = 301
+          object lbl2: TLabel
+            AlignWithMargins = True
+            Left = 3
+            Top = 28
+            Width = 291
+            Height = 362
+            Align = alClient
+            Caption = 
+              'This receiver captures messages from any local applicatiion that' +
+              ' uses the OutputDebugString routine from the native Windows API ' +
+              'to emit logging information. The native version of OutputDebugSt' +
+              'ring uses ASCII text messages.'#13#10#13#10'The performance impact by usin' +
+              'g OutputDebugString in your application is generally quite low w' +
+              'hen no one is listening to its output. However, having a listene' +
+              'r running in the background like LogViewer can make it more than' +
+              ' 10 times slower, and even much more in a mutithreaded environme' +
+              'nt. The reason is that any listener needs to hook the report eve' +
+              'nt, and the handling of the event is done within the scope of th' +
+              'e OutputDebugString call. Moreover, if several threads call Outp' +
+              'utDebugString concurrently, they will be synchronized. '#13#10#13#10'A new' +
+              ' node is automatically created when a new process is detected th' +
+              'at sends these messages.'#13#10
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clGrayText
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = []
+            ParentFont = False
+            WordWrap = True
+            ExplicitHeight = 247
+          end
           object pnlWinODSTitle: TPanel
             Left = 0
             Top = 0
-            Width = 301
+            Width = 297
             Height = 25
             Align = alTop
             BevelOuter = bvNone
-            Caption = 'Windows OuputDebugString '
+            Caption = 'Windows API OuputDebugString '
             Font.Charset = ANSI_CHARSET
             Font.Color = clGray
             Font.Height = -16
@@ -106,100 +171,51 @@ object frmDashboard: TfrmDashboard
             ParentBackground = False
             ParentFont = False
             TabOrder = 0
+            ExplicitWidth = 301
           end
         end
         object tsZeroMQ: TTabSheet
           Caption = 'ZeroMQ'
           ImageIndex = 6
+          ExplicitWidth = 301
           DesignSize = (
-            301
-            387)
-          object edtAddress: TLabeledEdit
-            Left = 52
-            Top = 31
-            Width = 121
-            Height = 21
-            Alignment = taCenter
-            EditLabel.Width = 43
-            EditLabel.Height = 13
-            EditLabel.Caption = 'Address:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            LabelPosition = lpLeft
-            ParentFont = False
-            TabOrder = 0
-            OnExit = edtAddressExit
-          end
-          object edtPort: TLabeledEdit
-            Left = 52
-            Top = 58
-            Width = 121
-            Height = 21
-            Alignment = taCenter
-            EditLabel.Width = 24
-            EditLabel.Height = 13
-            EditLabel.Caption = 'Port:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            LabelPosition = lpLeft
-            LabelSpacing = 20
-            ParentFont = False
-            TabOrder = 1
-          end
-          object btnAddZeroMQNode: TButton
-            Left = 179
-            Top = 31
-            Width = 119
-            Height = 48
-            Action = actAddZeroMQNode
-            TabOrder = 2
-          end
+            297
+            390)
           object btnAddZMQNodeLocalHost: TButton
-            Left = 52
-            Top = 85
-            Width = 246
+            Left = 3
+            Top = 31
+            Width = 291
             Height = 25
             Action = actAddZMQNodeLocalHost
+            Anchors = [akLeft, akTop, akRight]
             Caption = 'Subscribe to default localhost socket'
-            TabOrder = 3
+            TabOrder = 0
+            ExplicitWidth = 295
           end
           object btnAddZMQNodeForLogViewer: TButton
-            Left = 52
-            Top = 113
-            Width = 246
+            Left = 3
+            Top = 57
+            Width = 291
             Height = 25
             Action = actAddZMQNodeForLogViewer
-            TabOrder = 4
-          end
-          object mmoZMQEndPoints: TMemo
-            Left = 52
-            Top = 172
-            Width = 246
-            Height = 215
-            Anchors = [akLeft, akTop, akRight, akBottom]
-            BevelInner = bvNone
-            BevelKind = bkFlat
-            BorderStyle = bsNone
-            TabOrder = 5
+            Anchors = [akLeft, akTop, akRight]
+            TabOrder = 1
+            ExplicitWidth = 295
           end
           object btnSubscribeToList: TButton
-            Left = 52
-            Top = 141
-            Width = 246
+            Left = 3
+            Top = 365
+            Width = 291
             Height = 25
             Action = actSubscribeToList
-            TabOrder = 6
+            Anchors = [akLeft, akRight, akBottom]
+            TabOrder = 2
+            ExplicitWidth = 295
           end
           object pnlZeroMQTitle: TPanel
             Left = 0
             Top = 0
-            Width = 301
+            Width = 297
             Height = 25
             Align = alTop
             BevelOuter = bvNone
@@ -211,16 +227,39 @@ object frmDashboard: TfrmDashboard
             Font.Style = []
             ParentBackground = False
             ParentFont = False
-            TabOrder = 7
+            TabOrder = 3
+            ExplicitWidth = 301
+          end
+          object lstZeroMQ: TValueListEditor
+            Left = 3
+            Top = 85
+            Width = 291
+            Height = 274
+            Anchors = [akLeft, akTop, akRight, akBottom]
+            DisplayOptions = [doColumnTitles, doAutoColResize]
+            DrawingStyle = gdsClassic
+            KeyOptions = [keyEdit, keyAdd, keyDelete, keyUnique]
+            Options = [goVertLine, goRangeSelect, goDrawFocusSelected, goColSizing, goEditing, goAlwaysShowEditor, goThumbTracking]
+            TabOrder = 4
+            TitleCaptions.Strings = (
+              'Name'
+              'Endpoint')
+            ColWidths = (
+              142
+              143)
+            RowHeights = (
+              18
+              18)
           end
         end
         object tsCOMPort: TTabSheet
           Caption = 'COMPort'
           ImageIndex = 24
+          ExplicitWidth = 301
           object pnlCOMPortTitle: TPanel
             Left = 0
             Top = 0
-            Width = 301
+            Width = 297
             Height = 25
             Align = alTop
             BevelOuter = bvNone
@@ -233,18 +272,15 @@ object frmDashboard: TfrmDashboard
             ParentBackground = False
             ParentFont = False
             TabOrder = 0
+            ExplicitWidth = 301
           end
         end
       end
     end
   end
   object aclMain: TActionList
-    Left = 288
-    Top = 112
-    object actAddZeroMQNode: TAction
-      Caption = 'Add ZeroMQ node'
-      OnExecute = actAddZeroMQNodeExecute
-    end
+    Left = 328
+    Top = 160
     object actAddZMQNodeLocalHost: TAction
       Caption = 'Add default node for localhost'
       OnExecute = actAddZMQNodeLocalHostExecute
@@ -271,7 +307,7 @@ object frmDashboard: TfrmDashboard
     Left = 328
     Top = 112
     Bitmap = {
-      494C0101030005004C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010103000500500010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000C0D0C4F777C7AF01D1E1D770000000000000005151515660808
@@ -411,8 +447,8 @@ object frmDashboard: TfrmDashboard
       000000000000}
   end
   object ppmMain: TPopupMenu
-    Left = 408
-    Top = 352
+    Left = 328
+    Top = 224
     object mniCloseSsubscriber: TMenuItem
       Action = actCloseSubscriber
     end

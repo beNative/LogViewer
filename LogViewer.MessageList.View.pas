@@ -1545,7 +1545,7 @@ begin
       UpdateColorDisplay(ALogNode);
     lmtComponent:
       UpdateComponentDisplay(ALogNode);
-    lmtBitmap:
+    lmtBitmap, lmtScreenShot:
       UpdateBitmapDisplay(ALogNode);
     lmtMemory:
     begin
