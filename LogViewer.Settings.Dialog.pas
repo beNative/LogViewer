@@ -84,13 +84,11 @@ type
       TextType     : TVSTTextType;
       var CellText : string
     );
-
     procedure FConfigTreeFocusChanged(
       Sender : TBaseVirtualTree;
       Node   : PVirtualNode;
       Column : TColumnIndex
     );
-
     procedure FConfigTreeFreeNode(
       Sender: TBaseVirtualTree;
       Node: PVirtualNode

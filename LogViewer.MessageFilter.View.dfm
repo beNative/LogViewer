@@ -22,9 +22,5 @@ object frmMessageFilter: TfrmMessageFilter
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitLeft = 144
-    ExplicitTop = 208
-    ExplicitWidth = 185
-    ExplicitHeight = 41
   end
 end

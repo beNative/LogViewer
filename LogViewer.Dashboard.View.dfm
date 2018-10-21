@@ -38,9 +38,6 @@ object frmDashboard: TfrmDashboard
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
-      ExplicitLeft = 331
-      ExplicitTop = 2
-      ExplicitWidth = 586
     end
     object pnlLeft: TPanel
       Left = 0
@@ -59,7 +56,7 @@ object frmDashboard: TfrmDashboard
         Top = 0
         Width = 305
         Height = 421
-        ActivePage = tsWinIPC
+        ActivePage = tsZeroMQ
         Align = alClient
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clGrayText
@@ -77,7 +74,6 @@ object frmDashboard: TfrmDashboard
           Margins.Bottom = 0
           Caption = 'WinIPC'
           ImageIndex = 28
-          ExplicitWidth = 301
           object lbl1: TLabel
             AlignWithMargins = True
             Left = 3
@@ -117,13 +113,11 @@ object frmDashboard: TfrmDashboard
             ParentBackground = False
             ParentFont = False
             TabOrder = 0
-            ExplicitWidth = 301
           end
         end
         object tsWinODS: TTabSheet
           Caption = 'WinODS'
           ImageIndex = 28
-          ExplicitWidth = 301
           object lbl2: TLabel
             AlignWithMargins = True
             Left = 3
@@ -171,13 +165,11 @@ object frmDashboard: TfrmDashboard
             ParentBackground = False
             ParentFont = False
             TabOrder = 0
-            ExplicitWidth = 301
           end
         end
         object tsZeroMQ: TTabSheet
           Caption = 'ZeroMQ'
           ImageIndex = 6
-          ExplicitWidth = 301
           DesignSize = (
             297
             390)
@@ -190,7 +182,6 @@ object frmDashboard: TfrmDashboard
             Anchors = [akLeft, akTop, akRight]
             Caption = 'Subscribe to default localhost socket'
             TabOrder = 0
-            ExplicitWidth = 295
           end
           object btnAddZMQNodeForLogViewer: TButton
             Left = 3
@@ -200,7 +191,6 @@ object frmDashboard: TfrmDashboard
             Action = actAddZMQNodeForLogViewer
             Anchors = [akLeft, akTop, akRight]
             TabOrder = 1
-            ExplicitWidth = 295
           end
           object btnSubscribeToList: TButton
             Left = 3
@@ -210,7 +200,6 @@ object frmDashboard: TfrmDashboard
             Action = actSubscribeToList
             Anchors = [akLeft, akRight, akBottom]
             TabOrder = 2
-            ExplicitWidth = 295
           end
           object pnlZeroMQTitle: TPanel
             Left = 0
@@ -228,7 +217,6 @@ object frmDashboard: TfrmDashboard
             ParentBackground = False
             ParentFont = False
             TabOrder = 3
-            ExplicitWidth = 301
           end
           object lstZeroMQ: TValueListEditor
             Left = 3
@@ -238,8 +226,14 @@ object frmDashboard: TfrmDashboard
             Anchors = [akLeft, akTop, akRight, akBottom]
             DisplayOptions = [doColumnTitles, doAutoColResize]
             DrawingStyle = gdsClassic
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clBlack
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = []
             KeyOptions = [keyEdit, keyAdd, keyDelete, keyUnique]
             Options = [goVertLine, goRangeSelect, goDrawFocusSelected, goColSizing, goEditing, goAlwaysShowEditor, goThumbTracking]
+            ParentFont = False
             TabOrder = 4
             TitleCaptions.Strings = (
               'Name'
@@ -255,7 +249,6 @@ object frmDashboard: TfrmDashboard
         object tsCOMPort: TTabSheet
           Caption = 'COMPort'
           ImageIndex = 24
-          ExplicitWidth = 301
           object pnlCOMPortTitle: TPanel
             Left = 0
             Top = 0
@@ -272,7 +265,6 @@ object frmDashboard: TfrmDashboard
             ParentBackground = False
             ParentFont = False
             TabOrder = 0
-            ExplicitWidth = 301
           end
         end
       end
@@ -307,7 +299,7 @@ object frmDashboard: TfrmDashboard
     Left = 328
     Top = 112
     Bitmap = {
-      494C010103000500500010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010103000500540010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000C0D0C4F777C7AF01D1E1D770000000000000005151515660808

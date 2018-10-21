@@ -35,8 +35,8 @@ type
   IChannelReceiver = interface;
 
   TReceiveMessageEvent = procedure(
-    Sender    : TObject;
-    AStream   : TStream
+    Sender  : TObject;
+    AStream : TStream
   ) of object;
 
   TLogViewerEvent = procedure(

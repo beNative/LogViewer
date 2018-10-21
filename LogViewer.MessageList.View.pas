@@ -105,6 +105,8 @@ type
     );
     procedure chkAutoFilterClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure pnlFilterClick(Sender: TObject);
+    procedure edtMessageFilterDblClick(Sender: TObject);
 
   private class var
     FCounter : Integer;
@@ -254,6 +256,8 @@ type
     procedure Clear;
     procedure AutoFitColumns;
 
+    procedure ShowFilterTree;
+
     procedure ApplySettings;
 
     procedure ProcessMessage(AStream: TStream);
@@ -342,7 +346,7 @@ uses
 
   DDuce.ObjectInspector.zObjectInspector, DDuce.DynamicRecord,
 
-  LogViewer.Factories, LogViewer.Resources;
+  LogViewer.Factories, LogViewer.Resources, LogViewer.MessageFilter.View;
 
 {$R *.dfm}
 
@@ -604,6 +608,11 @@ begin
 
   if Settings.AutoFilterMessages then
     UpdateLogTreeView;
+end;
+
+procedure TfrmMessageList.edtMessageFilterDblClick(Sender: TObject);
+begin
+  ShowFilterTree;
 end;
 
 procedure TfrmMessageList.edtMessageFilterKeyDown(Sender: TObject;
@@ -1418,6 +1427,11 @@ begin
   end;
 end;
 
+procedure TfrmMessageList.pnlFilterClick(Sender: TObject);
+begin
+  ShowFilterTree;
+end;
+
 procedure TfrmMessageList.SelectAll;
 begin
   FLogTreeView.SelectAll(False);
@@ -1428,6 +1442,16 @@ begin
   if edtMessageFilter.CanFocus then
     edtMessageFilter.SetFocus;
 end;
+
+procedure TfrmMessageList.ShowFilterTree;
+var
+  LFilterTree: TfrmMessageFilter;
+begin
+  LFilterTree := TfrmMessageFilter.Create(Self, imlMessageTypes);
+  LFilterTree.ShowModal;
+
+end;
+
 {$ENDREGION}
 
 {$REGION 'Display updating'}
@@ -1579,8 +1603,8 @@ begin
   pgcMessageDetails.ActivePage := tsTextViewer;
   FEditorView.Text := ALogNode.Value;
   S := Trim(ALogNode.ValueType);
-//  if S <> '' then
-//   FEditorView.HighlighterName := S;
+  if S <> '' then
+   FEditorView.HighlighterName := S;
 end;
 
 procedure TfrmMessageList.UpdateTextStreamDisplay(ALogNode: TLogNode);

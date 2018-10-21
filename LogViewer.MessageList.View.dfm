@@ -45,7 +45,6 @@ object frmMessageList: TfrmMessageList
     Constraints.MinWidth = 100
     ParentBackground = False
     TabOrder = 0
-    ExplicitLeft = 683
     object pnlMessageContent: TPanel
       Left = 0
       Top = 0
@@ -307,7 +306,6 @@ object frmMessageList: TfrmMessageList
     Color = clWhite
     ParentBackground = False
     TabOrder = 2
-    ExplicitWidth = 358
     object pnlFilter: TPanel
       Left = 0
       Top = 0
@@ -317,7 +315,7 @@ object frmMessageList: TfrmMessageList
       BevelOuter = bvNone
       ParentBackground = False
       TabOrder = 0
-      ExplicitWidth = 358
+      OnClick = pnlFilterClick
       DesignSize = (
         423
         25)
@@ -335,6 +333,7 @@ object frmMessageList: TfrmMessageList
         LabelPosition = lpLeft
         TabOrder = 0
         OnChange = edtMessageFilterChange
+        OnDblClick = edtMessageFilterDblClick
         OnKeyDown = edtMessageFilterKeyDown
         OnKeyUp = edtMessageFilterKeyUp
       end
@@ -367,7 +366,7 @@ object frmMessageList: TfrmMessageList
     Left = 607
     Top = 150
     Bitmap = {
-      494C010116001900480010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010116001900500010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

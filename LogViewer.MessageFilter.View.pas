@@ -16,6 +16,8 @@
 
 unit LogViewer.MessageFilter.View;
 
+{ User interface for message filter setup. }
+
 interface
 
 uses
@@ -25,19 +27,212 @@ uses
 
   VirtualTrees,
 
-  LogViewer.MessageFilter.Node;
+  DDuce.Logger.Interfaces,
+  DDuce.Components.VirtualTrees.Node,
+
+  LogViewer.MessageFilter.Data;
+
+type
+  TFilterNode = TVTNode<TFilterData>;
 
 type
   TfrmMessageFilter = class(TForm)
     pnlMessageFilter : TPanel;
   private
+    FTree  : TVirtualStringTree;
+    FImageList : TImageList;
+
+  protected
+    procedure BuildTree;
+
+    procedure FTreeGetText(
+      Sender       : TBaseVirtualTree;
+      Node         : PVirtualNode;
+      Column       : TColumnIndex;
+      TextType     : TVSTTextType;
+      var CellText : string
+    );
+    procedure FTreeGetImageIndex(
+      Sender         : TBaseVirtualTree;
+      Node           : PVirtualNode;
+      Kind           : TVTImageKind;
+      Column         : TColumnIndex;
+      var Ghosted    : Boolean;
+      var ImageIndex : TImageIndex
+    );
+    procedure FTreeFocusChanged(
+      Sender : TBaseVirtualTree;
+      Node   : PVirtualNode;
+      Column : TColumnIndex
+    );
+    procedure FTreeFreeNode(
+      Sender: TBaseVirtualTree;
+      Node: PVirtualNode
+    );
 
   public
+    constructor Create(
+      AOwner     : TComponent;
+      AImageList : TImageList
+    )
+    ; reintroduce; virtual;
+    procedure AfterConstruction; override;
+    procedure BeforeDestruction; override;
+
 
   end;
 
 implementation
 
 {$R *.dfm}
+
+uses
+  Spring,
+
+  DDuce.Factories.VirtualTrees;
+
+{$REGION 'construction and destruction'}
+procedure TfrmMessageFilter.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  FTree := TVirtualStringTreeFactory.CreateTree(Self, pnlMessageFilter);
+  FTree.OnGetText       := FTreeGetText;
+  FTree.OnGetImageIndex := FTreeGetImageIndex;
+  FTree.OnFreeNode      := FTreeFreeNode;
+  FTree.OnFocusChanged  := FTreeFocusChanged;
+
+  FTree.Header.Options := FTree.Header.Options - [hoVisible];
+  FTree.TreeOptions.PaintOptions :=
+    FTree.TreeOptions.PaintOptions + [toShowTreeLines];
+  FTree.TreeOptions.SelectionOptions :=
+    FTree.TreeOptions.SelectionOptions + [toMultiSelect];
+  FTree.Margins.Right := 0;
+  FTree.Images := FImageList;
+  FTree.StateImages := FImageList;
+  BuildTree;
+end;
+
+procedure TfrmMessageFilter.BeforeDestruction;
+begin
+  FTree.Free;
+  inherited BeforeDestruction;
+end;
+{$ENDREGION}
+
+{$REGION 'event handlers'}
+procedure TfrmMessageFilter.FTreeFocusChanged(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; Column: TColumnIndex);
+begin
+//
+end;
+
+procedure TfrmMessageFilter.FTreeFreeNode(Sender: TBaseVirtualTree;
+  Node: PVirtualNode);
+var
+  FN : TFilterNode;
+begin
+  FN := Sender.GetNodeData<TFilterNode>(Node);
+  FN.Free;
+end;
+
+procedure TfrmMessageFilter.FTreeGetImageIndex(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
+  var Ghosted: Boolean; var ImageIndex: TImageIndex);
+var
+  FN : TFilterNode;
+begin
+  if Kind in [ikNormal, ikSelected] then
+  begin
+    FN := Sender.GetNodeData<TFilterNode>(Node);
+    if Assigned(FN) and Assigned(FN.Data) then
+      ImageIndex := FN.ImageIndex;
+  end;
+end;
+
+procedure TfrmMessageFilter.FTreeGetText(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
+  var CellText: string);
+var
+  FN : TFilterNode;
+begin
+  FN := Sender.GetNodeData<TFilterNode>(Node);
+  if Assigned(FN) and Assigned(FN.Data) then
+    CellText := FN.Data.Caption;
+end;
+{$ENDREGION}
+
+{$REGION 'protected methods'}
+procedure TfrmMessageFilter.BuildTree;
+var
+  LNode : TFilterNode;
+
+  function AddNode(
+    ACaption     : string;
+    AImageIndex  : Integer = -1;
+    AMessageType : TLogMessageType = lmtNone
+  ): TFilterNode;
+  begin
+    if Assigned(LNode) then
+    begin
+      Result := LNode.Add(TFilterData.Create(ACaption, AMessageType));
+      Result.ImageIndex := AImageIndex;
+      Result.CheckType := ctCheckBox;
+    end
+    else
+    begin
+      Result := TFilterNode.Create(FTree, TFilterData.Create(ACaption));
+      Result.ImageIndex := AImageIndex;
+      Result.CheckType := ctCheckBox;
+    end;
+  end;
+
+begin
+  LNode := nil;
+  LNode := AddNode('Notification messages');
+  AddNode('Info', 0, lmtInfo);
+  AddNode('Warning', 2, lmtWarning);
+  AddNode('Error', 1, lmtError);
+
+  LNode := nil;
+  LNode := AddNode('Value messages');
+  AddNode('Value', 19, lmtValue);
+  AddNode('Strings', 8, lmtStrings);
+  AddNode('Components', 10, lmtComponent);
+  AddNode('Color', 22, lmtColor);
+  AddNode('AlphaColor', 22, lmtAlphaColor);
+  AddNode('Persistent', 16, lmtPersistent);
+  AddNode('Interface', 17, lmtInterface);
+  AddNode('Object', 18, lmtObject);
+  AddNode('DataSet', 20, lmtDataSet);
+  AddNode('Action', 21, lmtAction);
+  AddNode('Bitmap', 12, lmtBitmap);
+  AddNode('Screenshot', 12, lmtScreenshot);
+  AddNode('Exception', 11, lmtException);
+
+  LNode := nil;
+  LNode := AddNode('Text messages', 24);
+  AddNode('SQL', 0, lmtText);
+  AddNode('XML', 0, lmtText);
+  AddNode('INI', 0, lmtText);
+  AddNode('JSON', 0, lmtText);
+
+  LNode := nil;
+  LNode := AddNode('Trace messages');
+  AddNode('Checkpoint', 7, lmtCheckpoint);
+  AddNode('Counter', 23, lmtCounter);
+  LNode := AddNode('Track method', 9);
+  AddNode('Enter', 4, lmtEnterMethod);
+  AddNode('Leave', 5, lmtLeaveMethod);
+  FTree.FullExpand;
+end;
+
+constructor TfrmMessageFilter.Create(AOwner: TComponent;
+  AImageList: TImageList);
+begin
+  inherited Create(AOwner);
+  FImageList := AImageList;
+end;
+
+{$ENDREGION}
 
 end.
