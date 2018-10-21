@@ -34,7 +34,7 @@ a dedicated logviewer.
 - Up to 255 logging levels
 
 ## Overview
-A mindmap with an overview of the application: [LogViewer.xmind](https://github.com/beNative/LogViewer/blob/master/Documents/LogViewer.xmind)
+A mindmap with a technical overview of the application: [LogViewer.xmind](https://github.com/beNative/LogViewer/blob/master/Documents/LogViewer.xmind)
 
 ## Libraries used
 The Object Pascal (Delphi) sources depend on the following open source libraries and components:
