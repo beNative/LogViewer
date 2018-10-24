@@ -21,7 +21,7 @@ The DDuce demo application demonstrates the currently supported message types.
 
 ## Features currently supported
 - Info/Warning and Error messages
-- Method tracking
+- Method tracking with stack display showing execution times
 - Screenshot capture
 - Conditional logging
 - Checkpoints
