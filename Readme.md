@@ -13,6 +13,8 @@ a dedicated logviewer.
 The [DDuce](http://github.com/beNative/dduce) library provides the Logger module to add logging to your application (currently only Delphi support, but FPC-Lazarus support will be added soon).
 The DDuce demo application demonstrates the currently supported message types.
 
+![Logger demo](https://github.com/beNative/LogViewer/blob/master/Wiki/DDuce Logger24-10-2018 22-12-44.png)
+
 ## General layout
 - the main log treeview
 - watches with history 
