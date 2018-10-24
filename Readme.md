@@ -4,21 +4,24 @@ LogViewer is a general purpose message viewer for log messages with support for 
 
 * Windows ``OutputDebugString`` API
 * Windows IPC (using ``WM_COPY`` messages)
-* [ZeroMQ](https://github.com/zeromq/libzmq) (`PUB`/`SUB` socket) for logging over the network
+* [ZeroMQ](https://github.com/zeromq/libzmq) (`PUB`/`SUB` socket) for logging over the network. It demonstrates the brilliant performance of ZMQ sockets.
 * Serial port
 
 Each of these receivers support multiple subscribers for which messages can be displayed in
 a dedicated logviewer.
 
+The [DDuce](http://github.com/beNative/dduce) library provides the Logger module to add logging to your application (currently only Delphi support, but FPC-Lazarus support will be added soon).
+The DDuce demo application demonstrates the currently supported message types.
+
 ## General layout
 - the main log treeview
-- watches with history
+- watches with history 
 - method callstack level display
 - message details
 
 ## Features currently supported
 - Info/Warning and Error messages
-- Method tracking
+- Method tracking with stack display showing execution times
 - Screenshot capture
 - Conditional logging
 - Checkpoints
