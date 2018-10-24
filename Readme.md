@@ -10,6 +10,9 @@ LogViewer is a general purpose message viewer for log messages with support for 
 Each of these receivers support multiple subscribers for which messages can be displayed in
 a dedicated logviewer.
 
+The [DDuce](http://github.com/beNative/dduce) library provides the Logger module to add logging to your application (currently only Delphi support, but FPC-Lazarus support will be added soon).
+The DDuce demo application demonstrates the currently supported message types.
+
 ## General layout
 - the main log treeview
 - watches with history
