@@ -47,34 +47,34 @@ type
       Action     : TCollectionChangedAction
     );
     function FCDLevelCustomDraw(
-      Sender          : TObject;
-      ColumnDefinition: TColumnDefinition;
-      Item            : TObject;
-      TargetCanvas    : TCanvas;
-      CellRect        : TRect;
-      ImageList       : TCustomImageList;
-      DrawMode        : TDrawMode;
-      Selected        : Boolean
+      Sender           : TObject;
+      ColumnDefinition : TColumnDefinition;
+      Item             : TObject;
+      TargetCanvas     : TCanvas;
+      CellRect         : TRect;
+      ImageList        : TCustomImageList;
+      DrawMode         : TDrawMode;
+      Selected         : Boolean
     ): Boolean;
     function FCDTitleCustomDraw(
-      Sender          : TObject;
-      ColumnDefinition: TColumnDefinition;
-      Item            : TObject;
-      TargetCanvas    : TCanvas;
-      CellRect        : TRect;
-      ImageList       : TCustomImageList;
-      DrawMode        : TDrawMode;
-      Selected        : Boolean
+      Sender           : TObject;
+      ColumnDefinition : TColumnDefinition;
+      Item             : TObject;
+      TargetCanvas     : TCanvas;
+      CellRect         : TRect;
+      ImageList        : TCustomImageList;
+      DrawMode         : TDrawMode;
+      Selected         : Boolean
     ): Boolean;
     function FCDDurationCustomDraw(
-      Sender          : TObject;
-      ColumnDefinition: TColumnDefinition;
-      Item            : TObject;
-      TargetCanvas    : TCanvas;
-      CellRect        : TRect;
-      ImageList       : TCustomImageList;
-      DrawMode        : TDrawMode;
-      Selected        : Boolean
+      Sender                 : TObject;
+      ColumnDefinition : TColumnDefinition;
+      Item             : TObject;
+      TargetCanvas     : TCanvas;
+      CellRect         : TRect;
+      ImageList        : TCustomImageList;
+      DrawMode         : TDrawMode;
+      Selected         : Boolean
     ): Boolean;
 
   public
@@ -116,12 +116,13 @@ begin
   FVSTCallStack := TVirtualStringTreeFactory.CreateList(Self, Self);
   FVSTCallStack.AlignWithMargins := False;
   CDS                  := TFactories.CreateColumnDefinitions;
-  CD                   := CDS.Add('Level');
+  CD                   := CDS.Add('');
   CD.ValuePropertyName := 'Level';
   CD.HintPropertyName  := CD.ValuePropertyName;
   CD.OnCustomDraw      := FCDLevelCustomDraw;
+  CD.Width             := 10;
   CD.AutoSize          := True;
-  CD                   := CDS.Add('Title');
+  CD                   := CDS.Add('Name');
   CD.ValuePropertyName := 'Title';
   CD.HintPropertyName  := CD.ValuePropertyName;
   CD.OnCustomDraw      := FCDTitleCustomDraw;
@@ -130,14 +131,17 @@ begin
   CD.ValuePropertyName := 'Duration';
   CD.HintPropertyName  := CD.ValuePropertyName;
   CD.OnCustomDraw      := FCDDurationCustomDraw;
-  CD.AutoSize          := True;
+  CD.Width             := 60;
+  CD.MinWidth          := 60;
+  CD.AutoSize          := False;
+  FVSTCallStack.Header.AutoSizeIndex := 1;
   FTVPCallStack := TFactories.CreateTreeViewPresenter(
     Self,
     FVSTCallStack,
     FCallStack as IObjectList,
     CDS
   );
-  FTVPCallStack.ShowHeader := False;
+  FTVPCallStack.ShowHeader := True;
 end;
 
 procedure TfrmCallStackView.BeforeDestruction;

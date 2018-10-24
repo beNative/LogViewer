@@ -45,34 +45,18 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     TabOrder = 1
     object tsWatches: TTabSheet
       Caption = 'Watches'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 250
     end
     object tsCallstack: TTabSheet
       Caption = 'Callstack'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 250
     end
     object tsWinIPC: TTabSheet
       Caption = 'WinIPC'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 250
     end
     object tsWinODS: TTabSheet
       Caption = 'OutputDebugString API'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 250
     end
     object tsComport: TTabSheet
       Caption = 'Serial port'
@@ -81,26 +65,14 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     object tsZeroMQ: TTabSheet
       Caption = 'ZeroMQ'
       ImageIndex = 5
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 250
     end
     object tsDisplayValuesSettings: TTabSheet
       Caption = 'DisplayValuesSettings'
       ImageIndex = 6
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 250
     end
     object tsAdvanced: TTabSheet
       Caption = 'Advanced'
       ImageIndex = 7
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 250
     end
   end
   object pnlBottom: TPanel
@@ -147,8 +119,8 @@ object frmLogViewerSettings: TfrmLogViewerSettings
   end
   object aclMain: TActionList
     Images = imlMain
-    Left = 328
-    Top = 192
+    Left = 568
+    Top = 80
     object actClose: TAction
       Caption = '&Close'
       ImageIndex = 0
@@ -167,10 +139,10 @@ object frmLogViewerSettings: TfrmLogViewerSettings
   end
   object imlMain: TImageList
     ColorDepth = cd32Bit
-    Left = 464
-    Top = 192
+    Left = 568
+    Top = 32
     Bitmap = {
-      494C010103000800200010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010103000800240010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

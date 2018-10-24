@@ -210,7 +210,7 @@ begin
     FMenus.MessageTypesPopupMenu
   );
   CreateToolButton(TB);
-//  CreateToolButton(TB, 'actFilterMessages');
+  CreateToolButton(TB, 'actShowFilterView');
 //  CreateToolButton(TB);
 //  CreateToolButton(TB, 'actSetFocusToFilter');
 //  CreateToolButton(TB);

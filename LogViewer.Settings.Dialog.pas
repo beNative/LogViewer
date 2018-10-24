@@ -30,9 +30,7 @@ uses
 
   DDuce.Editor.Interfaces,
 
-  LogViewer.Settings,
-  LogViewer.Settings.Dialog.ConfigNode,
-
+  LogViewer.Settings, LogViewer.Settings.Dialog.ConfigNode,
   LogViewer.Comport.Settings.View, LogViewer.WinIPC.Settings.View,
   LogViewer.Watches.Settings.View, LogViewer.WinODS.Settings.View,
   LogViewer.ZeroMQ.Settings.View, LogViewer.DisplayValues.Settings.View;

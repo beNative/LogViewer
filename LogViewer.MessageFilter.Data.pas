@@ -73,7 +73,7 @@ constructor TFilterData.Create(const ACaption: string;
 begin
   FMessageType := AMessageType;
   FCaption     := ACaption;
-  FImageIndex := AImageIndex;
+  FImageIndex  := AImageIndex;
 end;
 {$ENDREGION}
 

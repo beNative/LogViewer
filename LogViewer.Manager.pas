@@ -31,7 +31,9 @@ uses
   DDuce.Editor.Interfaces,
 
   LogViewer.Interfaces, LogViewer.Settings, LogViewer.Events,
-  LogViewer.Commands;
+  LogViewer.Commands,
+
+  LogViewer.MessageFilter.View;
 
 type
   TdmManager = class(TDataModule, ILogViewerActions,
@@ -87,6 +89,8 @@ type
     imlMain               : TImageList;
     ppmLogTreeViewer      : TPopupMenu;
     ppmMessageTypes       : TPopupMenu;
+    imlMessageTypes: TImageList;
+    actShowFilterView: TAction;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -132,6 +136,7 @@ type
     procedure actCounterExecute(Sender: TObject);
     procedure actTextExecute(Sender: TObject);
     procedure actScreenshotExecute(Sender: TObject);
+    procedure actShowFilterViewExecute(Sender: TObject);
     {$ENDREGION}
 
   private
@@ -143,6 +148,7 @@ type
     FReceivers      : IList<IChannelReceiver>;
     FEditorManager  : IEditorManager;
     FEditorSettings : IEditorSettings;
+    FFilterView     : TfrmMessageFilter;
 
     function AddMenuItem(
       AParent : TMenuItem;
@@ -282,6 +288,7 @@ begin
   FEditorManager  := TEditorFactories.CreateManager(Self, FEditorSettings);
   BuildMessageTypesPopupMenu;
   BuildLogTreeViewerPopupMenu;
+  FFilterView := TfrmMessageFilter.Create(Self, Settings.MessageListSettings, imlMessageTypes);
 end;
 
 procedure TdmManager.BeforeDestruction;
@@ -301,18 +308,12 @@ end;
 function TdmManager.DeleteView(AView: ILogViewer): Boolean;
 var
   I : Integer;
-  //V : ILogViewer;
   S : ISubscriber;
 begin
   Logger.Track(Self, 'DeleteView');
   if Assigned(AView) then
   begin
     I := FViewList.IndexOf(AView);
-//    if ActiveView = AView then // select a new active view
-//    begin
-//      V := Views[I];
-//      V.Activate;
-//    end;
     if ActiveView = AView then
       FActiveView := nil;
 
@@ -507,6 +508,11 @@ begin
   finally
     F.Free;
   end;
+end;
+
+procedure TdmManager.actShowFilterViewExecute(Sender: TObject);
+begin
+  FFilterView.Show;
 end;
 
 procedure TdmManager.actStartExecute(Sender: TObject);
@@ -821,27 +827,27 @@ var
   MLS : TMessageListSettings;
 begin
   MLS := Settings.MessageListSettings;
-  actBitmap.Checked       := lmtBitmap in MLS.VisibleMessageTypes;
-  actCallStack.Checked    := lmtCallStack in MLS.VisibleMessageTypes;
-  actCheckPoint.Checked   := lmtCheckpoint in MLS.VisibleMessageTypes;
-  actConditional.Checked  := lmtConditional in MLS.VisibleMessageTypes;
-  actInfo.Checked         := lmtInfo in MLS.VisibleMessageTypes;
-  actWarning.Checked      := lmtWarning in MLS.VisibleMessageTypes;
-  actValue.Checked        := lmtValue in MLS.VisibleMessageTypes;
-  actError.Checked        := lmtError in MLS.VisibleMessageTypes;
-  actMethodTraces.Checked := lmtEnterMethod in MLS.VisibleMessageTypes;
-  actException.Checked    := lmtException in MLS.VisibleMessageTypes;
-  actComponent.Checked    := lmtComponent in MLS.VisibleMessageTypes;
-  actObject.Checked       := lmtObject in MLS.VisibleMessageTypes;
-  actPersistent.Checked   := lmtPersistent in MLS.VisibleMessageTypes;
-  actInterface.Checked    := lmtInterface in MLS.VisibleMessageTypes;
-  actHeapInfo.Checked     := lmtHeapInfo in MLS.VisibleMessageTypes;
-  actCustomData.Checked   := lmtCustomData in MLS.VisibleMessageTypes;
-  actStrings.Checked      := lmtStrings in MLS.VisibleMessageTypes;
-  actMemory.Checked       := lmtMemory in MLS.VisibleMessageTypes;
-  actText.Checked         := lmtText in MLS.VisibleMessageTypes;
-  actDataSet.Checked      := lmtDataSet in MLS.VisibleMessageTypes;
-  actAction.Checked       := lmtAction in MLS.VisibleMessageTypes;
+//  actBitmap.Checked       := lmtBitmap in MLS.VisibleMessageTypes;
+//  actCallStack.Checked    := lmtCallStack in MLS.VisibleMessageTypes;
+//  actCheckPoint.Checked   := lmtCheckpoint in MLS.VisibleMessageTypes;
+//  actConditional.Checked  := lmtConditional in MLS.VisibleMessageTypes;
+//  actInfo.Checked         := lmtInfo in MLS.VisibleMessageTypes;
+//  actWarning.Checked      := lmtWarning in MLS.VisibleMessageTypes;
+//  actValue.Checked        := lmtValue in MLS.VisibleMessageTypes;
+//  actError.Checked        := lmtError in MLS.VisibleMessageTypes;
+//  actMethodTraces.Checked := lmtEnterMethod in MLS.VisibleMessageTypes;
+//  actException.Checked    := lmtException in MLS.VisibleMessageTypes;
+//  actComponent.Checked    := lmtComponent in MLS.VisibleMessageTypes;
+//  actObject.Checked       := lmtObject in MLS.VisibleMessageTypes;
+//  actPersistent.Checked   := lmtPersistent in MLS.VisibleMessageTypes;
+//  actInterface.Checked    := lmtInterface in MLS.VisibleMessageTypes;
+//  actHeapInfo.Checked     := lmtHeapInfo in MLS.VisibleMessageTypes;
+//  actCustomData.Checked   := lmtCustomData in MLS.VisibleMessageTypes;
+//  actStrings.Checked      := lmtStrings in MLS.VisibleMessageTypes;
+//  actMemory.Checked       := lmtMemory in MLS.VisibleMessageTypes;
+//  actText.Checked         := lmtText in MLS.VisibleMessageTypes;
+//  actDataSet.Checked      := lmtDataSet in MLS.VisibleMessageTypes;
+//  actAction.Checked       := lmtAction in MLS.VisibleMessageTypes;
   actAutoScrollMessages.Checked
     := FSettings.MessageListSettings.AutoScrollMessages;
   B := Assigned(ActiveView) and Assigned(ActiveView.Subscriber);
@@ -891,18 +897,18 @@ var
   A   : TAction;
   MLS : TMessageListSettings;
 begin
-  MLS := Settings.MessageListSettings;
-  if Assigned(FActiveView) then
-  begin
-    A := ASender as TAction;
-    if AToggle then
-      A.Checked := not A.Checked;
-    if A.Checked then
-      MLS.VisibleMessageTypes := MLS.VisibleMessageTypes + [AMessageType]
-    else
-      MLS.VisibleMessageTypes := MLS.VisibleMessageTypes - [AMessageType];
-    FActiveView.UpdateView;
-  end;
+//  MLS := Settings.MessageListSettings;
+//  if Assigned(FActiveView) then
+//  begin
+//    A := ASender as TAction;
+//    if AToggle then
+//      A.Checked := not A.Checked;
+//    if A.Checked then
+//      MLS.VisibleMessageTypes := MLS.VisibleMessageTypes + [AMessageType]
+//    else
+//      MLS.VisibleMessageTypes := MLS.VisibleMessageTypes - [AMessageType];
+//    FActiveView.UpdateView;
+//  end;
 end;
 {$ENDREGION}
 

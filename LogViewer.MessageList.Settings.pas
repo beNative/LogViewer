@@ -52,9 +52,11 @@ type
     FWatchSettings          : TWatchSettings;
     FLeftPanelWidth         : Integer;
     FRightPanelWidth        : Integer;
+    FVisibleValueTypes      : TStringList;
 
   protected
     {$REGION 'property access methods'}
+    function GetVisibleValueTypes: TStrings;
     function GetAutoScrollMessages: Boolean;
     procedure SetAutoScrollMessages(const Value: Boolean);
     function GetOnChanged: IEvent<TNotifyEvent>;
@@ -70,6 +72,8 @@ type
     procedure SetRightPanelWidth(const Value: Integer);
     {$ENDREGION}
 
+    procedure FVisibleValueTypesChange(Sender: TObject);
+
     procedure Changed;
 
   public
@@ -83,6 +87,9 @@ type
 
     property VisibleMessageTypes: TLogMessageTypes
       read GetVisibleMessageTypes write SetVisibleMessageTypes;
+
+    property VisibleValueTypes: TStrings
+      read GetVisibleValueTypes;
 
     property WatchSettings: TWatchSettings
       read FWatchSettings;
@@ -112,6 +119,10 @@ procedure TMessageListSettings.AfterConstruction;
 begin
   inherited AfterConstruction;
   FOnChanged.UseFreeNotification := False;
+  FVisibleValueTypes            := TStringList.Create;
+  FVisibleValueTypes.OnChange   := FVisibleValueTypesChange;
+  FVisibleValueTypes.Sorted     := True;
+  FVisibleValueTypes.Duplicates := dupIgnore;
   FVisibleMessageTypes := ALL_MESSAGES;
   FLeftPanelWidth      := 250;
   FRightPanelWidth     := 250;
@@ -120,6 +131,7 @@ end;
 
 procedure TMessageListSettings.BeforeDestruction;
 begin
+  FVisibleValueTypes.Free;
   FWatchSettings.Free;
   inherited BeforeDestruction;
 end;
@@ -197,6 +209,11 @@ begin
   end;
 end;
 
+function TMessageListSettings.GetVisibleValueTypes: TStrings;
+begin
+  Result := FVisibleValueTypes;
+end;
+
 function TMessageListSettings.GetOnChanged: IEvent<TNotifyEvent>;
 begin
   Result := FOnChanged;
@@ -214,6 +231,13 @@ begin
     FRightPanelWidth := Value;
     Changed;
   end;
+end;
+{$ENDREGION}
+
+{$REGION 'event handlers'}
+procedure TMessageListSettings.FVisibleValueTypesChange(Sender: TObject);
+begin
+  Changed;
 end;
 {$ENDREGION}
 

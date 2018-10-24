@@ -52,9 +52,12 @@ type
     FLogLevel    : Byte;
     FMessageData : TStream; // binary data stream for bitmaps, etc.
     FTimeStamp   : TDateTime;
+    FHighlighter : string; // highlighter to use in text editor
 
   protected
     {$REGION 'property access methods'}
+    function GetHighlighter: string;
+    procedure SetHighlighter(const Value: string);
     function GetLogLevel: Byte;
     procedure SetLogLevel(const Value: Byte);
     function GetMessageData: TStream;
@@ -83,6 +86,9 @@ type
 
     property Id: Int64
       read GetId write SetId;
+
+    property Highlighter: string
+      read GetHighlighter write SetHighlighter;
 
     property Nodes: IList<TLogNode>
       read GetNodes;
@@ -130,6 +136,16 @@ end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
+function TLogNode.GetHighlighter: string;
+begin
+  Result := FHighlighter;
+end;
+
+procedure TLogNode.SetHighlighter(const Value: string);
+begin
+  FHighlighter := Value;
+end;
+
 function TLogNode.GetId: Int64;
 begin
   Result := FId;

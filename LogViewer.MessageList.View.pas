@@ -245,6 +245,7 @@ type
     {$ENDREGION}
 
     procedure FSettingsChanged(Sender: TObject);
+
     procedure EnsureIsActiveViewIfFocused;
 
   protected
@@ -374,7 +375,18 @@ begin
   CreateLogTreeView;
   CreateWatchesView;
   CreateCallStackView;
-  // CreateValueListView;
+    // CreateValueListView;
+
+  if Supports(Subscriber, IWinIPC) or Supports(Subscriber, IZMQ) then
+  begin
+    pnlLeft.Visible         := True;
+    splLeftVertical.Visible := True;
+  end
+  else
+  begin
+    pnlLeft.Visible         := False;
+    splLeftVertical.Visible := False;
+  end;
 
   tsRawData.TabVisible      := False;
   tsMessageView.TabVisible  := False;
@@ -447,6 +459,7 @@ end;
 procedure TfrmMessageList.CreateLogTreeView;
 var
   C : TVirtualTreeColumn;
+  B : Boolean;
 begin
   FLogTreeView := TVirtualStringTreeFactory.CreateTreeList(Self, pnlMessages);
   FLogTreeView.AlignWithMargins := False;
@@ -461,7 +474,8 @@ begin
 
   FLogTreeView.NodeDataSize := SizeOf(TLogNode);
   FLogTreeView.Images       := imlMessageTypes;
-  FLogTreeView.HintMode     := hmHint;
+  FLogTreeView.HintMode     := hmTooltip;
+  FLogTreeView.ShowHint     := True;
 
   FLogTreeView.OnBeforeItemPaint := FLogTreeViewBeforeItemPaint;
   FLogTreeView.OnAfterItemPaint  := FLogTreeViewAfterItemPaint;
@@ -479,9 +493,10 @@ begin
   FLogTreeView.OnGetImageIndex   := FLogTreeViewGetImageIndex;
   FLogTreeView.OnKeyPress        := FLogTreeViewKeyPress;
 
+  B := Supports(Subscriber, IWinIPC) or Supports(Subscriber, IZMQ);
+
   C := FLogTreeView.Header.Columns.Add;
   C.Text     := '';
-  C.Options  := C.Options + [coFixed];
   C.Margin   := 0;
   C.Spacing  := 0;
   C.Width    := 10;
@@ -490,31 +505,34 @@ begin
 
   C := FLogTreeView.Header.Columns.Add;
   C.Text     := '';
-  C.Options  := C.Options + [coFixed];
   C.Width    := 120;
-  C.MinWidth := 120;
+  C.MinWidth := 70;
   C.MaxWidth := 150;
 
   C := FLogTreeView.Header.Columns.Add;
   C.Text     := SName;
   C.Options  := C.Options + [coSmartResize, coAutoSpring];
-  C.Width    := 150;
-  C.MinWidth := 100;
+  if not B then
+    C.Options  := C.Options - [coVisible];
+  C.Width    := 100;
+  C.MinWidth := 60;
   C.MaxWidth := 2000;
 
   C := FLogTreeView.Header.Columns.Add;
   C.Text     := SValue;
-  C.Options  := C.Options + [coAutoSpring];
-  C.Width    := 150;
-  C.MinWidth := 80;
+  C.Options  := C.Options - [coAutoSpring];
+  C.Width    := 100;
+  C.MinWidth := 60;
   C.MaxWidth := 2000;
 
   C := FLogTreeView.Header.Columns.Add;
   C.Text      := SType;
-  C.Options   := C.Options + [coSmartResize, coAutoSpring];
+  C.Options   := C.Options + [coSmartResize{, coAutoSpring}];
+  if not B then
+    C.Options  := C.Options - [coVisible];
   C.Width     := 100;
   C.MinWidth  := 0;
-  C.MaxWidth  := 2000;
+  C.MaxWidth  := 400;
 
   C := FLogTreeView.Header.Columns.Add;
   C.Text     := STimestamp;
@@ -522,8 +540,8 @@ begin
   C.MinWidth := 80;
   C.MaxWidth := 80;
 
-  FLogTreeView.Header.AutoSizeIndex := 3;
-  FLogTreeView.Header.MainColumn    := 1;
+  FLogTreeView.Header.AutoSizeIndex := COLUMN_VALUE; // for hoAutoResize feature
+  FLogTreeView.Header.MainColumn    := COLUMN_MAIN;
 end;
 
 procedure TfrmMessageList.CreateValueListView;
@@ -704,7 +722,6 @@ procedure TfrmMessageList.FLogTreeViewClick(Sender: TObject);
 begin
   FUpdate := True;
   FAutoSizeColumns := False;
-//  AutoFitColumns;
 end;
 
 procedure TfrmMessageList.FLogTreeViewBeforeCellPaint(Sender: TBaseVirtualTree;
@@ -790,8 +807,13 @@ var
   LN: TLogNode;
 begin
   LN := Sender.GetNodeData<TLogNode>(Node);
-  Guard.CheckNotNull(LN, 'ND');
-  //HintText := Reflect.Fields(LN).ToString;
+  if Column = COLUMN_VALUE then
+  begin
+    HintText := LN.Value;
+    //LineBreakStyle := hlbForceMultiLine;
+  end;
+
+  //HintText := Sender.Get
 end;
 
 procedure TfrmMessageList.FLogTreeViewGetHintKind(Sender: TBaseVirtualTree;
@@ -837,7 +859,10 @@ procedure TfrmMessageList.FLogTreeViewGetText(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
   var CellText: string);
 var
-  LN : TLogNode;
+  LN     : TLogNode;
+  S      : string;
+  LDelim : array of string;
+  LTrim  : TArray<string>;
 begin
   LN := Sender.GetNodeData<TLogNode>(Node);
   Guard.CheckNotNull(LN, 'ND');
@@ -888,11 +913,13 @@ begin
   end
   else if Column = COLUMN_VALUE then
   begin
-    if LN.Value.Contains(#13#10)
-      or (LN.Value.Length > MAX_TEXTLENGTH_VALUECOLUMN) then
-      CellText := '...'
-    else
-      CellText := LN.Value;
+    LDelim := [sLineBreak];
+    LTrim := LN.Value.Split(LDelim, 1, TStringSplitOptions.ExcludeEmpty);
+    if Length(LTrim) > 0 then
+      S := LTrim[0];
+    if (S.Length > MAX_TEXTLENGTH_VALUECOLUMN) then
+      S := S.Substring(1, MAX_TEXTLENGTH_VALUECOLUMN);
+    CellText := S;
   end
   else if Column = COLUMN_TIMESTAMP then
   begin
@@ -995,7 +1022,7 @@ begin
           if I > 1 then
           begin
             LN.ValueName := Copy(S, 1, I);
-            LN.ValueType := ExtractText(S, '(', ')');
+            LN.Highlighter := Trim(ExtractText(S, '(', ')'));
           end;
           SL.Delete(0);
         end;
@@ -1447,9 +1474,8 @@ procedure TfrmMessageList.ShowFilterTree;
 var
   LFilterTree: TfrmMessageFilter;
 begin
-  LFilterTree := TfrmMessageFilter.Create(Self, imlMessageTypes);
+  LFilterTree := TfrmMessageFilter.Create(Self, Settings, imlMessageTypes);
   LFilterTree.ShowModal;
-
 end;
 
 {$ENDREGION}
@@ -1481,7 +1507,9 @@ var
   I   : Integer;
   CSD : TCallStackData;
   LN  : TLogNode;
+  LN2 : TLogNode;
   VN  : PVirtualNode;
+  VN2  : PVirtualNode;
 begin
   FCallStack.Clear;
   VN := ALogNode.VTNode;
@@ -1492,6 +1520,11 @@ begin
     CSD := TCallStackData.Create;
     CSD.Title := LN.Text;
     CSD.Level := I;
+    LN2 :=  FLogTreeView.GetNodeData<TLogNode>(LN.VTNode.NextSibling);
+    if Assigned(LN2) then
+    begin
+      CSD.Duration := MilliSecondsBetween(LN2.TimeStamp, LN.TimeStamp);
+    end;
     FCallStack.Add(CSD);
     VN := VN.Parent;
     Dec(I);
@@ -1602,7 +1635,7 @@ begin
   tsDataSet.TabVisible     := False;
   pgcMessageDetails.ActivePage := tsTextViewer;
   FEditorView.Text := ALogNode.Value;
-  S := Trim(ALogNode.ValueType);
+  S := ALogNode.Highlighter;
   if S <> '' then
    FEditorView.HighlighterName := S;
 end;
@@ -1657,6 +1690,8 @@ begin
   FEditorView.Text := ALogNode.Value;
   FEditorView.HighlighterName  := 'INI';
   pgcMessageDetails.ActivePage := tsTextViewer;
+
+//  // test
 //  if ALogNode.Value.Contains('=') then
 //  begin
 //    pgcMessageDetails.ActivePage := tsValueList;

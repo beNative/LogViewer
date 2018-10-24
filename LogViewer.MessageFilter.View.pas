@@ -30,7 +30,7 @@ uses
   DDuce.Logger.Interfaces,
   DDuce.Components.VirtualTrees.Node,
 
-  LogViewer.MessageFilter.Data;
+  LogViewer.MessageList.Settings, LogViewer.MessageFilter.Data;
 
 type
   TFilterNode = TVTNode<TFilterData>;
@@ -39,12 +39,14 @@ type
   TfrmMessageFilter = class(TForm)
     pnlMessageFilter : TPanel;
   private
-    FTree  : TVirtualStringTree;
+    FTree      : TVirtualStringTree;
     FImageList : TImageList;
+    FSettings  : TMessageListSettings;
 
   protected
     procedure BuildTree;
 
+    {$REGION 'event handlers'}
     procedure FTreeGetText(
       Sender       : TBaseVirtualTree;
       Node         : PVirtualNode;
@@ -69,16 +71,23 @@ type
       Sender: TBaseVirtualTree;
       Node: PVirtualNode
     );
+    procedure FTreeChecked(
+      Sender : TBaseVirtualTree;
+      Node   : PVirtualNode
+    );
+
+    procedure FSettingsChanged(Sender: TObject);
+
+    {$ENDREGION}
 
   public
     constructor Create(
       AOwner     : TComponent;
+      ASettings  : TMessageListSettings;
       AImageList : TImageList
-    )
-    ; reintroduce; virtual;
+    ); reintroduce; virtual;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
-
 
   end;
 
@@ -100,16 +109,27 @@ begin
   FTree.OnGetImageIndex := FTreeGetImageIndex;
   FTree.OnFreeNode      := FTreeFreeNode;
   FTree.OnFocusChanged  := FTreeFocusChanged;
+  FTree.OnChecked       := FTreeChecked;
 
   FTree.Header.Options := FTree.Header.Options - [hoVisible];
-  FTree.TreeOptions.PaintOptions :=
-    FTree.TreeOptions.PaintOptions + [toShowTreeLines];
-  FTree.TreeOptions.SelectionOptions :=
-    FTree.TreeOptions.SelectionOptions + [toMultiSelect];
+  FTree.TreeOptions.PaintOptions := FTree.TreeOptions.PaintOptions
+    + [toShowTreeLines];
+  FTree.TreeOptions.SelectionOptions := FTree.TreeOptions.SelectionOptions
+    + [toMultiSelect];
   FTree.Margins.Right := 0;
-  FTree.Images := FImageList;
-  FTree.StateImages := FImageList;
+  FTree.Images        := FImageList;
+  FTree.StateImages   := FImageList;
   BuildTree;
+end;
+
+constructor TfrmMessageFilter.Create(AOwner: TComponent;
+  ASettings: TMessageListSettings; AImageList: TImageList);
+begin
+  inherited Create(AOwner);
+  Guard.CheckNotNull(ASettings, 'ASettings');
+  Guard.CheckNotNull(AImageList, 'AImageList');
+  FSettings  := ASettings;
+  FImageList := AImageList;
 end;
 
 procedure TfrmMessageFilter.BeforeDestruction;
@@ -120,6 +140,25 @@ end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
+procedure TfrmMessageFilter.FSettingsChanged(Sender: TObject);
+begin
+//
+end;
+
+procedure TfrmMessageFilter.FTreeChecked(Sender: TBaseVirtualTree;
+  Node: PVirtualNode);
+var
+  FN : TFilterNode;
+begin
+  FN := Sender.GetNodeData<TFilterNode>(Node);
+  if FN.VNode.CheckState.IsChecked then
+    FSettings.VisibleMessageTypes := FSettings.VisibleMessageTypes +
+      [FN.Data.MessageType]
+  else
+    FSettings.VisibleMessageTypes := FSettings.VisibleMessageTypes -
+      [FN.Data.MessageType]
+end;
+
 procedure TfrmMessageFilter.FTreeFocusChanged(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex);
 begin
@@ -175,15 +214,15 @@ var
     if Assigned(LNode) then
     begin
       Result := LNode.Add(TFilterData.Create(ACaption, AMessageType));
-      Result.ImageIndex := AImageIndex;
-      Result.CheckType := ctCheckBox;
     end
     else
     begin
       Result := TFilterNode.Create(FTree, TFilterData.Create(ACaption));
-      Result.ImageIndex := AImageIndex;
-      Result.CheckType := ctCheckBox;
     end;
+    Result.ImageIndex := AImageIndex;
+    Result.CheckType  := ctCheckBox;
+    if (AMessageType = lmtNone) or (AMessageType in FSettings.VisibleMessageTypes) then
+      Result.CheckState := csCheckedNormal;
   end;
 
 begin
@@ -192,7 +231,6 @@ begin
   AddNode('Info', 0, lmtInfo);
   AddNode('Warning', 2, lmtWarning);
   AddNode('Error', 1, lmtError);
-
   LNode := nil;
   LNode := AddNode('Value messages');
   AddNode('Value', 19, lmtValue);
@@ -225,14 +263,6 @@ begin
   AddNode('Leave', 5, lmtLeaveMethod);
   FTree.FullExpand;
 end;
-
-constructor TfrmMessageFilter.Create(AOwner: TComponent;
-  AImageList: TImageList);
-begin
-  inherited Create(AOwner);
-  FImageList := AImageList;
-end;
-
 {$ENDREGION}
 
 end.
