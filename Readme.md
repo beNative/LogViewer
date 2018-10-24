@@ -15,7 +15,7 @@ The DDuce demo application demonstrates the currently supported message types.
 
 ## General layout
 - the main log treeview
-- watches with history
+- watches with history 
 - method callstack level display
 - message details
 
