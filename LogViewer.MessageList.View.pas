@@ -54,13 +54,10 @@ uses
 
 type
   TfrmMessageList = class(TForm, ILogViewer)
-    {$REGION 'designer controls'}
-    btnFilterMessages : TButton;
-    chkAutoFilter     : TCheckBox;
     dscMain           : TDataSource;
     edtHandleType     : TLabeledEdit;
     edtHeight         : TLabeledEdit;
-    edtMessageFilter  : TLabeledEdit;
+    edtMessageFilter  : TButtonedEdit;
     edtPixelFormat    : TLabeledEdit;
     edtWidth          : TLabeledEdit;
     imgBitmap         : TImage;
@@ -105,8 +102,6 @@ type
     );
     procedure chkAutoFilterClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure pnlFilterClick(Sender: TObject);
-    procedure edtMessageFilterDblClick(Sender: TObject);
 
   private class var
     FCounter : Integer;
@@ -223,29 +218,15 @@ type
       Column             : TColumnIndex;
       TextType           : TVSTTextType
     );
-    procedure FLogTreeViewGetHint(
-      Sender             : TBaseVirtualTree;
-      Node               : PVirtualNode;
-      Column             : TColumnIndex;
-      var LineBreakStyle : TVTTooltipLineBreakStyle;
-      var HintText       : string
-    );
-    procedure FLogTreeViewGetHintKind(
-      Sender   : TBaseVirtualTree;
-      Node     : PVirtualNode;
-      Column   : TColumnIndex;
-      var Kind : TVTHintKind
-    );
     procedure FLogTreeViewHotChange(
       Sender  : TBaseVirtualTree;
       OldNode : PVirtualNode;
       NewNode : PVirtualNode
     );
-    function GetMilliSecondsBetweenSelection: Integer;
     {$ENDREGION}
-
     procedure FSettingsChanged(Sender: TObject);
 
+    function GetMilliSecondsBetweenSelection: Integer;
     procedure EnsureIsActiveViewIfFocused;
 
   protected
@@ -256,9 +237,6 @@ type
 
     procedure Clear;
     procedure AutoFitColumns;
-
-    procedure ShowFilterTree;
-
     procedure ApplySettings;
 
     procedure ProcessMessage(AStream: TStream);
@@ -347,7 +325,7 @@ uses
 
   DDuce.ObjectInspector.zObjectInspector, DDuce.DynamicRecord,
 
-  LogViewer.Factories, LogViewer.Resources, LogViewer.MessageFilter.View;
+  LogViewer.Manager, LogViewer.Factories, LogViewer.Resources;
 
 {$R *.dfm}
 
@@ -369,7 +347,8 @@ begin
   inherited AfterConstruction;
   Inc(FCounter);
   FMiliSecondsBetweenSelection := -1;
-  btnFilterMessages.Action := FManager.Actions.Items['actFilterMessages'];
+  edtMessageFilter.OnRightButtonClick :=
+    FManager.Actions.Items['actFilterMessages'].OnExecute;
   FExpandParents           := True;
   CreateEditor;
   CreateLogTreeView;
@@ -486,8 +465,6 @@ begin
   FLogTreeView.OnHotChange       := FLogTreeViewHotChange;
   FLogTreeView.OnInitNode        := FLogTreeViewInitNode;
   FLogTreeView.OnFreeNode        := FLogTreeViewFreeNode;
-  FLogTreeView.OnGetHint         := FLogTreeViewGetHint;
-  FLogTreeView.OnGetHintKind     := FLogTreeViewGetHintKind;
   FLogTreeView.OnGetText         := FLogTreeViewGetText;
   FLogTreeView.OnPaintText       := FLogTreeViewPaintText;
   FLogTreeView.OnGetImageIndex   := FLogTreeViewGetImageIndex;
@@ -626,11 +603,6 @@ begin
 
   if Settings.AutoFilterMessages then
     UpdateLogTreeView;
-end;
-
-procedure TfrmMessageList.edtMessageFilterDblClick(Sender: TObject);
-begin
-  ShowFilterTree;
 end;
 
 procedure TfrmMessageList.edtMessageFilterKeyDown(Sender: TObject;
@@ -787,7 +759,6 @@ var
   B  : Boolean;
 begin
   LN := Sender.GetNodeData<TLogNode>(Node);
-//  Guard.CheckNotNull(LN, 'LogNode');
   if Assigned(LN) then
   begin
     B := LN.MessageType in Settings.VisibleMessageTypes;
@@ -798,28 +769,6 @@ begin
          ContainsText(LN.Value, edtMessageFilter.Text));
     Sender.IsVisible[Node] := B;
   end;
-end;
-
-procedure TfrmMessageList.FLogTreeViewGetHint(Sender: TBaseVirtualTree;
-  Node: PVirtualNode; Column: TColumnIndex;
-  var LineBreakStyle: TVTTooltipLineBreakStyle; var HintText: string);
-var
-  LN: TLogNode;
-begin
-  LN := Sender.GetNodeData<TLogNode>(Node);
-  if Column = COLUMN_VALUE then
-  begin
-    HintText := LN.Value;
-    //LineBreakStyle := hlbForceMultiLine;
-  end;
-
-  //HintText := Sender.Get
-end;
-
-procedure TfrmMessageList.FLogTreeViewGetHintKind(Sender: TBaseVirtualTree;
-  Node: PVirtualNode; Column: TColumnIndex; var Kind: TVTHintKind);
-begin
-  Kind := vhkText;
 end;
 
 procedure TfrmMessageList.FLogTreeViewGetImageIndex(Sender: TBaseVirtualTree;
@@ -1184,7 +1133,7 @@ end;
 {$REGION 'protected methods'}
 procedure TfrmMessageList.ApplySettings;
 begin
-  chkAutoFilter.Checked := Settings.AutoFilterMessages;
+//  chkAutoFilter.Checked := Settings.AutoFilterMessages;
   pnlLeft.Width         := Settings.LeftPanelWidth;
   pnlRight.Width        := Settings.RightPanelWidth;
 //  DisplayValuesSettings.TimeStamp.AssignTo(edtTimeStamp.Font);
@@ -1454,11 +1403,6 @@ begin
   end;
 end;
 
-procedure TfrmMessageList.pnlFilterClick(Sender: TObject);
-begin
-  ShowFilterTree;
-end;
-
 procedure TfrmMessageList.SelectAll;
 begin
   FLogTreeView.SelectAll(False);
@@ -1469,15 +1413,6 @@ begin
   if edtMessageFilter.CanFocus then
     edtMessageFilter.SetFocus;
 end;
-
-procedure TfrmMessageList.ShowFilterTree;
-var
-  LFilterTree: TfrmMessageFilter;
-begin
-  LFilterTree := TfrmMessageFilter.Create(Self, Settings, imlMessageTypes);
-  LFilterTree.ShowModal;
-end;
-
 {$ENDREGION}
 
 {$REGION 'Display updating'}

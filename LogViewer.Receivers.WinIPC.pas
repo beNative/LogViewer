@@ -48,6 +48,8 @@ type
   TWinIPCChannelReceiver = class(TChannelReceiver, IChannelReceiver, IWinIPC)
   private
      FIPCServer : TWinIPCServer;
+    function GetWindowName: string;
+    function GetMsgWindowClassName: string;
 
   protected
     {$REGION 'property access methods'}
@@ -76,6 +78,11 @@ type
     property Settings: TWinIPCSettings
       read GetSettings;
 
+    property WindowName: string
+      read GetWindowName;
+
+    property MsgWindowClassName: string
+      read GetMsgWindowClassName;
   end;
 
 implementation
@@ -122,9 +129,19 @@ begin
   FIPCServer.Active := Value;
 end;
 
+function TWinIPCChannelReceiver.GetMsgWindowClassName: string;
+begin
+  Result := FIPCServer.MsgWindowClassName;
+end;
+
 function TWinIPCChannelReceiver.GetSettings: TWinIPCSettings;
 begin
   Result := Manager.Settings.WinIPCSettings;
+end;
+
+function TWinIPCChannelReceiver.GetWindowName: string;
+begin
+  Result := FIPCServer.WindowName;
 end;
 {$ENDREGION}
 

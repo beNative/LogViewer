@@ -56,7 +56,7 @@ object frmDashboard: TfrmDashboard
         Top = 0
         Width = 305
         Height = 421
-        ActivePage = tsZeroMQ
+        ActivePage = tsCOMPort
         Align = alClient
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clGrayText
@@ -74,7 +74,7 @@ object frmDashboard: TfrmDashboard
           Margins.Bottom = 0
           Caption = 'WinIPC'
           ImageIndex = 28
-          object lbl1: TLabel
+          object lblWinIPCDescription: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
@@ -118,7 +118,7 @@ object frmDashboard: TfrmDashboard
         object tsWinODS: TTabSheet
           Caption = 'WinODS'
           ImageIndex = 28
-          object lbl2: TLabel
+          object lblWinODSDescription: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
@@ -173,33 +173,21 @@ object frmDashboard: TfrmDashboard
           DesignSize = (
             297
             390)
-          object btnAddZMQNodeLocalHost: TButton
-            Left = 3
-            Top = 31
-            Width = 291
-            Height = 25
-            Action = actAddZMQNodeLocalHost
-            Anchors = [akLeft, akTop, akRight]
-            Caption = 'Subscribe to default localhost socket'
-            TabOrder = 0
-          end
-          object btnAddZMQNodeForLogViewer: TButton
-            Left = 3
-            Top = 57
-            Width = 291
-            Height = 25
-            Action = actAddZMQNodeForLogViewer
-            Anchors = [akLeft, akTop, akRight]
-            TabOrder = 1
-          end
           object btnSubscribeToList: TButton
-            Left = 3
-            Top = 365
-            Width = 291
+            Left = -1
+            Top = 316
+            Width = 299
             Height = 25
             Action = actSubscribeToList
             Anchors = [akLeft, akRight, akBottom]
-            TabOrder = 2
+            Default = True
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clGrayText
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = [fsBold]
+            ParentFont = False
+            TabOrder = 0
           end
           object pnlZeroMQTitle: TPanel
             Left = 0
@@ -216,13 +204,13 @@ object frmDashboard: TfrmDashboard
             Font.Style = []
             ParentBackground = False
             ParentFont = False
-            TabOrder = 3
+            TabOrder = 1
           end
           object lstZeroMQ: TValueListEditor
-            Left = 3
-            Top = 85
-            Width = 291
-            Height = 274
+            Left = 1
+            Top = 31
+            Width = 296
+            Height = 279
             Anchors = [akLeft, akTop, akRight, akBottom]
             DisplayOptions = [doColumnTitles, doAutoColResize]
             DrawingStyle = gdsClassic
@@ -234,16 +222,85 @@ object frmDashboard: TfrmDashboard
             KeyOptions = [keyEdit, keyAdd, keyDelete, keyUnique]
             Options = [goVertLine, goRangeSelect, goDrawFocusSelected, goColSizing, goEditing, goAlwaysShowEditor, goThumbTracking]
             ParentFont = False
-            TabOrder = 4
+            TabOrder = 2
             TitleCaptions.Strings = (
               'Name'
               'Endpoint')
             ColWidths = (
-              142
-              143)
+              145
+              145)
             RowHeights = (
               18
               18)
+          end
+          object pnlZeroMQButtons: TGridPanel
+            Left = 0
+            Top = 342
+            Width = 297
+            Height = 48
+            Anchors = [akLeft, akRight, akBottom]
+            BevelOuter = bvNone
+            ColumnCollection = <
+              item
+                Value = 50.000000000000000000
+              end
+              item
+                Value = 50.000000000000000000
+              end>
+            ControlCollection = <
+              item
+                Column = 0
+                Control = btnAddZMQNodeLocalHost
+                Row = 0
+              end
+              item
+                Column = 1
+                Control = btnAddZMQNodeForLogViewer
+                Row = 0
+              end>
+            RowCollection = <
+              item
+                Value = 100.000000000000000000
+              end>
+            TabOrder = 3
+            object btnAddZMQNodeLocalHost: TButton
+              AlignWithMargins = True
+              Left = 0
+              Top = 0
+              Width = 148
+              Height = 48
+              Margins.Left = 0
+              Margins.Top = 0
+              Margins.Right = 0
+              Margins.Bottom = 0
+              Action = actSubscribeToLocalHost
+              Align = alClient
+              TabOrder = 0
+              WordWrap = True
+              ExplicitLeft = 36
+              ExplicitTop = 8
+              ExplicitWidth = 75
+              ExplicitHeight = 25
+            end
+            object btnAddZMQNodeForLogViewer: TButton
+              AlignWithMargins = True
+              Left = 150
+              Top = 0
+              Width = 147
+              Height = 48
+              Margins.Left = 2
+              Margins.Top = 0
+              Margins.Right = 0
+              Margins.Bottom = 0
+              Action = actAddSubscribeToLogViewer
+              Align = alClient
+              TabOrder = 1
+              WordWrap = True
+              ExplicitLeft = 183
+              ExplicitTop = 8
+              ExplicitWidth = 75
+              ExplicitHeight = 25
+            end
           end
         end
         object tsCOMPort: TTabSheet
@@ -273,17 +330,17 @@ object frmDashboard: TfrmDashboard
   object aclMain: TActionList
     Left = 328
     Top = 160
-    object actAddZMQNodeLocalHost: TAction
-      Caption = 'Add default node for localhost'
-      OnExecute = actAddZMQNodeLocalHostExecute
+    object actSubscribeToLocalHost: TAction
+      Caption = 'Subscribe to default local publisher (tcp://localhost:5555)'
+      OnExecute = actSubscribeToLocalHostExecute
     end
     object actInspectTreeview: TAction
       Caption = 'Inspect treeview'
       OnExecute = actInspectTreeviewExecute
     end
-    object actAddZMQNodeForLogViewer: TAction
-      Caption = 'Subscribe to local logviewer instance'
-      OnExecute = actAddZMQNodeForLogViewerExecute
+    object actAddSubscribeToLogViewer: TAction
+      Caption = 'Subscribe to LogViewer instance (tcp://localhost:42134)'
+      OnExecute = actAddSubscribeToLogViewerExecute
     end
     object actSubscribeToList: TAction
       Caption = 'Subscribe to list of endpoints'
@@ -299,7 +356,7 @@ object frmDashboard: TfrmDashboard
     Left = 328
     Top = 112
     Bitmap = {
-      494C010103000500540010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010103000500640010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000C0D0C4F777C7AF01D1E1D770000000000000005151515660808

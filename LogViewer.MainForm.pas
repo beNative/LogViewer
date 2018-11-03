@@ -29,6 +29,8 @@ uses
 
   ChromeTabs, ChromeTabsClasses, ChromeTabsTypes,
 
+  kcontrols, kprogress,
+
   Spring,
 
   DDuce.Settings.TextFormat, DDuce.Utils,
@@ -37,9 +39,7 @@ uses
   LogViewer.Factories, LogViewer.Manager, LogViewer.Settings,
   LogViewer.ComPort.Settings,
 
-  LogViewer.Dashboard.View,
-
-  kcontrols, kprogress;
+  LogViewer.Dashboard.View;
 
 type
   TfrmMain = class(TForm)

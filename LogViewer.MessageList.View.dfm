@@ -68,59 +68,81 @@ object frmMessageList: TfrmMessageList
       Width = 325
       Height = 721
       Align = alClient
+      BevelKind = bkFlat
       BevelOuter = bvNone
+      Color = clWhite
       ParentBackground = False
       TabOrder = 1
       object pgcMessageData: TPageControl
         Left = 0
         Top = 0
-        Width = 325
-        Height = 721
+        Width = 321
+        Height = 717
+        Margins.Left = 0
+        Margins.Top = 0
+        Margins.Right = 0
+        Margins.Bottom = 0
         ActivePage = tsMessageView
         Align = alClient
+        Style = tsFlatButtons
         TabOrder = 0
+        StyleElements = [seFont]
         object tsMessageView: TTabSheet
           Caption = 'Messageview'
           object pgcMessageDetails: TPageControl
             Left = 0
             Top = 0
-            Width = 317
-            Height = 693
+            Width = 313
+            Height = 686
+            Margins.Left = 0
+            Margins.Top = 0
+            Margins.Right = 0
+            Margins.Bottom = 0
             ActivePage = tsValueList
             Align = alClient
-            MultiLine = True
+            Style = tsFlatButtons
             TabOrder = 0
-            TabPosition = tpBottom
             object tsValueList: TTabSheet
               Caption = 'Value list'
               ImageIndex = 2
             end
             object tsTextViewer: TTabSheet
               Caption = 'Text viewer'
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object pnlTextViewer: TPanel
-                AlignWithMargins = True
-                Left = 3
-                Top = 3
-                Width = 303
-                Height = 661
+                Left = 0
+                Top = 0
+                Width = 305
+                Height = 655
                 Align = alClient
+                BevelEdges = []
                 BevelOuter = bvNone
                 Color = clWhite
-                ParentBackground = False
                 TabOrder = 0
               end
             end
             object tsImageViewer: TTabSheet
               Caption = 'Image viewer'
               ImageIndex = 1
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object pnlImageViewer: TPanel
                 Left = 0
                 Top = 0
-                Width = 309
-                Height = 667
+                Width = 305
+                Height = 655
+                Margins.Left = 0
+                Margins.Top = 0
+                Margins.Right = 0
+                Margins.Bottom = 0
                 Align = alClient
+                BevelEdges = []
                 BevelOuter = bvNone
-                ParentBackground = False
                 TabOrder = 0
                 object edtWidth: TLabeledEdit
                   Left = 64
@@ -168,17 +190,17 @@ object frmMessageList: TfrmMessageList
                 end
                 object sbxImage: TScrollBox
                   Left = 0
-                  Top = 72
-                  Width = 309
-                  Height = 595
+                  Top = 59
+                  Width = 305
+                  Height = 596
                   HorzScrollBar.Smooth = True
                   HorzScrollBar.Tracking = True
                   VertScrollBar.Smooth = True
                   VertScrollBar.Tracking = True
                   Align = alBottom
                   Anchors = [akLeft, akTop, akRight, akBottom]
+                  BevelEdges = []
                   BevelInner = bvNone
-                  BevelKind = bkFlat
                   BorderStyle = bsNone
                   Color = clWhite
                   ParentColor = False
@@ -187,7 +209,7 @@ object frmMessageList: TfrmMessageList
                     Left = 3
                     Top = 3
                     Width = 420
-                    Height = 519
+                    Height = 585
                     AutoSize = True
                     IncrementalDisplay = True
                     Proportional = True
@@ -198,12 +220,20 @@ object frmMessageList: TfrmMessageList
             object tsDataSet: TTabSheet
               Caption = 'DataSet'
               ImageIndex = 3
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
             end
           end
         end
         object tsRawData: TTabSheet
           Caption = 'Raw message data'
           ImageIndex = 1
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
         end
       end
     end
@@ -315,49 +345,29 @@ object frmMessageList: TfrmMessageList
       BevelOuter = bvNone
       ParentBackground = False
       TabOrder = 0
-      OnClick = pnlFilterClick
-      DesignSize = (
-        423
-        25)
-      object edtMessageFilter: TLabeledEdit
-        Left = 79
+      object edtMessageFilter: TButtonedEdit
+        AlignWithMargins = True
+        Left = 0
         Top = 2
-        Width = 186
+        Width = 423
         Height = 21
+        Margins.Left = 0
+        Margins.Top = 2
+        Margins.Right = 0
+        Margins.Bottom = 2
+        Align = alClient
         Alignment = taCenter
-        Anchors = [akLeft, akTop, akRight]
         AutoSize = False
-        EditLabel.Width = 71
-        EditLabel.Height = 13
-        EditLabel.Caption = 'Message filter:'
-        LabelPosition = lpLeft
+        BevelInner = bvLowered
+        BevelOuter = bvNone
+        Images = dmManager.imlMain
+        RightButton.ImageIndex = 15
+        RightButton.Visible = True
         TabOrder = 0
+        TextHint = 'Message filter'
         OnChange = edtMessageFilterChange
-        OnDblClick = edtMessageFilterDblClick
         OnKeyDown = edtMessageFilterKeyDown
         OnKeyUp = edtMessageFilterKeyUp
-      end
-      object btnFilterMessages: TButton
-        Left = 271
-        Top = 0
-        Width = 77
-        Height = 25
-        Anchors = [akTop, akRight]
-        Caption = 'Apply filter'
-        Default = True
-        TabOrder = 1
-      end
-      object chkAutoFilter: TCheckBox
-        Left = 354
-        Top = 4
-        Width = 71
-        Height = 17
-        Anchors = [akTop, akRight]
-        Caption = 'Autofilter'
-        Checked = True
-        State = cbChecked
-        TabOrder = 2
-        OnClick = chkAutoFilterClick
       end
     end
   end
@@ -366,7 +376,7 @@ object frmMessageList: TfrmMessageList
     Left = 607
     Top = 150
     Bitmap = {
-      494C010116001900580010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010116001900640010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

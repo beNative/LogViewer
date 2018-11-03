@@ -30,13 +30,13 @@ uses
 type
   TFilterData = class
   private
-    FMessageType : TLogMessageType;
-    FCaption     : string;
-    FImageIndex  : Integer;
+    FMessageTypes : TLogMessageTypes;
+    FCaption      : string;
+    FImageIndex   : Integer;
 
     {$REGION 'property access methods'}
-    function GetMessageType: TLogMessageType;
-    procedure SetMessageType(const Value: TLogMessageType);
+    function GetMessageTypes: TLogMessageTypes;
+    procedure SetMessageTypes(const Value: TLogMessageTypes);
     function GetCaption: string;
     procedure SetCaption(const Value: string);
     function GetImageIndex: Integer;
@@ -46,12 +46,12 @@ type
     procedure AfterConstruction; override;
     constructor Create(
       const ACaption : string;
-      AMessageType   : TLogMessageType = lmtNone;
+      AMessageTypes  : TLogMessageTypes = [lmtNone];
       AImageIndex    : Integer = -1
     );
 
-    property MessageType: TLogMessageType
-      read GetMessageType write SetMessageType;
+    property MessageTypes: TLogMessageTypes
+      read GetMessageTypes write SetMessageTypes;
 
     property Caption: string
       read GetCaption write SetCaption;
@@ -69,11 +69,11 @@ begin
 end;
 
 constructor TFilterData.Create(const ACaption: string;
-  AMessageType: TLogMessageType; AImageIndex: Integer);
+  AMessageTypes: TLogMessageTypes; AImageIndex: Integer);
 begin
-  FMessageType := AMessageType;
-  FCaption     := ACaption;
-  FImageIndex  := AImageIndex;
+  FMessageTypes := AMessageTypes;
+  FCaption      := ACaption;
+  FImageIndex   := AImageIndex;
 end;
 {$ENDREGION}
 
@@ -98,14 +98,14 @@ begin
   FCaption := Value;
 end;
 
-function TFilterData.GetMessageType: TLogMessageType;
+function TFilterData.GetMessageTypes: TLogMessageTypes;
 begin
-  Result := FMessageType;
+  Result := FMessageTypes;
 end;
 
-procedure TFilterData.SetMessageType(const Value: TLogMessageType);
+procedure TFilterData.SetMessageTypes(const Value: TLogMessageTypes);
 begin
-  FMessageType := Value;
+  FMessageTypes := Value;
 end;
 {$ENDREGION}
 end.

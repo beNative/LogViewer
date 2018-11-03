@@ -27,8 +27,7 @@ uses
 
   Spring, Spring.Collections,
 
-  DDuce.Logger.Interfaces,
-  DDuce.Editor.Interfaces,
+  DDuce.Logger.Interfaces, DDuce.Editor.Interfaces,
 
   LogViewer.Interfaces, LogViewer.Settings, LogViewer.Events,
   LogViewer.Commands,
@@ -78,6 +77,7 @@ type
     actSelectNone         : TAction;
     actSetFocusToFilter   : TAction;
     actSettings           : TAction;
+    actShowFilterView     : TAction;
     actStart              : TAction;
     actStop               : TAction;
     actStrings            : TAction;
@@ -87,10 +87,9 @@ type
     actValue              : TAction;
     actWarning            : TAction;
     imlMain               : TImageList;
+    imlMessageTypes       : TImageList;
     ppmLogTreeViewer      : TPopupMenu;
     ppmMessageTypes       : TPopupMenu;
-    imlMessageTypes: TImageList;
-    actShowFilterView: TAction;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -288,7 +287,11 @@ begin
   FEditorManager  := TEditorFactories.CreateManager(Self, FEditorSettings);
   BuildMessageTypesPopupMenu;
   BuildLogTreeViewerPopupMenu;
-  FFilterView := TfrmMessageFilter.Create(Self, Settings.MessageListSettings, imlMessageTypes);
+  FFilterView := TfrmMessageFilter.Create(
+    Self,
+    Settings.MessageListSettings,
+    imlMessageTypes
+  );
 end;
 
 procedure TdmManager.BeforeDestruction;
@@ -316,7 +319,6 @@ begin
     I := FViewList.IndexOf(AView);
     if ActiveView = AView then
       FActiveView := nil;
-
     S := AView.Subscriber;
     S.Receiver.SubscriberList.Remove(S.SourceId);
     FViewList[I].Form.Close; // instance still exists after closing

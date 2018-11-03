@@ -77,7 +77,6 @@ type
     );
 
     procedure FSettingsChanged(Sender: TObject);
-
     {$ENDREGION}
 
   public
@@ -148,15 +147,39 @@ end;
 procedure TfrmMessageFilter.FTreeChecked(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 var
-  FN : TFilterNode;
+  FN       : TFilterNode;
+  LSubNode : TFilterNode;
+  I        : Integer;
 begin
   FN := Sender.GetNodeData<TFilterNode>(Node);
   if FN.VNode.CheckState.IsChecked then
+  begin
+    if FN.ChildCount > 0 then
+    begin
+      for I := 0 to FN.ChildCount - 1 do
+      begin
+        LSubNode := FN.Items[I];
+        LSubNode.CheckState := csCheckedNormal;
+        Sender.RepaintNode(LSubNode.VNode);
+      end;
+    end;
     FSettings.VisibleMessageTypes := FSettings.VisibleMessageTypes +
-      [FN.Data.MessageType]
+      FN.Data.MessageTypes;
+  end
   else
+  begin
+    if FN.ChildCount > 0 then
+    begin
+      for I := 0 to FN.ChildCount - 1 do
+      begin
+        LSubNode := FN.Items[I];
+        LSubNode.CheckState := csUncheckedNormal;
+        Sender.RepaintNode(LSubNode.VNode);
+      end;
+    end;
     FSettings.VisibleMessageTypes := FSettings.VisibleMessageTypes -
-      [FN.Data.MessageType]
+      FN.Data.MessageTypes;
+  end;
 end;
 
 procedure TfrmMessageFilter.FTreeFocusChanged(Sender: TBaseVirtualTree;
@@ -206,14 +229,14 @@ var
   LNode : TFilterNode;
 
   function AddNode(
-    ACaption     : string;
-    AImageIndex  : Integer = -1;
-    AMessageType : TLogMessageType = lmtNone
+    ACaption      : string;
+    AImageIndex   : Integer = -1;
+    AMessageTypes : TLogMessageTypes = []
   ): TFilterNode;
   begin
     if Assigned(LNode) then
     begin
-      Result := LNode.Add(TFilterData.Create(ACaption, AMessageType));
+      Result := LNode.Add(TFilterData.Create(ACaption, AMessageTypes));
     end
     else
     begin
@@ -221,46 +244,45 @@ var
     end;
     Result.ImageIndex := AImageIndex;
     Result.CheckType  := ctCheckBox;
-    if (AMessageType = lmtNone) or (AMessageType in FSettings.VisibleMessageTypes) then
+    if AMessageTypes * FSettings.VisibleMessageTypes = AMessageTypes then
       Result.CheckState := csCheckedNormal;
   end;
 
 begin
   LNode := nil;
-  LNode := AddNode('Notification messages');
-  AddNode('Info', 0, lmtInfo);
-  AddNode('Warning', 2, lmtWarning);
-  AddNode('Error', 1, lmtError);
+  LNode := AddNode('Notification messages', -1, [lmtInfo, lmtWarning, lmtError]);
+  AddNode('Info', 0, [lmtInfo]);
+  AddNode('Warning', 2, [lmtWarning]);
+  AddNode('Error', 1, [lmtError]);
   LNode := nil;
   LNode := AddNode('Value messages');
-  AddNode('Value', 19, lmtValue);
-  AddNode('Strings', 8, lmtStrings);
-  AddNode('Components', 10, lmtComponent);
-  AddNode('Color', 22, lmtColor);
-  AddNode('AlphaColor', 22, lmtAlphaColor);
-  AddNode('Persistent', 16, lmtPersistent);
-  AddNode('Interface', 17, lmtInterface);
-  AddNode('Object', 18, lmtObject);
-  AddNode('DataSet', 20, lmtDataSet);
-  AddNode('Action', 21, lmtAction);
-  AddNode('Bitmap', 12, lmtBitmap);
-  AddNode('Screenshot', 12, lmtScreenshot);
-  AddNode('Exception', 11, lmtException);
+  AddNode('Value', 19, [lmtValue]);
+  AddNode('Strings', 8, [lmtStrings]);
+  AddNode('Components', 10, [lmtComponent]);
+  AddNode('Color', 22, [lmtColor, lmtAlphaColor]);
+  AddNode('Persistent', 16, [lmtPersistent]);
+  AddNode('Interface', 17, [lmtInterface]);
+  AddNode('Object', 18, [lmtObject]);
+  AddNode('DataSet', 20, [lmtDataSet]);
+  AddNode('Action', 21, [lmtAction]);
+  AddNode('Bitmap', 12, [lmtBitmap]);
+  AddNode('Screenshot', 12, [lmtScreenshot]);
+  AddNode('Exception', 11, [lmtException]);
 
   LNode := nil;
   LNode := AddNode('Text messages', 24);
-  AddNode('SQL', 0, lmtText);
-  AddNode('XML', 0, lmtText);
-  AddNode('INI', 0, lmtText);
-  AddNode('JSON', 0, lmtText);
+  AddNode('SQL', 27, [lmtText]);
+  AddNode('XML', 28, [lmtText]);
+  AddNode('INI', 0, [lmtText]);
+  AddNode('JSON', 26, [lmtText]);
 
   LNode := nil;
-  LNode := AddNode('Trace messages');
-  AddNode('Checkpoint', 7, lmtCheckpoint);
-  AddNode('Counter', 23, lmtCounter);
-  LNode := AddNode('Track method', 9);
-  AddNode('Enter', 4, lmtEnterMethod);
-  AddNode('Leave', 5, lmtLeaveMethod);
+  LNode := AddNode('Trace messages', 25, [lmtCheckpoint, lmtCounter, lmtEnterMethod, lmtLeaveMethod]);
+  AddNode('Checkpoint', 7, [lmtCheckpoint]);
+  AddNode('Counter', 23, [lmtCounter]);
+  LNode := AddNode('Track method', 9, [lmtEnterMethod, lmtLeaveMethod]);
+  AddNode('Enter', 4, [lmtEnterMethod]);
+  AddNode('Leave', 5, [lmtLeaveMethod]);
   FTree.FullExpand;
 end;
 {$ENDREGION}

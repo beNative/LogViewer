@@ -203,14 +203,15 @@ begin
   CreateToolButton(TB);
   CreateToolButton(TB, 'actClearMessages', tbsTextButton);
   CreateToolButton(TB);
-  CreateToolButton(
-    TB,
-    'actMessageTypesMenu',
-    tbsDropDown,
-    FMenus.MessageTypesPopupMenu
-  );
-  CreateToolButton(TB);
+//  CreateToolButton(
+//    TB,
+//    'actMessageTypesMenu',
+//    tbsDropDown,
+//    FMenus.MessageTypesPopupMenu
+//  );
+//  CreateToolButton(TB);
   CreateToolButton(TB, 'actShowFilterView');
+  CreateToolButton(TB);
 //  CreateToolButton(TB);
 //  CreateToolButton(TB, 'actSetFocusToFilter');
 //  CreateToolButton(TB);

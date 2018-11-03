@@ -38,8 +38,7 @@ uses
   LogViewer.Interfaces, LogViewer.Dashboard.Node,
   LogViewer.ComPort.Settings.View;
 
-  {
-    TODO:
+  { TODO:
       - indicate amount of data received per channel
       - editable treeview in which we can add nodes for every channel we want to
         subscribe to.
@@ -49,15 +48,16 @@ type
   TfrmDashboard = class(TForm)
     {$REGION 'designer controls'}
     aclMain                   : TActionList;
-    actAddZMQNodeForLogViewer : TAction;
-    actAddZMQNodeLocalHost    : TAction;
+    actAddSubscribeToLogViewer: TAction;
+    actSubscribeToLocalHost: TAction;
     actCloseSubscriber        : TAction;
     actInspectTreeview        : TAction;
     actSubscribeToList        : TAction;
-    btnAddZMQNodeForLogViewer : TButton;
-    btnAddZMQNodeLocalHost    : TButton;
     btnSubscribeToList        : TButton;
     imlMain                   : TImageList;
+    lblWinIPCDescription      : TLabel;
+    lblWinODSDescription      : TLabel;
+    lstZeroMQ                 : TValueListEditor;
     mniCloseSsubscriber       : TMenuItem;
     pgcMain                   : TPageControl;
     pnlCOMPortTitle           : TPanel;
@@ -73,16 +73,18 @@ type
     tsWinIPC                  : TTabSheet;
     tsWinODS                  : TTabSheet;
     tsZeroMQ                  : TTabSheet;
-    lstZeroMQ                 : TValueListEditor;
-    lbl1                      : TLabel;
-    lbl2                      : TLabel;
+    pnlZeroMQButtons: TGridPanel;
+    btnAddZMQNodeLocalHost: TButton;
+    btnAddZMQNodeForLogViewer: TButton;
     {$ENDREGION}
 
-    procedure actAddZMQNodeLocalHostExecute(Sender: TObject);
+    {$REGION 'action handlers'}
+    procedure actSubscribeToLocalHostExecute(Sender: TObject);
     procedure actInspectTreeviewExecute(Sender: TObject);
-    procedure actAddZMQNodeForLogViewerExecute(Sender: TObject);
+    procedure actAddSubscribeToLogViewerExecute(Sender: TObject);
     procedure actSubscribeToListExecute(Sender: TObject);
     procedure actCloseSubscriberExecute(Sender: TObject);
+    {$ENDREGION}
 
   private
     FManager             : ILogViewerManager;
@@ -98,6 +100,7 @@ type
     FWinODSNode          : TDashboardNode;
     FComPortSettingsForm : TfrmComPortSettings;
 
+    {$REGION 'event handlers'}
     procedure FTreeViewFreeNode(
       Sender : TBaseVirtualTree;
       Node   : PVirtualNode
@@ -159,6 +162,7 @@ type
       const AKey : UInt32;
       Action     : TCollectionChangedAction
     );
+    {$ENDREGION}
 
   protected
     procedure InitializeTreeView;
@@ -166,7 +170,10 @@ type
     procedure CreateChannelReceivers;
     procedure UpdateActions; override;
 
-    procedure AddNodesToTree(AParent: PVirtualNode; ANode: TDashboardNode);
+    procedure AddNodesToTree(
+      AParent : PVirtualNode;
+      ANode   : TDashboardNode
+    );
 
   public
     constructor Create(
@@ -227,12 +234,12 @@ end;
 {$ENDREGION}
 
 {$REGION 'action handlers'}
-procedure TfrmDashboard.actAddZMQNodeForLogViewerExecute(Sender: TObject);
+procedure TfrmDashboard.actAddSubscribeToLogViewerExecute(Sender: TObject);
 var
-  SL           : TStringList;
-  LSubscriber  : ISubscriber;
-  LEndPoint    : string;
-  LName        : string;
+  SL          : TStringList;
+  LSubscriber : ISubscriber;
+  LEndPoint   : string;
+  LName       : string;
 begin
   SL := TStringList.Create;
   try
@@ -258,7 +265,7 @@ begin
   end;
 end;
 
-procedure TfrmDashboard.actAddZMQNodeLocalHostExecute(Sender: TObject);
+procedure TfrmDashboard.actSubscribeToLocalHostExecute(Sender: TObject);
 var
   SL          : TStringList;
   LSubscriber : ISubscriber;
@@ -270,8 +277,8 @@ begin
     GetIPAddresses(SL);
     if SL.Count > 0 then
     begin
-      LEndPoint := Format('tcp://%s:%s', [SL[0], '5555']);
-      LName     := 'localhost';
+      LEndPoint   := Format('tcp://%s:%s', [SL[0], '5555']);
+      LName       := 'localhost';
       LSubscriber := TZMQSubscriber.Create(
         FZeroMQReceiver,
         FZeroMQ,
@@ -353,29 +360,33 @@ var
   B  : Boolean;
 begin
   DN := Sender.GetNodeData<TDashboardNode>(Node);
-  if Sender.GetNodeLevel(Node) = 0 then
+  if Assigned(DN) then
   begin
-    B := Node.CheckState = csCheckedNormal;
-    if Supports(DN.Receiver, IWinIPC) then
+    if Sender.GetNodeLevel(Node) = 0 then
     begin
-      FManager.Settings.WinIPCSettings.Enabled := B;
+      B := Node.CheckState = csCheckedNormal;
+      if Supports(DN.Receiver, IWinIPC) then
+      begin
+        FManager.Settings.WinIPCSettings.Enabled := B;
+      end
+      else if Supports(DN.Receiver, IZMQ) then
+      begin
+        FManager.Settings.ZeroMQSettings.Enabled := B;
+      end
+      else if Supports(DN.Receiver, IWinODS) then
+      begin
+        FManager.Settings.WinODSSettings.Enabled := B;
+      end
+      else if Supports(DN.Receiver, IComPort) then
+      begin
+        DN.Receiver.Enabled := True;
+        //FManager.Settings.ComPortSettings.E
+      end;
     end
-    else if Supports(DN.Receiver, IZMQ) then
+    else
     begin
-      FManager.Settings.ZeroMQSettings.Enabled := B;
-    end
-    else if Supports(DN.Receiver, IWinODS) then
-    begin
-      FManager.Settings.WinODSSettings.Enabled := B;
-    end
-    else if Supports(DN.Receiver, IComPort) then
-    begin
-      //FManager.Settings.ComPortSettings.
+      DN.Subscriber.Enabled := Node.CheckState = csCheckedNormal;
     end;
-  end
-  else
-  begin
-    DN.Subscriber.Enabled := Node.CheckState = csCheckedNormal;
   end;
 end;
 
@@ -645,7 +656,7 @@ begin
   );
   FManager.AddReceiver(FComPortReceiver);
   FComPortReceiver.SubscriberList.OnKeyChanged.Add(FComPortReceiverSubscriberListChanged);
-  //FComPortReceiver.Enabled := FManager.Settings.ComPortSettings.Enabled;
+//  FComPortReceiver.Enabled := FManager.Settings.ComPortSettings.Enabled;
   FComPortNode := TDashboardNode.Create(nil, FTreeView, FComPortReceiver, nil);
   AddNodesToTree(FTreeView.RootNode, FComPortNode);
   FComPortNode.VTNode.CheckType := ctCheckBox;
