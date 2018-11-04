@@ -308,26 +308,6 @@ begin
   FSettings := ASettings;
 end;
 
-function TdmManager.DeleteView(AView: ILogViewer): Boolean;
-var
-  I : Integer;
-  S : ISubscriber;
-begin
-  Logger.Track(Self, 'DeleteView');
-  if Assigned(AView) then
-  begin
-    I := FViewList.IndexOf(AView);
-    if ActiveView = AView then
-      FActiveView := nil;
-    S := AView.Subscriber;
-    S.Receiver.SubscriberList.Remove(S.SourceId);
-    FViewList[I].Form.Close; // instance still exists after closing
-    FViewList.Delete(I); // automatically frees the instance
-    Result := True;
-  end
-  else
-    Result := False;
-end;
 destructor TdmManager.Destroy;
 begin
   Logger.Track(Self, 'Destroy');
@@ -339,7 +319,6 @@ begin
   FEditorManager  := nil;
   inherited Destroy;
 end;
-
 {$ENDREGION}
 
 {$REGION 'action handlers'}
@@ -819,6 +798,27 @@ begin
   end;
   Events.DoAddLogViewer(ALogViewer);
   FActiveView := ALogViewer;
+end;
+
+function TdmManager.DeleteView(AView: ILogViewer): Boolean;
+var
+  I : Integer;
+  S : ISubscriber;
+begin
+  Logger.Track(Self, 'DeleteView');
+  if Assigned(AView) then
+  begin
+    I := FViewList.IndexOf(AView);
+    if ActiveView = AView then
+      FActiveView := nil;
+    S := AView.Subscriber;
+    S.Receiver.SubscriberList.Remove(S.SourceId);
+    FViewList[I].Form.Close; // instance still exists after closing
+    FViewList.Delete(I); // automatically frees the instance
+    Result := True;
+  end
+  else
+    Result := False;
 end;
 
 { Gets called from the active messages view. }

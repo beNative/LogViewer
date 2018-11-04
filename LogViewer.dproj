@@ -193,6 +193,8 @@
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.MessageFilter.Data.pas"/>
+        <DCCReference Include="LogViewer.Receivers.FileSystem.pas"/>
+        <DCCReference Include="LogViewer.Subscribers.FileSystem.pas"/>
         <None Include="Readme.md"/>
         <RcItem Include="Bin\Win32\libzmq.dll">
             <ContainerId>ResourceItem</ContainerId>

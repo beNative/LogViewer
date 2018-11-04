@@ -79,6 +79,11 @@ type
     procedure FSettingsChanged(Sender: TObject);
     {$ENDREGION}
 
+    function UpdateChildren(
+      ANode       : TFilterNode;
+      ACheckState : TCheckState
+    ): Boolean;
+
   public
     constructor Create(
       AOwner     : TComponent;
@@ -97,7 +102,9 @@ implementation
 uses
   Spring,
 
-  DDuce.Factories.VirtualTrees;
+  DDuce.Factories.VirtualTrees,
+
+  LogViewer.Resources;
 
 {$REGION 'construction and destruction'}
 procedure TfrmMessageFilter.AfterConstruction;
@@ -147,35 +154,25 @@ end;
 procedure TfrmMessageFilter.FTreeChecked(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 var
-  FN       : TFilterNode;
-  LSubNode : TFilterNode;
-  I        : Integer;
+  FN : TFilterNode;
 begin
   FN := Sender.GetNodeData<TFilterNode>(Node);
   if FN.VNode.CheckState.IsChecked then
   begin
-    if FN.ChildCount > 0 then
+    if not UpdateChildren(FN, csCheckedNormal) then
     begin
-      for I := 0 to FN.ChildCount - 1 do
-      begin
-        LSubNode := FN.Items[I];
-        LSubNode.CheckState := csCheckedNormal;
-        Sender.RepaintNode(LSubNode.VNode);
-      end;
+      FN.VNode.Parent.CheckState := csMixedNormal;
+      FTree.RepaintNode(FN.VNode.Parent);
     end;
     FSettings.VisibleMessageTypes := FSettings.VisibleMessageTypes +
       FN.Data.MessageTypes;
   end
   else
   begin
-    if FN.ChildCount > 0 then
+    if not UpdateChildren(FN, csUncheckedNormal) then
     begin
-      for I := 0 to FN.ChildCount - 1 do
-      begin
-        LSubNode := FN.Items[I];
-        LSubNode.CheckState := csUncheckedNormal;
-        Sender.RepaintNode(LSubNode.VNode);
-      end;
+      FN.VNode.Parent.CheckState := csMixedNormal;
+      FTree.RepaintNode(FN.VNode.Parent);
     end;
     FSettings.VisibleMessageTypes := FSettings.VisibleMessageTypes -
       FN.Data.MessageTypes;
@@ -240,7 +237,7 @@ var
     end
     else
     begin
-      Result := TFilterNode.Create(FTree, TFilterData.Create(ACaption));
+      Result := TFilterNode.Create(FTree, TFilterData.Create(ACaption, AMessageTypes));
     end;
     Result.ImageIndex := AImageIndex;
     Result.CheckType  := ctCheckBox;
@@ -250,41 +247,69 @@ var
 
 begin
   LNode := nil;
-  LNode := AddNode('Notification messages', -1, [lmtInfo, lmtWarning, lmtError]);
-  AddNode('Info', 0, [lmtInfo]);
-  AddNode('Warning', 2, [lmtWarning]);
-  AddNode('Error', 1, [lmtError]);
-  LNode := nil;
-  LNode := AddNode('Value messages');
-  AddNode('Value', 19, [lmtValue]);
-  AddNode('Strings', 8, [lmtStrings]);
-  AddNode('Components', 10, [lmtComponent]);
-  AddNode('Color', 22, [lmtColor, lmtAlphaColor]);
-  AddNode('Persistent', 16, [lmtPersistent]);
-  AddNode('Interface', 17, [lmtInterface]);
-  AddNode('Object', 18, [lmtObject]);
-  AddNode('DataSet', 20, [lmtDataSet]);
-  AddNode('Action', 21, [lmtAction]);
-  AddNode('Bitmap', 12, [lmtBitmap]);
-  AddNode('Screenshot', 12, [lmtScreenshot]);
-  AddNode('Exception', 11, [lmtException]);
+  LNode := AddNode(SNotificationMessages, -1, [lmtInfo, lmtWarning, lmtError]);
+  AddNode(SInfo, 0, [lmtInfo]);
+  AddNode(SWarning, 2, [lmtWarning]);
+  AddNode(SError, 1, [lmtError]);
 
   LNode := nil;
-  LNode := AddNode('Text messages', 24);
+  LNode := AddNode(SValueMessages, - 1, [lmtValue, lmtStrings, lmtComponent,
+    lmtColor, lmtAlphaColor, lmtPersistent, lmtInterface, lmtObject, lmtDataSet,
+    lmtAction, lmtBitmap, lmtScreenshot, lmtException]);
+  AddNode(SValue, 19, [lmtValue]);
+  AddNode(SStrings, 8, [lmtStrings]);
+  AddNode(SComponent, 10, [lmtComponent]);
+  AddNode(SColor, 22, [lmtColor, lmtAlphaColor]);
+  AddNode(SPersistent, 16, [lmtPersistent]);
+  AddNode(SInterface, 17, [lmtInterface]);
+  AddNode(SObject, 18, [lmtObject]);
+  AddNode(SDataSet, 20, [lmtDataSet]);
+  AddNode(SAction, 21, [lmtAction]);
+  AddNode(SBitmap, 12, [lmtBitmap]);
+  AddNode(SScreenshot, 12, [lmtScreenshot]);
+  AddNode(SException, 11, [lmtException]);
+
+  LNode := nil;
+  LNode := AddNode(STextMessages, 24);
   AddNode('SQL', 27, [lmtText]);
   AddNode('XML', 28, [lmtText]);
   AddNode('INI', 0, [lmtText]);
   AddNode('JSON', 26, [lmtText]);
 
   LNode := nil;
-  LNode := AddNode('Trace messages', 25, [lmtCheckpoint, lmtCounter, lmtEnterMethod, lmtLeaveMethod]);
-  AddNode('Checkpoint', 7, [lmtCheckpoint]);
-  AddNode('Counter', 23, [lmtCounter]);
-  LNode := AddNode('Track method', 9, [lmtEnterMethod, lmtLeaveMethod]);
-  AddNode('Enter', 4, [lmtEnterMethod]);
-  AddNode('Leave', 5, [lmtLeaveMethod]);
+  LNode := AddNode(
+    STraceMessages,
+    25,
+    [lmtCheckpoint, lmtCounter, lmtEnterMethod, lmtLeaveMethod]
+  );
+  AddNode(SCheckpoint, 7, [lmtCheckpoint]);
+  AddNode(SCounter, 23, [lmtCounter]);
+  LNode := AddNode(STrackMethod, 9, [lmtEnterMethod, lmtLeaveMethod]);
+  AddNode(SEnter, 4, [lmtEnterMethod]);
+  AddNode(SLeave, 5, [lmtLeaveMethod]);
   FTree.FullExpand;
 end;
+
+function TfrmMessageFilter.UpdateChildren(ANode: TFilterNode;
+  ACheckState: TCheckState): Boolean;
+var
+  N : TFilterNode;
+  I : Integer;
+begin
+  if ANode.ChildCount > 0 then
+  begin
+    for I := 0 to ANode.ChildCount - 1 do
+    begin
+      N := ANode.Items[I];
+      N.CheckState := ACheckState;
+      FTree.RepaintNode(N.VNode);
+    end;
+    Result := True;
+  end
+  else
+    Result := False;
+end;
+
 {$ENDREGION}
 
 end.

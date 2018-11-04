@@ -139,6 +139,10 @@ type
   ['{456C6CFE-8BC8-4ED4-B087-1C8116B5A84A}']
   end;
 
+  IFileSystem = interface
+  ['{254D6F91-FE9F-4B80-B35C-CC00329319A9}']
+  end;
+
   ILogViewerActions = interface
   ['{73B2BDA9-4098-49A3-95D7-E837EC129FE4}']
     {$REGION 'property access methods'}

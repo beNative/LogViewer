@@ -47,12 +47,12 @@ uses
 type
   TWinIPCChannelReceiver = class(TChannelReceiver, IChannelReceiver, IWinIPC)
   private
-     FIPCServer : TWinIPCServer;
-    function GetWindowName: string;
-    function GetMsgWindowClassName: string;
+    FIPCServer : TWinIPCServer;
 
   protected
     {$REGION 'property access methods'}
+    function GetWindowName: string;
+    function GetMsgWindowClassName: string;
     function GetSettings: TWinIPCSettings;
     procedure SetEnabled(const Value: Boolean); override;
     {$ENDREGION}

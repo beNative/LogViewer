@@ -391,6 +391,8 @@ end;
 procedure TfrmMessageList.BeforeDestruction;
 begin
   Logger.Track(Self, 'BeforeDestruction');
+  FEditorView.Visible := False;
+  //FEditorView := nil;
   if Assigned(FSettings) then
   begin
     FSettings.LeftPanelWidth  := pnlLeft.Width;
@@ -404,7 +406,6 @@ begin
     FSubscriber := nil;
   end;
   FCallStack  := nil;
-  FEditorView := nil;
   FreeAndNil(FValueList);
   FreeAndNil(FWatches);
   FreeAndNIl(FWatchesView);

@@ -58,7 +58,9 @@ uses
   LogViewer.ValueList.View in 'LogViewer.ValueList.View.pas' {frmValueList},
   LogViewer.Receivers.WinODS in 'LogViewer.Receivers.WinODS.pas',
   LogViewer.MessageFilter.View in 'LogViewer.MessageFilter.View.pas' {frmMessageFilter},
-  LogViewer.MessageFilter.Data in 'LogViewer.MessageFilter.Data.pas';
+  LogViewer.MessageFilter.Data in 'LogViewer.MessageFilter.Data.pas',
+  LogViewer.Receivers.FileSystem in 'LogViewer.Receivers.FileSystem.pas',
+  LogViewer.Subscribers.FileSystem in 'LogViewer.Subscribers.FileSystem.pas';
 
 {$R *.res}
 

@@ -137,7 +137,6 @@ uses
 
   LogViewer.Subscribers.WinODS;
 
-
 {$REGION 'TWinDebugMonitor'}
 // ----------------------------------------------------------------------------
 //  PROPERTIES OF OBJECTS
@@ -354,7 +353,6 @@ begin
   end;
 end;
 {$ENDREGION}
-
 
 {$REGION 'TWinODSChannelReceiver'}
 procedure TWinODSChannelReceiver.AfterConstruction;

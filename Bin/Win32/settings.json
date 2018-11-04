@@ -1,18 +1,18 @@
 {
 	"FormSettings": {
-		"Left": 327,
-		"Top": 288,
-		"Width": 1902,
-		"Height": 630,
+		"Left": 905,
+		"Top": 289,
+		"Width": 1265,
+		"Height": 748,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
 	"MessageListSettings": {
-		"AutoScrollMessages": true,
+		"AutoScrollMessages": false,
 		"AutoFilterMessages": true,
 		"DynamicAutoSizeColumns": false,
 		"LeftPanelWidth": 398,
-		"RightPanelWidth": 825
+		"RightPanelWidth": 419
 	},
 	"WinODSSettings": {
 		"Enabled": false
@@ -23,7 +23,7 @@
 	"ZeroMQSettings": {
 		"Enabled": true,
 		"PollingInterval": 100,
-		"Subscriptions": "Default=tcp://localhost:5555\r\nee=tcp://localhost:5705\r\nepi=tcp://localhost:7539\r\n"
+		"Subscriptions": "Default=tcp://localhost:5555\r\nee=tcp://localhost:5227\r\nepi=tcp://localhost:7539\r\n"
 	},
 	"DisplayValueSettings": {
 		"Id": {

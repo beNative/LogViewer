@@ -106,6 +106,11 @@ type
       AZMQ     : IZeroMQ
     ): IChannelReceiver;
 
+    class function CreateFileSystemReceiver(
+      AManager    : ILogViewerManager;
+      const APath : string
+    ): IChannelReceiver;
+
   end;
 
 implementation
@@ -117,7 +122,8 @@ uses
 
   LogViewer.Resources, LogViewer.Factories.Toolbars,
   LogViewer.Receivers.WinIPC, LogViewer.Receivers.WinODS,
-  LogViewer.Receivers.ZeroMQ, LogViewer.Receivers.ComPort;
+  LogViewer.Receivers.ZeroMQ, LogViewer.Receivers.ComPort,
+  LogViewer.Receivers.FileSystem;
 
 {$REGION 'private class methods'}
 class procedure TLogViewerFactories.OnDropdownMenuButtonClick(Sender: TObject);
@@ -222,6 +228,14 @@ class function TLogViewerFactories.CreateComPortReceiver(
   AManager: ILogViewerManager; ASettings: TComPortSettings): IChannelReceiver;
 begin
   Result := TComPortChannelReceiver.Create(AManager, RECEIVERNAME_COMPORT);
+end;
+
+class function TLogViewerFactories.CreateFileSystemReceiver(
+  AManager: ILogViewerManager; const APath: string): IChannelReceiver;
+begin
+  Result := TFileSystemChannelReceiver.Create(
+    AManager, APath, RECEIVERNAME_FILESYSTEM
+  );
 end;
 {$ENDREGION}
 

@@ -46,7 +46,7 @@ type
     procedure AfterConstruction; override;
     constructor Create(
       const ACaption : string;
-      AMessageTypes  : TLogMessageTypes = [lmtNone];
+      AMessageTypes  : TLogMessageTypes;
       AImageIndex    : Integer = -1
     );
 

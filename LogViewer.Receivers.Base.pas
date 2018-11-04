@@ -19,7 +19,7 @@ unit LogViewer.Receivers.Base;
 { Base class for all channel receivers (implementing IChannelReceiver). }
 
 { A IChannelReceiver instance maintains a dictionary of subscribers
-  (ISubscriber) with SourceId as the key.
+  (ISubscriber instances) with SourceId as the key.
 
   TChannelReceiver has a class property Processes that keeps track of
   (Windows) ProcessId/ProcessName pairs.

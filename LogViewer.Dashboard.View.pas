@@ -94,10 +94,12 @@ type
     FWinIPCReceiver      : IChannelReceiver;
     FComPortReceiver     : IChannelReceiver;
     FWinODSReceiver      : IChannelReceiver;
+    FFileSystemReceiver  : IChannelReceiver;
     FZeroMQNode          : TDashboardNode;
     FWinIPCNode          : TDashboardNode;
     FComPortNode         : TDashboardNode;
     FWinODSNode          : TDashboardNode;
+    FFileSystemNode      : TDashboardNode;
     FComPortSettingsForm : TfrmComPortSettings;
 
     {$REGION 'event handlers'}
@@ -158,6 +160,11 @@ type
       Action     : TCollectionChangedAction
     );
     procedure FComPortReceiverSubscriberListChanged(
+      Sender     : TObject;
+      const AKey : UInt32;
+      Action     : TCollectionChangedAction
+    );
+    procedure FFileSystemReceiverSubscriberListChanged(
       Sender     : TObject;
       const AKey : UInt32;
       Action     : TCollectionChangedAction
@@ -596,6 +603,22 @@ begin
     end;
   end;
 end;
+
+procedure TfrmDashboard.FFileSystemReceiverSubscriberListChanged(
+  Sender: TObject; const AKey: UInt32; Action: TCollectionChangedAction);
+var
+  LDelete : TDashboardNode;
+begin
+  if Action = caRemoved then
+  begin
+    LDelete := FComPortNode.Nodes.GetValueOrDefault(AKey);
+    if Assigned(LDelete) then
+    begin
+      FTreeView.DeleteNode(LDelete.VTNode);
+      FComPortNode.Nodes.Remove(AKey);
+    end;
+  end;
+end;
 {$ENDREGION}
 {$ENDREGION}
 
@@ -652,7 +675,7 @@ begin
     FZeroMQNode.VTNode.CheckState := csUncheckedNormal;
 
   FComPortReceiver := TLogViewerFactories.CreateComPortReceiver(
-    FManager,FManager.Settings.ComPortSettings
+    FManager, FManager.Settings.ComPortSettings
   );
   FManager.AddReceiver(FComPortReceiver);
   FComPortReceiver.SubscriberList.OnKeyChanged.Add(FComPortReceiverSubscriberListChanged);
@@ -665,6 +688,21 @@ begin
   else
     FComPortNode.VTNode.CheckState := csUncheckedNormal;
   FComPortReceiver.Enabled := False;
+
+  FFileSystemReceiver := TLogViewerFactories.CreateFileSystemReceiver(
+    FManager, ''
+  );
+  FFileSystemNode := TDashboardNode.Create(
+    nil, FTreeView, FFileSystemReceiver, nil
+  );
+  AddNodesToTree(FTreeView.RootNode, FFileSystemNode);
+  FFileSystemNode.VTNode.CheckType := ctCheckBox;
+  if FFileSystemReceiver.Enabled then
+    FFileSystemNode.VTNode.CheckState := csCheckedNormal
+  else
+    FFileSystemNode.VTNode.CheckState := csUncheckedNormal;
+  FFileSystemReceiver.Enabled := False;
+
 end;
 
 procedure TfrmDashboard.InitializeControls;

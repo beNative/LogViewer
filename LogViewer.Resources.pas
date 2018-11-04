@@ -87,6 +87,19 @@ resourcestring
   SScreenShot  = 'ScreenShot';
   SText        = 'Text';
   SAction      = 'Action';
+  SInfo        = 'Info';
+  SWarning     = 'Warning';
+  SError       = 'Error';
+  SException   = 'Exception';
+  SCounter     = 'Counter';
+  SEnter       = 'Enter';
+  SLeave       = 'Leave';
+
+  STextMessages         = 'Text messages';
+  SNotificationMessages = 'Notification messages';
+  SValueMessages        = 'Value messages';
+  STraceMessages        = 'Trace messages';
+  STrackMethod          = 'Track method';
 
 const
   ALL_MESSAGES = [
@@ -121,16 +134,18 @@ const
 
   // channel receiver names
 const
-  RECEIVERNAME_WINIPC  = 'WinIPC';
-  RECEIVERNAME_WINODS  = 'WinODS';
-  RECEIVERNAME_ZEROMQ  = 'ZeroMQ';
-  RECEIVERNAME_COMPORT = 'ComPort';
+  RECEIVERNAME_WINIPC     = 'WinIPC';
+  RECEIVERNAME_WINODS     = 'WinODS';
+  RECEIVERNAME_ZEROMQ     = 'ZeroMQ';
+  RECEIVERNAME_COMPORT    = 'ComPort';
+  RECEIVERNAME_FILESYSTEM = 'FileSystem';
 
 resourcestring
-  SReceiverCaptionWinIPC  = 'Windows IPC receiver';
-  SReceiverCaptionWinODS  = 'Windows API OutputDebugString receiver';
-  SReceiverCaptionZeroMQ  = 'ZeroMQ subscription receiver';
-  SReceiverCaptionComPort = 'ComPort receiver';
+  SReceiverCaptionWinIPC     = 'Windows IPC receiver';
+  SReceiverCaptionWinODS     = 'Windows API OutputDebugString receiver';
+  SReceiverCaptionZeroMQ     = 'ZeroMQ subscription receiver';
+  SReceiverCaptionComPort    = 'ComPort receiver';
+  SReceiverCaptionFileSystem = 'File system receiver';
 
   // message viewer
 const

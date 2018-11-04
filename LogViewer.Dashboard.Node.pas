@@ -148,6 +148,10 @@ begin
     else if Supports(Receiver, IComPort) then
     begin
       FCaption := SReceiverCaptionComPort;
+    end
+    else if Supports(Receiver, IFileSystem) then
+    begin
+      FCaption := SReceiverCaptionFileSystem;
     end;
   end;
   Subscriber := ASubscriber;

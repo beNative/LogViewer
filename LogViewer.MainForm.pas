@@ -343,8 +343,8 @@ begin
       ALogViewer.Subscriber.SourceId
     ]);
   ALogViewer.Form.Show;
-//  UpdateStatusBar;
-//  OptimizeStatusBarPanelWidths;
+  UpdateStatusBar;
+  OptimizeStatusBarPanelWidths;
 end;
 
 procedure TfrmMain.SettingsChanged(Sender: TObject);
