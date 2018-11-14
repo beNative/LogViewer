@@ -16,18 +16,16 @@
 
 unit LogViewer.MessageList.LogNode;
 
-{ Datastructure holding the data to display extracted from each TLogMessage. }
+{ Datastructure holding the relevant data to display for each node. }
 
 interface
 
 uses
   System.Classes,
 
-  Spring.Collections,
-
   VirtualTrees,
 
-  DDuce.Logger.Interfaces;
+  DDuce.Logger.Interfaces, DDuce.Components.VirtualTrees.Node;
 
 {$REGION 'documentation'}
 {
@@ -44,7 +42,6 @@ type
     FId          : Int64;
     FText        : string; // warning/info/error
     FVTNode      : PVirtualNode;
-    FNodes       : IList<TLogNode>;
     FValueName   : string; // variables
     FValueType   : string;
     FValue       : string;
@@ -68,7 +65,6 @@ type
     procedure SetId(const Value: Int64);
     function GetMessageType: TLogMessageType;
     procedure SetMessageType(const Value: TLogMessageType);
-    function GetNodes: IList<TLogNode>;
     function GetText: string;
     procedure SetText(const Value: string);
     function GetVTNode: PVirtualNode;
@@ -89,9 +85,6 @@ type
 
     property Highlighter: string
       read GetHighlighter write SetHighlighter;
-
-    property Nodes: IList<TLogNode>
-      read GetNodes;
 
     property LogLevel: Byte
       read GetLogLevel write SetLogLevel;
@@ -184,13 +177,6 @@ end;
 procedure TLogNode.SetMessageType(const Value: TLogMessageType);
 begin
   FMessageType := Value;
-end;
-
-function TLogNode.GetNodes: IList<TLogNode>;
-begin
-  if not Assigned(FNodes) then
-    FNodes := TCollections.CreateObjectList<TLogNode>;
-  Result := FNodes;
 end;
 
 function TLogNode.GetText: string;

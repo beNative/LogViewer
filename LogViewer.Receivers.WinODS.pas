@@ -28,6 +28,7 @@ uses
 
   LogViewer.Interfaces, LogViewer.Receivers.Base, LogViewer.WinODS.Settings;
 
+{$REGION 'documentation'}
 {
       https://stackoverflow.com/questions/
         509498/in-delphi-is-outputdebugstring-thread-safe?rq=1
@@ -54,6 +55,7 @@ uses
   8. Close the Event and Section objects, though we keep the handle to the mutex
      around for later.
 }
+{$ENDREGION}
 
 type
   PDBWinBuffer = ^TDBWinBuffer;

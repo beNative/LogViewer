@@ -49,8 +49,9 @@ object frmMessageList: TfrmMessageList
       Left = 0
       Top = 0
       Width = 325
-      Height = 25
+      Height = 22
       Align = alTop
+      Alignment = taLeftJustify
       BevelOuter = bvNone
       Caption = 'Message Details'
       Font.Charset = ANSI_CHARSET
@@ -64,9 +65,9 @@ object frmMessageList: TfrmMessageList
     end
     object pnlRawMessageData: TPanel
       Left = 0
-      Top = 25
+      Top = 22
       Width = 325
-      Height = 721
+      Height = 724
       Align = alClient
       BevelKind = bkFlat
       BevelOuter = bvNone
@@ -77,7 +78,7 @@ object frmMessageList: TfrmMessageList
         Left = 0
         Top = 0
         Width = 321
-        Height = 717
+        Height = 720
         Margins.Left = 0
         Margins.Top = 0
         Margins.Right = 0
@@ -89,15 +90,11 @@ object frmMessageList: TfrmMessageList
         StyleElements = [seFont]
         object tsMessageView: TTabSheet
           Caption = 'Messageview'
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object pgcMessageDetails: TPageControl
             Left = 0
             Top = 0
             Width = 313
-            Height = 686
+            Height = 689
             Margins.Left = 0
             Margins.Top = 0
             Margins.Right = 0
@@ -109,27 +106,24 @@ object frmMessageList: TfrmMessageList
             object tsValueList: TTabSheet
               Caption = 'Value list'
               ImageIndex = 2
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
             end
             object tsTextViewer: TTabSheet
               Caption = 'Text viewer'
               ExplicitLeft = 0
               ExplicitTop = 0
               ExplicitWidth = 0
-              ExplicitHeight = 0
+              ExplicitHeight = 655
               object pnlTextViewer: TPanel
                 Left = 0
                 Top = 0
                 Width = 305
-                Height = 655
+                Height = 658
                 Align = alClient
                 BevelEdges = []
                 BevelOuter = bvNone
                 Color = clWhite
                 TabOrder = 0
+                ExplicitHeight = 655
               end
             end
             object tsImageViewer: TTabSheet
@@ -138,12 +132,12 @@ object frmMessageList: TfrmMessageList
               ExplicitLeft = 0
               ExplicitTop = 0
               ExplicitWidth = 0
-              ExplicitHeight = 0
+              ExplicitHeight = 655
               object pnlImageViewer: TPanel
                 Left = 0
                 Top = 0
                 Width = 305
-                Height = 655
+                Height = 658
                 Margins.Left = 0
                 Margins.Top = 0
                 Margins.Right = 0
@@ -152,6 +146,7 @@ object frmMessageList: TfrmMessageList
                 BevelEdges = []
                 BevelOuter = bvNone
                 TabOrder = 0
+                ExplicitHeight = 655
                 object edtWidth: TLabeledEdit
                   Left = 64
                   Top = 6
@@ -200,7 +195,7 @@ object frmMessageList: TfrmMessageList
                   Left = 0
                   Top = 59
                   Width = 305
-                  Height = 596
+                  Height = 599
                   HorzScrollBar.Smooth = True
                   HorzScrollBar.Tracking = True
                   VertScrollBar.Smooth = True
@@ -213,6 +208,7 @@ object frmMessageList: TfrmMessageList
                   Color = clWhite
                   ParentColor = False
                   TabOrder = 4
+                  ExplicitHeight = 596
                   object imgBitmap: TImage
                     Left = 3
                     Top = 3
@@ -231,7 +227,7 @@ object frmMessageList: TfrmMessageList
               ExplicitLeft = 0
               ExplicitTop = 0
               ExplicitWidth = 0
-              ExplicitHeight = 0
+              ExplicitHeight = 655
             end
           end
         end
@@ -241,7 +237,7 @@ object frmMessageList: TfrmMessageList
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
-          ExplicitHeight = 0
+          ExplicitHeight = 686
         end
       end
     end
@@ -291,8 +287,9 @@ object frmMessageList: TfrmMessageList
           Left = 0
           Top = 0
           Width = 313
-          Height = 25
+          Height = 22
           Align = alTop
+          Alignment = taLeftJustify
           BevelOuter = bvNone
           Caption = 'Watch List'
           Font.Charset = ANSI_CHARSET
@@ -317,8 +314,9 @@ object frmMessageList: TfrmMessageList
           Left = 0
           Top = 0
           Width = 313
-          Height = 25
+          Height = 22
           Align = alTop
+          Alignment = taLeftJustify
           BevelOuter = bvNone
           Caption = 'Call Stack'
           Font.Charset = ANSI_CHARSET
@@ -384,7 +382,7 @@ object frmMessageList: TfrmMessageList
     Left = 607
     Top = 150
     Bitmap = {
-      494C0101160019006C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010116001900780010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

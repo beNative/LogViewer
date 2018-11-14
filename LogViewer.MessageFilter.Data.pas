@@ -16,6 +16,8 @@
 
 unit LogViewer.MessageFilter.Data;
 
+{ Holds fields and criteria to filter messages on. }
+
 interface
 
 uses

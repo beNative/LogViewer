@@ -16,7 +16,7 @@
 
 unit LogViewer.MessageFilter.View;
 
-{ User interface for message filter setup. }
+{ User interface for message filter treeview. }
 
 interface
 
@@ -84,6 +84,11 @@ type
       ACheckState : TCheckState
     ): Boolean;
 
+    function UpdateParent(
+      ANode       : TFilterNode;
+      ACheckState : TCheckState
+    ): Boolean;
+
   public
     constructor Create(
       AOwner     : TComponent;
@@ -100,9 +105,13 @@ implementation
 {$R *.dfm}
 
 uses
+  System.StrUtils,
+
   Spring,
 
   DDuce.Factories.VirtualTrees,
+
+  DDuce.Logger,
 
   LogViewer.Resources;
 
@@ -155,28 +164,32 @@ procedure TfrmMessageFilter.FTreeChecked(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 var
   FN : TFilterNode;
+  I  : Integer;
 begin
   FN := Sender.GetNodeData<TFilterNode>(Node);
   if FN.VNode.CheckState.IsChecked then
   begin
-    if not UpdateChildren(FN, csCheckedNormal) then
-    begin
-      FN.VNode.Parent.CheckState := csMixedNormal;
-      FTree.RepaintNode(FN.VNode.Parent);
-    end;
     FSettings.VisibleMessageTypes := FSettings.VisibleMessageTypes +
       FN.Data.MessageTypes;
+    if MatchText(FN.Data.Caption, ['SQL', 'INI', 'JSON']) then
+      FSettings.VisibleValueTypes.Add(FN.Data.Caption);
   end
   else
   begin
-    if not UpdateChildren(FN, csUncheckedNormal) then
-    begin
-      FN.VNode.Parent.CheckState := csMixedNormal;
-      FTree.RepaintNode(FN.VNode.Parent);
-    end;
     FSettings.VisibleMessageTypes := FSettings.VisibleMessageTypes -
       FN.Data.MessageTypes;
+    if MatchText(FN.Data.Caption, ['SQL', 'INI', 'JSON']) then
+    begin
+      I := FSettings.VisibleValueTypes.IndexOf(FN.Data.Caption);
+      if I <> -1 then
+      begin
+        FSettings.VisibleValueTypes.Delete(I);
+      end;
+    end;
   end;
+  Logger.SendStrings(FSettings.VisibleValueTypes);
+  UpdateChildren(FN, FN.VNode.CheckState);
+  UpdateParent(FN, FN.VNode.CheckState);
 end;
 
 procedure TfrmMessageFilter.FTreeFocusChanged(Sender: TBaseVirtualTree;
@@ -275,6 +288,12 @@ begin
   AddNode('XML', 28, [lmtText]);
   AddNode('INI', 0, [lmtText]);
   AddNode('JSON', 26, [lmtText]);
+  FSettings.VisibleValueTypes.Add('SQL');
+  FSettings.VisibleValueTypes.Add('XML');
+  FSettings.VisibleValueTypes.Add('INI');
+  FSettings.VisibleValueTypes.Add('JSON');
+
+  Logger.SendStrings(FSettings.VisibleValueTypes);
 
   LNode := nil;
   LNode := AddNode(
@@ -290,6 +309,8 @@ begin
   FTree.FullExpand;
 end;
 
+{ Updates checkbox state of children if applicable. }
+
 function TfrmMessageFilter.UpdateChildren(ANode: TFilterNode;
   ACheckState: TCheckState): Boolean;
 var
@@ -303,6 +324,7 @@ begin
       N := ANode.Items[I];
       N.CheckState := ACheckState;
       FTree.RepaintNode(N.VNode);
+      UpdateChildren(N, ACheckState);
     end;
     Result := True;
   end
@@ -310,6 +332,40 @@ begin
     Result := False;
 end;
 
+function TfrmMessageFilter.UpdateParent(ANode: TFilterNode;
+  ACheckState: TCheckState): Boolean;
+var
+  LFirstChild : PVirtualNode;
+  LLastChild  : PVirtualNode;
+  N           : PVirtualNode;
+  B           : Boolean;
+begin
+  Logger.Track(Self, 'UpdateParent');
+  if Assigned(ANode) and Assigned(ANode.VNode) and Assigned(ANode.VNode.Parent) then
+  begin
+    LFirstChild := ANode.VNode.Parent.FirstChild;
+    LLastChild  := ANode.VNode.Parent.LastChild;
+    N := LFirstChild;
+    B := Assigned(N) and (N.CheckState = ACheckState);
+    while B and (N <> LLastChild) do
+    begin
+      N := N.NextSibling;
+      B := B and Assigned(N) and (N.CheckState = ACheckState);
+    end;
+    if B then
+    begin
+      ANode.VNode.Parent.CheckState := ACheckState;
+    end
+    else
+    begin
+      ANode.VNode.Parent.CheckState := csMixedNormal;
+    end;
+    FTree.RepaintNode(ANode.VNode.Parent);
+    Result := B;
+  end
+  else
+    Result := False;
+end;
 {$ENDREGION}
 
 end.

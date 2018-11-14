@@ -35,11 +35,8 @@ uses
 
   DDuce.Settings.TextFormat, DDuce.Utils,
 
-  LogViewer.Interfaces,
-  LogViewer.Factories, LogViewer.Manager, LogViewer.Settings,
-  LogViewer.ComPort.Settings,
-
-  LogViewer.Dashboard.View;
+  LogViewer.Interfaces, LogViewer.Factories, LogViewer.Manager,
+  LogViewer.Settings, LogViewer.ComPort.Settings, LogViewer.Dashboard.View;
 
 type
   TfrmMain = class(TForm)

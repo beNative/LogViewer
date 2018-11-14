@@ -16,7 +16,7 @@
 
 unit LogViewer.CallStack.Data;
 
-{ Data class holding information shown in the callstack list. }
+{ Class holding information shown in the callstack list. }
 
 interface
 

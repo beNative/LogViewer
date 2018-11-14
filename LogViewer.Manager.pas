@@ -899,18 +899,18 @@ var
   A   : TAction;
   MLS : TMessageListSettings;
 begin
-//  MLS := Settings.MessageListSettings;
-//  if Assigned(FActiveView) then
-//  begin
-//    A := ASender as TAction;
-//    if AToggle then
-//      A.Checked := not A.Checked;
-//    if A.Checked then
-//      MLS.VisibleMessageTypes := MLS.VisibleMessageTypes + [AMessageType]
-//    else
-//      MLS.VisibleMessageTypes := MLS.VisibleMessageTypes - [AMessageType];
-//    FActiveView.UpdateView;
-//  end;
+  MLS := Settings.MessageListSettings;
+  if Assigned(FActiveView) then
+  begin
+    A := ASender as TAction;
+    if AToggle then
+      A.Checked := not A.Checked;
+    if A.Checked then
+      MLS.VisibleMessageTypes := MLS.VisibleMessageTypes + [AMessageType]
+    else
+      MLS.VisibleMessageTypes := MLS.VisibleMessageTypes - [AMessageType];
+    FActiveView.UpdateView;
+  end;
 end;
 {$ENDREGION}
 

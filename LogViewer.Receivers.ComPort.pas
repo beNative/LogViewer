@@ -16,7 +16,7 @@
 
 unit LogViewer.Receivers.ComPort;
 
-{ COM port channel receiver. }
+{ COM-port channel receiver. }
 
 interface
 

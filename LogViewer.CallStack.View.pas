@@ -18,7 +18,7 @@ unit LogViewer.CallStack.View;
 
 interface
 
-{ TVirtualStringTree - TTreeViewPresenter combination to display the callstack }
+{ Callstack viewer. }
 
 uses
   Winapi.Windows, Winapi.Messages,

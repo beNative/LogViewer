@@ -175,10 +175,6 @@ object frmDashboard: TfrmDashboard
         object tsZeroMQ: TTabSheet
           Caption = 'ZeroMQ'
           ImageIndex = 6
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           DesignSize = (
             297
             390)
@@ -315,10 +311,6 @@ object frmDashboard: TfrmDashboard
         object tsCOMPort: TTabSheet
           Caption = 'COMPort'
           ImageIndex = 24
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object pnlCOMPortTitle: TPanel
             Left = 0
             Top = 0
@@ -369,7 +361,7 @@ object frmDashboard: TfrmDashboard
     Left = 328
     Top = 112
     Bitmap = {
-      494C0101030005006C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010103000500740010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000C0D0C4F777C7AF01D1E1D770000000000000005151515660808

@@ -49,7 +49,6 @@ uses
   LogViewer.Receivers.Base in 'LogViewer.Receivers.Base.pas',
   LogViewer.DisplayValues.Settings in 'LogViewer.DisplayValues.Settings.pas',
   LogViewer.DisplayValues.Settings.View in 'LogViewer.DisplayValues.Settings.View.pas' {frmDisplayValuesSettings},
-  LogViewer.Dashboard.Node in 'LogViewer.Dashboard.Node.pas',
   LogViewer.Subscribers.ZeroMQ in 'LogViewer.Subscribers.ZeroMQ.pas',
   LogViewer.Subscribers.ComPort in 'LogViewer.Subscribers.ComPort.pas',
   LogViewer.Subscribers.WinIPC in 'LogViewer.Subscribers.WinIPC.pas',
@@ -60,7 +59,9 @@ uses
   LogViewer.MessageFilter.View in 'LogViewer.MessageFilter.View.pas' {frmMessageFilter},
   LogViewer.MessageFilter.Data in 'LogViewer.MessageFilter.Data.pas',
   LogViewer.Receivers.FileSystem in 'LogViewer.Receivers.FileSystem.pas',
-  LogViewer.Subscribers.FileSystem in 'LogViewer.Subscribers.FileSystem.pas';
+  LogViewer.Subscribers.FileSystem in 'LogViewer.Subscribers.FileSystem.pas',
+  LogViewer.Dashboard.Data in 'LogViewer.Dashboard.Data.pas',
+  LogViewer.MessageList.Data in 'LogViewer.MessageList.Data.pas';
 
 {$R *.res}
 

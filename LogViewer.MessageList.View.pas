@@ -54,6 +54,7 @@ uses
 
 type
   TfrmMessageList = class(TForm, ILogViewer)
+    {$REGION 'designer controls'}
     dscMain           : TDataSource;
     edtHandleType     : TLabeledEdit;
     edtHeight         : TLabeledEdit;
@@ -762,12 +763,19 @@ begin
   LN := Sender.GetNodeData<TLogNode>(Node);
   if Assigned(LN) then
   begin
-    B := LN.MessageType in Settings.VisibleMessageTypes;
+    if (LN.MessageType = lmtText) and (LN.Highlighter <> '') then
+    begin
+      B := Settings.VisibleValueTypes.IndexOf(LN.Highlighter) <> -1;
+    end
+    else
+    begin
+      B := LN.MessageType in Settings.VisibleMessageTypes;
+    end;
     if edtMessageFilter.Text <> '' then
       B := B and
-        (ContainsText(LN.Text, edtMessageFilter.Text) or
-         ContainsText(LN.ValueName, edtMessageFilter.Text) or
-         ContainsText(LN.Value, edtMessageFilter.Text));
+      (ContainsText(LN.Text, edtMessageFilter.Text) or
+       ContainsText(LN.ValueName, edtMessageFilter.Text) or
+       ContainsText(LN.Value, edtMessageFilter.Text));
     Sender.IsVisible[Node] := B;
   end;
 end;
@@ -1445,7 +1453,6 @@ var
   LN  : TLogNode;
   LN2 : TLogNode;
   VN  : PVirtualNode;
-  VN2  : PVirtualNode;
 begin
   FCallStack.Clear;
   VN := ALogNode.VTNode;

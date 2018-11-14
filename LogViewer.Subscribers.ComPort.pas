@@ -16,7 +16,7 @@
 
 unit LogViewer.Subscribers.ComPort;
 
-{ ComPort subscriber data. }
+{ COM-Port subscriber data. }
 
 interface
 
@@ -33,6 +33,7 @@ type
     FSettings   : TComPortSettings;
     FSerialPort : TBlockSerial;
     FBuffer     : TMemoryStream;
+    FLineBuffer : TStringList;
 
     procedure FSerialPortStatus(
       Sender      : TObject;
@@ -86,6 +87,7 @@ procedure TComPortSubscriber.AfterConstruction;
 begin
   inherited AfterConstruction;
   FBuffer              := TMemoryStream.Create;
+  FLineBuffer          := TStringList.Create;
   FSerialPort          := TBlockSerial.Create;
   FSerialPort.OnStatus := FSerialPortStatus;
 end;
@@ -96,6 +98,7 @@ begin
   FSettings.Free;
   FSerialPort.Free;
   FBuffer.Free;
+  FLineBuffer.Free;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
@@ -202,14 +205,23 @@ end;
 procedure TComPortSubscriber.Poll;
 var
   S : AnsiString;
+//  I : Integer;
+  //L : string;
 begin
   inherited Poll;
   while FSerialPort.WaitingDataEx <> 0 do
   begin
-    S := FSerialPort.RecvPacket(500); // 50ms timeout
-    //S := Trim(FSerialPort.RecvTerminated(10, #10));
-    if Trim(S) <> '' then
-      DoStringReceived(S);
+    //S := FSerialPort.RecvPacket(50); // 50ms timeout
+    S := Trim(FSerialPort.RecvTerminated(50, #13));
+    DoStringReceived(S);
+//    if Trim(S) <> '' then
+//    begin
+//      FLineBuffer.Text := S;
+//      for I := 0 to FLineBuffer.Count - 1 do
+//      begin
+//        DoStringReceived(AnsiString(FLineBuffer[I]));
+//      end;
+//    end;
   end;
 end;
 {$ENDREGION}

@@ -20,6 +20,16 @@ unit LogViewer.Receivers.WinIPC;
 
 interface
 
+uses
+  System.Classes,
+  Vcl.ExtCtrls,
+
+  Spring,
+
+  DDuce.WinIPC.Server,
+
+  LogViewer.Receivers.Base, LogViewer.Interfaces, LogViewer.WinIPC.Settings;
+
 {$REGION 'documentation'}
 { Receives logmessages through WinIPC (WM_COPYDATA) messages.
 
@@ -33,16 +43,6 @@ interface
 
 { TODO :  Notification when a ProcessId/ProcessName does not exist anymore }
 {$ENDREGION}
-
-uses
-  System.Classes,
-  Vcl.ExtCtrls,
-
-  Spring,
-
-  DDuce.WinIPC.Server,
-
-  LogViewer.Receivers.Base, LogViewer.Interfaces, LogViewer.WinIPC.Settings;
 
 type
   TWinIPCChannelReceiver = class(TChannelReceiver, IChannelReceiver, IWinIPC)

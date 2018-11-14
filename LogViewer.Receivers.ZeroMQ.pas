@@ -20,6 +20,18 @@ unit LogViewer.Receivers.ZeroMQ;
 
 interface
 
+uses
+  System.Classes,
+  Vcl.ExtCtrls,
+
+  Spring, Spring.Collections,
+
+  ZeroMQ,
+
+  DDuce.DynamicRecord,
+
+  LogViewer.Interfaces,  LogViewer.Receivers.Base, LogViewer.ZeroMQ.Settings;
+
 {$REGION 'documentation'}
 { Receives logmessages from one or more ZMQ publisher through a subscriber
   socket.
@@ -42,18 +54,6 @@ interface
     - list of connectionstrings to subscribe to?
 }
 {$ENDREGION}
-
-uses
-  System.Classes,
-  Vcl.ExtCtrls,
-
-  Spring, Spring.Collections,
-
-  ZeroMQ,
-
-  DDuce.DynamicRecord,
-
-  LogViewer.Interfaces,  LogViewer.Receivers.Base, LogViewer.ZeroMQ.Settings;
 
 type
   TZeroMQChannelReceiver = class(TChannelReceiver, IChannelReceiver, IZMQ)
