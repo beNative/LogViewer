@@ -650,6 +650,7 @@ begin
       TDashboardData.Create(AReceiver, ASubscriber)
     );
   end;
+  FTreeView.FullExpand;
 end;
 
 procedure TfrmDashboard.CreateChannelReceivers;
@@ -705,6 +706,7 @@ begin
   FFileSystemReceiver := TLogViewerFactories.CreateFileSystemReceiver(
     FManager, ''
   );
+  FFileSystemReceiver.SubscriberList.OnKeyChanged.Add(FFileSystemReceiverSubscriberListChanged);
   FFileSystemNode := AddNode(nil, FFileSystemReceiver, nil);
     FFileSystemNode.CheckType := ctCheckBox;
   if FFileSystemReceiver.Enabled then

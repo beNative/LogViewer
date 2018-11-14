@@ -28,12 +28,15 @@ uses
 
   VirtualTrees,
 
-  DDuce.Editor.Interfaces,
+  DDuce.Editor.Interfaces, DDuce.Components.VirtualTrees.Node,
 
-  LogViewer.Settings, LogViewer.Settings.Dialog.ConfigNode,
+  LogViewer.Settings, LogViewer.Settings.Dialog.Data,
   LogViewer.Comport.Settings.View, LogViewer.WinIPC.Settings.View,
   LogViewer.Watches.Settings.View, LogViewer.WinODS.Settings.View,
   LogViewer.ZeroMQ.Settings.View, LogViewer.DisplayValues.Settings.View;
+
+type
+  TConfigNode = TVTNode<TConfigData>;
 
 type
   TfrmLogViewerSettings = class(TForm)
@@ -73,7 +76,6 @@ type
     FWinODSSettingsForm        : TfrmWinODSSettings;
     FZeroMQSettingsForm        : TfrmZeroMQSettings;
     FDisplayValuesSettingsForm : TfrmDisplayValuesSettings;
-    //FEditor                    : IEditorView;
 
     procedure FConfigTreeGetText(
       Sender       : TBaseVirtualTree;
@@ -93,8 +95,13 @@ type
     );
 
   protected
-    procedure BuildConfigNodes;
-    procedure AddNodesToTree(AParent: PVirtualNode; ANode: TConfigNode);
+    procedure BuildTree;
+
+    function AddNode(
+      AParentNode : TConfigNode;
+      const AText : string;
+      ATabSheet   : TTabSheet
+    ): TConfigNode;
 
     procedure CreateSettingsForms;
 
@@ -139,7 +146,7 @@ begin
   FConfigTree.Margins.Right := 0;
 
   FConfigTree.NodeDataSize := SizeOf(TConfigNode);
-  BuildConfigNodes;
+  BuildTree;
   for I := 0 to pgcMain.PageCount - 1 do
   begin
     pgcMain.Pages[I].TabVisible := False;
@@ -161,8 +168,8 @@ var
   CN: TConfigNode;
 begin
   CN := Sender.GetNodeData<TConfigNode>(Node);
-  if Assigned(CN.TabSheet) then
-    pgcMain.ActivePage := CN.TabSheet;
+  if Assigned(CN.Data.TabSheet) then
+    pgcMain.ActivePage := CN.Data.TabSheet;
 end;
 
 procedure TfrmLogViewerSettings.FConfigTreeFreeNode(Sender: TBaseVirtualTree;
@@ -203,35 +210,39 @@ end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
-procedure TfrmLogViewerSettings.AddNodesToTree(AParent: PVirtualNode;
-  ANode: TConfigNode);
-var
-  LSubNode: TConfigNode;
-  LVTNode : PVirtualNode;
+function TfrmLogViewerSettings.AddNode(AParentNode: TConfigNode; const AText:
+  string;  ATabSheet: TTabSheet): TConfigNode;
 begin
-  LVTNode := FConfigTree.AddChild(AParent, ANode);
-  ANode.VTNode := LVTNode;
-  for LSubNode in ANode.Nodes do
-    AddNodesToTree(LVTNode, LSubNode);
+  if Assigned(AParentNode) then
+  begin
+    Result := AParentNode.Add(TConfigData.Create(AText, ATabSheet));
+  end
+  else
+  begin
+    Result := TConfigNode.Create(
+      FConfigTree,
+      TConfigData.Create(AText, ATabSheet)
+    );
+  end;
+  Result.Text := AText;
 end;
 
-procedure TfrmLogViewerSettings.BuildConfigNodes;
+procedure TfrmLogViewerSettings.BuildTree;
 var
   LNode : TConfigNode;
 begin
-  LNode := TConfigNode.Create('View settings');
-  AddNodesToTree(nil, LNode);
-  AddNodesToTree(LNode.VTNode, TConfigNode.Create('Display settings', tsDisplayValuesSettings));
-  AddNodesToTree(LNode.VTNode, TConfigNode.Create('Watches', tsWatches));
-  AddNodesToTree(LNode.VTNode, TConfigNode.Create('Callstack', tsCallstack));
-  LNode := TConfigNode.Create('Channel settings');
-  AddNodesToTree(nil, LNode);
-  AddNodesToTree(LNode.VTNode, TConfigNode.Create('WinIPC', tsWinIPC));
-  AddNodesToTree(LNode.VTNode, TConfigNode.Create('OutputDebugString API', tsWinODS));
-  AddNodesToTree(LNode.VTNode, TConfigNode.Create('Serial port', tsComport));
-  AddNodesToTree(LNode.VTNode, TConfigNode.Create('ZeroMQ', tsZeroMQ));
-  LNode := TConfigNode.Create('General settings');
-  AddNodesToTree(nil, LNode);
+  LNode := AddNode(nil, 'View settings', nil);
+  AddNode(LNode, 'Display settings', tsDisplayValuesSettings);
+  AddNode(LNode, 'Watches', tsWatches);
+  AddNode(LNode, 'Callstack', tsCallstack);
+
+  LNode := AddNode(nil, 'Channel settings', nil);
+  AddNode(LNode, 'WinIPC', tsWinIPC);
+  AddNode(LNode, 'OutputDebugString API', tsWinODS);
+  AddNode(LNode, 'Serial port', tsComport);
+  AddNode(LNode, 'ZeroMQ', tsZeroMQ);
+
+  AddNode(nil, 'General settings', nil);
   FConfigTree.FullExpand;
 end;
 

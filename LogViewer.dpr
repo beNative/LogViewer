@@ -40,7 +40,6 @@ uses
   LogViewer.WinODS.Settings in 'LogViewer.WinODS.Settings.pas',
   LogViewer.ZeroMQ.Settings in 'LogViewer.ZeroMQ.Settings.pas',
   LogViewer.WinIPC.Settings in 'LogViewer.WinIPC.Settings.pas',
-  LogViewer.Settings.Dialog.ConfigNode in 'LogViewer.Settings.Dialog.ConfigNode.pas',
   LogViewer.Watches.Settings in 'LogViewer.Watches.Settings.pas',
   LogViewer.CallStack.Settings in 'LogViewer.CallStack.Settings.pas',
   LogViewer.Watches.Settings.View in 'LogViewer.Watches.Settings.View.pas' {frmWatchSettings},
@@ -61,7 +60,8 @@ uses
   LogViewer.Receivers.FileSystem in 'LogViewer.Receivers.FileSystem.pas',
   LogViewer.Subscribers.FileSystem in 'LogViewer.Subscribers.FileSystem.pas',
   LogViewer.Dashboard.Data in 'LogViewer.Dashboard.Data.pas',
-  LogViewer.MessageList.Data in 'LogViewer.MessageList.Data.pas';
+  LogViewer.MessageList.Data in 'LogViewer.MessageList.Data.pas',
+  LogViewer.Settings.Dialog.Data in 'LogViewer.Settings.Dialog.Data.pas';
 
 {$R *.res}
 

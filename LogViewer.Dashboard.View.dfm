@@ -56,7 +56,7 @@ object frmDashboard: TfrmDashboard
         Top = 0
         Width = 305
         Height = 421
-        ActivePage = tsCOMPort
+        ActivePage = tsWinIPC
         Align = alClient
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clGrayText
@@ -74,16 +74,12 @@ object frmDashboard: TfrmDashboard
           Margins.Bottom = 0
           Caption = 'WinIPC'
           ImageIndex = 28
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object lblWinIPCDescription: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
-            Width = 287
-            Height = 221
+            Width = 291
+            Height = 362
             Align = alClient
             Caption = 
               'Messages are exchanged between the source application and LogVie' +
@@ -98,6 +94,8 @@ object frmDashboard: TfrmDashboard
               'based on queueuing.'#13#10#13#10'A new node is automatically created when ' +
               'a process is detected that sends compatible log messages.'#13#10
             WordWrap = True
+            ExplicitWidth = 287
+            ExplicitHeight = 221
           end
           object pnlWinIPCTitle: TPanel
             Left = 0
@@ -105,6 +103,7 @@ object frmDashboard: TfrmDashboard
             Width = 297
             Height = 25
             Align = alTop
+            Alignment = taLeftJustify
             BevelOuter = bvNone
             Caption = 'Windows IPC'
             Font.Charset = ANSI_CHARSET
@@ -120,16 +119,12 @@ object frmDashboard: TfrmDashboard
         object tsWinODS: TTabSheet
           Caption = 'WinODS'
           ImageIndex = 28
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object lblWinODSDescription: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
             Width = 291
-            Height = 247
+            Height = 362
             Align = alClient
             Caption = 
               'This receiver captures messages from any local applicatiion that' +
@@ -153,6 +148,7 @@ object frmDashboard: TfrmDashboard
             Font.Style = []
             ParentFont = False
             WordWrap = True
+            ExplicitHeight = 247
           end
           object pnlWinODSTitle: TPanel
             Left = 0
@@ -160,6 +156,7 @@ object frmDashboard: TfrmDashboard
             Width = 297
             Height = 25
             Align = alTop
+            Alignment = taLeftJustify
             BevelOuter = bvNone
             Caption = 'Windows API OuputDebugString '
             Font.Charset = ANSI_CHARSET
@@ -200,6 +197,7 @@ object frmDashboard: TfrmDashboard
             Width = 297
             Height = 25
             Align = alTop
+            Alignment = taLeftJustify
             BevelOuter = bvNone
             Caption = 'ZeroMQ'
             Font.Charset = ANSI_CHARSET
@@ -282,10 +280,6 @@ object frmDashboard: TfrmDashboard
               Align = alClient
               TabOrder = 0
               WordWrap = True
-              ExplicitLeft = 36
-              ExplicitTop = 8
-              ExplicitWidth = 75
-              ExplicitHeight = 25
             end
             object btnAddZMQNodeForLogViewer: TButton
               AlignWithMargins = True
@@ -301,10 +295,6 @@ object frmDashboard: TfrmDashboard
               Align = alClient
               TabOrder = 1
               WordWrap = True
-              ExplicitLeft = 183
-              ExplicitTop = 8
-              ExplicitWidth = 75
-              ExplicitHeight = 25
             end
           end
         end
@@ -317,6 +307,7 @@ object frmDashboard: TfrmDashboard
             Width = 297
             Height = 25
             Align = alTop
+            Alignment = taLeftJustify
             BevelOuter = bvNone
             Caption = 'COM port'
             Font.Charset = ANSI_CHARSET
