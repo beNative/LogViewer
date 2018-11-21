@@ -63,6 +63,7 @@
         <VerInfo_MinorVer>8</VerInfo_MinorVer>
         <VerInfo_Build>114</VerInfo_Build>
         <VerInfo_Release>17</VerInfo_Release>
+        <Custom_Styles>Light|VCLSTYLE|$(BDSCOMMONDIR)\Styles\Light.vsf</Custom_Styles>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>

@@ -206,7 +206,10 @@ end;
 {$REGION 'property access methods'}
 function TWatch.GetValue: string;
 begin
-  Result := FList[FCurrentIndex].Value;
+  if FList.Count > 0 then
+    Result := FList[FCurrentIndex].Value
+  else
+    Result := '';
 end;
 
 function TWatch.GetCount: Integer;

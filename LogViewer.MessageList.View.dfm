@@ -4,6 +4,7 @@ object frmMessageList: TfrmMessageList
   ClientHeight = 746
   ClientWidth = 1073
   Color = clWhite
+  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -49,14 +50,14 @@ object frmMessageList: TfrmMessageList
       Left = 0
       Top = 0
       Width = 325
-      Height = 22
+      Height = 20
       Align = alTop
       Alignment = taLeftJustify
       BevelOuter = bvNone
       Caption = 'Message Details'
       Font.Charset = ANSI_CHARSET
       Font.Color = clGray
-      Font.Height = -16
+      Font.Height = -15
       Font.Name = 'Segoe UI'
       Font.Style = []
       ParentBackground = False
@@ -65,20 +66,27 @@ object frmMessageList: TfrmMessageList
     end
     object pnlRawMessageData: TPanel
       Left = 0
-      Top = 22
+      Top = 20
       Width = 325
-      Height = 724
+      Height = 726
+      Margins.Left = 0
+      Margins.Top = 1
+      Margins.Right = 0
+      Margins.Bottom = 0
       Align = alClient
       BevelKind = bkFlat
       BevelOuter = bvNone
       Color = clWhite
       ParentBackground = False
       TabOrder = 1
+      StyleElements = [seFont, seBorder]
+      ExplicitTop = 22
+      ExplicitHeight = 724
       object pgcMessageData: TPageControl
         Left = 0
         Top = 0
         Width = 321
-        Height = 720
+        Height = 722
         Margins.Left = 0
         Margins.Top = 0
         Margins.Right = 0
@@ -88,13 +96,19 @@ object frmMessageList: TfrmMessageList
         Style = tsFlatButtons
         TabOrder = 0
         StyleElements = [seFont]
+        ExplicitWidth = 325
+        ExplicitHeight = 724
         object tsMessageView: TTabSheet
           Caption = 'Messageview'
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 317
+          ExplicitHeight = 693
           object pgcMessageDetails: TPageControl
             Left = 0
             Top = 0
             Width = 313
-            Height = 689
+            Height = 691
             Margins.Left = 0
             Margins.Top = 0
             Margins.Right = 0
@@ -103,27 +117,34 @@ object frmMessageList: TfrmMessageList
             Align = alClient
             Style = tsFlatButtons
             TabOrder = 0
+            StyleElements = [seFont]
+            ExplicitWidth = 317
+            ExplicitHeight = 693
             object tsValueList: TTabSheet
               Caption = 'Value list'
               ImageIndex = 2
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 309
+              ExplicitHeight = 662
             end
             object tsTextViewer: TTabSheet
               Caption = 'Text viewer'
               ExplicitLeft = 0
               ExplicitTop = 0
               ExplicitWidth = 0
-              ExplicitHeight = 655
+              ExplicitHeight = 658
               object pnlTextViewer: TPanel
                 Left = 0
                 Top = 0
                 Width = 305
-                Height = 658
+                Height = 660
                 Align = alClient
                 BevelEdges = []
                 BevelOuter = bvNone
                 Color = clWhite
                 TabOrder = 0
-                ExplicitHeight = 655
+                ExplicitHeight = 658
               end
             end
             object tsImageViewer: TTabSheet
@@ -132,12 +153,12 @@ object frmMessageList: TfrmMessageList
               ExplicitLeft = 0
               ExplicitTop = 0
               ExplicitWidth = 0
-              ExplicitHeight = 655
+              ExplicitHeight = 658
               object pnlImageViewer: TPanel
                 Left = 0
                 Top = 0
                 Width = 305
-                Height = 658
+                Height = 660
                 Margins.Left = 0
                 Margins.Top = 0
                 Margins.Right = 0
@@ -146,7 +167,7 @@ object frmMessageList: TfrmMessageList
                 BevelEdges = []
                 BevelOuter = bvNone
                 TabOrder = 0
-                ExplicitHeight = 655
+                ExplicitHeight = 658
                 object edtWidth: TLabeledEdit
                   Left = 64
                   Top = 6
@@ -195,7 +216,7 @@ object frmMessageList: TfrmMessageList
                   Left = 0
                   Top = 59
                   Width = 305
-                  Height = 599
+                  Height = 601
                   HorzScrollBar.Smooth = True
                   HorzScrollBar.Tracking = True
                   VertScrollBar.Smooth = True
@@ -208,7 +229,7 @@ object frmMessageList: TfrmMessageList
                   Color = clWhite
                   ParentColor = False
                   TabOrder = 4
-                  ExplicitHeight = 596
+                  ExplicitHeight = 599
                   object imgBitmap: TImage
                     Left = 3
                     Top = 3
@@ -227,7 +248,7 @@ object frmMessageList: TfrmMessageList
               ExplicitLeft = 0
               ExplicitTop = 0
               ExplicitWidth = 0
-              ExplicitHeight = 655
+              ExplicitHeight = 658
             end
           end
         end
@@ -237,7 +258,7 @@ object frmMessageList: TfrmMessageList
           ExplicitLeft = 0
           ExplicitTop = 0
           ExplicitWidth = 0
-          ExplicitHeight = 686
+          ExplicitHeight = 689
         end
       end
     end
@@ -287,14 +308,14 @@ object frmMessageList: TfrmMessageList
           Left = 0
           Top = 0
           Width = 313
-          Height = 22
+          Height = 20
           Align = alTop
           Alignment = taLeftJustify
           BevelOuter = bvNone
           Caption = 'Watch List'
           Font.Charset = ANSI_CHARSET
           Font.Color = clGray
-          Font.Height = -16
+          Font.Height = -15
           Font.Name = 'Segoe UI'
           Font.Style = []
           ParentBackground = False
@@ -314,14 +335,14 @@ object frmMessageList: TfrmMessageList
           Left = 0
           Top = 0
           Width = 313
-          Height = 22
+          Height = 20
           Align = alTop
           Alignment = taLeftJustify
           BevelOuter = bvNone
           Caption = 'Call Stack'
           Font.Charset = ANSI_CHARSET
           Font.Color = clGray
-          Font.Height = -16
+          Font.Height = -15
           Font.Name = 'Segoe UI'
           Font.Style = []
           ParentBackground = False
@@ -340,23 +361,22 @@ object frmMessageList: TfrmMessageList
     BevelOuter = bvNone
     BevelWidth = 2
     Color = clWhite
-    ParentBackground = False
     TabOrder = 2
     object pnlFilter: TPanel
       Left = 0
       Top = 0
       Width = 423
-      Height = 25
+      Height = 20
       Align = alTop
       BevelOuter = bvNone
-      ParentBackground = False
       TabOrder = 0
+      StyleElements = [seFont, seBorder]
       object edtMessageFilter: TButtonedEdit
         AlignWithMargins = True
         Left = 0
         Top = 2
         Width = 423
-        Height = 21
+        Height = 16
         Margins.Left = 0
         Margins.Top = 2
         Margins.Right = 0
@@ -364,16 +384,27 @@ object frmMessageList: TfrmMessageList
         Align = alClient
         Alignment = taCenter
         AutoSize = False
-        BevelInner = bvLowered
+        BevelKind = bkFlat
         BevelOuter = bvNone
+        BorderStyle = bsNone
+        Color = clBtnFace
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
         Images = dmManager.imlMain
+        ParentFont = False
         RightButton.ImageIndex = 15
         RightButton.Visible = True
         TabOrder = 0
-        TextHint = 'Message filter'
+        StyleElements = [seFont, seBorder]
         OnChange = edtMessageFilterChange
         OnKeyDown = edtMessageFilterKeyDown
         OnKeyUp = edtMessageFilterKeyUp
+        OnMouseEnter = edtMessageFilterMouseEnter
+        OnMouseLeave = edtMessageFilterMouseLeave
+        ExplicitHeight = 20
       end
     end
   end
@@ -382,7 +413,7 @@ object frmMessageList: TfrmMessageList
     Left = 607
     Top = 150
     Bitmap = {
-      494C010116001900780010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010116001900800010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

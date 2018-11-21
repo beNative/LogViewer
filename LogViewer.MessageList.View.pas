@@ -103,6 +103,8 @@ type
     );
     procedure chkAutoFilterClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure edtMessageFilterMouseEnter(Sender: TObject);
+    procedure edtMessageFilterMouseLeave(Sender: TObject);
 
   private class var
     FCounter : Integer;
@@ -355,18 +357,18 @@ begin
   CreateLogTreeView;
   CreateWatchesView;
   CreateCallStackView;
-    // CreateValueListView;
+  CreateValueListView;
 
-  if Supports(Subscriber, IWinIPC) or Supports(Subscriber, IZMQ) then
-  begin
-    pnlLeft.Visible         := True;
-    splLeftVertical.Visible := True;
-  end
-  else
-  begin
-    pnlLeft.Visible         := False;
-    splLeftVertical.Visible := False;
-  end;
+//  if Supports(Subscriber, IWinIPC) or Supports(Subscriber, IZMQ) then
+//  begin
+//    pnlLeft.Visible         := True;
+//    splLeftVertical.Visible := True;
+//  end
+//  else
+//  begin
+//    pnlLeft.Visible         := False;
+//    splLeftVertical.Visible := False;
+//  end;
 
   tsRawData.TabVisible      := False;
   tsMessageView.TabVisible  := False;
@@ -393,7 +395,6 @@ procedure TfrmMessageList.BeforeDestruction;
 begin
   Logger.Track(Self, 'BeforeDestruction');
   FEditorView.Visible := False;
-  //FEditorView := nil;
   if Assigned(FSettings) then
   begin
     FSettings.LeftPanelWidth  := pnlLeft.Width;
@@ -600,7 +601,7 @@ begin
   else
   begin
     edtMessageFilter.Font.Style := [];
-    edtMessageFilter.Color := clWhite;
+    edtMessageFilter.Color := clBtnFace;
   end;
 
   if Settings.AutoFilterMessages then
@@ -661,6 +662,18 @@ begin
       FLogTreeView.SetFocus;
   end;
   FVKPressed := False;
+end;
+
+procedure TfrmMessageList.edtMessageFilterMouseEnter(Sender: TObject);
+begin
+  if not edtMessageFilter.Focused then
+    edtMessageFilter.Color := clWhite;
+end;
+
+procedure TfrmMessageList.edtMessageFilterMouseLeave(Sender: TObject);
+begin
+  if not edtMessageFilter.Focused then
+    edtMessageFilter.Color := clBtnFace;
 end;
 {$ENDREGION}
 
@@ -972,7 +985,7 @@ begin
     begin
       SL := TStringList.Create;
       try
-        SL.Text := string(FCurrentMsg.Text);
+        SL.Text := Trim(string(FCurrentMsg.Text));
         if SL.Count > 0 then
         begin
           S := SL[0];

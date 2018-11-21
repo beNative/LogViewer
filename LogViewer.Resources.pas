@@ -70,6 +70,7 @@ var
   ];
 
 resourcestring
+  // message types
   SName        = 'Name';
   SType        = 'Type';
   SValue       = 'Value';
@@ -100,6 +101,19 @@ resourcestring
   SValueMessages        = 'Value messages';
   STraceMessages        = 'Trace messages';
   STrackMethod          = 'Track method';
+
+  // settings dialog
+  SViewSettings    = 'View settings';
+  SDisplaySettings = 'Display settings';
+  SWatches         = 'Watches';
+  SCallStack       = 'Callstack';
+  SChannelSettings = 'Channel settings';
+  SGeneralSettings = 'General settings';
+
+  SWinIPC  = 'WinIPC';
+  SWinODS  = 'OutputDebugString API';
+  SComPort = 'Serial port';
+  SZeroMQ  = 'ZeroMQ';
 
 const
   ALL_MESSAGES = [

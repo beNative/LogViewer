@@ -120,7 +120,9 @@ implementation
 {$R *.dfm}
 
 uses
-  DDuce.Editor.Factories, DDuce.Factories.VirtualTrees;
+  DDuce.Editor.Factories, DDuce.Factories.VirtualTrees,
+
+  LogViewer.Resources;
 
 {$REGION 'construction and destruction'}
 constructor TfrmLogViewerSettings.Create(AOwner: TComponent;
@@ -231,18 +233,18 @@ procedure TfrmLogViewerSettings.BuildTree;
 var
   LNode : TConfigNode;
 begin
-  LNode := AddNode(nil, 'View settings', nil);
-  AddNode(LNode, 'Display settings', tsDisplayValuesSettings);
-  AddNode(LNode, 'Watches', tsWatches);
-  AddNode(LNode, 'Callstack', tsCallstack);
+  LNode := AddNode(nil, SViewSettings, nil);
+  AddNode(LNode, SDisplaySettings, tsDisplayValuesSettings);
+  AddNode(LNode, SWatches, tsWatches);
+  AddNode(LNode, SCallStack, tsCallstack);
 
-  LNode := AddNode(nil, 'Channel settings', nil);
-  AddNode(LNode, 'WinIPC', tsWinIPC);
-  AddNode(LNode, 'OutputDebugString API', tsWinODS);
-  AddNode(LNode, 'Serial port', tsComport);
-  AddNode(LNode, 'ZeroMQ', tsZeroMQ);
+  LNode := AddNode(nil, SChannelSettings, nil);
+  AddNode(LNode, SWinIPC, tsWinIPC);
+  AddNode(LNode, SWinODS, tsWinODS);
+  AddNode(LNode, SComPort, tsComport);
+  AddNode(LNode, SZeroMQ, tsZeroMQ);
 
-  AddNode(nil, 'General settings', nil);
+  AddNode(nil, SGeneralSettings, nil);
   FConfigTree.FullExpand;
 end;
 

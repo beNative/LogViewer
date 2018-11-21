@@ -420,13 +420,16 @@ begin
       FWatchHistoryColumnDefinitions
     );
     ConnectWatchHistoryCDEvents;
-    if FMessageId = 0 then
+    if SelectedWatch.Count > 0 then
     begin
-      FTVPWatchHistory.SelectedItem := SelectedWatch.List.Last;
-    end
-    else
-    begin
-      FTVPWatchHistory.SelectedItem := SelectedWatch.CurrentWatchValue;
+      if FMessageId = 0 then
+      begin
+        FTVPWatchHistory.SelectedItem := SelectedWatch.List.Last;
+      end
+      else
+      begin
+        FTVPWatchHistory.SelectedItem := SelectedWatch.CurrentWatchValue;
+      end;
     end;
   end
   else

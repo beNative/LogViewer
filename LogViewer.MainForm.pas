@@ -55,7 +55,7 @@ type
     pnlDelta          : TPanel;
     pbrCPU            : TKPercentProgressBar;
     pnlMessageCount   : TPanel;
-    pnlMemory: TPanel;
+    pnlMemory         : TPanel;
     {$ENDREGION}
 
     procedure actCenterToScreenExecute(Sender: TObject);
@@ -201,6 +201,12 @@ begin
     Menus
   );
   CreateDashboardView;
+  ctMain.LookAndFeel.Tabs.NotActive.Style.StartColor := ColorToRGB(clBtnFace);
+  ctMain.LookAndFeel.Tabs.NotActive.Style.StopColor  := ColorToRGB(clBtnFace);
+  ctMain.LookAndFeel.Tabs.Active.Style.StartColor    := ColorToRGB(clWindowFrame);
+  ctMain.LookAndFeel.Tabs.Active.Style.StopColor     := ColorToRGB(clWindowFrame);
+  ctMain.LookAndFeel.Tabs.Hot.Style.StartColor       := clSilver;
+  ctMain.LookAndFeel.Tabs.Hot.Style.StopColor        := clSilver;
 end;
 
 procedure TfrmMain.BeforeDestruction;

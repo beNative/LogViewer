@@ -74,12 +74,12 @@ object frmMain: TfrmMain
       Options.Display.Tabs.OffsetTop = 0
       Options.Display.Tabs.OffsetRight = 5
       Options.Display.Tabs.OffsetBottom = 0
-      Options.Display.Tabs.MinWidth = 150
-      Options.Display.Tabs.MaxWidth = 800
+      Options.Display.Tabs.MinWidth = 80
+      Options.Display.Tabs.MaxWidth = 200
       Options.Display.Tabs.TabWidthFromContent = True
-      Options.Display.Tabs.PinnedWidth = 100
+      Options.Display.Tabs.PinnedWidth = 80
       Options.Display.Tabs.ImageOffsetLeft = 15
-      Options.Display.Tabs.TextTrimType = tttNone
+      Options.Display.Tabs.TextTrimType = tttFade
       Options.Display.Tabs.Orientation = toTop
       Options.Display.Tabs.BaseLineTabRegionOnly = False
       Options.Display.Tabs.WordWrap = False
@@ -168,7 +168,7 @@ object frmMain: TfrmMain
       LookAndFeel.Tabs.BaseLine.Thickness = 1.000000000000000000
       LookAndFeel.Tabs.BaseLine.Alpha = 255
       LookAndFeel.Tabs.Modified.CentreColor = clBlue
-      LookAndFeel.Tabs.Modified.OutsideColor = clWhite
+      LookAndFeel.Tabs.Modified.OutsideColor = clBlue
       LookAndFeel.Tabs.Modified.CentreAlpha = 130
       LookAndFeel.Tabs.Modified.OutsideAlpha = 0
       LookAndFeel.Tabs.DefaultFont.Name = 'Segoe UI'
@@ -178,7 +178,7 @@ object frmMain: TfrmMain
       LookAndFeel.Tabs.DefaultFont.TextRenderingMode = TextRenderingHintClearTypeGridFit
       LookAndFeel.Tabs.MouseGlow.CentreColor = clWhite
       LookAndFeel.Tabs.MouseGlow.OutsideColor = clWhite
-      LookAndFeel.Tabs.MouseGlow.CentreAlpha = 120
+      LookAndFeel.Tabs.MouseGlow.CentreAlpha = 0
       LookAndFeel.Tabs.MouseGlow.OutsideAlpha = 0
       LookAndFeel.Tabs.Spinners.Upload.Color = 12759975
       LookAndFeel.Tabs.Spinners.Upload.Thickness = 2.500000000000000000
@@ -187,13 +187,13 @@ object frmMain: TfrmMain
       LookAndFeel.Tabs.Spinners.Download.Thickness = 2.500000000000000000
       LookAndFeel.Tabs.Spinners.Download.Alpha = 255
       LookAndFeel.Tabs.Active.Font.Name = 'Tahoma'
-      LookAndFeel.Tabs.Active.Font.Color = clBlack
+      LookAndFeel.Tabs.Active.Font.Color = clWhite
       LookAndFeel.Tabs.Active.Font.Size = 8
-      LookAndFeel.Tabs.Active.Font.Alpha = 100
+      LookAndFeel.Tabs.Active.Font.Alpha = 255
       LookAndFeel.Tabs.Active.Font.TextRenderingMode = TextRenderingHintClearTypeGridFit
-      LookAndFeel.Tabs.Active.Font.UseDefaultFont = True
-      LookAndFeel.Tabs.Active.Style.StartColor = clWhite
-      LookAndFeel.Tabs.Active.Style.StopColor = clWhite
+      LookAndFeel.Tabs.Active.Font.UseDefaultFont = False
+      LookAndFeel.Tabs.Active.Style.StartColor = clGray
+      LookAndFeel.Tabs.Active.Style.StopColor = clGray
       LookAndFeel.Tabs.Active.Style.StartAlpha = 255
       LookAndFeel.Tabs.Active.Style.StopAlpha = 255
       LookAndFeel.Tabs.Active.Style.OutlineColor = clGray
@@ -491,7 +491,7 @@ object frmMain: TfrmMain
     Left = 208
     Top = 48
     Bitmap = {
-      494C010101000500380010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000500440010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

@@ -65,8 +65,6 @@ type
       AThreadId         : UInt32;
       const ASourceName : string
     ): ISubscriber; override;
-
-    function ToString: string; override;
   end;
 
 implementation
@@ -136,11 +134,6 @@ end;
 {$ENDREGION}
 
 {$REGION 'public methods'}
-function TComPortChannelReceiver.ToString: string;
-begin
-//
-end;
-
 function TComPortChannelReceiver.CreateSubscriber(ASourceId, AThreadId: UInt32;
   const ASourceName: string): ISubscriber;
 begin

@@ -77,6 +77,10 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     object tsComport: TTabSheet
       Caption = 'Serial port'
       ImageIndex = 4
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object tsZeroMQ: TTabSheet
       Caption = 'ZeroMQ'
@@ -170,7 +174,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Left = 568
     Top = 32
     Bitmap = {
-      494C010103000800280010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101030008002C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

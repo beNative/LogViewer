@@ -255,7 +255,8 @@ begin
   try
     for LSubscriber in SubscriberList.Values do
     begin
-      LSubscriber.Poll;
+      if LSubscriber.Enabled then
+        LSubscriber.Poll;
     end;
   finally
     PollTimer.Enabled := True;

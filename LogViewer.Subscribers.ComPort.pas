@@ -70,7 +70,7 @@ implementation
 uses
   System.SysUtils, System.AnsiStrings,
 
-  DDuce.Logger.Interfaces;
+  DDuce.Logger.Interfaces, DDuce.Logger;
 
 {$REGION 'construction and destruction'}
 constructor TComPortSubscriber.Create(const AReceiver: IChannelReceiver;
@@ -86,10 +86,11 @@ end;
 procedure TComPortSubscriber.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FBuffer              := TMemoryStream.Create;
-  FLineBuffer          := TStringList.Create;
-  FSerialPort          := TBlockSerial.Create;
-  FSerialPort.OnStatus := FSerialPortStatus;
+  FBuffer                 := TMemoryStream.Create;
+  FLineBuffer             := TStringList.Create;
+  FSerialPort             := TBlockSerial.Create;
+//  FSerialPort.RaiseExcept := True; // default is False
+  FSerialPort.OnStatus    := FSerialPortStatus;
 end;
 
 procedure TComPortSubscriber.BeforeDestruction;
@@ -197,7 +198,8 @@ begin
   FBuffer.WriteBuffer(LMsgType, SizeOf(Integer));
   FBuffer.WriteBuffer(LTimeStamp, SizeOf(TDateTime));
   FBuffer.WriteBuffer(LTextSize, SizeOf(Integer));
-  FBuffer.WriteBuffer(LString[1], LTextSize);
+  if LTextSize > 0 then
+    FBuffer.WriteBuffer(LString[1], LTextSize);
   FBuffer.WriteBuffer(LZero, SizeOf(Integer));
   Receiver.DoReceiveMessage(FBuffer);
 end;
@@ -211,9 +213,13 @@ begin
   inherited Poll;
   while FSerialPort.WaitingDataEx <> 0 do
   begin
-    //S := FSerialPort.RecvPacket(50); // 50ms timeout
-    S := Trim(FSerialPort.RecvTerminated(50, #13));
-    DoStringReceived(S);
+    S := FSerialPort.RecvPacket(50); // 50ms timeout
+    //S := Trim(FSerialPort.RecvTerminated(10000, #13));
+
+    if S <> '' then
+    begin
+      DoStringReceived(S);
+    end;
 //    if Trim(S) <> '' then
 //    begin
 //      FLineBuffer.Text := S;
@@ -223,6 +229,8 @@ begin
 //      end;
 //    end;
   end;
+
+
 end;
 {$ENDREGION}
 
