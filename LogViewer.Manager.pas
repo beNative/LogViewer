@@ -161,6 +161,8 @@ type
     procedure BuildLogTreeViewerPopupMenu;
     procedure BuildMessageTypesPopupMenu;
 
+    procedure FeatureNotImplemented;
+
   protected
     {$REGION 'property access methods'}
     function GetEditorManager: IEditorManager;
@@ -265,7 +267,7 @@ type
 implementation
 
 uses
-  Vcl.Forms,
+  Vcl.Forms, Vcl.Dialogs,
 
   DDuce.Editor.Factories, DDuce.AboutDialog,
   DDuce.Logger, DDuce.Logger.Channels.ZeroMQ,
@@ -292,6 +294,7 @@ begin
     Settings.MessageListSettings,
     imlMessageTypes
   );
+  UpdateActions;
 end;
 
 procedure TdmManager.BeforeDestruction;
@@ -769,6 +772,11 @@ begin
   AddMenuItem(MI, actMemory);
   AddMenuItem(MI);
   AddMenuItem(MI, actCheckPoint);
+end;
+
+procedure TdmManager.FeatureNotImplemented;
+begin
+  ShowMessage('This feature is not implemented yet.');
 end;
 {$ENDREGION}
 

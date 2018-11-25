@@ -215,11 +215,10 @@ var
 begin
   Logger.Track(Self, 'BeforeDestruction');
   tmrPoll.Enabled := False;
-  //FDashboard.Close;
   for CR in Manager.Receivers do
     CR.Enabled := False;
-  //Events.Clear;
   FSettings.FormSettings.Assign(Self);
+  Logger.SendComponent('MainForm', Self);
   FSettings.Save;
   FSettings.OnChanged.Remove(SettingsChanged);
   FSettings.Free;

@@ -21,10 +21,6 @@ unit LogViewer.Subscribers.WinODS;
 interface
 
 uses
-  System.Classes,
-
-  Spring,
-
   LogViewer.Interfaces, LogViewer.Subscribers.Base;
 
 type

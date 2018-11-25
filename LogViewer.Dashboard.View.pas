@@ -642,6 +642,7 @@ begin
   if Assigned(AParentNode) then
   begin
     Result := AParentNode.Add(TDashboardData.Create(AReceiver, ASubscriber));
+    Result.CheckType := ctCheckBox;
   end
   else
   begin
@@ -804,7 +805,7 @@ end;
 
 procedure TfrmDashboard.UpdateActions;
 begin
-//  FManager.Actions.UpdateActions;  // optimize for performance
+  //FManager.Actions.UpdateActions;  // optimize for performance
   inherited UpdateActions;
 end;
 {$ENDREGION}

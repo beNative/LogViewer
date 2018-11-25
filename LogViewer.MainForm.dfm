@@ -36,13 +36,13 @@ object frmMain: TfrmMain
       OnButtonCloseTabClick = ctMainButtonCloseTabClick
       OnNeedDragImageControl = ctMainNeedDragImageControl
       ActiveTabIndex = -1
-      Options.Display.CloseButton.Offsets.Vertical = 2
+      Options.Display.CloseButton.Offsets.Vertical = 6
       Options.Display.CloseButton.Offsets.Horizontal = -10
       Options.Display.CloseButton.Height = 15
-      Options.Display.CloseButton.Width = 14
+      Options.Display.CloseButton.Width = 15
       Options.Display.CloseButton.AutoHide = True
       Options.Display.CloseButton.Visibility = bvActive
-      Options.Display.CloseButton.AutoHideWidth = 20
+      Options.Display.CloseButton.AutoHideWidth = 10
       Options.Display.CloseButton.CrossRadialOffset = 4
       Options.Display.AddButton.Offsets.Vertical = 10
       Options.Display.AddButton.Offsets.Horizontal = 3
@@ -171,7 +171,7 @@ object frmMain: TfrmMain
       LookAndFeel.Tabs.Modified.OutsideColor = clBlue
       LookAndFeel.Tabs.Modified.CentreAlpha = 130
       LookAndFeel.Tabs.Modified.OutsideAlpha = 0
-      LookAndFeel.Tabs.DefaultFont.Name = 'Segoe UI'
+      LookAndFeel.Tabs.DefaultFont.Name = 'Segoe UI Semibold'
       LookAndFeel.Tabs.DefaultFont.Color = clBlack
       LookAndFeel.Tabs.DefaultFont.Size = 8
       LookAndFeel.Tabs.DefaultFont.Alpha = 255
@@ -186,7 +186,7 @@ object frmMain: TfrmMain
       LookAndFeel.Tabs.Spinners.Download.Color = 14388040
       LookAndFeel.Tabs.Spinners.Download.Thickness = 2.500000000000000000
       LookAndFeel.Tabs.Spinners.Download.Alpha = 255
-      LookAndFeel.Tabs.Active.Font.Name = 'Tahoma'
+      LookAndFeel.Tabs.Active.Font.Name = 'Segoe UI Semibold'
       LookAndFeel.Tabs.Active.Font.Color = clWhite
       LookAndFeel.Tabs.Active.Font.Size = 8
       LookAndFeel.Tabs.Active.Font.Alpha = 255
@@ -199,7 +199,7 @@ object frmMain: TfrmMain
       LookAndFeel.Tabs.Active.Style.OutlineColor = clGray
       LookAndFeel.Tabs.Active.Style.OutlineSize = 1.000000000000000000
       LookAndFeel.Tabs.Active.Style.OutlineAlpha = 255
-      LookAndFeel.Tabs.NotActive.Font.Name = 'Tahoma'
+      LookAndFeel.Tabs.NotActive.Font.Name = 'Segoe UI Semibold'
       LookAndFeel.Tabs.NotActive.Font.Color = clBlack
       LookAndFeel.Tabs.NotActive.Font.Size = 8
       LookAndFeel.Tabs.NotActive.Font.Alpha = 255
@@ -212,12 +212,12 @@ object frmMain: TfrmMain
       LookAndFeel.Tabs.NotActive.Style.OutlineColor = clGray
       LookAndFeel.Tabs.NotActive.Style.OutlineSize = 1.000000000000000000
       LookAndFeel.Tabs.NotActive.Style.OutlineAlpha = 255
-      LookAndFeel.Tabs.Hot.Font.Name = 'Tahoma'
+      LookAndFeel.Tabs.Hot.Font.Name = 'Segoe UI Semibold'
       LookAndFeel.Tabs.Hot.Font.Color = clBlack
       LookAndFeel.Tabs.Hot.Font.Size = 8
       LookAndFeel.Tabs.Hot.Font.Alpha = 255
       LookAndFeel.Tabs.Hot.Font.TextRenderingMode = TextRenderingHintClearTypeGridFit
-      LookAndFeel.Tabs.Hot.Font.UseDefaultFont = True
+      LookAndFeel.Tabs.Hot.Font.UseDefaultFont = False
       LookAndFeel.Tabs.Hot.Style.StartColor = clSilver
       LookAndFeel.Tabs.Hot.Style.StopColor = clSilver
       LookAndFeel.Tabs.Hot.Style.StartAlpha = 255
@@ -354,6 +354,11 @@ object frmMain: TfrmMain
       LookAndFeel.ScrollButtons.Arrow.Disabled.OutlineSize = 1.000000000000000000
       LookAndFeel.ScrollButtons.Arrow.Disabled.OutlineAlpha = 255
       Align = alTop
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = [fsBold]
       TabOrder = 0
     end
   end
@@ -491,7 +496,7 @@ object frmMain: TfrmMain
     Left = 208
     Top = 48
     Bitmap = {
-      494C010101000500440010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C0101010005004C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

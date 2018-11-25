@@ -2,8 +2,8 @@ object frmLogViewerSettings: TfrmLogViewerSettings
   Left = 0
   Top = 0
   Caption = 'Settings'
-  ClientHeight = 331
-  ClientWidth = 617
+  ClientHeight = 403
+  ClientWidth = 689
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -19,7 +19,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Left = 207
     Top = 0
     Width = 6
-    Height = 301
+    Height = 373
     ExplicitHeight = 287
   end
   object pnlConfigTree: TPanel
@@ -27,99 +27,137 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Left = 3
     Top = 3
     Width = 201
-    Height = 295
+    Height = 367
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitHeight = 295
   end
   object pgcMain: TPageControl
     AlignWithMargins = True
     Left = 213
     Top = 3
-    Width = 401
-    Height = 295
+    Width = 473
+    Height = 367
     Margins.Left = 0
-    ActivePage = tsComport
+    ActivePage = tsAdvanced
     Align = alClient
     Style = tsButtons
     TabOrder = 1
+    ExplicitWidth = 401
+    ExplicitHeight = 295
     object tsWatches: TTabSheet
       Caption = 'Watches'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 393
+      ExplicitHeight = 264
     end
     object tsCallstack: TTabSheet
       Caption = 'Callstack'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 393
+      ExplicitHeight = 264
     end
     object tsWinIPC: TTabSheet
       Caption = 'WinIPC'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 393
+      ExplicitHeight = 264
     end
     object tsWinODS: TTabSheet
       Caption = 'OutputDebugString API'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 393
+      ExplicitHeight = 264
     end
     object tsComport: TTabSheet
       Caption = 'Serial port'
       ImageIndex = 4
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 393
+      ExplicitHeight = 264
     end
     object tsZeroMQ: TTabSheet
       Caption = 'ZeroMQ'
       ImageIndex = 5
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 393
+      ExplicitHeight = 264
     end
     object tsDisplayValuesSettings: TTabSheet
       Caption = 'DisplayValuesSettings'
       ImageIndex = 6
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 393
+      ExplicitHeight = 264
     end
     object tsAdvanced: TTabSheet
       Caption = 'Advanced'
       ImageIndex = 7
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 393
+      ExplicitHeight = 264
+      object seSettings: TSynEdit
+        AlignWithMargins = True
+        Left = 3
+        Top = 3
+        Width = 459
+        Height = 330
+        Align = alClient
+        ActiveLineColor = clYellow
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = 'Consolas'
+        Font.Style = []
+        TabOrder = 0
+        CodeFolding.GutterShapeSize = 11
+        CodeFolding.CollapsedLineColor = clGrayText
+        CodeFolding.FolderBarLinesColor = clGrayText
+        CodeFolding.IndentGuidesColor = clGray
+        CodeFolding.IndentGuides = True
+        CodeFolding.ShowCollapsedLine = False
+        CodeFolding.ShowHintMark = True
+        UseCodeFolding = False
+        Gutter.AutoSize = True
+        Gutter.Color = cl3DLight
+        Gutter.Font.Charset = ANSI_CHARSET
+        Gutter.Font.Color = clSilver
+        Gutter.Font.Height = -11
+        Gutter.Font.Name = 'Consolas'
+        Gutter.Font.Style = []
+        Gutter.LeftOffset = 0
+        Gutter.RightOffset = 0
+        Gutter.ShowLineNumbers = True
+        Gutter.ShowModification = True
+        Gutter.Width = 15
+        Gutter.Gradient = True
+        Gutter.GradientStartColor = clWhite
+        Gutter.GradientEndColor = clWhite
+        Highlighter = synJScript
+        Options = [eoAltSetsColumnMode, eoAutoIndent, eoDragDropEditing, eoEnhanceHomeKey, eoEnhanceEndKey, eoGroupUndo, eoScrollPastEol, eoShowScrollHint, eoSmartTabDelete, eoSmartTabs, eoTabsToSpaces]
+        ReadOnly = True
+        RightEdgeColor = cl3DLight
+        TabWidth = 2
+        WordWrap = True
+        FontSmoothing = fsmNone
+        ExplicitLeft = 6
+        ExplicitTop = 6
+        ExplicitWidth = 387
+        ExplicitHeight = 258
+      end
     end
   end
   object pnlBottom: TPanel
     Left = 0
-    Top = 301
-    Width = 617
+    Top = 373
+    Width = 689
     Height = 30
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 2
+    ExplicitTop = 301
+    ExplicitWidth = 617
     DesignSize = (
-      617
+      689
       30)
     object btnClose: TButton
-      Left = 463
+      Left = 535
       Top = 1
       Width = 150
       Height = 25
@@ -127,9 +165,10 @@ object frmLogViewerSettings: TfrmLogViewerSettings
       Anchors = [akRight, akBottom]
       Images = imlMain
       TabOrder = 0
+      ExplicitLeft = 463
     end
     object btnClose1: TButton
-      Left = 151
+      Left = 223
       Top = 1
       Width = 150
       Height = 25
@@ -137,9 +176,10 @@ object frmLogViewerSettings: TfrmLogViewerSettings
       Anchors = [akRight, akBottom]
       Images = imlMain
       TabOrder = 1
+      ExplicitLeft = 151
     end
     object btnCancel: TButton
-      Left = 307
+      Left = 379
       Top = 1
       Width = 150
       Height = 25
@@ -147,6 +187,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
       Anchors = [akRight, akBottom]
       Images = imlMain
       TabOrder = 2
+      ExplicitLeft = 307
     end
   end
   object aclMain: TActionList
@@ -174,7 +215,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Left = 568
     Top = 32
     Bitmap = {
-      494C0101030008002C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010103000800300010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -312,5 +353,21 @@ object frmLogViewerSettings: TfrmLogViewerSettings
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000}
+  end
+  object synJScript: TSynJScriptSyn
+    Options.AutoDetectEnabled = False
+    Options.AutoDetectLineLimit = 0
+    Options.Visible = False
+    CommentAttri.Foreground = clMedGray
+    CommentAttri.Style = []
+    KeyAttri.Foreground = clBlue
+    NumberAttri.Foreground = clRed
+    NumberAttri.Style = [fsBold]
+    StringAttri.Foreground = clGreen
+    StringAttri.Style = [fsBold]
+    SymbolAttri.Foreground = clMaroon
+    SymbolAttri.Style = [fsBold]
+    Left = 567
+    Top = 164
   end
 end

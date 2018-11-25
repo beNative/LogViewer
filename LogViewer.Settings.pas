@@ -50,6 +50,7 @@ type
 
   protected
     function GetOnChanged: IEvent<TNotifyEvent>;
+    function GetFileName: string;
 
   public
     procedure AfterConstruction; override;
@@ -85,6 +86,9 @@ type
 
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
+
+    property FileName: string
+      read GetFileName;
   end;
 
 implementation
@@ -126,6 +130,11 @@ end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
+function TLogViewerSettings.GetFileName: string;
+begin
+  Result := FFileName;
+end;
+
 function TLogViewerSettings.GetOnChanged: IEvent<TNotifyEvent>;
 begin
   Result := FOnChanged;

@@ -28,6 +28,8 @@ uses
 
   VirtualTrees,
 
+  SynEditHighlighter, SynEditCodeFolding, SynHighlighterJScript, SynEdit,
+
   DDuce.Editor.Interfaces, DDuce.Components.VirtualTrees.Node,
 
   LogViewer.Settings, LogViewer.Settings.Dialog.Data,
@@ -41,26 +43,28 @@ type
 type
   TfrmLogViewerSettings = class(TForm)
     {$REGION 'designer controls'}
-    pnlConfigTree           : TPanel;
-    pgcMain                 : TPageControl;
-    tsWatches               : TTabSheet;
-    tsCallstack             : TTabSheet;
-    tsWinIPC                : TTabSheet;
-    tsWinODS                : TTabSheet;
-    tsComport               : TTabSheet;
-    tsZeroMQ                : TTabSheet;
-    pnlBottom               : TPanel;
     aclMain                 : TActionList;
-    actClose                : TAction;
-    btnClose                : TButton;
-    tsDisplayValuesSettings : TTabSheet;
-    tsAdvanced              : TTabSheet;
-    imlMain                 : TImageList;
     actApply                : TAction;
     actCancel               : TAction;
-    btnClose1               : TButton;
+    actClose                : TAction;
     btnCancel               : TButton;
+    btnClose                : TButton;
+    btnClose1               : TButton;
+    imlMain                 : TImageList;
+    pgcMain                 : TPageControl;
+    pnlBottom               : TPanel;
+    pnlConfigTree           : TPanel;
     splVertical             : TSplitter;
+    tsAdvanced              : TTabSheet;
+    tsCallstack             : TTabSheet;
+    tsComport               : TTabSheet;
+    tsDisplayValuesSettings : TTabSheet;
+    tsWatches               : TTabSheet;
+    tsWinIPC                : TTabSheet;
+    tsWinODS                : TTabSheet;
+    tsZeroMQ                : TTabSheet;
+    seSettings              : TSynEdit;
+    synJScript              : TSynJScriptSyn;
     {$ENDREGION}
 
     procedure actCloseExecute(Sender: TObject);
@@ -154,6 +158,7 @@ begin
     pgcMain.Pages[I].TabVisible := False;
   end;
   pgcMain.ActivePage := tsDisplayValuesSettings;
+  seSettings.Lines.LoadFromFile(FSettings.FileName);
 end;
 
 procedure TfrmLogViewerSettings.BeforeDestruction;
@@ -197,16 +202,18 @@ end;
 {$REGION 'action handlers'}
 procedure TfrmLogViewerSettings.actApplyExecute(Sender: TObject);
 begin
-// TODO
+  FSettings.Save;
+  seSettings.Lines.LoadFromFile(FSettings.FileName);
 end;
 
 procedure TfrmLogViewerSettings.actCancelExecute(Sender: TObject);
 begin
-// TODO
+  Close;
 end;
 
 procedure TfrmLogViewerSettings.actCloseExecute(Sender: TObject);
 begin
+  FSettings.Save;
   Close;
 end;
 {$ENDREGION}
@@ -245,6 +252,7 @@ begin
   AddNode(LNode, SZeroMQ, tsZeroMQ);
 
   AddNode(nil, SGeneralSettings, nil);
+  AddNode(nil, SAdvanced, tsAdvanced);
   FConfigTree.FullExpand;
 end;
 

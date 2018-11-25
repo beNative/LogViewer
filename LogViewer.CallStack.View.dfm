@@ -1,8 +1,8 @@
 object frmCallStackView: TfrmCallStackView
   Left = 0
   Top = 0
-  ClientHeight = 411
-  ClientWidth = 438
+  ClientHeight = 241
+  ClientWidth = 217
   Color = clWhite
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

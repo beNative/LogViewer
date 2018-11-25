@@ -109,6 +109,7 @@ resourcestring
   SCallStack       = 'Callstack';
   SChannelSettings = 'Channel settings';
   SGeneralSettings = 'General settings';
+  SAdvanced        = 'Advanced';
 
   SWinIPC  = 'WinIPC';
   SWinODS  = 'OutputDebugString API';
