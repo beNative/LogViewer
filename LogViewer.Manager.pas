@@ -161,8 +161,6 @@ type
     procedure BuildLogTreeViewerPopupMenu;
     procedure BuildMessageTypesPopupMenu;
 
-    procedure FeatureNotImplemented;
-
   protected
     {$REGION 'property access methods'}
     function GetEditorManager: IEditorManager;
@@ -175,6 +173,7 @@ type
     function GetLogTreeViewerPopupMenu: TPopupMenu;
     {$ENDREGION}
 
+    procedure FeatureNotImplemented;
     function AsComponent: TComponent;
     function DeleteView(AView: ILogViewer): Boolean;
 

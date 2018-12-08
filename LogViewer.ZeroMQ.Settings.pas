@@ -32,14 +32,14 @@ type
   private
     FOnChanged       : Event<TNotifyEvent>;
     FEnabled         : Boolean;
-    FSubscriptions   : TStrings;
+    FEndpoints       : TStrings;
     FPollingInterval : Integer;
 
   protected
     {$REGION 'property access methods'}
     function GetPollingInterval: Integer;
     procedure SetPollingInterval(const Value: Integer);
-    function GetSubscriptions: TStrings;
+    function GetEndpoints: TStrings;
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
     function GetOnChanged: IEvent<TNotifyEvent>;
@@ -64,8 +64,8 @@ type
       read GetPollingInterval write SetPollingInterval
       default DEFAULT_POLLING_INTERVAL;
 
-    property Subscriptions: TStrings
-      read GetSubscriptions;
+    property Endpoints: TStrings
+      read GetEndpoints;
   end;
 
 implementation
@@ -74,13 +74,13 @@ implementation
 procedure TZeroMQSettings.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FSubscriptions   := TStringList.Create;
+  FEndpoints   := TStringList.Create;
   FPollingInterval := DEFAULT_POLLING_INTERVAL;
 end;
 
 procedure TZeroMQSettings.BeforeDestruction;
 begin
-  FSubscriptions.Free;
+  FEndpoints.Free;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
@@ -91,9 +91,9 @@ begin
   Result := FOnChanged;
 end;
 
-function TZeroMQSettings.GetSubscriptions: TStrings;
+function TZeroMQSettings.GetEndpoints: TStrings;
 begin
-  Result := FSubscriptions;
+  Result := FEndpoints;
 end;
 
 function TZeroMQSettings.GetPollingInterval: Integer;
@@ -142,7 +142,7 @@ begin
     LSettings       := TZeroMQSettings(Source);
     Enabled         := LSettings.Enabled;
     PollingInterval := LSettings.PollingInterval;
-    FSubscriptions.Assign(LSettings.Subscriptions);
+    FEndpoints.Assign(LSettings.Endpoints);
   end
   else
     inherited Assign(Source);

@@ -170,8 +170,8 @@ begin
       JO['WinODSSettings'].ObjectValue.ToSimpleObject(FWinODSSettings);
       JO['WinIPCSettings'].ObjectValue.ToSimpleObject(FWinIPCSettings);
       JO['ZeroMQSettings'].ObjectValue.ToSimpleObject(FZeroMQSettings);
-      FZeroMQSettings.Subscriptions.Text :=
-        JO['ZeroMQSettings'].ObjectValue['Subscriptions'].Value;
+      FZeroMQSettings.Endpoints.Text :=
+        JO['ZeroMQSettings'].ObjectValue['Endpoints'].Value;
       JO['DisplayValueSettings'].ObjectValue['Id'].ObjectValue
         .ToSimpleObject(FDisplayValuesSettings.Id);
       JO['DisplayValueSettings'].ObjectValue['Info'].ObjectValue
@@ -215,8 +215,8 @@ begin
     JO['WinODSSettings'].ObjectValue.FromSimpleObject(FWinODSSettings);
     JO['WinIPCSettings'].ObjectValue.FromSimpleObject(FWinIPCSettings);
     JO['ZeroMQSettings'].ObjectValue.FromSimpleObject(FZeroMQSettings);
-    JO['ZeroMQSettings'].ObjectValue['Subscriptions'].Value :=
-      FZeroMQSettings.Subscriptions.Text;
+    JO['ZeroMQSettings'].ObjectValue['Endpoints'].Value :=
+      FZeroMQSettings.Endpoints.Text;
     JO['DisplayValueSettings'].ObjectValue['Id'].ObjectValue
       .FromSimpleObject(FDisplayValuesSettings.Id);
     JO['DisplayValueSettings'].ObjectValue['Info'].ObjectValue

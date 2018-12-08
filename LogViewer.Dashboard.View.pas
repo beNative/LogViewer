@@ -25,7 +25,7 @@ uses
   System.SysUtils, System.Variants, System.Classes, System.Actions,
   System.UITypes, System.ImageList,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  Vcl.ActnList, Vcl.ComCtrls, Vcl.ImgList, Vcl.Menus, Vcl.Grids, Vcl.ValEdit,
+  Vcl.ActnList, Vcl.ComCtrls, Vcl.ImgList, Vcl.Menus, Vcl.Grids, Vcl.ToolWin,
 
   Spring.Collections,
 
@@ -35,7 +35,8 @@ uses
 
   synaser,
 
-  DDuce.Components.VirtualTrees.Node,
+  DDuce.Components.VirtualTrees.Node, DDuce.Components.ValueList,
+  DDuce.Components.Factories, DDuce.DynamicRecord,
 
   LogViewer.Interfaces, LogViewer.Dashboard.Data,
   LogViewer.ComPort.Settings.View;
@@ -64,7 +65,6 @@ type
     imlMain                   : TImageList;
     lblWinIPCDescription      : TLabel;
     lblWinODSDescription      : TLabel;
-    lstZeroMQ                 : TValueListEditor;
     mniCloseSsubscriber       : TMenuItem;
     pgcMain                   : TPageControl;
     pnlCOMPortTitle           : TPanel;
@@ -83,6 +83,20 @@ type
     pnlZeroMQButtons          : TGridPanel;
     btnAddZMQNodeLocalHost    : TButton;
     btnAddZMQNodeForLogViewer : TButton;
+    pnlZMQEndpoints: TPanel;
+    tlbZMQEndpoints: TToolBar;
+    btnAdd: TToolButton;
+    btnDelete: TToolButton;
+    btnSpacer1: TToolButton;
+    btnDuplicate: TToolButton;
+    btnSpacer2: TToolButton;
+    btnMoveUp: TToolButton;
+    btnMoveDown: TToolButton;
+    actMoveUp: TAction;
+    actMoveDown: TAction;
+    actAdd: TAction;
+    actDelete: TAction;
+    actCopy: TAction;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -91,11 +105,17 @@ type
     procedure actAddSubscribeToLogViewerExecute(Sender: TObject);
     procedure actSubscribeToListExecute(Sender: TObject);
     procedure actCloseSubscriberExecute(Sender: TObject);
+    procedure actAddExecute(Sender: TObject);
+    procedure actDeleteExecute(Sender: TObject);
+    procedure actCopyExecute(Sender: TObject);
+    procedure actMoveDownExecute(Sender: TObject);
+    procedure actMoveUpExecute(Sender: TObject);
     {$ENDREGION}
 
   private
     FManager             : ILogViewerManager;
     FTreeView            : TVirtualStringTree;
+    FValueList           : TValueList;
     FZeroMQ              : IZeroMQ;
     FZeroMQReceiver      : IChannelReceiver;
     FWinIPCReceiver      : IChannelReceiver;
@@ -108,6 +128,7 @@ type
     FWinODSNode          : TDashboardNode;
     FFileSystemNode      : TDashboardNode;
     FComPortSettingsForm : TfrmComPortSettings;
+    FZMQEndpoints        : DynamicRecord;
 
     {$REGION 'event handlers'}
     procedure FTreeViewFreeNode(
@@ -171,19 +192,26 @@ type
       const AKey : UInt32;
       Action     : TCollectionChangedAction
     );
+    procedure FValueListExit(Sender : TObject);
     {$ENDREGION}
 
   protected
     procedure InitializeTreeView;
     procedure InitializeControls;
     procedure CreateChannelReceivers;
-    procedure UpdateActions; override;
 
     function AddNode(
       AParentNode : TDashboardNode;
       AReceiver   : IChannelReceiver;
       ASubscriber : ISubscriber
     ): TDashboardNode;
+
+    function CanMoveUp: Boolean;
+    function CanMoveDown: Boolean;
+    procedure SaveEndpoints;
+    procedure UpdateActions; override;
+
+
 
   public
     constructor Create(
@@ -222,7 +250,13 @@ procedure TfrmDashboard.AfterConstruction;
 begin
   inherited AfterConstruction;
   FTreeView := TVirtualStringTreeFactory.CreateTreeList(Self, pnlRight);
-  FTreeView.AlignWithMargins := False;
+  FValueList             := TValueList.Create(Self);
+  FValueList.Parent      := pnlZMQEndpoints;
+  FValueList.Align       := alClient;
+  FValueList.ShowGutter  := False;
+  FValueList.MultiSelect := True;
+  FValueList.OnExit      := FValueListExit;
+
   InitializeTreeView;
   InitializeControls;
   CreateChannelReceivers;
@@ -244,6 +278,12 @@ end;
 {$ENDREGION}
 
 {$REGION 'action handlers'}
+procedure TfrmDashboard.actAddExecute(Sender: TObject);
+begin
+  FValueList.Data['New'] := 'tcp://';
+  FValueList.Repaint;
+end;
+
 procedure TfrmDashboard.actAddSubscribeToLogViewerExecute(Sender: TObject);
 var
   SL          : TStringList;
@@ -310,25 +350,58 @@ begin
 //
 end;
 
+procedure TfrmDashboard.actCopyExecute(Sender: TObject);
+begin
+//
+end;
+
+procedure TfrmDashboard.actDeleteExecute(Sender: TObject);
+begin
+  FValueList.DeleteSelectedNodes;
+end;
+
 procedure TfrmDashboard.actInspectTreeviewExecute(Sender: TObject);
 begin
   InspectComponent(FTreeView);
 end;
 
+procedure TfrmDashboard.actMoveDownExecute(Sender: TObject);
+var
+  LNode : TValueListNode;
+begin
+  if Assigned(FValueList.FocusedField) then
+  begin
+    LNode := FValueList.GetFirstSelectedNodeData<TValueListNode>;
+    LNode.Data.Index := LNode.Data.Index + 1;
+    FValueList.MoveTo(LNode.VNode, LNode.VNode.NextSibling, amInsertAfter, False);
+  end;
+end;
+
+procedure TfrmDashboard.actMoveUpExecute(Sender: TObject);
+var
+  LNode : TValueListNode;
+begin
+  if Assigned(FValueList.FocusedField) then
+  begin
+    LNode := FValueList.GetFirstSelectedNodeData<TValueListNode>;
+    LNode.Data.Index := LNode.Data.Index - 1;
+    FValueList.MoveTo(LNode.VNode, LNode.VNode.PrevSibling, amInsertBefore, False);
+  end;
+end;
+
 procedure TfrmDashboard.actSubscribeToListExecute(Sender: TObject);
 var
-  I           : Integer;
   LSubscriber : ISubscriber;
-  LStrings    : TStrings;
   LEndPoint   : string;
   LName       : string;
+  LNode       : TValueListNode;
 begin
   FZeroMQReceiver.SubscriberList.Clear;
-  LStrings := lstZeroMQ.Strings;
-  for I := 0 to LStrings.Count - 1 do
+  for LNode in FValueList.GetSelectedData<TValueListNode> do
   begin
-    LEndPoint := LStrings.ValueFromIndex[I];
-    LName     := LStrings.Names[I];
+    //FZeroMQReceiver.SubscriberList.ContainsKey()
+    LEndPoint := LNode.Data.Value.AsString;
+    LName     := LNode.Data.Name;
     LSubscriber := TZMQSubscriber.Create(
       FZeroMQReceiver,
       FZeroMQ,
@@ -341,7 +414,6 @@ begin
     LSubscriber.Enabled := True;
     FZeroMQReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
   end;
-  FManager.Settings.ZeroMQSettings.Subscriptions.Assign(LStrings);
 end;
 {$ENDREGION}
 
@@ -532,6 +604,11 @@ begin
   end;
 end;
 
+procedure TfrmDashboard.FValueListExit(Sender: TObject);
+begin
+  SaveEndpoints;
+end;
+
 procedure TfrmDashboard.FWinIPCReceiverSubscriberListChanged(Sender: TObject;
   const AKey: UInt32; Action: TCollectionChangedAction);
 var
@@ -654,6 +731,22 @@ begin
   FTreeView.FullExpand;
 end;
 
+function TfrmDashboard.CanMoveDown: Boolean;
+begin
+  if Assigned(FValueList.FocusedNode) then
+    Result := Assigned(FValueList.FocusedNode.NextSibling)
+  else
+    Result := False;
+end;
+
+function TfrmDashboard.CanMoveUp: Boolean;
+begin
+  if Assigned(FValueList.FocusedNode) then
+    Result := Assigned(FValueList.FocusedNode.PrevSibling)
+  else
+    Result := False;
+end;
+
 procedure TfrmDashboard.CreateChannelReceivers;
 begin
   FZeroMQ := TZeroMQ.Create;
@@ -733,11 +826,15 @@ begin
   AssignFormParent(FComPortSettingsForm, tsCOMPort);
   pgcMain.ActivePage := tsWinIPC;
 
-  lstZeroMQ.Strings.Assign(FManager.Settings.ZeroMQSettings.Subscriptions);
+  FZMQEndpoints.FromStrings(FManager.Settings.ZeroMQSettings.Endpoints);
+  FValueList.Data := FZMQEndpoints;
 end;
 
 procedure TfrmDashboard.InitializeTreeView;
 begin
+  FTreeView.DefaultNodeHeight := 30;
+  FTreeView.Images            := imlMain;
+  FTreeView.AlignWithMargins  := False;
   FTreeView.OnBeforeCellPaint := FTreeViewBeforeCellPaint;
   FTreeView.OnFreeNode        := FTreeViewFreeNode;
   FTreeView.OnGetText         := FTreeViewGetText;
@@ -745,53 +842,46 @@ begin
   FTreeView.OnFocusChanged    := FTreeViewFocusChanged;
   FTreeView.OnDblClick        := FTreeViewDblClick;
   FTreeView.OnGetImageIndex   := FTreeViewGetImageIndex;
-  FTreeView.DefaultNodeHeight := 30;
-  FTreeView.Images            := imlMain;
-
   with FTreeView do
   begin
     with Header.Columns.Add do
     begin
       Color    := clWhite;
-      MaxWidth := 400;
-      MinWidth := 200;
-      Options  := [coAllowClick, coDraggable, coEnabled, coParentBidiMode,
-        coResizable, coShowDropMark, coVisible, coSmartResize, coAllowFocus,
-        coEditable];
+      MaxWidth := 800;
+      MinWidth := 100;
+      Options  := [coAllowClick, coEnabled, coParentBidiMode, coResizable,
+        coVisible, coSmartResize, coAllowFocus];
       Position := 0;
       Indent   := 8;
-      Width    := 300;
+      Width    := 100;
       Text := 'Name';
     end;
     with Header.Columns.Add do
     begin
-      MaxWidth := 800;
-      MinWidth := 200;
-      Options  := [coAllowClick, coDraggable, coEnabled, coParentBidiMode,
-        coParentColor, coResizable, coShowDropMark, coVisible, coAutoSpring,
-        coSmartResize, coAllowFocus, coEditable];
+      MaxWidth := 400;
+      MinWidth := 150;
+      Options  := [coAllowClick, coEnabled, coParentBidiMode, coResizable,
+        coVisible, coSmartResize, coAllowFocus];
       Position := 1;
-      Width    := 100;
+      Width    := 200;
       Text := 'Value';
     end;
     with Header.Columns.Add do
     begin
-      MaxWidth := 800;
+      MaxWidth := 100;
       MinWidth := 100;
-      Options  := [coAllowClick, coDraggable, coEnabled, coParentBidiMode,
-        coParentColor, coResizable, coShowDropMark, coVisible, coAutoSpring,
-        coSmartResize, coAllowFocus, coEditable];
+      Options  := [coAllowClick, coEnabled, coParentBidiMode, coVisible,
+        coAutoSpring, coAllowFocus];
       Position := 2;
       Width    := 100;
       Text := 'Id';
     end;
     with Header.Columns.Add do
     begin
-      MaxWidth := 800;
+      MaxWidth := 100;
       MinWidth := 100;
-      Options  := [coAllowClick, coDraggable, coEnabled, coParentBidiMode,
-        coParentColor, coResizable, coShowDropMark, coVisible, coAutoSpring,
-        coSmartResize, coAllowFocus, coEditable];
+      Options  := [coAllowClick, coEnabled, coParentBidiMode, coShowDropMark,
+        coVisible, coAllowFocus];
       Position := 3;
       Width    := 100;
       Text := 'Messagecount';
@@ -800,13 +890,25 @@ begin
     TreeOptions.AutoOptions := TreeOptions.AutoOptions + [toAutoSpanColumns];
     TreeOptions.PaintOptions := TreeOptions.PaintOptions + [toShowTreeLines];
   end;
-  FTreeView.Indent            := 30;
+  FTreeView.Header.AutoSizeIndex := 0;
+  FTreeView.Indent := 30;
+end;
+
+procedure TfrmDashboard.SaveEndpoints;
+var
+  LStrings : Shared<TStrings>;
+begin
+  LStrings := TStringList.Create;
+  FValueList.Data.ToStrings(LStrings);
+  FManager.Settings.ZeroMQSettings.Endpoints.Assign(LStrings.Value);
 end;
 
 procedure TfrmDashboard.UpdateActions;
 begin
-  //FManager.Actions.UpdateActions;  // optimize for performance
   inherited UpdateActions;
+  actMoveUp.Enabled   := CanMoveUp;
+  actMoveDown.Enabled := CanMoveDown;
+
 end;
 {$ENDREGION}
 

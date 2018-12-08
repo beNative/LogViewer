@@ -134,7 +134,7 @@ type
     property Events: ILogViewerEvents
       read GetEvents;
 
-    end;
+  end;
 
 var
   frmMain: TfrmMain;
@@ -149,6 +149,8 @@ uses
 {$R *.dfm}
 
 {$REGION 'non-interfaced routines'}
+{ Extracts the ZMQ library form resources if it does not exist. }
+
 procedure EnsureZMQLibExists;
 const
   LIBZMQ = 'libzmq';
@@ -211,7 +213,7 @@ end;
 
 procedure TfrmMain.BeforeDestruction;
 var
-  CR: IChannelReceiver;
+  CR : IChannelReceiver;
 begin
   Logger.Track(Self, 'BeforeDestruction');
   tmrPoll.Enabled := False;
@@ -407,9 +409,8 @@ end;
 
 procedure TfrmMain.UpdateActions;
 begin
-  inherited UpdateActions;
   UpdateStatusBar;
-  //UpdateTabs;
+  inherited UpdateActions;
 end;
 
 procedure TfrmMain.OptimizeStatusBarPanelWidths;
@@ -419,7 +420,7 @@ end;
 
 procedure TfrmMain.OptimizeWidth(APanel: TPanel);
 var
-  S: string;
+  S : string;
 begin
   S := APanel.Caption;
   if Trim(S) <> '' then
@@ -438,10 +439,11 @@ end;
 
 procedure TfrmMain.UpdateStatusBar;
 var
-  N  : Integer;
-  S  : string;
+  N : Integer;
+  S : string;
 begin
-  if Assigned(ctMain.ActiveTab) and Assigned(Manager) and Assigned(Manager.ActiveView)
+  if Assigned(ctMain.ActiveTab) and Assigned(Manager)
+    and Assigned(Manager.ActiveView)
     and Assigned(Manager.ActiveView.Subscriber)
     and (ctMain.ActiveTab.Caption <> 'Dashboard') then
   begin
