@@ -52,11 +52,9 @@ type
 
   public
     procedure AfterConstruction; override;
-
+    destructor Destroy; override;
 
     procedure Clear;
-    procedure BeforeDestruction; override;
-    destructor Destroy; override;
 
     property Data: IDynamicRecord
       read GetData write SetData;
@@ -91,16 +89,10 @@ end;
 
 destructor TfrmValueList.Destroy;
 begin
+  FData := nil;
+  FPropertyView.Data := nil;
+  FFieldView.Data    := nil;
   inherited Destroy;
-//  FData := nil;
-//  FreeAndNil(FPropertyView);
-//  FreeAndNil(FFieldView);
-end;
-
-procedure TfrmValueList.BeforeDestruction;
-begin
-
-  inherited BeforeDestruction;
 end;
 {$ENDREGION}
 
@@ -118,6 +110,7 @@ end;
 
 procedure TfrmValueList.SetData(const Value: IDynamicRecord);
 begin
+  Clear;
   FData := Value;
   UpdateData;
 end;
@@ -178,7 +171,6 @@ begin
     end;
   end;
 end;
-
 {$ENDREGION}
 
 end.

@@ -29,7 +29,6 @@ object frmValueList: TfrmValueList
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitHeight = 257
   end
   object pnlBottom: TPanel
     Left = 0
@@ -39,6 +38,5 @@ object frmValueList: TfrmValueList
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitTop = 8
   end
 end

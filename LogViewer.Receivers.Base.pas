@@ -26,6 +26,8 @@ uses
 
   Spring, Spring.Collections,
 
+  MQTT,
+
   DDuce.DynamicRecord,
 
   LogViewer.Interfaces;
@@ -47,6 +49,7 @@ type
     FSubscriberList : IDictionary<UInt32, ISubscriber>;
     FManager        : ILogViewerManager;
     FPollTimer      : Lazy<TTimer>;
+    FOnChange       : Event<TNotifyEvent>;
 
   class var
     FProcesses : Lazy<IDictionary<UInt32, string>>;
@@ -62,6 +65,7 @@ type
     function GetName: string;
     procedure SetName(const Value: string);
     function GetSubscriberList: IDictionary<UInt32, ISubscriber>;
+    function GetOnChange: IEvent<TNotifyEvent>;
     {$ENDREGION}
 
     procedure PollTimerTimer(Sender: TObject);
@@ -77,6 +81,7 @@ type
       AThreadId         : UInt32 = 0;
       const ASourceName : string = ''
     ); virtual;
+    procedure DoChange; virtual;
 
     property PollTimer: TTimer
       read GetPollTimer;
@@ -108,6 +113,9 @@ type
 
     property SubscriberList: IDictionary<UInt32, ISubscriber>
       read GetSubscriberList;
+
+    property OnChange: IEvent<TNotifyEvent>
+      read GetOnChange;
   end;
 
 implementation
@@ -188,6 +196,12 @@ end;
 {$ENDREGION}
 
 {$REGION 'event dispatch methods'}
+procedure TChannelReceiver.DoChange;
+begin
+  if FOnChange.CanInvoke then
+    FOnChange.Invoke(Self);
+end;
+
 procedure TChannelReceiver.DoReceiveMessage(AStream: TStream; ASourceId: UInt32;
   AThreadId: UInt32; const ASourceName : string);
 var
@@ -206,6 +220,7 @@ begin
     FSubscriberList.AddOrSetValue(ASourceId, LSubscriber);
   end;
   LSubscriber.DoReceiveMessage(AStream);
+  DoChange;
 end;
 {$ENDREGION}
 
@@ -217,7 +232,11 @@ end;
 
 procedure TChannelReceiver.SetEnabled(const Value: Boolean);
 begin
-  FEnabled := Value;
+  if Value <> Enabled then
+  begin
+    FEnabled := Value;
+    DoChange;
+  end;
 end;
 
 function TChannelReceiver.GetManager: ILogViewerManager;
@@ -230,14 +249,23 @@ begin
   Result := FName;
 end;
 
+procedure TChannelReceiver.SetName(const Value: string);
+begin
+  if Value <> Name then
+  begin
+    FName := Value;
+    DoChange;
+  end;
+end;
+
+function TChannelReceiver.GetOnChange: IEvent<TNotifyEvent>;
+begin
+  Result := FOnChange;
+end;
+
 function TChannelReceiver.GetPollTimer: TTimer;
 begin
   Result := FPollTimer.Value;
-end;
-
-procedure TChannelReceiver.SetName(const Value: string);
-begin
-  FName := Value;
 end;
 
 function TChannelReceiver.GetSubscriberList: IDictionary<UInt32, ISubscriber>;

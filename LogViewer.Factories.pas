@@ -36,7 +36,7 @@ uses
 
   Spring.Collections,
 
-  ZeroMQ,
+  ZeroMQ, MQTT,
 
   LogViewer.CallStack.View, LogViewer.Watches.View,
   LogViewer.Watches.Data, LogViewer.Messages.Data, LogViewer.MessageList.View,
@@ -106,6 +106,11 @@ type
       AZMQ     : IZeroMQ
     ): IChannelReceiver;
 
+    class function CreateMQTTReceiver(
+      AManager : ILogViewerManager;
+      AMQTT    : TMQTT
+    ): IChannelReceiver;
+
     class function CreateFileSystemReceiver(
       AManager    : ILogViewerManager;
       const APath : string
@@ -122,8 +127,8 @@ uses
 
   LogViewer.Resources, LogViewer.Factories.Toolbars,
   LogViewer.Receivers.WinIPC, LogViewer.Receivers.WinODS,
-  LogViewer.Receivers.ZeroMQ, LogViewer.Receivers.ComPort,
-  LogViewer.Receivers.FileSystem;
+  LogViewer.Receivers.ZeroMQ, LogViewer.Receivers.MQTT,
+  LogViewer.Receivers.ComPort, LogViewer.Receivers.FileSystem;
 
 {$REGION 'private class methods'}
 class procedure TLogViewerFactories.OnDropdownMenuButtonClick(Sender: TObject);
@@ -222,6 +227,12 @@ class function TLogViewerFactories.CreateZeroMQReceiver(
   AManager: ILogViewerManager; AZMQ: IZeroMQ): IChannelReceiver;
 begin
   Result := TZeroMQChannelReceiver.Create(AManager, AZMQ, RECEIVERNAME_ZEROMQ);
+end;
+
+class function TLogViewerFactories.CreateMQTTReceiver(
+  AManager: ILogViewerManager; AMQTT: TMQTT): IChannelReceiver;
+begin
+  Result := TMQTTChannelReceiver.Create(AManager, AMQTT, RECEIVERNAME_MQTT);
 end;
 
 class function TLogViewerFactories.CreateComPortReceiver(

@@ -94,6 +94,8 @@ object frmMessageList: TfrmMessageList
         Style = tsFlatButtons
         TabOrder = 0
         StyleElements = [seFont]
+        ExplicitLeft = 1
+        ExplicitTop = 1
         object tsMessageView: TTabSheet
           Caption = 'Messageview'
           object pgcMessageDetails: TPageControl
@@ -105,7 +107,7 @@ object frmMessageList: TfrmMessageList
             Margins.Top = 0
             Margins.Right = 0
             Margins.Bottom = 0
-            ActivePage = tsValueList
+            ActivePage = tsTextViewer
             Align = alClient
             Style = tsFlatButtons
             TabOrder = 0
@@ -380,7 +382,7 @@ object frmMessageList: TfrmMessageList
     Left = 607
     Top = 150
     Bitmap = {
-      494C0101160019008C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010116001900900010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

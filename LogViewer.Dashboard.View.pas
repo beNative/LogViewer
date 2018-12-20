@@ -16,9 +16,20 @@
 
 unit LogViewer.Dashboard.View;
 
+{ Provides an overview of all active channels and statistics. }
+
 interface
 
-{ Provides an overview of all active channels and statistics. }
+{$REGION 'documentation'}
+{ This form provides an overview of all supported channel receivers and allows
+  to configure and activate user defined subscriptions.
+
+TODO:
+    - indicate amount of data received per channel
+    - editable treeview in which we can add nodes for every channel we want to
+      subscribe to.
+}
+{$ENDREGION}
 
 uses
   Winapi.Windows, Winapi.Messages,
@@ -31,7 +42,7 @@ uses
 
   VirtualTrees,
 
-  ZeroMQ,
+  ZeroMQ, MQTT,
 
   synaser,
 
@@ -41,88 +52,95 @@ uses
   LogViewer.Interfaces, LogViewer.Dashboard.Data,
   LogViewer.ComPort.Settings.View;
 
-{$REGION 'documentation'}
-{ TODO:
-    - indicate amount of data received per channel
-    - editable treeview in which we can add nodes for every channel we want to
-      subscribe to.
-}
-{$ENDREGION}
-
 type
   TDashboardNode = TVTNode<TDashboardData>;
 
 type
   TfrmDashboard = class(TForm)
     {$REGION 'designer controls'}
-    aclMain                   : TActionList;
-    actAddSubscribeToLogViewer: TAction;
-    actSubscribeToLocalHost: TAction;
-    actCloseSubscriber        : TAction;
-    actInspectTreeview        : TAction;
-    actSubscribeToList        : TAction;
-    btnSubscribeToList        : TButton;
-    imlMain                   : TImageList;
-    lblWinIPCDescription      : TLabel;
-    lblWinODSDescription      : TLabel;
-    mniCloseSsubscriber       : TMenuItem;
-    pgcMain                   : TPageControl;
-    pnlCOMPortTitle           : TPanel;
-    pnlLeft                   : TPanel;
-    pnlLogChannels            : TPanel;
-    pnlRight                  : TPanel;
-    pnlWinIPCTitle            : TPanel;
-    pnlWinODSTitle            : TPanel;
-    pnlZeroMQTitle            : TPanel;
-    ppmMain                   : TPopupMenu;
-    splVertical               : TSplitter;
-    tsCOMPort                 : TTabSheet;
-    tsWinIPC                  : TTabSheet;
-    tsWinODS                  : TTabSheet;
-    tsZeroMQ                  : TTabSheet;
-    pnlZeroMQButtons          : TGridPanel;
-    btnAddZMQNodeLocalHost    : TButton;
-    btnAddZMQNodeForLogViewer : TButton;
-    pnlZMQEndpoints: TPanel;
-    tlbZMQEndpoints: TToolBar;
-    btnAdd: TToolButton;
-    btnDelete: TToolButton;
-    btnSpacer1: TToolButton;
-    btnDuplicate: TToolButton;
-    btnSpacer2: TToolButton;
-    btnMoveUp: TToolButton;
-    btnMoveDown: TToolButton;
-    actMoveUp: TAction;
-    actMoveDown: TAction;
-    actAdd: TAction;
-    actDelete: TAction;
-    actCopy: TAction;
+    aclMain                    : TActionList;
+    actAddEndpoint             : TAction;
+    actAddSubscribeToLogViewer : TAction;
+    actCloseSubscriber         : TAction;
+    actCopyEndpoint            : TAction;
+    actDeleteEndpoint          : TAction;
+    actInspectTreeview         : TAction;
+    actMoveDownEndpoint        : TAction;
+    actMoveUpEndpoint          : TAction;
+    actSubscribeToLocalHost    : TAction;
+    actSubscribeToSelection    : TAction;
+    btn1                       : TToolButton;
+    btnAdd                     : TToolButton;
+    btnAddZMQNodeForLogViewer  : TButton;
+    btnAddZMQNodeLocalHost     : TButton;
+    btnDelete                  : TToolButton;
+    btnDuplicate               : TToolButton;
+    btnMoveDown                : TToolButton;
+    btnMoveUp                  : TToolButton;
+    btnSpacer1                 : TToolButton;
+    btnSpacer2                 : TToolButton;
+    btnSubscribeToSelection    : TToolButton;
+    imlMain                    : TImageList;
+    lblWinIPCDescription       : TLabel;
+    lblWinODSDescription       : TLabel;
+    mniAddEndpoint             : TMenuItem;
+    mniCloseSsubscriber        : TMenuItem;
+    mniCopyEndpoint            : TMenuItem;
+    mniDeleteEndpoint          : TMenuItem;
+    mniMoveDownEndpoint        : TMenuItem;
+    mniMoveUpEndpoint          : TMenuItem;
+    mniN1                      : TMenuItem;
+    mniN2                      : TMenuItem;
+    mniN3                      : TMenuItem;
+    mniSubscribeToSelection    : TMenuItem;
+    pgcMain                    : TPageControl;
+    pnlCOMPortTitle            : TPanel;
+    pnlLeft                    : TPanel;
+    pnlLogChannels             : TPanel;
+    pnlRight                   : TPanel;
+    pnlWinIPCTitle             : TPanel;
+    pnlWinODSTitle             : TPanel;
+    pnlZeroMQButtons           : TGridPanel;
+    pnlZeroMQTitle             : TPanel;
+    pnlZMQEndpoints            : TPanel;
+    ppmEndpoints               : TPopupMenu;
+    ppmMain                    : TPopupMenu;
+    splVertical                : TSplitter;
+    tlbZMQEndpoints            : TToolBar;
+    tsCOMPort                  : TTabSheet;
+    tsWinIPC                   : TTabSheet;
+    tsWinODS                   : TTabSheet;
+    tsZeroMQ                   : TTabSheet;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
     procedure actSubscribeToLocalHostExecute(Sender: TObject);
     procedure actInspectTreeviewExecute(Sender: TObject);
     procedure actAddSubscribeToLogViewerExecute(Sender: TObject);
-    procedure actSubscribeToListExecute(Sender: TObject);
+    procedure actSubscribeToSelectionExecute(Sender: TObject);
     procedure actCloseSubscriberExecute(Sender: TObject);
-    procedure actAddExecute(Sender: TObject);
-    procedure actDeleteExecute(Sender: TObject);
-    procedure actCopyExecute(Sender: TObject);
-    procedure actMoveDownExecute(Sender: TObject);
-    procedure actMoveUpExecute(Sender: TObject);
+    procedure actAddEndpointExecute(Sender: TObject);
+    procedure actDeleteEndpointExecute(Sender: TObject);
+    procedure actCopyEndpointExecute(Sender: TObject);
+    procedure actMoveDownEndpointExecute(Sender: TObject);
+    procedure actMoveUpEndpointExecute(Sender: TObject);
     {$ENDREGION}
 
   private
+    FUpdate              : Boolean;
     FManager             : ILogViewerManager;
     FTreeView            : TVirtualStringTree;
     FValueList           : TValueList;
     FZeroMQ              : IZeroMQ;
+    FMQTT                : TMQTT;
     FZeroMQReceiver      : IChannelReceiver;
+    FMQTTReceiver        : IChannelReceiver;
     FWinIPCReceiver      : IChannelReceiver;
     FComPortReceiver     : IChannelReceiver;
     FWinODSReceiver      : IChannelReceiver;
     FFileSystemReceiver  : IChannelReceiver;
     FZeroMQNode          : TDashboardNode;
+    FMQTTNode            : TDashboardNode;
     FWinIPCNode          : TDashboardNode;
     FComPortNode         : TDashboardNode;
     FWinODSNode          : TDashboardNode;
@@ -192,10 +210,14 @@ type
       const AKey : UInt32;
       Action     : TCollectionChangedAction
     );
+    procedure FReceiverChange(Sender : TObject);
+    procedure FSubscriberChange(Sender : TObject);
+
     procedure FValueListExit(Sender : TObject);
     {$ENDREGION}
 
   protected
+    procedure Modified;
     procedure InitializeTreeView;
     procedure InitializeControls;
     procedure CreateChannelReceivers;
@@ -210,8 +232,6 @@ type
     function CanMoveDown: Boolean;
     procedure SaveEndpoints;
     procedure UpdateActions; override;
-
-
 
   public
     constructor Create(
@@ -266,11 +286,13 @@ procedure TfrmDashboard.BeforeDestruction;
 begin
   Logger.Track(Self, 'BeforeDestruction');
   FZeroMQReceiver  := nil;
+  FMQTTReceiver    := nil;
   FWinIPCReceiver  := nil;
   FWinODSReceiver  := nil;
   FComPortReceiver := nil;
   FManager         := nil;
   FZeroMQ          := nil;
+  FMQTT.Free;
   FTreeView.Clear;
   FTreeView.Free;
   inherited BeforeDestruction;
@@ -278,7 +300,7 @@ end;
 {$ENDREGION}
 
 {$REGION 'action handlers'}
-procedure TfrmDashboard.actAddExecute(Sender: TObject);
+procedure TfrmDashboard.actAddEndpointExecute(Sender: TObject);
 begin
   FValueList.Data['New'] := 'tcp://';
   FValueList.Repaint;
@@ -309,6 +331,7 @@ begin
       );
       Logger.Channels.Clear;
       FZeroMQReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
+      Modified;
     end;
   finally
     SL.Free;
@@ -339,6 +362,7 @@ begin
         FZeroMQReceiver.Enabled
       );
       FZeroMQReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
+      Modified;
     end;
   finally
     SL.Free;
@@ -350,12 +374,12 @@ begin
 //
 end;
 
-procedure TfrmDashboard.actCopyExecute(Sender: TObject);
+procedure TfrmDashboard.actCopyEndpointExecute(Sender: TObject);
 begin
 //
 end;
 
-procedure TfrmDashboard.actDeleteExecute(Sender: TObject);
+procedure TfrmDashboard.actDeleteEndpointExecute(Sender: TObject);
 begin
   FValueList.DeleteSelectedNodes;
 end;
@@ -365,7 +389,7 @@ begin
   InspectComponent(FTreeView);
 end;
 
-procedure TfrmDashboard.actMoveDownExecute(Sender: TObject);
+procedure TfrmDashboard.actMoveDownEndpointExecute(Sender: TObject);
 var
   LNode : TValueListNode;
 begin
@@ -377,7 +401,7 @@ begin
   end;
 end;
 
-procedure TfrmDashboard.actMoveUpExecute(Sender: TObject);
+procedure TfrmDashboard.actMoveUpEndpointExecute(Sender: TObject);
 var
   LNode : TValueListNode;
 begin
@@ -389,7 +413,7 @@ begin
   end;
 end;
 
-procedure TfrmDashboard.actSubscribeToListExecute(Sender: TObject);
+procedure TfrmDashboard.actSubscribeToSelectionExecute(Sender: TObject);
 var
   LSubscriber : ISubscriber;
   LEndPoint   : string;
@@ -413,6 +437,7 @@ begin
     );
     LSubscriber.Enabled := True;
     FZeroMQReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
+    Modified;
   end;
 end;
 {$ENDREGION}
@@ -432,6 +457,13 @@ begin
       Node.CheckState := csCheckedNormal
     else
       Node.CheckState := csUncheckedNormal;
+  end
+  else if Sender.GetNodeLevel(Node) = 1 then
+  begin
+    if DN.Data.Subscriber.Enabled then
+      Node.CheckState := csCheckedNormal
+    else
+      Node.CheckState := csUncheckedNormal;
   end;
 end;
 
@@ -447,6 +479,7 @@ begin
     if Sender.GetNodeLevel(Node) = 0 then
     begin
       B := Node.CheckState = csCheckedNormal;
+      DN.Data.Receiver.Enabled := B;
       if Supports(DN.Data.Receiver, IWinIPC) then
       begin
         FManager.Settings.WinIPCSettings.Enabled := B;
@@ -461,15 +494,22 @@ begin
       end
       else if Supports(DN.Data.Receiver, IComPort) then
       begin
-        DN.Data.Receiver.Enabled := True;
+        //
         //FManager.Settings.ComPortSettings.E
       end;
     end
     else
     begin
       DN.Data.Subscriber.Enabled := Node.CheckState = csCheckedNormal;
+      if DN.Data.Subscriber.Enabled and
+        not DN.Data.Subscriber.Receiver.Enabled then
+      begin
+        DN.Data.Subscriber.Receiver.Enabled := True;
+        UpdateActions;
+      end;
     end;
   end;
+  Modified;
 end;
 
 procedure TfrmDashboard.FTreeViewDblClick(Sender: TObject);
@@ -603,6 +643,7 @@ begin
     end;
   end;
 end;
+{$ENDREGION}
 
 procedure TfrmDashboard.FValueListExit(Sender: TObject);
 begin
@@ -612,7 +653,8 @@ end;
 procedure TfrmDashboard.FWinIPCReceiverSubscriberListChanged(Sender: TObject;
   const AKey: UInt32; Action: TCollectionChangedAction);
 var
-  LDelete : TDashboardNode;
+  LDelete     : TDashboardNode;
+  LSubscriber : ISubscriber;
 begin
   if Action = caRemoved then
   begin
@@ -624,14 +666,17 @@ begin
   end
   else if Action = caAdded then
   begin
-    AddNode(FWinIPCNode, nil, FWinIPCReceiver.SubscriberList[AKey]);
+    LSubscriber := FWinIPCReceiver.SubscriberList[AKey];
+    AddNode(FWinIPCNode, nil, LSubscriber);
+    LSubscriber.OnChange.Add(FSubscriberChange);
   end;
 end;
 
 procedure TfrmDashboard.FWinODSReceiverSubscriberListChanged(Sender: TObject;
   const AKey: UInt32; Action: TCollectionChangedAction);
 var
-  LDelete : TDashboardNode;
+  LDelete     : TDashboardNode;
+  LSubscriber : ISubscriber;
 begin
   if Action = caRemoved then
   begin
@@ -643,14 +688,17 @@ begin
   end
   else if Action = caAdded then
   begin
-    AddNode(FWinODSNode, nil, FWinODSReceiver.SubscriberList[AKey]);
+    LSubscriber := FWinODSReceiver.SubscriberList[AKey];
+    AddNode(FWinODSNode, nil, LSubscriber);
+    LSubscriber.OnChange.Add(FSubscriberChange);
   end;
 end;
 
 procedure TfrmDashboard.FZeroMQReceiverSubscriberListChanged(Sender: TObject;
   const AKey: UInt32; Action: TCollectionChangedAction);
 var
-  LDelete : TDashboardNode;
+  LDelete     : TDashboardNode;
+  LSubscriber : ISubscriber;
 begin
   if Action = caRemoved then
   begin
@@ -662,14 +710,17 @@ begin
   end
   else if Action = caAdded then
   begin
-    AddNode(FZeroMQNode, nil, FZeroMQReceiver.SubscriberList[AKey]);
+    LSubscriber := FZeroMQReceiver.SubscriberList[AKey];
+    AddNode(FZeroMQNode, nil, LSubscriber);
+    LSubscriber.OnChange.Add(FSubscriberChange);
   end;
 end;
 
 procedure TfrmDashboard.FComPortReceiverSubscriberListChanged(Sender: TObject;
   const AKey: UInt32; Action: TCollectionChangedAction);
 var
-  LDelete : TDashboardNode;
+  LDelete     : TDashboardNode;
+  LSubscriber : ISubscriber;
 begin
   if Action = caRemoved then
   begin
@@ -681,14 +732,17 @@ begin
   end
   else if Action = caAdded then
   begin
-    AddNode(FComPortNode, nil, FComPortReceiver.SubscriberList[AKey]);
+    LSubscriber := FComPortReceiver.SubscriberList[AKey];
+    AddNode(FComPortNode, nil, LSubscriber);
+    LSubscriber.OnChange.Add(FSubscriberChange);
   end;
 end;
 
 procedure TfrmDashboard.FFileSystemReceiverSubscriberListChanged(
   Sender: TObject; const AKey: UInt32; Action: TCollectionChangedAction);
 var
-  LDelete : TDashboardNode;
+  LDelete     : TDashboardNode;
+  LSubscriber : ISubscriber;
 begin
   if Action = caRemoved then
   begin
@@ -700,10 +754,21 @@ begin
   end
   else if Action = caAdded then
   begin
-    AddNode(FFileSystemNode, nil, FFileSystemReceiver.SubscriberList[AKey]);
+    LSubscriber := FFileSystemReceiver.SubscriberList[AKey];
+    AddNode(FFileSystemNode, nil, LSubscriber);
+    LSubscriber.OnChange.Add(FSubscriberChange);
   end;
 end;
-{$ENDREGION}
+
+procedure TfrmDashboard.FReceiverChange(Sender: TObject);
+begin
+  Modified;
+end;
+
+procedure TfrmDashboard.FSubscriberChange(Sender: TObject);
+begin
+  Modified;
+end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
@@ -719,7 +784,8 @@ begin
   if Assigned(AParentNode) then
   begin
     Result := AParentNode.Add(TDashboardData.Create(AReceiver, ASubscriber));
-    Result.CheckType := ctCheckBox;
+    Result.CheckType  := ctCheckBox;
+    Result.CheckState := csCheckedNormal;
   end
   else
   begin
@@ -752,6 +818,7 @@ begin
   FZeroMQ := TZeroMQ.Create;
   FWinIPCReceiver := TLogViewerFactories.CreateWinIPCReceiver(FManager);
   FManager.AddReceiver(FWinIPCReceiver);
+  FWinIPCReceiver.OnChange.Add(FReceiverChange);
   FWinIPCReceiver.SubscriberList.OnKeyChanged.Add(FWinIPCReceiverSubscriberListChanged);
   FWinIPCReceiver.Enabled := FManager.Settings.WinIPCSettings.Enabled;
   FWinIPCNode := AddNode(nil, FWinIPCReceiver, nil);
@@ -763,6 +830,7 @@ begin
 
   FWinODSReceiver := TLogViewerFactories.CreateWinODSReceiver(FManager);
   FManager.AddReceiver(FWinODSReceiver);
+  FWinODSReceiver.OnChange.Add(FReceiverChange);
   FWinODSReceiver.SubscriberList.OnKeyChanged.Add(FWinODSReceiverSubscriberListChanged);
   FWinODSReceiver.Enabled := FManager.Settings.WinODSSettings.Enabled;
   FWinODSNode := AddNode(nil, FWinODSReceiver, nil);
@@ -774,6 +842,7 @@ begin
 
   FZeroMQReceiver := TLogViewerFactories.CreateZeroMQReceiver(FManager, FZeroMQ);
   FManager.AddReceiver(FZeroMQReceiver);
+  FZeroMQReceiver.OnChange.Add(FReceiverChange);
   FZeroMQReceiver.SubscriberList.OnKeyChanged.Add(FZeroMQReceiverSubscriberListChanged);
   FZeroMQReceiver.Enabled := FManager.Settings.ZeroMQSettings.Enabled;
   FZeroMQNode := AddNode(nil, FZeroMQReceiver, nil);
@@ -783,10 +852,20 @@ begin
   else
     FZeroMQNode.CheckState := csUncheckedNormal;
 
+  FMQTT := TMQTT.Create('localhost', 1833);
+  FMQTTReceiver := TLogViewerFactories.CreateMQTTReceiver(FManager, FMQTT);
+  FManager.AddReceiver(FMQTTReceiver);
+  FMQTTReceiver.OnChange.Add(FReceiverChange);
+  FMQTTNode := AddNode(nil, FMQTTReceiver, nil);
+  FMQTTNode.CheckType := ctCheckBox;
+  if FMQTTReceiver.Enabled then
+    FMQTTNode.CheckState := csCheckedNormal;
+
   FComPortReceiver := TLogViewerFactories.CreateComPortReceiver(
     FManager, FManager.Settings.ComPortSettings
   );
   FManager.AddReceiver(FComPortReceiver);
+  FComPortReceiver.OnChange.Add(FReceiverChange);
   FComPortReceiver.SubscriberList.OnKeyChanged.Add(FComPortReceiverSubscriberListChanged);
 //  FComPortReceiver.Enabled := FManager.Settings.ComPortSettings.Enabled;
   FComPortNode := AddNode(nil, FComPortReceiver, nil);
@@ -802,7 +881,8 @@ begin
   );
   FFileSystemReceiver.SubscriberList.OnKeyChanged.Add(FFileSystemReceiverSubscriberListChanged);
   FFileSystemNode := AddNode(nil, FFileSystemReceiver, nil);
-    FFileSystemNode.CheckType := ctCheckBox;
+  FFileSystemReceiver.OnChange.Add(FReceiverChange);
+  FFileSystemNode.CheckType := ctCheckBox;
   if FFileSystemReceiver.Enabled then
     FFileSystemNode.CheckState := csCheckedNormal
   else
@@ -827,7 +907,8 @@ begin
   pgcMain.ActivePage := tsWinIPC;
 
   FZMQEndpoints.FromStrings(FManager.Settings.ZeroMQSettings.Endpoints);
-  FValueList.Data := FZMQEndpoints;
+  FValueList.Data      := FZMQEndpoints;
+  FValueList.PopupMenu := ppmEndpoints;
 end;
 
 procedure TfrmDashboard.InitializeTreeView;
@@ -894,6 +975,13 @@ begin
   FTreeView.Indent := 30;
 end;
 
+{ Called when actions in the manager need to be updated. }
+
+procedure TfrmDashboard.Modified;
+begin
+  FUpdate := True;
+end;
+
 procedure TfrmDashboard.SaveEndpoints;
 var
   LStrings : Shared<TStrings>;
@@ -906,9 +994,14 @@ end;
 procedure TfrmDashboard.UpdateActions;
 begin
   inherited UpdateActions;
-  actMoveUp.Enabled   := CanMoveUp;
-  actMoveDown.Enabled := CanMoveDown;
-
+  actMoveUpEndpoint.Enabled   := CanMoveUp;
+  actMoveDownEndpoint.Enabled := CanMoveDown;
+  if FUpdate then
+  begin
+    FManager.Actions.UpdateActions;
+    FUpdate := False;
+    FTreeView.Repaint;
+  end;
 end;
 {$ENDREGION}
 

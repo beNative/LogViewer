@@ -1,7 +1,7 @@
 object frmComPortSettings: TfrmComPortSettings
   Left = 0
   Top = 0
-  ClientHeight = 148
+  ClientHeight = 149
   ClientWidth = 258
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET

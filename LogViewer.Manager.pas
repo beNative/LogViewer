@@ -596,12 +596,12 @@ end;
 
 procedure TdmManager.SetActiveView(const Value: ILogViewer);
 begin
-  if Assigned(Value) and (Value <> FActiveView) then
+  if  Value <> FActiveView then
   begin
     FActiveView := Value;
+    Events.DoActiveViewChange(FActiveView);
     UpdateActions;
   end;
-  Events.DoActiveViewChange(FActiveView);
 end;
 
 function TdmManager.GetItem(AName: string): TCustomAction;
@@ -860,35 +860,38 @@ begin
   actAutoScrollMessages.Checked
     := FSettings.MessageListSettings.AutoScrollMessages;
   B := Assigned(ActiveView) and Assigned(ActiveView.Subscriber);
-  actStart.Enabled         := B and not ActiveView.Subscriber.Enabled;
-  actStop.Enabled          := B and not actStart.Enabled;
-  actBitmap.Enabled        := B;
-  actAction.Enabled        := B;
-  actText.Enabled          := B;
-  actDataSet.Enabled       := B;
-  actCallStack.Enabled     := B;
-  actCheckPoint.Enabled    := B;
-  actConditional.Enabled   := B;
-  actInfo.Enabled          := B;
-  actWarning.Enabled       := B;
-  actValue.Enabled         := B;
-  actError.Enabled         := B;
-  actMethodTraces.Enabled  := B;
-  actException.Enabled     := B;
-  actComponent.Enabled     := B;
-  actHeapInfo.Enabled      := B;
-  actCustomData.Enabled    := B;
-  actStrings.Enabled       := B;
-  actObject.Enabled        := B;
-  actPersistent.Enabled    := B;
-  actInterface.Enabled     := B;
-  actMemory.Enabled        := B;
-  actCollapseAll.Enabled   := B;
-  actExpandAll.Enabled     := B;
-  actClearMessages.Enabled := B;
-  actSelectAll.Enabled     := MLS.VisibleMessageTypes <> ALL_MESSAGES;
-  actSelectNone.Enabled    := MLS.VisibleMessageTypes <> [];
-  actFilterMessages.Enabled :=
+  actAutoScrollMessages.Enabled := B;
+  actMessageTypesMenu.Enabled   := B;
+  actShowFilterView.Enabled     := B;
+  actStart.Enabled              := B and not ActiveView.Subscriber.Enabled;
+  actStop.Enabled               := B and not actStart.Enabled;
+  actBitmap.Enabled             := B;
+  actAction.Enabled             := B;
+  actText.Enabled               := B;
+  actDataSet.Enabled            := B;
+  actCallStack.Enabled          := B;
+  actCheckPoint.Enabled         := B;
+  actConditional.Enabled        := B;
+  actInfo.Enabled               := B;
+  actWarning.Enabled            := B;
+  actValue.Enabled              := B;
+  actError.Enabled              := B;
+  actMethodTraces.Enabled       := B;
+  actException.Enabled          := B;
+  actComponent.Enabled          := B;
+  actHeapInfo.Enabled           := B;
+  actCustomData.Enabled         := B;
+  actStrings.Enabled            := B;
+  actObject.Enabled             := B;
+  actPersistent.Enabled         := B;
+  actInterface.Enabled          := B;
+  actMemory.Enabled             := B;
+  actCollapseAll.Enabled        := B;
+  actExpandAll.Enabled          := B;
+  actClearMessages.Enabled      := B;
+  actSelectAll.Enabled          := MLS.VisibleMessageTypes <> ALL_MESSAGES;
+  actSelectNone.Enabled         := MLS.VisibleMessageTypes <> [];
+  actFilterMessages.Enabled := B and
     not Settings.MessageListSettings.AutoFilterMessages;
   actToggleAlwaysOnTop.Checked := Settings.FormSettings.FormStyle = fsStayOnTop;
   actToggleFullscreen.Checked := Settings.FormSettings.WindowState = wsMaximized;

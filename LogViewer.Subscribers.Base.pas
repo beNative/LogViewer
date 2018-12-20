@@ -37,6 +37,7 @@ type
     FSourceId         : UInt32;
     FSourceName       : string;
     FKey              : string;
+    FOnChange         : Event<TNotifyEvent>;
 
   protected
     {$REGION 'property access methods'}
@@ -48,10 +49,12 @@ type
     procedure SetEnabled(const Value: Boolean); virtual;
     function GetSourceId: UInt32; virtual;
     function GetSourceName: string;
+    function GetOnChange: IEvent<TNotifyEvent>;
     {$ENDREGION}
 
     procedure Poll; virtual;
     procedure DoReceiveMessage(AStream: TStream); virtual;
+    procedure DoChange; virtual;
 
     property Key: string
       read GetKey;
@@ -73,6 +76,9 @@ type
 
     property OnReceiveMessage: IEvent<TReceiveMessageEvent>
       read GetOnReceiveMessage;
+
+    property OnChange: IEvent<TNotifyEvent>
+      read GetOnChange;
 
   public
     constructor Create(
@@ -123,7 +129,11 @@ end;
 
 procedure TSubscriber.SetEnabled(const Value: Boolean);
 begin
-  FEnabled := Value;
+  if Value <> Enabled then
+  begin
+    FEnabled := Value;
+    DoChange;
+  end;
 end;
 
 function TSubscriber.GetKey: string;
@@ -134,6 +144,11 @@ end;
 function TSubscriber.GetMessageCount: Int64;
 begin
   Result := FMessageCount;
+end;
+
+function TSubscriber.GetOnChange: IEvent<TNotifyEvent>;
+begin
+  Result := FOnChange;
 end;
 
 function TSubscriber.GetOnReceiveMessage: IEvent<TReceiveMessageEvent>;
@@ -157,10 +172,11 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION 'protected methods'}
-procedure TSubscriber.Poll;
+{$REGION 'event dispatch methods'}
+procedure TSubscriber.DoChange;
 begin
-  // override in descendants
+  if FOnChange.CanInvoke then
+    FOnChange.Invoke(Self);
 end;
 
 procedure TSubscriber.DoReceiveMessage(AStream: TStream);
@@ -171,6 +187,13 @@ begin
     Inc(FMessageCount);
     FOnReceiveMessage.Invoke(Self, AStream);
   end;
+end;
+{$ENDREGION}
+
+{$REGION 'protected methods'}
+procedure TSubscriber.Poll;
+begin
+  // override in descendants
 end;
 {$ENDREGION}
 

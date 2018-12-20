@@ -68,6 +68,7 @@ type
     function GetSourceId: UInt32;
     function GetSourceName: string;
     function GetMessageCount: Int64;
+    function GetOnChange: IEvent<TNotifyEvent>;
     {$ENDREGION}
     procedure Poll;
     procedure DoReceiveMessage(AStream : TStream);
@@ -92,6 +93,9 @@ type
 
     property SourceName: string
       read GetSourceName;
+
+    property OnChange: IEvent<TNotifyEvent>
+      read GetOnChange;
   end;
 
   IChannelReceiver = interface
@@ -102,6 +106,7 @@ type
     function GetName: string;
     procedure SetName(const Value: string);
     function GetSubscriberList: IDictionary<UInt32, ISubscriber>;
+    function GetOnChange: IEvent<TNotifyEvent>;
     {$ENDREGION}
 
     function ToString: string;
@@ -121,10 +126,17 @@ type
 
     property SubscriberList: IDictionary<UInt32, ISubscriber>
       read GetSubscriberList;
+
+    property OnChange: IEvent<TNotifyEvent>
+      read GetOnChange;
   end;
 
   IZMQ = interface
   ['{89F150A7-414B-4C81-BC08-40227768D317}']
+  end;
+
+  IMQTT = interface
+  ['{4C00B52A-0EA5-4247-A88D-109E15D104DA}']
   end;
 
   IWinIPC = interface

@@ -254,6 +254,7 @@ procedure TfrmMain.ctMainActiveTabChanged(Sender: TObject; ATab: TChromeTab);
 var
   MV : ILogViewer;
 begin
+  Logger.Track(Self, 'ctMainActiveTabChanged');
   if ATab.DisplayName = 'Dashboard' then
   begin
     FDashboard.Show;
@@ -261,6 +262,7 @@ begin
     pnlSourceName.Caption   := '';
     pnlMessageCount.Caption := '';
     pnlDelta.Caption        := '';
+    Manager.ActiveView      := nil;
     OptimizeStatusBarPanelWidths;
   end
   else if Assigned(ATab.Data) then
@@ -321,13 +323,21 @@ var
   CT : TChromeTab;
   I  : Integer;
 begin
-  for I := 0 to ctMain.Tabs.Count - 1 do
+  Logger.Track(Self, 'EventsActiveViewChange');
+  if Assigned(ALogViewer) then
   begin
-    CT := ctMain.Tabs[I];
-    if CT.Data = Pointer(ALogViewer) then
-      ctMain.ActiveTab := CT;
+    for I := 0 to ctMain.Tabs.Count - 1 do
+    begin
+      CT := ctMain.Tabs[I];
+      if CT.Data = Pointer(ALogViewer) then
+        ctMain.ActiveTab := CT;
+    end;
+    ALogViewer.Form.Show;
+  end
+  else
+  begin
+    FDashboard.Show;
   end;
-  ALogViewer.Form.Show;
 end;
 
 procedure TfrmMain.EventsAddLogViewer(Sender: TObject;

@@ -152,6 +152,7 @@ const
   RECEIVERNAME_WINIPC     = 'WinIPC';
   RECEIVERNAME_WINODS     = 'WinODS';
   RECEIVERNAME_ZEROMQ     = 'ZeroMQ';
+  RECEIVERNAME_MQTT       = 'MQTT';
   RECEIVERNAME_COMPORT    = 'ComPort';
   RECEIVERNAME_FILESYSTEM = 'FileSystem';
 
@@ -159,6 +160,7 @@ resourcestring
   SReceiverCaptionWinIPC     = 'Windows IPC receiver';
   SReceiverCaptionWinODS     = 'Windows API OutputDebugString receiver';
   SReceiverCaptionZeroMQ     = 'ZeroMQ subscription receiver';
+  SReceiverCaptionMQTT       = 'MQTT subscription receiver';
   SReceiverCaptionComPort    = 'ComPort receiver';
   SReceiverCaptionFileSystem = 'File system receiver';
 

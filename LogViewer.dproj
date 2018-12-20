@@ -197,6 +197,8 @@
         <DCCReference Include="LogViewer.Dashboard.Data.pas"/>
         <DCCReference Include="LogViewer.MessageList.Data.pas"/>
         <DCCReference Include="LogViewer.Settings.Dialog.Data.pas"/>
+        <DCCReference Include="LogViewer.Receivers.MQTT.pas"/>
+        <DCCReference Include="LogViewer.Subscribers.MQTT.pas"/>
         <None Include="Readme.md"/>
         <RcItem Include="Bin\Win32\libzmq.dll">
             <ContainerId>ResourceItem</ContainerId>

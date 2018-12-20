@@ -359,13 +359,13 @@ begin
   CreateWatchesView;
   CreateCallStackView;
   CreateValueListView;
-  tsRawData.TabVisible      := False;
-  tsMessageView.TabVisible  := False;
   pgcMessageData.ActivePage := tsMessageView;
-  tsValueList.TabVisible    := False;
-  tsImageViewer.TabVisible  := False;
-  tsDataSet.TabVisible      := False;
-  tsTextViewer.TabVisible   := False;
+//  tsRawData.TabVisible      := False;
+//  tsMessageView.TabVisible  := False;
+//  tsValueList.TabVisible    := False;
+//  tsImageViewer.TabVisible  := False;
+//  tsDataSet.TabVisible      := False;
+//  tsTextViewer.TabVisible   := False;
 
   Caption := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
 
@@ -1640,37 +1640,37 @@ begin
 end;
 
 procedure TfrmMessageList.UpdateValueDisplay(ALogNode: TLogNode);
-//var
-//  DR : DynamicRecord;
-//  SL : TStringList;
+var
+  DR : DynamicRecord;
+  SL : TStringList;
 begin
   FEditorView.Text := ALogNode.Value;
   FEditorView.HighlighterName  := 'INI';
   pgcMessageDetails.ActivePage := tsTextViewer;
 
-//  // test
-//  if ALogNode.Value.Contains('=') then
-//  begin
-//    pgcMessageDetails.ActivePage := tsValueList;
-//    DR.FromString(ALogNode.Value);
-//    FValueList.Data := DR;
-//  end
-//  else if ALogNode.Value.Contains(#13#10) then
-//  begin
-//    SL := TStringList.Create;
-//    try
-//     SL.Text := ALogNode.Value;
-//     DR.FromArray<string>(SL.ToStringArray, True);
-//    finally
-//      SL.Free;
-//    end;
-//    pgcMessageDetails.ActivePage := tsValueList;
-//    FValueList.Data := DR;
-//  end
-//  else
-//  begin
-//    pgcMessageDetails.ActivePage := tsTextViewer;
-//  end;
+  // test
+  if ALogNode.Value.Contains('=') then
+  begin
+    pgcMessageDetails.ActivePage := tsValueList;
+    DR.FromString(ALogNode.Value);
+    FValueList.Data := DR;
+  end
+  else if ALogNode.Value.Contains(#13#10) then
+  begin
+    SL := TStringList.Create;
+    try
+     SL.Text := ALogNode.Value;
+     DR.FromArray<string>(SL.ToStringArray, True);
+    finally
+      SL.Free;
+    end;
+    pgcMessageDetails.ActivePage := tsValueList;
+    FValueList.Data := DR;
+  end
+  else
+  begin
+    pgcMessageDetails.ActivePage := tsTextViewer;
+  end;
 end;
 {$ENDREGION}
 
