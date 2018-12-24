@@ -656,9 +656,14 @@ var
   LDelete     : TDashboardNode;
   LSubscriber : ISubscriber;
 begin
+  LDelete := nil;
   if Action = caRemoved then
   begin
-    LDelete := FWinIPCNode.Items[AKey];
+    for LDelete in FWinIPCNode do
+    begin
+      if LDelete.Data.Subscriber.SourceId = AKey then
+        Break;
+    end;
     if Assigned(LDelete) then
     begin
       FTreeView.DeleteNode(LDelete.VNode);
@@ -678,9 +683,14 @@ var
   LDelete     : TDashboardNode;
   LSubscriber : ISubscriber;
 begin
+  LDelete := nil;
   if Action = caRemoved then
   begin
-    LDelete := FWinODSNode[AKey];
+    for LDelete in FWinODSNode do
+    begin
+      if LDelete.Data.Subscriber.SourceId = AKey then
+        Break;
+    end;
     if Assigned(LDelete) then
     begin
       FTreeView.DeleteNode(LDelete.VNode);
@@ -700,9 +710,14 @@ var
   LDelete     : TDashboardNode;
   LSubscriber : ISubscriber;
 begin
+  LDelete := nil;
   if Action = caRemoved then
   begin
-    LDelete := FZeroMQNode[AKey];
+    for LDelete in FZeroMQNode do
+    begin
+      if LDelete.Data.Subscriber.SourceId = AKey then
+        Break;
+    end;
     if Assigned(LDelete) then
     begin
       FTreeView.DeleteNode(LDelete.VNode);
@@ -722,9 +737,14 @@ var
   LDelete     : TDashboardNode;
   LSubscriber : ISubscriber;
 begin
+  LDelete := nil;
   if Action = caRemoved then
   begin
-    LDelete := FComPortNode[AKey];
+    for LDelete in FComPortNode do
+    begin
+      if LDelete.Data.Subscriber.SourceId = AKey then
+        Break;
+    end;
     if Assigned(LDelete) then
     begin
       FTreeView.DeleteNode(LDelete.VNode);
@@ -744,9 +764,14 @@ var
   LDelete     : TDashboardNode;
   LSubscriber : ISubscriber;
 begin
+  LDelete := nil;
   if Action = caRemoved then
   begin
-    LDelete := FFileSystemNode[AKey];
+    for LDelete in FFileSystemNode do
+    begin
+      if LDelete.Data.Subscriber.SourceId = AKey then
+        Break;
+    end;
     if Assigned(LDelete) then
     begin
       FTreeView.DeleteNode(LDelete.VNode);

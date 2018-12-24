@@ -31,14 +31,8 @@ type
   TfrmComPortSettings = class(TForm)
     cbxPort     : TComboBox;
     cbxBaudRate : TComboBox;
-    cbxParity   : TComboBox;
-    cbxDataBits : TComboBox;
-    cbxStopBits : TComboBox;
     lblPort     : TLabel;
     lblBaudRate : TLabel;
-    lblDataBits : TLabel;
-    lblParity   : TLabel;
-    lblStopBits : TLabel;
 
   private
     FSettings: TComPortSettings;
@@ -80,9 +74,6 @@ begin
   inherited UpdateActions;
   cbxPort.Text     := FSettings.Port;
   cbxBaudRate.Text := FSettings.BaudRate.ToString;
-  cbxDataBits.Text := FSettings.DataBits.ToString;
-  cbxStopBits.Text := FSettings.StopBits.ToString;
-  cbxParity.Text   := FSettings.Parity;
 end;
 {$ENDREGION}
 

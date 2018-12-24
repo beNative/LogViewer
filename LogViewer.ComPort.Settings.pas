@@ -30,10 +30,8 @@ uses
 type
   TComPortSettings = class(TPersistent)
   const
-    DEFAULT_PARITY           = 'N';
-    DEFAULT_BAUDRATE         = 9600;
-    DEFAULT_DATA_BITS        = 8;
-    DEFAULT_STOP_BITS        = SB1;
+    //DEFAULT_BAUDRATE         = 9600;
+    DEFAULT_BAUDRATE         = 115200;
     DEFAULT_POLLING_INTERVAL = 50;
   private
     FBaudRate        : Integer;
@@ -47,14 +45,8 @@ type
     {$REGION 'property access methods'}
     function GetBaudRate: Integer;
     procedure SetBaudRate(const Value: Integer);
-    function GetDataBits: Integer;
     function GetPort: string;
-    function GetStopBits: Integer;
-    procedure SetDataBits(const Value: Integer);
     procedure SetPort(const Value: string);
-    procedure SetStopBits(const Value: Integer);
-    function GetParity: Char;
-    procedure SetParity(const Value: Char);
     function GetOnChanged: IEvent<TNotifyEvent>;
     function GetPollingInterval: Integer;
     procedure SetPollingInterval(const Value: Integer);
@@ -74,17 +66,6 @@ type
     property Port: string
       read GetPort write SetPort;
 
-    property DataBits: Integer
-      read GetDataBits write SetDataBits default DEFAULT_DATA_BITS;
-
-    { SB1, SB15, SB2 }
-    property StopBits: Integer
-      read GetStopBits write SetStopBits default DEFAULT_STOP_BITS;
-
-    { N - None, O - Odd, E - Even, M - Mark or S - Space.}
-    property Parity: Char
-      read GetParity write SetParity default DEFAULT_PARITY;
-
     property PollingInterval: Integer // in ms
       read GetPollingInterval write SetPollingInterval
       default DEFAULT_POLLING_INTERVAL;
@@ -99,10 +80,7 @@ implementation
 procedure TComPortSettings.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FParity          := DEFAULT_PARITY;
   FBaudRate        := DEFAULT_BAUDRATE;
-  FDataBits        := DEFAULT_DATA_BITS;
-  FStopBits        := DEFAULT_STOP_BITS;
   FPollingInterval := DEFAULT_POLLING_INTERVAL;
 end;
 {$ENDREGION}
@@ -122,37 +100,9 @@ begin
   end;
 end;
 
-function TComPortSettings.GetDataBits: Integer;
-begin
-  Result := FDataBits;
-end;
-
 function TComPortSettings.GetOnChanged: IEvent<TNotifyEvent>;
 begin
   Result := FOnChanged;
-end;
-
-procedure TComPortSettings.SetDataBits(const Value: Integer);
-begin
-  if Value <> DataBits then
-  begin
-    FDataBits := Value;
-    Changed;
-  end;
-end;
-
-function TComPortSettings.GetParity: Char;
-begin
-  Result := FParity;
-end;
-
-procedure TComPortSettings.SetParity(const Value: Char);
-begin
-  if Value <> Parity then
-  begin
-    FParity := Value;
-    Changed;
-  end;
 end;
 
 function TComPortSettings.GetPollingInterval: Integer;
@@ -182,20 +132,6 @@ begin
     Changed;
   end;
 end;
-
-function TComPortSettings.GetStopBits: Integer;
-begin
-  Result := FStopBits;
-end;
-
-procedure TComPortSettings.SetStopBits(const Value: Integer);
-begin
-  if Value <> StopBits then
-  begin
-    FStopBits := Value;
-    Changed;
-  end;
-end;
 {$ENDREGION}
 
 {$REGION 'event dispatch methods'}
@@ -214,9 +150,6 @@ begin
   begin
     CPS := TComPortSettings(Source);
     FBaudRate        := CPS.BaudRate;
-    FDataBits        := CPS.DataBits;
-    FStopBits        := CPS.StopBits;
-    FParity          := CPS.Parity;
     FPort            := CPS.Port;
     FPollingInterval := CPS.PollingInterval;
   end

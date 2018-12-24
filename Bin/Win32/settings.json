@@ -1,7 +1,7 @@
 {
 	"FormSettings": {
-		"Left": 337,
-		"Top": 47,
+		"Left": 562,
+		"Top": 184,
 		"Width": 1590,
 		"Height": 854,
 		"FormStyle": 0,
@@ -15,10 +15,10 @@
 		"RightPanelWidth": 482
 	},
 	"WinODSSettings": {
-		"Enabled": false
+		"Enabled": true
 	},
 	"WinIPCSettings": {
-		"Enabled": false
+		"Enabled": true
 	},
 	"ZeroMQSettings": {
 		"Enabled": true,

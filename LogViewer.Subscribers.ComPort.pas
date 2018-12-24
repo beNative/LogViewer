@@ -111,14 +111,7 @@ begin
   if Value then
   begin
     FSerialPort.Connect(FSettings.Port);
-    FSerialPort.Config(
-      FSettings.BaudRate,
-      FSettings.DataBits,
-      FSettings.Parity,
-      FSettings.StopBits,
-      False,
-      True
-    );
+    FSerialPort.Config(FSettings.BaudRate, 8, 'N', SB1, False, True);
   end
   else
   begin
@@ -163,14 +156,7 @@ begin
       FSerialPort.Connect(FSettings.Port);
     end;
   end;
-  FSerialPort.Config(
-    FSettings.BaudRate,
-    FSettings.DataBits,
-    FSettings.Parity,
-    FSettings.StopBits,
-    False,
-    True
-  );
+  FSerialPort.Config(FSettings.BaudRate, 8, 'N', SB1, False, True);
 end;
 {$ENDREGION}
 
