@@ -1,5 +1,5 @@
 {
-  Copyright (C) 2013-2018 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2019 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -111,6 +111,11 @@ type
     tsWinIPC                   : TTabSheet;
     tsWinODS                   : TTabSheet;
     tsZeroMQ                   : TTabSheet;
+    tsMQTT: TTabSheet;
+    edtBroker: TLabeledEdit;
+    pnlMQTTTitle: TPanel;
+    tsFileSystem: TTabSheet;
+    pnlFileSystemTitle: TPanel;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -559,6 +564,14 @@ begin
   else if Supports(LReceiver, IComPort) then
   begin
     pgcMain.ActivePage := tsCOMPort;
+  end
+  else if Supports(LReceiver, IMQTT) then
+  begin
+    pgcMain.ActivePage := tsMQTT;
+  end
+  else if Supports(LReceiver, IFileSystem) then
+  begin
+    pgcMain.ActivePage := tsFileSystem;
   end;
 end;
 

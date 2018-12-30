@@ -1,5 +1,5 @@
 {
-  Copyright (C) 2013-2018 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2019 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -887,7 +887,7 @@ begin
     if Length(LTrim) > 0 then
       S := LTrim[0];
     if (S.Length > MAX_TEXTLENGTH_VALUECOLUMN) then
-      S := S.Substring(1, MAX_TEXTLENGTH_VALUECOLUMN);
+      S := S.Substring(0, MAX_TEXTLENGTH_VALUECOLUMN);
     CellText := S;
   end
   else if Column = COLUMN_TIMESTAMP then
@@ -993,7 +993,8 @@ begin
             LN.ValueName := Copy(S, 1, I);
             LN.Highlighter := Trim(ExtractText(S, '(', ')'));
           end;
-          SL.Delete(0);
+          if I <> -1 then
+            SL.Delete(0);
         end;
         LN.Value := SL.Text;
       finally

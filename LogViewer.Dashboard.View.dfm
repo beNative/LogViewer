@@ -56,7 +56,7 @@ object frmDashboard: TfrmDashboard
         Top = 0
         Width = 305
         Height = 421
-        ActivePage = tsCOMPort
+        ActivePage = tsZeroMQ
         Align = alClient
         MultiLine = True
         Style = tsFlatButtons
@@ -68,16 +68,14 @@ object frmDashboard: TfrmDashboard
           Margins.Bottom = 0
           Caption = 'WinIPC'
           ImageIndex = 28
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
+          ExplicitTop = 27
+          ExplicitHeight = 390
           object lblWinIPCDescription: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
-            Width = 287
-            Height = 221
+            Width = 291
+            Height = 335
             Align = alClient
             Caption = 
               'Messages are exchanged between the source application and LogVie' +
@@ -92,6 +90,8 @@ object frmDashboard: TfrmDashboard
               'based on queueuing.'#13#10#13#10'A new node is automatically created when ' +
               'a process is detected that sends compatible log messages.'#13#10
             WordWrap = True
+            ExplicitWidth = 287
+            ExplicitHeight = 221
           end
           object pnlWinIPCTitle: TPanel
             Left = 0
@@ -115,16 +115,14 @@ object frmDashboard: TfrmDashboard
         object tsWinODS: TTabSheet
           Caption = 'WinODS'
           ImageIndex = 28
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
+          ExplicitTop = 27
+          ExplicitHeight = 390
           object lblWinODSDescription: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
             Width = 291
-            Height = 247
+            Height = 335
             Align = alClient
             Caption = 
               'This receiver captures messages from any local applicatiion that' +
@@ -148,6 +146,7 @@ object frmDashboard: TfrmDashboard
             Font.Style = []
             ParentFont = False
             WordWrap = True
+            ExplicitHeight = 247
           end
           object pnlWinODSTitle: TPanel
             Left = 0
@@ -171,13 +170,11 @@ object frmDashboard: TfrmDashboard
         object tsZeroMQ: TTabSheet
           Caption = 'ZeroMQ'
           ImageIndex = 6
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
+          ExplicitTop = 27
+          ExplicitHeight = 390
           DesignSize = (
             297
-            390)
+            366)
           object pnlZeroMQTitle: TPanel
             Left = 0
             Top = 0
@@ -198,7 +195,7 @@ object frmDashboard: TfrmDashboard
           end
           object pnlZeroMQButtons: TGridPanel
             Left = 0
-            Top = 342
+            Top = 318
             Width = 297
             Height = 48
             Anchors = [akLeft, akRight, akBottom]
@@ -226,6 +223,7 @@ object frmDashboard: TfrmDashboard
                 Value = 100.000000000000000000
               end>
             TabOrder = 1
+            ExplicitTop = 342
             object btnAddZMQNodeLocalHost: TButton
               AlignWithMargins = True
               Left = 0
@@ -261,11 +259,12 @@ object frmDashboard: TfrmDashboard
             Left = 0
             Top = 25
             Width = 297
-            Height = 311
+            Height = 287
             Align = alTop
             Anchors = [akLeft, akTop, akRight, akBottom]
             BevelOuter = bvNone
             TabOrder = 2
+            ExplicitHeight = 311
             object tlbZMQEndpoints: TToolBar
               Left = 0
               Top = 0
@@ -331,10 +330,8 @@ object frmDashboard: TfrmDashboard
         object tsCOMPort: TTabSheet
           Caption = 'COMPort'
           ImageIndex = 24
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
+          ExplicitTop = 27
+          ExplicitHeight = 390
           object pnlCOMPortTitle: TPanel
             Left = 0
             Top = 0
@@ -352,6 +349,79 @@ object frmDashboard: TfrmDashboard
             ParentBackground = False
             ParentFont = False
             TabOrder = 0
+          end
+        end
+        object tsMQTT: TTabSheet
+          Caption = 'MQTT'
+          ImageIndex = 4
+          ExplicitTop = 27
+          ExplicitHeight = 390
+          DesignSize = (
+            297
+            366)
+          object edtBroker: TLabeledEdit
+            Left = 40
+            Top = 31
+            Width = 255
+            Height = 21
+            Alignment = taCenter
+            Anchors = [akLeft, akTop, akRight]
+            EditLabel.Width = 35
+            EditLabel.Height = 13
+            EditLabel.Caption = 'Broker:'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = [fsBold]
+            LabelPosition = lpLeft
+            ParentFont = False
+            TabOrder = 0
+            Text = 'localhost'
+          end
+          object pnlMQTTTitle: TPanel
+            Left = 0
+            Top = 0
+            Width = 297
+            Height = 25
+            Align = alTop
+            Alignment = taLeftJustify
+            BevelOuter = bvNone
+            Caption = 'MQTT'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clGray
+            Font.Height = -16
+            Font.Name = 'Segoe UI'
+            Font.Style = []
+            ParentBackground = False
+            ParentFont = False
+            TabOrder = 1
+            ExplicitTop = 8
+          end
+        end
+        object tsFileSystem: TTabSheet
+          Caption = 'FileSystem'
+          ImageIndex = 5
+          ExplicitLeft = 2
+          ExplicitTop = 55
+          object pnlFileSystemTitle: TPanel
+            Left = 0
+            Top = 0
+            Width = 297
+            Height = 25
+            Align = alTop
+            Alignment = taLeftJustify
+            BevelOuter = bvNone
+            Caption = 'File system'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clGray
+            Font.Height = -16
+            Font.Name = 'Segoe UI'
+            Font.Style = []
+            ParentBackground = False
+            ParentFont = False
+            TabOrder = 0
+            ExplicitTop = 8
           end
         end
       end
@@ -425,7 +495,7 @@ object frmDashboard: TfrmDashboard
     Left = 328
     Top = 112
     Bitmap = {
-      494C010109000801D40010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010109000801DC0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000001001B09532ED308512ED100000010000000000000
