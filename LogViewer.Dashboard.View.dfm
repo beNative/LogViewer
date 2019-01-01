@@ -68,14 +68,16 @@ object frmDashboard: TfrmDashboard
           Margins.Bottom = 0
           Caption = 'WinIPC'
           ImageIndex = 28
-          ExplicitTop = 27
-          ExplicitHeight = 390
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object lblWinIPCDescription: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
-            Width = 291
-            Height = 335
+            Width = 287
+            Height = 221
             Align = alClient
             Caption = 
               'Messages are exchanged between the source application and LogVie' +
@@ -90,8 +92,6 @@ object frmDashboard: TfrmDashboard
               'based on queueuing.'#13#10#13#10'A new node is automatically created when ' +
               'a process is detected that sends compatible log messages.'#13#10
             WordWrap = True
-            ExplicitWidth = 287
-            ExplicitHeight = 221
           end
           object pnlWinIPCTitle: TPanel
             Left = 0
@@ -115,14 +115,16 @@ object frmDashboard: TfrmDashboard
         object tsWinODS: TTabSheet
           Caption = 'WinODS'
           ImageIndex = 28
-          ExplicitTop = 27
-          ExplicitHeight = 390
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object lblWinODSDescription: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
             Width = 291
-            Height = 335
+            Height = 247
             Align = alClient
             Caption = 
               'This receiver captures messages from any local applicatiion that' +
@@ -146,7 +148,6 @@ object frmDashboard: TfrmDashboard
             Font.Style = []
             ParentFont = False
             WordWrap = True
-            ExplicitHeight = 247
           end
           object pnlWinODSTitle: TPanel
             Left = 0
@@ -170,8 +171,10 @@ object frmDashboard: TfrmDashboard
         object tsZeroMQ: TTabSheet
           Caption = 'ZeroMQ'
           ImageIndex = 6
-          ExplicitTop = 27
-          ExplicitHeight = 390
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           DesignSize = (
             297
             366)
@@ -223,7 +226,6 @@ object frmDashboard: TfrmDashboard
                 Value = 100.000000000000000000
               end>
             TabOrder = 1
-            ExplicitTop = 342
             object btnAddZMQNodeLocalHost: TButton
               AlignWithMargins = True
               Left = 0
@@ -264,74 +266,15 @@ object frmDashboard: TfrmDashboard
             Anchors = [akLeft, akTop, akRight, akBottom]
             BevelOuter = bvNone
             TabOrder = 2
-            ExplicitHeight = 311
-            object tlbZMQEndpoints: TToolBar
-              Left = 0
-              Top = 0
-              Width = 297
-              Height = 25
-              Images = imlMain
-              TabOrder = 0
-              object btnAdd: TToolButton
-                Left = 0
-                Top = 0
-                Action = actAddEndpoint
-              end
-              object btnDelete: TToolButton
-                Left = 23
-                Top = 0
-                Action = actDeleteEndpoint
-              end
-              object btnSpacer1: TToolButton
-                Left = 46
-                Top = 0
-                Width = 10
-                ImageIndex = 8
-                Style = tbsSeparator
-              end
-              object btnDuplicate: TToolButton
-                Left = 56
-                Top = 0
-                Action = actCopyEndpoint
-              end
-              object btnSpacer2: TToolButton
-                Left = 79
-                Top = 0
-                Width = 10
-                ImageIndex = 8
-                Style = tbsSeparator
-              end
-              object btnMoveUp: TToolButton
-                Left = 89
-                Top = 0
-                Action = actMoveUpEndpoint
-              end
-              object btnMoveDown: TToolButton
-                Left = 112
-                Top = 0
-                Action = actMoveDownEndpoint
-              end
-              object btn1: TToolButton
-                Left = 135
-                Top = 0
-                Width = 8
-                Caption = 'btn1'
-                ImageIndex = 6
-                Style = tbsSeparator
-              end
-              object btnSubscribeToSelection: TToolButton
-                Left = 143
-                Top = 0
-                Action = actSubscribeToSelection
-              end
-            end
           end
         end
         object tsCOMPort: TTabSheet
           Caption = 'COMPort'
           ImageIndex = 24
-          ExplicitTop = 27
-          ExplicitHeight = 390
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object pnlCOMPortTitle: TPanel
             Left = 0
             Top = 0
@@ -354,8 +297,10 @@ object frmDashboard: TfrmDashboard
         object tsMQTT: TTabSheet
           Caption = 'MQTT'
           ImageIndex = 4
-          ExplicitTop = 27
-          ExplicitHeight = 390
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           DesignSize = (
             297
             366)
@@ -396,14 +341,15 @@ object frmDashboard: TfrmDashboard
             ParentBackground = False
             ParentFont = False
             TabOrder = 1
-            ExplicitTop = 8
           end
         end
         object tsFileSystem: TTabSheet
           Caption = 'FileSystem'
           ImageIndex = 5
-          ExplicitLeft = 2
-          ExplicitTop = 55
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object pnlFileSystemTitle: TPanel
             Left = 0
             Top = 0
@@ -421,7 +367,6 @@ object frmDashboard: TfrmDashboard
             ParentBackground = False
             ParentFont = False
             TabOrder = 0
-            ExplicitTop = 8
           end
         end
       end
@@ -459,35 +404,30 @@ object frmDashboard: TfrmDashboard
       Caption = 'Move up'
       Hint = 'Move endpoint one position upwards.'
       ImageIndex = 3
-      OnExecute = actMoveUpEndpointExecute
     end
     object actMoveDownEndpoint: TAction
       Category = 'ZMQEndpoints'
       Caption = 'Move down'
       Hint = 'Move endpoint one position downwards.'
       ImageIndex = 4
-      OnExecute = actMoveDownEndpointExecute
     end
     object actAddEndpoint: TAction
       Category = 'ZMQEndpoints'
       Caption = 'Add'
       Hint = 'Add a new endpoint to the list.'
       ImageIndex = 5
-      OnExecute = actAddEndpointExecute
     end
     object actDeleteEndpoint: TAction
       Category = 'ZMQEndpoints'
       Caption = 'Delete'
       Hint = 'Delete the selected endpoint.'
       ImageIndex = 6
-      OnExecute = actDeleteEndpointExecute
     end
     object actCopyEndpoint: TAction
       Category = 'ZMQEndpoints'
       Caption = 'Copy'
       Hint = 'Copy selected endpoint.'
       ImageIndex = 7
-      OnExecute = actCopyEndpointExecute
     end
   end
   object imlMain: TImageList
@@ -495,7 +435,7 @@ object frmDashboard: TfrmDashboard
     Left = 328
     Top = 112
     Bitmap = {
-      494C010109000801DC0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010109000801EC0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000001001B09532ED308512ED100000010000000000000
@@ -903,38 +843,6 @@ object frmDashboard: TfrmDashboard
     Top = 224
     object mniCloseSsubscriber: TMenuItem
       Action = actCloseSubscriber
-    end
-  end
-  object ppmEndpoints: TPopupMenu
-    Images = imlMain
-    Left = 328
-    Top = 59
-    object mniAddEndpoint: TMenuItem
-      Action = actAddEndpoint
-    end
-    object mniDeleteEndpoint: TMenuItem
-      Action = actDeleteEndpoint
-    end
-    object mniN1: TMenuItem
-      Caption = '-'
-    end
-    object mniCopyEndpoint: TMenuItem
-      Action = actCopyEndpoint
-    end
-    object mniN2: TMenuItem
-      Caption = '-'
-    end
-    object mniMoveUpEndpoint: TMenuItem
-      Action = actMoveUpEndpoint
-    end
-    object mniMoveDownEndpoint: TMenuItem
-      Action = actMoveDownEndpoint
-    end
-    object mniN3: TMenuItem
-      Caption = '-'
-    end
-    object mniSubscribeToSelection: TMenuItem
-      Action = actSubscribeToSelection
     end
   end
 end

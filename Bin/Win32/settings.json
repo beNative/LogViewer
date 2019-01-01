@@ -1,9 +1,9 @@
 {
 	"FormSettings": {
-		"Left": 562,
-		"Top": 184,
+		"Left": 222,
+		"Top": 180,
 		"Width": 1590,
-		"Height": 854,
+		"Height": 985,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -15,13 +15,13 @@
 		"RightPanelWidth": 482
 	},
 	"WinODSSettings": {
-		"Enabled": true
+		"Enabled": false
 	},
 	"WinIPCSettings": {
-		"Enabled": true
+		"Enabled": false
 	},
 	"ZeroMQSettings": {
-		"Enabled": true,
+		"Enabled": false,
 		"PollingInterval": 100,
 		"Endpoints": "localhost=tcp://localhost:5555\r\nNew=tcp://\r\n"
 	},

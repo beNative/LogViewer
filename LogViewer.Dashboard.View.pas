@@ -34,7 +34,7 @@ TODO:
 uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes, System.Actions,
-  System.UITypes, System.ImageList,
+  System.UITypes, System.ImageList, System.Rtti,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
   Vcl.ActnList, Vcl.ComCtrls, Vcl.ImgList, Vcl.Menus, Vcl.Grids, Vcl.ToolWin,
 
@@ -47,7 +47,7 @@ uses
   synaser,
 
   DDuce.Components.VirtualTrees.Node, DDuce.Components.ValueList,
-  DDuce.Components.Factories, DDuce.DynamicRecord,
+  DDuce.Components.Factories, DDuce.DynamicRecord, DDuce.EditList,
 
   LogViewer.Interfaces, LogViewer.Dashboard.Data,
   LogViewer.ComPort.Settings.View;
@@ -69,30 +69,12 @@ type
     actMoveUpEndpoint          : TAction;
     actSubscribeToLocalHost    : TAction;
     actSubscribeToSelection    : TAction;
-    btn1                       : TToolButton;
-    btnAdd                     : TToolButton;
     btnAddZMQNodeForLogViewer  : TButton;
     btnAddZMQNodeLocalHost     : TButton;
-    btnDelete                  : TToolButton;
-    btnDuplicate               : TToolButton;
-    btnMoveDown                : TToolButton;
-    btnMoveUp                  : TToolButton;
-    btnSpacer1                 : TToolButton;
-    btnSpacer2                 : TToolButton;
-    btnSubscribeToSelection    : TToolButton;
     imlMain                    : TImageList;
     lblWinIPCDescription       : TLabel;
     lblWinODSDescription       : TLabel;
-    mniAddEndpoint             : TMenuItem;
     mniCloseSsubscriber        : TMenuItem;
-    mniCopyEndpoint            : TMenuItem;
-    mniDeleteEndpoint          : TMenuItem;
-    mniMoveDownEndpoint        : TMenuItem;
-    mniMoveUpEndpoint          : TMenuItem;
-    mniN1                      : TMenuItem;
-    mniN2                      : TMenuItem;
-    mniN3                      : TMenuItem;
-    mniSubscribeToSelection    : TMenuItem;
     pgcMain                    : TPageControl;
     pnlCOMPortTitle            : TPanel;
     pnlLeft                    : TPanel;
@@ -103,10 +85,8 @@ type
     pnlZeroMQButtons           : TGridPanel;
     pnlZeroMQTitle             : TPanel;
     pnlZMQEndpoints            : TPanel;
-    ppmEndpoints               : TPopupMenu;
     ppmMain                    : TPopupMenu;
     splVertical                : TSplitter;
-    tlbZMQEndpoints            : TToolBar;
     tsCOMPort                  : TTabSheet;
     tsWinIPC                   : TTabSheet;
     tsWinODS                   : TTabSheet;
@@ -124,18 +104,12 @@ type
     procedure actAddSubscribeToLogViewerExecute(Sender: TObject);
     procedure actSubscribeToSelectionExecute(Sender: TObject);
     procedure actCloseSubscriberExecute(Sender: TObject);
-    procedure actAddEndpointExecute(Sender: TObject);
-    procedure actDeleteEndpointExecute(Sender: TObject);
-    procedure actCopyEndpointExecute(Sender: TObject);
-    procedure actMoveDownEndpointExecute(Sender: TObject);
-    procedure actMoveUpEndpointExecute(Sender: TObject);
     {$ENDREGION}
 
   private
     FUpdate              : Boolean;
     FManager             : ILogViewerManager;
     FTreeView            : TVirtualStringTree;
-    FValueList           : TValueList;
     FZeroMQ              : IZeroMQ;
     FMQTT                : TMQTT;
     FZeroMQReceiver      : IChannelReceiver;
@@ -151,7 +125,7 @@ type
     FWinODSNode          : TDashboardNode;
     FFileSystemNode      : TDashboardNode;
     FComPortSettingsForm : TfrmComPortSettings;
-    FZMQEndpoints        : DynamicRecord;
+    FZMQEndpoints        : TEditList;
 
     {$REGION 'event handlers'}
     procedure FTreeViewFreeNode(
@@ -188,6 +162,12 @@ type
       Column         : TColumnIndex;
       var Ghosted    : Boolean;
       var ImageIndex : TImageIndex
+    );
+
+    procedure FZMQEndpointsAdd(
+      ASender    : TObject;
+      var AName  : string;
+      var AValue : TValue
     );
 
     procedure FWinIPCReceiverSubscriberListChanged(
@@ -233,8 +213,6 @@ type
       ASubscriber : ISubscriber
     ): TDashboardNode;
 
-    function CanMoveUp: Boolean;
-    function CanMoveDown: Boolean;
     procedure SaveEndpoints;
     procedure UpdateActions; override;
 
@@ -275,13 +253,10 @@ procedure TfrmDashboard.AfterConstruction;
 begin
   inherited AfterConstruction;
   FTreeView := TVirtualStringTreeFactory.CreateTreeList(Self, pnlRight);
-  FValueList             := TValueList.Create(Self);
-  FValueList.Parent      := pnlZMQEndpoints;
-  FValueList.Align       := alClient;
-  FValueList.ShowGutter  := False;
-  FValueList.MultiSelect := True;
-  FValueList.OnExit      := FValueListExit;
-
+  FZMQEndpoints := TEditList.Create(Self, pnlZMQEndpoints);
+  FZMQEndpoints.OnAdd.Add(FZMQEndpointsAdd);
+  // TODO: implement a better way to save changes.
+  FZMQEndpoints.ValueList.OnExit := FValueListExit;
   InitializeTreeView;
   InitializeControls;
   CreateChannelReceivers;
@@ -290,6 +265,9 @@ end;
 procedure TfrmDashboard.BeforeDestruction;
 begin
   Logger.Track(Self, 'BeforeDestruction');
+  // required as this event can be called after FManager is released!
+  FZMQEndpoints.ValueList.OnExit := nil;
+  SaveEndpoints;
   FZeroMQReceiver  := nil;
   FMQTTReceiver    := nil;
   FWinIPCReceiver  := nil;
@@ -305,12 +283,6 @@ end;
 {$ENDREGION}
 
 {$REGION 'action handlers'}
-procedure TfrmDashboard.actAddEndpointExecute(Sender: TObject);
-begin
-  FValueList.Data['New'] := 'tcp://';
-  FValueList.Repaint;
-end;
-
 procedure TfrmDashboard.actAddSubscribeToLogViewerExecute(Sender: TObject);
 var
   SL          : TStringList;
@@ -379,43 +351,9 @@ begin
 //
 end;
 
-procedure TfrmDashboard.actCopyEndpointExecute(Sender: TObject);
-begin
-//
-end;
-
-procedure TfrmDashboard.actDeleteEndpointExecute(Sender: TObject);
-begin
-  FValueList.DeleteSelectedNodes;
-end;
-
 procedure TfrmDashboard.actInspectTreeviewExecute(Sender: TObject);
 begin
   InspectComponent(FTreeView);
-end;
-
-procedure TfrmDashboard.actMoveDownEndpointExecute(Sender: TObject);
-var
-  LNode : TValueListNode;
-begin
-  if Assigned(FValueList.FocusedField) then
-  begin
-    LNode := FValueList.GetFirstSelectedNodeData<TValueListNode>;
-    LNode.Data.Index := LNode.Data.Index + 1;
-    FValueList.MoveTo(LNode.VNode, LNode.VNode.NextSibling, amInsertAfter, False);
-  end;
-end;
-
-procedure TfrmDashboard.actMoveUpEndpointExecute(Sender: TObject);
-var
-  LNode : TValueListNode;
-begin
-  if Assigned(FValueList.FocusedField) then
-  begin
-    LNode := FValueList.GetFirstSelectedNodeData<TValueListNode>;
-    LNode.Data.Index := LNode.Data.Index - 1;
-    FValueList.MoveTo(LNode.VNode, LNode.VNode.PrevSibling, amInsertBefore, False);
-  end;
 end;
 
 procedure TfrmDashboard.actSubscribeToSelectionExecute(Sender: TObject);
@@ -425,25 +363,25 @@ var
   LName       : string;
   LNode       : TValueListNode;
 begin
-  FZeroMQReceiver.SubscriberList.Clear;
-  for LNode in FValueList.GetSelectedData<TValueListNode> do
-  begin
-    //FZeroMQReceiver.SubscriberList.ContainsKey()
-    LEndPoint := LNode.Data.Value.AsString;
-    LName     := LNode.Data.Name;
-    LSubscriber := TZMQSubscriber.Create(
-      FZeroMQReceiver,
-      FZeroMQ,
-      LEndPoint,
-      0,
-      LEndPoint,
-      LName,
-      FZeroMQReceiver.Enabled
-    );
-    LSubscriber.Enabled := True;
-    FZeroMQReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
-    Modified;
-  end;
+//  FZeroMQReceiver.SubscriberList.Clear;
+//  for LNode in FValueList.GetSelectedData<TValueListNode> do
+//  begin
+//    //FZeroMQReceiver.SubscriberList.ContainsKey()
+//    LEndPoint := LNode.Data.Value.AsString;
+//    LName     := LNode.Data.Name;
+//    LSubscriber := TZMQSubscriber.Create(
+//      FZeroMQReceiver,
+//      FZeroMQ,
+//      LEndPoint,
+//      0,
+//      LEndPoint,
+//      LName,
+//      FZeroMQReceiver.Enabled
+//    );
+//    LSubscriber.Enabled := True;
+//    FZeroMQReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
+//    Modified;
+//  end;
 end;
 {$ENDREGION}
 
@@ -744,6 +682,13 @@ begin
   end;
 end;
 
+procedure TfrmDashboard.FZMQEndpointsAdd(ASender: TObject; var AName: string;
+  var AValue: TValue);
+begin
+  AName  := 'New';
+  AValue := 'tcp://';
+end;
+
 procedure TfrmDashboard.FComPortReceiverSubscriberListChanged(Sender: TObject;
   const AKey: UInt32; Action: TCollectionChangedAction);
 var
@@ -833,22 +778,6 @@ begin
     );
   end;
   FTreeView.FullExpand;
-end;
-
-function TfrmDashboard.CanMoveDown: Boolean;
-begin
-  if Assigned(FValueList.FocusedNode) then
-    Result := Assigned(FValueList.FocusedNode.NextSibling)
-  else
-    Result := False;
-end;
-
-function TfrmDashboard.CanMoveUp: Boolean;
-begin
-  if Assigned(FValueList.FocusedNode) then
-    Result := Assigned(FValueList.FocusedNode.PrevSibling)
-  else
-    Result := False;
 end;
 
 procedure TfrmDashboard.CreateChannelReceivers;
@@ -944,9 +873,9 @@ begin
   AssignFormParent(FComPortSettingsForm, tsCOMPort);
   pgcMain.ActivePage := tsWinIPC;
 
-  FZMQEndpoints.FromStrings(FManager.Settings.ZeroMQSettings.Endpoints);
-  FValueList.Data      := FZMQEndpoints;
-  FValueList.PopupMenu := ppmEndpoints;
+
+  FZMQEndpoints.Data.FromStrings(FManager.Settings.ZeroMQSettings.Endpoints);
+//  FZMQEndpoints.ValueList.Repaint;
 end;
 
 procedure TfrmDashboard.InitializeTreeView;
@@ -1024,16 +953,16 @@ procedure TfrmDashboard.SaveEndpoints;
 var
   LStrings : Shared<TStrings>;
 begin
+  Logger.Track(Self, 'SaveEndpoints');
   LStrings := TStringList.Create;
-  FValueList.Data.ToStrings(LStrings);
+  FZMQEndpoints.Data.ToStrings(LStrings);
+  Logger.SendObject(FManager.Settings);
   FManager.Settings.ZeroMQSettings.Endpoints.Assign(LStrings.Value);
 end;
 
 procedure TfrmDashboard.UpdateActions;
 begin
   inherited UpdateActions;
-  actMoveUpEndpoint.Enabled   := CanMoveUp;
-  actMoveDownEndpoint.Enabled := CanMoveDown;
   if FUpdate then
   begin
     FManager.Actions.UpdateActions;

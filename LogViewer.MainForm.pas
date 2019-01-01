@@ -219,10 +219,10 @@ begin
   tmrPoll.Enabled := False;
   for CR in Manager.Receivers do
     CR.Enabled := False;
-  FSettings.FormSettings.Assign(Self);
-  Logger.SendComponent('MainForm', Self);
-  FSettings.Save;
-  FSettings.OnChanged.Remove(SettingsChanged);
+  FreeAndNil(FDashboard);
+  FManager.Settings.FormSettings.Assign(Self);
+  FManager.Settings.Save;
+  FManager.Settings.OnChanged.Remove(SettingsChanged);
   FSettings.Free;
   FManager := nil;
   inherited BeforeDestruction;

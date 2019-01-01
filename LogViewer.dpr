@@ -73,6 +73,7 @@ begin
   {$WARNINGS ON}
   Application.Initialize;
   Application.Title := 'Log viewer';
+  // setup logchannel for using a log LogViewer instance to debug itself.
   Logger.Channels.Add(
     TZeroMQChannel.Create(Format('tcp://*:%d', [LOGVIEWER_ZMQ_PORT]))
   );

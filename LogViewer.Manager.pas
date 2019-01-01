@@ -307,6 +307,7 @@ end;
 constructor TdmManager.Create(AOwner: TComponent; ASettings: TLogViewerSettings);
 begin
   inherited Create(AOwner);
+  Guard.CheckNotNull(ASettings, 'ASettings');
   FSettings := ASettings;
 end;
 
