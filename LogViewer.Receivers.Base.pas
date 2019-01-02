@@ -26,8 +26,6 @@ uses
 
   Spring, Spring.Collections,
 
-  MQTT,
-
   DDuce.DynamicRecord,
 
   LogViewer.Interfaces;

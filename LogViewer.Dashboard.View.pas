@@ -91,14 +91,14 @@ type
     tsWinIPC                   : TTabSheet;
     tsWinODS                   : TTabSheet;
     tsZeroMQ                   : TTabSheet;
-    tsMQTT: TTabSheet;
-    edtBroker: TLabeledEdit;
-    pnlMQTTTitle: TPanel;
-    tsFileSystem: TTabSheet;
-    pnlFileSystemTitle: TPanel;
-    pnlMQTTTopics: TPanel;
-    pnlCOMPorts: TPanel;
-    pnlFSLocations: TPanel;
+    tsMQTT                     : TTabSheet;
+    edtBroker                  : TLabeledEdit;
+    pnlMQTTTitle               : TPanel;
+    tsFileSystem               : TTabSheet;
+    pnlFileSystemTitle         : TPanel;
+    pnlMQTTTopics              : TPanel;
+    pnlCOMPorts                : TPanel;
+    pnlFSLocations             : TPanel;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -127,7 +127,7 @@ type
     FComPortNode         : TDashboardNode;
     FWinODSNode          : TDashboardNode;
     FFileSystemNode      : TDashboardNode;
-    FComPortSettingsForm : TfrmComPortSettings;
+    //FComPortSettingsForm : TfrmComPortSettings;
     FZMQEndpoints        : TEditList;
     FMQTTTopics          : TEditList;
     FCOMPorts            : TEditList;
@@ -171,6 +171,11 @@ type
     );
 
     procedure FZMQEndpointsAdd(
+      ASender    : TObject;
+      var AName  : string;
+      var AValue : TValue
+    );
+    procedure FZMQEndpointsExecuteItem(
       ASender    : TObject;
       var AName  : string;
       var AValue : TValue
@@ -267,6 +272,8 @@ begin
   FTreeView := TVirtualStringTreeFactory.CreateTreeList(Self, pnlRight);
   FZMQEndpoints := TEditList.Create(Self, pnlZMQEndpoints);
   FZMQEndpoints.OnAdd.Add(FZMQEndpointsAdd);
+  FZMQEndpoints.OnExecuteItem.Add(FZMQEndpointsExecuteItem);
+  FZMQEndpoints.OnExecute.Add(FZMQEndpointsExecuteItem);
   // TODO: implement a better way to save changes.
   FZMQEndpoints.ValueList.OnExit := FValueListExit;
 
@@ -377,11 +384,11 @@ begin
 end;
 
 procedure TfrmDashboard.actSubscribeToSelectionExecute(Sender: TObject);
-var
-  LSubscriber : ISubscriber;
-  LEndPoint   : string;
-  LName       : string;
-  LNode       : TValueListNode;
+//var
+//  LSubscriber : ISubscriber;
+//  LEndPoint   : string;
+//  LName       : string;
+//  LNode       : TValueListNode;
 begin
 //  FZeroMQReceiver.SubscriberList.Clear;
 //  for LNode in FValueList.GetSelectedData<TValueListNode> do
@@ -707,6 +714,28 @@ procedure TfrmDashboard.FZMQEndpointsAdd(ASender: TObject; var AName: string;
 begin
   AName  := 'New';
   AValue := 'tcp://';
+end;
+
+procedure TfrmDashboard.FZMQEndpointsExecuteItem(ASender: TObject;
+  var AName: string; var AValue: TValue);
+var
+  LSubscriber : ISubscriber;
+  LEndPoint   : string;
+  LName       : string;
+begin
+  LEndPoint   := AValue.ToString;
+  LName       := AName;
+  LSubscriber := TZMQSubscriber.Create(
+    FZeroMQReceiver,
+    FZeroMQ,
+    LEndPoint,
+    0,
+    LEndPoint,
+    LName,
+    FZeroMQReceiver.Enabled
+  );
+  FZeroMQReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
+  Modified;
 end;
 
 procedure TfrmDashboard.FComPortReceiverSubscriberListChanged(Sender: TObject;

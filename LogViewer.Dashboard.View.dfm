@@ -38,8 +38,6 @@ object frmDashboard: TfrmDashboard
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
-      ExplicitLeft = 315
-      ExplicitTop = 2
     end
     object pnlLeft: TPanel
       Left = 0
@@ -58,7 +56,7 @@ object frmDashboard: TfrmDashboard
         Top = 0
         Width = 305
         Height = 421
-        ActivePage = tsMQTT
+        ActivePage = tsZeroMQ
         Align = alClient
         MultiLine = True
         Style = tsFlatButtons
@@ -70,12 +68,16 @@ object frmDashboard: TfrmDashboard
           Margins.Bottom = 0
           Caption = 'WinIPC'
           ImageIndex = 28
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object lblWinIPCDescription: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
-            Width = 291
-            Height = 335
+            Width = 287
+            Height = 221
             Align = alClient
             Caption = 
               'Messages are exchanged between the source application and LogVie' +
@@ -90,8 +92,6 @@ object frmDashboard: TfrmDashboard
               'based on queueuing.'#13#10#13#10'A new node is automatically created when ' +
               'a process is detected that sends compatible log messages.'#13#10
             WordWrap = True
-            ExplicitWidth = 287
-            ExplicitHeight = 221
           end
           object pnlWinIPCTitle: TPanel
             Left = 0
@@ -115,12 +115,16 @@ object frmDashboard: TfrmDashboard
         object tsWinODS: TTabSheet
           Caption = 'WinODS'
           ImageIndex = 28
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object lblWinODSDescription: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
             Width = 291
-            Height = 335
+            Height = 247
             Align = alClient
             Caption = 
               'This receiver captures messages from any local applicatiion that' +
@@ -144,7 +148,6 @@ object frmDashboard: TfrmDashboard
             Font.Style = []
             ParentFont = False
             WordWrap = True
-            ExplicitHeight = 247
           end
           object pnlWinODSTitle: TPanel
             Left = 0
@@ -264,6 +267,10 @@ object frmDashboard: TfrmDashboard
         object tsCOMPort: TTabSheet
           Caption = 'COMPort'
           ImageIndex = 24
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object pnlCOMPortTitle: TPanel
             Left = 0
             Top = 0
@@ -352,6 +359,10 @@ object frmDashboard: TfrmDashboard
         object tsFileSystem: TTabSheet
           Caption = 'FileSystem'
           ImageIndex = 5
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object pnlFileSystemTitle: TPanel
             Left = 0
             Top = 0
@@ -450,7 +461,7 @@ object frmDashboard: TfrmDashboard
     Left = 328
     Top = 112
     Bitmap = {
-      494C010109000801F00010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010109000801F40010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000001001B09532ED308512ED100000010000000000000
