@@ -127,7 +127,7 @@ type
     FComPortNode         : TDashboardNode;
     FWinODSNode          : TDashboardNode;
     FFileSystemNode      : TDashboardNode;
-    FComPortSettingsForm : TfrmComPortSettings;
+    //FComPortSettingsForm : TfrmComPortSettings;
     FZMQEndpoints        : TEditList;
     FMQTTTopics          : TEditList;
     FCOMPorts            : TEditList;
@@ -377,11 +377,11 @@ begin
 end;
 
 procedure TfrmDashboard.actSubscribeToSelectionExecute(Sender: TObject);
-var
-  LSubscriber : ISubscriber;
-  LEndPoint   : string;
-  LName       : string;
-  LNode       : TValueListNode;
+//var
+//  LSubscriber : ISubscriber;
+//  LEndPoint   : string;
+//  LName       : string;
+//  LNode       : TValueListNode;
 begin
 //  FZeroMQReceiver.SubscriberList.Clear;
 //  for LNode in FValueList.GetSelectedData<TValueListNode> do
