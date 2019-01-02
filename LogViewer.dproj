@@ -123,7 +123,6 @@
         <DCCReference Include="LogViewer.Receivers.WinIPC.pas"/>
         <DCCReference Include="LogViewer.Receivers.ZeroMQ.pas"/>
         <DCCReference Include="LogViewer.Interfaces.pas"/>
-        <DCCReference Include="uCustomImageDrawHook.pas"/>
         <DCCReference Include="LogViewer.Resources.pas"/>
         <DCCReference Include="LogViewer.MainForm.pas">
             <Form>frmMain</Form>

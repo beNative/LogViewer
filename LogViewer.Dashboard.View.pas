@@ -96,6 +96,9 @@ type
     pnlMQTTTitle: TPanel;
     tsFileSystem: TTabSheet;
     pnlFileSystemTitle: TPanel;
+    pnlMQTTTopics: TPanel;
+    pnlCOMPorts: TPanel;
+    pnlFSLocations: TPanel;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -126,6 +129,9 @@ type
     FFileSystemNode      : TDashboardNode;
     FComPortSettingsForm : TfrmComPortSettings;
     FZMQEndpoints        : TEditList;
+    FMQTTTopics          : TEditList;
+    FCOMPorts            : TEditList;
+    FFSLocations         : TEditList;
 
     {$REGION 'event handlers'}
     procedure FTreeViewFreeNode(
@@ -165,6 +171,12 @@ type
     );
 
     procedure FZMQEndpointsAdd(
+      ASender    : TObject;
+      var AName  : string;
+      var AValue : TValue
+    );
+
+    procedure FMQTTSubscriptionsAdd(
       ASender    : TObject;
       var AName  : string;
       var AValue : TValue
@@ -257,6 +269,14 @@ begin
   FZMQEndpoints.OnAdd.Add(FZMQEndpointsAdd);
   // TODO: implement a better way to save changes.
   FZMQEndpoints.ValueList.OnExit := FValueListExit;
+
+  FMQTTTopics := TEditList.Create(Self, pnlMQTTTopics);
+  FMQTTTopics .OnAdd.Add(FMQTTSubscriptionsAdd);
+
+  FCOMPorts := TEditList.Create(Self, pnlCOMPorts);
+
+  FFSLocations := TEditList.Create(Self, pnlFSLocations);
+
   InitializeTreeView;
   InitializeControls;
   CreateChannelReceivers;
@@ -743,6 +763,12 @@ begin
   end;
 end;
 
+procedure TfrmDashboard.FMQTTSubscriptionsAdd(ASender: TObject;
+  var AName: string; var AValue: TValue);
+begin
+//
+end;
+
 procedure TfrmDashboard.FReceiverChange(Sender: TObject);
 begin
   Modified;
@@ -867,10 +893,10 @@ begin
   begin
     pgcMain.Pages[I].TabVisible := False;
   end;
-  FComPortSettingsForm := TfrmComPortSettings.Create(
-    Self, FManager.Settings.ComPortSettings
-  );
-  AssignFormParent(FComPortSettingsForm, tsCOMPort);
+//  FComPortSettingsForm := TfrmComPortSettings.Create(
+//    Self, FManager.Settings.ComPortSettings
+//  );
+//  AssignFormParent(FComPortSettingsForm, tsCOMPort);
   pgcMain.ActivePage := tsWinIPC;
 
 
