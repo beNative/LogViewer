@@ -50,6 +50,12 @@ type
     function GetOnChanged: IEvent<TNotifyEvent>;
     function GetPollingInterval: Integer;
     procedure SetPollingInterval(const Value: Integer);
+    function GetDataBits: Integer;
+    procedure SetDataBits(const Value: Integer);
+    function GetStopBits: Integer;
+    procedure SetStopBits(const Value: Integer);
+    function GetParity: Char;
+    procedure SetParity(const Value: Char);
     {$ENDREGION}
 
   protected
@@ -62,6 +68,15 @@ type
 
     property BaudRate: Integer
       read GetBaudRate write SetBaudRate default DEFAULT_BAUDRATE;
+
+    property DataBits: Integer
+      read GetDataBits write SetDataBits;
+
+    property StopBits: Integer
+      read GetStopBits write SetStopBits;
+
+    property Parity: Char
+      read GetParity write SetParity;
 
     property Port: string
       read GetPort write SetPort;
@@ -100,6 +115,20 @@ begin
   end;
 end;
 
+function TComPortSettings.GetDataBits: Integer;
+begin
+  Result := FDataBits;
+end;
+
+procedure TComPortSettings.SetDataBits(const Value: Integer);
+begin
+  if Value <> DataBits then
+  begin
+    FDataBits := Value;
+    Changed;
+  end;
+end;
+
 function TComPortSettings.GetOnChanged: IEvent<TNotifyEvent>;
 begin
   Result := FOnChanged;
@@ -108,6 +137,20 @@ end;
 function TComPortSettings.GetPollingInterval: Integer;
 begin
   Result := FPollingInterval;
+end;
+
+function TComPortSettings.GetParity: Char;
+begin
+  Result := FParity;
+end;
+
+procedure TComPortSettings.SetParity(const Value: Char);
+begin
+  if Value <> Parity then
+  begin
+    FParity := Value;
+    Changed;
+  end;
 end;
 
 procedure TComPortSettings.SetPollingInterval(const Value: Integer);
@@ -129,6 +172,20 @@ begin
   if Value <> Port then
   begin
     FPort := Value;
+    Changed;
+  end;
+end;
+
+function TComPortSettings.GetStopBits: Integer;
+begin
+  Result := FStopBits;
+end;
+
+procedure TComPortSettings.SetStopBits(const Value: Integer);
+begin
+  if Value <> StopBits then
+  begin
+    FStopBits := Value;
     Changed;
   end;
 end;

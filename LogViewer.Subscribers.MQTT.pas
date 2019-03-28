@@ -31,7 +31,8 @@ uses
 type
   TMQTTSubscriber = class(TSubscriber, ISubscriber, IMQTT)
   private
-    FMQTT : TMQTT;
+    FMQTT       : TMQTT;
+    FMQTTStream : TStringStream;
 
     //procedure CreateSubscriberSocket(const AEndPoint: string);
 
@@ -55,6 +56,11 @@ type
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 
+    procedure FMQTTPublish(
+      Sender   : TObject;
+      ATopic   : UTF8String;
+      APayload : UTF8String
+    );
   end;
 
 implementation
@@ -63,13 +69,14 @@ implementation
 procedure TMQTTSubscriber.AfterConstruction;
 begin
   inherited AfterConstruction;
+  FMQTTStream := TStringStream.Create;
 
 end;
 
 procedure TMQTTSubscriber.BeforeDestruction;
 begin
+  FMQTTStream.Free;
   inherited BeforeDestruction;
-
 end;
 
 constructor TMQTTSubscriber.Create(const AReceiver: IChannelReceiver;
@@ -78,14 +85,27 @@ constructor TMQTTSubscriber.Create(const AReceiver: IChannelReceiver;
 begin
   inherited Create(AReceiver, ASourceId, AKey, ASourceName, AEnabled);
   FMQTT := AMQTT;
+  FMQTT.OnPublish := FMQTTPublish;
 end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
 procedure TMQTTSubscriber.SetEnabled(const Value: Boolean);
 begin
-  inherited;
+  inherited SetEnabled(Value);
 
+end;
+{$ENDREGION}
+
+{$REGION 'event handlers'}
+procedure TMQTTSubscriber.FMQTTPublish(Sender: TObject; ATopic,
+  APayload: UTF8String);
+begin
+//  FMQTTStream.WriteString(FSubscriber.ReceiveString);
+//  Receiver.DoReceiveMessage(
+//    FMQTTStream, SourceId, 0, FSubscriber.LastEndPoint
+//  );
+//  FMQTTStream.Clear;
 end;
 {$ENDREGION}
 
@@ -97,7 +117,7 @@ end;
 
 procedure TMQTTSubscriber.Poll;
 begin
-  inherited;
+  inherited Poll;
 
 end;
 {$ENDREGION}

@@ -29,8 +29,8 @@ uses
 
   LogViewer.MessageList.Settings, LogViewer.Watches.Settings,
   LogViewer.ComPort.Settings, LogViewer.WinODS.Settings,
-  LogViewer.WinIPC.Settings, LogViewer.ZeroMQ.Settings,
-  LogViewer.DisplayValues.Settings;
+  LogViewer.WinIPC.Settings, LogViewer.ZeroMQ.Settings, LogViewer.MQTT.Settings,
+  LogViewer.FileSystem.Settings, LogViewer.DisplayValues.Settings;
 
 type
   TLogViewerSettings = class(TPersistent)
@@ -42,6 +42,8 @@ type
     FWinIPCSettings        : TWinIPCSettings;
     FComPortSettings       : TComPortSettings;
     FZeroMQSettings        : TZeroMQSettings;
+    FMQTTSettings          : TMQTTSettings;
+    FFileSystemSettings    : TFileSystemSettings;
     FWatchSettings         : TWatchSettings;
     FDisplayValuesSettings : TDisplayValuesSettings;
     FOnChanged             : Event<TNotifyEvent>;
@@ -74,6 +76,12 @@ type
 
     property ZeroMQSettings: TZeroMQSettings
       read FZeroMQSettings;
+
+    property MQTTSettings: TMQTTSettings
+      read FMQTTSettings;
+
+    property FileSystemSettings: TFileSystemSettings
+      read FFileSystemSettings;
 
     property WatchSettings: TWatchSettings
       read FWatchSettings;
@@ -110,6 +118,8 @@ begin
   FWinIPCSettings        := TWinIPCSettings.Create;
   FComPortSettings       := TComPortSettings.Create;
   FZeroMQSettings        := TZeroMQSettings.Create;
+  FMQTTSettings          := TMQTTSettings.Create;
+  FFileSystemSettings    := TFileSystemSettings.Create;
   FWatchSettings         := TWatchSettings.Create;
   FDisplayValuesSettings := TDisplayValuesSettings.Create;
 end;
@@ -119,6 +129,8 @@ begin
   FreeAndNil(FDisplayValuesSettings);
   FreeAndNil(FWatchSettings);
   FreeAndNil(FZeroMQSettings);
+  FreeAndNil(FMQTTSettings);
+  FreeAndNil(FFileSystemSettings);
   FreeAndNil(FComPortSettings);
   FreeAndNil(FWinIPCSettings);
   FreeAndNil(FWinODSSettings);
@@ -172,6 +184,12 @@ begin
       JO['ZeroMQSettings'].ObjectValue.ToSimpleObject(FZeroMQSettings);
       FZeroMQSettings.Endpoints.Text :=
         JO['ZeroMQSettings'].ObjectValue['Endpoints'].Value;
+      JO['MQTTSettings'].ObjectValue.ToSimpleObject(FMQTTSettings);
+      FMQTTSettings.Endpoints.Text :=
+        JO['MQTTSettings'].ObjectValue['Endpoints'].Value;
+      JO['FileSystemSettings'].ObjectValue.ToSimpleObject(FFileSystemSettings);
+      FFileSystemSettings.PathNames.Text :=
+        JO['FileSystemSettings'].ObjectValue['PathNames'].Value;
       JO['DisplayValueSettings'].ObjectValue['Id'].ObjectValue
         .ToSimpleObject(FDisplayValuesSettings.Id);
       JO['DisplayValueSettings'].ObjectValue['Info'].ObjectValue
@@ -217,6 +235,12 @@ begin
     JO['ZeroMQSettings'].ObjectValue.FromSimpleObject(FZeroMQSettings);
     JO['ZeroMQSettings'].ObjectValue['Endpoints'].Value :=
       FZeroMQSettings.Endpoints.Text;
+    JO['MQTTSettings'].ObjectValue.FromSimpleObject(FMQTTSettings);
+    JO['MQTTSettings'].ObjectValue['Endpoints'].Value :=
+      FMQTTSettings.Endpoints.Text;
+    JO['FileSystemSettings'].ObjectValue.FromSimpleObject(FFileSystemSettings);
+    JO['FileSystemSettings'].ObjectValue['PathNames'].Value :=
+      FileSystemSettings.PathNames.Text;
     JO['DisplayValueSettings'].ObjectValue['Id'].ObjectValue
       .FromSimpleObject(FDisplayValuesSettings.Id);
     JO['DisplayValueSettings'].ObjectValue['Info'].ObjectValue

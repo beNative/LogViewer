@@ -26,7 +26,7 @@ uses
 
   Spring,
 
-  LogViewer.Interfaces, LogViewer.Receivers.Base;
+  LogViewer.Interfaces, LogViewer.Receivers.Base, LogViewer.FileSystem.Settings;
 
 {$REGION 'documentation'}
 {$ENDREGION}
@@ -37,6 +37,9 @@ type
   )
   private
     FPath : string;
+    function GetSettings: TFileSystemSettings;
+
+    procedure SettingsChanged(Sender: TObject);
 
   protected
     function CreateSubscriber(
@@ -51,19 +54,53 @@ type
       const APath : string;
       const AName : string
     ); reintroduce; virtual;
+    procedure AfterConstruction; override;
+
+    property Settings: TFileSystemSettings
+      read GetSettings;
+
   end;
 
 implementation
 
 uses
+  System.SysUtils,
+  Vcl.Forms,
+
   LogViewer.Subscribers.FileSystem;
 
 {$REGION 'construction and destruction'}
+procedure TFileSystemChannelReceiver.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  PollTimer.Interval := 1000;
+  PollTimer.Enabled  := True;
+  PollTimer.OnTimer  := PollTimerTimer;
+  Settings.OnChanged.Add(SettingsChanged);
+end;
+
 constructor TFileSystemChannelReceiver.Create(AManager: ILogViewerManager;
   const APath, AName: string);
 begin
   inherited Create(AManager, AName);
-  FPath := APath;
+  if APath.IsEmpty then
+    FPath := ExtractFilePath(Application.ExeName)
+  else
+    FPath := APath;
+end;
+{$ENDREGION}
+
+{$REGION 'property access methods'}
+function TFileSystemChannelReceiver.GetSettings: TFileSystemSettings;
+begin
+  Result := Manager.Settings.FileSystemSettings;
+end;
+{$ENDREGION}
+
+{$REGION 'event handlers'}
+procedure TFileSystemChannelReceiver.SettingsChanged(Sender: TObject);
+begin
+  Enabled := Settings.Enabled;
 end;
 {$ENDREGION}
 
@@ -71,7 +108,21 @@ end;
 function TFileSystemChannelReceiver.CreateSubscriber(ASourceId,
   AThreadId: UInt32; const ASourceName: string): ISubscriber;
 begin
-
+  //Settings.Port := ASourceName;
+//  if ASourceName <> '' then
+//  begin
+//    Result := TFileSystemSubscriber.Create(
+//      Self,
+//      ASourceId,
+//      ASourceName,
+//      ASourceName,
+//      False
+//    );
+//  end
+//  else
+//  begin
+//    Result := nil;
+//  end;
 end;
 {$ENDREGION}
 

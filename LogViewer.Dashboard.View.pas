@@ -40,11 +40,7 @@ uses
 
   Spring.Collections,
 
-  VirtualTrees,
-
-  ZeroMQ, MQTT,
-
-  synaser,
+  VirtualTrees, ZeroMQ, MQTT, synaser,
 
   DDuce.Components.VirtualTrees.Node, DDuce.Components.ValueList,
   DDuce.Components.Factories, DDuce.DynamicRecord, DDuce.EditList,
@@ -187,6 +183,16 @@ type
       var AValue : TValue
     );
 
+    procedure FFSLocationsAdd(
+      ASender    : TObject;
+      var AName  : string;
+      var AValue : TValue
+    );
+    procedure FFSLocationsExecuteItem(
+      ASender    : TObject;
+      var AName  : string;
+      var AValue : TValue
+    );
     procedure FWinIPCReceiverSubscriberListChanged(
       Sender     : TObject;
       const AKey : UInt32;
@@ -214,8 +220,6 @@ type
     );
     procedure FReceiverChange(Sender : TObject);
     procedure FSubscriberChange(Sender : TObject);
-
-    procedure FValueListExit(Sender : TObject);
     {$ENDREGION}
 
   protected
@@ -230,7 +234,7 @@ type
       ASubscriber : ISubscriber
     ): TDashboardNode;
 
-    procedure SaveEndpoints;
+    procedure SaveSettings;
     procedure UpdateActions; override;
 
   public
@@ -255,7 +259,7 @@ uses
   DDuce.ObjectInspector.zObjectInspector,
 
   LogViewer.Manager, LogViewer.Factories, LogViewer.Resources,
-  LogViewer.Subscribers.ZeroMQ;
+  LogViewer.Subscribers.ZeroMQ, LogViewer.Subscribers.FileSystem;
 
 {$REGION 'construction and destruction'}
 constructor TfrmDashboard.Create(AOwner: TComponent;
@@ -275,14 +279,18 @@ begin
   FZMQEndpoints.OnExecuteItem.Add(FZMQEndpointsExecuteItem);
   FZMQEndpoints.OnExecute.Add(FZMQEndpointsExecuteItem);
   // TODO: implement a better way to save changes.
-  FZMQEndpoints.ValueList.OnExit := FValueListExit;
+  //FZMQEndpoints.ValueList.OnExit := FValueListExit;
 
   FMQTTTopics := TEditList.Create(Self, pnlMQTTTopics);
-  FMQTTTopics .OnAdd.Add(FMQTTSubscriptionsAdd);
+  FMQTTTopics.OnAdd.Add(FMQTTSubscriptionsAdd);
 
   FCOMPorts := TEditList.Create(Self, pnlCOMPorts);
 
   FFSLocations := TEditList.Create(Self, pnlFSLocations);
+  FFSLocations.OnAdd.Add(FFSLocationsAdd);
+  FFSLocations.OnExecuteItem.Add(FFSLocationsExecuteItem);
+  FFSLocations.OnExecute.Add(FFSLocationsExecuteItem);
+  //FFSLocations.ValueList.OnExit := FValueListExit;
 
   InitializeTreeView;
   InitializeControls;
@@ -294,7 +302,7 @@ begin
   Logger.Track(Self, 'BeforeDestruction');
   // required as this event can be called after FManager is released!
   FZMQEndpoints.ValueList.OnExit := nil;
-  SaveEndpoints;
+  SaveSettings;
   FZeroMQReceiver  := nil;
   FMQTTReceiver    := nil;
   FWinIPCReceiver  := nil;
@@ -310,6 +318,8 @@ end;
 {$ENDREGION}
 
 {$REGION 'action handlers'}
+{ Used to debug the application itself. }
+
 procedure TfrmDashboard.actAddSubscribeToLogViewerExecute(Sender: TObject);
 var
   SL          : TStringList;
@@ -375,7 +385,7 @@ end;
 
 procedure TfrmDashboard.actCloseSubscriberExecute(Sender: TObject);
 begin
-//
+// TODO
 end;
 
 procedure TfrmDashboard.actInspectTreeviewExecute(Sender: TObject);
@@ -466,6 +476,10 @@ begin
       begin
         //
         //FManager.Settings.ComPortSettings.E
+      end
+      else if Supports(DN.Data.Receiver, IFileSystem)  then
+      begin
+        FManager.Settings.FileSystemSettings.Enabled := B;
       end;
     end
     else
@@ -623,11 +637,7 @@ begin
 end;
 {$ENDREGION}
 
-procedure TfrmDashboard.FValueListExit(Sender: TObject);
-begin
-  SaveEndpoints;
-end;
-
+{$REGION 'Subscriber lists'}
 procedure TfrmDashboard.FWinIPCReceiverSubscriberListChanged(Sender: TObject;
   const AKey: UInt32; Action: TCollectionChangedAction);
 var
@@ -708,7 +718,9 @@ begin
     LSubscriber.OnChange.Add(FSubscriberChange);
   end;
 end;
+{$ENDREGION}
 
+{$REGION 'FZMQEndpoints'}
 procedure TfrmDashboard.FZMQEndpointsAdd(ASender: TObject; var AName: string;
   var AValue: TValue);
 begin
@@ -729,9 +741,9 @@ begin
     FZeroMQReceiver,
     FZeroMQ,
     LEndPoint,
-    0,
-    LEndPoint,
-    LName,
+    0,         // ASourceId
+    LEndPoint, // AKey
+    LName,     // ASourceName
     FZeroMQReceiver.Enabled
   );
   FZeroMQReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
@@ -771,6 +783,7 @@ var
   LDelete     : TDashboardNode;
   LSubscriber : ISubscriber;
 begin
+  Logger.Track(Self, 'FFileSystemReceiverSubscriberListChanged');
   LDelete := nil;
   if Action = caRemoved then
   begin
@@ -787,9 +800,37 @@ begin
   else if Action = caAdded then
   begin
     LSubscriber := FFileSystemReceiver.SubscriberList[AKey];
-    AddNode(FFileSystemNode, nil, LSubscriber);
-    LSubscriber.OnChange.Add(FSubscriberChange);
+    if Assigned(LSubscriber) then
+    begin
+      AddNode(FFileSystemNode, nil, LSubscriber);
+      LSubscriber.OnChange.Add(FSubscriberChange);
+    end;
   end;
+end;
+
+procedure TfrmDashboard.FFSLocationsAdd(ASender: TObject; var AName: string;
+  var AValue: TValue);
+begin
+  AName  := 'New';
+  AValue := '';
+end;
+
+procedure TfrmDashboard.FFSLocationsExecuteItem(ASender: TObject;
+  var AName: string; var AValue: TValue);
+var
+  LSubscriber : ISubscriber;
+  LName       : string;
+begin
+  LName       := AName;
+  LSubscriber := TFileSystemSubscriber.Create(
+    FFileSystemReceiver,
+    10,
+    AName,
+    AName,
+    FFileSystemReceiver.Enabled
+  );
+  FFileSystemReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
+  Modified;
 end;
 
 procedure TfrmDashboard.FMQTTSubscriptionsAdd(ASender: TObject;
@@ -797,6 +838,7 @@ procedure TfrmDashboard.FMQTTSubscriptionsAdd(ASender: TObject;
 begin
 //
 end;
+{$ENDREGION}
 
 procedure TfrmDashboard.FReceiverChange(Sender: TObject);
 begin
@@ -813,6 +855,7 @@ end;
 function TfrmDashboard.AddNode(AParentNode: TDashboardNode;
   AReceiver: IChannelReceiver; ASubscriber: ISubscriber): TDashboardNode;
 begin
+  Logger.Track(Self, 'AddNode');
   if Assigned(AParentNode) then
     Logger.SendObject('AParentNode', AParentNode);
   if Assigned(AReceiver) then
@@ -837,7 +880,6 @@ end;
 
 procedure TfrmDashboard.CreateChannelReceivers;
 begin
-  FZeroMQ := TZeroMQ.Create;
   FWinIPCReceiver := TLogViewerFactories.CreateWinIPCReceiver(FManager);
   FManager.AddReceiver(FWinIPCReceiver);
   FWinIPCReceiver.OnChange.Add(FReceiverChange);
@@ -850,18 +892,19 @@ begin
   else
     FWinIPCNode.CheckState := csUncheckedNormal;
 
-  FWinODSReceiver := TLogViewerFactories.CreateWinODSReceiver(FManager);
-  FManager.AddReceiver(FWinODSReceiver);
-  FWinODSReceiver.OnChange.Add(FReceiverChange);
-  FWinODSReceiver.SubscriberList.OnKeyChanged.Add(FWinODSReceiverSubscriberListChanged);
-  FWinODSReceiver.Enabled := FManager.Settings.WinODSSettings.Enabled;
-  FWinODSNode := AddNode(nil, FWinODSReceiver, nil);
-  FWinODSNode.CheckType := ctCheckBox;
-  if FWinODSReceiver.Enabled then
-    FWinODSNode.CheckState := csCheckedNormal
-  else
-    FWinODSNode.CheckState := csUncheckedNormal;
+//  FWinODSReceiver := TLogViewerFactories.CreateWinODSReceiver(FManager);
+//  FManager.AddReceiver(FWinODSReceiver);
+//  FWinODSReceiver.OnChange.Add(FReceiverChange);
+//  FWinODSReceiver.SubscriberList.OnKeyChanged.Add(FWinODSReceiverSubscriberListChanged);
+//  FWinODSReceiver.Enabled := FManager.Settings.WinODSSettings.Enabled;
+//  FWinODSNode := AddNode(nil, FWinODSReceiver, nil);
+//  FWinODSNode.CheckType := ctCheckBox;
+//  if FWinODSReceiver.Enabled then
+//    FWinODSNode.CheckState := csCheckedNormal
+//  else
+//    FWinODSNode.CheckState := csUncheckedNormal;
 
+  FZeroMQ := TZeroMQ.Create;
   FZeroMQReceiver := TLogViewerFactories.CreateZeroMQReceiver(FManager, FZeroMQ);
   FManager.AddReceiver(FZeroMQReceiver);
   FZeroMQReceiver.OnChange.Add(FReceiverChange);
@@ -883,6 +926,7 @@ begin
   if FMQTTReceiver.Enabled then
     FMQTTNode.CheckState := csCheckedNormal;
 
+
   FComPortReceiver := TLogViewerFactories.CreateComPortReceiver(
     FManager, FManager.Settings.ComPortSettings
   );
@@ -901,6 +945,7 @@ begin
   FFileSystemReceiver := TLogViewerFactories.CreateFileSystemReceiver(
     FManager, ''
   );
+  FManager.AddReceiver(FFileSystemReceiver);
   FFileSystemReceiver.SubscriberList.OnKeyChanged.Add(FFileSystemReceiverSubscriberListChanged);
   FFileSystemNode := AddNode(nil, FFileSystemReceiver, nil);
   FFileSystemReceiver.OnChange.Add(FReceiverChange);
@@ -909,7 +954,6 @@ begin
     FFileSystemNode.CheckState := csCheckedNormal
   else
     FFileSystemNode.CheckState := csUncheckedNormal;
-  FFileSystemReceiver.Enabled := False;
 
   FTreeView.FullExpand;
 end;
@@ -927,10 +971,8 @@ begin
 //  );
 //  AssignFormParent(FComPortSettingsForm, tsCOMPort);
   pgcMain.ActivePage := tsWinIPC;
-
-
   FZMQEndpoints.Data.FromStrings(FManager.Settings.ZeroMQSettings.Endpoints);
-//  FZMQEndpoints.ValueList.Repaint;
+  FFSLocations.Data.FromStrings(FManager.Settings.FileSystemSettings.PathNames);
 end;
 
 procedure TfrmDashboard.InitializeTreeView;
@@ -1004,15 +1046,16 @@ begin
   FUpdate := True;
 end;
 
-procedure TfrmDashboard.SaveEndpoints;
+procedure TfrmDashboard.SaveSettings;
 var
   LStrings : Shared<TStrings>;
 begin
-  Logger.Track(Self, 'SaveEndpoints');
+  Logger.Track(Self, 'SaveSettings');
   LStrings := TStringList.Create;
   FZMQEndpoints.Data.ToStrings(LStrings);
-  Logger.SendObject(FManager.Settings);
   FManager.Settings.ZeroMQSettings.Endpoints.Assign(LStrings.Value);
+  FFSLocations.Data.ToStrings(LStrings);
+  FManager.Settings.FileSystemSettings.PathNames.Assign(LStrings.Value);
 end;
 
 procedure TfrmDashboard.UpdateActions;

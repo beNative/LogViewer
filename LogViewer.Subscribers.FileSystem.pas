@@ -21,13 +21,90 @@ interface
 uses
   System.Classes,
 
+  Spring, Spring.Helpers,
+
   LogViewer.Interfaces, LogViewer.Subscribers.Base;
 
 type
   TFileSystemSubscriber = class(TSubscriber, ISubscriber, IFileSystem)
+  private
+    FPosition : Int64;
+    FStream   : TFileStream;
+    FBuffer   : TMemoryStream; // message buffer
 
+  public
+    procedure AfterConstruction; override;
+    procedure BeforeDestruction; override;
+
+    procedure Poll; override;
   end;
 
 implementation
+
+uses
+  System.SysUtils, System.IOUtils,
+
+  DDuce.Logger, DDuce.Logger.Interfaces;
+
+{$REGION 'construction and destruction'}
+procedure TFileSystemSubscriber.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  FStream   := TFileStream.Create(SourceName, fmOpenRead or fmShareDenyNone);
+  FBuffer   := TMemoryStream.Create;
+  FPosition := 0;
+end;
+
+procedure TFileSystemSubscriber.BeforeDestruction;
+begin
+  FStream.Free;
+  FBuffer.Free;
+  inherited BeforeDestruction;
+end;
+
+procedure TFileSystemSubscriber.Poll;
+const
+  ZERO_BUF : Integer = 0;
+var
+  LTextSize    : Integer;
+  LText        : AnsiString;
+  LStringStream: Shared<TStringStream>;
+  LMsgType     : Byte;
+  LDummy       : Byte;
+  LProcessName : string;
+begin
+  if Enabled and (FPosition <> FStream.Size) then
+  begin
+    FStream.Seek(FPosition, soFromBeginning);
+    LStringStream := TStringStream.Create;
+
+    LStringStream.Value.CopyFrom(FStream, FStream.Size - FPosition);
+    Logger.Send('Text', LStringStream.Value.DataString);
+
+    FBuffer.Clear;
+    LMsgType := Integer(lmtText);
+    LTextSize := LStringStream.Value.Size;
+    Logger.Send('LTextSize', LTextSize);
+    FBuffer.Seek(0, soFromBeginning);
+    FBuffer.WriteBuffer(LMsgType);
+    FBuffer.WriteBuffer(LDummy);
+    FBuffer.WriteBuffer(LDummy);
+    FBuffer.WriteBuffer(LDummy);
+    FBuffer.WriteBuffer(Now);
+    FBuffer.WriteBuffer(LTextSize);
+    FBuffer.WriteBuffer(LStringStream.Value.Bytes, LTextSize);
+    FBuffer.WriteBuffer(ZERO_BUF);
+//    if not Processes.TryGetValue(AProcessId, LProcessName) then
+//    begin
+//      LProcessName := GetExenameForProcess(AProcessId);
+//      Processes.AddOrSetValue(AProcessId, LProcessName);
+//    end;
+
+//      DoReceiveMessage(FBuffer, AProcessId, 0, LProcessName);
+    Receiver.DoReceiveMessage(FBuffer, SourceId, 0, SourceName);
+    FPosition := FStream.Size;
+  end;
+end;
+{$ENDREGION}
 
 end.

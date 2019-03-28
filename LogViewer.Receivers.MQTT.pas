@@ -38,7 +38,7 @@ uses
 
   DDuce.DynamicRecord,
 
-  LogViewer.Interfaces,  LogViewer.Receivers.Base;
+  LogViewer.Interfaces,  LogViewer.Receivers.Base, LogViewer.MQTT.Settings;
 
 {$REGION 'documentation'}
 {$ENDREGION}
@@ -46,15 +46,15 @@ uses
 type
   TMQTTChannelReceiver = class(TChannelReceiver, IChannelReceiver, IMQTT)
   private
-    FMQTT: TMQTT;
+    FMQTT : TMQTT;
 
   protected
     {$REGION 'property access methods'}
-    //function GetSettings: TMQTTSettings;
+    function GetSettings: TMQTTSettings;
     procedure SetEnabled(const Value: Boolean); override;
     {$ENDREGION}
 
-    //procedure SettingsChanged(Sender: TObject);
+    procedure SettingsChanged(Sender: TObject);
 
     function CreateSubscriber(
       ASourceId         : UInt32;
@@ -70,23 +70,17 @@ type
       AMQTT       : TMQTT;
       const AName : string
     ); reintroduce;
-//
-//    property Settings: TMQTTSettings
-//      read GetSettings;
+    procedure BeforeDestruction; override;
+
+    property Settings: TMQTTSettings
+      read GetSettings;
 
   end;
 
 implementation
 
 {$REGION 'construction and destruction'}
-procedure TMQTTChannelReceiver.AfterConstruction;
-begin
-  inherited AfterConstruction;
 
-end;
-{$ENDREGION}
-
-{$REGION 'protected methods'}
 constructor TMQTTChannelReceiver.Create(AManager: ILogViewerManager;
   AMQTT: TMQTT; const AName: string);
 begin
@@ -94,9 +88,22 @@ begin
   FMQTT := AMQTT;
 end;
 
+procedure TMQTTChannelReceiver.AfterConstruction;
+begin
+  inherited AfterConstruction;
+end;
+
+procedure TMQTTChannelReceiver.BeforeDestruction;
+begin
+  inherited BeforeDestruction;
+end;
+{$ENDREGION}
+
+{$REGION 'protected methods'}
 function TMQTTChannelReceiver.CreateSubscriber(ASourceId, AThreadId: UInt32;
   const ASourceName: string): ISubscriber;
 begin
+
 
 end;
 {$ENDREGION}
@@ -104,7 +111,18 @@ end;
 {$REGION 'property access methods'}
 procedure TMQTTChannelReceiver.SetEnabled(const Value: Boolean);
 begin
-  inherited;
+  inherited SetEnabled(Value);
+end;
+
+function TMQTTChannelReceiver.GetSettings: TMQTTSettings;
+begin
+  Result := Manager.Settings.MQTTSettings;
+end;
+{$ENDREGION}
+
+{$REGION 'private methods'}
+procedure TMQTTChannelReceiver.SettingsChanged(Sender: TObject);
+begin
 
 end;
 {$ENDREGION}

@@ -389,10 +389,6 @@ object frmDashboard: TfrmDashboard
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 1
-            ExplicitLeft = 56
-            ExplicitTop = 160
-            ExplicitWidth = 185
-            ExplicitHeight = 41
           end
         end
       end
@@ -461,7 +457,7 @@ object frmDashboard: TfrmDashboard
     Left = 328
     Top = 112
     Bitmap = {
-      494C010109000801F40010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010109000801000110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000001001B09532ED308512ED100000010000000000000

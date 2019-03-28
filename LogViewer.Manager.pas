@@ -90,6 +90,7 @@ type
     imlMessageTypes       : TImageList;
     ppmLogTreeViewer      : TPopupMenu;
     ppmMessageTypes       : TPopupMenu;
+    actSaveBitmapAs: TAction;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -136,6 +137,7 @@ type
     procedure actTextExecute(Sender: TObject);
     procedure actScreenshotExecute(Sender: TObject);
     procedure actShowFilterViewExecute(Sender: TObject);
+    procedure actSaveBitmapAsExecute(Sender: TObject);
     {$ENDREGION}
 
   private
@@ -455,6 +457,11 @@ end;
 procedure TdmManager.actPersistentExecute(Sender: TObject);
 begin
   UpdateVisibleMessageTypes(lmtPersistent, Sender);
+end;
+
+procedure TdmManager.actSaveBitmapAsExecute(Sender: TObject);
+begin
+  //
 end;
 
 procedure TdmManager.actSaveExecute(Sender: TObject);
@@ -788,6 +795,7 @@ end;
 
 procedure TdmManager.AddReceiver(AReceiver: IChannelReceiver);
 begin
+  Logger.Track(Self, 'AddReceiver');
   Guard.CheckNotNull(AReceiver, 'AReceiver');
   FReceivers.Add(AReceiver);
   Events.DoAddReceiver(AReceiver);

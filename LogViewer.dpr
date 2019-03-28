@@ -63,7 +63,9 @@ uses
   LogViewer.MessageList.Data in 'LogViewer.MessageList.Data.pas',
   LogViewer.Settings.Dialog.Data in 'LogViewer.Settings.Dialog.Data.pas',
   LogViewer.Receivers.MQTT in 'LogViewer.Receivers.MQTT.pas',
-  LogViewer.Subscribers.MQTT in 'LogViewer.Subscribers.MQTT.pas';
+  LogViewer.Subscribers.MQTT in 'LogViewer.Subscribers.MQTT.pas',
+  LogViewer.FileSystem.Settings in 'LogViewer.FileSystem.Settings.pas',
+  LogViewer.MQTT.Settings in 'LogViewer.MQTT.Settings.pas';
 
 {$R *.res}
 

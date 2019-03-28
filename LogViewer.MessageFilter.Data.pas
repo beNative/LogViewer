@@ -64,7 +64,7 @@ type
 
 implementation
 
-{$REGION 'property access methods'}
+{$REGION 'construction and destruction'}
 procedure TFilterData.AfterConstruction;
 begin
   inherited AfterConstruction;

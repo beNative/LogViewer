@@ -141,12 +141,12 @@ var
 
 implementation
 
+{$R *.dfm}
+
 uses
   Spring.Utils,
 
   DDuce.ObjectInspector.zObjectInspector, DDuce.Logger, DDuce.Utils.Winapi;
-
-{$R *.dfm}
 
 {$REGION 'non-interfaced routines'}
 { Extracts the ZMQ library form resources if it does not exist. }

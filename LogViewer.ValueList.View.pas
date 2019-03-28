@@ -25,13 +25,13 @@ uses
 
   DDuce.DynamicRecord,
 
-  DDuce.Components.ValueList;
+  DDuce.Components.ValueList, OMultiPanel;
 
 type
   TfrmValueList = class(TForm)
-    pnlTop        : TPanel;
-    pnlBottom     : TPanel;
-    splHorizontal : TSplitter;
+    pnlMain: TOMultiPanel;
+    pnlBottom: TPanel;
+    pnlTop: TPanel;
 
   private
     FFieldView    : TValueList;
@@ -160,13 +160,13 @@ begin
       end;
       FFieldView.Data := LFieldData;
       FPropertyView.Data := LPropertyData;
-      splHorizontal.Visible := True;
+      //splHorizontal.Visible := True;
       FPropertyView.Visible := True;
     end
     else
     begin
       FFieldView.Data := FData;
-      splHorizontal.Visible := False;
+      //splHorizontal.Visible := False;
       FPropertyView.Visible := False;
     end;
   end;

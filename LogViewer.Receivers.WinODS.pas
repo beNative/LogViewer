@@ -153,17 +153,17 @@ uses
 
 constructor TWinDebugMonitor.Create;
 begin
-  inherited;
+  inherited Create;
   if Initialize <> 0 then
   begin
-    OutputDebugString('TWinDebugMonitor.Initialize failed.'#10);
+    //OutputDebugString('TWinDebugMonitor.Initialize failed.'#10);
   end;
 end;
 
 destructor TWinDebugMonitor.Destroy;
 begin
   Uninitialize;
-  inherited;
+  inherited Destroy;
 end;
 
 procedure TWinDebugMonitor.DoMessageReceived(const AString: AnsiString;
@@ -224,7 +224,6 @@ begin
   end;
 
   // Event: data ready
-  // ---------------------------------------------------------
   FHEventDataReady := OpenEvent(SYNCHRONIZE, False, 'DBWIN_DATA_READY');
   if FHEventDataReady = 0 then
   begin
@@ -236,7 +235,6 @@ begin
   end;
 
   // Shared memory
-  // ---------------------------------------------------------
   FHDBMonBuffer := OpenFileMapping(FILE_MAP_READ, False, 'DBWIN_BUFFER');
   if FHDBMonBuffer = 0 then
   begin
@@ -266,7 +264,6 @@ begin
     end;
 
     // Monitoring thread
-    // ---------------------------------------------------------
     FWinDebugMonStopped := False;
 
     FHWinDebugMonitorThread := CreateThread(
@@ -285,7 +282,6 @@ begin
     end;
 
     // set monitor thread priority to highest
-    // ---------------------------------------------------------
     SetPriorityClass(GetCurrentProcess, REALTIME_PRIORITY_CLASS);
     SetThreadPriority(FHWinDebugMonitorThread, THREAD_PRIORITY_TIME_CRITICAL);
 

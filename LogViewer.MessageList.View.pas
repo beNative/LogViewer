@@ -101,7 +101,6 @@ type
       var Key : Word;
       Shift   : TShiftState
     );
-    procedure chkAutoFilterClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure edtMessageFilterMouseEnter(Sender: TObject);
     procedure edtMessageFilterMouseLeave(Sender: TObject);
@@ -318,6 +317,8 @@ type
 
 implementation
 
+{$R *.dfm}
+
 uses
   System.StrUtils, System.UITypes, System.DateUtils, System.Math,
   System.UIConsts,
@@ -330,8 +331,6 @@ uses
   DDuce.ObjectInspector.zObjectInspector, DDuce.DynamicRecord,
 
   LogViewer.Manager, LogViewer.Factories, LogViewer.Resources;
-
-{$R *.dfm}
 
 {$REGION 'construction and destruction'}
 constructor TfrmMessageList.Create(AOwner: TComponent; AManager
@@ -360,6 +359,8 @@ begin
   CreateCallStackView;
   CreateValueListView;
   pgcMessageData.ActivePage := tsMessageView;
+  // TEMP TSI
+  tsRawData.TabVisible      := True;
 //  tsRawData.TabVisible      := False;
 //  tsMessageView.TabVisible  := False;
 //  tsValueList.TabVisible    := False;
@@ -368,6 +369,7 @@ begin
 //  tsTextViewer.TabVisible   := False;
 
   Caption := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
+  Logger.Info('Creating new message viewer (%s)', [Caption]);
 
   Subscriber.OnReceiveMessage.Add(FSubscriberReceiveMessage);
   FSettings.OnChanged.Add(FSettingsChanged);
@@ -426,6 +428,8 @@ begin
   );
   FEditorView.Settings.EditorOptions.WordWrapEnabled := True;
 end;
+
+{ Creates and initializes the TVirtualStringTree component. }
 
 procedure TfrmMessageList.CreateLogTreeView;
 var
@@ -1114,11 +1118,6 @@ begin
 end;
 {$ENDREGION}
 
-procedure TfrmMessageList.chkAutoFilterClick(Sender: TObject);
-begin
-  Settings.AutoFilterMessages := (Sender as TCheckBox).Checked;
-end;
-
 procedure TfrmMessageList.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Action := caFree;
@@ -1247,8 +1246,9 @@ begin
     FValueList.Clear;
 end;
 
-{ Reads the received message stream from the active logchannel . }
+{ Reads the received message stream from the active logchannel. }
 
+{$REGION 'documentation'}
 {
    Message layout in stream
      1. Message type (1 byte)          => TLogMessage.MsgType (TLogMessageType)
@@ -1271,6 +1271,7 @@ end;
       Data      : TStream;
     end;
 }
+{$ENDREGION}
 
 procedure TfrmMessageList.ProcessMessage(AStream: TStream);
 var

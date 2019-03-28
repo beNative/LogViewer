@@ -16,7 +16,7 @@
 
 unit LogViewer.Interfaces;
 
-{ Main application interfaces. }
+{ Main application interfaces and common types. }
 
 interface
 
@@ -154,6 +154,8 @@ type
   IFileSystem = interface
   ['{254D6F91-FE9F-4B80-B35C-CC00329319A9}']
   end;
+
+  { Provides access to all actions that a ILogViewer instance can perform. }
 
   ILogViewerActions = interface
   ['{73B2BDA9-4098-49A3-95D7-E837EC129FE4}']
