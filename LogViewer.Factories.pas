@@ -36,7 +36,7 @@ uses
 
   Spring.Collections,
 
-  ZeroMQ, MQTT,
+  ZeroMQ,
 
   LogViewer.CallStack.View, LogViewer.Watches.View,
   LogViewer.Watches.Data, LogViewer.Messages.Data, LogViewer.MessageList.View,
@@ -107,8 +107,7 @@ type
     ): IChannelReceiver;
 
     class function CreateMQTTReceiver(
-      AManager : ILogViewerManager;
-      AMQTT    : TMQTT
+      AManager : ILogViewerManager
     ): IChannelReceiver;
 
     class function CreateFileSystemReceiver(
@@ -230,9 +229,9 @@ begin
 end;
 
 class function TLogViewerFactories.CreateMQTTReceiver(
-  AManager: ILogViewerManager; AMQTT: TMQTT): IChannelReceiver;
+  AManager: ILogViewerManager): IChannelReceiver;
 begin
-  Result := TMQTTChannelReceiver.Create(AManager, AMQTT, RECEIVERNAME_MQTT);
+  Result := TMQTTChannelReceiver.Create(AManager, RECEIVERNAME_MQTT);
 end;
 
 class function TLogViewerFactories.CreateComPortReceiver(

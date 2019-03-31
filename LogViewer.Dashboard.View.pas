@@ -95,6 +95,7 @@ type
     pnlMQTTTopics              : TPanel;
     pnlCOMPorts                : TPanel;
     pnlFSLocations             : TPanel;
+    edtMQTTPort: TLabeledEdit;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -103,6 +104,8 @@ type
     procedure actAddSubscribeToLogViewerExecute(Sender: TObject);
     procedure actSubscribeToSelectionExecute(Sender: TObject);
     procedure actCloseSubscriberExecute(Sender: TObject);
+    procedure edtBrokerExit(Sender: TObject);
+    procedure edtMQTTPortExit(Sender: TObject);
     {$ENDREGION}
 
   private
@@ -110,7 +113,6 @@ type
     FManager             : ILogViewerManager;
     FTreeView            : TVirtualStringTree;
     FZeroMQ              : IZeroMQ;
-    FMQTT                : TMQTT;
     FZeroMQReceiver      : IChannelReceiver;
     FMQTTReceiver        : IChannelReceiver;
     FWinIPCReceiver      : IChannelReceiver;
@@ -310,7 +312,6 @@ begin
   FComPortReceiver := nil;
   FManager         := nil;
   FZeroMQ          := nil;
-  FMQTT.Free;
   FTreeView.Clear;
   FTreeView.Free;
   inherited BeforeDestruction;
@@ -917,8 +918,7 @@ begin
   else
     FZeroMQNode.CheckState := csUncheckedNormal;
 
-  FMQTT := TMQTT.Create('localhost', 1833);
-  FMQTTReceiver := TLogViewerFactories.CreateMQTTReceiver(FManager, FMQTT);
+  FMQTTReceiver := TLogViewerFactories.CreateMQTTReceiver(FManager);
   FManager.AddReceiver(FMQTTReceiver);
   FMQTTReceiver.OnChange.Add(FReceiverChange);
   FMQTTNode := AddNode(nil, FMQTTReceiver, nil);
@@ -958,6 +958,16 @@ begin
   FTreeView.FullExpand;
 end;
 
+procedure TfrmDashboard.edtBrokerExit(Sender: TObject);
+begin
+  FManager.Settings.MQTTSettings.Broker := edtBroker.Text;
+end;
+
+procedure TfrmDashboard.edtMQTTPortExit(Sender: TObject);
+begin
+  FManager.Settings.MQTTSettings.Port := StrToInt(edtMQTTPort.Text);
+end;
+
 procedure TfrmDashboard.InitializeControls;
 var
   I : Integer;
@@ -970,6 +980,9 @@ begin
 //    Self, FManager.Settings.ComPortSettings
 //  );
 //  AssignFormParent(FComPortSettingsForm, tsCOMPort);
+  edtBroker.Text   := FManager.Settings.MQTTSettings.Broker;
+  edtMQTTPort.Text := FManager.Settings.MQTTSettings.Port.ToString;
+  FManager.Settings.MQTTSettings.Enabled := False;
   pgcMain.ActivePage := tsWinIPC;
   FZMQEndpoints.Data.FromStrings(FManager.Settings.ZeroMQSettings.Endpoints);
   FFSLocations.Data.FromStrings(FManager.Settings.FileSystemSettings.PathNames);

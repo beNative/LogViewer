@@ -33,7 +33,9 @@ object frmValueList: TfrmValueList
         Index = 1
       end>
     MinPosition = 0.020000000000000000
+    SplitterSize = 6
     Align = alClient
+    AutoSize = True
     BevelEdges = []
     TabOrder = 0
     ExplicitLeft = 112
@@ -42,9 +44,9 @@ object frmValueList: TfrmValueList
     ExplicitHeight = 41
     object pnlBottom: TPanel
       Left = 0
-      Top = 287
+      Top = 290
       Width = 398
-      Height = 282
+      Height = 279
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 1

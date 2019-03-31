@@ -33,6 +33,7 @@ type
     //DEFAULT_BAUDRATE         = 9600;
     DEFAULT_BAUDRATE         = 115200;
     DEFAULT_POLLING_INTERVAL = 50;
+
   private
     FBaudRate        : Integer;
     FDataBits        : Integer;

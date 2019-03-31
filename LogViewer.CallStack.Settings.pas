@@ -66,12 +66,10 @@ begin
   if Source is TCallStackSettings then
   begin
     //LSettings := TCallStackSettings(Source);
-
   end
   else
     inherited Assign(Source);
 end;
-
 {$ENDREGION}
 
 end.

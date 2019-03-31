@@ -52,7 +52,7 @@ type
 
   public
     procedure AfterConstruction; override;
-    destructor Destroy; override;
+    procedure BeforeDestruction; override;
 
     procedure Clear;
 
@@ -87,12 +87,12 @@ begin
   FPropertyView.Editable   := False;
 end;
 
-destructor TfrmValueList.Destroy;
+procedure TfrmValueList.BeforeDestruction;
 begin
   FData := nil;
   FPropertyView.Data := nil;
   FFieldView.Data    := nil;
-  inherited Destroy;
+  inherited BeforeDestruction;
 end;
 {$ENDREGION}
 
@@ -160,14 +160,12 @@ begin
       end;
       FFieldView.Data := LFieldData;
       FPropertyView.Data := LPropertyData;
-      //splHorizontal.Visible := True;
-      FPropertyView.Visible := True;
+      pnlMain.PanelCollection[1].Visible := True;
     end
     else
     begin
       FFieldView.Data := FData;
-      //splHorizontal.Visible := False;
-      FPropertyView.Visible := False;
+      pnlMain.PanelCollection[1].Visible := False;
     end;
   end;
 end;

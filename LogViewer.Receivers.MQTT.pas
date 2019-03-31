@@ -41,6 +41,7 @@ uses
   LogViewer.Interfaces,  LogViewer.Receivers.Base, LogViewer.MQTT.Settings;
 
 {$REGION 'documentation'}
+
 {$ENDREGION}
 
 type
@@ -48,13 +49,22 @@ type
   private
     FMQTT : TMQTT;
 
+    procedure Connect;
+
   protected
     {$REGION 'property access methods'}
+    function GetMQTT: TMQTT;
     function GetSettings: TMQTTSettings;
     procedure SetEnabled(const Value: Boolean); override;
     {$ENDREGION}
 
     procedure SettingsChanged(Sender: TObject);
+    // event called when message is received
+    procedure FMQTTPublish(
+      Sender   : TObject;
+      ATopic   : UTF8String;
+      APayload : UTF8String
+    );
 
     function CreateSubscriber(
       ASourceId         : UInt32;
@@ -62,14 +72,11 @@ type
       const ASourceName : string
     ): ISubscriber; override;
 
+    property MQTT: TMQTT
+      read GetMQTT;
+
   public
     procedure AfterConstruction; override;
-
-    constructor Create(
-      AManager    : ILogViewerManager;
-      AMQTT       : TMQTT;
-      const AName : string
-    ); reintroduce;
     procedure BeforeDestruction; override;
 
     property Settings: TMQTTSettings
@@ -79,39 +86,78 @@ type
 
 implementation
 
+uses
+  System.SysUtils,
+
+  LogViewer.Subscribers.MQTT,
+
+  DDuce.Logger, DDuce.Logger.Interfaces;
+
 {$REGION 'construction and destruction'}
-
-constructor TMQTTChannelReceiver.Create(AManager: ILogViewerManager;
-  AMQTT: TMQTT; const AName: string);
-begin
-  inherited Create(AManager, AName);
-  FMQTT := AMQTT;
-end;
-
 procedure TMQTTChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
+//  FMQTT.Create(function: TMQTT
+//    begin
+//      Result := TMQTT.Create(Settings.Broker, Settings.Port);
+//      // some brokers require these to have a value
+//      Result.WillTopic := 'a';
+//      Result.WillMsg   := 'a';
+//      Result.OnPublish := FMQTTPublish;
+//    end
+//  );
 end;
 
 procedure TMQTTChannelReceiver.BeforeDestruction;
 begin
+//  if FMQTT.IsValueCreated then
+//  begin
+//    FMQTT.Value.Free; // we need to do an explicit call to Free
+//  end;
+  if Assigned(FMQTT) then
+  begin
+    FMQTT.OnPublish := nil;
+    FreeAndNil(FMQTT);
+  end;
+  //FMQTT.Free;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
 
-{$REGION 'protected methods'}
-function TMQTTChannelReceiver.CreateSubscriber(ASourceId, AThreadId: UInt32;
-  const ASourceName: string): ISubscriber;
+{$REGION 'event handlers'}
+procedure TMQTTChannelReceiver.FMQTTPublish(Sender: TObject; ATopic,
+  APayload: UTF8String);
 begin
-
-
+//  Logger.Send('ATopic', ATopic);
+//  Logger.Send('APayload', APayload);
 end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
+function TMQTTChannelReceiver.GetMQTT: TMQTT;
+begin
+  Result := FMQTT;
+end;
+
 procedure TMQTTChannelReceiver.SetEnabled(const Value: Boolean);
 begin
+  if Value <> Enabled then
+  begin
+    if Value {and not MQTT.Connected }then
+    begin
+      Connect;
+      MQTT.Subscribe('#', 0);
+    end
+    else if not Value {and MQTT.Connected} then
+    begin
+      if Assigned(FMQTT) then
+      begin
+        MQTT.Disconnect;
+      end;
+    end;
+  end;
   inherited SetEnabled(Value);
+  //inherited SetEnabled(MQTT.Connected);
 end;
 
 function TMQTTChannelReceiver.GetSettings: TMQTTSettings;
@@ -127,7 +173,31 @@ begin
 end;
 {$ENDREGION}
 
+{$REGION 'protected methods'}
+procedure TMQTTChannelReceiver.Connect;
+begin
+  if Assigned(FMQTT) then
+  begin
+    FreeAndNil(FMQTT);
+  end;
+  FMQTT := TMQTT.Create(Settings.Broker, Settings.Port);
+  FMQTT.OnPublish := FMQTTPublish;
+  FMQTT.WillTopic := 'a'; // required by some brokers
+  FMQTT.WillMsg := 'a';   // required by some brokers
+  if FMQTT.Connect then
+  begin
+//    FLogTree.Log('Socket connected to broker.', llInfo);
+//    FLogTree.Header.AutoFitColumns;
+//    if chkSubscribeToAllTopics.Checked then
+//      SubscribeToAllTopics;
+  end;
+end;
+
+function TMQTTChannelReceiver.CreateSubscriber(ASourceId, AThreadId: UInt32;
+  const ASourceName: string): ISubscriber;
+begin
+  //Result := TMQTTS WinODSSubscriber.Create(Self, ASourceId, '', ASourceName, True);
+end;
+{$ENDREGION}
+
 end.
-
-
-

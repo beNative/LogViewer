@@ -56,11 +56,7 @@ type
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 
-    procedure FMQTTPublish(
-      Sender   : TObject;
-      ATopic   : UTF8String;
-      APayload : UTF8String
-    );
+
   end;
 
 implementation
@@ -85,7 +81,7 @@ constructor TMQTTSubscriber.Create(const AReceiver: IChannelReceiver;
 begin
   inherited Create(AReceiver, ASourceId, AKey, ASourceName, AEnabled);
   FMQTT := AMQTT;
-  FMQTT.OnPublish := FMQTTPublish;
+
 end;
 {$ENDREGION}
 
@@ -98,15 +94,15 @@ end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
-procedure TMQTTSubscriber.FMQTTPublish(Sender: TObject; ATopic,
-  APayload: UTF8String);
-begin
-//  FMQTTStream.WriteString(FSubscriber.ReceiveString);
-//  Receiver.DoReceiveMessage(
-//    FMQTTStream, SourceId, 0, FSubscriber.LastEndPoint
-//  );
-//  FMQTTStream.Clear;
-end;
+//procedure TMQTTSubscriber.FMQTTPublish(Sender: TObject; ATopic,
+//  APayload: UTF8String);
+//begin
+////  FMQTTStream.WriteString(FSubscriber.ReceiveString);
+////  Receiver.DoReceiveMessage(
+////    FMQTTStream, SourceId, 0, FSubscriber.LastEndPoint
+////  );
+////  FMQTTStream.Clear;
+//end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}

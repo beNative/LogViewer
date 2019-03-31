@@ -32,14 +32,13 @@ uses
   DSharp.Windows.TreeViewPresenter, DSharp.Windows.ColumnDefinitions,
 
   LogViewer.Messages.Data, LogViewer.Watches.Data,
-  LogViewer.Watches.Settings, LogViewer.DisplayValues.Settings;
+  LogViewer.Watches.Settings, LogViewer.DisplayValues.Settings, OMultiPanel;
 
 type
   TfrmWatchesView = class(TForm)
-    {$REGION 'designer controls'}
-    pnlWatches      : TPanel;
-    splHorizontal   : TSplitter;
-    pnlWatchHistory : TPanel;
+    pnlMain: TOMultiPanel;
+    pnlWatches: TPanel;
+    pnlWatchHistory: TPanel;
     {$ENDREGION}
 
   private
