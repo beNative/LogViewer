@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.WinODS.Settings;
+unit LogViewer.Receivers.WinODS.Settings;
 
 { Persistable settings for WinODS receivers. }
 

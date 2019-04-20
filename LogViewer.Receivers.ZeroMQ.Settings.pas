@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.ZeroMQ.Settings;
+unit LogViewer.Receivers.ZeroMQ.Settings;
 
 { Persistable settings for ZeroMQ receiver. }
 
@@ -29,6 +29,7 @@ type
   TZeroMQSettings = class(TPersistent)
   const
     DEFAULT_POLLING_INTERVAL = 100;
+
   private
     FOnChanged       : Event<TNotifyEvent>;
     FEnabled         : Boolean;

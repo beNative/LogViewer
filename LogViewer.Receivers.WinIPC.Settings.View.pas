@@ -14,33 +14,32 @@
   limitations under the License.
 }
 
-unit LogViewer.WinODS.Settings.View;
+unit LogViewer.Receivers.WinIPC.Settings.View;
 
 interface
 
 uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
 
-  LogViewer.WinODS.Settings;
+  LogViewer.Receivers.WinIPC.Settings;
 
 type
-  TfrmWinODSSettings = class(TForm)
-    {$REGION 'designer controls'}
-    lblProcess   : TLabel;
-    lblProcessId : TLabel;
-    edtProcess   : TButtonedEdit;
-    edtProcessId : TButtonedEdit;
-    {$ENDREGION}
+  TfrmWinIPCSettings = class(TForm)
+    lblWindowHandleName : TLabel;
+    edtWindowHandleName : TEdit;
 
   private
-    FSettings : TWinODSSettings;
+    FSettings : TWinIPCSettings;
+
+  protected
+    procedure UpdateActions; override;
 
   public
     constructor Create(
       AOwner    : TComponent;
-      ASettings : TWinODSSettings
+      ASettings : TWinIPCSettings
     ); reintroduce;
     procedure BeforeDestruction; override;
 
@@ -51,17 +50,25 @@ implementation
 {$R *.dfm}
 
 {$REGION 'construction and destruction'}
-constructor TfrmWinODSSettings.Create(AOwner: TComponent;
-  ASettings: TWinODSSettings);
+procedure TfrmWinIPCSettings.BeforeDestruction;
+begin
+  FSettings := nil;
+  inherited BeforeDestruction;
+end;
+
+constructor TfrmWinIPCSettings.Create(AOwner: TComponent;
+  ASettings: TWinIPCSettings);
 begin
   inherited Create(AOwner);
   FSettings := ASettings;
 end;
 
-procedure TfrmWinODSSettings.BeforeDestruction;
+{$ENDREGION}
+
+{$REGION 'protected methods'}
+procedure TfrmWinIPCSettings.UpdateActions;
 begin
-  FSettings := nil;
-  inherited BeforeDestruction;
+  inherited UpdateActions;
 end;
 {$ENDREGION}
 

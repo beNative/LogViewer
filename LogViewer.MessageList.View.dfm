@@ -116,6 +116,10 @@ object frmMessageList: TfrmMessageList
             end
             object tsTextViewer: TTabSheet
               Caption = 'Text viewer'
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object pnlTextViewer: TPanel
                 Left = 0
                 Top = 0
@@ -131,6 +135,10 @@ object frmMessageList: TfrmMessageList
             object tsImageViewer: TTabSheet
               Caption = 'Image viewer'
               ImageIndex = 1
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object pnlImageViewer: TPanel
                 Left = 0
                 Top = 0
@@ -220,12 +228,20 @@ object frmMessageList: TfrmMessageList
             object tsDataSet: TTabSheet
               Caption = 'DataSet'
               ImageIndex = 3
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
             end
           end
         end
         object tsRawData: TTabSheet
           Caption = 'Raw message data'
           ImageIndex = 1
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
         end
       end
     end
@@ -381,7 +397,7 @@ object frmMessageList: TfrmMessageList
     Left = 607
     Top = 150
     Bitmap = {
-      494C010116001900AC0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010116001900B40010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

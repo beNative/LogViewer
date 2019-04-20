@@ -90,7 +90,7 @@ type
     imlMessageTypes       : TImageList;
     ppmLogTreeViewer      : TPopupMenu;
     ppmMessageTypes       : TPopupMenu;
-    actSaveBitmapAs: TAction;
+    actSaveBitmapAs       : TAction;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -162,6 +162,9 @@ type
 
     procedure BuildLogTreeViewerPopupMenu;
     procedure BuildMessageTypesPopupMenu;
+
+    procedure FViewListChanged(Sender: TObject; const Item: ILogViewer;
+    Action: TCollectionChangedAction);
 
   protected
     {$REGION 'property access methods'}
@@ -261,7 +264,6 @@ type
     ); reintroduce; virtual;
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
-    destructor Destroy; override;
 
   end;
 
@@ -286,6 +288,7 @@ begin
   FCommands       := TLogViewerCommands.Create(Self);
   FReceivers      := TCollections.CreateInterfaceList<IChannelReceiver>;
   FViewList       := TCollections.CreateInterfaceList<ILogViewer>;
+  FViewList.OnChanged.Add(FViewListChanged);
   FEditorSettings := TEditorFactories.CreateSettings(Self, 'settings.xml');
   FEditorManager  := TEditorFactories.CreateManager(Self, FEditorSettings);
   BuildMessageTypesPopupMenu;
@@ -301,6 +304,13 @@ end;
 procedure TdmManager.BeforeDestruction;
 begin
   Logger.Track(Self, 'BeforeDestruction');
+  FActiveView     := nil;
+  FViewList       := nil;
+  FReceivers      := nil;
+  FSettings       := nil;
+  FEditorSettings := nil;
+  FEditorManager  := nil;
+
   FreeAndNil(FEvents);
   FreeAndNil(FCommands);
   inherited BeforeDestruction;
@@ -311,18 +321,6 @@ begin
   inherited Create(AOwner);
   Guard.CheckNotNull(ASettings, 'ASettings');
   FSettings := ASettings;
-end;
-
-destructor TdmManager.Destroy;
-begin
-  Logger.Track(Self, 'Destroy');
-  FActiveView     := nil;
-  FViewList       := nil;
-  FReceivers      := nil;
-  FSettings       := nil;
-  FEditorSettings := nil;
-  FEditorManager  := nil;
-  inherited Destroy;
 end;
 {$ENDREGION}
 
@@ -604,10 +602,14 @@ end;
 
 procedure TdmManager.SetActiveView(const Value: ILogViewer);
 begin
-  if  Value <> FActiveView then
+  if Assigned(Value) and (Value <> FActiveView) then
   begin
     FActiveView := Value;
-    Events.DoActiveViewChange(FActiveView);
+    if Assigned(FActiveView) then
+    begin
+      Events.DoActiveViewChange(FActiveView);
+      Logger.Watch('FActiveView', FActiveView.Form.Caption);
+    end;
     UpdateActions;
   end;
 end;
@@ -668,6 +670,16 @@ begin
   begin
     AddView(TLogViewerFactories.CreateLogViewer(Self, Item));
   end;
+end;
+
+procedure TdmManager.FViewListChanged(Sender: TObject; const Item: ILogViewer;
+  Action: TCollectionChangedAction);
+begin
+//  if Assigned(Item) then
+//  begin
+//    //Logger.SendInterface('Item', Item);
+//    Logger.Send('Action', TValue.From(Action));
+//  end;
 end;
 {$ENDREGION}
 

@@ -28,7 +28,7 @@ uses
 
   DDuce.Editor.Interfaces, DDuce.DynamicRecord,
 
-  LogViewer.Settings, LogViewer.ComPort.Settings;
+  LogViewer.Settings, LogViewer.Receivers.ComPort.Settings;
 
 type
   ILogViewer       = interface;

@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.WinIPC.Settings;
+unit LogViewer.Receivers.WinIPC.Settings;
 
 { Persistable settings for WinIPC receivers. }
 
@@ -41,7 +41,6 @@ type
     procedure Changed;
 
   public
-
     procedure Assign(Source: TPersistent); override;
     procedure BeforeDestruction; override;
 
@@ -51,6 +50,7 @@ type
   published
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
+
   end;
 
 implementation

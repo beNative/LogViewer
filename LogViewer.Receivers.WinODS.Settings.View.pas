@@ -14,29 +14,35 @@
   limitations under the License.
 }
 
-unit LogViewer.ZeroMQ.Settings.View;
+unit LogViewer.Receivers.WinODS.Settings.View;
 
 interface
 
 uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
 
-  LogViewer.ZeroMQ.Settings;
+  LogViewer.Receivers.WinODS.Settings;
 
 type
-  TfrmZeroMQSettings = class(TForm)
-    mmoSubscriptions : TMemo;
+  TfrmWinODSSettings = class(TForm)
+    {$REGION 'designer controls'}
+    lblProcess   : TLabel;
+    lblProcessId : TLabel;
+    edtProcess   : TButtonedEdit;
+    edtProcessId : TButtonedEdit;
+    {$ENDREGION}
 
   private
-    FSettings : TZeroMQSettings;
+    FSettings : TWinODSSettings;
 
   public
     constructor Create(
       AOwner    : TComponent;
-      ASettings : TZeroMQSettings
-    ); reintroduce; virtual;
+      ASettings : TWinODSSettings
+    ); reintroduce;
+    procedure BeforeDestruction; override;
 
   end;
 
@@ -44,16 +50,18 @@ implementation
 
 {$R *.dfm}
 
-uses
-  Spring;
-
 {$REGION 'construction and destruction'}
-constructor TfrmZeroMQSettings.Create(AOwner: TComponent;
-  ASettings: TZeroMQSettings);
+constructor TfrmWinODSSettings.Create(AOwner: TComponent;
+  ASettings: TWinODSSettings);
 begin
   inherited Create(AOwner);
-  Guard.CheckNotNull(ASettings, 'ASettings');
   FSettings := ASettings;
+end;
+
+procedure TfrmWinODSSettings.BeforeDestruction;
+begin
+  FSettings := nil;
+  inherited BeforeDestruction;
 end;
 {$ENDREGION}
 

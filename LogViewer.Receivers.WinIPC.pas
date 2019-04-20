@@ -28,7 +28,8 @@ uses
 
   DDuce.WinIPC.Server,
 
-  LogViewer.Receivers.Base, LogViewer.Interfaces, LogViewer.WinIPC.Settings;
+  LogViewer.Receivers.Base, LogViewer.Interfaces,
+  LogViewer.Receivers.WinIPC.Settings;
 
 {$REGION 'documentation'}
 { Receives logmessages through WinIPC (WM_COPYDATA) messages.
@@ -40,8 +41,6 @@ uses
    - the sending application and the logviewer need to be started with the same
      windows user credentials.
 }
-
-{ TODO :  Notification when a ProcessId/ProcessName does not exist anymore }
 {$ENDREGION}
 
 type

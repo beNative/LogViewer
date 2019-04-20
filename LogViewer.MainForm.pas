@@ -36,7 +36,8 @@ uses
   DDuce.Settings.TextFormat, DDuce.Utils,
 
   LogViewer.Interfaces, LogViewer.Factories, LogViewer.Manager,
-  LogViewer.Settings, LogViewer.ComPort.Settings, LogViewer.Dashboard.View;
+  LogViewer.Settings, LogViewer.Receivers.ComPort.Settings,
+  LogViewer.Dashboard.View;
 
 type
   TfrmMain = class(TForm)
@@ -219,10 +220,11 @@ begin
   tmrPoll.Enabled := False;
   for CR in Manager.Receivers do
     CR.Enabled := False;
-  FreeAndNil(FDashboard);
+  FreeAndNil(FDashboard); // needs to be freed before manager!
   FManager.Settings.FormSettings.Assign(Self);
   FManager.Settings.Save;
   FManager.Settings.OnChanged.Remove(SettingsChanged);
+
   FSettings.Free;
   FManager := nil;
   inherited BeforeDestruction;
@@ -244,7 +246,9 @@ const
 var
   FVI : TFileVersionInfo;
 begin
-  FVI := TFileVersionInfo.GetVersionInfo(Format('%s\%s.dll', [ExtractFileDir(ParamStr(0)), LIBZMQ]));
+  FVI := TFileVersionInfo.GetVersionInfo(
+    Format('%s\%s.dll', [ExtractFileDir(ParamStr(0)), LIBZMQ])
+  );
   ShowMessage(FVI.ToString);
 end;
 {$ENDREGION}
@@ -281,6 +285,7 @@ procedure TfrmMain.ctMainButtonCloseTabClick(Sender: TObject; ATab: TChromeTab;
 var
   V : ILogViewer;
 begin
+  Logger.Track(Self, 'ctMainButtonCloseTabClick');
   Close := ATab.DisplayName <> 'Dashboard';
   if Close then
   begin

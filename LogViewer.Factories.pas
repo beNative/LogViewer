@@ -41,7 +41,7 @@ uses
   LogViewer.CallStack.View, LogViewer.Watches.View,
   LogViewer.Watches.Data, LogViewer.Messages.Data, LogViewer.MessageList.View,
   LogViewer.Interfaces, LogViewer.Manager, LogViewer.Settings,
-  LogViewer.ComPort.Settings, LogViewer.DisplayValues.Settings,
+  LogViewer.Receivers.ComPort.Settings, LogViewer.DisplayValues.Settings,
   LogViewer.Watches.Settings;
 
 type

@@ -1,7 +1,7 @@
 {
 	"FormSettings": {
-		"Left": 386,
-		"Top": 166,
+		"Left": 464,
+		"Top": 192,
 		"Width": 1593,
 		"Height": 758,
 		"FormStyle": 0,
@@ -18,10 +18,10 @@
 		"Enabled": false
 	},
 	"WinIPCSettings": {
-		"Enabled": false
+		"Enabled": true
 	},
 	"ZeroMQSettings": {
-		"Enabled": false,
+		"Enabled": true,
 		"PollingInterval": 100,
 		"Endpoints": "localhost=tcp://localhost:5555\r\nlocalhost2=tcp://localhost:5556\r\n"
 	},
@@ -32,7 +32,7 @@
 		"Endpoints": ""
 	},
 	"FileSystemSettings": {
-		"Enabled": true,
+		"Enabled": false,
 		"PathNames": "test.txt=tcp://localhost:5555\r\nC:\\Tools\\doublecmd\\doublecmd_2019-03-17.log=tcp://localhost:5556\r\n"
 	},
 	"DisplayValueSettings": {

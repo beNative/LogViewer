@@ -38,7 +38,8 @@ uses
 
   DDuce.DynamicRecord,
 
-  LogViewer.Interfaces,  LogViewer.Receivers.Base, LogViewer.MQTT.Settings;
+  LogViewer.Interfaces,  LogViewer.Receivers.Base,
+  LogViewer.Receivers.MQTT.Settings;
 
 {$REGION 'documentation'}
 

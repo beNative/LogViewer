@@ -30,7 +30,8 @@ uses
 
   DDuce.DynamicRecord,
 
-  LogViewer.Interfaces,  LogViewer.Receivers.Base, LogViewer.ZeroMQ.Settings;
+  LogViewer.Interfaces,  LogViewer.Receivers.Base,
+  LogViewer.Receivers.ZeroMQ.Settings;
 
 {$REGION 'documentation'}
 { Receives logmessages from one or more ZMQ publisher through a subscriber

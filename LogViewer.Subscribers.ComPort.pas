@@ -25,7 +25,8 @@ uses
 
   synaser,
 
-  LogViewer.Interfaces, LogViewer.Subscribers.Base, LogViewer.ComPort.Settings;
+  LogViewer.Interfaces, LogViewer.Subscribers.Base,
+  LogViewer.Receivers.ComPort.Settings;
 
 type
   TComPortSubscriber = class(TSubscriber, ISubscriber, IComPort)

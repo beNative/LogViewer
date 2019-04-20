@@ -48,48 +48,64 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     ExplicitHeight = 295
     object tsWatches: TTabSheet
       Caption = 'Watches'
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 393
       ExplicitHeight = 264
     end
     object tsCallstack: TTabSheet
       Caption = 'Callstack'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 393
       ExplicitHeight = 264
     end
     object tsWinIPC: TTabSheet
       Caption = 'WinIPC'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 393
       ExplicitHeight = 264
     end
     object tsWinODS: TTabSheet
       Caption = 'OutputDebugString API'
       ImageIndex = 3
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 393
       ExplicitHeight = 264
     end
     object tsComport: TTabSheet
       Caption = 'Serial port'
       ImageIndex = 4
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 393
       ExplicitHeight = 264
     end
     object tsZeroMQ: TTabSheet
       Caption = 'ZeroMQ'
       ImageIndex = 5
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 393
       ExplicitHeight = 264
     end
     object tsDisplayValuesSettings: TTabSheet
       Caption = 'DisplayValuesSettings'
       ImageIndex = 6
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 393
       ExplicitHeight = 264
     end
     object tsAdvanced: TTabSheet
       Caption = 'Advanced'
       ImageIndex = 7
+      ExplicitLeft = 0
+      ExplicitTop = 0
       ExplicitWidth = 393
       ExplicitHeight = 264
       object seSettings: TSynEdit
@@ -215,7 +231,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Left = 568
     Top = 32
     Bitmap = {
-      494C010103000800300010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010103000800340010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

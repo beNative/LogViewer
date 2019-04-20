@@ -317,8 +317,6 @@ type
 
 implementation
 
-{$R *.dfm}
-
 uses
   System.StrUtils, System.UITypes, System.DateUtils, System.Math,
   System.UIConsts,
@@ -331,6 +329,8 @@ uses
   DDuce.ObjectInspector.zObjectInspector, DDuce.DynamicRecord,
 
   LogViewer.Manager, LogViewer.Factories, LogViewer.Resources;
+
+{$R *.dfm}
 
 {$REGION 'construction and destruction'}
 constructor TfrmMessageList.Create(AOwner: TComponent; AManager
@@ -357,7 +357,7 @@ begin
   CreateLogTreeView;
   CreateWatchesView;
   CreateCallStackView;
-  CreateValueListView;
+//  CreateValueListView;
   pgcMessageData.ActivePage := tsMessageView;
   // TEMP TSI
   tsRawData.TabVisible      := True;
@@ -1651,28 +1651,28 @@ begin
   pgcMessageDetails.ActivePage := tsTextViewer;
 
   // test
-  if ALogNode.Value.Contains('=') then
-  begin
-    pgcMessageDetails.ActivePage := tsValueList;
-    DR.FromString(ALogNode.Value);
-    FValueList.Data := DR;
-  end
-  else if ALogNode.Value.Contains(#13#10) then
-  begin
-    SL := TStringList.Create;
-    try
-     SL.Text := ALogNode.Value;
-     DR.FromArray<string>(SL.ToStringArray, True);
-    finally
-      SL.Free;
-    end;
-    pgcMessageDetails.ActivePage := tsValueList;
-    FValueList.Data := DR;
-  end
-  else
-  begin
-    pgcMessageDetails.ActivePage := tsTextViewer;
-  end;
+//  if ALogNode.Value.Contains('=') then
+//  begin
+//    pgcMessageDetails.ActivePage := tsValueList;
+//    DR.FromString(ALogNode.Value);
+//    FValueList.Data := DR;
+//  end
+//  else if ALogNode.Value.Contains(#13#10) then
+//  begin
+//    SL := TStringList.Create;
+//    try
+//     SL.Text := ALogNode.Value;
+//     DR.FromArray<string>(SL.ToStringArray, True);
+//    finally
+//      SL.Free;
+//    end;
+//    pgcMessageDetails.ActivePage := tsValueList;
+//    FValueList.Data := DR;
+//  end
+//  else
+//  begin
+//    pgcMessageDetails.ActivePage := tsTextViewer;
+//  end;
 end;
 {$ENDREGION}
 

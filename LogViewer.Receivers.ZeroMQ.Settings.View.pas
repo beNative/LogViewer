@@ -14,9 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.ComPort.Settings.View;
-
-{ ComPort configuration view. }
+unit LogViewer.Receivers.ZeroMQ.Settings.View;
 
 interface
 
@@ -25,27 +23,20 @@ uses
   System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
 
-  LogViewer.ComPort.Settings;
+  LogViewer.Receivers.ZeroMQ.Settings;
 
 type
-  TfrmComPortSettings = class(TForm)
-    cbxPort     : TComboBox;
-    cbxBaudRate : TComboBox;
-    lblPort     : TLabel;
-    lblBaudRate : TLabel;
+  TfrmZeroMQSettings = class(TForm)
+    mmoSubscriptions : TMemo;
 
   private
-    FSettings: TComPortSettings;
-
-  protected
-    procedure UpdateActions; override;
+    FSettings : TZeroMQSettings;
 
   public
     constructor Create(
       AOwner    : TComponent;
-      ASettings : TComPortSettings
-    ); reintroduce;
-    procedure BeforeDestruction; override;
+      ASettings : TZeroMQSettings
+    ); reintroduce; virtual;
 
   end;
 
@@ -53,27 +44,16 @@ implementation
 
 {$R *.dfm}
 
+uses
+  Spring;
+
 {$REGION 'construction and destruction'}
-constructor TfrmComPortSettings.Create(AOwner: TComponent;
-  ASettings: TComPortSettings);
+constructor TfrmZeroMQSettings.Create(AOwner: TComponent;
+  ASettings: TZeroMQSettings);
 begin
   inherited Create(AOwner);
+  Guard.CheckNotNull(ASettings, 'ASettings');
   FSettings := ASettings;
-end;
-
-procedure TfrmComPortSettings.BeforeDestruction;
-begin
-  FSettings := nil;
-  inherited BeforeDestruction;
-end;
-{$ENDREGION}
-
-{$REGION 'protected methods'}
-procedure TfrmComPortSettings.UpdateActions;
-begin
-  inherited UpdateActions;
-  cbxPort.Text     := FSettings.Port;
-  cbxBaudRate.Text := FSettings.BaudRate.ToString;
 end;
 {$ENDREGION}
 

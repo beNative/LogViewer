@@ -103,16 +103,19 @@ end;
 {$REGION 'event dispatch methods'}
 procedure TLogViewerEvents.DoActiveViewChange(ALogViewer: ILogViewer);
 begin
+  Logger.Track(Self, 'DoActiveViewChange');
   FOnActiveViewChange.Invoke(Self, ALogViewer);
 end;
 
 procedure TLogViewerEvents.DoAddLogViewer(ALogViewer: ILogViewer);
 begin
+  Logger.Track(Self, 'DoAddLogViewer');
   FOnAddLogViewer.Invoke(Self, ALogViewer);
 end;
 
 procedure TLogViewerEvents.DoAddReceiver(AReceiver: IChannelReceiver);
 begin
+  Logger.Track(Self, 'DoAddReceiver');
   FOnAddReceiver.Invoke(Self, AReceiver);
 end;
 {$ENDREGION}

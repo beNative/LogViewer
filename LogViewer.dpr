@@ -3,7 +3,6 @@ program LogViewer;
 {$R *.dres}
 
 uses
-  //LeakCheck,
   System.SysUtils,
   Vcl.Themes,
   Vcl.Styles,
@@ -32,14 +31,14 @@ uses
   LogViewer.MessageList.Settings in 'LogViewer.MessageList.Settings.pas',
   LogViewer.Commands in 'LogViewer.Commands.pas',
   LogViewer.Events in 'LogViewer.Events.pas',
-  LogViewer.ComPort.Settings in 'LogViewer.ComPort.Settings.pas',
-  LogViewer.ComPort.Settings.View in 'LogViewer.ComPort.Settings.View.pas' {frmComPortSettings},
-  LogViewer.WinODS.Settings.View in 'LogViewer.WinODS.Settings.View.pas' {frmWinODSSettings},
-  LogViewer.WinIPC.Settings.View in 'LogViewer.WinIPC.Settings.View.pas' {frmWinIPCSettings},
-  LogViewer.ZeroMQ.Settings.View in 'LogViewer.ZeroMQ.Settings.View.pas' {frmZeroMQSettings},
-  LogViewer.WinODS.Settings in 'LogViewer.WinODS.Settings.pas',
-  LogViewer.ZeroMQ.Settings in 'LogViewer.ZeroMQ.Settings.pas',
-  LogViewer.WinIPC.Settings in 'LogViewer.WinIPC.Settings.pas',
+  LogViewer.Receivers.ComPort.Settings in 'LogViewer.Receivers.ComPort.Settings.pas',
+  LogViewer.Receivers.ComPort.Settings.View in 'LogViewer.Receivers.ComPort.Settings.View.pas' {frmComPortSettings},
+  LogViewer.Receivers.WinODS.Settings.View in 'LogViewer.Receivers.WinODS.Settings.View.pas' {frmWinODSSettings},
+  LogViewer.Receivers.WinIPC.Settings.View in 'LogViewer.Receivers.WinIPC.Settings.View.pas' {frmWinIPCSettings},
+  LogViewer.Receivers.ZeroMQ.Settings.View in 'LogViewer.Receivers.ZeroMQ.Settings.View.pas' {frmZeroMQSettings},
+  LogViewer.Receivers.WinODS.Settings in 'LogViewer.Receivers.WinODS.Settings.pas',
+  LogViewer.Receivers.ZeroMQ.Settings in 'LogViewer.Receivers.ZeroMQ.Settings.pas',
+  LogViewer.Receivers.WinIPC.Settings in 'LogViewer.Receivers.WinIPC.Settings.pas',
   LogViewer.Watches.Settings in 'LogViewer.Watches.Settings.pas',
   LogViewer.CallStack.Settings in 'LogViewer.CallStack.Settings.pas',
   LogViewer.Watches.Settings.View in 'LogViewer.Watches.Settings.View.pas' {frmWatchSettings},
@@ -64,8 +63,8 @@ uses
   LogViewer.Settings.Dialog.Data in 'LogViewer.Settings.Dialog.Data.pas',
   LogViewer.Receivers.MQTT in 'LogViewer.Receivers.MQTT.pas',
   LogViewer.Subscribers.MQTT in 'LogViewer.Subscribers.MQTT.pas',
-  LogViewer.FileSystem.Settings in 'LogViewer.FileSystem.Settings.pas',
-  LogViewer.MQTT.Settings in 'LogViewer.MQTT.Settings.pas';
+  LogViewer.Receivers.FileSystem.Settings in 'LogViewer.Receivers.FileSystem.Settings.pas',
+  LogViewer.Receivers.MQTT.Settings in 'LogViewer.Receivers.MQTT.Settings.pas';
 
 {$R *.res}
 
@@ -79,6 +78,7 @@ begin
   Logger.Channels.Add(
     TZeroMQChannel.Create(Format('tcp://*:%d', [LOGVIEWER_ZMQ_PORT]))
   );
+  Logger.Clear;
   Logger.Clear;
   Logger.Info('LogViewer Started.');
   Application.CreateForm(TfrmMain, frmMain);

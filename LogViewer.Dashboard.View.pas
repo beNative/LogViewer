@@ -46,7 +46,7 @@ uses
   DDuce.Components.Factories, DDuce.DynamicRecord, DDuce.EditList,
 
   LogViewer.Interfaces, LogViewer.Dashboard.Data,
-  LogViewer.ComPort.Settings.View;
+  LogViewer.Receivers.ComPort.Settings.View;
 
 type
   TDashboardNode = TVTNode<TDashboardData>;
@@ -67,14 +67,21 @@ type
     actSubscribeToSelection    : TAction;
     btnAddZMQNodeForLogViewer  : TButton;
     btnAddZMQNodeLocalHost     : TButton;
+    edtBroker                  : TLabeledEdit;
+    edtMQTTPort                : TLabeledEdit;
     imlMain                    : TImageList;
     lblWinIPCDescription       : TLabel;
     lblWinODSDescription       : TLabel;
     mniCloseSsubscriber        : TMenuItem;
     pgcMain                    : TPageControl;
+    pnlCOMPorts                : TPanel;
     pnlCOMPortTitle            : TPanel;
+    pnlFileSystemTitle         : TPanel;
+    pnlFSLocations             : TPanel;
     pnlLeft                    : TPanel;
     pnlLogChannels             : TPanel;
+    pnlMQTTTitle               : TPanel;
+    pnlMQTTTopics              : TPanel;
     pnlRight                   : TPanel;
     pnlWinIPCTitle             : TPanel;
     pnlWinODSTitle             : TPanel;
@@ -84,18 +91,11 @@ type
     ppmMain                    : TPopupMenu;
     splVertical                : TSplitter;
     tsCOMPort                  : TTabSheet;
+    tsFileSystem               : TTabSheet;
+    tsMQTT                     : TTabSheet;
     tsWinIPC                   : TTabSheet;
     tsWinODS                   : TTabSheet;
     tsZeroMQ                   : TTabSheet;
-    tsMQTT                     : TTabSheet;
-    edtBroker                  : TLabeledEdit;
-    pnlMQTTTitle               : TPanel;
-    tsFileSystem               : TTabSheet;
-    pnlFileSystemTitle         : TPanel;
-    pnlMQTTTopics              : TPanel;
-    pnlCOMPorts                : TPanel;
-    pnlFSLocations             : TPanel;
-    edtMQTTPort: TLabeledEdit;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -222,6 +222,12 @@ type
     );
     procedure FReceiverChange(Sender : TObject);
     procedure FSubscriberChange(Sender : TObject);
+    procedure CreateWinIPCReceiver;
+    procedure CreateWinODSReceiver;
+    procedure CreateZeroMQReceiver;
+    procedure CreateMQTTReceiver;
+    procedure CreateComPortReceiver;
+    procedure CreateFileSystemReceiver;
     {$ENDREGION}
 
   protected
@@ -305,13 +311,14 @@ begin
   // required as this event can be called after FManager is released!
   FZMQEndpoints.ValueList.OnExit := nil;
   SaveSettings;
-  FZeroMQReceiver  := nil;
-  FMQTTReceiver    := nil;
-  FWinIPCReceiver  := nil;
-  FWinODSReceiver  := nil;
-  FComPortReceiver := nil;
-  FManager         := nil;
-  FZeroMQ          := nil;
+  FZeroMQReceiver     := nil;
+  FMQTTReceiver       := nil;
+  FWinIPCReceiver     := nil;
+  FWinODSReceiver     := nil;
+  FComPortReceiver    := nil;
+  FFileSystemReceiver := nil;
+  FManager            := nil;
+  FZeroMQ             := nil;
   FTreeView.Clear;
   FTreeView.Free;
   inherited BeforeDestruction;
@@ -850,19 +857,29 @@ procedure TfrmDashboard.FSubscriberChange(Sender: TObject);
 begin
   Modified;
 end;
+
+procedure TfrmDashboard.edtBrokerExit(Sender: TObject);
+begin
+  FManager.Settings.MQTTSettings.Broker := edtBroker.Text;
+end;
+
+procedure TfrmDashboard.edtMQTTPortExit(Sender: TObject);
+begin
+  FManager.Settings.MQTTSettings.Port := StrToInt(edtMQTTPort.Text);
+end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
 function TfrmDashboard.AddNode(AParentNode: TDashboardNode;
   AReceiver: IChannelReceiver; ASubscriber: ISubscriber): TDashboardNode;
 begin
-  Logger.Track(Self, 'AddNode');
-  if Assigned(AParentNode) then
-    Logger.SendObject('AParentNode', AParentNode);
-  if Assigned(AReceiver) then
-    Logger.SendInterface('AReceiver', AReceiver);
-  if Assigned(ASubscriber) then
-    Logger.SendInterface('ASubscriber', ASubscriber);
+//  Logger.Track(Self, 'AddNode');
+//  if Assigned(AParentNode) then
+//    Logger.SendObject('AParentNode', AParentNode);
+//  if Assigned(AReceiver) then
+//    Logger.SendInterface('AReceiver', AReceiver);
+//  if Assigned(ASubscriber) then
+//    Logger.SendInterface('ASubscriber', ASubscriber);
   if Assigned(AParentNode) then
   begin
     Result := AParentNode.Add(TDashboardData.Create(AReceiver, ASubscriber));
@@ -881,30 +898,67 @@ end;
 
 procedure TfrmDashboard.CreateChannelReceivers;
 begin
-  FWinIPCReceiver := TLogViewerFactories.CreateWinIPCReceiver(FManager);
-  FManager.AddReceiver(FWinIPCReceiver);
-  FWinIPCReceiver.OnChange.Add(FReceiverChange);
-  FWinIPCReceiver.SubscriberList.OnKeyChanged.Add(FWinIPCReceiverSubscriberListChanged);
-  FWinIPCReceiver.Enabled := FManager.Settings.WinIPCSettings.Enabled;
-  FWinIPCNode := AddNode(nil, FWinIPCReceiver, nil);
-  FWinIPCNode.CheckType := ctCheckBox;
-  if FWinIPCReceiver.Enabled then
-    FWinIPCNode.CheckState := csCheckedNormal
+  Logger.Track(Self, 'CreateChannelReceivers');
+  CreateWinIPCReceiver;
+//  CreateWinODSReceiver;
+//  CreateZeroMQReceiver;
+//  CreateMQTTReceiver;
+//  CreateComPortReceiver;
+//  CreateFileSystemReceiver;
+
+  FTreeView.FullExpand;
+end;
+
+procedure TfrmDashboard.CreateFileSystemReceiver;
+begin
+  FFileSystemReceiver :=
+    TLogViewerFactories.CreateFileSystemReceiver(FManager, '');
+  FManager.AddReceiver(FFileSystemReceiver);
+  FFileSystemReceiver.SubscriberList.OnKeyChanged.Add(
+    FFileSystemReceiverSubscriberListChanged
+  );
+  FFileSystemNode := AddNode(nil, FFileSystemReceiver, nil);
+  FFileSystemReceiver.OnChange.Add(FReceiverChange);
+  FFileSystemNode.CheckType := ctCheckBox;
+  FFileSystemReceiver.Enabled := FManager.Settings.FileSystemSettings.Enabled;
+  if FFileSystemReceiver.Enabled then
+    FFileSystemNode.CheckState := csCheckedNormal
   else
-    FWinIPCNode.CheckState := csUncheckedNormal;
+    FFileSystemNode.CheckState := csUncheckedNormal;
+end;
 
-//  FWinODSReceiver := TLogViewerFactories.CreateWinODSReceiver(FManager);
-//  FManager.AddReceiver(FWinODSReceiver);
-//  FWinODSReceiver.OnChange.Add(FReceiverChange);
-//  FWinODSReceiver.SubscriberList.OnKeyChanged.Add(FWinODSReceiverSubscriberListChanged);
-//  FWinODSReceiver.Enabled := FManager.Settings.WinODSSettings.Enabled;
-//  FWinODSNode := AddNode(nil, FWinODSReceiver, nil);
-//  FWinODSNode.CheckType := ctCheckBox;
-//  if FWinODSReceiver.Enabled then
-//    FWinODSNode.CheckState := csCheckedNormal
-//  else
-//    FWinODSNode.CheckState := csUncheckedNormal;
+procedure TfrmDashboard.CreateComPortReceiver;
+begin
+  FComPortReceiver := TLogViewerFactories.CreateComPortReceiver(
+    FManager, FManager.Settings.ComPortSettings
+  );
+  FManager.AddReceiver(FComPortReceiver);
+  FComPortReceiver.OnChange.Add(FReceiverChange);
+  FComPortReceiver.SubscriberList.OnKeyChanged.Add(
+    FComPortReceiverSubscriberListChanged
+  );
+  FComPortNode := AddNode(nil, FComPortReceiver, nil);
+  FComPortNode.CheckType := ctCheckBox;
+  if FComPortReceiver.Enabled then
+    FComPortNode.CheckState := csCheckedNormal
+  else
+    FComPortNode.CheckState := csUncheckedNormal;
+  FComPortReceiver.Enabled := False;
+end;
 
+procedure TfrmDashboard.CreateMQTTReceiver;
+begin
+  FMQTTReceiver := TLogViewerFactories.CreateMQTTReceiver(FManager);
+  FManager.AddReceiver(FMQTTReceiver);
+  FMQTTReceiver.OnChange.Add(FReceiverChange);
+  FMQTTNode := AddNode(nil, FMQTTReceiver, nil);
+  FMQTTNode.CheckType := ctCheckBox;
+  if FMQTTReceiver.Enabled then
+    FMQTTNode.CheckState := csCheckedNormal;
+end;
+
+procedure TfrmDashboard.CreateZeroMQReceiver;
+begin
   FZeroMQ := TZeroMQ.Create;
   FZeroMQReceiver := TLogViewerFactories.CreateZeroMQReceiver(FManager, FZeroMQ);
   FManager.AddReceiver(FZeroMQReceiver);
@@ -917,55 +971,36 @@ begin
     FZeroMQNode.CheckState := csCheckedNormal
   else
     FZeroMQNode.CheckState := csUncheckedNormal;
-
-  FMQTTReceiver := TLogViewerFactories.CreateMQTTReceiver(FManager);
-  FManager.AddReceiver(FMQTTReceiver);
-  FMQTTReceiver.OnChange.Add(FReceiverChange);
-  FMQTTNode := AddNode(nil, FMQTTReceiver, nil);
-  FMQTTNode.CheckType := ctCheckBox;
-  if FMQTTReceiver.Enabled then
-    FMQTTNode.CheckState := csCheckedNormal;
-
-
-  FComPortReceiver := TLogViewerFactories.CreateComPortReceiver(
-    FManager, FManager.Settings.ComPortSettings
-  );
-  FManager.AddReceiver(FComPortReceiver);
-  FComPortReceiver.OnChange.Add(FReceiverChange);
-  FComPortReceiver.SubscriberList.OnKeyChanged.Add(FComPortReceiverSubscriberListChanged);
-//  FComPortReceiver.Enabled := FManager.Settings.ComPortSettings.Enabled;
-  FComPortNode := AddNode(nil, FComPortReceiver, nil);
-  FComPortNode.CheckType := ctCheckBox;
-  if FComPortReceiver.Enabled then
-    FComPortNode.CheckState := csCheckedNormal
-  else
-    FComPortNode.CheckState := csUncheckedNormal;
-  FComPortReceiver.Enabled := False;
-
-  FFileSystemReceiver := TLogViewerFactories.CreateFileSystemReceiver(
-    FManager, ''
-  );
-  FManager.AddReceiver(FFileSystemReceiver);
-  FFileSystemReceiver.SubscriberList.OnKeyChanged.Add(FFileSystemReceiverSubscriberListChanged);
-  FFileSystemNode := AddNode(nil, FFileSystemReceiver, nil);
-  FFileSystemReceiver.OnChange.Add(FReceiverChange);
-  FFileSystemNode.CheckType := ctCheckBox;
-  if FFileSystemReceiver.Enabled then
-    FFileSystemNode.CheckState := csCheckedNormal
-  else
-    FFileSystemNode.CheckState := csUncheckedNormal;
-
-  FTreeView.FullExpand;
 end;
 
-procedure TfrmDashboard.edtBrokerExit(Sender: TObject);
+procedure TfrmDashboard.CreateWinODSReceiver;
 begin
-  FManager.Settings.MQTTSettings.Broker := edtBroker.Text;
+  FWinODSReceiver := TLogViewerFactories.CreateWinODSReceiver(FManager);
+  FManager.AddReceiver(FWinODSReceiver);
+  FWinODSReceiver.OnChange.Add(FReceiverChange);
+  FWinODSReceiver.SubscriberList.OnKeyChanged.Add(FWinODSReceiverSubscriberListChanged);
+  FWinODSReceiver.Enabled := FManager.Settings.WinODSSettings.Enabled;
+  FWinODSNode := AddNode(nil, FWinODSReceiver, nil);
+  FWinODSNode.CheckType := ctCheckBox;
+  if FWinODSReceiver.Enabled then
+    FWinODSNode.CheckState := csCheckedNormal
+  else
+    FWinODSNode.CheckState := csUncheckedNormal;
 end;
 
-procedure TfrmDashboard.edtMQTTPortExit(Sender: TObject);
+procedure TfrmDashboard.CreateWinIPCReceiver;
 begin
-  FManager.Settings.MQTTSettings.Port := StrToInt(edtMQTTPort.Text);
+  FWinIPCReceiver := TLogViewerFactories.CreateWinIPCReceiver(FManager);
+  FManager.AddReceiver(FWinIPCReceiver);
+  FWinIPCReceiver.OnChange.Add(FReceiverChange);
+  FWinIPCReceiver.SubscriberList.OnKeyChanged.Add(FWinIPCReceiverSubscriberListChanged);
+  FWinIPCReceiver.Enabled := FManager.Settings.WinIPCSettings.Enabled;
+  FWinIPCNode := AddNode(nil, FWinIPCReceiver, nil);
+  FWinIPCNode.CheckType := ctCheckBox;
+  if FWinIPCReceiver.Enabled then
+    FWinIPCNode.CheckState := csCheckedNormal
+  else
+    FWinIPCNode.CheckState := csUncheckedNormal;
 end;
 
 procedure TfrmDashboard.InitializeControls;
@@ -1057,6 +1092,7 @@ end;
 procedure TfrmDashboard.Modified;
 begin
   FUpdate := True;
+  Logger.Watch('FUpdate', FUpdate);
 end;
 
 procedure TfrmDashboard.SaveSettings;
@@ -1078,6 +1114,7 @@ begin
   begin
     FManager.Actions.UpdateActions;
     FUpdate := False;
+    Logger.Watch('FUpdate', FUpdate);
     FTreeView.Repaint;
   end;
 end;

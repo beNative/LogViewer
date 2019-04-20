@@ -14,7 +14,9 @@
   limitations under the License.
 }
 
-unit LogViewer.WinIPC.Settings.View;
+unit LogViewer.Receivers.ComPort.Settings.View;
+
+{ ComPort configuration view. }
 
 interface
 
@@ -23,15 +25,17 @@ uses
   System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
 
-  LogViewer.WinIPC.Settings;
+  LogViewer.Receivers.ComPort.Settings;
 
 type
-  TfrmWinIPCSettings = class(TForm)
-    lblWindowHandleName : TLabel;
-    edtWindowHandleName : TEdit;
+  TfrmComPortSettings = class(TForm)
+    cbxPort     : TComboBox;
+    cbxBaudRate : TComboBox;
+    lblPort     : TLabel;
+    lblBaudRate : TLabel;
 
   private
-    FSettings : TWinIPCSettings;
+    FSettings: TComPortSettings;
 
   protected
     procedure UpdateActions; override;
@@ -39,7 +43,7 @@ type
   public
     constructor Create(
       AOwner    : TComponent;
-      ASettings : TWinIPCSettings
+      ASettings : TComPortSettings
     ); reintroduce;
     procedure BeforeDestruction; override;
 
@@ -50,25 +54,26 @@ implementation
 {$R *.dfm}
 
 {$REGION 'construction and destruction'}
-procedure TfrmWinIPCSettings.BeforeDestruction;
-begin
-  FSettings := nil;
-  inherited BeforeDestruction;
-end;
-
-constructor TfrmWinIPCSettings.Create(AOwner: TComponent;
-  ASettings: TWinIPCSettings);
+constructor TfrmComPortSettings.Create(AOwner: TComponent;
+  ASettings: TComPortSettings);
 begin
   inherited Create(AOwner);
   FSettings := ASettings;
 end;
 
+procedure TfrmComPortSettings.BeforeDestruction;
+begin
+  FSettings := nil;
+  inherited BeforeDestruction;
+end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
-procedure TfrmWinIPCSettings.UpdateActions;
+procedure TfrmComPortSettings.UpdateActions;
 begin
   inherited UpdateActions;
+  cbxPort.Text     := FSettings.Port;
+  cbxBaudRate.Text := FSettings.BaudRate.ToString;
 end;
 {$ENDREGION}
 

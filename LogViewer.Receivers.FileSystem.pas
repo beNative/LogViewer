@@ -26,7 +26,8 @@ uses
 
   Spring,
 
-  LogViewer.Interfaces, LogViewer.Receivers.Base, LogViewer.FileSystem.Settings;
+  LogViewer.Interfaces, LogViewer.Receivers.Base,
+  LogViewer.Receivers.FileSystem.Settings;
 
 {$REGION 'documentation'}
 {$ENDREGION}

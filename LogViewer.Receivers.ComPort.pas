@@ -28,7 +28,8 @@ uses
 
   synaser,
 
-  LogViewer.Interfaces, LogViewer.Receivers.Base, LogViewer.ComPort.Settings;
+  LogViewer.Interfaces, LogViewer.Receivers.Base,
+  LogViewer.Receivers.ComPort.Settings;
 
 {$REGION 'documentation'}
 { Receives data from a serial port. The data is queued as a TLogMessage

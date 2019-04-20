@@ -33,9 +33,11 @@ uses
   DDuce.Editor.Interfaces, DDuce.Components.VirtualTrees.Node,
 
   LogViewer.Settings, LogViewer.Settings.Dialog.Data,
-  LogViewer.Comport.Settings.View, LogViewer.WinIPC.Settings.View,
-  LogViewer.Watches.Settings.View, LogViewer.WinODS.Settings.View,
-  LogViewer.ZeroMQ.Settings.View, LogViewer.DisplayValues.Settings.View;
+  LogViewer.Receivers.ComPort.Settings.View,
+  LogViewer.Receivers.WinODS.Settings.View,
+  LogViewer.Receivers.WinIPC.Settings.View, LogViewer.Watches.Settings.View,
+  LogViewer.Receivers.ZeroMQ.Settings.View,
+  LogViewer.DisplayValues.Settings.View;
 
 type
   TConfigNode = TVTNode<TConfigData>;

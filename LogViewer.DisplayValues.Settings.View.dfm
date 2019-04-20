@@ -1,8 +1,8 @@
 object frmDisplayValuesSettings: TfrmDisplayValuesSettings
   Left = 0
   Top = 0
-  ClientHeight = 204
-  ClientWidth = 474
+  ClientHeight = 339
+  ClientWidth = 542
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -16,26 +16,28 @@ object frmDisplayValuesSettings: TfrmDisplayValuesSettings
     Left = 145
     Top = 0
     Width = 7
-    Height = 204
+    Height = 339
+    ExplicitHeight = 204
   end
   object pnlRight: TPanel
     Left = 152
     Top = 0
-    Width = 322
-    Height = 204
+    Width = 390
+    Height = 339
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitLeft = 145
-    ExplicitWidth = 329
+    ExplicitWidth = 322
+    ExplicitHeight = 204
   end
   object pnlLeft: TPanel
     Left = 0
     Top = 0
     Width = 145
-    Height = 204
+    Height = 339
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitHeight = 204
   end
 end

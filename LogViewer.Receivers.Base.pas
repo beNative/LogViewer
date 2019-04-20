@@ -234,6 +234,7 @@ begin
   if Value <> Enabled then
   begin
     FEnabled := Value;
+    Logger.Send(Name, FEnabled);
     DoChange;
   end;
 end;

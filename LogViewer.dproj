@@ -146,22 +146,22 @@
         <DCCReference Include="LogViewer.MessageList.Settings.pas"/>
         <DCCReference Include="LogViewer.Commands.pas"/>
         <DCCReference Include="LogViewer.Events.pas"/>
-        <DCCReference Include="LogViewer.ComPort.Settings.pas"/>
-        <DCCReference Include="LogViewer.ComPort.Settings.View.pas">
+        <DCCReference Include="LogViewer.Receivers.ComPort.Settings.pas"/>
+        <DCCReference Include="LogViewer.Receivers.ComPort.Settings.View.pas">
             <Form>frmComPortSettings</Form>
         </DCCReference>
-        <DCCReference Include="LogViewer.WinODS.Settings.View.pas">
+        <DCCReference Include="LogViewer.Receivers.WinODS.Settings.View.pas">
             <Form>frmWinODSSettings</Form>
         </DCCReference>
-        <DCCReference Include="LogViewer.WinIPC.Settings.View.pas">
+        <DCCReference Include="LogViewer.Receivers.WinIPC.Settings.View.pas">
             <Form>frmWinIPCSettings</Form>
         </DCCReference>
-        <DCCReference Include="LogViewer.ZeroMQ.Settings.View.pas">
+        <DCCReference Include="LogViewer.Receivers.ZeroMQ.Settings.View.pas">
             <Form>frmZeroMQSettings</Form>
         </DCCReference>
-        <DCCReference Include="LogViewer.WinODS.Settings.pas"/>
-        <DCCReference Include="LogViewer.ZeroMQ.Settings.pas"/>
-        <DCCReference Include="LogViewer.WinIPC.Settings.pas"/>
+        <DCCReference Include="LogViewer.Receivers.WinODS.Settings.pas"/>
+        <DCCReference Include="LogViewer.Receivers.ZeroMQ.Settings.pas"/>
+        <DCCReference Include="LogViewer.Receivers.WinIPC.Settings.pas"/>
         <DCCReference Include="LogViewer.Watches.Settings.pas"/>
         <DCCReference Include="LogViewer.CallStack.Settings.pas"/>
         <DCCReference Include="LogViewer.Watches.Settings.View.pas">
@@ -196,8 +196,8 @@
         <DCCReference Include="LogViewer.Settings.Dialog.Data.pas"/>
         <DCCReference Include="LogViewer.Receivers.MQTT.pas"/>
         <DCCReference Include="LogViewer.Subscribers.MQTT.pas"/>
-        <DCCReference Include="LogViewer.FileSystem.Settings.pas"/>
-        <DCCReference Include="LogViewer.MQTT.Settings.pas"/>
+        <DCCReference Include="LogViewer.Receivers.FileSystem.Settings.pas"/>
+        <DCCReference Include="LogViewer.Receivers.MQTT.Settings.pas"/>
         <None Include="Readme.md"/>
         <RcItem Include="Bin\Win32\libzmq.dll">
             <ContainerId>ResourceItem</ContainerId>
