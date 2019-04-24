@@ -6,6 +6,8 @@ LogViewer is a general purpose message viewer for log messages with support for 
 * Windows IPC (using ``WM_COPY`` messages)
 * [ZeroMQ](https://github.com/zeromq/libzmq) (`PUB`/`SUB` socket) for logging over the network. It demonstrates the brilliant performance of ZMQ sockets.
 * Serial port
+* MQTT
+* File change monitor
 
 Each of these receivers support multiple subscribers for which messages can be displayed in
 a dedicated logviewer.
