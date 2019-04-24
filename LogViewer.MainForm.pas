@@ -119,7 +119,7 @@ type
 
   public
     procedure AfterConstruction; override;
-    procedure BeforeDestruction; override;
+    destructor Destroy; override;
 
     property Manager: ILogViewerManager
       read GetManager;
@@ -211,24 +211,6 @@ begin
   ctMain.LookAndFeel.Tabs.Hot.Style.StartColor       := clSilver;
   ctMain.LookAndFeel.Tabs.Hot.Style.StopColor        := clSilver;
 end;
-
-procedure TfrmMain.BeforeDestruction;
-var
-  CR : IChannelReceiver;
-begin
-  Logger.Track(Self, 'BeforeDestruction');
-  tmrPoll.Enabled := False;
-  for CR in Manager.Receivers do
-    CR.Enabled := False;
-  FreeAndNil(FDashboard); // needs to be freed before manager!
-  FManager.Settings.FormSettings.Assign(Self);
-  FManager.Settings.Save;
-  FManager.Settings.OnChanged.Remove(SettingsChanged);
-
-  FSettings.Free;
-  FManager := nil;
-  inherited BeforeDestruction;
-end;
 {$ENDREGION}
 
 {$REGION 'action handlers'}
@@ -298,6 +280,20 @@ procedure TfrmMain.ctMainNeedDragImageControl(Sender: TObject; ATab: TChromeTab;
   var DragControl: TWinControl);
 begin
   DragControl := pnlMainClient;
+end;
+
+destructor TfrmMain.Destroy;
+begin
+  Logger.Track(Self, 'Destroy');
+  tmrPoll.Enabled := False;
+  Manager.Receivers.Clear;
+  FManager.Settings.FormSettings.Assign(Self);
+  FManager.Settings.Save;
+  FManager.Settings.OnChanged.Remove(SettingsChanged);
+  FManager := nil;
+  FreeAndNil(FDashboard); // needs to be freed before manager!
+  inherited Destroy;
+  FSettings.Free;
 end;
 
 procedure TfrmMain.DrawPanelText(APanel: TPanel; const AText: string);

@@ -206,12 +206,6 @@ var
   LSubscriber : ISubscriber;
 begin
   Guard.CheckNotNull(AStream, 'AStream');
-  Logger.Track(Self, 'DoReceiveMessage');
-  Logger.Watch('AStream', AStream);
-  Logger.Watch('ASourceId', ASourceId);
-  Logger.Watch('AThreadId', AThreadId);
-  Logger.Watch('ASourceName', ASourceName);
-  Logger.Send('ASourceName', ASourceName);
   if not FSubscriberList.TryGetValue(ASourceId, LSubscriber) then
   begin
     Logger.Info('CreateSubscriber(%d, %d, %s)', [ASourceId, AThreadId, ASourceName]);

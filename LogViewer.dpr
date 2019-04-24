@@ -3,6 +3,12 @@ program LogViewer;
 {$R *.dres}
 
 uses
+//  LeakCheck,
+//  LeakCheck.Setup.Trace,
+//  LeakCheck.MapFile,
+//  LeakCheck.Trace.Map,
+//  LeakCheck.Trace.WinApi,
+  //FastMM4,
   System.SysUtils,
   Vcl.Themes,
   Vcl.Styles,

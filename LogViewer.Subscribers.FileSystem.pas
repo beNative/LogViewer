@@ -66,16 +66,14 @@ procedure TFileSystemSubscriber.Poll;
 const
   ZERO_BUF : Integer = 0;
 var
-  LTextSize    : Integer;
-  LText        : AnsiString;
-  LStringStream: Shared<TStringStream>;
-  LMsgType     : Byte;
-  LDummy       : Byte;
-  LProcessName : string;
+  LTextSize     : Integer;
+  LStringStream : Shared<TStringStream>;
+  LMsgType      : Byte;
+  LDummy        : Byte;
 begin
   if Enabled and (FPosition <> FStream.Size) then
   begin
-    FStream.Seek(FPosition, soFromBeginning);
+    FStream.Seek(FPosition, soBeginning);
     LStringStream := TStringStream.Create;
 
     LStringStream.Value.CopyFrom(FStream, FStream.Size - FPosition);
@@ -84,8 +82,9 @@ begin
     FBuffer.Clear;
     LMsgType := Integer(lmtText);
     LTextSize := LStringStream.Value.Size;
+    LDummy := 0;
     Logger.Send('LTextSize', LTextSize);
-    FBuffer.Seek(0, soFromBeginning);
+    FBuffer.Seek(0, soBeginning);
     FBuffer.WriteBuffer(LMsgType);
     FBuffer.WriteBuffer(LDummy);
     FBuffer.WriteBuffer(LDummy);
@@ -94,13 +93,6 @@ begin
     FBuffer.WriteBuffer(LTextSize);
     FBuffer.WriteBuffer(LStringStream.Value.Bytes, LTextSize);
     FBuffer.WriteBuffer(ZERO_BUF);
-//    if not Processes.TryGetValue(AProcessId, LProcessName) then
-//    begin
-//      LProcessName := GetExenameForProcess(AProcessId);
-//      Processes.AddOrSetValue(AProcessId, LProcessName);
-//    end;
-
-//      DoReceiveMessage(FBuffer, AProcessId, 0, LProcessName);
     Receiver.DoReceiveMessage(FBuffer, SourceId, 0, SourceName);
     FPosition := FStream.Size;
   end;

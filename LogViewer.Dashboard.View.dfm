@@ -175,6 +175,10 @@ object frmDashboard: TfrmDashboard
         object tsZeroMQ: TTabSheet
           Caption = 'ZeroMQ'
           ImageIndex = 6
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           DesignSize = (
             377
             585)
@@ -310,6 +314,10 @@ object frmDashboard: TfrmDashboard
         object tsMQTT: TTabSheet
           Caption = 'MQTT'
           ImageIndex = 4
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           DesignSize = (
             377
             585)
@@ -493,7 +501,7 @@ object frmDashboard: TfrmDashboard
     Left = 408
     Top = 8
     Bitmap = {
-      494C010109000801240110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101090008012C0110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000001001B09532ED308512ED100000010000000000000

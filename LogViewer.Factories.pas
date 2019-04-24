@@ -182,7 +182,7 @@ class function TLogViewerFactories.CreateLogViewer(AManager: ILogViewerManager;
   ASubscriber: ISubscriber; AParent: TWinControl): TfrmMessageList;
 begin
   Result := TfrmMessageList.Create(
-    Application,
+    AParent,
     AManager,
     ASubscriber,
     AManager.Settings.MessageListSettings

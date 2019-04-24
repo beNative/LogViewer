@@ -222,15 +222,16 @@ type
     );
     procedure FReceiverChange(Sender : TObject);
     procedure FSubscriberChange(Sender : TObject);
+    {$ENDREGION}
+
+  protected
     procedure CreateWinIPCReceiver;
     procedure CreateWinODSReceiver;
     procedure CreateZeroMQReceiver;
     procedure CreateMQTTReceiver;
     procedure CreateComPortReceiver;
     procedure CreateFileSystemReceiver;
-    {$ENDREGION}
 
-  protected
     procedure Modified;
     procedure InitializeTreeView;
     procedure InitializeControls;
@@ -251,7 +252,9 @@ type
       AManager : ILogViewerManager
     ); reintroduce; virtual;
     procedure AfterConstruction; override;
+
     procedure BeforeDestruction; override;
+    destructor Destroy; override;
 
   end;
 
@@ -308,6 +311,13 @@ end;
 procedure TfrmDashboard.BeforeDestruction;
 begin
   Logger.Track(Self, 'BeforeDestruction');
+
+  inherited BeforeDestruction;
+end;
+
+destructor TfrmDashboard.Destroy;
+begin
+  Logger.Track(Self, 'Destroy');
   // required as this event can be called after FManager is released!
   FZMQEndpoints.ValueList.OnExit := nil;
   SaveSettings;
@@ -321,7 +331,7 @@ begin
   FZeroMQ             := nil;
   FTreeView.Clear;
   FTreeView.Free;
-  inherited BeforeDestruction;
+  inherited Destroy;
 end;
 {$ENDREGION}
 
@@ -873,13 +883,6 @@ end;
 function TfrmDashboard.AddNode(AParentNode: TDashboardNode;
   AReceiver: IChannelReceiver; ASubscriber: ISubscriber): TDashboardNode;
 begin
-//  Logger.Track(Self, 'AddNode');
-//  if Assigned(AParentNode) then
-//    Logger.SendObject('AParentNode', AParentNode);
-//  if Assigned(AReceiver) then
-//    Logger.SendInterface('AReceiver', AReceiver);
-//  if Assigned(ASubscriber) then
-//    Logger.SendInterface('ASubscriber', ASubscriber);
   if Assigned(AParentNode) then
   begin
     Result := AParentNode.Add(TDashboardData.Create(AReceiver, ASubscriber));
@@ -900,11 +903,11 @@ procedure TfrmDashboard.CreateChannelReceivers;
 begin
   Logger.Track(Self, 'CreateChannelReceivers');
   CreateWinIPCReceiver;
-//  CreateWinODSReceiver;
-//  CreateZeroMQReceiver;
-//  CreateMQTTReceiver;
-//  CreateComPortReceiver;
-//  CreateFileSystemReceiver;
+  CreateWinODSReceiver;
+  CreateZeroMQReceiver;
+  CreateMQTTReceiver;
+  CreateComPortReceiver;
+  CreateFileSystemReceiver;
 
   FTreeView.FullExpand;
 end;

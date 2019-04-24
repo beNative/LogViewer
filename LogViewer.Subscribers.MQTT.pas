@@ -108,7 +108,7 @@ end;
 {$REGION 'protected methods'}
 function TMQTTSubscriber.GetSourceId: UInt32;
 begin
-
+  Result := 0;
 end;
 
 procedure TMQTTSubscriber.Poll;

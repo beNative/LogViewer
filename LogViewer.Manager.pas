@@ -144,7 +144,7 @@ type
     FSettings       : TLogViewerSettings;
     FEvents         : TLogViewerEvents;
     FCommands       : TLogViewerCommands;
-    FActiveView     : ILogViewer;
+    FActiveView     : Weak<ILogViewer>;
     FViewList       : IList<ILogViewer>;
     FReceivers      : IList<IChannelReceiver>;
     FEditorManager  : IEditorManager;
@@ -262,8 +262,10 @@ type
       AOwner    : TComponent;
       ASettings : TLogViewerSettings
     ); reintroduce; virtual;
+
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
+    destructor Destroy; override;
 
   end;
 
@@ -304,6 +306,19 @@ end;
 procedure TdmManager.BeforeDestruction;
 begin
   Logger.Track(Self, 'BeforeDestruction');
+  inherited BeforeDestruction;
+end;
+
+constructor TdmManager.Create(AOwner: TComponent; ASettings: TLogViewerSettings);
+begin
+  inherited Create(AOwner);
+  Guard.CheckNotNull(ASettings, 'ASettings');
+  FSettings := ASettings;
+end;
+
+destructor TdmManager.Destroy;
+begin
+  Logger.Track(Self, 'Destroy');
   FActiveView     := nil;
   FViewList       := nil;
   FReceivers      := nil;
@@ -313,14 +328,7 @@ begin
 
   FreeAndNil(FEvents);
   FreeAndNil(FCommands);
-  inherited BeforeDestruction;
-end;
-
-constructor TdmManager.Create(AOwner: TComponent; ASettings: TLogViewerSettings);
-begin
-  inherited Create(AOwner);
-  Guard.CheckNotNull(ASettings, 'ASettings');
-  FSettings := ASettings;
+  inherited Destroy;
 end;
 {$ENDREGION}
 
@@ -605,10 +613,10 @@ begin
   if Assigned(Value) and (Value <> FActiveView) then
   begin
     FActiveView := Value;
-    if Assigned(FActiveView) then
+    if Assigned(FActiveView.Target) then
     begin
       Events.DoActiveViewChange(FActiveView);
-      Logger.Watch('FActiveView', FActiveView.Form.Caption);
+      Logger.Watch('FActiveView', FActiveView.Target.Form.Caption);
     end;
     UpdateActions;
   end;
@@ -931,7 +939,7 @@ var
   MLS : TMessageListSettings;
 begin
   MLS := Settings.MessageListSettings;
-  if Assigned(FActiveView) then
+  if Assigned(FActiveView.Target) then
   begin
     A := ASender as TAction;
     if AToggle then
@@ -940,7 +948,7 @@ begin
       MLS.VisibleMessageTypes := MLS.VisibleMessageTypes + [AMessageType]
     else
       MLS.VisibleMessageTypes := MLS.VisibleMessageTypes - [AMessageType];
-    FActiveView.UpdateView;
+    FActiveView.Target.UpdateView;
   end;
 end;
 {$ENDREGION}

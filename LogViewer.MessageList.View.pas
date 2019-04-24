@@ -231,6 +231,7 @@ type
 
     function GetMilliSecondsBetweenSelection: Integer;
     procedure EnsureIsActiveViewIfFocused;
+    function GetEditorView: IEditorView;
 
   protected
     procedure FSubscriberReceiveMessage(
@@ -281,6 +282,9 @@ type
 
     property IsActiveView: Boolean
       read GetIsActiveView;
+
+    property EditorView: IEditorView
+      read GetEditorView;
 
     property Manager: ILogViewerManager
       read GetManager;
@@ -385,7 +389,6 @@ end;
 procedure TfrmMessageList.BeforeDestruction;
 begin
   Logger.Track(Self, 'BeforeDestruction');
-  FEditorView.Visible := False;
   if Assigned(FSettings) then
   begin
     FSettings.LeftPanelWidth  := pnlLeft.Width;
@@ -426,7 +429,7 @@ begin
     pnlTextViewer,
     Manager.EditorManager
   );
-  FEditorView.Settings.EditorOptions.WordWrapEnabled := True;
+  EditorView.Settings.EditorOptions.WordWrapEnabled := True;
 end;
 
 { Creates and initializes the TVirtualStringTree component. }
@@ -552,6 +555,11 @@ begin
     Result := Manager.Settings.DisplayValuesSettings
   else
     Result := nil;
+end;
+
+function TfrmMessageList.GetEditorView: IEditorView;
+begin
+  Result := FEditorView;
 end;
 
 function TfrmMessageList.GetForm: TCustomForm;
@@ -1241,7 +1249,7 @@ begin
   edtPixelFormat.Text := '';
   edtHandleType.Text  := '';
   FDataSet.Active     := False;
-  FEditorView.Clear;
+  EditorView.Clear;
   if Assigned(FValueList) then
     FValueList.Clear;
 end;
@@ -1371,7 +1379,7 @@ procedure TfrmMessageList.Clear;
 begin
   ClearMessageDetailsControls;
   FWatches.Clear;
-  FEditorView.Clear;
+  EditorView.Clear;
   FCallStack.Clear;
   FLogTreeView.Clear;
   FMessageCount := 0;
@@ -1526,15 +1534,15 @@ begin
       ALogNode.MessageData.Position := 0;
       ObjectBinaryToText(ALogNode.MessageData, LStream);
       LStream.Position := 0;
-      FEditorView.Text := LStream.DataString;
-      FEditorView.HighlighterName := 'DFM';
+      EditorView.Text := LStream.DataString;
+      EditorView.HighlighterName := 'DFM';
     finally
       FreeAndNil(LStream);
     end;
   end
   else
   begin
-    FEditorView.Text := ALogNode.Value;
+    EditorView.Text := ALogNode.Value;
   end;
 end;
 
@@ -1594,10 +1602,10 @@ begin
   tsImageViewer.TabVisible := False;
   tsDataSet.TabVisible     := False;
   pgcMessageDetails.ActivePage := tsTextViewer;
-  FEditorView.Text := ALogNode.Value;
+  EditorView.Text := ALogNode.Value;
   S := ALogNode.Highlighter;
   if S <> '' then
-   FEditorView.HighlighterName := S;
+   EditorView.HighlighterName := S;
 end;
 
 procedure TfrmMessageList.UpdateTextStreamDisplay(ALogNode: TLogNode);
@@ -1611,7 +1619,7 @@ begin
   pgcMessageDetails.ActivePage := tsTextViewer;
   if ALogNode.MessageData = nil then
   begin
-    FEditorView.Text := '';
+    EditorView.Text := '';
   end
   else
   begin
@@ -1621,8 +1629,8 @@ begin
       LStream.Position := 0;
       LStream.CopyFrom(ALogNode.MessageData, ALogNode.MessageData.Size);
       LStream.Position := 0;
-      FEditorView.Text := LStream.DataString;
-      FEditorView.HighlighterName := 'TXT';
+      EditorView.Text := LStream.DataString;
+      EditorView.HighlighterName := 'TXT';
     finally
       LStream.Free;
     end;
@@ -1642,12 +1650,12 @@ begin
 end;
 
 procedure TfrmMessageList.UpdateValueDisplay(ALogNode: TLogNode);
-var
-  DR : DynamicRecord;
-  SL : TStringList;
+//var
+//  DR : DynamicRecord;
+//  SL : TStringList;
 begin
-  FEditorView.Text := ALogNode.Value;
-  FEditorView.HighlighterName  := 'INI';
+  EditorView.Text := ALogNode.Value;
+  EditorView.HighlighterName  := 'INI';
   pgcMessageDetails.ActivePage := tsTextViewer;
 
   // test

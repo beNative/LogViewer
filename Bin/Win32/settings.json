@@ -1,9 +1,9 @@
 {
 	"FormSettings": {
-		"Left": 464,
-		"Top": 192,
-		"Width": 1593,
-		"Height": 758,
+		"Left": 353,
+		"Top": 147,
+		"Width": 1337,
+		"Height": 939,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -15,7 +15,7 @@
 		"RightPanelWidth": 538
 	},
 	"WinODSSettings": {
-		"Enabled": false
+		"Enabled": true
 	},
 	"WinIPCSettings": {
 		"Enabled": true
