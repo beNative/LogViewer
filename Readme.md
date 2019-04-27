@@ -6,6 +6,8 @@ LogViewer is a general purpose message viewer for log messages with support for 
 * Windows IPC (using ``WM_COPY`` messages)
 * [ZeroMQ](https://github.com/zeromq/libzmq) (`PUB`/`SUB` socket) for logging over the network. It demonstrates the brilliant performance of ZMQ sockets.
 * Serial port
+* MQTT
+* File change monitor
 
 Each of these receivers support multiple subscribers for which messages can be displayed in
 a dedicated logviewer.
@@ -52,6 +54,8 @@ The Object Pascal (Delphi) sources depend on the following open source libraries
   * [TBCEditor](https://github.com/beNative/TBCEditor)
   * [TChromeTabs](https://github.com/norgepaul/TChromeTabs)
   * [Ararat Synapse](https://sourceforge.net/projects/synalist/)
+  * [OMultiPanel](http://www.kluug.net)
+  * [JsonDataObjects](https://github.com/ahausladen/JsonDataObjects)
 
 ## Screenshots
 Here is a preliminary look of the application (2018/09/22):
