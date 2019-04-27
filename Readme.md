@@ -54,6 +54,8 @@ The Object Pascal (Delphi) sources depend on the following open source libraries
   * [TBCEditor](https://github.com/beNative/TBCEditor)
   * [TChromeTabs](https://github.com/norgepaul/TChromeTabs)
   * [Ararat Synapse](https://sourceforge.net/projects/synalist/)
+  * [OMultiPanel](http://www.kluug.net)
+  * [JsonDataObjects](https://github.com/ahausladen/JsonDataObjects)
 
 ## Screenshots
 Here is a preliminary look of the application (2018/09/22):
