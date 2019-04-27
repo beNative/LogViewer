@@ -39,9 +39,9 @@ uses
 
 type
   TfrmDisplayValuesSettings = class(TForm)
-    pnlRight : TPanel;
-    pnlLeft  : TPanel;
-    splVertical: TSplitter;
+    pnlRight    : TPanel;
+    pnlLeft     : TPanel;
+    splVertical : TSplitter;
 
   private
     FSettings      : TDisplayValuesSettings;
@@ -62,7 +62,6 @@ type
     ): Boolean;
 
     procedure FListPresenterSelectionChanged(Sender: TObject);
-
     procedure FFormatSettingsChanged(Sender: TObject);
 
   protected
@@ -152,10 +151,14 @@ var
   FS : TTextFormatSettings;
 begin
   FS := Item as TTextFormatSettings;
-  if DrawMode = dmPaintText then
+  if DrawMode = dmBeforeCellPaint then
+  begin
+    TargetCanvas.Brush.Color := FS.BackgroundColor;
+    TargetCanvas.FillRect(CellRect);
+  end
+  else if DrawMode = dmPaintText then
   begin
     FS.AssignTo(TargetCanvas.Font);
-    TargetCanvas.Brush.Color := FS.BackgroundColor;
   end;
   Result := True;
 end;
@@ -166,7 +169,7 @@ begin
 end;
 {$ENDREGION}
 
-{$REGION 'public methods'}
+{$REGION 'protected methods'}
 procedure TfrmDisplayValuesSettings.UpdateActions;
 begin
   inherited UpdateActions;
