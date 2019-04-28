@@ -1,24 +1,24 @@
 {
 	"FormSettings": {
-		"Left": 353,
-		"Top": 147,
-		"Width": 1337,
-		"Height": 939,
+		"Left": 412,
+		"Top": 134,
+		"Width": 1398,
+		"Height": 971,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
 	"MessageListSettings": {
-		"AutoScrollMessages": true,
+		"AutoScrollMessages": false,
 		"AutoFilterMessages": true,
 		"DynamicAutoSizeColumns": false,
-		"LeftPanelWidth": 452,
-		"RightPanelWidth": 538
+		"LeftPanelWidth": 313,
+		"RightPanelWidth": 325
 	},
 	"WinODSSettings": {
 		"Enabled": true
 	},
 	"WinIPCSettings": {
-		"Enabled": true
+		"Enabled": false
 	},
 	"ZeroMQSettings": {
 		"Enabled": true,
@@ -37,7 +37,7 @@
 	},
 	"DisplayValueSettings": {
 		"Id": {
-			"BackgroundColor": 0,
+			"BackgroundColor": 16777215,
 			"FontName": "Tahoma",
 			"FontColor": 8421504,
 			"FontSize": 8,
@@ -47,7 +47,7 @@
 			"VerticalAlignment": 0
 		},
 		"Info": {
-			"BackgroundColor": 0,
+			"BackgroundColor": 16777215,
 			"FontName": "Tahoma",
 			"FontColor": 16711680,
 			"FontSize": 8,
@@ -57,7 +57,7 @@
 			"VerticalAlignment": 0
 		},
 		"Warning": {
-			"BackgroundColor": 0,
+			"BackgroundColor": 16777215,
 			"FontName": "Tahoma",
 			"FontColor": 42495,
 			"FontSize": 8,
@@ -67,7 +67,7 @@
 			"VerticalAlignment": 0
 		},
 		"Error": {
-			"BackgroundColor": 0,
+			"BackgroundColor": 16777215,
 			"FontName": "Tahoma",
 			"FontColor": 255,
 			"FontSize": 8,
@@ -77,7 +77,7 @@
 			"VerticalAlignment": 0
 		},
 		"TimeStamp": {
-			"BackgroundColor": 0,
+			"BackgroundColor": 16777215,
 			"FontName": "Tahoma",
 			"FontColor": 16711680,
 			"FontSize": 8,
@@ -87,7 +87,7 @@
 			"VerticalAlignment": 0
 		},
 		"ValueName": {
-			"BackgroundColor": 0,
+			"BackgroundColor": 16777215,
 			"FontName": "Tahoma",
 			"FontColor": 128,
 			"FontSize": 8,
@@ -97,7 +97,7 @@
 			"VerticalAlignment": 0
 		},
 		"ValueType": {
-			"BackgroundColor": 0,
+			"BackgroundColor": 16777215,
 			"FontName": "Consolas",
 			"FontColor": 8388608,
 			"FontSize": 8,
@@ -107,7 +107,7 @@
 			"VerticalAlignment": 0
 		},
 		"Value": {
-			"BackgroundColor": 0,
+			"BackgroundColor": 16777215,
 			"FontName": "Tahoma",
 			"FontColor": 0,
 			"FontSize": 8,
@@ -117,7 +117,7 @@
 			"VerticalAlignment": 0
 		},
 		"CheckPoint": {
-			"BackgroundColor": 0,
+			"BackgroundColor": 16777215,
 			"FontName": "Tahoma",
 			"FontColor": 32768,
 			"FontSize": 8,
@@ -127,7 +127,7 @@
 			"VerticalAlignment": 0
 		},
 		"Counter": {
-			"BackgroundColor": 0,
+			"BackgroundColor": 16777215,
 			"FontName": "Tahoma",
 			"FontColor": 8388736,
 			"FontSize": 8,
@@ -137,7 +137,7 @@
 			"VerticalAlignment": 0
 		},
 		"Tracing": {
-			"BackgroundColor": 16777215,
+			"BackgroundColor": 15790320,
 			"FontName": "Tahoma",
 			"FontColor": 32896,
 			"FontSize": 8,
@@ -146,8 +146,28 @@
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
 		},
+		"Enter": {
+			"BackgroundColor": 15790320,
+			"FontName": "Tahoma",
+			"FontColor": 32768,
+			"FontSize": 8,
+			"FontStyle": "",
+			"WordWrap": false,
+			"HorizontalAlignment": 0,
+			"VerticalAlignment": 0
+		},
+		"Leave": {
+			"BackgroundColor": 15790320,
+			"FontName": "Tahoma",
+			"FontColor": 255,
+			"FontSize": 8,
+			"FontStyle": "",
+			"WordWrap": false,
+			"HorizontalAlignment": 0,
+			"VerticalAlignment": 0
+		},
 		"Conditional": {
-			"BackgroundColor": 0,
+			"BackgroundColor": 16777215,
 			"FontName": "Tahoma",
 			"FontColor": 8421376,
 			"FontSize": 8,

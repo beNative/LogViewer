@@ -676,7 +676,7 @@ procedure TdmManager.FReceiverSubscriberListChanged(Sender: TObject;
 begin
   if Action = caAdded then
   begin
-    AddView(TLogViewerFactories.CreateLogViewer(Self, Item));
+    AddView(TLogViewerFactories.CreateLogViewer(Self, Item{, Owner as TWinControl}));
   end;
 end;
 
@@ -824,7 +824,7 @@ end;
 
 procedure TdmManager.AddView(ALogViewer: ILogViewer);
 begin
-  Logger.Track(Self, 'AddView');
+ // Logger.Track(Self, 'AddView');
   Guard.CheckNotNull(ALogViewer, 'ALogViewer');
   FViewList.Add(ALogViewer);
   if not FReceivers.Contains(ALogViewer.Subscriber.Receiver) then
@@ -952,7 +952,5 @@ begin
   end;
 end;
 {$ENDREGION}
-
-initialization
 
 end.

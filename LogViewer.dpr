@@ -8,7 +8,7 @@ uses
 //  LeakCheck.MapFile,
 //  LeakCheck.Trace.Map,
 //  LeakCheck.Trace.WinApi,
-  //FastMM4,
+//  FastMM4,
   System.SysUtils,
   Vcl.Themes,
   Vcl.Styles,

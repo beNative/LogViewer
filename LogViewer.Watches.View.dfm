@@ -32,13 +32,10 @@ object frmWatchesView: TfrmWatchesView
         Index = 1
       end>
     MinPosition = 0.020000000000000000
+    SplitterSize = 8
     Align = alClient
     BevelEdges = []
     TabOrder = 0
-    ExplicitLeft = 120
-    ExplicitTop = 288
-    ExplicitWidth = 185
-    ExplicitHeight = 41
     object pnlWatches: TPanel
       Left = 0
       Top = 0
@@ -50,9 +47,9 @@ object frmWatchesView: TfrmWatchesView
     end
     object pnlWatchHistory: TPanel
       Left = 0
-      Top = 293
+      Top = 298
       Width = 402
-      Height = 288
+      Height = 283
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 1

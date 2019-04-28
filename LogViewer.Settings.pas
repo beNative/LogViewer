@@ -50,6 +50,7 @@ type
     FOnChanged             : Event<TNotifyEvent>;
 
     procedure FormSettingsChanged(Sender: TObject);
+    procedure DisplayValuesSettingsChanged(Sender: TObject);
 
   protected
     function GetOnChanged: IEvent<TNotifyEvent>;
@@ -123,10 +124,12 @@ begin
   FFileSystemSettings    := TFileSystemSettings.Create;
   FWatchSettings         := TWatchSettings.Create;
   FDisplayValuesSettings := TDisplayValuesSettings.Create;
+  FDisplayValuesSettings.OnChanged.Add(DisplayValuesSettingsChanged);
 end;
 
 procedure TLogViewerSettings.BeforeDestruction;
 begin
+  FDisplayValuesSettings.OnChanged.Remove(DisplayValuesSettingsChanged);
   FreeAndNil(FDisplayValuesSettings);
   FreeAndNil(FWatchSettings);
   FreeAndNil(FZeroMQSettings);
@@ -162,6 +165,11 @@ end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
+procedure TLogViewerSettings.DisplayValuesSettingsChanged(Sender: TObject);
+begin
+  Changed;
+end;
+
 procedure TLogViewerSettings.FormSettingsChanged(Sender: TObject);
 begin
   Changed;
@@ -213,6 +221,10 @@ begin
         .ToSimpleObject(FDisplayValuesSettings.Counter);
       JO['DisplayValueSettings'].ObjectValue['Tracing'].ObjectValue
         .ToSimpleObject(FDisplayValuesSettings.Tracing);
+      JO['DisplayValueSettings'].ObjectValue['Enter'].ObjectValue
+        .ToSimpleObject(FDisplayValuesSettings.Enter);
+      JO['DisplayValueSettings'].ObjectValue['Leave'].ObjectValue
+        .ToSimpleObject(FDisplayValuesSettings.Leave);
       JO['DisplayValueSettings'].ObjectValue['Conditional'].ObjectValue
         .ToSimpleObject(FDisplayValuesSettings.Conditional);
       JO.ToSimpleObject(Self);
@@ -264,6 +276,10 @@ begin
       .FromSimpleObject(FDisplayValuesSettings.Counter);
     JO['DisplayValueSettings'].ObjectValue['Tracing'].ObjectValue
       .FromSimpleObject(FDisplayValuesSettings.Tracing);
+    JO['DisplayValueSettings'].ObjectValue['Enter'].ObjectValue
+      .FromSimpleObject(FDisplayValuesSettings.Enter);
+    JO['DisplayValueSettings'].ObjectValue['Leave'].ObjectValue
+      .FromSimpleObject(FDisplayValuesSettings.Leave);
     JO['DisplayValueSettings'].ObjectValue['Conditional'].ObjectValue
       .FromSimpleObject(FDisplayValuesSettings.Conditional);
     JO.SaveToFile(FFileName, False);

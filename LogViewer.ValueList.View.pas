@@ -29,9 +29,9 @@ uses
 
 type
   TfrmValueList = class(TForm)
-    pnlMain: TOMultiPanel;
-    pnlBottom: TPanel;
-    pnlTop: TPanel;
+    pnlMain   : TOMultiPanel;
+    pnlBottom : TPanel;
+    pnlTop    : TPanel;
 
   private
     FFieldView    : TValueList;

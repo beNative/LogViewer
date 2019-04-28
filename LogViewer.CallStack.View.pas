@@ -16,9 +16,9 @@
 
 unit LogViewer.CallStack.View;
 
-interface
-
 { Callstack viewer. }
+
+interface
 
 uses
   Winapi.Windows, Winapi.Messages,
@@ -114,6 +114,7 @@ begin
   FCallStack := AData;
   FCallStack.OnChanged.Add(FCallStackChanged);
   FVSTCallStack := TVirtualStringTreeFactory.CreateList(Self, Self);
+  FVSTCallStack.BorderStyle      := bsNone;
   FVSTCallStack.AlignWithMargins := False;
   CDS                  := TFactories.CreateColumnDefinitions;
   CD                   := CDS.Add('');

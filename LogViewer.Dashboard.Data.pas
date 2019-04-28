@@ -16,6 +16,8 @@
 
 unit LogViewer.Dashboard.Data;
 
+{ Data structure holding the data displayed in the dashboard list. }
+
 interface
 
 uses
@@ -45,7 +47,7 @@ type
       AReceiver   : IChannelReceiver;
       ASubscriber : ISubscriber = nil
     );
-    procedure BeforeDestruction; override;
+    destructor Destroy; override;
 
     property Caption: string
       read GetCaption;
@@ -61,8 +63,6 @@ implementation
 
 uses
   System.SysUtils,
-
-  DDuce.Logger,
 
   LogViewer.Resources;
 
@@ -105,12 +105,11 @@ begin
   end;
 end;
 
-procedure TDashboardData.BeforeDestruction;
+destructor TDashboardData.Destroy;
 begin
-  Logger.Track(Self, 'BeforeDestruction');
   FReceiver   := nil;
   FSubscriber := nil;
-  inherited BeforeDestruction;
+  inherited Destroy;
 end;
 {$ENDREGION}
 

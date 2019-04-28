@@ -903,7 +903,7 @@ procedure TfrmDashboard.CreateChannelReceivers;
 begin
   Logger.Track(Self, 'CreateChannelReceivers');
   CreateWinIPCReceiver;
-  CreateWinODSReceiver;
+  //CreateWinODSReceiver;
   CreateZeroMQReceiver;
   CreateMQTTReceiver;
   CreateComPortReceiver;

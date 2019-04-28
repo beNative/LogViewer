@@ -16,7 +16,7 @@
 
 unit LogViewer.DisplayValues.Settings;
 
-{ Persistable settings for display values. }
+{ Persistable settings for data displayed in the message viewer. }
 
 interface
 
@@ -227,7 +227,7 @@ begin
   FAction.Font.Color      := clMaroon;
   FAction.OnChanged.Add(FormatSettingsChanged);
 
-  // used when collapsed (TODO)
+  // used when collapsed
   FTracing                 := TTextFormatSettings.Create;
   FTracing.Name            := 'Tracing';
   FTracing.BackgroundColor := clSilver;
@@ -245,7 +245,7 @@ begin
   FLeave.Name              := 'Leave';
   FLeave.Font.Color        := clRed;
   FLeave.BackgroundColor   := clSilver;
-  FLeave.OnChanged.Add(FormatSettingsChanged);  
+  FLeave.OnChanged.Add(FormatSettingsChanged);
 end;
 {$ENDREGION}
 

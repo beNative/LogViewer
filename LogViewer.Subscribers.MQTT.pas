@@ -14,7 +14,6 @@
   limitations under the License.
 }
 
-
 unit LogViewer.Subscribers.MQTT;
 
 interface

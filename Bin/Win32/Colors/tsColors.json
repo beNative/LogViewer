@@ -78,14 +78,13 @@
             {
                 "Name": "Comment",
                 "Foreground": "clGray",
-                "Background": "clWindow",
-                "Style": "Italic"
+                "Background": "clWindow"
             },
             {
                 "Name": "String",
                 "Foreground": "clGreen",
                 "Background": "clWindow",
-                "Style": "Bold,Italic"
+                "Style": "Bold"
             },
             {
                 "Name": "Directive",
@@ -97,7 +96,7 @@
                 "Name": "Character",
                 "Foreground": "clGreen",
                 "Background": "clWindow",
-                "Style": "Bold,Italic"
+                "Style": "Bold"
             },
             {
                 "Name": "ReservedWord",
@@ -115,13 +114,13 @@
                 "Name": "Number",
                 "Foreground": "clRed",
                 "Background": "clWindow",
-                "Style": "Bold,Italic"
+                "Style": "Bold"
             },
             {
                 "Name": "HexNumber",
                 "Foreground": "clGreen",
                 "Background": "clWindow",
-                "Style": "Bold,Italic"
+                "Style": "Bold"
             },
             {
                 "Name": "HighlightedBlock",
@@ -136,8 +135,7 @@
             {
                 "Name": "AssemblerComment",
                 "Foreground": "clGray",
-                "Background": "clWindow",
-                "Style": "Italic"
+                "Background": "clWindow"                
             },
             {
                 "Name": "AssemblerReservedWord",

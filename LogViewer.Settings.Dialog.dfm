@@ -31,7 +31,6 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitHeight = 295
   end
   object pgcMain: TPageControl
     AlignWithMargins = True
@@ -40,12 +39,10 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Width = 473
     Height = 367
     Margins.Left = 0
-    ActivePage = tsAdvanced
+    ActivePage = tsDisplayValuesSettings
     Align = alClient
     Style = tsButtons
     TabOrder = 1
-    ExplicitWidth = 401
-    ExplicitHeight = 295
     object tsWatches: TTabSheet
       Caption = 'Watches'
       ExplicitLeft = 0
@@ -72,42 +69,22 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     object tsWinODS: TTabSheet
       Caption = 'OutputDebugString API'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 393
-      ExplicitHeight = 264
     end
     object tsComport: TTabSheet
       Caption = 'Serial port'
       ImageIndex = 4
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 393
-      ExplicitHeight = 264
     end
     object tsZeroMQ: TTabSheet
       Caption = 'ZeroMQ'
       ImageIndex = 5
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 393
-      ExplicitHeight = 264
     end
     object tsDisplayValuesSettings: TTabSheet
       Caption = 'DisplayValuesSettings'
       ImageIndex = 6
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 393
-      ExplicitHeight = 264
     end
     object tsAdvanced: TTabSheet
       Caption = 'Advanced'
       ImageIndex = 7
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 393
-      ExplicitHeight = 264
       object seSettings: TSynEdit
         AlignWithMargins = True
         Left = 3
@@ -152,10 +129,6 @@ object frmLogViewerSettings: TfrmLogViewerSettings
         TabWidth = 2
         WordWrap = True
         FontSmoothing = fsmNone
-        ExplicitLeft = 6
-        ExplicitTop = 6
-        ExplicitWidth = 387
-        ExplicitHeight = 258
       end
     end
   end
@@ -167,8 +140,6 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 2
-    ExplicitTop = 301
-    ExplicitWidth = 617
     DesignSize = (
       689
       30)
@@ -181,7 +152,6 @@ object frmLogViewerSettings: TfrmLogViewerSettings
       Anchors = [akRight, akBottom]
       Images = imlMain
       TabOrder = 0
-      ExplicitLeft = 463
     end
     object btnClose1: TButton
       Left = 223
@@ -192,7 +162,6 @@ object frmLogViewerSettings: TfrmLogViewerSettings
       Anchors = [akRight, akBottom]
       Images = imlMain
       TabOrder = 1
-      ExplicitLeft = 151
     end
     object btnCancel: TButton
       Left = 379
@@ -203,7 +172,6 @@ object frmLogViewerSettings: TfrmLogViewerSettings
       Anchors = [akRight, akBottom]
       Images = imlMain
       TabOrder = 2
-      ExplicitLeft = 307
     end
   end
   object aclMain: TActionList
@@ -231,7 +199,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Left = 568
     Top = 32
     Bitmap = {
-      494C010103000800340010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010103000800380010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

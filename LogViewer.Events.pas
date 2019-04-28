@@ -50,7 +50,7 @@ type
 
   public
     constructor Create(AManager: ILogViewerManager);
-    procedure BeforeDestruction; override;
+    destructor Destroy; override;
 
     property OnActiveViewChange: IEvent<TLogViewerEvent>
       read GetOnActiveViewChange;
@@ -74,12 +74,12 @@ begin
   FManager := AManager;
 end;
 
-procedure TLogViewerEvents.BeforeDestruction;
+destructor TLogViewerEvents.Destroy;
 begin
-  Logger.Track('TLogViewerEvents.BeforeDestruction');
+  Logger.Track(Self, 'Destroy');
   Clear;
   FManager := nil;
-  inherited BeforeDestruction;
+  inherited Destroy;
 end;
 {$ENDREGION}
 

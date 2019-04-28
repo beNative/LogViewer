@@ -20,17 +20,6 @@ unit LogViewer.Receivers.WinIPC;
 
 interface
 
-uses
-  System.Classes,
-  Vcl.ExtCtrls,
-
-  Spring,
-
-  DDuce.WinIPC.Server,
-
-  LogViewer.Receivers.Base, LogViewer.Interfaces,
-  LogViewer.Receivers.WinIPC.Settings;
-
 {$REGION 'documentation'}
 { Receives logmessages through WinIPC (WM_COPYDATA) messages.
 
@@ -42,6 +31,17 @@ uses
      windows user credentials.
 }
 {$ENDREGION}
+
+uses
+  System.Classes,
+  Vcl.ExtCtrls,
+
+  Spring,
+
+  DDuce.WinIPC.Server,
+
+  LogViewer.Receivers.Base, LogViewer.Interfaces,
+  LogViewer.Receivers.WinIPC.Settings;
 
 type
   TWinIPCChannelReceiver = class(TChannelReceiver, IChannelReceiver, IWinIPC)

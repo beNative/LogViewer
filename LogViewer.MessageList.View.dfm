@@ -16,25 +16,22 @@ object frmMessageList: TfrmMessageList
   PixelsPerInch = 96
   TextHeight = 13
   object splVertical: TSplitter
-    Left = 742
+    Left = 740
     Top = 0
-    Width = 6
+    Width = 8
     Height = 746
     Align = alRight
     Color = clBtnFace
     ParentColor = False
-    ExplicitLeft = 951
-    ExplicitHeight = 806
+    ExplicitLeft = 742
   end
   object splLeftVertical: TSplitter
     Left = 313
     Top = 0
-    Width = 6
+    Width = 8
     Height = 746
     Color = clBtnFace
     ParentColor = False
-    ExplicitLeft = 353
-    ExplicitHeight = 806
   end
   object pnlRight: TPanel
     Left = 748
@@ -74,7 +71,6 @@ object frmMessageList: TfrmMessageList
       Margins.Right = 0
       Margins.Bottom = 0
       Align = alClient
-      BevelKind = bkFlat
       BevelOuter = bvNone
       Color = clWhite
       ParentBackground = False
@@ -83,8 +79,8 @@ object frmMessageList: TfrmMessageList
       object pgcMessageData: TPageControl
         Left = 0
         Top = 0
-        Width = 321
-        Height = 722
+        Width = 325
+        Height = 726
         Margins.Left = 0
         Margins.Top = 0
         Margins.Right = 0
@@ -99,13 +95,13 @@ object frmMessageList: TfrmMessageList
           object pgcMessageDetails: TPageControl
             Left = 0
             Top = 0
-            Width = 313
-            Height = 691
+            Width = 317
+            Height = 695
             Margins.Left = 0
             Margins.Top = 0
             Margins.Right = 0
             Margins.Bottom = 0
-            ActivePage = tsValueList
+            ActivePage = tsDataSet
             Align = alClient
             Style = tsFlatButtons
             TabOrder = 0
@@ -113,6 +109,10 @@ object frmMessageList: TfrmMessageList
             object tsValueList: TTabSheet
               Caption = 'Value list'
               ImageIndex = 2
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
             end
             object tsTextViewer: TTabSheet
               Caption = 'Text viewer'
@@ -123,8 +123,8 @@ object frmMessageList: TfrmMessageList
               object pnlTextViewer: TPanel
                 Left = 0
                 Top = 0
-                Width = 305
-                Height = 660
+                Width = 309
+                Height = 664
                 Align = alClient
                 BevelEdges = []
                 BevelOuter = bvNone
@@ -142,8 +142,8 @@ object frmMessageList: TfrmMessageList
               object pnlImageViewer: TPanel
                 Left = 0
                 Top = 0
-                Width = 305
-                Height = 660
+                Width = 309
+                Height = 664
                 Margins.Left = 0
                 Margins.Top = 0
                 Margins.Right = 0
@@ -199,8 +199,8 @@ object frmMessageList: TfrmMessageList
                 object sbxImage: TScrollBox
                   Left = 0
                   Top = 59
-                  Width = 305
-                  Height = 601
+                  Width = 309
+                  Height = 605
                   HorzScrollBar.Smooth = True
                   HorzScrollBar.Tracking = True
                   VertScrollBar.Smooth = True
@@ -228,10 +228,6 @@ object frmMessageList: TfrmMessageList
             object tsDataSet: TTabSheet
               Caption = 'DataSet'
               ImageIndex = 3
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
             end
           end
         end
@@ -269,19 +265,17 @@ object frmMessageList: TfrmMessageList
         Left = 0
         Top = 137
         Width = 313
-        Height = 6
+        Height = 8
         Cursor = crVSplit
         Align = alTop
         Color = clBtnFace
         ParentColor = False
-        ExplicitTop = 184
-        ExplicitWidth = 353
       end
       object pnlLeftBottom: TPanel
         Left = 0
-        Top = 143
+        Top = 145
         Width = 313
-        Height = 603
+        Height = 601
         Align = alClient
         BevelOuter = bvNone
         Caption = 'pnlLeftBottom'
@@ -336,9 +330,9 @@ object frmMessageList: TfrmMessageList
     end
   end
   object pnlMessages: TPanel
-    Left = 319
+    Left = 321
     Top = 0
-    Width = 423
+    Width = 419
     Height = 746
     Align = alClient
     BevelOuter = bvNone
@@ -349,7 +343,7 @@ object frmMessageList: TfrmMessageList
     object pnlFilter: TPanel
       Left = 0
       Top = 0
-      Width = 423
+      Width = 419
       Height = 20
       Align = alTop
       BevelOuter = bvNone
@@ -359,7 +353,7 @@ object frmMessageList: TfrmMessageList
         AlignWithMargins = True
         Left = 0
         Top = 2
-        Width = 423
+        Width = 419
         Height = 16
         Margins.Left = 0
         Margins.Top = 2
@@ -397,7 +391,7 @@ object frmMessageList: TfrmMessageList
     Left = 607
     Top = 150
     Bitmap = {
-      494C010116001900C40010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010116001900D80010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

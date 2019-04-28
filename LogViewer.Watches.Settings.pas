@@ -60,7 +60,6 @@ type
     property Height: Integer
       read GetHeight write SetHeight default DEFAULT_HEIGHT;
 
-
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
 

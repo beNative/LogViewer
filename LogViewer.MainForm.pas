@@ -96,11 +96,6 @@ type
       ALogViewer : ILogViewer
     );
 
-    procedure DrawPanelText(
-      APanel      : TPanel;
-      const AText : string
-    );
-
   protected
     {$REGION 'property access methods'}
     function GetEvents: ILogViewerEvents;
@@ -110,10 +105,12 @@ type
     {$ENDREGION}
 
     procedure CreateDashboardView;
-
+    procedure DrawPanelText(
+      APanel      : TPanel;
+      const AText : string
+    );
     procedure UpdateStatusBar;
     procedure UpdateActions; override;
-
     procedure OptimizeWidth(APanel: TPanel);
     procedure OptimizeStatusBarPanelWidths;
 
@@ -211,6 +208,20 @@ begin
   ctMain.LookAndFeel.Tabs.Hot.Style.StartColor       := clSilver;
   ctMain.LookAndFeel.Tabs.Hot.Style.StopColor        := clSilver;
 end;
+
+destructor TfrmMain.Destroy;
+begin
+  Logger.Track(Self, 'Destroy');
+  tmrPoll.Enabled := False;
+  Manager.Receivers.Clear;
+  FManager.Settings.FormSettings.Assign(Self);
+  FManager.Settings.Save;
+  FManager.Settings.OnChanged.Remove(SettingsChanged);
+  FManager := nil;
+  FreeAndNil(FDashboard); // needs to be freed before manager!
+  inherited Destroy;
+  FSettings.Free;
+end;
 {$ENDREGION}
 
 {$REGION 'action handlers'}
@@ -280,42 +291,6 @@ procedure TfrmMain.ctMainNeedDragImageControl(Sender: TObject; ATab: TChromeTab;
   var DragControl: TWinControl);
 begin
   DragControl := pnlMainClient;
-end;
-
-destructor TfrmMain.Destroy;
-begin
-  Logger.Track(Self, 'Destroy');
-  tmrPoll.Enabled := False;
-  Manager.Receivers.Clear;
-  FManager.Settings.FormSettings.Assign(Self);
-  FManager.Settings.Save;
-  FManager.Settings.OnChanged.Remove(SettingsChanged);
-  FManager := nil;
-  FreeAndNil(FDashboard); // needs to be freed before manager!
-  inherited Destroy;
-  FSettings.Free;
-end;
-
-procedure TfrmMain.DrawPanelText(APanel: TPanel; const AText: string);
-var
-  LCanvas : Shared<TControlCanvas>;
-  LBitmap : Shared<TBitmap>;
-  LWidth  : Integer;
-  X       : Integer;
-begin
-  LBitmap := TBitmap.Create;
-  LBitmap.Value.SetSize(APanel.Width, APanel.Height);
-  LBitmap.Value.Canvas.Brush.Color := APanel.Color;
-  LBitmap.Value.Canvas.FillRect(LBitmap.Value.Canvas.ClipRect);
-  LWidth := DrawFormattedText(
-    LBitmap.Value.Canvas.ClipRect,
-    LBitmap.Value.Canvas,
-    AText
-  );
-  X := (APanel.Width - LWidth) div 2;
-  LCanvas := TControlCanvas.Create;
-  LCanvas.Value.Control := APanel;
-  LCanvas.Value.Draw(X, 0, LBitmap);
 end;
 
 procedure TfrmMain.EventsActiveViewChange(Sender: TObject;
@@ -416,6 +391,28 @@ begin
   ctMain.ActiveTab.DisplayName := 'Dashboard';
   ctMain.ActiveTab.Pinned      := True;
   FDashboard.Show;
+end;
+
+procedure TfrmMain.DrawPanelText(APanel: TPanel; const AText: string);
+var
+  LCanvas : Shared<TControlCanvas>;
+  LBitmap : Shared<TBitmap>;
+  LWidth  : Integer;
+  X       : Integer;
+begin
+  LBitmap := TBitmap.Create;
+  LBitmap.Value.SetSize(APanel.Width, APanel.Height);
+  LBitmap.Value.Canvas.Brush.Color := APanel.Color;
+  LBitmap.Value.Canvas.FillRect(LBitmap.Value.Canvas.ClipRect);
+  LWidth := DrawFormattedText(
+    LBitmap.Value.Canvas.ClipRect,
+    LBitmap.Value.Canvas,
+    AText
+  );
+  X := (APanel.Width - LWidth) div 2;
+  LCanvas := TControlCanvas.Create;
+  LCanvas.Value.Control := APanel;
+  LCanvas.Value.Draw(X, 0, LBitmap);
 end;
 
 procedure TfrmMain.UpdateActions;

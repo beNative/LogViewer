@@ -38,10 +38,6 @@ object frmValueList: TfrmValueList
     AutoSize = True
     BevelEdges = []
     TabOrder = 0
-    ExplicitLeft = 112
-    ExplicitTop = 288
-    ExplicitWidth = 185
-    ExplicitHeight = 41
     object pnlBottom: TPanel
       Left = 0
       Top = 290

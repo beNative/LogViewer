@@ -21,7 +21,7 @@ unit LogViewer.Factories;
 interface
 
 {$REGION 'documentation'}
-{ Factories for all modules used in the application:
+{ Factories for all core modules used in the application:
     - Callstack view
     - Watches view
     - Main message view
@@ -49,7 +49,7 @@ type
   private
      { forces drop down menu to be shown on pressing a toolbarbutton with
        Style tbsDropDown }
-     class procedure OnDropdownMenuButtonClick(Sender: TObject);
+    class procedure OnDropdownMenuButtonClick(Sender: TObject);
 
   public
     class function CreateCallStackView(

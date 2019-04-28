@@ -29,9 +29,6 @@ uses
   LogViewer.Interfaces, LogViewer.Receivers.Base,
   LogViewer.Receivers.FileSystem.Settings;
 
-{$REGION 'documentation'}
-{$ENDREGION}
-
 type
   TFileSystemChannelReceiver = class(TChannelReceiver, IChannelReceiver,
                                                        IFileSystem

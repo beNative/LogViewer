@@ -75,7 +75,6 @@ end;
 
 procedure TLogViewerCommands.BeforeDestruction;
 begin
-  Logger.Track(Self, 'BeforeDestruction');
   FManager := nil;
   inherited BeforeDestruction;
 end;

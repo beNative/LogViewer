@@ -20,6 +20,15 @@ unit LogViewer.Receivers.Base;
 
 interface
 
+{$REGION 'documentation'}
+{ A IChannelReceiver instance maintains a dictionary of subscribers
+  (ISubscriber instances) with SourceId as the key.
+
+  TChannelReceiver has a class property Processes that keeps track of
+  (Windows) ProcessId/ProcessName pairs.
+}
+{$ENDREGION}
+
 uses
   System.Classes,
   Vcl.ExtCtrls,
@@ -29,15 +38,6 @@ uses
   DDuce.DynamicRecord,
 
   LogViewer.Interfaces;
-
-{$REGION 'documentation'}
-{ A IChannelReceiver instance maintains a dictionary of subscribers
-  (ISubscriber instances) with SourceId as the key.
-
-  TChannelReceiver has a class property Processes that keeps track of
-  (Windows) ProcessId/ProcessName pairs.
-}
-{$ENDREGION}
 
 type
   TChannelReceiver = class(TInterfacedObject, IChannelReceiver)

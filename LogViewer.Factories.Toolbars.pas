@@ -34,7 +34,7 @@ const
 
 type
   TLogViewerToolbarsFactory = class(TInterfacedObject, ILogViewerToolbarsFactory)
-  strict private
+  private
     FActions : ILogViewerActions;
     FMenus   : ILogViewerMenus;
 
@@ -43,9 +43,7 @@ type
     FEdgeOuter   : TEdgeStyle;
     FTransparant : Boolean;
 
-    procedure ApplyDefaultProperties(
-      AToolbar : TToolbar
-    );
+    procedure ApplyDefaultProperties(AToolbar: TToolbar);
 
     function CreateToolButton(
       AParent    : TToolBar;
@@ -65,7 +63,6 @@ type
 
   public
     procedure AfterConstruction; override;
-
     constructor Create(
       AActions : ILogViewerActions;
       AMenus   : ILogViewerMenus
@@ -243,7 +240,6 @@ begin
   CreateToolButton(TB, 'actToggleAlwaysOnTop');
   Result := TB;
 end;
-
 {$ENDREGION}
 
 end.

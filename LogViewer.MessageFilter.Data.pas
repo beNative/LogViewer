@@ -44,12 +44,13 @@ type
     function GetImageIndex: Integer;
     procedure SetImageIndex(const Value: Integer);
     {$ENDREGION}
+
   public
     procedure AfterConstruction; override;
     constructor Create(
       const ACaption : string;
-      AMessageTypes  : TLogMessageTypes;
-      AImageIndex    : Integer = -1
+      AMessageTypes : TLogMessageTypes;
+      AImageIndex   : Integer = -1
     );
 
     property MessageTypes: TLogMessageTypes
@@ -60,6 +61,7 @@ type
 
     property ImageIndex: Integer
       read GetImageIndex write SetImageIndex;
+
   end;
 
 implementation
