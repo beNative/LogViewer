@@ -114,7 +114,6 @@ begin
   FCallStack := AData;
   FCallStack.OnChanged.Add(FCallStackChanged);
   FVSTCallStack := TVirtualStringTreeFactory.CreateList(Self, Self);
-  FVSTCallStack.BorderStyle      := bsNone;
   FVSTCallStack.AlignWithMargins := False;
   CDS                  := TFactories.CreateColumnDefinitions;
   CD                   := CDS.Add('');

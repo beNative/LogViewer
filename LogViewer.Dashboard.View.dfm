@@ -5,6 +5,7 @@ object frmDashboard: TfrmDashboard
   ClientHeight = 616
   ClientWidth = 1046
   Color = clBtnFace
+  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -58,11 +59,16 @@ object frmDashboard: TfrmDashboard
         Top = 0
         Width = 385
         Height = 616
-        ActivePage = tsCOMPort
+        Margins.Left = 0
+        Margins.Top = 0
+        Margins.Right = 0
+        Margins.Bottom = 0
+        ActivePage = tsWinIPC
         Align = alClient
         MultiLine = True
         Style = tsFlatButtons
         TabOrder = 0
+        StyleElements = [seFont, seClient]
         object tsWinIPC: TTabSheet
           Margins.Left = 0
           Margins.Top = 0
@@ -70,16 +76,12 @@ object frmDashboard: TfrmDashboard
           Margins.Bottom = 0
           Caption = 'WinIPC'
           ImageIndex = 28
-          ExplicitLeft = 0
-          ExplicitTop = 51
-          ExplicitWidth = 297
-          ExplicitHeight = 366
           object lblWinIPCDescription: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
-            Width = 367
-            Height = 182
+            Width = 371
+            Height = 554
             Align = alClient
             Caption = 
               'Messages are exchanged between the source application and LogVie' +
@@ -94,6 +96,8 @@ object frmDashboard: TfrmDashboard
               'based on queueuing.'#13#10#13#10'A new node is automatically created when ' +
               'a process is detected that sends compatible log messages.'#13#10
             WordWrap = True
+            ExplicitWidth = 367
+            ExplicitHeight = 182
           end
           object pnlWinIPCTitle: TPanel
             Left = 0
@@ -112,22 +116,17 @@ object frmDashboard: TfrmDashboard
             ParentBackground = False
             ParentFont = False
             TabOrder = 0
-            ExplicitWidth = 297
           end
         end
         object tsWinODS: TTabSheet
           Caption = 'WinODS'
           ImageIndex = 28
-          ExplicitLeft = 0
-          ExplicitTop = 51
-          ExplicitWidth = 297
-          ExplicitHeight = 366
           object lblWinODSDescription: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
-            Width = 370
-            Height = 221
+            Width = 371
+            Height = 554
             Align = alClient
             Caption = 
               'This receiver captures messages from any local applicatiion that' +
@@ -151,6 +150,8 @@ object frmDashboard: TfrmDashboard
             Font.Style = []
             ParentFont = False
             WordWrap = True
+            ExplicitWidth = 370
+            ExplicitHeight = 221
           end
           object pnlWinODSTitle: TPanel
             Left = 0
@@ -169,16 +170,11 @@ object frmDashboard: TfrmDashboard
             ParentBackground = False
             ParentFont = False
             TabOrder = 0
-            ExplicitWidth = 297
           end
         end
         object tsZeroMQ: TTabSheet
           Caption = 'ZeroMQ'
           ImageIndex = 6
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           DesignSize = (
             377
             585)
@@ -199,7 +195,6 @@ object frmDashboard: TfrmDashboard
             ParentBackground = False
             ParentFont = False
             TabOrder = 0
-            ExplicitWidth = 297
           end
           object pnlZeroMQButtons: TGridPanel
             Left = 0
@@ -231,8 +226,6 @@ object frmDashboard: TfrmDashboard
                 Value = 100.000000000000000000
               end>
             TabOrder = 1
-            ExplicitTop = 318
-            ExplicitWidth = 297
             object btnAddZMQNodeLocalHost: TButton
               AlignWithMargins = True
               Left = 0
@@ -247,7 +240,6 @@ object frmDashboard: TfrmDashboard
               Align = alClient
               TabOrder = 0
               WordWrap = True
-              ExplicitWidth = 148
             end
             object btnAddZMQNodeForLogViewer: TButton
               AlignWithMargins = True
@@ -263,8 +255,6 @@ object frmDashboard: TfrmDashboard
               Align = alClient
               TabOrder = 1
               WordWrap = True
-              ExplicitLeft = 150
-              ExplicitWidth = 147
             end
           end
           object pnlZMQEndpoints: TPanel
@@ -276,17 +266,11 @@ object frmDashboard: TfrmDashboard
             Anchors = [akLeft, akTop, akRight, akBottom]
             BevelOuter = bvNone
             TabOrder = 2
-            ExplicitWidth = 297
-            ExplicitHeight = 287
           end
         end
         object tsCOMPort: TTabSheet
           Caption = 'COMPort'
           ImageIndex = 24
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object pnlCOMPortTitle: TPanel
             Left = 0
             Top = 0
@@ -318,10 +302,6 @@ object frmDashboard: TfrmDashboard
         object tsMQTT: TTabSheet
           Caption = 'MQTT'
           ImageIndex = 4
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           DesignSize = (
             377
             585)
@@ -345,7 +325,6 @@ object frmDashboard: TfrmDashboard
             TabOrder = 0
             Text = 'localhost'
             OnExit = edtBrokerExit
-            ExplicitWidth = 161
           end
           object pnlMQTTTitle: TPanel
             Left = 0
@@ -364,7 +343,6 @@ object frmDashboard: TfrmDashboard
             ParentBackground = False
             ParentFont = False
             TabOrder = 1
-            ExplicitWidth = 297
           end
           object pnlMQTTTopics: TPanel
             Left = 0
@@ -375,8 +353,6 @@ object frmDashboard: TfrmDashboard
             Anchors = [akLeft, akTop, akRight, akBottom]
             BevelOuter = bvNone
             TabOrder = 2
-            ExplicitWidth = 297
-            ExplicitHeight = 308
           end
           object edtMQTTPort: TLabeledEdit
             Left = 318
@@ -398,16 +374,11 @@ object frmDashboard: TfrmDashboard
             TabOrder = 3
             Text = '1883'
             OnExit = edtMQTTPortExit
-            ExplicitLeft = 238
           end
         end
         object tsFileSystem: TTabSheet
           Caption = 'FileSystem'
           ImageIndex = 5
-          ExplicitLeft = 0
-          ExplicitTop = 51
-          ExplicitWidth = 297
-          ExplicitHeight = 366
           object pnlFileSystemTitle: TPanel
             Left = 0
             Top = 0
@@ -425,7 +396,6 @@ object frmDashboard: TfrmDashboard
             ParentBackground = False
             ParentFont = False
             TabOrder = 0
-            ExplicitWidth = 297
           end
           object pnlFSLocations: TPanel
             Left = 0
@@ -435,8 +405,6 @@ object frmDashboard: TfrmDashboard
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 1
-            ExplicitWidth = 297
-            ExplicitHeight = 341
           end
         end
       end
@@ -505,7 +473,7 @@ object frmDashboard: TfrmDashboard
     Left = 408
     Top = 8
     Bitmap = {
-      494C010109000801300110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101090008013C0110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000001001B09532ED308512ED100000010000000000000

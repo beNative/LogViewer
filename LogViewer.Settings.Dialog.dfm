@@ -3,7 +3,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
   Top = 0
   Caption = 'Settings'
   ClientHeight = 403
-  ClientWidth = 689
+  ClientWidth = 920
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -36,60 +36,56 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     AlignWithMargins = True
     Left = 213
     Top = 3
-    Width = 473
+    Width = 704
     Height = 367
     Margins.Left = 0
-    ActivePage = tsDisplayValuesSettings
+    ActivePage = tsViewSettings
     Align = alClient
     Style = tsButtons
     TabOrder = 1
     object tsWatches: TTabSheet
       Caption = 'Watches'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 393
-      ExplicitHeight = 264
+      ExplicitWidth = 465
     end
     object tsCallstack: TTabSheet
       Caption = 'Callstack'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 393
-      ExplicitHeight = 264
+      ExplicitWidth = 465
     end
     object tsWinIPC: TTabSheet
       Caption = 'WinIPC'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 393
-      ExplicitHeight = 264
+      ExplicitWidth = 465
     end
     object tsWinODS: TTabSheet
       Caption = 'OutputDebugString API'
       ImageIndex = 3
+      ExplicitWidth = 465
     end
     object tsComport: TTabSheet
       Caption = 'Serial port'
       ImageIndex = 4
+      ExplicitWidth = 465
     end
     object tsZeroMQ: TTabSheet
       Caption = 'ZeroMQ'
       ImageIndex = 5
+      ExplicitWidth = 465
     end
     object tsDisplayValuesSettings: TTabSheet
       Caption = 'DisplayValuesSettings'
       ImageIndex = 6
+      ExplicitWidth = 465
     end
     object tsAdvanced: TTabSheet
       Caption = 'Advanced'
       ImageIndex = 7
+      ExplicitWidth = 465
       object seSettings: TSynEdit
         AlignWithMargins = True
         Left = 3
         Top = 3
-        Width = 459
+        Width = 690
         Height = 330
         Align = alClient
         ActiveLineColor = clYellow
@@ -129,22 +125,28 @@ object frmLogViewerSettings: TfrmLogViewerSettings
         TabWidth = 2
         WordWrap = True
         FontSmoothing = fsmNone
+        ExplicitWidth = 459
       end
+    end
+    object tsViewSettings: TTabSheet
+      Caption = 'ViewSettings'
+      ImageIndex = 8
     end
   end
   object pnlBottom: TPanel
     Left = 0
     Top = 373
-    Width = 689
+    Width = 920
     Height = 30
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 2
+    ExplicitWidth = 689
     DesignSize = (
-      689
+      920
       30)
     object btnClose: TButton
-      Left = 535
+      Left = 766
       Top = 1
       Width = 150
       Height = 25
@@ -152,9 +154,10 @@ object frmLogViewerSettings: TfrmLogViewerSettings
       Anchors = [akRight, akBottom]
       Images = imlMain
       TabOrder = 0
+      ExplicitLeft = 535
     end
     object btnClose1: TButton
-      Left = 223
+      Left = 454
       Top = 1
       Width = 150
       Height = 25
@@ -162,9 +165,10 @@ object frmLogViewerSettings: TfrmLogViewerSettings
       Anchors = [akRight, akBottom]
       Images = imlMain
       TabOrder = 1
+      ExplicitLeft = 223
     end
     object btnCancel: TButton
-      Left = 379
+      Left = 610
       Top = 1
       Width = 150
       Height = 25
@@ -172,6 +176,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
       Anchors = [akRight, akBottom]
       Images = imlMain
       TabOrder = 2
+      ExplicitLeft = 379
     end
   end
   object aclMain: TActionList
@@ -199,7 +204,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Left = 568
     Top = 32
     Bitmap = {
-      494C010103000800380010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010103000800400010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

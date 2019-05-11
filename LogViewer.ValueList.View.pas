@@ -23,9 +23,9 @@ uses
   System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls,
 
-  DDuce.DynamicRecord,
+  OMultiPanel,
 
-  DDuce.Components.ValueList, OMultiPanel;
+  DDuce.DynamicRecord, DDuce.Components.ValueList;
 
 type
   TfrmValueList = class(TForm)
@@ -74,17 +74,21 @@ implementation
 procedure TfrmValueList.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FFieldView            := TValueList.Create(Self);
-  FFieldView.Parent     := pnlTop;
-  FFieldView.Align      := alClient;
-  FFieldView.ShowHeader := False;
-  FFieldView.Editable   := False;
+  FFieldView             := TValueList.Create(Self);
+  FFieldView.Parent      := pnlTop;
+  FFieldView.Align       := alClient;
+  FFieldView.ShowHeader  := False;
+  FFieldView.Editable    := False;
+  FFieldView.BorderStyle := bsNone;
+  FFieldView.ShowGutter  := False;
 
-  FPropertyView            := TValueList.Create(Self);
-  FPropertyView.Parent     := pnlBottom;
-  FPropertyView.Align      := alClient;
-  FPropertyView.ShowHeader := False;
-  FPropertyView.Editable   := False;
+  FPropertyView             := TValueList.Create(Self);
+  FPropertyView.Parent      := pnlBottom;
+  FPropertyView.Align       := alClient;
+  FPropertyView.ShowHeader  := False;
+  FPropertyView.Editable    := False;
+  FPropertyView.BorderStyle := bsNone;
+  FPropertyView.ShowGutter  := False;
 end;
 
 procedure TfrmValueList.BeforeDestruction;

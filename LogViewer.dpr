@@ -3,12 +3,6 @@ program LogViewer;
 {$R *.dres}
 
 uses
-//  LeakCheck,
-//  LeakCheck.Setup.Trace,
-//  LeakCheck.MapFile,
-//  LeakCheck.Trace.Map,
-//  LeakCheck.Trace.WinApi,
-//  FastMM4,
   System.SysUtils,
   Vcl.Themes,
   Vcl.Styles,
@@ -70,7 +64,8 @@ uses
   LogViewer.Receivers.MQTT in 'LogViewer.Receivers.MQTT.pas',
   LogViewer.Subscribers.MQTT in 'LogViewer.Subscribers.MQTT.pas',
   LogViewer.Receivers.FileSystem.Settings in 'LogViewer.Receivers.FileSystem.Settings.pas',
-  LogViewer.Receivers.MQTT.Settings in 'LogViewer.Receivers.MQTT.Settings.pas';
+  LogViewer.Receivers.MQTT.Settings in 'LogViewer.Receivers.MQTT.Settings.pas',
+  LogViewer.MessageList.Settings.View in 'LogViewer.MessageList.Settings.View.pas' {frmViewSettings};
 
 {$R *.res}
 

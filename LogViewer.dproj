@@ -63,7 +63,6 @@
         <VerInfo_MinorVer>8</VerInfo_MinorVer>
         <VerInfo_Build>156</VerInfo_Build>
         <VerInfo_Release>27</VerInfo_Release>
-        <Custom_Styles>Light|VCLSTYLE|$(BDSCOMMONDIR)\Styles\Light.vsf</Custom_Styles>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
@@ -198,6 +197,10 @@
         <DCCReference Include="LogViewer.Subscribers.MQTT.pas"/>
         <DCCReference Include="LogViewer.Receivers.FileSystem.Settings.pas"/>
         <DCCReference Include="LogViewer.Receivers.MQTT.Settings.pas"/>
+        <DCCReference Include="LogViewer.MessageList.Settings.View.pas">
+            <Form>frmViewSettings</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <None Include="Readme.md"/>
         <RcItem Include="Bin\Win32\libzmq.dll">
             <ContainerId>ResourceItem</ContainerId>

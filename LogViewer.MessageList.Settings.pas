@@ -46,6 +46,7 @@ type
   private
     FAutoScrollMessages     : Boolean;
     FAutoFilterMessages     : Boolean;
+    FSmartTimeStamps        : Boolean;
     FDynamicAutoSizeColumns : Boolean;
     FOnChanged              : Event<TNotifyEvent>;
     FVisibleMessageTypes    : TLogMessageTypes;
@@ -53,6 +54,8 @@ type
     FLeftPanelWidth         : Integer;
     FRightPanelWidth        : Integer;
     FVisibleValueTypes      : TStringList;
+    function GetSmartTimeStamps: Boolean;
+    procedure SetSmartTimeStamps(const Value: Boolean);
 
   protected
     {$REGION 'property access methods'}
@@ -110,6 +113,8 @@ type
     property RightPanelWidth: Integer
       read GetRightPanelWidth write SetRightPanelWidth;
 
+    property SmartTimeStamps: Boolean
+      read GetSmartTimeStamps write SetSmartTimeStamps;
   end;
 
 implementation
@@ -229,6 +234,20 @@ begin
   if Value <> RightPanelWidth then
   begin
     FRightPanelWidth := Value;
+    Changed;
+  end;
+end;
+
+function TMessageListSettings.GetSmartTimeStamps: Boolean;
+begin
+  Result := FSmartTimeStamps;
+end;
+
+procedure TMessageListSettings.SetSmartTimeStamps(const Value: Boolean);
+begin
+  if Value <> SmartTimeStamps then
+  begin
+    FSmartTimeStamps := Value;
     Changed;
   end;
 end;

@@ -167,7 +167,6 @@ type
       var Ghosted    : Boolean;
       var ImageIndex : TImageIndex
     );
-
     procedure FZMQEndpointsAdd(
       ASender    : TObject;
       var AName  : string;
@@ -178,13 +177,11 @@ type
       var AName  : string;
       var AValue : TValue
     );
-
     procedure FMQTTSubscriptionsAdd(
       ASender    : TObject;
       var AName  : string;
       var AValue : TValue
     );
-
     procedure FFSLocationsAdd(
       ASender    : TObject;
       var AName  : string;
@@ -289,18 +286,22 @@ begin
   FZMQEndpoints.OnAdd.Add(FZMQEndpointsAdd);
   FZMQEndpoints.OnExecuteItem.Add(FZMQEndpointsExecuteItem);
   FZMQEndpoints.OnExecute.Add(FZMQEndpointsExecuteItem);
+  FZMQEndpoints.ValueList.BorderStyle := bsNone;
   // TODO: implement a better way to save changes.
   //FZMQEndpoints.ValueList.OnExit := FValueListExit;
 
   FMQTTTopics := TEditList.Create(Self, pnlMQTTTopics);
   FMQTTTopics.OnAdd.Add(FMQTTSubscriptionsAdd);
+  FMQTTTopics.ValueList.BorderStyle := bsNone;
 
   FCOMPorts := TEditList.Create(Self, pnlCOMPorts);
+  FCOMPorts.ValueList.BorderStyle := bsNone;
 
   FFSLocations := TEditList.Create(Self, pnlFSLocations);
   FFSLocations.OnAdd.Add(FFSLocationsAdd);
   FFSLocations.OnExecuteItem.Add(FFSLocationsExecuteItem);
   FFSLocations.OnExecute.Add(FFSLocationsExecuteItem);
+  FFSLocations.ValueList.BorderStyle := bsNone;
   //FFSLocations.ValueList.OnExit := FValueListExit;
 
   InitializeTreeView;

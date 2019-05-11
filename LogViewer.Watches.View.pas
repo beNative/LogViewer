@@ -302,7 +302,6 @@ var
   CD  : TColumnDefinition;
 begin
   FVSTWatchValues := TVirtualStringTreeFactory.CreateList(Self, pnlWatches);
-  FVSTWatchValues.BorderStyle      := bsNone;
   FVSTWatchValues.AlignWithMargins := False;
   CDS                  := TFactories.CreateColumnDefinitions;
   CD                   := CDS.Add('Name');
@@ -368,7 +367,6 @@ begin
   FTVPWatchValues.OnSelectionChanged := FTVPWatchValuesSelectionChanged;
   FTVPWatchValues.OnDoubleClick      := FTVPWatchValuesDoubleClick;
   FVSTWatchHistory := TVirtualStringTreeFactory.CreateList(Self, pnlWatchHistory);
-  FVSTWatchHistory.BorderStyle      := bsNone;
   FVSTWatchHistory.AlignWithMargins := False;
   FTVPWatchHistory := TFactories.CreateTreeViewPresenter(Self, FVSTWatchHistory);
   FTVPWatchHistory.OnDoubleClick := FTVPWatchHistoryDoubleClick;

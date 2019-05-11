@@ -203,6 +203,13 @@ type
       CellRect        : TRect;
       var ContentRect : TRect
     );
+    procedure FLogTreeViewAfterCellPaint(
+      Sender          : TBaseVirtualTree;
+      TargetCanvas    : TCanvas;
+      Node            : PVirtualNode;
+      Column          : TColumnIndex;
+      CellRect        : TRect
+    );
     procedure FLogTreeViewBeforeItemPaint(
       Sender         : TBaseVirtualTree;
       TargetCanvas   : TCanvas;
@@ -458,7 +465,6 @@ var
 begin
   FLogTreeView := TVirtualStringTreeFactory.CreateTreeList(Self, pnlMessages);
   FLogTreeView.AlignWithMargins := False;
-  FLogTreeView.BorderStyle := bsNone;
   FLogTreeView.TreeOptions.AutoOptions := FLogTreeView.TreeOptions.AutoOptions +
     [toAutoSpanColumns];
   FLogTreeView.TreeOptions.PaintOptions := [
@@ -478,6 +484,7 @@ begin
 
   FLogTreeView.OnBeforeItemPaint := FLogTreeViewBeforeItemPaint;
   FLogTreeView.OnBeforeCellPaint := FLogTreeViewBeforeCellPaint;
+  FLogTreeView.OnAfterCellPaint  := FLogTreeViewAfterCellPaint;
   FLogTreeView.OnFocusChanged    := FLogTreeViewFocusChanged;
   FLogTreeView.OnFocusChanging   := FLogTreeViewFocusChanging;
   FLogTreeView.OnDblClick        := FLogTreeViewDblClick;
@@ -491,8 +498,6 @@ begin
   FLogTreeView.OnMeasureItem     := FLogTreeViewMeasureItem;
   FLogTreeView.OnCollapsed       := FLogTreeViewCollapsed;
   FLogTreeView.OnExpanded        := FLogTreeViewExpanded;
-
-  //FLogTreeView.OnStateChange
 
   B := Supports(Subscriber, IWinIPC) or Supports(Subscriber, IZMQ);
 
@@ -511,7 +516,7 @@ begin
   C.MinWidth := 100;
   C.MaxWidth := 2000;
 
-  C := FLogTreeView.Header.Columns.Add;
+  C := FLogTreeView.Header.Columns.Add; // name
   C.Text     := SName;
   C.Options  := C.Options + [coSmartResize, coAutoSpring];
   if not B then
@@ -520,7 +525,7 @@ begin
   C.MinWidth := 100;
   C.MaxWidth := 2000;
 
-  C := FLogTreeView.Header.Columns.Add;
+  C := FLogTreeView.Header.Columns.Add; // value
   C.Text     := SValue;
   C.Options  := C.Options + [coSmartResize, coAutoSpring];
   C.Width    := 100;
@@ -536,11 +541,12 @@ begin
   C.MinWidth  := 75;
   C.MaxWidth  := 2000;
 
-  C := FLogTreeView.Header.Columns.Add;
+  C := FLogTreeView.Header.Columns.Add; // timestamp
   C.Text     := STimestamp;
   C.Width    := 80;
   C.MinWidth := 80;
   C.MaxWidth := 80;
+  C.Alignment := taRightJustify;
 
   FLogTreeView.Header.AutoSizeIndex := COLUMN_MAIN;
   FLogTreeView.Header.Options       :=
@@ -722,16 +728,16 @@ begin
 //  end;
 end;
 
+{ Do not show Enter and Leave nodes when collapsed. }
+
 procedure TfrmMessageList.FLogTreeViewCollapsed(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 var
-  LN  : TLogNode;
-  PN  : TLogNode;
+  LN : TLogNode;
 begin
   LN := Sender.GetNodeData<TLogNode>(Node);
   if Assigned(LN.VTNode.NextSibling) then
   begin
-    PN := Sender.GetNodeData<TLogNode>(LN.VTNode.NextSibling);
     Sender.IsVisible[LN.VTNode.NextSibling] := False;
   end
 end;
@@ -742,18 +748,58 @@ begin
   AutoFitColumns;
 end;
 
+{ Show both Enter and Leave nodes when expanded. }
+
 procedure TfrmMessageList.FLogTreeViewExpanded(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 var
-  LN  : TLogNode;
-  PN  : TLogNode;
+  LN : TLogNode;
 begin
   LN := Sender.GetNodeData<TLogNode>(Node);
   if Assigned(LN.VTNode.NextSibling) then
   begin
-    PN := Sender.GetNodeData<TLogNode>(LN.VTNode.NextSibling);
     Sender.IsVisible[LN.VTNode.NextSibling] := True;
   end
+end;
+
+procedure TfrmMessageList.FLogTreeViewAfterCellPaint(Sender: TBaseVirtualTree;
+  TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
+  CellRect: TRect);
+var
+  LN : TLogNode;
+  PN : TLogNode;
+  N  : Int64;
+  S  : string;
+begin
+  LN := Sender.GetNodeData<TLogNode>(Node);
+  if Column = COLUMN_TIMESTAMP then
+  begin
+    S := Format('<fc=clBlue>%s</fc>',
+            [FormatDateTime('hh:nn:ss:zzz',  LN.TimeStamp)]);
+    if not (LN.MessageType in [lmtEnterMethod, lmtLeaveMethod]) then
+    begin
+      if Assigned(LN.VTNode.PrevSibling) then
+        PN := Sender.GetNodeData<TLogNode>(LN.VTNode.PrevSibling)
+      else if Assigned(LN.VTNode.Parent) and (LN.VTNode.Parent <> Sender.RootNode) then
+        PN := Sender.GetNodeData<TLogNode>(LN.VTNode.Parent)
+      else
+        PN := nil;
+      if Assigned(PN) then
+      begin
+        if MilliSecondOf(PN.TimeStamp) <= MilliSecondOf(LN.TimeStamp) then
+        begin
+          N := MilliSecondsBetween(PN.TimeStamp, LN.TimeStamp);
+          if N < 1000 then
+          begin
+            S := Format('<fc=clSilver>%s:</fc><fc=clBlue>%s</fc>',
+            [FormatDateTime('hh:nn:ss',  LN.TimeStamp),
+             FormatDateTime('zzz',  LN.TimeStamp)]);
+          end;
+        end;
+      end;
+    end;
+    DrawFormattedText(CellRect, TargetCanvas, S);
+  end;
 end;
 
 procedure TfrmMessageList.FLogTreeViewBeforeCellPaint(Sender: TBaseVirtualTree;
@@ -761,14 +807,17 @@ procedure TfrmMessageList.FLogTreeViewBeforeCellPaint(Sender: TBaseVirtualTree;
   CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
 var
   LN      : TLogNode;
+  PN      : TLogNode;
+  N       : Int64;
   DVS     : TDisplayValuesSettings;
   LIndent : Integer;
   LNode   : PVirtualNode;
+  S       : string;
 begin
   LN := Sender.GetNodeData<TLogNode>(Node);
   DVS := Manager.Settings.DisplayValuesSettings;
   if (LN.MessageType in [lmtEnterMethod, lmtLeaveMethod])
-    and (Column = COLUMN_MAIN) then
+    and ((Column = COLUMN_MAIN) or (Column = COLUMN_TIMESTAMP)) then
   begin
     DVS.Tracing.AssignTo(TargetCanvas);
     //TargetCanvas.FillRect(ContentRect);
@@ -785,7 +834,7 @@ begin
   // draw indentation lines
   if Column = Sender.Header.MainColumn then
   begin
-    LIndent := Sender.GetNodeLevel(Node) *  FLogTreeView.Indent;
+    LIndent := Sender.GetNodeLevel(Node) * FLogTreeView.Indent;
     Inc(CellRect.Left, LIndent);
     LIndent := -Integer(FLogTreeView.Indent);
 //    TargetCanvas.Brush.Color := clYellow;
@@ -794,12 +843,11 @@ begin
     Inc(CellRect.Bottom);
     LNode := Node;
     repeat
-      TargetCanvas.Brush.Color := DVS.Tracing.BackgroundColor;;
+      TargetCanvas.Brush.Color := DVS.Tracing.BackgroundColor;
       TargetCanvas.FillRect(CellRect);
       LNode := LNode.Parent;
       if not Assigned(LNode) or (LNode = Sender.RootNode) then
         Break;
-
       Inc(CellRect.Left, LIndent);
       Inc(CellRect.Right, LIndent);
       //DoGetBackColor(ANode, C);
@@ -841,8 +889,10 @@ procedure TfrmMessageList.FLogTreeViewFilterCallback(Sender: TBaseVirtualTree;
 var
   LN : TLogNode;
   B  : Boolean;
+  S  : string;
 begin
   LN := Sender.GetNodeData<TLogNode>(Node);
+  S  := edtMessageFilter.Text;
   if Assigned(LN) then
   begin
     if (LN.MessageType = lmtText) and (LN.Highlighter <> '') then
@@ -853,11 +903,11 @@ begin
     begin
       B := LN.MessageType in Settings.VisibleMessageTypes;
     end;
-    if edtMessageFilter.Text <> '' then
-      B := B and
-      (ContainsText(LN.Text, edtMessageFilter.Text) or
-       ContainsText(LN.ValueName, edtMessageFilter.Text) or
-       ContainsText(LN.Value, edtMessageFilter.Text));
+    if S <> '' then
+    begin
+      B := B and (ContainsText(LN.Text, S) or ContainsText(LN.ValueName, S) or
+       ContainsText(LN.Value, S));
+    end;
     Sender.IsVisible[Node] := B;
   end;
 end;
@@ -875,13 +925,11 @@ begin
     if Integer(ND.MessageType) < imlMessageTypes.Count then
     begin
       ImageIndex := Integer(ND.MessageType);
-
-      if not (vsExpanded in Node.States)
-      and (ND.MessageType = lmtEnterMethod)
-      and (Node.ChildCount > 0) and
-      Assigned(ND.VTNode.NextSibling) then
+      if not (vsExpanded in Node.States) and (ND.MessageType = lmtEnterMethod)
+        and (Node.ChildCount > 0) and Assigned(ND.VTNode.NextSibling) then
+      begin
         ImageIndex := 9;
-
+      end;
     end
     else if ND.MessageType = lmtDataSet then
     begin
@@ -910,6 +958,8 @@ var
   S      : string;
   LDelim : array of string;
   LTrim  : TArray<string>;
+  PN     : TLogNode;
+  N      : Int64;
 begin
   LN := Sender.GetNodeData<TLogNode>(Node);
   Guard.CheckNotNull(LN, 'ND');
@@ -970,8 +1020,31 @@ begin
   end
   else if Column = COLUMN_TIMESTAMP then
   begin
-    if YearOf(LN.TimeStamp) = YearOf(Now) then // sanity check
-      CellText := FormatDateTime('hh:nn:ss:zzz',  LN.TimeStamp);
+    CellText := '';
+//    if not (LN.MessageType in [lmtEnterMethod, lmtLeaveMethod]) then
+//    begin
+//      if Assigned(LN.VTNode.PrevSibling) then
+//        PN := Sender.GetNodeData<TLogNode>(LN.VTNode.PrevSibling)
+//      else if Assigned(LN.VTNode.Parent) and (LN.VTNode.Parent <> Sender.RootNode) then
+//        PN := Sender.GetNodeData<TLogNode>(LN.VTNode.Parent)
+//      else
+//        PN := nil;
+//      if Assigned(PN) then
+//      begin
+//        if MilliSecondOf(PN.TimeStamp) <= MilliSecondOf(LN.TimeStamp) then
+//        begin
+//          N := MilliSecondsBetween(PN.TimeStamp, LN.TimeStamp);
+//          if N < 1000 then
+//          begin
+//            CellText := FormatDateTime('zzz',  LN.TimeStamp);
+//          end;
+//        end;
+//      end;
+//    end;
+//    if CellText.IsEmpty and (YearOf(LN.TimeStamp) = YearOf(Now)) then // sanity check
+//    begin
+//      CellText := FormatDateTime('hh:nn:ss:zzz',  LN.TimeStamp);
+//    end;
   end;
 end;
 
@@ -997,7 +1070,7 @@ end;
 procedure TfrmMessageList.FLogTreeViewInitNode(Sender: TBaseVirtualTree;
   ParentNode, Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
 var
-  LN    : TLogNode; // class type
+  LN    : TLogNode;
   I     : Integer;
   S     : string;
   SL    : TStringList;
@@ -1088,7 +1161,7 @@ begin
       LN.ValueName := Copy(S, 1, I);
       LN.Value := Copy(S, I + 2, S.Length);
     end
-  end;
+  end; // case LN.MessageType of
 end;
 
 procedure TfrmMessageList.FLogTreeViewFreeNode(Sender: TBaseVirtualTree;
@@ -1134,7 +1207,9 @@ begin
 //   vsExpanded
 end;
 
-{ Used to apply custom settings to TargetCanvas.Font. }
+{ Triggered before either normal or fixed text is painted to allow finer
+  customization (kind of sub cell painting). Hereit is used to apply custom
+  settings to TargetCanvas.Font. }
 
 procedure TfrmMessageList.FLogTreeViewPaintText(Sender: TBaseVirtualTree;
   const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
@@ -1146,8 +1221,6 @@ begin
   LN := Sender.GetNodeData<TLogNode>(Node);
   Guard.CheckNotNull(LN, 'ND');
   DVS := Manager.Settings.DisplayValuesSettings;
-  if not Assigned(Manager) then
-    Exit;
   if Column = COLUMN_MAIN then
   begin
     case LN.MessageType of
@@ -1215,7 +1288,7 @@ end;
 
 procedure TfrmMessageList.pnlMessagesResize(Sender: TObject);
 begin
-  FUpdate := True;
+  FUpdate          := True;
   FAutoSizeColumns := False;
 end;
 {$ENDREGION}
@@ -1349,7 +1422,6 @@ begin
       FAutoSizeColumns := False
     else
      FAutoSizeColumns := True;
-
   finally
     FLogTreeView.EndUpdate;
   end;

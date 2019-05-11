@@ -144,6 +144,8 @@ implementation
 uses
   Spring.Utils,
 
+  DDuce.Factories.VirtualTrees, DDuce.Factories.zObjInspector,
+  DDuce.Factories.GridView,
   DDuce.ObjectInspector.zObjectInspector, DDuce.Logger, DDuce.Utils.Winapi;
 
 {$REGION 'non-interfaced routines'}
@@ -181,6 +183,11 @@ var
   FVI : TFileVersionInfo;
 begin
   inherited AfterConstruction;
+  TVirtualStringTreeFactory.DefaultTreeOptions.BorderStyle     := bsNone;
+  TVirtualStringTreeFactory.DefaultGridOptions.BorderStyle     := bsNone;
+  TVirtualStringTreeFactory.DefaultListOptions.BorderStyle     := bsNone;
+  TVirtualStringTreeFactory.DefaultTreeGridOptions.BorderStyle := bsNone;
+  TVirtualStringTreeFactory.DefaultTreeListOptions.BorderStyle := bsNone;
   FVI := TFileVersionInfo.GetVersionInfo(Application.ExeName);
   Caption := Format('%s %s', [FVI.ProductName, FVI.ProductVersion]);
   FSettings := TLogViewerFactories.CreateSettings;
@@ -382,8 +389,8 @@ procedure TfrmMain.CreateDashboardView;
 begin
   FDashboard := TfrmDashboard.Create(Self, Manager);
   FDashboard.Parent      := pnlMainClient;
-  FDashboard.BorderStyle := bsNone;
   FDashboard.Align       := alClient;
+  FDashboard.BorderStyle := bsNone;
 
   ctMain.Tabs.Add;
   ctMain.ActiveTab.Data        := Pointer(FDashboard);

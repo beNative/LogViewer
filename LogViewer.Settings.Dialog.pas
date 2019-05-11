@@ -33,6 +33,7 @@ uses
   DDuce.Editor.Interfaces, DDuce.Components.VirtualTrees.Node,
 
   LogViewer.Settings, LogViewer.Settings.Dialog.Data,
+  LogViewer.MessageList.Settings.View,
   LogViewer.Receivers.ComPort.Settings.View,
   LogViewer.Receivers.WinODS.Settings.View,
   LogViewer.Receivers.WinIPC.Settings.View, LogViewer.Watches.Settings.View,
@@ -67,6 +68,7 @@ type
     tsZeroMQ                : TTabSheet;
     seSettings              : TSynEdit;
     synJScript              : TSynJScriptSyn;
+    tsViewSettings: TTabSheet; // used to display JSON config
     {$ENDREGION}
 
     procedure actCloseExecute(Sender: TObject);
@@ -82,6 +84,7 @@ type
     FWinODSSettingsForm        : TfrmWinODSSettings;
     FZeroMQSettingsForm        : TfrmZeroMQSettings;
     FDisplayValuesSettingsForm : TfrmDisplayValuesSettings;
+    FViewSettingsForm          : TfrmViewSettings;
 
     procedure FConfigTreeGetText(
       Sender       : TBaseVirtualTree;
@@ -113,11 +116,11 @@ type
 
   public
     procedure AfterConstruction; override;
-    procedure BeforeDestruction; override;
     constructor Create(
       AOwner    : TComponent;
       ASettings : TLogViewerSettings
     ); reintroduce;
+    destructor Destroy; override;
 
   end;
 
@@ -126,7 +129,7 @@ implementation
 {$R *.dfm}
 
 uses
-  DDuce.Editor.Factories, DDuce.Factories.VirtualTrees,
+  DDuce.Utils, DDuce.Editor.Factories, DDuce.Factories.VirtualTrees,
 
   LogViewer.Resources;
 
@@ -152,7 +155,6 @@ begin
   FConfigTree.TreeOptions.PaintOptions :=
     FConfigTree.TreeOptions.PaintOptions + [toShowTreeLines];
   FConfigTree.Margins.Right := 0;
-
   FConfigTree.NodeDataSize := SizeOf(TConfigNode);
   BuildTree;
   for I := 0 to pgcMain.PageCount - 1 do
@@ -163,10 +165,10 @@ begin
   seSettings.Lines.LoadFromFile(FSettings.FileName);
 end;
 
-procedure TfrmLogViewerSettings.BeforeDestruction;
+destructor TfrmLogViewerSettings.Destroy;
 begin
   FConfigTree.Free;
-  inherited BeforeDestruction;
+  inherited Destroy;
 end;
 {$ENDREGION}
 
@@ -242,7 +244,7 @@ procedure TfrmLogViewerSettings.BuildTree;
 var
   LNode : TConfigNode;
 begin
-  LNode := AddNode(nil, SViewSettings, nil);
+  LNode := AddNode(nil, SViewSettings, tsViewSettings);
   AddNode(LNode, SDisplaySettings, tsDisplayValuesSettings);
   AddNode(LNode, SWatches, tsWatches);
   AddNode(LNode, SCallStack, tsCallstack);
@@ -260,43 +262,32 @@ end;
 
 procedure TfrmLogViewerSettings.CreateSettingsForms;
 begin
-  FComportSettingsForm := TfrmComPortSettings.Create(Self, FSettings.ComPortSettings);
-  FComportSettingsForm.Parent      := tsComport;
-  FComportSettingsForm.Align       := alClient;
-  FComportSettingsForm.BorderStyle := bsNone;
-  FComportSettingsForm.Visible     := True;
+  FComportSettingsForm :=
+    TfrmComPortSettings.Create(Self, FSettings.ComPortSettings);
+  AssignFormParent(FComportSettingsForm, tsComport);
 
   FWatchSettingsForm := TfrmWatchSettings.Create(Self, FSettings.WatchSettings);
-  FWatchSettingsForm.Parent      := tsWatches;
-  FWatchSettingsForm.Align       := alClient;
-  FWatchSettingsForm.BorderStyle := bsNone;
-  FWatchSettingsForm.Visible     := True;
+  AssignFormParent(FWatchSettingsForm, tsWatches);
 
-  FWinIPCSettingsForm := TfrmWinIPCSettings.Create(Self, FSettings.WinIPCSettings);
-  FWinIPCSettingsForm.Parent      := tsWinIPC;
-  FWinIPCSettingsForm.Align       := alClient;
-  FWinIPCSettingsForm.BorderStyle := bsNone;
-  FWinIPCSettingsForm.Visible     := True;
+  FWinIPCSettingsForm :=
+    TfrmWinIPCSettings.Create(Self, FSettings.WinIPCSettings);
+  AssignFormParent(FWinIPCSettingsForm, tsWinIPC);
 
-  FWinODSSettingsForm := TfrmWinODSSettings.Create(Self, FSettings.WinODSSettings);
-  FWinODSSettingsForm.Parent      := tsWinODS;
-  FWinODSSettingsForm.Align       := alClient;
-  FWinODSSettingsForm.BorderStyle := bsNone;
-  FWinODSSettingsForm.Visible     := True;
+  FWinODSSettingsForm :=
+    TfrmWinODSSettings.Create(Self, FSettings.WinODSSettings);
+  AssignFormParent(FWinODSSettingsForm, tsWinODS);
 
-  FZeroMQSettingsForm := TfrmZeroMQSettings.Create(Self, FSettings.ZeroMQSettings);
-  FZeroMQSettingsForm.Parent      := tsZeroMQ;
-  FZeroMQSettingsForm.Align       := alClient;
-  FZeroMQSettingsForm.BorderStyle := bsNone;
-  FZeroMQSettingsForm.Visible     := True;
+  FZeroMQSettingsForm :=
+    TfrmZeroMQSettings.Create(Self, FSettings.ZeroMQSettings);
+  AssignFormParent(FZeroMQSettingsForm, tsZeroMQ);
 
-  FDisplayValuesSettingsForm := TfrmDisplayValuesSettings.Create(
-    Self, FSettings.DisplayValuesSettings
-  );
-  FDisplayValuesSettingsForm.Parent      := tsDisplayValuesSettings;
-  FDisplayValuesSettingsForm.Align       := alClient;
-  FDisplayValuesSettingsForm.BorderStyle := bsNone;
-  FDisplayValuesSettingsForm.Visible     := True;
+  FDisplayValuesSettingsForm :=
+    TfrmDisplayValuesSettings.Create(Self, FSettings.DisplayValuesSettings);
+  AssignFormParent(FDisplayValuesSettingsForm, tsDisplayValuesSettings);
+
+  FViewSettingsForm :=
+    TfrmViewSettings.Create(Self, FSettings.MessageListSettings);
+  AssignFormParent(FViewSettingsForm, tsViewSettings);
 end;
 {$ENDREGION}
 
