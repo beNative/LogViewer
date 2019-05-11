@@ -161,7 +161,7 @@ begin
   begin
     pgcMain.Pages[I].TabVisible := False;
   end;
-  pgcMain.ActivePage := tsDisplayValuesSettings;
+  pgcMain.ActivePage := tsViewSettings;
   seSettings.Lines.LoadFromFile(FSettings.FileName);
 end;
 
