@@ -1368,7 +1368,6 @@ end;
 
 procedure TfrmMessageList.AutoFitColumns;
 begin
-  Logger.Track(Self, 'AutoFitColumns');
   FLogTreeView.Header.AutoFitColumns(False, smaUseColumnOption, 2);
   FAutoSizeColumns := True;
 end;
