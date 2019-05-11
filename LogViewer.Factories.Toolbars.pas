@@ -198,26 +198,14 @@ begin
   CreateToolButton(TB, 'actStart', tbsTextButton);
   CreateToolButton(TB, 'actStop', tbsTextButton);
   CreateToolButton(TB);
+  CreateToolButton(TB, 'actSettings', tbsTextButton);
+  CreateToolButton(TB);
+  CreateToolButton(TB, 'actShowFilterView');
   CreateToolButton(TB, 'actClearMessages', tbsTextButton);
   CreateToolButton(TB);
-//  CreateToolButton(
-//    TB,
-//    'actMessageTypesMenu',
-//    tbsDropDown,
-//    FMenus.MessageTypesPopupMenu
-//  );
-//  CreateToolButton(TB);
-  CreateToolButton(TB, 'actShowFilterView');
-  CreateToolButton(TB);
-//  CreateToolButton(TB);
-//  CreateToolButton(TB, 'actSetFocusToFilter');
-//  CreateToolButton(TB);
   CreateToolButton(TB, 'actCollapseAll', tbsTextButton);
   CreateToolButton(TB, 'actExpandAll', tbsTextButton);
-  CreateToolButton(TB);
   CreateToolButton(TB, 'actAutoScrollMessages', tbsTextButton);
-  CreateToolButton(TB);
-  CreateToolButton(TB, 'actSettings', tbsTextButton);
   Result := TB;
 end;
 
