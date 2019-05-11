@@ -521,8 +521,11 @@ var
   V  : ILogViewer;
 begin
   DN := FTreeView.GetNodeData<TDashboardNode>(FTreeView.FocusedNode);
+  Logger.SendObject('DN.Data', DN.Data);
+  Logger.SendInterface('DN.Data.Subscriber', DN.Data.Subscriber);
   for V in FManager.Views do
   begin
+    Logger.SendInterface('V.Subscriber', V.Subscriber);
     if V.Subscriber = DN.Data.Subscriber then
     begin
       FManager.ActiveView := V;
