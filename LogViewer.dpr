@@ -59,7 +59,6 @@ uses
   LogViewer.Receivers.FileSystem in 'LogViewer.Receivers.FileSystem.pas',
   LogViewer.Subscribers.FileSystem in 'LogViewer.Subscribers.FileSystem.pas',
   LogViewer.Dashboard.Data in 'LogViewer.Dashboard.Data.pas',
-  LogViewer.MessageList.Data in 'LogViewer.MessageList.Data.pas',
   LogViewer.Settings.Dialog.Data in 'LogViewer.Settings.Dialog.Data.pas',
   LogViewer.Receivers.MQTT in 'LogViewer.Receivers.MQTT.pas',
   LogViewer.Subscribers.MQTT in 'LogViewer.Subscribers.MQTT.pas',

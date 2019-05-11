@@ -25,14 +25,14 @@ uses
   System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Vcl.ExtCtrls,
 
-  VirtualTrees,
+  VirtualTrees, OMultiPanel,
 
   Spring.Collections,
 
   DSharp.Windows.TreeViewPresenter, DSharp.Windows.ColumnDefinitions,
 
   LogViewer.Messages.Data, LogViewer.Watches.Data,
-  LogViewer.Watches.Settings, LogViewer.DisplayValues.Settings, OMultiPanel;
+  LogViewer.Watches.Settings, LogViewer.DisplayValues.Settings;
 
 type
   TfrmWatchesView = class(TForm)

@@ -16,7 +16,7 @@
 
 unit LogViewer.Dashboard.Data;
 
-{ Data structure holding the data displayed in the dashboard list. }
+{ Data structure holding the data displayed in the dashboard treeview. }
 
 interface
 

@@ -555,7 +555,7 @@ end;
 
 procedure TfrmMessageList.CreateValueListView;
 begin
-  FValueList := TfrmValueList.Create(Self);
+  FValueList := TfrmValueList.Create(Self, DisplayValuesSettings);
   AssignFormParent(FValueList, tsValueList);
 end;
 
@@ -807,7 +807,6 @@ procedure TfrmMessageList.FLogTreeViewBeforeCellPaint(Sender: TBaseVirtualTree;
   CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
 var
   LN      : TLogNode;
-  PN      : TLogNode;
   N       : Int64;
   DVS     : TDisplayValuesSettings;
   LIndent : Integer;

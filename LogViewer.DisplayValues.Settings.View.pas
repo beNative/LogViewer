@@ -82,9 +82,8 @@ implementation
 uses
   DSharp.Windows.ControlTemplates,
 
-  DDuce.Factories.TreeViewPresenter,
-
-  DDuce.Factories.zObjInspector, DDuce.Factories.VirtualTrees;
+  DDuce.Factories.TreeViewPresenter, DDuce.Factories.zObjInspector,
+  DDuce.Factories.VirtualTrees;
 
 {$REGION 'construction and destruction'}
 constructor TfrmDisplayValuesSettings.Create(AOwner: TComponent;

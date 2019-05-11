@@ -191,7 +191,6 @@
         <DCCReference Include="LogViewer.Receivers.FileSystem.pas"/>
         <DCCReference Include="LogViewer.Subscribers.FileSystem.pas"/>
         <DCCReference Include="LogViewer.Dashboard.Data.pas"/>
-        <DCCReference Include="LogViewer.MessageList.Data.pas"/>
         <DCCReference Include="LogViewer.Settings.Dialog.Data.pas"/>
         <DCCReference Include="LogViewer.Receivers.MQTT.pas"/>
         <DCCReference Include="LogViewer.Subscribers.MQTT.pas"/>

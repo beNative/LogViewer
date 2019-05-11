@@ -25,7 +25,9 @@ uses
 
   OMultiPanel,
 
-  DDuce.DynamicRecord, DDuce.Components.ValueList;
+  DDuce.DynamicRecord, DDuce.Components.ValueList,
+
+  LogViewer.DisplayValues.Settings;
 
 type
   TfrmValueList = class(TForm)
@@ -34,9 +36,10 @@ type
     pnlTop    : TPanel;
 
   private
-    FFieldView    : TValueList;
-    FPropertyView : TValueList;
-    FData         : IDynamicRecord;
+    FFieldView             : TValueList;
+    FPropertyView          : TValueList;
+    FData                  : IDynamicRecord;
+    FDisplayValuesSettings : TDisplayValuesSettings;
 
     {$REGION 'property access methods'}
     function GetFields: IDynamicRecord;
@@ -51,8 +54,12 @@ type
     procedure UpdateData;
 
   public
+    constructor Create(
+      AOwner                 : TComponent;
+      ADisplayValuesSettings : TDisplayValuesSettings
+    ); reintroduce; virtual;
     procedure AfterConstruction; override;
-    procedure BeforeDestruction; override;
+    destructor Destroy; override;
 
     procedure Clear;
 
@@ -71,6 +78,13 @@ implementation
 {$R *.dfm}
 
 {$REGION 'construction and destruction'}
+constructor TfrmValueList.Create(AOwner: TComponent;
+  ADisplayValuesSettings: TDisplayValuesSettings);
+begin
+  inherited Create(AOwner);
+  FDisplayValuesSettings := ADisplayValuesSettings;
+end;
+
 procedure TfrmValueList.AfterConstruction;
 begin
   inherited AfterConstruction;
@@ -91,12 +105,12 @@ begin
   FPropertyView.ShowGutter  := False;
 end;
 
-procedure TfrmValueList.BeforeDestruction;
+destructor TfrmValueList.Destroy;
 begin
-  FData := nil;
+  FData              := nil;
   FPropertyView.Data := nil;
   FFieldView.Data    := nil;
-  inherited BeforeDestruction;
+  inherited Destroy;
 end;
 {$ENDREGION}
 
