@@ -23,7 +23,7 @@ uses
   System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls,
 
-  OMultiPanel,
+  VirtualTrees, OMultiPanel,
 
   DDuce.DynamicRecord, DDuce.Components.ValueList,
 
@@ -49,6 +49,14 @@ type
     function GetData: IDynamicRecord;
     procedure SetData(const Value: IDynamicRecord);
     {$ENDREGION}
+
+    procedure FValueListViewPaintText(
+      Sender             : TBaseVirtualTree;
+      const TargetCanvas : TCanvas;
+      Node               : PVirtualNode;
+      Column             : TColumnIndex;
+      TextType           : TVSTTextType
+    );
 
   protected
     procedure UpdateData;
@@ -95,6 +103,7 @@ begin
   FFieldView.Editable    := False;
   FFieldView.BorderStyle := bsNone;
   FFieldView.ShowGutter  := False;
+  FFieldView.OnPaintText := FValueListViewPaintText;
 
   FPropertyView             := TValueList.Create(Self);
   FPropertyView.Parent      := pnlBottom;
@@ -103,6 +112,7 @@ begin
   FPropertyView.Editable    := False;
   FPropertyView.BorderStyle := bsNone;
   FPropertyView.ShowGutter  := False;
+  FPropertyView.OnPaintText := FValueListViewPaintText;
 end;
 
 destructor TfrmValueList.Destroy;
@@ -111,6 +121,22 @@ begin
   FPropertyView.Data := nil;
   FFieldView.Data    := nil;
   inherited Destroy;
+end;
+{$ENDREGION}
+
+{$REGION 'event handlers'}
+procedure TfrmValueList.FValueListViewPaintText(Sender: TBaseVirtualTree;
+  const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
+  TextType: TVSTTextType);
+begin
+  if Column = 1 then
+  begin
+    FDisplayValuesSettings.ValueName.AssignTo(TargetCanvas.Font);
+  end
+  else if Column = 2 then
+  begin
+    FDisplayValuesSettings.Value.AssignTo(TargetCanvas.Font);
+  end;
 end;
 {$ENDREGION}
 
