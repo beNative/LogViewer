@@ -207,6 +207,8 @@ object dmManager: TdmManager
     object actAutoScrollMessages: TAction
       Category = 'Commands'
       Caption = 'Auto scroll'
+      Checked = True
+      GroupIndex = 5
       Hint = 'Auto scroll to last message'
       ImageIndex = 26
       OnExecute = actAutoScrollMessagesExecute
@@ -286,13 +288,23 @@ object dmManager: TdmManager
       Caption = 'actSaveBitmapAs'
       OnExecute = actSaveBitmapAsExecute
     end
+    object actCloseMessageView: TAction
+      Category = 'Commands'
+      Caption = 'Close message viewer'
+      OnExecute = actCloseMessageViewExecute
+    end
+    object actCloseOtherMessageViews: TAction
+      Category = 'Commands'
+      Caption = 'Close all other message viewers'
+      OnExecute = actCloseOtherMessageViewsExecute
+    end
   end
   object imlMain: TImageList
     ColorDepth = cd32Bit
     Left = 39
     Top = 22
     Bitmap = {
-      494C010121002500B40010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010121002500B80010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000009000000001002000000000000090
       000000000000000000000000000000000000361B0099603001CC603001CC6030
       01CC361B0099000000000000000000000000000000000000000000000000361B
@@ -1502,7 +1514,7 @@ object dmManager: TdmManager
     Left = 37
     Top = 158
     Bitmap = {
-      494C01011D00C800D00010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01011D00C800D40010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000008000000001002000000000000080
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

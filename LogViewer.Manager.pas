@@ -72,6 +72,7 @@ type
     actOpen               : TAction;
     actPersistent         : TAction;
     actSave               : TAction;
+    actSaveBitmapAs       : TAction;
     actScreenshot         : TAction;
     actSelectAll          : TAction;
     actSelectNone         : TAction;
@@ -90,7 +91,8 @@ type
     imlMessageTypes       : TImageList;
     ppmLogTreeViewer      : TPopupMenu;
     ppmMessageTypes       : TPopupMenu;
-    actSaveBitmapAs       : TAction;
+    actCloseMessageView: TAction;
+    actCloseOtherMessageViews: TAction;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -138,6 +140,8 @@ type
     procedure actScreenshotExecute(Sender: TObject);
     procedure actShowFilterViewExecute(Sender: TObject);
     procedure actSaveBitmapAsExecute(Sender: TObject);
+    procedure actCloseMessageViewExecute(Sender: TObject);
+    procedure actCloseOtherMessageViewsExecute(Sender: TObject);
     {$ENDREGION}
 
   private
@@ -165,6 +169,7 @@ type
 
     procedure FViewListChanged(Sender: TObject; const Item: ILogViewer;
     Action: TCollectionChangedAction);
+    procedure FSettingsChanged(Sender: TObject);
 
   protected
     {$REGION 'property access methods'}
@@ -314,6 +319,7 @@ begin
   inherited Create(AOwner);
   Guard.CheckNotNull(ASettings, 'ASettings');
   FSettings := ASettings;
+  FSettings.OnChanged.Add(FSettingsChanged);
 end;
 
 destructor TdmManager.Destroy;
@@ -372,6 +378,17 @@ end;
 procedure TdmManager.actClearMessagesExecute(Sender: TObject);
 begin
   Commands.ClearMessages;
+end;
+
+procedure TdmManager.actCloseMessageViewExecute(Sender: TObject);
+begin
+  DeleteView(FActiveView);
+end;
+
+procedure TdmManager.actCloseOtherMessageViewsExecute(Sender: TObject);
+begin
+  //
+
 end;
 
 procedure TdmManager.actCollapseAllExecute(Sender: TObject);
@@ -610,7 +627,7 @@ end;
 
 procedure TdmManager.SetActiveView(const Value: ILogViewer);
 begin
-  if Assigned(Value) and (Value <> FActiveView) then
+  if Assigned(Value) {and (Value <> FActiveView)} then // TODO FActiveView should be nil if dashboard has focus
   begin
     FActiveView := Value;
     if Assigned(FActiveView.Target) then
@@ -680,14 +697,20 @@ begin
   end;
 end;
 
+procedure TdmManager.FSettingsChanged(Sender: TObject);
+begin
+//  UpdateActions;
+end;
+
 procedure TdmManager.FViewListChanged(Sender: TObject; const Item: ILogViewer;
   Action: TCollectionChangedAction);
 begin
-//  if Assigned(Item) then
-//  begin
-//    //Logger.SendInterface('Item', Item);
-//    Logger.Send('Action', TValue.From(Action));
-//  end;
+  if Assigned(Item) then
+  begin
+    //Logger.SendInterface('Item', Item);
+//    UpdateActions;
+    //Logger.Send('Action', TValue.From(Action));
+  end;
 end;
 {$ENDREGION}
 
@@ -764,6 +787,9 @@ begin
   AddMenuItem(MI, actStop);
   AddMenuItem(MI);
   AddMenuItem(MI, MessageTypesPopupMenu);
+  AddMenuItem(MI);
+  AddMenuItem(MI, actCloseMessageView);
+  AddMenuItem(MI, actCloseOtherMessageViews);
 end;
 
 procedure TdmManager.BuildMessageTypesPopupMenu;
@@ -824,7 +850,7 @@ end;
 
 procedure TdmManager.AddView(ALogViewer: ILogViewer);
 begin
- // Logger.Track(Self, 'AddView');
+  Logger.Track(Self, 'AddView');
   Guard.CheckNotNull(ALogViewer, 'ALogViewer');
   FViewList.Add(ALogViewer);
   if not FReceivers.Contains(ALogViewer.Subscriber.Receiver) then
@@ -849,6 +875,7 @@ begin
       FActiveView := nil;
     S := AView.Subscriber;
     S.Receiver.SubscriberList.Remove(S.SourceId);
+    //Events.DoDeleteLogViewer(FViewList[I]);
     FViewList[I].Form.Close; // instance still exists after closing
     FViewList.Delete(I); // automatically frees the instance
     Result := True;
@@ -865,31 +892,32 @@ var
   MLS : TMessageListSettings;
 begin
   MLS := Settings.MessageListSettings;
-//  actBitmap.Checked       := lmtBitmap in MLS.VisibleMessageTypes;
-//  actCallStack.Checked    := lmtCallStack in MLS.VisibleMessageTypes;
-//  actCheckPoint.Checked   := lmtCheckpoint in MLS.VisibleMessageTypes;
-//  actConditional.Checked  := lmtConditional in MLS.VisibleMessageTypes;
-//  actInfo.Checked         := lmtInfo in MLS.VisibleMessageTypes;
-//  actWarning.Checked      := lmtWarning in MLS.VisibleMessageTypes;
-//  actValue.Checked        := lmtValue in MLS.VisibleMessageTypes;
-//  actError.Checked        := lmtError in MLS.VisibleMessageTypes;
-//  actMethodTraces.Checked := lmtEnterMethod in MLS.VisibleMessageTypes;
-//  actException.Checked    := lmtException in MLS.VisibleMessageTypes;
-//  actComponent.Checked    := lmtComponent in MLS.VisibleMessageTypes;
-//  actObject.Checked       := lmtObject in MLS.VisibleMessageTypes;
-//  actPersistent.Checked   := lmtPersistent in MLS.VisibleMessageTypes;
-//  actInterface.Checked    := lmtInterface in MLS.VisibleMessageTypes;
-//  actHeapInfo.Checked     := lmtHeapInfo in MLS.VisibleMessageTypes;
-//  actCustomData.Checked   := lmtCustomData in MLS.VisibleMessageTypes;
-//  actStrings.Checked      := lmtStrings in MLS.VisibleMessageTypes;
-//  actMemory.Checked       := lmtMemory in MLS.VisibleMessageTypes;
-//  actText.Checked         := lmtText in MLS.VisibleMessageTypes;
-//  actDataSet.Checked      := lmtDataSet in MLS.VisibleMessageTypes;
-//  actAction.Checked       := lmtAction in MLS.VisibleMessageTypes;
-  actAutoScrollMessages.Checked
-    := FSettings.MessageListSettings.AutoScrollMessages;
+  actBitmap.Checked       := lmtBitmap in MLS.VisibleMessageTypes;
+  actCallStack.Checked    := lmtCallStack in MLS.VisibleMessageTypes;
+  actCheckPoint.Checked   := lmtCheckpoint in MLS.VisibleMessageTypes;
+  actConditional.Checked  := lmtConditional in MLS.VisibleMessageTypes;
+  actInfo.Checked         := lmtInfo in MLS.VisibleMessageTypes;
+  actWarning.Checked      := lmtWarning in MLS.VisibleMessageTypes;
+  actValue.Checked        := lmtValue in MLS.VisibleMessageTypes;
+  actError.Checked        := lmtError in MLS.VisibleMessageTypes;
+  actMethodTraces.Checked := lmtEnterMethod in MLS.VisibleMessageTypes;
+  actException.Checked    := lmtException in MLS.VisibleMessageTypes;
+  actComponent.Checked    := lmtComponent in MLS.VisibleMessageTypes;
+  actObject.Checked       := lmtObject in MLS.VisibleMessageTypes;
+  actPersistent.Checked   := lmtPersistent in MLS.VisibleMessageTypes;
+  actInterface.Checked    := lmtInterface in MLS.VisibleMessageTypes;
+  actHeapInfo.Checked     := lmtHeapInfo in MLS.VisibleMessageTypes;
+  actCustomData.Checked   := lmtCustomData in MLS.VisibleMessageTypes;
+  actStrings.Checked      := lmtStrings in MLS.VisibleMessageTypes;
+  actMemory.Checked       := lmtMemory in MLS.VisibleMessageTypes;
+  actText.Checked         := lmtText in MLS.VisibleMessageTypes;
+  actDataSet.Checked      := lmtDataSet in MLS.VisibleMessageTypes;
+  actAction.Checked       := lmtAction in MLS.VisibleMessageTypes;
   B := Assigned(ActiveView) and Assigned(ActiveView.Subscriber);
-  actAutoScrollMessages.Enabled := B;
+  // workaround toolbar issue which refuses to reflect checked state when button
+  // is first Disabled, then Enabled and Checked
+  actAutoScrollMessages.Visible := B;
+
   actMessageTypesMenu.Enabled   := B;
   actShowFilterView.Enabled     := B;
   actStart.Enabled              := B and not ActiveView.Subscriber.Enabled;
@@ -924,11 +952,15 @@ begin
     not Settings.MessageListSettings.AutoFilterMessages;
   actToggleAlwaysOnTop.Checked := Settings.FormSettings.FormStyle = fsStayOnTop;
   actToggleFullscreen.Checked := Settings.FormSettings.WindowState = wsMaximized;
+  actAutoScrollMessages.Checked := MLS.AutoScrollMessages;
+  Logger.Watch('actAutoScrollMessages.Checked', actAutoScrollMessages.Checked);
   if B then
     ActiveView.UpdateView;
   Logger.IncCounter('UpdateActions');
-  Logger.Watch('ViewCount', FViewList.Count);
-  Logger.Watch('ReceiverCount', FReceivers.Count);
+  if Assigned(FViewList) then
+    Logger.Watch('ViewCount', FViewList.Count);
+  if Assigned(FReceivers) then
+    Logger.Watch('ReceiverCount', FReceivers.Count);
 end;
 
 procedure TdmManager.UpdateVisibleMessageTypes(
