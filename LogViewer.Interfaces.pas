@@ -223,12 +223,14 @@ type
   ['{3BD96AF8-654C-4E7C-9C73-EA6522330E88}']
     {$REGION 'property access methods'}
     function GetOnAddLogViewer: IEvent<TLogViewerEvent>;
+    function GetOnDeleteLogViewer: IEvent<TLogViewerEvent>;
     function GetOnAddReceiver: IEvent<TChannelReceiverEvent>;
     function GetOnActiveViewChange: IEvent<TLogViewerEvent>;
     {$ENDREGION}
 
     procedure DoActiveViewChange(ALogViewer: ILogViewer);
     procedure DoAddLogViewer(ALogViewer: ILogViewer);
+    procedure DoDeleteLogViewer(ALogViewer: ILogViewer);
     procedure DoAddReceiver(AReceiver: IChannelReceiver);
 
     procedure Clear;
@@ -241,6 +243,9 @@ type
 
     property OnAddLogViewer: IEvent<TLogViewerEvent>
       read GetOnAddLogViewer;
+
+    property OnDeleteLogViewer: IEvent<TLogViewerEvent>
+      read GetOnDeleteLogViewer;
   end;
 
   ILogViewerCommands = interface

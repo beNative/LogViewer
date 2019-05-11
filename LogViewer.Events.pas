@@ -30,6 +30,7 @@ type
   private
     FManager            : ILogViewerManager;
     FOnAddLogViewer     : Event<TLogViewerEvent>;
+    FOnDeleteLogViewer  : Event<TLogViewerEvent>;
     FOnAddReceiver      : Event<TChannelReceiverEvent>;
     FOnActiveViewChange : Event<TLogViewerEvent>;
 
@@ -37,11 +38,13 @@ type
     {$REGION 'property access methods'}
     function GetOnActiveViewChange: IEvent<TLogViewerEvent>;
     function GetOnAddLogViewer: IEvent<TLogViewerEvent>;
+    function GetOnDeleteLogViewer: IEvent<TLogViewerEvent>;
     function GetOnAddReceiver: IEvent<TChannelReceiverEvent>;
     {$ENDREGION}
 
     {$REGION 'event dispatch methods'}
     procedure DoAddLogViewer(ALogViewer: ILogViewer); virtual;
+    procedure DoDeleteLogViewer(ALogViewer: ILogViewer); virtual;
     procedure DoActiveViewChange(ALogViewer: ILogViewer); virtual;
     procedure DoAddReceiver(AReceiver: IChannelReceiver); virtual;
     {$ENDREGION}
@@ -57,6 +60,9 @@ type
 
     property OnAddLogViewer: IEvent<TLogViewerEvent>
       read GetOnAddLogViewer;
+
+    property OnDeleteLogViewer: IEvent<TLogViewerEvent>
+      read GetOnDeleteLogViewer;
 
     property OnAddReceiver: IEvent<TChannelReceiverEvent>
       read GetOnAddReceiver;
@@ -98,6 +104,11 @@ function TLogViewerEvents.GetOnAddReceiver: IEvent<TChannelReceiverEvent>;
 begin
   Result := FOnAddReceiver;
 end;
+
+function TLogViewerEvents.GetOnDeleteLogViewer: IEvent<TLogViewerEvent>;
+begin
+  Result := FOnDeleteLogViewer;
+end;
 {$ENDREGION}
 
 {$REGION 'event dispatch methods'}
@@ -117,6 +128,12 @@ procedure TLogViewerEvents.DoAddReceiver(AReceiver: IChannelReceiver);
 begin
   Logger.Track(Self, 'DoAddReceiver');
   FOnAddReceiver.Invoke(Self, AReceiver);
+end;
+
+procedure TLogViewerEvents.DoDeleteLogViewer(ALogViewer: ILogViewer);
+begin
+  Logger.Track(Self, 'DoDeleteLogViewer');
+  FOnDeleteLogViewer.Invoke(Self, ALogViewer);
 end;
 {$ENDREGION}
 
