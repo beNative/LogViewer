@@ -39,7 +39,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Width = 704
     Height = 367
     Margins.Left = 0
-    ActivePage = tsWatches
+    ActivePage = tsViewSettings
     Align = alClient
     Style = tsButtons
     TabOrder = 1
@@ -97,6 +97,10 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     object tsAdvanced: TTabSheet
       Caption = 'Advanced'
       ImageIndex = 7
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object seSettings: TSynEdit
         AlignWithMargins = True
         Left = 3
@@ -215,7 +219,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Left = 568
     Top = 32
     Bitmap = {
-      494C010103000800440010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010103000800480010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

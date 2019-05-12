@@ -1,19 +1,19 @@
 {
 	"FormSettings": {
-		"Left": 212,
-		"Top": 16,
-		"Width": 1873,
-		"Height": 1116,
+		"Left": 0,
+		"Top": 0,
+		"Width": 2576,
+		"Height": 1417,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
 	"MessageListSettings": {
-		"AutoScrollMessages": false,
+		"AutoScrollMessages": true,
 		"AutoFilterMessages": true,
 		"DynamicAutoSizeColumns": false,
 		"LeftPanelWidth": 430,
 		"RightPanelWidth": 325,
-		"SmartTimeStamps": false
+		"SmartTimeStamps": true
 	},
 	"WinODSSettings": {
 		"Enabled": true

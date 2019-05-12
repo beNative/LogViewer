@@ -43,7 +43,7 @@ type
       ASettings : TWatchSettings
     ); reintroduce;
 
-    procedure BeforeDestruction; override;
+    destructor Destroy; override;
   end;
 
 implementation
@@ -58,10 +58,10 @@ begin
   FSettings := ASettings;
 end;
 
-procedure TfrmWatchSettings.BeforeDestruction;
+destructor TfrmWatchSettings.Destroy;
 begin
   FSettings := nil;
-  inherited BeforeDestruction;
+  inherited Destroy;
 end;
 {$ENDREGION}
 

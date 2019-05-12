@@ -765,41 +765,41 @@ end;
 procedure TfrmMessageList.FLogTreeViewAfterCellPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   CellRect: TRect);
-var
-  LN : TLogNode;
-  PN : TLogNode;
-  N  : Int64;
-  S  : string;
+//var
+//  LN : TLogNode;
+//  PN : TLogNode;
+//  N  : Int64;
+//  S  : string;
 begin
-  LN := Sender.GetNodeData<TLogNode>(Node);
-  if Column = COLUMN_TIMESTAMP then
-  begin
-    S := Format('<fc=clBlue>%s</fc>',
-            [FormatDateTime('hh:nn:ss:zzz',  LN.TimeStamp)]);
-    if not (LN.MessageType in [lmtEnterMethod, lmtLeaveMethod]) then
-    begin
-      if Assigned(LN.VTNode.PrevSibling) then
-        PN := Sender.GetNodeData<TLogNode>(LN.VTNode.PrevSibling)
-      else if Assigned(LN.VTNode.Parent) and (LN.VTNode.Parent <> Sender.RootNode) then
-        PN := Sender.GetNodeData<TLogNode>(LN.VTNode.Parent)
-      else
-        PN := nil;
-      if Assigned(PN) then
-      begin
-        if MilliSecondOf(PN.TimeStamp) <= MilliSecondOf(LN.TimeStamp) then
-        begin
-          N := MilliSecondsBetween(PN.TimeStamp, LN.TimeStamp);
-          if N < 1000 then
-          begin
-            S := Format('<fc=clSilver>%s:</fc><fc=clBlue>%s</fc>',
-            [FormatDateTime('hh:nn:ss',  LN.TimeStamp),
-             FormatDateTime('zzz',  LN.TimeStamp)]);
-          end;
-        end;
-      end;
-    end;
-    DrawFormattedText(CellRect, TargetCanvas, S);
-  end;
+//  LN := Sender.GetNodeData<TLogNode>(Node);
+//  if Column = COLUMN_TIMESTAMP then
+//  begin
+//    S := Format('<fc=clBlue>%s</fc>',
+//            [FormatDateTime('hh:nn:ss:zzz',  LN.TimeStamp)]);
+//    if not (LN.MessageType in [lmtEnterMethod, lmtLeaveMethod]) then
+//    begin
+//      if Assigned(LN.VTNode.PrevSibling) then
+//        PN := Sender.GetNodeData<TLogNode>(LN.VTNode.PrevSibling)
+//      else if Assigned(LN.VTNode.Parent) and (LN.VTNode.Parent <> Sender.RootNode) then
+//        PN := Sender.GetNodeData<TLogNode>(LN.VTNode.Parent)
+//      else
+//        PN := nil;
+//      if Assigned(PN) then
+//      begin
+//        if MilliSecondOf(PN.TimeStamp) <= MilliSecondOf(LN.TimeStamp) then
+//        begin
+//          N := MilliSecondsBetween(PN.TimeStamp, LN.TimeStamp);
+//          if N < 1000 then
+//          begin
+//            S := Format('<fc=clSilver>%s:</fc><fc=clBlue>%s</fc>',
+//            [FormatDateTime('hh:nn:ss',  LN.TimeStamp),
+//             FormatDateTime('zzz',  LN.TimeStamp)]);
+//          end;
+//        end;
+//      end;
+//    end;
+//    DrawFormattedText(CellRect, TargetCanvas, S);
+//  end;
 end;
 
 procedure TfrmMessageList.FLogTreeViewBeforeCellPaint(Sender: TBaseVirtualTree;
@@ -807,7 +807,6 @@ procedure TfrmMessageList.FLogTreeViewBeforeCellPaint(Sender: TBaseVirtualTree;
   CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
 var
   LN      : TLogNode;
-  N       : Int64;
   DVS     : TDisplayValuesSettings;
   LIndent : Integer;
   LNode   : PVirtualNode;
@@ -1019,31 +1018,36 @@ begin
   end
   else if Column = COLUMN_TIMESTAMP then
   begin
-    CellText := '';
-//    if not (LN.MessageType in [lmtEnterMethod, lmtLeaveMethod]) then
-//    begin
-//      if Assigned(LN.VTNode.PrevSibling) then
-//        PN := Sender.GetNodeData<TLogNode>(LN.VTNode.PrevSibling)
-//      else if Assigned(LN.VTNode.Parent) and (LN.VTNode.Parent <> Sender.RootNode) then
-//        PN := Sender.GetNodeData<TLogNode>(LN.VTNode.Parent)
-//      else
-//        PN := nil;
-//      if Assigned(PN) then
-//      begin
-//        if MilliSecondOf(PN.TimeStamp) <= MilliSecondOf(LN.TimeStamp) then
-//        begin
-//          N := MilliSecondsBetween(PN.TimeStamp, LN.TimeStamp);
-//          if N < 1000 then
-//          begin
-//            CellText := FormatDateTime('zzz',  LN.TimeStamp);
-//          end;
-//        end;
-//      end;
-//    end;
-//    if CellText.IsEmpty and (YearOf(LN.TimeStamp) = YearOf(Now)) then // sanity check
-//    begin
-//      CellText := FormatDateTime('hh:nn:ss:zzz',  LN.TimeStamp);
-//    end;
+    if Settings.SmartTimeStamps then
+    begin
+      CellText := '';
+      if not (LN.MessageType in [lmtEnterMethod, lmtLeaveMethod]) then
+      begin
+        if Assigned(LN.VTNode.PrevSibling) then
+          PN := Sender.GetNodeData<TLogNode>(LN.VTNode.PrevSibling)
+        else if Assigned(LN.VTNode.Parent) and (LN.VTNode.Parent <> Sender.RootNode) then
+          PN := Sender.GetNodeData<TLogNode>(LN.VTNode.Parent)
+        else
+          PN := nil;
+        if Assigned(PN) then
+        begin
+          if MilliSecondOf(PN.TimeStamp) <= MilliSecondOf(LN.TimeStamp) then
+          begin
+            N := MilliSecondsBetween(PN.TimeStamp, LN.TimeStamp);
+            if N < 1000 then
+            begin
+              CellText := FormatDateTime('zzz',  LN.TimeStamp);
+            end;
+          end;
+        end;
+      end;
+      if CellText.IsEmpty and (YearOf(LN.TimeStamp) = YearOf(Now)) then // sanity check
+      begin
+        CellText := FormatDateTime('hh:nn:ss:zzz',  LN.TimeStamp);
+      end;
+    end
+    else
+      CellText := FormatDateTime('hh:nn:ss:zzz',  LN.TimeStamp);
   end;
 end;
 

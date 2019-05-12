@@ -83,7 +83,7 @@ type
       AData                  : IObjectList;
       ADisplayValuesSettings : TDisplayValuesSettings
     ); reintroduce; virtual;
-    procedure BeforeDestruction; override;
+    destructor Destroy; override;
 
   end;
 
@@ -144,13 +144,13 @@ begin
   FTVPCallStack.ShowHeader := True;
 end;
 
-procedure TfrmCallStackView.BeforeDestruction;
+destructor TfrmCallStackView.Destroy;
 begin
-  Logger.Track(Self, 'BeforeDestruction');
+  Logger.Track(Self, 'Destroy');
   FCallStack.OnChanged.Remove(FCallStackChanged);
   FCallStack := nil;
   FDisplayValuesSettings := nil;
-  inherited BeforeDestruction;
+  inherited Destroy;
 end;
 {$ENDREGION}
 
@@ -167,6 +167,15 @@ function TfrmCallStackView.FCDDurationCustomDraw(Sender: TObject;
   CellRect: TRect; ImageList: TCustomImageList; DrawMode: TDrawMode;
   Selected: Boolean): Boolean;
 begin
+  if DrawMode = dmBeforeCellPaint then
+  begin
+    FDisplayValuesSettings.Tracing.AssignTo(TargetCanvas);
+    if not Selected then
+    begin
+      TargetCanvas.Brush.Color := FDisplayValuesSettings.Tracing.BackgroundColor;
+      TargetCanvas.FillRect(CellRect);
+    end;
+  end;
   if DrawMode = dmPaintText then
   begin
     FDisplayValuesSettings.TimeStamp.AssignTo(TargetCanvas.Font);
@@ -179,6 +188,15 @@ function TfrmCallStackView.FCDLevelCustomDraw(Sender: TObject;
   CellRect: TRect; ImageList: TCustomImageList; DrawMode: TDrawMode;
   Selected: Boolean): Boolean;
 begin
+  if DrawMode = dmBeforeCellPaint then
+  begin
+    FDisplayValuesSettings.Tracing.AssignTo(TargetCanvas);
+    if not Selected then
+    begin
+      TargetCanvas.Brush.Color := FDisplayValuesSettings.Tracing.BackgroundColor;
+      TargetCanvas.FillRect(CellRect);
+    end;
+  end;
   if DrawMode = dmPaintText then
   begin
     FDisplayValuesSettings.Id.AssignTo(TargetCanvas.Font);
