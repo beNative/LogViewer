@@ -347,6 +347,7 @@ implementation
 uses
   System.StrUtils, System.UITypes, System.DateUtils, System.Math,
   System.UIConsts,
+  Vcl.GraphUtil,
 
   Spring.Helpers,
 
@@ -827,6 +828,13 @@ begin
   end;
   if Column = COLUMN_LEVEL then
   begin
+    if LN.LogLevel < WebNamedColorsCount then
+    begin
+      TargetCanvas.Brush.Color := WebNamedColors[LN.LogLevel].Value;
+    end
+    else
+      TargetCanvas.Brush.Color := clWhite;
+    TargetCanvas.FillRect(CellRect);
     // TODO : logging level colors
   end;
   // draw indentation lines

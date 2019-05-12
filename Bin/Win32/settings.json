@@ -1,14 +1,14 @@
 {
 	"FormSettings": {
-		"Left": 0,
-		"Top": 0,
-		"Width": 2576,
-		"Height": 1417,
+		"Left": 242,
+		"Top": 73,
+		"Width": 1477,
+		"Height": 749,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
 	"MessageListSettings": {
-		"AutoScrollMessages": true,
+		"AutoScrollMessages": false,
 		"AutoFilterMessages": true,
 		"DynamicAutoSizeColumns": false,
 		"LeftPanelWidth": 430,
@@ -22,7 +22,7 @@
 		"Enabled": true
 	},
 	"ZeroMQSettings": {
-		"Enabled": false,
+		"Enabled": true,
 		"PollingInterval": 100,
 		"Endpoints": "localhost=tcp://localhost:5555\r\nlocalhost2=tcp://localhost:5556\r\n"
 	},
