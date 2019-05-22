@@ -30,7 +30,7 @@ uses
   LogViewer.DisplayValues.Settings;
 
 type
-  TfrmValueList = class(TForm)
+  TfrmValueListView = class(TForm)
     pnlMain   : TOMultiPanel;
     pnlBottom : TPanel;
     pnlTop    : TPanel;
@@ -86,14 +86,14 @@ implementation
 {$R *.dfm}
 
 {$REGION 'construction and destruction'}
-constructor TfrmValueList.Create(AOwner: TComponent;
+constructor TfrmValueListView.Create(AOwner: TComponent;
   ADisplayValuesSettings: TDisplayValuesSettings);
 begin
   inherited Create(AOwner);
   FDisplayValuesSettings := ADisplayValuesSettings;
 end;
 
-procedure TfrmValueList.AfterConstruction;
+procedure TfrmValueListView.AfterConstruction;
 begin
   inherited AfterConstruction;
   FFieldView             := TValueList.Create(Self);
@@ -115,7 +115,7 @@ begin
   FPropertyView.OnPaintText := FValueListViewPaintText;
 end;
 
-destructor TfrmValueList.Destroy;
+destructor TfrmValueListView.Destroy;
 begin
   FData              := nil;
   FPropertyView.Data := nil;
@@ -125,7 +125,7 @@ end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
-procedure TfrmValueList.FValueListViewPaintText(Sender: TBaseVirtualTree;
+procedure TfrmValueListView.FValueListViewPaintText(Sender: TBaseVirtualTree;
   const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   TextType: TVSTTextType);
 begin
@@ -141,44 +141,44 @@ end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
-procedure TfrmValueList.Clear;
+procedure TfrmValueListView.Clear;
 begin
   FFieldView.Clear;
   FPropertyView.Clear;
 end;
 
-function TfrmValueList.GetData: IDynamicRecord;
+function TfrmValueListView.GetData: IDynamicRecord;
 begin
   Result := FData;
 end;
 
-procedure TfrmValueList.SetData(const Value: IDynamicRecord);
+procedure TfrmValueListView.SetData(const Value: IDynamicRecord);
 begin
   Clear;
   FData := Value;
   UpdateData;
 end;
 
-function TfrmValueList.GetFields: IDynamicRecord;
+function TfrmValueListView.GetFields: IDynamicRecord;
 begin
   Result := FFieldView.Data;
 end;
 
-procedure TfrmValueList.SetFields(const Value: IDynamicRecord);
+procedure TfrmValueListView.SetFields(const Value: IDynamicRecord);
 begin
   FFieldView.Data := Value;
 end;
 
-function TfrmValueList.GetProperties: IDynamicRecord;
+function TfrmValueListView.GetProperties: IDynamicRecord;
 begin
   Result := FPropertyView.Data;
 end;
 
-procedure TfrmValueList.SetProperties(const Value: IDynamicRecord);
+procedure TfrmValueListView.SetProperties(const Value: IDynamicRecord);
 begin
   FPropertyView.Data := Value;
 end;
-procedure TfrmValueList.UpdateData;
+procedure TfrmValueListView.UpdateData;
 var
   LFieldData    : DynamicRecord;
   LPropertyData : DynamicRecord;

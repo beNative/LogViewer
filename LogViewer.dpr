@@ -3,6 +3,7 @@ program LogViewer;
 {$R *.dres}
 
 uses
+  //LeakCheck,
   System.SysUtils,
   Vcl.Themes,
   Vcl.Styles,
@@ -52,7 +53,7 @@ uses
   LogViewer.Subscribers.WinIPC in 'LogViewer.Subscribers.WinIPC.pas',
   LogViewer.Subscribers.Base in 'LogViewer.Subscribers.Base.pas',
   LogViewer.Subscribers.WinODS in 'LogViewer.Subscribers.WinODS.pas',
-  LogViewer.ValueList.View in 'LogViewer.ValueList.View.pas' {frmValueList},
+  LogViewer.ValueList.View in 'LogViewer.ValueList.View.pas' {frmValueListView},
   LogViewer.Receivers.WinODS in 'LogViewer.Receivers.WinODS.pas',
   LogViewer.MessageFilter.View in 'LogViewer.MessageFilter.View.pas' {frmMessageFilter},
   LogViewer.MessageFilter.Data in 'LogViewer.MessageFilter.Data.pas',
@@ -64,7 +65,9 @@ uses
   LogViewer.Subscribers.MQTT in 'LogViewer.Subscribers.MQTT.pas',
   LogViewer.Receivers.FileSystem.Settings in 'LogViewer.Receivers.FileSystem.Settings.pas',
   LogViewer.Receivers.MQTT.Settings in 'LogViewer.Receivers.MQTT.Settings.pas',
-  LogViewer.MessageList.Settings.View in 'LogViewer.MessageList.Settings.View.pas' {frmViewSettings};
+  LogViewer.MessageList.Settings.View in 'LogViewer.MessageList.Settings.View.pas' {frmViewSettings},
+  LogViewer.Image.View in 'LogViewer.Image.View.pas' {frmImageView},
+  LogViewer.DataSet.View in 'LogViewer.DataSet.View.pas' {frmDataSetView};
 
 {$R *.res}
 

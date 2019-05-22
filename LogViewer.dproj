@@ -181,7 +181,7 @@
         <DCCReference Include="LogViewer.Subscribers.Base.pas"/>
         <DCCReference Include="LogViewer.Subscribers.WinODS.pas"/>
         <DCCReference Include="LogViewer.ValueList.View.pas">
-            <Form>frmValueList</Form>
+            <Form>frmValueListView</Form>
         </DCCReference>
         <DCCReference Include="LogViewer.Receivers.WinODS.pas"/>
         <DCCReference Include="LogViewer.MessageFilter.View.pas">
@@ -198,7 +198,12 @@
         <DCCReference Include="LogViewer.Receivers.MQTT.Settings.pas"/>
         <DCCReference Include="LogViewer.MessageList.Settings.View.pas">
             <Form>frmViewSettings</Form>
-            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="LogViewer.Image.View.pas">
+            <Form>frmImageView</Form>
+        </DCCReference>
+        <DCCReference Include="LogViewer.DataSet.View.pas">
+            <Form>frmDataSetView</Form>
         </DCCReference>
         <None Include="Readme.md"/>
         <RcItem Include="Bin\Win32\libzmq.dll">

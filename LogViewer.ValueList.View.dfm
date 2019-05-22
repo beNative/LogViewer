@@ -1,4 +1,4 @@
-object frmValueList: TfrmValueList
+object frmValueListView: TfrmValueListView
   Left = 0
   Top = 0
   ClientHeight = 569

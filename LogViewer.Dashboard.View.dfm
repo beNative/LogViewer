@@ -5,7 +5,6 @@ object frmDashboard: TfrmDashboard
   ClientHeight = 616
   ClientWidth = 1046
   Color = clWhite
-  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -269,15 +268,15 @@ object frmDashboard: TfrmDashboard
             314
             616)
           object edtBroker: TLabeledEdit
-            Left = 64
+            Left = 48
             Top = 31
-            Width = 84
+            Width = 161
             Height = 21
             Alignment = taCenter
             Anchors = [akLeft, akTop, akRight]
-            EditLabel.Width = 47
+            EditLabel.Width = 35
             EditLabel.Height = 13
-            EditLabel.Caption = 'edtBroker'
+            EditLabel.Caption = 'Broker:'
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWindowText
             Font.Height = -11
@@ -300,15 +299,15 @@ object frmDashboard: TfrmDashboard
             TabOrder = 1
           end
           object edtMQTTPort: TLabeledEdit
-            Left = 225
+            Left = 249
             Top = 31
             Width = 56
             Height = 21
             Alignment = taCenter
             Anchors = [akTop, akRight]
-            EditLabel.Width = 64
+            EditLabel.Width = 24
             EditLabel.Height = 13
-            EditLabel.Caption = 'edtMQTTPort'
+            EditLabel.Caption = 'Port:'
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWindowText
             Font.Height = -11

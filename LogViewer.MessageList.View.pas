@@ -34,29 +34,21 @@ uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes, System.ImageList,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
-  Vcl.ExtCtrls, Vcl.Buttons, Vcl.ComCtrls, Vcl.ImgList, Vcl.Grids, Vcl.DBGrids,
-  Data.DB,
+  Vcl.ExtCtrls, Vcl.Buttons, Vcl.ComCtrls, Vcl.ImgList, Vcl.Grids,
 
-  FireDAC.Comp.Client, FireDAC.Stan.Intf, FireDAC.Comp.DataSet,
-  FireDAC.Stan.StorageBin,
-
-  VirtualTrees,
+  VirtualTrees, kcontrols, kpagecontrol, OMultiPanel,
 
   Spring, Spring.Collections,
 
   DDuce.Editor.Interfaces, DDuce.Logger.Interfaces, DDuce.Components.ValueList,
-  DDuce.Components.DBGridView,
 
   LogViewer.Messages.Data, LogViewer.Watches.Data, LogViewer.Watches.View,
   LogViewer.Interfaces, LogViewer.CallStack.Data, LogViewer.CallStack.View,
   LogViewer.ValueList.View, LogViewer.MessageList.Settings,
-  LogViewer.MessageList.LogNode, LogViewer.DisplayValues.Settings, OMultiPanel,
-  kcontrols, kpagecontrol;
+  LogViewer.MessageList.LogNode, LogViewer.DisplayValues.Settings;
 
 type
   TfrmMessageList = class(TForm, ILogViewer)
-    {$REGION 'designer controls'}
-    dscMain           : TDataSource;
     imlMessageTypes   : TImageList;
     pnlMain: TOMultiPanel;
     pnlMessages: TPanel;
@@ -69,36 +61,6 @@ type
     pnlCallStackTitle: TPanel;
     pnlWatches: TPanel;
     pnlWatchTitle: TPanel;
-    KTabSheet1: TKTabSheet;
-    KPageControl1: TKPageControl;
-    KTabSheet2: TKTabSheet;
-    KTabSheet3: TKTabSheet;
-    Panel1: TPanel;
-    KTabSheet4: TKTabSheet;
-    Panel2: TPanel;
-    LabeledEdit1: TLabeledEdit;
-    LabeledEdit2: TLabeledEdit;
-    LabeledEdit3: TLabeledEdit;
-    LabeledEdit4: TLabeledEdit;
-    ScrollBox1: TScrollBox;
-    Image1: TImage;
-    KTabSheet5: TKTabSheet;
-    KTabSheet6: TKTabSheet;
-    KTabSheet7: TKTabSheet;
-    KPageControl2: TKPageControl;
-    KTabSheet8: TKTabSheet;
-    KTabSheet9: TKTabSheet;
-    Panel3: TPanel;
-    KTabSheet10: TKTabSheet;
-    Panel4: TPanel;
-    LabeledEdit5: TLabeledEdit;
-    LabeledEdit6: TLabeledEdit;
-    LabeledEdit7: TLabeledEdit;
-    LabeledEdit8: TLabeledEdit;
-    ScrollBox2: TScrollBox;
-    Image2: TImage;
-    KTabSheet11: TKTabSheet;
-    KTabSheet12: TKTabSheet;
     pgcMessageData: TKPageControl;
     tsMessageView: TKTabSheet;
     pgcMessageDetails: TKPageControl;
@@ -107,12 +69,6 @@ type
     pnlTextViewer: TPanel;
     tsImageViewer: TKTabSheet;
     Panel6: TPanel;
-    LabeledEdit9: TLabeledEdit;
-    LabeledEdit10: TLabeledEdit;
-    LabeledEdit11: TLabeledEdit;
-    LabeledEdit12: TLabeledEdit;
-    ScrollBox3: TScrollBox;
-    Image3: TImage;
     tsDataSet: TKTabSheet;
     tsRawData: TKTabSheet;
     {$ENDREGION}
@@ -154,9 +110,7 @@ type
     FVKPressed                   : Boolean;
     FSettings                    : TMessageListSettings;
     FAutoSizeColumns             : Boolean;
-    FValueList                   : TfrmValueList;
-    FDataSet                     : TFDMemTable;
-    FDBGridView                  : TDBGridView;
+    FValueList                   : TfrmValueListView;
     FMiliSecondsBetweenSelection : Integer;
 
     {$REGION 'property access methods'}
@@ -379,7 +333,7 @@ uses
   Spring.Helpers,
 
   DDuce.Factories.VirtualTrees, DDuce.Editor.Factories, DDuce.Reflect,
-  DDuce.Utils, DDuce.Factories.GridView, DDuce.Logger,
+  DDuce.Utils, DDuce.Logger,
 
   DDuce.ObjectInspector.zObjectInspector, DDuce.DynamicRecord,
 
@@ -431,9 +385,7 @@ begin
 
   FLogTreeView.PopupMenu := Manager.Menus.LogTreeViewerPopupMenu;
 
-  FDataSet    := TFDMemTable.Create(Self);
-  FDBGridView := TGridViewFactory.CreateDBGridView(Self, tsDataSet, dscMain);
-  FDBGridView.BorderStyle := bsNone;
+
 
   ApplySettings;
 end;
@@ -459,8 +411,6 @@ begin
   FreeAndNIl(FWatchesView);
   FreeAndNil(FCallStackView);
   FreeAndNil(FLogTreeView);
-  FreeAndNil(FDataSet);
-  FreeAndNil(FDBGridView);
   inherited BeforeDestruction;
 end;
 
@@ -583,7 +533,7 @@ end;
 
 procedure TfrmMessageList.CreateValueListView;
 begin
-  FValueList := TfrmValueList.Create(Self, DisplayValuesSettings);
+  FValueList := TfrmValueListView.Create(Self, DisplayValuesSettings);
   AssignFormParent(FValueList, tsValueList);
 end;
 
@@ -1471,7 +1421,6 @@ begin
 //  edtHeight.Text      := '';
 //  edtPixelFormat.Text := '';
 //  edtHandleType.Text  := '';
-  FDataSet.Active     := False;
   EditorView.Clear;
   if Assigned(FValueList) then
     FValueList.Clear;
@@ -1777,9 +1726,9 @@ begin
 //  tsTextViewer.TabVisible  := False;
   pgcMessageDetails.ActivePage := tsDataSet;
   ALogNode.MessageData.Position := 0;
-  FDataSet.LoadFromStream(ALogNode.MessageData);
-  dscMain.DataSet := FDataSet;
-  FDBGridView.AutoSizeCols;
+//  FDataSet.LoadFromStream(ALogNode.MessageData);
+//  dscMain.DataSet := FDataSet;
+//  FDBGridView.AutoSizeCols;
 end;
 
 procedure TfrmMessageList.UpdateMessageDetails(ALogNode: TLogNode);
