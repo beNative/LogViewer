@@ -51,11 +51,12 @@ The Object Pascal (Delphi) sources depend on the following open source libraries
   * [DDuce](http://github.com/beNative/dduce)
   * [ZeroMQ](http://github.com/beNative/Delphi-ZeroMQ)
   * [zcontrols](http://github.com/beNative/zcontrols)
-  * [TBCEditor](https://github.com/beNative/TBCEditor)
-  * [TChromeTabs](https://github.com/norgepaul/TChromeTabs)
-  * [Ararat Synapse](https://sourceforge.net/projects/synalist/)
+  * [TBCEditor](http://github.com/beNative/TBCEditor)
+  * [TChromeTabs](http://github.com/norgepaul/TChromeTabs)
+  * [Ararat Synapse](http://sourceforge.net/projects/synalist/)
   * [OMultiPanel](http://www.kluug.net)
-  * [JsonDataObjects](https://github.com/ahausladen/JsonDataObjects)
+  * [KControls](http://bitbucket.org/tomkrysl/kcontrols/src/default/)
+  * [JsonDataObjects](http://github.com/ahausladen/JsonDataObjects)
 
 ## Screenshots
 Here is a preliminary look of the application (2018/09/22):
