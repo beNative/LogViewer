@@ -42,7 +42,7 @@ type
 
   public
     procedure AfterConstruction; override;
-    procedure BeforeDestruction; override;
+    destructor Destroy; override;
 
     procedure Assign(Source: TPersistent); override;
 
@@ -67,10 +67,10 @@ begin
   FPathNames := TStringList.Create;
 end;
 
-procedure TFileSystemSettings.BeforeDestruction;
+destructor TFileSystemSettings.Destroy;
 begin
   FPathNames.Free;
-  inherited BeforeDestruction;
+  inherited Destroy;
 end;
 {$ENDREGION}
 

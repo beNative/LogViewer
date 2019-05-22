@@ -46,7 +46,8 @@ uses
   DDuce.Components.Factories, DDuce.DynamicRecord, DDuce.EditList,
 
   LogViewer.Interfaces, LogViewer.Dashboard.Data,
-  LogViewer.Receivers.ComPort.Settings.View;
+  LogViewer.Receivers.ComPort.Settings.View, OMultiPanel, kcontrols,
+  kpagecontrol;
 
 type
   TDashboardNode = TVTNode<TDashboardData>;
@@ -65,37 +66,36 @@ type
     actMoveUpEndpoint          : TAction;
     actSubscribeToLocalHost    : TAction;
     actSubscribeToSelection    : TAction;
-    btnAddZMQNodeForLogViewer  : TButton;
-    btnAddZMQNodeLocalHost     : TButton;
-    edtBroker                  : TLabeledEdit;
-    edtMQTTPort                : TLabeledEdit;
     imlMain                    : TImageList;
-    lblWinIPCDescription       : TLabel;
-    lblWinODSDescription       : TLabel;
-    mniCloseSsubscriber        : TMenuItem;
-    pgcMain                    : TPageControl;
-    pnlCOMPorts                : TPanel;
-    pnlCOMPortTitle            : TPanel;
-    pnlFileSystemTitle         : TPanel;
-    pnlFSLocations             : TPanel;
-    pnlLeft                    : TPanel;
-    pnlLogChannels             : TPanel;
-    pnlMQTTTitle               : TPanel;
-    pnlMQTTTopics              : TPanel;
-    pnlRight                   : TPanel;
-    pnlWinIPCTitle             : TPanel;
-    pnlWinODSTitle             : TPanel;
-    pnlZeroMQButtons           : TGridPanel;
-    pnlZeroMQTitle             : TPanel;
-    pnlZMQEndpoints            : TPanel;
-    ppmMain                    : TPopupMenu;
-    splVertical                : TSplitter;
-    tsCOMPort                  : TTabSheet;
-    tsFileSystem               : TTabSheet;
-    tsMQTT                     : TTabSheet;
-    tsWinIPC                   : TTabSheet;
-    tsWinODS                   : TTabSheet;
-    tsZeroMQ                   : TTabSheet;
+    pnlMain: TOMultiPanel;
+    pnlLeft: TPanel;
+    pnlRight: TPanel;
+    ppmMain: TPopupMenu;
+    mniCloseSsubscriber: TMenuItem;
+    pgcMain: TKPageControl;
+    tsWinIPC: TKTabSheet;
+    lblWinIPC: TLabel;
+    pnlWinIPCTitle: TPanel;
+    tsWinODS: TKTabSheet;
+    lblWinODS: TLabel;
+    pnlWinODSTitle: TPanel;
+    tsZeroMQ: TKTabSheet;
+    pnlZMQEndpoints: TPanel;
+    Panel4: TPanel;
+    pnlButtons: TGridPanel;
+    btnSubscribeToLocalHost: TButton;
+    btnAddSubscribeToLogViewer: TButton;
+    tsMQTT: TKTabSheet;
+    edtBroker: TLabeledEdit;
+    pnlMQTTTopics: TPanel;
+    edtMQTTPort: TLabeledEdit;
+    pnlMQTTTitle: TPanel;
+    tsFileSystem: TKTabSheet;
+    pnlFileSystemTitle: TPanel;
+    pnlFSLocations: TPanel;
+    tsCOMPort: TKTabSheet;
+    pnlCOMPorts: TPanel;
+    pnlCOMPortTitle: TPanel;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -104,6 +104,9 @@ type
     procedure actAddSubscribeToLogViewerExecute(Sender: TObject);
     procedure actSubscribeToSelectionExecute(Sender: TObject);
     procedure actCloseSubscriberExecute(Sender: TObject);
+    {$ENDREGION}
+
+    {$REGION 'event handlers'}
     procedure edtBrokerExit(Sender: TObject);
     procedure edtMQTTPortExit(Sender: TObject);
     {$ENDREGION}
@@ -249,8 +252,6 @@ type
       AManager : ILogViewerManager
     ); reintroduce; virtual;
     procedure AfterConstruction; override;
-
-    procedure BeforeDestruction; override;
     destructor Destroy; override;
 
   end;
@@ -307,13 +308,6 @@ begin
   InitializeTreeView;
   InitializeControls;
   CreateChannelReceivers;
-end;
-
-procedure TfrmDashboard.BeforeDestruction;
-begin
-  Logger.Track(Self, 'BeforeDestruction');
-
-  inherited BeforeDestruction;
 end;
 
 destructor TfrmDashboard.Destroy;
@@ -521,8 +515,6 @@ var
   V  : ILogViewer;
 begin
   DN := FTreeView.GetNodeData<TDashboardNode>(FTreeView.FocusedNode);
-  Logger.SendObject('DN.Data', DN.Data);
-  Logger.SendInterface('DN.Data.Subscriber', DN.Data.Subscriber);
   for V in FManager.Views do
   begin
     Logger.SendInterface('V.Subscriber', V.Subscriber);
@@ -1016,7 +1008,7 @@ var
 begin
   for I := 0 to pgcMain.PageCount - 1 do
   begin
-    pgcMain.Pages[I].TabVisible := False;
+    //pgcMain.Pages[I].TabVisible := False;
   end;
 //  FComPortSettingsForm := TfrmComPortSettings.Create(
 //    Self, FManager.Settings.ComPortSettings

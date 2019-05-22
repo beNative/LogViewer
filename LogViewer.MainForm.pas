@@ -47,21 +47,25 @@ type
     actShowVersion    : TAction;
     ctMain            : TChromeTabs;
     imlMain           : TImageList;
+    pbrCPU            : TKPercentProgressBar;
+    pnlDelta          : TPanel;
     pnlMainClient     : TPanel;
+    pnlMemory         : TPanel;
+    pnlMessageCount   : TPanel;
+    pnlSourceName     : TPanel;
     pnlStatusBar      : TPanel;
     pnlTop            : TPanel;
-    tskbrMain         : TTaskbar;
+    shpLine           : TShape;
     tmrPoll           : TTimer;
-    pnlSourceName     : TPanel;
-    pnlDelta          : TPanel;
-    pbrCPU            : TKPercentProgressBar;
-    pnlMessageCount   : TPanel;
-    pnlMemory         : TPanel;
+    tskbrMain         : TTaskbar;
     {$ENDREGION}
 
+    {$REGION 'action handlers'}
     procedure actCenterToScreenExecute(Sender: TObject);
     procedure actShowVersionExecute(Sender: TObject);
+    {$ENDREGION}
 
+    {$REGION 'event handlers'}
     procedure ctMainButtonCloseTabClick(
       Sender    : TObject;
       ATab      : TChromeTab;
@@ -78,6 +82,7 @@ type
     );
     procedure FormShortCut(var Msg: TWMKey; var Handled: Boolean);
     procedure tmrPollTimer(Sender: TObject);
+    {$ENDREGION}
 
   private
     FManager     : ILogViewerManager;
@@ -194,7 +199,7 @@ begin
   try
     FSettings.Load;
   except
-    // ignore it
+    // ignore it and continue with defaults
   end;
   FManager := TLogViewerFactories.CreateManager(Self, FSettings);
   Events.OnAddLogViewer.Add(EventsAddLogViewer);
@@ -334,7 +339,7 @@ begin
   ctMain.Tabs.Add;
   ctMain.ActiveTab.Data := Pointer(ALogViewer);
   ctMain.ActiveTab.Caption :=
-    Format('%s (%s, %d)      . ', [
+    Format('%s (%s, %d)         . ', [
       ALogViewer.Subscriber.Receiver.ToString,
       S,
       ALogViewer.Subscriber.SourceId
@@ -441,12 +446,10 @@ begin
   if Trim(S) <> '' then
   begin
     APanel.Width := GetTextWidth(APanel.Caption, APanel.Font) + 10;
-    APanel.BevelKind := bkFlat;
     APanel.AlignWithMargins := True;
   end
   else
   begin
-    APanel.BevelKind := bkNone;
     APanel.Width := 0;
     APanel.AlignWithMargins := False;
   end;
@@ -471,13 +474,11 @@ begin
     begin
       pnlDelta.Caption := Format('Delta: %dms', [N]);
       pnlDelta.Color := clWhite;
-      pnlDelta.BevelKind := bkFlat;
     end
     else
     begin
       pnlDelta.Caption := '';
       pnlDelta.Color := clBtnFace;
-      pnlDelta.BevelKind := bkNone;
     end;
     S := Format(
       '<b>%d</b></x>',

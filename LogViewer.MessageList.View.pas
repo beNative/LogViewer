@@ -50,44 +50,71 @@ uses
   LogViewer.Messages.Data, LogViewer.Watches.Data, LogViewer.Watches.View,
   LogViewer.Interfaces, LogViewer.CallStack.Data, LogViewer.CallStack.View,
   LogViewer.ValueList.View, LogViewer.MessageList.Settings,
-  LogViewer.MessageList.LogNode, LogViewer.DisplayValues.Settings;
+  LogViewer.MessageList.LogNode, LogViewer.DisplayValues.Settings, OMultiPanel,
+  kcontrols, kpagecontrol;
 
 type
   TfrmMessageList = class(TForm, ILogViewer)
     {$REGION 'designer controls'}
     dscMain           : TDataSource;
-    edtHandleType     : TLabeledEdit;
-    edtHeight         : TLabeledEdit;
-    edtMessageFilter  : TButtonedEdit;
-    edtPixelFormat    : TLabeledEdit;
-    edtWidth          : TLabeledEdit;
-    imgBitmap         : TImage;
     imlMessageTypes   : TImageList;
-    pgcMessageData    : TPageControl;
-    pgcMessageDetails : TPageControl;
-    pnlCallStack      : TPanel;
-    pnlCallStackTitle : TPanel;
-    pnlCallStackWatch : TPanel;
-    pnlFilter         : TPanel;
-    pnlImageViewer    : TPanel;
-    pnlLeft           : TPanel;
-    pnlLeftBottom     : TPanel;
-    pnlMessageContent : TPanel;
-    pnlMessages       : TPanel;
-    pnlRawMessageData : TPanel;
-    pnlRight          : TPanel;
-    pnlTextViewer     : TPanel;
-    pnlWatches        : TPanel;
-    sbxImage          : TScrollBox;
-    splLeftHorizontal : TSplitter;
-    splLeftVertical   : TSplitter;
-    splVertical       : TSplitter;
-    tsDataSet         : TTabSheet;
-    tsImageViewer     : TTabSheet;
-    tsMessageView     : TTabSheet;
-    tsRawData         : TTabSheet;
-    tsTextViewer      : TTabSheet;
-    tsValueList       : TTabSheet;
+    pnlMain: TOMultiPanel;
+    pnlMessages: TPanel;
+    pnlFilter: TPanel;
+    edtMessageFilter: TButtonedEdit;
+    pnlRight: TPanel;
+    pnlMessageContent: TPanel;
+    pnlLeft: TOMultiPanel;
+    pnlCallStack: TPanel;
+    pnlCallStackTitle: TPanel;
+    pnlWatches: TPanel;
+    pnlWatchTitle: TPanel;
+    KTabSheet1: TKTabSheet;
+    KPageControl1: TKPageControl;
+    KTabSheet2: TKTabSheet;
+    KTabSheet3: TKTabSheet;
+    Panel1: TPanel;
+    KTabSheet4: TKTabSheet;
+    Panel2: TPanel;
+    LabeledEdit1: TLabeledEdit;
+    LabeledEdit2: TLabeledEdit;
+    LabeledEdit3: TLabeledEdit;
+    LabeledEdit4: TLabeledEdit;
+    ScrollBox1: TScrollBox;
+    Image1: TImage;
+    KTabSheet5: TKTabSheet;
+    KTabSheet6: TKTabSheet;
+    KTabSheet7: TKTabSheet;
+    KPageControl2: TKPageControl;
+    KTabSheet8: TKTabSheet;
+    KTabSheet9: TKTabSheet;
+    Panel3: TPanel;
+    KTabSheet10: TKTabSheet;
+    Panel4: TPanel;
+    LabeledEdit5: TLabeledEdit;
+    LabeledEdit6: TLabeledEdit;
+    LabeledEdit7: TLabeledEdit;
+    LabeledEdit8: TLabeledEdit;
+    ScrollBox2: TScrollBox;
+    Image2: TImage;
+    KTabSheet11: TKTabSheet;
+    KTabSheet12: TKTabSheet;
+    pgcMessageData: TKPageControl;
+    tsMessageView: TKTabSheet;
+    pgcMessageDetails: TKPageControl;
+    tsValueList: TKTabSheet;
+    tsTextViewer: TKTabSheet;
+    pnlTextViewer: TPanel;
+    tsImageViewer: TKTabSheet;
+    Panel6: TPanel;
+    LabeledEdit9: TLabeledEdit;
+    LabeledEdit10: TLabeledEdit;
+    LabeledEdit11: TLabeledEdit;
+    LabeledEdit12: TLabeledEdit;
+    ScrollBox3: TScrollBox;
+    Image3: TImage;
+    tsDataSet: TKTabSheet;
+    tsRawData: TKTabSheet;
     {$ENDREGION}
 
     procedure edtMessageFilterChange(Sender: TObject);
@@ -388,7 +415,7 @@ begin
   CreateValueListView;
   pgcMessageData.ActivePage := tsMessageView;
   // TEMP TSI
-  tsRawData.TabVisible      := True;
+  //tsRawData.TabVisible      := True;
 //  tsRawData.TabVisible      := False;
 //  tsMessageView.TabVisible  := False;
 //  tsValueList.TabVisible    := False;
@@ -565,7 +592,7 @@ begin
   FWatches := TWatchList.Create;
   FWatchesView := TLogViewerFactories.CreateWatchesView(
     Self,
-    pnlLeftBottom,
+    pnlWatches,
     FWatches,
     FSettings.WatchSettings,
     DisplayValuesSettings
@@ -631,7 +658,7 @@ begin
   else
   begin
     edtMessageFilter.Font.Style := [];
-    edtMessageFilter.Color := clBtnFace;
+    edtMessageFilter.Color := clWhite;
   end;
 
   if Settings.AutoFilterMessages then
@@ -697,13 +724,13 @@ end;
 procedure TfrmMessageList.edtMessageFilterMouseEnter(Sender: TObject);
 begin
   if not edtMessageFilter.Focused then
-    edtMessageFilter.Color := clWhite;
+    edtMessageFilter.Color := clYellow;
 end;
 
 procedure TfrmMessageList.edtMessageFilterMouseLeave(Sender: TObject);
 begin
   if not edtMessageFilter.Focused then
-    edtMessageFilter.Color := clBtnFace;
+    edtMessageFilter.Color := clWhite;
 end;
 {$ENDREGION}
 
@@ -1439,11 +1466,11 @@ end;
 
 procedure TfrmMessageList.ClearMessageDetailsControls;
 begin
-  imgBitmap.Picture   := nil;
-  edtWidth.Text       := '';
-  edtHeight.Text      := '';
-  edtPixelFormat.Text := '';
-  edtHandleType.Text  := '';
+//  imgBitmap.Picture   := nil;
+//  edtWidth.Text       := '';
+//  edtHeight.Text      := '';
+//  edtPixelFormat.Text := '';
+//  edtHandleType.Text  := '';
   FDataSet.Active     := False;
   EditorView.Clear;
   if Assigned(FValueList) then
@@ -1650,20 +1677,20 @@ procedure TfrmMessageList.UpdateBitmapDisplay(ALogNode: TLogNode);
 begin
   if Assigned(ALogNode.MessageData) then
   begin
-    tsValueList.TabVisible   := False;
-    tsImageViewer.TabVisible := False;
-    tsDataSet.TabVisible     := False;
-    tsTextViewer.TabVisible  := False;
+//    tsValueList.TabVisible   := False;
+//    tsImageViewer.TabVisible := False;
+//    tsDataSet.TabVisible     := False;
+//    tsTextViewer.TabVisible  := False;
     ALogNode.MessageData.Position := 0;
-    imgBitmap.Picture.Bitmap.LoadFromStream(ALogNode.MessageData);
-    pgcMessageDetails.ActivePage := tsImageViewer;
-    with imgBitmap.Picture do
-    begin
-      edtWidth.Text       := Bitmap.Width.ToString;
-      edtHeight.Text      := Bitmap.Height.ToString;
-      edtPixelFormat.Text := Reflect.EnumName(Bitmap.PixelFormat);
-      edtHandleType.Text  := Reflect.EnumName(Bitmap.HandleType);
-    end;
+//    imgBitmap.Picture.Bitmap.LoadFromStream(ALogNode.MessageData);
+//    pgcMessageDetails.ActivePage := tsImageViewer;
+//    with imgBitmap.Picture do
+//    begin
+//      edtWidth.Text       := Bitmap.Width.ToString;
+//      edtHeight.Text      := Bitmap.Height.ToString;
+//      edtPixelFormat.Text := Reflect.EnumName(Bitmap.PixelFormat);
+//      edtHandleType.Text  := Reflect.EnumName(Bitmap.HandleType);
+//    end;
   end;
 end;
 
@@ -1722,10 +1749,10 @@ begin
   begin
     LStream := TStringStream.Create('', TEncoding.ANSI);
     try
-      tsValueList.TabVisible   := False;
-      tsImageViewer.TabVisible := False;
-      tsDataSet.TabVisible     := False;
-      tsTextViewer.TabVisible  := False;
+//      tsValueList.TabVisible   := False;
+//      tsImageViewer.TabVisible := False;
+//      tsDataSet.TabVisible     := False;
+//      tsTextViewer.TabVisible  := False;
       pgcMessageDetails.ActivePage := tsTextViewer;
       ALogNode.MessageData.Position := 0;
       ObjectBinaryToText(ALogNode.MessageData, LStream);
@@ -1744,10 +1771,10 @@ end;
 
 procedure TfrmMessageList.UpdateDataSetDisplay(ALogNode: TLogNode);
 begin
-  tsValueList.TabVisible   := False;
-  tsImageViewer.TabVisible := False;
-  tsDataSet.TabVisible     := False;
-  tsTextViewer.TabVisible  := False;
+//  tsValueList.TabVisible   := False;
+//  tsImageViewer.TabVisible := False;
+//  tsDataSet.TabVisible     := False;
+//  tsTextViewer.TabVisible  := False;
   pgcMessageDetails.ActivePage := tsDataSet;
   ALogNode.MessageData.Position := 0;
   FDataSet.LoadFromStream(ALogNode.MessageData);
@@ -1793,10 +1820,10 @@ procedure TfrmMessageList.UpdateTextDisplay(ALogNode: TLogNode);
 var
   S : string;
 begin
-  tsValueList.TabVisible   := False;
-  tsTextViewer.TabVisible  := False;
-  tsImageViewer.TabVisible := False;
-  tsDataSet.TabVisible     := False;
+//  tsValueList.TabVisible   := False;
+//  tsTextViewer.TabVisible  := False;
+//  tsImageViewer.TabVisible := False;
+//  tsDataSet.TabVisible     := False;
   pgcMessageDetails.ActivePage := tsTextViewer;
   EditorView.Text := ALogNode.Value;
   S := ALogNode.Highlighter;
@@ -1808,10 +1835,10 @@ procedure TfrmMessageList.UpdateTextStreamDisplay(ALogNode: TLogNode);
 var
   LStream : TStringStream;
 begin
-  tsValueList.TabVisible   := False;
-  tsImageViewer.TabVisible := False;
-  tsDataSet.TabVisible     := False;
-  tsTextViewer.TabVisible  := False;
+//  tsValueList.TabVisible   := False;
+//  tsImageViewer.TabVisible := False;
+//  tsDataSet.TabVisible     := False;
+//  tsTextViewer.TabVisible  := False;
   pgcMessageDetails.ActivePage := tsTextViewer;
   if ALogNode.MessageData = nil then
   begin

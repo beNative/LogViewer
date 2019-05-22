@@ -2,7 +2,7 @@ object frmMessageList: TfrmMessageList
   Left = 0
   Top = 0
   ClientHeight = 746
-  ClientWidth = 1073
+  ClientWidth = 1261
   Color = clWhite
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -15,133 +15,212 @@ object frmMessageList: TfrmMessageList
   OnClose = FormClose
   PixelsPerInch = 96
   TextHeight = 13
-  object splVertical: TSplitter
-    Left = 740
+  object pnlMain: TOMultiPanel
+    Left = 0
     Top = 0
-    Width = 8
+    Width = 1261
     Height = 746
-    Align = alRight
-    Color = clBtnFace
-    ParentColor = False
-    ExplicitLeft = 742
-  end
-  object splLeftVertical: TSplitter
-    Left = 313
-    Top = 0
-    Width = 8
-    Height = 746
-    Color = clBtnFace
-    ParentColor = False
-  end
-  object pnlRight: TPanel
-    Left = 748
-    Top = 0
-    Width = 325
-    Height = 746
-    Align = alRight
-    BevelOuter = bvNone
-    Constraints.MinWidth = 100
-    ParentBackground = False
+    PanelCollection = <
+      item
+        Control = pnlLeft
+        Position = 0.150000000000000000
+        Visible = True
+        Index = 0
+      end
+      item
+        Control = pnlMessages
+        Position = 0.666666666666666600
+        Visible = True
+        Index = 1
+      end
+      item
+        Control = pnlRight
+        Position = 1.000000000000000000
+        Visible = True
+        Index = 2
+      end>
+    MinPosition = 0.020000000000000000
+    SplitterSize = 2
+    SplitterColor = cl3DLight
+    SplitterHoverColor = clScrollBar
+    Align = alClient
+    BevelEdges = []
     TabOrder = 0
-    object pnlMessageContent: TPanel
-      Left = 0
+    ExplicitLeft = 264
+    ExplicitTop = 74
+    ExplicitWidth = 777
+    ExplicitHeight = 599
+    DesignSize = (
+      1261
+      746)
+    object pnlMessages: TPanel
+      Left = 191
       Top = 0
-      Width = 325
-      Height = 20
-      Align = alTop
-      Alignment = taLeftJustify
-      BevelOuter = bvNone
-      Caption = 'Message Details'
-      Font.Charset = ANSI_CHARSET
-      Font.Color = clGray
-      Font.Height = -15
-      Font.Name = 'Segoe UI'
-      Font.Style = []
-      ParentBackground = False
-      ParentFont = False
-      TabOrder = 0
-    end
-    object pnlRawMessageData: TPanel
-      Left = 0
-      Top = 20
-      Width = 325
-      Height = 726
-      Margins.Left = 0
-      Margins.Top = 1
-      Margins.Right = 0
-      Margins.Bottom = 0
+      Width = 650
+      Height = 746
       Align = alClient
       BevelOuter = bvNone
+      BevelWidth = 2
       Color = clWhite
-      ParentBackground = False
       TabOrder = 1
-      StyleElements = [seFont, seBorder]
-      object pgcMessageData: TPageControl
+      OnResize = pnlMessagesResize
+      object pnlFilter: TPanel
         Left = 0
         Top = 0
-        Width = 325
-        Height = 726
-        Margins.Left = 0
-        Margins.Top = 0
-        Margins.Right = 0
-        Margins.Bottom = 0
-        ActivePage = tsMessageView
-        Align = alClient
+        Width = 650
+        Height = 14
+        Align = alTop
+        BevelOuter = bvNone
+        ParentColor = True
         TabOrder = 0
-        object tsMessageView: TTabSheet
-          Caption = 'Messageview'
-          object pgcMessageDetails: TPageControl
+        StyleElements = [seFont, seBorder]
+        ExplicitWidth = 386
+        object edtMessageFilter: TButtonedEdit
+          Left = 0
+          Top = 0
+          Width = 650
+          Height = 14
+          Margins.Left = 0
+          Margins.Top = 0
+          Margins.Right = 0
+          Margins.Bottom = 0
+          Align = alClient
+          Alignment = taCenter
+          AutoSize = False
+          BevelEdges = []
+          BevelInner = bvNone
+          BevelOuter = bvNone
+          BorderStyle = bsNone
+          Color = clWhite
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = []
+          Images = dmManager.imlMain
+          ParentFont = False
+          RightButton.ImageIndex = 15
+          RightButton.Visible = True
+          TabOrder = 0
+          TextHint = 'Start typing to filter messages'
+          OnChange = edtMessageFilterChange
+          OnKeyDown = edtMessageFilterKeyDown
+          OnKeyUp = edtMessageFilterKeyUp
+          OnMouseEnter = edtMessageFilterMouseEnter
+          OnMouseLeave = edtMessageFilterMouseLeave
+          ExplicitWidth = 386
+        end
+      end
+    end
+    object pnlRight: TPanel
+      Left = 843
+      Top = 0
+      Width = 418
+      Height = 746
+      Align = alRight
+      BevelOuter = bvNone
+      Constraints.MinWidth = 100
+      ParentColor = True
+      TabOrder = 2
+      object pnlMessageContent: TPanel
+        Left = 0
+        Top = 0
+        Width = 418
+        Height = 20
+        Align = alTop
+        Alignment = taLeftJustify
+        BevelOuter = bvNone
+        Caption = 'Message Details'
+        Color = clWhite
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clGray
+        Font.Height = -15
+        Font.Name = 'Segoe UI'
+        Font.Style = []
+        ParentBackground = False
+        ParentFont = False
+        TabOrder = 0
+        ExplicitWidth = 256
+      end
+      object pgcMessageData: TKPageControl
+        Left = 0
+        Top = 20
+        Width = 418
+        Height = 726
+        ActivateNewDocked = False
+        ActivePageIndex = 0
+        Align = alClient
+        HotTrack = False
+        ParentBackground = True
+        TabHeight = 0
+        TabOrder = 1
+        TabPanelOptions.Colors.HotTop = clBtnHighlight
+        TabPanelOptions.Colors.HotBottom = clBtnHighlight
+        TabPanelOptions.Colors.NormalTop = clBtnHighlight
+        TabPanelOptions.Colors.SelectedTop = clBtnHighlight
+        TabPanelOptions.Colors.SelectedBottom = clBtnHighlight
+        TabPanelOptions.Colors.TabBorder = cl3DLight
+        TabPanelOptions.Options = [toDrag, toBrightTopColors]
+        ExplicitLeft = 18
+        ExplicitTop = 144
+        ExplicitWidth = 400
+        ExplicitHeight = 300
+        object tsMessageView: TKTabSheet
+          Caption = 'MessageView'
+          ExplicitTop = 24
+          ExplicitWidth = 400
+          ExplicitHeight = 276
+          object pgcMessageDetails: TKPageControl
             Left = 0
             Top = 0
-            Width = 317
-            Height = 698
-            Margins.Left = 0
-            Margins.Top = 0
-            Margins.Right = 0
-            Margins.Bottom = 0
-            ActivePage = tsDataSet
+            Width = 418
+            Height = 726
+            ActivePageIndex = 0
             Align = alClient
-            Style = tsFlatButtons
+            ParentBackground = True
             TabOrder = 0
-            StyleElements = [seFont]
-            object tsValueList: TTabSheet
+            TabPanelOptions.Colors.HotTop = clBtnHighlight
+            TabPanelOptions.Colors.HotBottom = clBtnHighlight
+            TabPanelOptions.Colors.NormalTop = clBtnHighlight
+            TabPanelOptions.Colors.NormalText = clGray
+            TabPanelOptions.Colors.SelectedTop = cl3DLight
+            TabPanelOptions.Colors.SelectedBottom = cl3DLight
+            TabPanelOptions.Colors.TabBorder = clWhite
+            TabPanelOptions.Options = [toDrag, toBrightTopColors]
+            ExplicitWidth = 400
+            ExplicitHeight = 276
+            object tsValueList: TKTabSheet
               Caption = 'Value list'
-              ImageIndex = 2
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
+              ExplicitWidth = 400
+              ExplicitHeight = 252
             end
-            object tsTextViewer: TTabSheet
+            object tsTextViewer: TKTabSheet
               Caption = 'Text viewer'
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
+              ExplicitWidth = 400
+              ExplicitHeight = 252
               object pnlTextViewer: TPanel
                 Left = 0
                 Top = 0
-                Width = 309
-                Height = 664
+                Width = 418
+                Height = 702
                 Align = alClient
                 BevelEdges = []
                 BevelOuter = bvNone
                 Color = clWhite
                 TabOrder = 0
+                ExplicitWidth = 400
+                ExplicitHeight = 252
               end
             end
-            object tsImageViewer: TTabSheet
+            object tsImageViewer: TKTabSheet
               Caption = 'Image viewer'
-              ImageIndex = 1
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
-              object pnlImageViewer: TPanel
+              ExplicitWidth = 400
+              ExplicitHeight = 252
+              object Panel6: TPanel
                 Left = 0
                 Top = 0
-                Width = 309
-                Height = 664
+                Width = 418
+                Height = 702
                 Margins.Left = 0
                 Margins.Top = 0
                 Margins.Right = 0
@@ -150,7 +229,9 @@ object frmMessageList: TfrmMessageList
                 BevelEdges = []
                 BevelOuter = bvNone
                 TabOrder = 0
-                object edtWidth: TLabeledEdit
+                ExplicitWidth = 400
+                ExplicitHeight = 252
+                object LabeledEdit9: TLabeledEdit
                   Left = 64
                   Top = 6
                   Width = 73
@@ -161,7 +242,7 @@ object frmMessageList: TfrmMessageList
                   LabelPosition = lpLeft
                   TabOrder = 0
                 end
-                object edtPixelFormat: TLabeledEdit
+                object LabeledEdit10: TLabeledEdit
                   Left = 64
                   Top = 33
                   Width = 73
@@ -172,7 +253,7 @@ object frmMessageList: TfrmMessageList
                   LabelPosition = lpLeft
                   TabOrder = 1
                 end
-                object edtHandleType: TLabeledEdit
+                object LabeledEdit11: TLabeledEdit
                   Left = 224
                   Top = 33
                   Width = 73
@@ -183,7 +264,7 @@ object frmMessageList: TfrmMessageList
                   LabelPosition = lpLeft
                   TabOrder = 2
                 end
-                object edtHeight: TLabeledEdit
+                object LabeledEdit12: TLabeledEdit
                   Left = 224
                   Top = 6
                   Width = 73
@@ -194,11 +275,11 @@ object frmMessageList: TfrmMessageList
                   LabelPosition = lpLeft
                   TabOrder = 3
                 end
-                object sbxImage: TScrollBox
+                object ScrollBox3: TScrollBox
                   Left = 0
-                  Top = 59
-                  Width = 309
-                  Height = 605
+                  Top = -353
+                  Width = 418
+                  Height = 1055
                   HorzScrollBar.Smooth = True
                   HorzScrollBar.Tracking = True
                   VertScrollBar.Smooth = True
@@ -211,7 +292,9 @@ object frmMessageList: TfrmMessageList
                   Color = clWhite
                   ParentColor = False
                   TabOrder = 4
-                  object imgBitmap: TImage
+                  ExplicitWidth = 400
+                  ExplicitHeight = 605
+                  object Image3: TImage
                     Left = 3
                     Top = 3
                     Width = 420
@@ -223,98 +306,64 @@ object frmMessageList: TfrmMessageList
                 end
               end
             end
-            object tsDataSet: TTabSheet
-              Caption = 'DataSet'
-              ImageIndex = 3
+            object tsDataSet: TKTabSheet
+              Caption = 'Dataset'
+              ExplicitWidth = 400
+              ExplicitHeight = 252
             end
           end
         end
-        object tsRawData: TTabSheet
-          Caption = 'Raw message data'
-          ImageIndex = 1
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
+        object tsRawData: TKTabSheet
+          Caption = 'Raw data'
+          ExplicitTop = 24
+          ExplicitWidth = 400
+          ExplicitHeight = 276
         end
       end
     end
-  end
-  object pnlLeft: TPanel
-    Left = 0
-    Top = 0
-    Width = 313
-    Height = 746
-    Align = alLeft
-    BevelOuter = bvNone
-    Constraints.MinWidth = 100
-    TabOrder = 1
-    object pnlCallStackWatch: TPanel
+    object pnlLeft: TOMultiPanel
       Left = 0
       Top = 0
-      Width = 313
+      Width = 189
       Height = 746
-      Align = alClient
-      BevelOuter = bvNone
-      Color = clWhite
-      ParentBackground = False
-      TabOrder = 0
-      object splLeftHorizontal: TSplitter
-        Left = 0
-        Top = 137
-        Width = 313
-        Height = 8
-        Cursor = crVSplit
-        Align = alTop
-        Color = clBtnFace
-        ParentColor = False
-      end
-      object pnlLeftBottom: TPanel
-        Left = 0
-        Top = 145
-        Width = 313
-        Height = 601
-        Align = alClient
-        BevelOuter = bvNone
-        Caption = 'pnlLeftBottom'
-        ShowCaption = False
-        TabOrder = 1
-        object pnlWatches: TPanel
-          Left = 0
-          Top = 0
-          Width = 313
-          Height = 20
-          Align = alTop
-          Alignment = taLeftJustify
-          BevelOuter = bvNone
-          Caption = 'Watch List'
-          Font.Charset = ANSI_CHARSET
-          Font.Color = clGray
-          Font.Height = -15
-          Font.Name = 'Segoe UI'
-          Font.Style = []
-          ParentBackground = False
-          ParentFont = False
-          TabOrder = 0
+      PanelType = ptVertical
+      PanelCollection = <
+        item
+          Control = pnlCallStack
+          Position = 0.500000000000000000
+          Visible = True
+          Index = 0
         end
-      end
+        item
+          Control = pnlWatches
+          Position = 1.000000000000000000
+          Visible = True
+          Index = 1
+        end>
+      MinPosition = 0.020000000000000000
+      SplitterSize = 2
+      SplitterColor = cl3DLight
+      SplitterHoverColor = clScrollBar
+      Anchors = []
+      TabOrder = 0
       object pnlCallStack: TPanel
         Left = 0
         Top = 0
-        Width = 313
-        Height = 137
+        Width = 189
+        Height = 373
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 0
         object pnlCallStackTitle: TPanel
           Left = 0
           Top = 0
-          Width = 313
+          Width = 189
           Height = 20
           Align = alTop
           Alignment = taLeftJustify
           BevelOuter = bvNone
           Caption = 'Call Stack'
+          Color = clWhite
           Font.Charset = ANSI_CHARSET
           Font.Color = clGray
           Font.Height = -15
@@ -323,64 +372,40 @@ object frmMessageList: TfrmMessageList
           ParentBackground = False
           ParentFont = False
           TabOrder = 0
+          ExplicitWidth = 593
         end
       end
-    end
-  end
-  object pnlMessages: TPanel
-    Left = 321
-    Top = 0
-    Width = 419
-    Height = 746
-    Align = alClient
-    BevelOuter = bvNone
-    BevelWidth = 2
-    Color = clWhite
-    TabOrder = 2
-    OnResize = pnlMessagesResize
-    object pnlFilter: TPanel
-      Left = 0
-      Top = 0
-      Width = 419
-      Height = 20
-      Align = alTop
-      BevelOuter = bvNone
-      TabOrder = 0
-      StyleElements = [seFont, seBorder]
-      object edtMessageFilter: TButtonedEdit
-        AlignWithMargins = True
+      object pnlWatches: TPanel
         Left = 0
-        Top = 2
-        Width = 419
-        Height = 16
-        Margins.Left = 0
-        Margins.Top = 2
-        Margins.Right = 0
-        Margins.Bottom = 2
+        Top = 375
+        Width = 189
+        Height = 371
         Align = alClient
-        Alignment = taCenter
-        AutoSize = False
-        BevelKind = bkFlat
         BevelOuter = bvNone
-        BorderStyle = bsNone
-        Color = clBtnFace
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Style = []
-        Images = dmManager.imlMain
-        ParentFont = False
-        RightButton.ImageIndex = 15
-        RightButton.Visible = True
-        TabOrder = 0
-        TextHint = 'Start typing to filter messages'
-        StyleElements = [seFont, seBorder]
-        OnChange = edtMessageFilterChange
-        OnKeyDown = edtMessageFilterKeyDown
-        OnKeyUp = edtMessageFilterKeyUp
-        OnMouseEnter = edtMessageFilterMouseEnter
-        OnMouseLeave = edtMessageFilterMouseLeave
+        Caption = 'pnlWatches'
+        ParentColor = True
+        ShowCaption = False
+        TabOrder = 1
+        object pnlWatchTitle: TPanel
+          Left = 0
+          Top = 0
+          Width = 189
+          Height = 20
+          Align = alTop
+          Alignment = taLeftJustify
+          BevelOuter = bvNone
+          Caption = 'Watch List'
+          Color = clWhite
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clGray
+          Font.Height = -15
+          Font.Name = 'Segoe UI'
+          Font.Style = []
+          ParentBackground = False
+          ParentFont = False
+          TabOrder = 0
+          ExplicitWidth = 593
+        end
       end
     end
   end
@@ -389,7 +414,7 @@ object frmMessageList: TfrmMessageList
     Left = 607
     Top = 150
     Bitmap = {
-      494C010116001900F80010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010116001900040110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -1191,5 +1216,253 @@ object frmMessageList: TfrmMessageList
   object dscMain: TDataSource
     Left = 1264
     Top = 328
+  end
+  object KTabSheet1: TKTabSheet
+    Caption = 'MessageView'
+    object KPageControl1: TKPageControl
+      Left = 0
+      Top = 0
+      Width = 400
+      Height = 276
+      ActivePageIndex = 2
+      Align = alClient
+      ParentBackground = False
+      TabOrder = 0
+      object KTabSheet2: TKTabSheet
+        Caption = 'Value list'
+      end
+      object KTabSheet3: TKTabSheet
+        Caption = 'Text viewer'
+        object Panel1: TPanel
+          Left = 0
+          Top = 0
+          Width = 400
+          Height = 252
+          Align = alClient
+          BevelEdges = []
+          BevelOuter = bvNone
+          Color = clWhite
+          TabOrder = 0
+        end
+      end
+      object KTabSheet4: TKTabSheet
+        Caption = 'Image viewer'
+        object Panel2: TPanel
+          Left = 0
+          Top = 0
+          Width = 400
+          Height = 252
+          Margins.Left = 0
+          Margins.Top = 0
+          Margins.Right = 0
+          Margins.Bottom = 0
+          Align = alClient
+          BevelEdges = []
+          BevelOuter = bvNone
+          TabOrder = 0
+          object LabeledEdit1: TLabeledEdit
+            Left = 64
+            Top = 6
+            Width = 73
+            Height = 21
+            EditLabel.Width = 32
+            EditLabel.Height = 13
+            EditLabel.Caption = 'Width:'
+            LabelPosition = lpLeft
+            TabOrder = 0
+          end
+          object LabeledEdit2: TLabeledEdit
+            Left = 64
+            Top = 33
+            Width = 73
+            Height = 21
+            EditLabel.Width = 61
+            EditLabel.Height = 13
+            EditLabel.Caption = 'Pixel format:'
+            LabelPosition = lpLeft
+            TabOrder = 1
+          end
+          object LabeledEdit3: TLabeledEdit
+            Left = 224
+            Top = 33
+            Width = 73
+            Height = 21
+            EditLabel.Width = 62
+            EditLabel.Height = 13
+            EditLabel.Caption = 'Handle type:'
+            LabelPosition = lpLeft
+            TabOrder = 2
+          end
+          object LabeledEdit4: TLabeledEdit
+            Left = 224
+            Top = 6
+            Width = 73
+            Height = 21
+            EditLabel.Width = 35
+            EditLabel.Height = 13
+            EditLabel.Caption = 'Height:'
+            LabelPosition = lpLeft
+            TabOrder = 3
+          end
+          object ScrollBox1: TScrollBox
+            Left = 0
+            Top = -353
+            Width = 400
+            Height = 605
+            HorzScrollBar.Smooth = True
+            HorzScrollBar.Tracking = True
+            VertScrollBar.Smooth = True
+            VertScrollBar.Tracking = True
+            Align = alBottom
+            Anchors = [akLeft, akTop, akRight, akBottom]
+            BevelEdges = []
+            BevelInner = bvNone
+            BorderStyle = bsNone
+            Color = clWhite
+            ParentColor = False
+            TabOrder = 4
+            object Image1: TImage
+              Left = 3
+              Top = 3
+              Width = 420
+              Height = 585
+              AutoSize = True
+              IncrementalDisplay = True
+              Proportional = True
+            end
+          end
+        end
+      end
+      object KTabSheet5: TKTabSheet
+        Caption = 'Dataset'
+      end
+    end
+  end
+  object KTabSheet6: TKTabSheet
+    Caption = 'Raw data'
+  end
+  object KTabSheet7: TKTabSheet
+    Caption = 'MessageView'
+    object KPageControl2: TKPageControl
+      Left = 0
+      Top = 0
+      Width = 400
+      Height = 276
+      ActivePageIndex = 2
+      Align = alClient
+      ParentBackground = False
+      TabOrder = 0
+      object KTabSheet8: TKTabSheet
+        Caption = 'Value list'
+      end
+      object KTabSheet9: TKTabSheet
+        Caption = 'Text viewer'
+        object Panel3: TPanel
+          Left = 0
+          Top = 0
+          Width = 400
+          Height = 252
+          Align = alClient
+          BevelEdges = []
+          BevelOuter = bvNone
+          Color = clWhite
+          TabOrder = 0
+        end
+      end
+      object KTabSheet10: TKTabSheet
+        Caption = 'Image viewer'
+        object Panel4: TPanel
+          Left = 0
+          Top = 0
+          Width = 400
+          Height = 252
+          Margins.Left = 0
+          Margins.Top = 0
+          Margins.Right = 0
+          Margins.Bottom = 0
+          Align = alClient
+          BevelEdges = []
+          BevelOuter = bvNone
+          TabOrder = 0
+          object LabeledEdit5: TLabeledEdit
+            Left = 64
+            Top = 6
+            Width = 73
+            Height = 21
+            EditLabel.Width = 32
+            EditLabel.Height = 13
+            EditLabel.Caption = 'Width:'
+            LabelPosition = lpLeft
+            TabOrder = 0
+          end
+          object LabeledEdit6: TLabeledEdit
+            Left = 64
+            Top = 33
+            Width = 73
+            Height = 21
+            EditLabel.Width = 61
+            EditLabel.Height = 13
+            EditLabel.Caption = 'Pixel format:'
+            LabelPosition = lpLeft
+            TabOrder = 1
+          end
+          object LabeledEdit7: TLabeledEdit
+            Left = 224
+            Top = 33
+            Width = 73
+            Height = 21
+            EditLabel.Width = 62
+            EditLabel.Height = 13
+            EditLabel.Caption = 'Handle type:'
+            LabelPosition = lpLeft
+            TabOrder = 2
+          end
+          object LabeledEdit8: TLabeledEdit
+            Left = 224
+            Top = 6
+            Width = 73
+            Height = 21
+            EditLabel.Width = 35
+            EditLabel.Height = 13
+            EditLabel.Caption = 'Height:'
+            LabelPosition = lpLeft
+            TabOrder = 3
+          end
+          object ScrollBox2: TScrollBox
+            Left = 0
+            Top = -353
+            Width = 400
+            Height = 605
+            HorzScrollBar.Smooth = True
+            HorzScrollBar.Tracking = True
+            VertScrollBar.Smooth = True
+            VertScrollBar.Tracking = True
+            Align = alBottom
+            Anchors = [akLeft, akTop, akRight, akBottom]
+            BevelEdges = []
+            BevelInner = bvNone
+            BorderStyle = bsNone
+            Color = clWhite
+            ParentColor = False
+            TabOrder = 4
+            object Image2: TImage
+              Left = 3
+              Top = 3
+              Width = 420
+              Height = 585
+              AutoSize = True
+              IncrementalDisplay = True
+              Proportional = True
+            end
+          end
+        end
+      end
+      object KTabSheet11: TKTabSheet
+        Caption = 'Dataset'
+      end
+    end
+  end
+  object KTabSheet12: TKTabSheet
+    Caption = 'Raw data'
   end
 end

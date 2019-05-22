@@ -1,18 +1,18 @@
 {
 	"FormSettings": {
-		"Left": 242,
-		"Top": 73,
-		"Width": 1477,
-		"Height": 749,
+		"Left": 514,
+		"Top": 95,
+		"Width": 1411,
+		"Height": 1011,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
 	"MessageListSettings": {
 		"AutoScrollMessages": false,
 		"AutoFilterMessages": true,
-		"DynamicAutoSizeColumns": false,
-		"LeftPanelWidth": 430,
-		"RightPanelWidth": 325,
+		"DynamicAutoSizeColumns": true,
+		"LeftPanelWidth": 344,
+		"RightPanelWidth": 463,
 		"SmartTimeStamps": true
 	},
 	"WinODSSettings": {

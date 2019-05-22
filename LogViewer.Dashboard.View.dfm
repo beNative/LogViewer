@@ -4,7 +4,7 @@ object frmDashboard: TfrmDashboard
   Caption = 'Dashboard'
   ClientHeight = 616
   ClientWidth = 1046
-  Color = clBtnFace
+  Color = clWhite
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -12,76 +12,63 @@ object frmDashboard: TfrmDashboard
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  ShowHint = True
   PixelsPerInch = 96
   TextHeight = 13
-  object pnlLogChannels: TPanel
+  object pnlMain: TOMultiPanel
     Left = 0
     Top = 0
     Width = 1046
     Height = 616
+    PanelCollection = <
+      item
+        Control = pnlLeft
+        Position = 0.300000000000000000
+        Visible = True
+        Index = 0
+      end
+      item
+        Control = pnlRight
+        Position = 1.000000000000000000
+        Visible = True
+        Index = 1
+      end>
+    MinPosition = 0.020000000000000000
+    SplitterSize = 2
+    SplitterColor = cl3DLight
+    SplitterHoverColor = clScrollBar
     Align = alClient
-    BevelOuter = bvNone
     TabOrder = 0
-    object splVertical: TSplitter
-      Left = 385
-      Top = 0
-      Width = 7
-      Height = 616
-      ExplicitLeft = 437
-      ExplicitHeight = 421
-    end
-    object pnlRight: TPanel
-      AlignWithMargins = True
-      Left = 392
-      Top = 3
-      Width = 651
-      Height = 613
-      Margins.Left = 0
-      Margins.Bottom = 0
-      Align = alClient
-      BevelOuter = bvNone
-      TabOrder = 0
-    end
     object pnlLeft: TPanel
       Left = 0
       Top = 0
-      Width = 385
+      Width = 314
       Height = 616
       Margins.Left = 0
       Margins.Top = 0
       Margins.Right = 0
       Margins.Bottom = 0
-      Align = alLeft
+      Align = alClient
       BevelOuter = bvNone
-      TabOrder = 1
-      object pgcMain: TPageControl
+      TabOrder = 0
+      object pgcMain: TKPageControl
         Left = 0
         Top = 0
-        Width = 385
+        Width = 314
         Height = 616
-        Margins.Left = 0
-        Margins.Top = 0
-        Margins.Right = 0
-        Margins.Bottom = 0
-        ActivePage = tsWinIPC
+        ActivePageIndex = 3
         Align = alClient
-        MultiLine = True
-        Style = tsFlatButtons
+        ParentBackground = True
+        TabHeight = 0
         TabOrder = 0
-        StyleElements = [seFont, seClient]
-        object tsWinIPC: TTabSheet
-          Margins.Left = 0
-          Margins.Top = 0
-          Margins.Right = 0
-          Margins.Bottom = 0
+        object tsWinIPC: TKTabSheet
           Caption = 'WinIPC'
-          ImageIndex = 28
-          object lblWinIPCDescription: TLabel
+          object lblWinIPC: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
-            Width = 371
-            Height = 554
+            Width = 308
+            Height = 585
             Align = alClient
             Caption = 
               'Messages are exchanged between the source application and LogVie' +
@@ -95,14 +82,15 @@ object frmDashboard: TfrmDashboard
               'ith LogViewer. As a result this method is slower than receivers ' +
               'based on queueuing.'#13#10#13#10'A new node is automatically created when ' +
               'a process is detected that sends compatible log messages.'#13#10
+            Transparent = True
             WordWrap = True
-            ExplicitWidth = 367
-            ExplicitHeight = 182
+            ExplicitWidth = 307
+            ExplicitHeight = 221
           end
           object pnlWinIPCTitle: TPanel
             Left = 0
             Top = 0
-            Width = 377
+            Width = 314
             Height = 25
             Align = alTop
             Alignment = taLeftJustify
@@ -113,20 +101,19 @@ object frmDashboard: TfrmDashboard
             Font.Height = -16
             Font.Name = 'Segoe UI'
             Font.Style = []
-            ParentBackground = False
+            ParentColor = True
             ParentFont = False
             TabOrder = 0
           end
         end
-        object tsWinODS: TTabSheet
+        object tsWinODS: TKTabSheet
           Caption = 'WinODS'
-          ImageIndex = 28
-          object lblWinODSDescription: TLabel
+          object lblWinODS: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
-            Width = 371
-            Height = 554
+            Width = 308
+            Height = 585
             Align = alClient
             Caption = 
               'This receiver captures messages from any local applicatiion that' +
@@ -149,14 +136,14 @@ object frmDashboard: TfrmDashboard
             Font.Name = 'Tahoma'
             Font.Style = []
             ParentFont = False
+            Transparent = True
             WordWrap = True
-            ExplicitWidth = 370
-            ExplicitHeight = 221
+            ExplicitHeight = 234
           end
           object pnlWinODSTitle: TPanel
             Left = 0
             Top = 0
-            Width = 377
+            Width = 314
             Height = 25
             Align = alTop
             Alignment = taLeftJustify
@@ -167,21 +154,27 @@ object frmDashboard: TfrmDashboard
             Font.Height = -16
             Font.Name = 'Segoe UI'
             Font.Style = []
-            ParentBackground = False
+            ParentColor = True
             ParentFont = False
             TabOrder = 0
           end
         end
-        object tsZeroMQ: TTabSheet
+        object tsZeroMQ: TKTabSheet
           Caption = 'ZeroMQ'
-          ImageIndex = 6
-          DesignSize = (
-            377
-            585)
-          object pnlZeroMQTitle: TPanel
+          object pnlZMQEndpoints: TPanel
+            Left = 0
+            Top = 25
+            Width = 314
+            Height = 874
+            Align = alTop
+            Anchors = [akLeft, akTop, akRight, akBottom]
+            BevelOuter = bvNone
+            TabOrder = 0
+          end
+          object Panel4: TPanel
             Left = 0
             Top = 0
-            Width = 377
+            Width = 314
             Height = 25
             Align = alTop
             Alignment = taLeftJustify
@@ -192,16 +185,16 @@ object frmDashboard: TfrmDashboard
             Font.Height = -16
             Font.Name = 'Segoe UI'
             Font.Style = []
-            ParentBackground = False
+            ParentColor = True
             ParentFont = False
-            TabOrder = 0
+            TabOrder = 1
           end
-          object pnlZeroMQButtons: TGridPanel
+          object pnlButtons: TGridPanel
             Left = 0
-            Top = 537
-            Width = 377
+            Top = 568
+            Width = 314
             Height = 48
-            Anchors = [akLeft, akRight, akBottom]
+            Align = alBottom
             BevelOuter = bvNone
             ColumnCollection = <
               item
@@ -213,108 +206,78 @@ object frmDashboard: TfrmDashboard
             ControlCollection = <
               item
                 Column = 0
-                Control = btnAddZMQNodeLocalHost
                 Row = 0
               end
               item
                 Column = 1
-                Control = btnAddZMQNodeForLogViewer
                 Row = 0
+              end
+              item
+                Column = 0
+                Control = btnSubscribeToLocalHost
+                Row = 1
+              end
+              item
+                Column = 1
+                Control = btnAddSubscribeToLogViewer
+                Row = 1
               end>
             RowCollection = <
               item
                 Value = 100.000000000000000000
+              end
+              item
+                SizeStyle = ssAuto
               end>
-            TabOrder = 1
-            object btnAddZMQNodeLocalHost: TButton
+            TabOrder = 2
+            ExplicitWidth = 220
+            object btnSubscribeToLocalHost: TButton
               AlignWithMargins = True
-              Left = 0
-              Top = 0
-              Width = 188
-              Height = 48
-              Margins.Left = 0
-              Margins.Top = 0
-              Margins.Right = 0
-              Margins.Bottom = 0
+              Left = 3
+              Top = 3
+              Width = 151
+              Height = 42
               Action = actSubscribeToLocalHost
               Align = alClient
               TabOrder = 0
               WordWrap = True
+              ExplicitLeft = 0
+              ExplicitTop = 0
+              ExplicitWidth = 110
+              ExplicitHeight = 48
             end
-            object btnAddZMQNodeForLogViewer: TButton
+            object btnAddSubscribeToLogViewer: TButton
               AlignWithMargins = True
-              Left = 190
-              Top = 0
-              Width = 187
-              Height = 48
-              Margins.Left = 2
-              Margins.Top = 0
-              Margins.Right = 0
-              Margins.Bottom = 0
+              Left = 160
+              Top = 3
+              Width = 151
+              Height = 42
               Action = actAddSubscribeToLogViewer
               Align = alClient
               TabOrder = 1
               WordWrap = True
+              ExplicitLeft = 112
+              ExplicitTop = 0
+              ExplicitWidth = 108
+              ExplicitHeight = 48
             end
           end
-          object pnlZMQEndpoints: TPanel
-            Left = 0
-            Top = 25
-            Width = 377
-            Height = 506
-            Align = alTop
-            Anchors = [akLeft, akTop, akRight, akBottom]
-            BevelOuter = bvNone
-            TabOrder = 2
-          end
         end
-        object tsCOMPort: TTabSheet
-          Caption = 'COMPort'
-          ImageIndex = 24
-          object pnlCOMPortTitle: TPanel
-            Left = 0
-            Top = 0
-            Width = 377
-            Height = 25
-            Align = alTop
-            Alignment = taLeftJustify
-            BevelOuter = bvNone
-            Caption = 'COM port'
-            Font.Charset = ANSI_CHARSET
-            Font.Color = clGray
-            Font.Height = -16
-            Font.Name = 'Segoe UI'
-            Font.Style = []
-            ParentBackground = False
-            ParentFont = False
-            TabOrder = 0
-          end
-          object pnlCOMPorts: TPanel
-            Left = 0
-            Top = 25
-            Width = 377
-            Height = 560
-            Align = alClient
-            BevelOuter = bvNone
-            TabOrder = 1
-          end
-        end
-        object tsMQTT: TTabSheet
+        object tsMQTT: TKTabSheet
           Caption = 'MQTT'
-          ImageIndex = 4
           DesignSize = (
-            377
-            585)
+            314
+            616)
           object edtBroker: TLabeledEdit
-            Left = 40
+            Left = 64
             Top = 31
-            Width = 241
+            Width = 84
             Height = 21
             Alignment = taCenter
             Anchors = [akLeft, akTop, akRight]
-            EditLabel.Width = 35
+            EditLabel.Width = 47
             EditLabel.Height = 13
-            EditLabel.Caption = 'Broker:'
+            EditLabel.Caption = 'edtBroker'
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clWindowText
             Font.Height = -11
@@ -326,10 +289,41 @@ object frmDashboard: TfrmDashboard
             Text = 'localhost'
             OnExit = edtBrokerExit
           end
+          object pnlMQTTTopics: TPanel
+            Left = 0
+            Top = 58
+            Width = 314
+            Height = 558
+            Align = alBottom
+            Anchors = [akLeft, akTop, akRight, akBottom]
+            BevelOuter = bvNone
+            TabOrder = 1
+          end
+          object edtMQTTPort: TLabeledEdit
+            Left = 225
+            Top = 31
+            Width = 56
+            Height = 21
+            Alignment = taCenter
+            Anchors = [akTop, akRight]
+            EditLabel.Width = 64
+            EditLabel.Height = 13
+            EditLabel.Caption = 'edtMQTTPort'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = [fsBold]
+            LabelPosition = lpLeft
+            ParentFont = False
+            TabOrder = 2
+            Text = '1883'
+            OnExit = edtMQTTPortExit
+          end
           object pnlMQTTTitle: TPanel
             Left = 0
             Top = 0
-            Width = 377
+            Width = 314
             Height = 25
             Align = alTop
             Alignment = taLeftJustify
@@ -340,49 +334,17 @@ object frmDashboard: TfrmDashboard
             Font.Height = -16
             Font.Name = 'Segoe UI'
             Font.Style = []
-            ParentBackground = False
-            ParentFont = False
-            TabOrder = 1
-          end
-          object pnlMQTTTopics: TPanel
-            Left = 0
-            Top = 58
-            Width = 377
-            Height = 527
-            Align = alBottom
-            Anchors = [akLeft, akTop, akRight, akBottom]
-            BevelOuter = bvNone
-            TabOrder = 2
-          end
-          object edtMQTTPort: TLabeledEdit
-            Left = 318
-            Top = 31
-            Width = 56
-            Height = 21
-            Alignment = taCenter
-            Anchors = [akTop, akRight]
-            EditLabel.Width = 24
-            EditLabel.Height = 13
-            EditLabel.Caption = 'Port:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            LabelPosition = lpLeft
+            ParentColor = True
             ParentFont = False
             TabOrder = 3
-            Text = '1883'
-            OnExit = edtMQTTPortExit
           end
         end
-        object tsFileSystem: TTabSheet
+        object tsFileSystem: TKTabSheet
           Caption = 'FileSystem'
-          ImageIndex = 5
           object pnlFileSystemTitle: TPanel
             Left = 0
             Top = 0
-            Width = 377
+            Width = 314
             Height = 25
             Align = alTop
             Alignment = taLeftJustify
@@ -393,21 +355,63 @@ object frmDashboard: TfrmDashboard
             Font.Height = -16
             Font.Name = 'Segoe UI'
             Font.Style = []
-            ParentBackground = False
+            ParentColor = True
             ParentFont = False
             TabOrder = 0
           end
           object pnlFSLocations: TPanel
             Left = 0
             Top = 25
-            Width = 377
-            Height = 560
+            Width = 314
+            Height = 591
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 1
           end
         end
+        object tsCOMPort: TKTabSheet
+          Caption = 'COM port'
+          object pnlCOMPorts: TPanel
+            Left = 0
+            Top = 25
+            Width = 314
+            Height = 591
+            Align = alClient
+            BevelOuter = bvNone
+            TabOrder = 0
+          end
+          object pnlCOMPortTitle: TPanel
+            Left = 0
+            Top = 0
+            Width = 314
+            Height = 25
+            Align = alTop
+            Alignment = taLeftJustify
+            BevelOuter = bvNone
+            Caption = 'COM port'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clGray
+            Font.Height = -16
+            Font.Name = 'Segoe UI'
+            Font.Style = []
+            ParentColor = True
+            ParentFont = False
+            TabOrder = 1
+          end
+        end
       end
+    end
+    object pnlRight: TPanel
+      AlignWithMargins = True
+      Left = 316
+      Top = 0
+      Width = 730
+      Height = 616
+      Margins.Left = 0
+      Margins.Bottom = 0
+      Align = alClient
+      BevelOuter = bvNone
+      TabOrder = 1
     end
   end
   object aclMain: TActionList
@@ -473,7 +477,7 @@ object frmDashboard: TfrmDashboard
     Left = 408
     Top = 8
     Bitmap = {
-      494C0101090008013C0110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101090008014C0110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000001001B09532ED308512ED100000010000000000000

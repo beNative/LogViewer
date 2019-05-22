@@ -33,16 +33,18 @@ object frmValueList: TfrmValueList
         Index = 1
       end>
     MinPosition = 0.020000000000000000
-    SplitterSize = 6
+    SplitterSize = 2
+    SplitterColor = cl3DLight
+    SplitterHoverColor = clScrollBar
     Align = alClient
     AutoSize = True
     BevelEdges = []
     TabOrder = 0
     object pnlBottom: TPanel
       Left = 0
-      Top = 290
+      Top = 286
       Width = 398
-      Height = 279
+      Height = 283
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 1

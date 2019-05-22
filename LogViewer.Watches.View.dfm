@@ -3,13 +3,14 @@ object frmWatchesView: TfrmWatchesView
   Top = 0
   ClientHeight = 581
   ClientWidth = 402
-  Color = clBtnFace
+  Color = clWhite
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  ShowHint = True
   PixelsPerInch = 96
   TextHeight = 13
   object pnlMain: TOMultiPanel
@@ -32,7 +33,9 @@ object frmWatchesView: TfrmWatchesView
         Index = 1
       end>
     MinPosition = 0.020000000000000000
-    SplitterSize = 8
+    SplitterSize = 2
+    SplitterColor = cl3DLight
+    SplitterHoverColor = clSilver
     Align = alClient
     BevelEdges = []
     TabOrder = 0
@@ -47,9 +50,9 @@ object frmWatchesView: TfrmWatchesView
     end
     object pnlWatchHistory: TPanel
       Left = 0
-      Top = 298
+      Top = 292
       Width = 402
-      Height = 283
+      Height = 289
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 1

@@ -35,6 +35,7 @@ type
   )
   private
     FPath : string;
+
     function GetSettings: TFileSystemSettings;
 
     procedure SettingsChanged(Sender: TObject);

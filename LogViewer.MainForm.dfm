@@ -162,9 +162,9 @@ object frmMain: TfrmMain
       LookAndFeel.TabsContainer.StopColor = clWhite
       LookAndFeel.TabsContainer.StartAlpha = 255
       LookAndFeel.TabsContainer.StopAlpha = 255
-      LookAndFeel.TabsContainer.OutlineColor = clSilver
+      LookAndFeel.TabsContainer.OutlineColor = cl3DLight
       LookAndFeel.TabsContainer.OutlineAlpha = 0
-      LookAndFeel.Tabs.BaseLine.Color = clActiveBorder
+      LookAndFeel.Tabs.BaseLine.Color = cl3DLight
       LookAndFeel.Tabs.BaseLine.Thickness = 1.000000000000000000
       LookAndFeel.Tabs.BaseLine.Alpha = 255
       LookAndFeel.Tabs.Modified.CentreColor = clBlue
@@ -357,7 +357,7 @@ object frmMain: TfrmMain
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
-      Font.Name = 'Tahoma'
+      Font.Name = 'Segoe UI'
       Font.Style = [fsBold]
       TabOrder = 0
     end
@@ -368,36 +368,44 @@ object frmMain: TfrmMain
     Width = 997
     Height = 20
     Align = alBottom
+    BevelEdges = []
     BevelOuter = bvNone
+    ParentColor = True
     TabOrder = 1
+    object shpLine: TShape
+      Left = 0
+      Top = 0
+      Width = 997
+      Height = 1
+      Align = alTop
+      Pen.Color = cl3DLight
+    end
     object pnlSourceName: TPanel
       AlignWithMargins = True
       Left = 1
-      Top = 1
+      Top = 2
       Width = 224
-      Height = 18
+      Height = 17
       Hint = 'Source'
       Margins.Left = 1
       Margins.Top = 1
       Margins.Right = 1
       Margins.Bottom = 1
       Align = alLeft
-      BevelKind = bkFlat
       BevelOuter = bvNone
       TabOrder = 0
     end
     object pnlDelta: TPanel
       AlignWithMargins = True
       Left = 291
-      Top = 1
+      Top = 2
       Width = 110
-      Height = 18
+      Height = 17
       Margins.Left = 1
       Margins.Top = 1
       Margins.Right = 1
       Margins.Bottom = 1
       Align = alLeft
-      BevelKind = bkFlat
       BevelOuter = bvNone
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clBlue
@@ -411,9 +419,9 @@ object frmMain: TfrmMain
     object pbrCPU: TKPercentProgressBar
       AlignWithMargins = True
       Left = 946
-      Top = 1
+      Top = 2
       Width = 50
-      Height = 18
+      Height = 17
       Hint = 'CPU load'
       Margins.Left = 1
       Margins.Top = 1
@@ -421,8 +429,6 @@ object frmMain: TfrmMain
       Margins.Bottom = 1
       Align = alRight
       BarColor = clGreen
-      Border = True
-      Color = clWhite
       Frame = False
       Min = 0
       Max = 100
@@ -430,16 +436,15 @@ object frmMain: TfrmMain
     object pnlMessageCount: TPanel
       AlignWithMargins = True
       Left = 227
-      Top = 1
+      Top = 2
       Width = 62
-      Height = 18
+      Height = 17
       Hint = 'Messages received'
       Margins.Left = 1
       Margins.Top = 1
       Margins.Right = 1
       Margins.Bottom = 1
       Align = alLeft
-      BevelKind = bkFlat
       BevelOuter = bvNone
       ShowCaption = False
       TabOrder = 3
@@ -447,16 +452,15 @@ object frmMain: TfrmMain
     object pnlMemory: TPanel
       AlignWithMargins = True
       Left = 888
-      Top = 1
+      Top = 2
       Width = 56
-      Height = 18
+      Height = 17
       Hint = 'Memory used'
       Margins.Left = 1
       Margins.Top = 1
       Margins.Right = 1
       Margins.Bottom = 1
       Align = alRight
-      BevelKind = bkFlat
       BevelOuter = bvNone
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clBlack
@@ -496,7 +500,7 @@ object frmMain: TfrmMain
     Left = 208
     Top = 48
     Bitmap = {
-      494C010101000500900010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000500A00010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
