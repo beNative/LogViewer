@@ -325,6 +325,7 @@ end;
 destructor TdmManager.Destroy;
 begin
   Logger.Track(Self, 'Destroy');
+  FSettings.Save;
   FActiveView     := nil;
   FViewList       := nil;
   FReceivers      := nil;

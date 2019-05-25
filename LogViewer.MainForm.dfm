@@ -164,7 +164,7 @@ object frmMain: TfrmMain
       LookAndFeel.TabsContainer.StopAlpha = 255
       LookAndFeel.TabsContainer.OutlineColor = cl3DLight
       LookAndFeel.TabsContainer.OutlineAlpha = 0
-      LookAndFeel.Tabs.BaseLine.Color = cl3DLight
+      LookAndFeel.Tabs.BaseLine.Color = clScrollBar
       LookAndFeel.Tabs.BaseLine.Thickness = 1.000000000000000000
       LookAndFeel.Tabs.BaseLine.Alpha = 255
       LookAndFeel.Tabs.Modified.CentreColor = clBlue
@@ -378,7 +378,7 @@ object frmMain: TfrmMain
       Width = 997
       Height = 1
       Align = alTop
-      Pen.Color = cl3DLight
+      Pen.Color = clScrollBar
     end
     object pnlSourceName: TPanel
       AlignWithMargins = True
@@ -500,7 +500,7 @@ object frmMain: TfrmMain
     Left = 208
     Top = 48
     Bitmap = {
-      494C010101000500A00010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000500A80010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

@@ -1,9 +1,9 @@
 {
 	"FormSettings": {
-		"Left": 403,
-		"Top": 92,
-		"Width": 1642,
-		"Height": 815,
+		"Left": 604,
+		"Top": 98,
+		"Width": 1539,
+		"Height": 989,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -11,20 +11,23 @@
 		"AutoScrollMessages": false,
 		"AutoFilterMessages": true,
 		"DynamicAutoSizeColumns": true,
-		"LeftPanelWidth": 210,
-		"RightPanelWidth": 464,
-		"SmartTimeStamps": true
+		"SmartTimeStamps": true,
+		"Positions": [
+			0.220922677063028,
+			0.800677966101695,
+			1
+		]
 	},
 	"WinODSSettings": {
 		"Enabled": true
 	},
 	"WinIPCSettings": {
-		"Enabled": true
+		"Enabled": false
 	},
 	"ZeroMQSettings": {
 		"Enabled": true,
 		"PollingInterval": 100,
-		"Endpoints": "localhost=tcp://localhost:5555\r\nlocalhost2=tcp://localhost:5556\r\n"
+		"Endpoints": "localhost=tcp://localhost:5555\r\nlocalhost2=tcp://localhost:5556\r\nNew=tcp://\r\n"
 	},
 	"MQTTSettings": {
 		"Broker": "192.168.0.219",
@@ -79,9 +82,9 @@
 		},
 		"TimeStamp": {
 			"BackgroundColor": 16777215,
-			"FontName": "Tahoma",
+			"FontName": "Callibri",
 			"FontColor": 16711680,
-			"FontSize": 8,
+			"FontSize": 7,
 			"FontStyle": "",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,

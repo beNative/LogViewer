@@ -45,32 +45,32 @@ uses
   LogViewer.Messages.Data, LogViewer.Watches.Data, LogViewer.Watches.View,
   LogViewer.Interfaces, LogViewer.CallStack.Data, LogViewer.CallStack.View,
   LogViewer.ValueList.View, LogViewer.MessageList.Settings,
-  LogViewer.MessageList.LogNode, LogViewer.DisplayValues.Settings;
+  LogViewer.MessageList.LogNode, LogViewer.DisplayValues.Settings,
+  LogViewer.DataSet.View, LogViewer.Image.View;
 
 type
   TfrmMessageList = class(TForm, ILogViewer)
     imlMessageTypes   : TImageList;
-    pnlMain: TOMultiPanel;
-    pnlMessages: TPanel;
-    pnlFilter: TPanel;
-    edtMessageFilter: TButtonedEdit;
-    pnlRight: TPanel;
-    pnlMessageContent: TPanel;
-    pnlLeft: TOMultiPanel;
-    pnlCallStack: TPanel;
-    pnlCallStackTitle: TPanel;
-    pnlWatches: TPanel;
-    pnlWatchTitle: TPanel;
-    pgcMessageData: TKPageControl;
-    tsMessageView: TKTabSheet;
-    pgcMessageDetails: TKPageControl;
-    tsValueList: TKTabSheet;
-    tsTextViewer: TKTabSheet;
-    pnlTextViewer: TPanel;
-    tsImageViewer: TKTabSheet;
-    Panel6: TPanel;
-    tsDataSet: TKTabSheet;
-    tsRawData: TKTabSheet;
+    pnlMain           : TOMultiPanel;
+    pnlMessages       : TPanel;
+    pnlFilter         : TPanel;
+    edtMessageFilter  : TButtonedEdit;
+    pnlRight          : TPanel;
+    pnlMessageContent : TPanel;
+    pnlLeft           : TOMultiPanel;
+    pnlCallStack      : TPanel;
+    pnlCallStackTitle : TPanel;
+    pnlWatches        : TPanel;
+    pnlWatchTitle     : TPanel;
+    pgcMessageData    : TKPageControl;
+    tsMessageView     : TKTabSheet;
+    pgcMessageDetails : TKPageControl;
+    tsValueList       : TKTabSheet;
+    tsTextViewer      : TKTabSheet;
+    pnlTextViewer     : TPanel;
+    tsImageViewer     : TKTabSheet;
+    tsDataSet         : TKTabSheet;
+    tsRawData         : TKTabSheet;
     {$ENDREGION}
 
     procedure edtMessageFilterChange(Sender: TObject);
@@ -111,7 +111,10 @@ type
     FSettings                    : TMessageListSettings;
     FAutoSizeColumns             : Boolean;
     FValueList                   : TfrmValueListView;
+    FDataSetView                 : TfrmDataSetView;
+    FImageView                   : TfrmImageView;
     FMiliSecondsBetweenSelection : Integer;
+    FScrollToLastNode            : Boolean;
 
     {$REGION 'property access methods'}
     function GetManager: ILogViewerManager;
@@ -241,7 +244,6 @@ type
     procedure EnsureIsActiveViewIfFocused;
 
   protected
-
     procedure Clear;
     procedure AutoFitColumns;
     procedure ApplySettings;
@@ -269,6 +271,8 @@ type
     procedure CreateCallStackView;
     procedure CreateWatchesView;
     procedure CreateValueListView;
+    procedure CreateDataSetView;
+    procedure CreateImageView;
 
     procedure CollapseAll;
     procedure ExpandAll;
@@ -367,37 +371,30 @@ begin
   CreateWatchesView;
   CreateCallStackView;
   CreateValueListView;
+  CreateDataSetView;
+  CreateImageView;
   pgcMessageData.ActivePage := tsMessageView;
-  // TEMP TSI
-  //tsRawData.TabVisible      := True;
-//  tsRawData.TabVisible      := False;
-//  tsMessageView.TabVisible  := False;
-//  tsValueList.TabVisible    := False;
-//  tsImageViewer.TabVisible  := False;
-//  tsDataSet.TabVisible      := False;
-//  tsTextViewer.TabVisible   := False;
-
   Caption := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
   Logger.Info('Creating new message viewer (%s)', [Caption]);
-
+  ApplySettings;
   Subscriber.OnReceiveMessage.Add(FSubscriberReceiveMessage);
   FSettings.OnChanged.Add(FSettingsChanged);
-
   FLogTreeView.PopupMenu := Manager.Menus.LogTreeViewerPopupMenu;
-
-
-
-  ApplySettings;
 end;
 
 procedure TfrmMessageList.BeforeDestruction;
+var
+  I : Integer;
 begin
   Logger.Track(Self, 'BeforeDestruction');
   if Assigned(FSettings) then
   begin
-    FSettings.LeftPanelWidth  := pnlLeft.Width;
-    FSettings.RightPanelWidth := pnlRight.Width;
     FSettings.OnChanged.Remove(FSettingsChanged);
+    for I := 0 to pnlMain.PanelCollection.Count - 1 do
+    begin
+      FSettings.PanelPositions[I] := pnlMain.PanelCollection[I].Position;
+      Logger.Send(pnlMain.PanelCollection[I].Position);
+    end;
     FSettings := nil;
   end;
   if Assigned(FSubscriber) then
@@ -407,6 +404,8 @@ begin
   end;
   FCallStack  := nil;
   FreeAndNil(FValueList);
+  FreeAndNil(FDataSetView);
+  FreeAndNil(FImageView);
   FreeAndNil(FWatches);
   FreeAndNIl(FWatchesView);
   FreeAndNil(FCallStackView);
@@ -425,6 +424,12 @@ begin
   );
 end;
 
+procedure TfrmMessageList.CreateDataSetView;
+begin
+  FDataSetView := TfrmDataSetView.Create(Self);
+  AssignFormParent(FDataSetView, tsDataSet);
+end;
+
 procedure TfrmMessageList.CreateEditor;
 begin
   FEditorView := TEditorFactories.CreateView(
@@ -432,6 +437,12 @@ begin
     Manager.EditorManager
   );
   EditorView.Settings.EditorOptions.WordWrapEnabled := True;
+end;
+
+procedure TfrmMessageList.CreateImageView;
+begin
+  FImageView := TfrmImageView.Create(Self);
+  AssignFormParent(FImageView, tsImageViewer);
 end;
 
 { Creates and initializes the TVirtualStringTree component. }
@@ -521,9 +532,10 @@ begin
 
   C := FLogTreeView.Header.Columns.Add; // timestamp
   C.Text     := STimestamp;
-  C.Width    := 80;
-  C.MinWidth := 80;
-  C.MaxWidth := 80;
+  // TODO: measure with respect of font configuration
+  C.Width    := 68;
+  C.MinWidth := 68;
+  C.MaxWidth := 68;
   C.Alignment := taRightJustify;
 
   FLogTreeView.Header.AutoSizeIndex := COLUMN_MAIN;
@@ -796,7 +808,6 @@ begin
     and ((Column = COLUMN_MAIN) or (Column = COLUMN_TIMESTAMP)) then
   begin
     DVS.Tracing.AssignTo(TargetCanvas);
-    //TargetCanvas.FillRect(ContentRect);
     TargetCanvas.FillRect(CellRect);
     if IsCollapsedTracingNode(Sender, Node) then
     begin
@@ -812,7 +823,6 @@ begin
     else
       TargetCanvas.Brush.Color := clWhite;
     TargetCanvas.FillRect(CellRect);
-    // TODO : logging level colors
   end;
   // draw indentation lines
   if Column = Sender.Header.MainColumn then
@@ -820,8 +830,6 @@ begin
     LIndent := Sender.GetNodeLevel(Node) * FLogTreeView.Indent;
     Inc(CellRect.Left, LIndent);
     LIndent := -Integer(FLogTreeView.Indent);
-//    TargetCanvas.Brush.Color := clYellow;
-//    TargetCanvas.FillRect(CellRect);
     CellRect.Right := CellRect.Left + Integer(FLogTreeView.Indent);
     Inc(CellRect.Bottom);
     LNode := Node;
@@ -833,7 +841,6 @@ begin
         Break;
       Inc(CellRect.Left, LIndent);
       Inc(CellRect.Right, LIndent);
-      //DoGetBackColor(ANode, C);
     until False;
   end
 end;
@@ -1340,18 +1347,15 @@ end;
 
 {$REGION 'protected methods'}
 procedure TfrmMessageList.ApplySettings;
+var
+  I : Integer;
 begin
-//  chkAutoFilter.Checked := Settings.AutoFilterMessages;
-  pnlLeft.Width         := Settings.LeftPanelWidth;
-  pnlRight.Width        := Settings.RightPanelWidth;
-//  DisplayValuesSettings.TimeStamp.AssignTo(edtTimeStamp.Font);
-//  edtTimeStamp.Alignment := DisplayValuesSettings.TimeStamp.HorizontalAlignment;
-//  DisplayValuesSettings.ValueName.AssignTo(edtValueName.Font);
-//  edtValueName.Alignment := DisplayValuesSettings.ValueName.HorizontalAlignment;
-//  DisplayValuesSettings.ValueType.AssignTo(edtValueType.Font);
-//  edtValueType.Alignment := DisplayValuesSettings.ValueType.HorizontalAlignment;
-//  DisplayValuesSettings.Value.AssignTo(edtValue.Font);
-//  edtValue.Alignment := DisplayValuesSettings.Value.HorizontalAlignment;
+  Logger.Track(Self, 'ApplySettings');
+  for I := 0 to pnlMain.PanelCollection.Count - 1 do
+  begin
+    Logger.Send(Settings.PanelPositions[I]);
+    pnlMain.PanelCollection[I].Position := Settings.PanelPositions[I];
+  end;
   FUpdate := True;
 end;
 
@@ -1416,11 +1420,6 @@ end;
 
 procedure TfrmMessageList.ClearMessageDetailsControls;
 begin
-//  imgBitmap.Picture   := nil;
-//  edtWidth.Text       := '';
-//  edtHeight.Text      := '';
-//  edtPixelFormat.Text := '';
-//  edtHandleType.Text  := '';
   EditorView.Clear;
   if Assigned(FValueList) then
     FValueList.Clear;
@@ -1538,8 +1537,7 @@ begin
       AddMessageToTree(FCurrentMsg);
       if Settings.AutoScrollMessages then
       begin
-        FLogTreeView.FocusedNode := FLogTreeView.GetLast;
-        FLogTreeView.Selected[FLogTreeView.FocusedNode] := True;
+        FScrollToLastNode := True;
       end;
       FUpdate := True;
     end;
@@ -1624,23 +1622,8 @@ end;
 {$REGION 'Display updating'}
 procedure TfrmMessageList.UpdateBitmapDisplay(ALogNode: TLogNode);
 begin
-  if Assigned(ALogNode.MessageData) then
-  begin
-//    tsValueList.TabVisible   := False;
-//    tsImageViewer.TabVisible := False;
-//    tsDataSet.TabVisible     := False;
-//    tsTextViewer.TabVisible  := False;
-    ALogNode.MessageData.Position := 0;
-//    imgBitmap.Picture.Bitmap.LoadFromStream(ALogNode.MessageData);
-//    pgcMessageDetails.ActivePage := tsImageViewer;
-//    with imgBitmap.Picture do
-//    begin
-//      edtWidth.Text       := Bitmap.Width.ToString;
-//      edtHeight.Text      := Bitmap.Height.ToString;
-//      edtPixelFormat.Text := Reflect.EnumName(Bitmap.PixelFormat);
-//      edtHandleType.Text  := Reflect.EnumName(Bitmap.HandleType);
-//    end;
-  end;
+  pgcMessageDetails.ActivePage := tsImageViewer;
+  FImageView.LoadFromStream(ALogNode.MessageData);
 end;
 
 procedure TfrmMessageList.UpdateCallStackDisplay(ALogNode: TLogNode);
@@ -1698,10 +1681,10 @@ begin
   begin
     LStream := TStringStream.Create('', TEncoding.ANSI);
     try
-//      tsValueList.TabVisible   := False;
-//      tsImageViewer.TabVisible := False;
-//      tsDataSet.TabVisible     := False;
-//      tsTextViewer.TabVisible  := False;
+      tsValueList.Visible   := False;
+      tsImageViewer.Visible := False;
+      tsDataSet.Visible     := False;
+      tsTextViewer.Visible  := False;
       pgcMessageDetails.ActivePage := tsTextViewer;
       ALogNode.MessageData.Position := 0;
       ObjectBinaryToText(ALogNode.MessageData, LStream);
@@ -1720,15 +1703,13 @@ end;
 
 procedure TfrmMessageList.UpdateDataSetDisplay(ALogNode: TLogNode);
 begin
-//  tsValueList.TabVisible   := False;
-//  tsImageViewer.TabVisible := False;
-//  tsDataSet.TabVisible     := False;
-//  tsTextViewer.TabVisible  := False;
+//  tsValueList.Visible   := False;
+//  tsTextViewer.Visible  := False;
+//  tsImageViewer.Visible := False;
+//  tsDataSet.Visible     := True;
+//  pgcMessageDetails.TabHeight  := 0;
   pgcMessageDetails.ActivePage := tsDataSet;
-  ALogNode.MessageData.Position := 0;
-//  FDataSet.LoadFromStream(ALogNode.MessageData);
-//  dscMain.DataSet := FDataSet;
-//  FDBGridView.AutoSizeCols;
+  FDataSetView.LoadFromStream(ALogNode.MessageData);
 end;
 
 procedure TfrmMessageList.UpdateMessageDetails(ALogNode: TLogNode);
@@ -1757,22 +1738,12 @@ begin
     lmtDataSet:
       UpdateDataSetDisplay(ALogNode);
   end;
-//  edtMessageType.Text := LogMessageTypeNameOf(ALogNode.MessageType);
-//  edtTimeStamp.Text   :=
-//    FormatDateTime('dd:mm:yyyy hh:nn:ss:zzz', ALogNode.TimeStamp);
-//  edtValue.Text       := ALogNode.Value;
-//  edtValueName.Text   := ALogNode.ValueName;
-//  edtValueType.Text   := ALogNode.ValueType;
 end;
 
 procedure TfrmMessageList.UpdateTextDisplay(ALogNode: TLogNode);
 var
   S : string;
 begin
-//  tsValueList.TabVisible   := False;
-//  tsTextViewer.TabVisible  := False;
-//  tsImageViewer.TabVisible := False;
-//  tsDataSet.TabVisible     := False;
   pgcMessageDetails.ActivePage := tsTextViewer;
   EditorView.Text := ALogNode.Value;
   S := ALogNode.Highlighter;
@@ -1784,10 +1755,6 @@ procedure TfrmMessageList.UpdateTextStreamDisplay(ALogNode: TLogNode);
 var
   LStream : TStringStream;
 begin
-//  tsValueList.TabVisible   := False;
-//  tsImageViewer.TabVisible := False;
-//  tsDataSet.TabVisible     := False;
-//  tsTextViewer.TabVisible  := False;
   pgcMessageDetails.ActivePage := tsTextViewer;
   if ALogNode.MessageData = nil then
   begin
@@ -1822,16 +1789,17 @@ begin
 
   LTotalWidth := FLogTreeView.ClientWidth;
   LColumn := FLogTreeView.Header.Columns[COLUMN_MAIN];
-  LColumn.MinWidth := LTotalWidth div 7;
-  LColumn := FLogTreeView.Header.Columns[COLUMN_VALUETYPE];
-  LColumn.MaxWidth := LTotalWidth div 4;
-  LColumn.MinWidth := LTotalWidth div 7;
-  LColumn := FLogTreeView.Header.Columns[COLUMN_VALUE];
-  LColumn.MaxWidth := LTotalWidth div 4 * 3;
-  LColumn.MinWidth := LTotalWidth div 4;
+  LColumn.MinWidth := LTotalWidth div 6;
   LColumn := FLogTreeView.Header.Columns[COLUMN_VALUENAME];
   LColumn.MaxWidth := LTotalWidth div 2;
+  LColumn.MinWidth := LTotalWidth div 10;
+  LColumn := FLogTreeView.Header.Columns[COLUMN_VALUE];
+  LColumn.MaxWidth := LTotalWidth div 2;
   LColumn.MinWidth := LTotalWidth div 6;
+  LColumn := FLogTreeView.Header.Columns[COLUMN_VALUETYPE];
+  LColumn.MaxWidth := LTotalWidth div 6;
+  LColumn.MinWidth := LTotalWidth div 10;
+  FAutoSizeColumns := True;
 end;
 
 procedure TfrmMessageList.UpdateLogTreeView;
@@ -1844,6 +1812,12 @@ begin
       AutoFitColumns;
   finally
     FLogTreeView.EndUpdate;
+  end;
+  if FScrollToLastNode then
+  begin
+    FLogTreeView.FocusedNode := FLogTreeView.GetLast;
+    FLogTreeView.Selected[FLogTreeView.FocusedNode] := True;
+    FScrollToLastNode := False;
   end;
 end;
 

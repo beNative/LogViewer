@@ -68,7 +68,7 @@ type
     tsZeroMQ                : TTabSheet;
     seSettings              : TSynEdit;
     synJScript              : TSynJScriptSyn;
-    tsViewSettings: TTabSheet; // used to display JSON config
+    tsViewSettings          : TTabSheet; // used to display JSON config
     {$ENDREGION}
 
     procedure actCloseExecute(Sender: TObject);

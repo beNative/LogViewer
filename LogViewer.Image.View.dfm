@@ -2,8 +2,8 @@ object frmImageView: TfrmImageView
   Left = 0
   Top = 0
   ClientHeight = 909
-  ClientWidth = 1043
-  Color = clBtnFace
+  ClientWidth = 682
+  Color = clWhite
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -13,8 +13,8 @@ object frmImageView: TfrmImageView
   PixelsPerInch = 96
   TextHeight = 13
   object edtPixelFormat: TLabeledEdit
-    Left = 64
-    Top = 33
+    Left = 303
+    Top = 6
     Width = 73
     Height = 21
     EditLabel.Width = 61
@@ -24,8 +24,8 @@ object frmImageView: TfrmImageView
     TabOrder = 0
   end
   object edtHandleType: TLabeledEdit
-    Left = 224
-    Top = 33
+    Left = 448
+    Top = 8
     Width = 73
     Height = 21
     EditLabel.Width = 62
@@ -35,7 +35,7 @@ object frmImageView: TfrmImageView
     TabOrder = 1
   end
   object edtHeight: TLabeledEdit
-    Left = 224
+    Left = 160
     Top = 6
     Width = 73
     Height = 21
@@ -46,7 +46,7 @@ object frmImageView: TfrmImageView
     TabOrder = 2
   end
   object edtWidth: TLabeledEdit
-    Left = 64
+    Left = 40
     Top = 6
     Width = 73
     Height = 21
@@ -58,9 +58,9 @@ object frmImageView: TfrmImageView
   end
   object sbxMain: TScrollBox
     Left = 0
-    Top = 72
-    Width = 1043
-    Height = 837
+    Top = 35
+    Width = 682
+    Height = 874
     HorzScrollBar.Smooth = True
     HorzScrollBar.Tracking = True
     VertScrollBar.Smooth = True
@@ -73,12 +73,14 @@ object frmImageView: TfrmImageView
     Color = clWhite
     ParentColor = False
     TabOrder = 4
+    ExplicitWidth = 1043
     object imgBitmap: TImage
-      Left = 20
-      Top = 18
-      Width = 420
+      Left = 3
+      Top = 3
+      Width = 673
       Height = 585
       AutoSize = True
+      Center = True
       IncrementalDisplay = True
       Proportional = True
     end

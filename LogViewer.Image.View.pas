@@ -32,15 +32,20 @@ type
     sbxMain        : TScrollBox;
     imgBitmap      : TImage;
 
-  private
   public
     procedure Clear;
+    procedure LoadFromStream(AStream: TStream);
 
   end;
 
 implementation
 
 {$R *.dfm}
+
+uses
+  Spring,
+
+  DDuce.Reflect;
 
 {$REGION 'public methods'}
 procedure TfrmImageView.Clear;
@@ -50,6 +55,20 @@ begin
   edtHeight.Text      := '';
   edtPixelFormat.Text := '';
   edtHandleType.Text  := '';
+end;
+
+procedure TfrmImageView.LoadFromStream(AStream: TStream);
+begin
+  Guard.CheckNotNull(AStream, 'AStream');
+  AStream.Position := 0;
+  imgBitmap.Picture.Bitmap.LoadFromStream(AStream);
+  with imgBitmap.Picture do
+  begin
+    edtWidth.Text       := Bitmap.Width.ToString;
+    edtHeight.Text      := Bitmap.Height.ToString;
+    edtPixelFormat.Text := Reflect.EnumName(Bitmap.PixelFormat);
+    edtHandleType.Text  := Reflect.EnumName(Bitmap.HandleType);
+  end;
 end;
 {$ENDREGION}
 

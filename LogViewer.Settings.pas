@@ -106,7 +106,9 @@ implementation
 uses
   System.SysUtils,
 
-  JsonDataObjects;
+  JsonDataObjects,
+
+  DDuce.Logger;
 
 {$REGION 'construction and destruction'}
 procedure TLogViewerSettings.AfterConstruction;
@@ -180,7 +182,9 @@ end;
 procedure TLogViewerSettings.Load;
 var
   JO : TJsonObject;
+  I  : Integer;
 begin
+  Logger.Track(Self, 'Load');
   if FileExists(FFileName) then
   begin
     JO := TJsonObject.Create;
@@ -188,6 +192,19 @@ begin
       JO.LoadFromFile(FFileName);
       JO['FormSettings'].ObjectValue.ToSimpleObject(FFormSettings);
       JO['MessageListSettings'].ObjectValue.ToSimpleObject(FMessageListSettings);
+
+      //if JO['MessageListSettings'].ObjectValue['Positions'].Count =  FMessageListSettings.PanelPositions.Count then
+      begin
+
+        //FMessageListSettings.PanelPositions.Clear;
+        for I := 0 to JO['MessageListSettings'].ObjectValue['Positions'].Count - 1 do
+        begin
+          FMessageListSettings.PanelPositions[I] :=
+            JO['MessageListSettings'].ObjectValue['Positions'].ArrayValue[I];
+          Logger.Send(FMessageListSettings.PanelPositions[I]);
+        end;
+      end;
+
       JO['WinODSSettings'].ObjectValue.ToSimpleObject(FWinODSSettings);
       JO['WinIPCSettings'].ObjectValue.ToSimpleObject(FWinIPCSettings);
       JO['ZeroMQSettings'].ObjectValue.ToSimpleObject(FZeroMQSettings);
@@ -237,12 +254,23 @@ end;
 procedure TLogViewerSettings.Save;
 var
   JO : TJsonObject;
+  I  : Integer;
 begin
+  Logger.Track(Self, 'Save');
   JO := TJsonObject.Create;
   try
     JO.FromSimpleObject(Self);
     JO['FormSettings'].ObjectValue.FromSimpleObject(FFormSettings);
     JO['MessageListSettings'].ObjectValue.FromSimpleObject(FMessageListSettings);
+
+    //for I := 0 to JO['MessageListSettings'].ObjectValue['Positions'].ArrayValue.Count - 1 do
+    //JO['MessageListSettings'].A['Positions']
+    for I := 0 to FMessageListSettings.PanelPositions.Count - 1 do
+    begin
+      Logger.Send(FMessageListSettings.PanelPositions[I]);
+      JO['MessageListSettings'].A['Positions'].Add(FMessageListSettings.PanelPositions[I]);
+    end;
+
     JO['WinODSSettings'].ObjectValue.FromSimpleObject(FWinODSSettings);
     JO['WinIPCSettings'].ObjectValue.FromSimpleObject(FWinIPCSettings);
     JO['ZeroMQSettings'].ObjectValue.FromSimpleObject(FZeroMQSettings);

@@ -31,15 +31,14 @@ uses
 
   DSharp.Windows.TreeViewPresenter, DSharp.Windows.ColumnDefinitions,
 
-  LogViewer.Messages.Data, LogViewer.Watches.Data,
-  LogViewer.Watches.Settings, LogViewer.DisplayValues.Settings;
+  LogViewer.Messages.Data, LogViewer.Watches.Data, LogViewer.Watches.Settings,
+  LogViewer.DisplayValues.Settings;
 
 type
   TfrmWatchesView = class(TForm)
-    pnlMain: TOMultiPanel;
-    pnlWatches: TPanel;
-    pnlWatchHistory: TPanel;
-    {$ENDREGION}
+    pnlMain         : TOMultiPanel;
+    pnlWatches      : TPanel;
+    pnlWatchHistory : TPanel;
 
   private
     FMessageId                     : Int64;
@@ -327,8 +326,8 @@ begin
   CD.OnCustomDraw      := FCDTypeCustomDraw;
 
   CD                   := CDS.Add('TimeStamp');
-  CD.MinWidth          := 80;
-  CD.Width             := 80;
+  CD.MinWidth          := 68;
+  CD.Width             := 68;
   CD.ValuePropertyName := 'TimeStamp';
   CD.HintPropertyName  := CD.ValuePropertyName;
   CD.Alignment         := taCenter;
@@ -349,8 +348,8 @@ begin
   CD.OnCustomDraw      := FCDValueCustomDraw;
 
   CD                   := FWatchHistoryColumnDefinitions.Add('Timestamp');
-  CD.MinWidth          := 80;
-  CD.Width             := 80;
+  CD.MinWidth          := 68;
+  CD.Width             := 68;
   CD.ValuePropertyName := 'TimeStamp';
   CD.HintPropertyName  := CD.ValuePropertyName;
   CD.Alignment         := taCenter;

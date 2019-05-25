@@ -31,7 +31,8 @@ uses
 
 type
   TfrmDataSetView = class(TForm)
-    dscMain: TDataSource;
+    dscMain : TDataSource;
+
   private
     FDataSet    : TFDMemTable;
     FDBGridView : TDBGridView;
@@ -41,12 +42,15 @@ type
     destructor Destroy; override;
 
     procedure Clear;
+    procedure LoadFromStream(AStream: TStream);
 
   end;
 
 implementation
 
 uses
+  Spring,
+
   DDuce.Factories.GridView;
 
 {$R *.dfm}
@@ -57,7 +61,9 @@ begin
   inherited AfterConstruction;
   FDataSet    := TFDMemTable.Create(Self);
   FDBGridView := TGridViewFactory.CreateDBGridView(Self, Self, dscMain);
-  FDBGridView.BorderStyle := bsNone;
+  FDBGridView.AlignWithMargins := False;
+  FDBGridView.GridLines        := False;
+  FDBGridView.BorderStyle      := bsNone;
 end;
 
 destructor TfrmDataSetView.Destroy;
@@ -72,6 +78,15 @@ end;
 procedure TfrmDataSetView.Clear;
 begin
   FDataSet.Active := False;
+end;
+
+procedure TfrmDataSetView.LoadFromStream(AStream: TStream);
+begin
+  Guard.CheckNotNull(AStream, 'AStream');
+  AStream.Position := 0;
+  FDataSet.LoadFromStream(AStream);
+  dscMain.DataSet := FDataSet;
+  FDBGridView.AutoSizeCols;
 end;
 {$ENDREGION}
 

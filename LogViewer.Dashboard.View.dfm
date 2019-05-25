@@ -34,7 +34,7 @@ object frmDashboard: TfrmDashboard
       end>
     MinPosition = 0.020000000000000000
     SplitterSize = 2
-    SplitterColor = cl3DLight
+    SplitterColor = clScrollBar
     SplitterHoverColor = clScrollBar
     Align = alClient
     TabOrder = 0
@@ -229,7 +229,6 @@ object frmDashboard: TfrmDashboard
                 SizeStyle = ssAuto
               end>
             TabOrder = 2
-            ExplicitWidth = 220
             object btnSubscribeToLocalHost: TButton
               AlignWithMargins = True
               Left = 3
@@ -240,10 +239,6 @@ object frmDashboard: TfrmDashboard
               Align = alClient
               TabOrder = 0
               WordWrap = True
-              ExplicitLeft = 0
-              ExplicitTop = 0
-              ExplicitWidth = 110
-              ExplicitHeight = 48
             end
             object btnAddSubscribeToLogViewer: TButton
               AlignWithMargins = True
@@ -255,10 +250,6 @@ object frmDashboard: TfrmDashboard
               Align = alClient
               TabOrder = 1
               WordWrap = True
-              ExplicitLeft = 112
-              ExplicitTop = 0
-              ExplicitWidth = 108
-              ExplicitHeight = 48
             end
           end
         end
@@ -297,6 +288,7 @@ object frmDashboard: TfrmDashboard
             Anchors = [akLeft, akTop, akRight, akBottom]
             BevelOuter = bvNone
             TabOrder = 1
+            ExplicitLeft = -1
           end
           object edtMQTTPort: TLabeledEdit
             Left = 249
@@ -476,7 +468,7 @@ object frmDashboard: TfrmDashboard
     Left = 408
     Top = 8
     Bitmap = {
-      494C0101090008014C0110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010109000801500110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000001001B09532ED308512ED100000010000000000000

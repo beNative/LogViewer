@@ -227,7 +227,6 @@ begin
   tmrPoll.Enabled := False;
   Manager.Receivers.Clear;
   FManager.Settings.FormSettings.Assign(Self);
-  FManager.Settings.Save;
   FManager.Settings.OnChanged.Remove(SettingsChanged);
   FManager := nil;
   FreeAndNil(FDashboard); // needs to be freed before manager!

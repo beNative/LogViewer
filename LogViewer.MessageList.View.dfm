@@ -23,7 +23,7 @@ object frmMessageList: TfrmMessageList
     PanelCollection = <
       item
         Control = pnlLeft
-        Position = 0.150000000000000000
+        Position = 0.330000000000000000
         Visible = True
         Index = 0
       end
@@ -41,7 +41,7 @@ object frmMessageList: TfrmMessageList
       end>
     MinPosition = 0.020000000000000000
     SplitterSize = 2
-    SplitterColor = cl3DLight
+    SplitterColor = clScrollBar
     SplitterHoverColor = clScrollBar
     Align = alClient
     BevelEdges = []
@@ -50,9 +50,9 @@ object frmMessageList: TfrmMessageList
       1261
       746)
     object pnlMessages: TPanel
-      Left = 191
+      Left = 418
       Top = 0
-      Width = 650
+      Width = 423
       Height = 746
       Align = alClient
       BevelOuter = bvNone
@@ -63,7 +63,7 @@ object frmMessageList: TfrmMessageList
       object pnlFilter: TPanel
         Left = 0
         Top = 0
-        Width = 650
+        Width = 423
         Height = 14
         Align = alTop
         BevelOuter = bvNone
@@ -73,7 +73,7 @@ object frmMessageList: TfrmMessageList
         object edtMessageFilter: TButtonedEdit
           Left = 0
           Top = 0
-          Width = 650
+          Width = 423
           Height = 14
           Margins.Left = 0
           Margins.Top = 0
@@ -163,18 +163,20 @@ object frmMessageList: TfrmMessageList
             Top = 0
             Width = 418
             Height = 726
+            ActivateNewDocked = False
             ActivePageIndex = 0
             Align = alClient
+            HotTrack = False
             ParentBackground = True
             TabOrder = 0
             TabPanelOptions.Colors.HotTop = clBtnHighlight
             TabPanelOptions.Colors.HotBottom = clBtnHighlight
             TabPanelOptions.Colors.NormalTop = clBtnHighlight
             TabPanelOptions.Colors.NormalText = clGray
-            TabPanelOptions.Colors.SelectedTop = cl3DLight
-            TabPanelOptions.Colors.SelectedBottom = cl3DLight
-            TabPanelOptions.Colors.TabBorder = clWhite
-            TabPanelOptions.Options = [toDrag, toBrightTopColors]
+            TabPanelOptions.Colors.SelectedTop = clBtnHighlight
+            TabPanelOptions.Colors.SelectedBottom = clBtnHighlight
+            TabPanelOptions.Colors.TabBorder = clBtnHighlight
+            TabPanelOptions.Options = []
             object tsValueList: TKTabSheet
               Caption = 'Value list'
             end
@@ -194,23 +196,10 @@ object frmMessageList: TfrmMessageList
             end
             object tsImageViewer: TKTabSheet
               Caption = 'Image viewer'
-              object Panel6: TPanel
-                Left = 0
-                Top = 0
-                Width = 418
-                Height = 702
-                Margins.Left = 0
-                Margins.Top = 0
-                Margins.Right = 0
-                Margins.Bottom = 0
-                Align = alClient
-                BevelEdges = []
-                BevelOuter = bvNone
-                TabOrder = 0
-              end
             end
             object tsDataSet: TKTabSheet
-              Caption = 'Dataset'
+              Caption = 'Dataset viewer'
+              ExplicitWidth = 0
             end
           end
         end
@@ -222,7 +211,7 @@ object frmMessageList: TfrmMessageList
     object pnlLeft: TOMultiPanel
       Left = 0
       Top = 0
-      Width = 189
+      Width = 416
       Height = 746
       PanelType = ptVertical
       PanelCollection = <
@@ -240,14 +229,14 @@ object frmMessageList: TfrmMessageList
         end>
       MinPosition = 0.020000000000000000
       SplitterSize = 2
-      SplitterColor = cl3DLight
+      SplitterColor = clScrollBar
       SplitterHoverColor = clScrollBar
       Anchors = []
       TabOrder = 0
       object pnlCallStack: TPanel
         Left = 0
         Top = 0
-        Width = 189
+        Width = 416
         Height = 373
         Align = alTop
         BevelOuter = bvNone
@@ -255,7 +244,7 @@ object frmMessageList: TfrmMessageList
         object pnlCallStackTitle: TPanel
           Left = 0
           Top = 0
-          Width = 189
+          Width = 416
           Height = 20
           Align = alTop
           Alignment = taLeftJustify
@@ -275,7 +264,7 @@ object frmMessageList: TfrmMessageList
       object pnlWatches: TPanel
         Left = 0
         Top = 375
-        Width = 189
+        Width = 416
         Height = 371
         Align = alClient
         BevelOuter = bvNone
@@ -286,7 +275,7 @@ object frmMessageList: TfrmMessageList
         object pnlWatchTitle: TPanel
           Left = 0
           Top = 0
-          Width = 189
+          Width = 416
           Height = 20
           Align = alTop
           Alignment = taLeftJustify
@@ -310,7 +299,7 @@ object frmMessageList: TfrmMessageList
     Left = 55
     Top = 22
     Bitmap = {
-      494C010116001900080110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010116001900140110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

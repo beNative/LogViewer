@@ -1,9 +1,11 @@
 object frmDataSetView: TfrmDataSetView
   Left = 0
   Top = 0
-  ClientHeight = 589
-  ClientWidth = 555
+  BorderStyle = bsNone
+  ClientHeight = 488
+  ClientWidth = 363
   Color = clBtnFace
+  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -13,7 +15,7 @@ object frmDataSetView: TfrmDataSetView
   PixelsPerInch = 96
   TextHeight = 13
   object dscMain: TDataSource
-    Left = 144
-    Top = 24
+    Left = 16
+    Top = 8
   end
 end

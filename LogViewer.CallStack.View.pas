@@ -133,6 +133,7 @@ begin
   CD.OnCustomDraw      := FCDDurationCustomDraw;
   CD.Width             := 60;
   CD.MinWidth          := 60;
+  CD.Alignment         := taRightJustify;
   CD.AutoSize          := False;
   FVSTCallStack.Header.AutoSizeIndex := 1;
   FTVPCallStack := TFactories.CreateTreeViewPresenter(

@@ -3,7 +3,7 @@ object frmValueListView: TfrmValueListView
   Top = 0
   ClientHeight = 569
   ClientWidth = 398
-  Color = clBtnFace
+  Color = clWhite
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -34,7 +34,7 @@ object frmValueListView: TfrmValueListView
       end>
     MinPosition = 0.020000000000000000
     SplitterSize = 2
-    SplitterColor = cl3DLight
+    SplitterColor = clScrollBar
     SplitterHoverColor = clScrollBar
     Align = alClient
     AutoSize = True
