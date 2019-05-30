@@ -20,7 +20,8 @@ interface
 
 { Implements support for watches. A watch is an object used to keep track of
   a variable's value over time. Each watch holds a list of its historical
-  logged values. }
+  logged values. A watch is identified by the combination of its name and
+  value type (both are case sensitive). }
 
 { This implementation is inspired by the watch implementation made by
   Luiz Américo Pereira Câmara (FPC-Lazarus). }
@@ -61,9 +62,9 @@ type
   TWatch = class
   private
     FFirstId          : Int64; // first message id
-    FCurrentIndex     : Integer;
     FName             : string;
     FValueType        : string;
+    FCurrentIndex     : Integer;
     FList             : IList<TWatchValue>;
     FOnlyTrackChanges : Boolean;
 
@@ -90,7 +91,7 @@ type
 
     function AddValue(
       const AValue : string;
-      AIndex          : Int64;
+      AIndex       : Int64;
       ATimeStamp   : TDateTime
     ): Boolean;
     function Locate(const AId: Int64): Boolean;
@@ -148,7 +149,7 @@ type
   public
     procedure AfterConstruction; override;
 
-    function IndexOf(const AName: string): Integer;
+    function IndexOf(const AName, AValueType: string): Integer;
     procedure Add(
       const AName          : string;
       const AValueType     : string;
@@ -260,8 +261,8 @@ end;
 function TWatch.AddValue(const AValue: string; AIndex: Int64; ATimeStamp:
   TDateTime): Boolean;
 var
-  Item : TWatchValue;
-  B    : Boolean;
+  LItem : TWatchValue;
+  B     : Boolean;
 begin
   B := (not OnlyTrackChanges) or (OnlyTrackChanges and
     (not Assigned(CurrentWatchValue) or
@@ -271,11 +272,11 @@ begin
   );
   if B then
   begin
-    Item := TWatchValue.Create;
-    Item.Id        := AIndex;
-    Item.Value     := AValue;
-    Item.TimeStamp := ATimeStamp;
-    FList.Add(Item);
+    LItem := TWatchValue.Create;
+    LItem.Id        := AIndex;
+    LItem.Value     := AValue;
+    LItem.TimeStamp := ATimeStamp;
+    FList.Add(LItem);
     Result := True;
   end
   else
@@ -345,14 +346,15 @@ end;
 {$ENDREGION}
 
 {$REGION 'public methods'}
-function TWatchList.IndexOf(const AName: string): Integer;
+function TWatchList.IndexOf(const AName, AValueType: string): Integer;
 var
   W : TWatch;
 begin
   if FList.TryGetSingle(W,
     function(const AWatchVariable: TWatch): Boolean
     begin
-      Result := AWatchVariable.Name = AName;
+      Result := (AWatchVariable.Name = AName)
+        and (AWatchVariable.ValueType = AValueType);
     end
   ) then
     Result := FList.IndexOf(W)
@@ -366,7 +368,7 @@ procedure TWatchList.Add(const AName: string; const AValueType: string;
 var
   I : Integer;
 begin
-  I := IndexOf(AName);
+  I := IndexOf(AName, AValueType);
   if I = -1 then
   begin
     I := FList.Add(TWatch.Create(AName, AValueType, AId, AOnlyTrackChanges));

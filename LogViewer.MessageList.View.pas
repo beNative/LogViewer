@@ -46,31 +46,32 @@ uses
   LogViewer.Interfaces, LogViewer.CallStack.Data, LogViewer.CallStack.View,
   LogViewer.ValueList.View, LogViewer.MessageList.Settings,
   LogViewer.MessageList.LogNode, LogViewer.DisplayValues.Settings,
-  LogViewer.DataSet.View, LogViewer.Image.View;
+  LogViewer.DataSet.View, LogViewer.Image.View, LogViewer.RawData.View;
 
 type
   TfrmMessageList = class(TForm, ILogViewer)
-    imlMessageTypes   : TImageList;
-    pnlMain           : TOMultiPanel;
-    pnlMessages       : TPanel;
-    pnlFilter         : TPanel;
-    edtMessageFilter  : TButtonedEdit;
-    pnlRight          : TPanel;
-    pnlMessageContent : TPanel;
-    pnlLeft           : TOMultiPanel;
-    pnlCallStack      : TPanel;
-    pnlCallStackTitle : TPanel;
-    pnlWatches        : TPanel;
-    pnlWatchTitle     : TPanel;
-    pgcMessageData    : TKPageControl;
-    tsMessageView     : TKTabSheet;
-    pgcMessageDetails : TKPageControl;
-    tsValueList       : TKTabSheet;
-    tsTextViewer      : TKTabSheet;
-    pnlTextViewer     : TPanel;
-    tsImageViewer     : TKTabSheet;
-    tsDataSet         : TKTabSheet;
-    tsRawData         : TKTabSheet;
+    chkSyncWithSelectedMessage : TCheckBox;
+    edtMessageFilter           : TButtonedEdit;
+    imlMessageTypes            : TImageList;
+    pgcMessageData             : TKPageControl;
+    pgcMessageDetails          : TKPageControl;
+    pnlCallStack               : TPanel;
+    pnlCallStackTitle          : TPanel;
+    pnlFilter                  : TPanel;
+    pnlLeft                    : TOMultiPanel;
+    pnlMain                    : TOMultiPanel;
+    pnlMessageContent          : TPanel;
+    pnlMessages                : TPanel;
+    pnlRight                   : TPanel;
+    pnlTextViewer              : TPanel;
+    pnlWatches                 : TPanel;
+    pnlWatchTitle              : TPanel;
+    tsDataSet                  : TKTabSheet;
+    tsImageViewer              : TKTabSheet;
+    tsMessageView              : TKTabSheet;
+    tsRawData                  : TKTabSheet;
+    tsTextViewer               : TKTabSheet;
+    tsValueList                : TKTabSheet;
     {$ENDREGION}
 
     procedure edtMessageFilterChange(Sender: TObject);
@@ -113,6 +114,7 @@ type
     FValueList                   : TfrmValueListView;
     FDataSetView                 : TfrmDataSetView;
     FImageView                   : TfrmImageView;
+    FRawDataView                 : TfrmRawDataView;
     FMiliSecondsBetweenSelection : Integer;
     FScrollToLastNode            : Boolean;
 
@@ -259,6 +261,7 @@ type
     procedure UpdateDataSetDisplay(ALogNode: TLogNode);
     procedure UpdateTextDisplay(ALogNode: TLogNode);
     procedure UpdateTextStreamDisplay(ALogNode: TLogNode);
+    procedure UpdateRawDataDisplay(ALogNode: TLogNode);
     procedure UpdateColorDisplay(ALogNode: TLogNode);
     procedure UpdateValueDisplay(ALogNode: TLogNode);
 
@@ -273,6 +276,7 @@ type
     procedure CreateValueListView;
     procedure CreateDataSetView;
     procedure CreateImageView;
+    procedure CreateRawDataView;
 
     procedure CollapseAll;
     procedure ExpandAll;
@@ -373,6 +377,7 @@ begin
   CreateValueListView;
   CreateDataSetView;
   CreateImageView;
+  CreateRawDataView;
   pgcMessageData.ActivePage := tsMessageView;
   Caption := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
   Logger.Info('Creating new message viewer (%s)', [Caption]);
@@ -406,6 +411,7 @@ begin
   FreeAndNil(FValueList);
   FreeAndNil(FDataSetView);
   FreeAndNil(FImageView);
+  FreeAndNil(FRawDataView);
   FreeAndNil(FWatches);
   FreeAndNIl(FWatchesView);
   FreeAndNil(FCallStackView);
@@ -541,6 +547,12 @@ begin
   FLogTreeView.Header.AutoSizeIndex := COLUMN_MAIN;
   FLogTreeView.Header.Options       :=
     FLogTreeView.Header.Options + [hoFullRepaintOnResize];
+end;
+
+procedure TfrmMessageList.CreateRawDataView;
+begin
+  FRawDataView := TfrmRawDataView.Create(Self);
+  AssignFormParent(FRawDataView, tsRawData);
 end;
 
 procedure TfrmMessageList.CreateValueListView;
@@ -1505,7 +1517,12 @@ begin
         True,
         True
       );
-      FWatchesView.UpdateView(FMessageCount);
+      if not chkSyncWithSelectedMessage.Checked then
+        FWatchesView.UpdateView(FMessageCount)
+      else
+        FWatchesView.UpdateView;
+
+      //FWatchesView.UpdateView(FMessageCount);
     end;
     lmtWatch:
     begin
@@ -1526,7 +1543,10 @@ begin
         True,
         False
       );
-      FWatchesView.UpdateView(FMessageCount);
+      if not chkSyncWithSelectedMessage.Checked then
+        FWatchesView.UpdateView(FMessageCount)
+      else
+        FWatchesView.UpdateView;
     end;
     lmtClear:
     begin
@@ -1737,7 +1757,17 @@ begin
       UpdateValueDisplay(ALogNode);
     lmtDataSet:
       UpdateDataSetDisplay(ALogNode);
+    lmtWatch, lmtCounter:
+      if chkSyncWithSelectedMessage.Checked then
+        FWatchesView.UpdateView(ALogNode.Id);
   end;
+  UpdateRawDataDisplay(ALogNode);
+end;
+
+procedure TfrmMessageList.UpdateRawDataDisplay(ALogNode: TLogNode);
+begin
+  //pgcMessageDetails.ActivePage := tsRawData;
+  FRawDataView.LoadFromStream(ALogNode.MessageData);
 end;
 
 procedure TfrmMessageList.UpdateTextDisplay(ALogNode: TLogNode);

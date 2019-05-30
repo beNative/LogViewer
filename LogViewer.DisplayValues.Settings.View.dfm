@@ -1,8 +1,9 @@
 object frmDisplayValuesSettings: TfrmDisplayValuesSettings
   Left = 0
   Top = 0
-  ClientHeight = 339
-  ClientWidth = 473
+  BorderStyle = bsNone
+  ClientHeight = 378
+  ClientWidth = 489
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -15,27 +16,33 @@ object frmDisplayValuesSettings: TfrmDisplayValuesSettings
   object splVertical: TSplitter
     Left = 145
     Top = 0
-    Width = 7
-    Height = 339
-    ExplicitHeight = 204
+    Width = 2
+    Height = 378
+    Color = clScrollBar
+    ParentColor = False
+    ResizeStyle = rsUpdate
+    ExplicitHeight = 339
   end
   object pnlRight: TPanel
-    Left = 152
+    Left = 147
     Top = 0
-    Width = 321
-    Height = 339
+    Width = 342
+    Height = 378
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitWidth = 390
+    ExplicitLeft = 152
+    ExplicitWidth = 321
+    ExplicitHeight = 339
   end
   object pnlLeft: TPanel
     Left = 0
     Top = 0
     Width = 145
-    Height = 339
+    Height = 378
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitHeight = 339
   end
 end

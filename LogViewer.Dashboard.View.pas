@@ -67,35 +67,35 @@ type
     actSubscribeToLocalHost    : TAction;
     actSubscribeToSelection    : TAction;
     imlMain                    : TImageList;
-    pnlMain: TOMultiPanel;
-    pnlLeft: TPanel;
-    pnlRight: TPanel;
-    ppmMain: TPopupMenu;
-    mniCloseSsubscriber: TMenuItem;
-    pgcMain: TKPageControl;
-    tsWinIPC: TKTabSheet;
-    lblWinIPC: TLabel;
-    pnlWinIPCTitle: TPanel;
-    tsWinODS: TKTabSheet;
-    lblWinODS: TLabel;
-    pnlWinODSTitle: TPanel;
-    tsZeroMQ: TKTabSheet;
-    pnlZMQEndpoints: TPanel;
-    Panel4: TPanel;
-    pnlButtons: TGridPanel;
-    btnSubscribeToLocalHost: TButton;
-    btnAddSubscribeToLogViewer: TButton;
-    tsMQTT: TKTabSheet;
-    edtBroker: TLabeledEdit;
-    pnlMQTTTopics: TPanel;
-    edtMQTTPort: TLabeledEdit;
-    pnlMQTTTitle: TPanel;
-    tsFileSystem: TKTabSheet;
-    pnlFileSystemTitle: TPanel;
-    pnlFSLocations: TPanel;
-    tsCOMPort: TKTabSheet;
-    pnlCOMPorts: TPanel;
-    pnlCOMPortTitle: TPanel;
+    pnlMain                    : TOMultiPanel;
+    pnlLeft                    : TPanel;
+    pnlRight                   : TPanel;
+    ppmMain                    : TPopupMenu;
+    mniCloseSsubscriber        : TMenuItem;
+    pgcMain                    : TKPageControl;
+    tsWinIPC                   : TKTabSheet;
+    lblWinIPC                  : TLabel;
+    pnlWinIPCTitle             : TPanel;
+    tsWinODS                   : TKTabSheet;
+    lblWinODS                  : TLabel;
+    pnlWinODSTitle             : TPanel;
+    tsZeroMQ                   : TKTabSheet;
+    pnlZMQEndpoints            : TPanel;
+    Panel4                     : TPanel;
+    pnlButtons                 : TGridPanel;
+    btnSubscribeToLocalHost    : TButton;
+    btnAddSubscribeToLogViewer : TButton;
+    tsMQTT                     : TKTabSheet;
+    edtBroker                  : TLabeledEdit;
+    pnlMQTTTopics              : TPanel;
+    edtMQTTPort                : TLabeledEdit;
+    pnlMQTTTitle               : TPanel;
+    tsFileSystem               : TKTabSheet;
+    pnlFileSystemTitle         : TPanel;
+    pnlFSLocations             : TPanel;
+    tsCOMPort                  : TKTabSheet;
+    pnlCOMPorts                : TPanel;
+    pnlCOMPortTitle            : TPanel;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -627,7 +627,7 @@ begin
   begin
     if Sender.GetNodeLevel(Node) = 0 then
     begin
-      if Column =  0 then
+      if Column = COLUMN_SOURCENAME then
         CellText := DN.Data.Caption
       else
         CellText := '';
@@ -637,13 +637,13 @@ begin
       if Assigned(DN.Data.Subscriber) then
       begin
         LSubscriber := DN.Data.Subscriber;
-        if Column =  0 then
+        if Column = COLUMN_SOURCENAME then
           CellText := LSubscriber.SourceName
-        else if Column =  1 then
+        else if Column = COLUMN_KEY then
           CellText := LSubscriber.Key
-        else if Column =  2 then
+        else if Column = COLUMN_SOURCEID then
           CellText := LSubscriber.SourceId.ToString
-        else if Column =  3 then
+        else if Column = COLUMN_MESSAGECOUNT then
           CellText := LSubscriber.MessageCount.ToString;
       end
     end;
@@ -1046,7 +1046,7 @@ begin
       Position := 0;
       Indent   := 8;
       Width    := 100;
-      Text := 'Name';
+      Text     := SName;
     end;
     with Header.Columns.Add do
     begin
@@ -1056,7 +1056,7 @@ begin
         coVisible, coSmartResize, coAllowFocus];
       Position := 1;
       Width    := 200;
-      Text := 'Value';
+      Text     := SValue;
     end;
     with Header.Columns.Add do
     begin
@@ -1066,7 +1066,7 @@ begin
         coAutoSpring, coAllowFocus];
       Position := 2;
       Width    := 100;
-      Text := 'Id';
+      Text     := SId;
     end;
     with Header.Columns.Add do
     begin
@@ -1076,7 +1076,7 @@ begin
         coVisible, coAllowFocus];
       Position := 3;
       Width    := 100;
-      Text := 'Messagecount';
+      Text     := SMessageCount;
     end;
     Header.MainColumn := 0;
     TreeOptions.AutoOptions := TreeOptions.AutoOptions + [toAutoSpanColumns];

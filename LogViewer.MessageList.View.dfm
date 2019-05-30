@@ -164,7 +164,7 @@ object frmMessageList: TfrmMessageList
             Width = 418
             Height = 726
             ActivateNewDocked = False
-            ActivePageIndex = 0
+            ActivePageIndex = 4
             Align = alClient
             HotTrack = False
             ParentBackground = True
@@ -199,12 +199,11 @@ object frmMessageList: TfrmMessageList
             end
             object tsDataSet: TKTabSheet
               Caption = 'Dataset viewer'
-              ExplicitWidth = 0
+            end
+            object tsRawData: TKTabSheet
+              Caption = 'Raw data viewer'
             end
           end
-        end
-        object tsRawData: TKTabSheet
-          Caption = 'Raw data'
         end
       end
     end
@@ -290,6 +289,27 @@ object frmMessageList: TfrmMessageList
           ParentBackground = False
           ParentFont = False
           TabOrder = 0
+          DesignSize = (
+            416
+            20)
+          object chkSyncWithSelectedMessage: TCheckBox
+            Left = 320
+            Top = 2
+            Width = 92
+            Height = 17
+            Hint = 'Synchronize with selected message'
+            Anchors = [akTop, akRight]
+            Caption = 'Synchronized'
+            Checked = True
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clGray
+            Font.Height = -11
+            Font.Name = 'Segoe UI'
+            Font.Style = []
+            ParentFont = False
+            State = cbChecked
+            TabOrder = 0
+          end
         end
       end
     end
@@ -299,7 +319,7 @@ object frmMessageList: TfrmMessageList
     Left = 55
     Top = 22
     Bitmap = {
-      494C010116001900140110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101160019001C0110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

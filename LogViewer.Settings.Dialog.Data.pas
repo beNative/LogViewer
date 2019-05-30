@@ -19,13 +19,15 @@ unit LogViewer.Settings.Dialog.Data;
 interface
 
 uses
-  Vcl.ComCtrls;
+  Vcl.ComCtrls,
+
+  kpagecontrol;
 
 type
   TConfigData = class
   private
     FText     : string;
-    FTabSheet : TTabSheet;
+    FTabSheet : TKTabSheet;
 
   protected
     {$REGION 'property access methods'}
@@ -36,20 +38,20 @@ type
   public
     constructor Create(
       const AText : string = '';
-      ATabSheet   : TTabSheet = nil
+      ATabSheet   : TKTabSheet = nil
     );
 
     property Text: string
       read GetText write SetText;
 
-    property TabSheet: TTabSheet
+    property TabSheet: TKTabSheet
       read FTabSheet write FTabSheet;
   end;
 
 implementation
 
 {$REGION 'construction and destruction'}
-constructor TConfigData.Create(const AText: string; ATabSheet: TTabSheet);
+constructor TConfigData.Create(const AText: string; ATabSheet: TKTabSheet);
 begin
   inherited Create;
   FText     := AText;

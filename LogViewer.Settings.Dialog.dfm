@@ -2,9 +2,9 @@ object frmLogViewerSettings: TfrmLogViewerSettings
   Left = 0
   Top = 0
   Caption = 'Settings'
-  ClientHeight = 403
-  ClientWidth = 920
-  Color = clBtnFace
+  ClientHeight = 415
+  ClientWidth = 668
+  Color = clWhite
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -20,7 +20,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Left = 201
     Top = 0
     Width = 2
-    Height = 375
+    Height = 384
     Color = clScrollBar
     ParentColor = False
     ResizeStyle = rsLine
@@ -31,79 +31,130 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Left = 0
     Top = 0
     Width = 201
-    Height = 375
+    Height = 384
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitLeft = 3
-    ExplicitTop = 3
-    ExplicitHeight = 367
+    ExplicitLeft = -5
+    ExplicitTop = -6
+    ExplicitHeight = 375
   end
-  object pgcMain: TPageControl
+  object pnlBottom: TPanel
+    Left = 0
+    Top = 384
+    Width = 668
+    Height = 31
+    Align = alBottom
+    BevelOuter = bvNone
+    ParentBackground = False
+    TabOrder = 1
+    DesignSize = (
+      668
+      31)
+    object shpLine: TShape
+      Left = 0
+      Top = 0
+      Width = 668
+      Height = 1
+      Align = alTop
+      Pen.Color = clScrollBar
+    end
+    object btnClose: TButton
+      Left = 515
+      Top = 4
+      Width = 150
+      Height = 25
+      Action = actClose
+      Anchors = [akRight, akBottom]
+      Images = imlMain
+      TabOrder = 0
+    end
+    object btnClose1: TButton
+      Left = 203
+      Top = 4
+      Width = 150
+      Height = 25
+      Action = actApply
+      Anchors = [akRight, akBottom]
+      Images = imlMain
+      TabOrder = 1
+    end
+    object btnCancel: TButton
+      Left = 359
+      Top = 4
+      Width = 150
+      Height = 25
+      Action = actCancel
+      Anchors = [akRight, akBottom]
+      Images = imlMain
+      TabOrder = 2
+    end
+  end
+  object pgcMain: TKPageControl
     Left = 203
     Top = 0
-    Width = 717
-    Height = 375
-    Margins.Left = 0
-    ActivePage = tsAdvanced
+    Width = 465
+    Height = 384
+    ActivePageIndex = 3
     Align = alClient
-    Style = tsButtons
-    TabOrder = 1
-    ExplicitLeft = 213
-    ExplicitTop = 3
-    ExplicitWidth = 704
-    ExplicitHeight = 367
-    object tsWatches: TTabSheet
+    ParentBackground = False
+    TabHeight = 0
+    TabOrder = 2
+    ExplicitLeft = -544
+    ExplicitTop = 24
+    ExplicitWidth = 745
+    ExplicitHeight = 300
+    object tsWatches: TKTabSheet
       Caption = 'Watches'
-      ExplicitWidth = 696
-      ExplicitHeight = 336
+      ExplicitTop = 24
+      ExplicitWidth = 745
+      ExplicitHeight = 276
     end
-    object tsCallstack: TTabSheet
+    object tsCallStack: TKTabSheet
       Caption = 'Callstack'
-      ImageIndex = 1
-      ExplicitWidth = 696
-      ExplicitHeight = 336
+      ExplicitTop = 24
+      ExplicitWidth = 745
+      ExplicitHeight = 276
     end
-    object tsWinIPC: TTabSheet
-      Caption = 'WinIPC'
-      ImageIndex = 2
-      ExplicitWidth = 696
-      ExplicitHeight = 336
+    object tsComPort: TKTabSheet
+      Caption = 'ComPort'
+      ExplicitTop = 24
+      ExplicitWidth = 745
+      ExplicitHeight = 276
     end
-    object tsWinODS: TTabSheet
-      Caption = 'OutputDebugString API'
-      ImageIndex = 3
-      ExplicitWidth = 696
-      ExplicitHeight = 336
-    end
-    object tsComport: TTabSheet
-      Caption = 'Serial port'
-      ImageIndex = 4
-      ExplicitWidth = 696
-      ExplicitHeight = 336
-    end
-    object tsZeroMQ: TTabSheet
+    object tsZeroMQ: TKTabSheet
       Caption = 'ZeroMQ'
-      ImageIndex = 5
-      ExplicitWidth = 696
-      ExplicitHeight = 336
+      ExplicitTop = 24
+      ExplicitWidth = 745
+      ExplicitHeight = 276
     end
-    object tsDisplayValuesSettings: TTabSheet
-      Caption = 'DisplayValuesSettings'
-      ImageIndex = 6
-      ExplicitWidth = 696
-      ExplicitHeight = 336
+    object tsWinODS: TKTabSheet
+      Caption = 'WinODS'
+      ExplicitTop = 24
+      ExplicitWidth = 745
+      ExplicitHeight = 276
     end
-    object tsAdvanced: TTabSheet
+    object tsWinIPC: TKTabSheet
+      Caption = 'WinIPC'
+      ExplicitTop = 24
+      ExplicitWidth = 745
+      ExplicitHeight = 276
+    end
+    object tsDisplayValueSettings: TKTabSheet
+      Caption = 'DisplayValueSettings'
+      ExplicitTop = 24
+      ExplicitWidth = 745
+      ExplicitHeight = 276
+    end
+    object tsAdvanced: TKTabSheet
       Caption = 'Advanced'
-      ImageIndex = 7
-      ExplicitWidth = 696
-      ExplicitHeight = 336
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object seSettings: TSynEdit
         Left = 0
         Top = 0
-        Width = 709
-        Height = 344
+        Width = 465
+        Height = 384
         Align = alClient
         ActiveLineColor = clYellow
         Font.Charset = DEFAULT_CHARSET
@@ -143,58 +194,16 @@ object frmLogViewerSettings: TfrmLogViewerSettings
         TabWidth = 2
         WordWrap = True
         FontSmoothing = fsmClearType
+        ExplicitLeft = 4
+        ExplicitTop = -6
+        ExplicitHeight = 351
       end
     end
-    object tsViewSettings: TTabSheet
+    object tsViewSettings: TKTabSheet
       Caption = 'ViewSettings'
-      ImageIndex = 8
-      ExplicitWidth = 696
-      ExplicitHeight = 336
-    end
-  end
-  object pnlBottom: TPanel
-    Left = 0
-    Top = 375
-    Width = 920
-    Height = 28
-    Align = alBottom
-    BevelOuter = bvNone
-    TabOrder = 2
-    DesignSize = (
-      920
-      28)
-    object btnClose: TButton
-      Left = 766
-      Top = -1
-      Width = 150
-      Height = 25
-      Action = actClose
-      Anchors = [akRight, akBottom]
-      Images = imlMain
-      TabOrder = 0
-      ExplicitTop = 1
-    end
-    object btnClose1: TButton
-      Left = 454
-      Top = -1
-      Width = 150
-      Height = 25
-      Action = actApply
-      Anchors = [akRight, akBottom]
-      Images = imlMain
-      TabOrder = 1
-      ExplicitTop = 1
-    end
-    object btnCancel: TButton
-      Left = 610
-      Top = -1
-      Width = 150
-      Height = 25
-      Action = actCancel
-      Anchors = [akRight, akBottom]
-      Images = imlMain
-      TabOrder = 2
-      ExplicitTop = 1
+      ExplicitTop = 24
+      ExplicitWidth = 745
+      ExplicitHeight = 276
     end
   end
   object aclMain: TActionList
@@ -222,7 +231,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Left = 568
     Top = 32
     Bitmap = {
-      494C0101030008004C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010103000800540010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -374,7 +383,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     StringAttri.Style = [fsBold]
     SymbolAttri.Foreground = clMaroon
     SymbolAttri.Style = [fsBold]
-    Left = 567
-    Top = 164
+    Left = 495
+    Top = 36
   end
 end

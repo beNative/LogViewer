@@ -493,6 +493,7 @@ begin
     OptimizeStatusBarPanelWidths;
   end;
 end;
+
 {$ENDREGION}
 
 initialization

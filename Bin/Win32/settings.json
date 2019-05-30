@@ -1,9 +1,9 @@
 {
 	"FormSettings": {
-		"Left": 604,
-		"Top": 98,
-		"Width": 1539,
-		"Height": 989,
+		"Left": 477,
+		"Top": 108,
+		"Width": 1558,
+		"Height": 913,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -13,8 +13,8 @@
 		"DynamicAutoSizeColumns": true,
 		"SmartTimeStamps": true,
 		"Positions": [
-			0.220922677063028,
-			0.800677966101695,
+			0.250972762645914,
+			0.72568093385214,
 			1
 		]
 	},

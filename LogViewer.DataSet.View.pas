@@ -82,11 +82,15 @@ end;
 
 procedure TfrmDataSetView.LoadFromStream(AStream: TStream);
 begin
-  Guard.CheckNotNull(AStream, 'AStream');
-  AStream.Position := 0;
-  FDataSet.LoadFromStream(AStream);
-  dscMain.DataSet := FDataSet;
-  FDBGridView.AutoSizeCols;
+  if Assigned(AStream) then
+  begin
+    AStream.Position := 0;
+    FDataSet.LoadFromStream(AStream);
+    dscMain.DataSet := FDataSet;
+    FDBGridView.AutoSizeCols;
+  end
+  else
+    Clear;
 end;
 {$ENDREGION}
 

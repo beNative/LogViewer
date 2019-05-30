@@ -38,7 +38,7 @@ uses
   LogViewer.Receivers.WinODS.Settings.View,
   LogViewer.Receivers.WinIPC.Settings.View, LogViewer.Watches.Settings.View,
   LogViewer.Receivers.ZeroMQ.Settings.View,
-  LogViewer.DisplayValues.Settings.View;
+  LogViewer.DisplayValues.Settings.View, kpagecontrol, kcontrols;
 
 type
   TConfigNode = TVTNode<TConfigData>;
@@ -54,21 +54,22 @@ type
     btnClose                : TButton;
     btnClose1               : TButton;
     imlMain                 : TImageList;
-    pgcMain                 : TPageControl;
+    pgcMain                 : TKPageControl;
     pnlBottom               : TPanel;
     pnlConfigTree           : TPanel;
-    splVertical             : TSplitter;
-    tsAdvanced              : TTabSheet;
-    tsCallstack             : TTabSheet;
-    tsComport               : TTabSheet;
-    tsDisplayValuesSettings : TTabSheet;
-    tsWatches               : TTabSheet;
-    tsWinIPC                : TTabSheet;
-    tsWinODS                : TTabSheet;
-    tsZeroMQ                : TTabSheet;
     seSettings              : TSynEdit;
+    shpLine                 : TShape;
+    splVertical             : TSplitter;
     synJScript              : TSynJScriptSyn;
-    tsViewSettings          : TTabSheet; // used to display JSON config
+    tsAdvanced              : TKTabSheet;
+    tsCallStack             : TKTabSheet;
+    tsComPort               : TKTabSheet;
+    tsDisplayValueSettings  : TKTabSheet;
+    tsViewSettings          : TKTabSheet;
+    tsWatches               : TKTabSheet;
+    tsWinIPC                : TKTabSheet;
+    tsWinODS                : TKTabSheet;
+    tsZeroMQ                : TKTabSheet;
     {$ENDREGION}
 
     procedure actCloseExecute(Sender: TObject);
@@ -109,7 +110,7 @@ type
     function AddNode(
       AParentNode : TConfigNode;
       const AText : string;
-      ATabSheet   : TTabSheet
+      ATabSheet   : TKTabSheet
     ): TConfigNode;
 
     procedure CreateSettingsForms;
@@ -157,10 +158,6 @@ begin
   FConfigTree.Margins.Right := 0;
   FConfigTree.NodeDataSize := SizeOf(TConfigNode);
   BuildTree;
-  for I := 0 to pgcMain.PageCount - 1 do
-  begin
-    pgcMain.Pages[I].TabVisible := False;
-  end;
   pgcMain.ActivePage := tsViewSettings;
   seSettings.Lines.LoadFromFile(FSettings.FileName);
 end;
@@ -224,7 +221,7 @@ end;
 
 {$REGION 'protected methods'}
 function TfrmLogViewerSettings.AddNode(AParentNode: TConfigNode; const AText:
-  string;  ATabSheet: TTabSheet): TConfigNode;
+  string;  ATabSheet: TKTabSheet): TConfigNode;
 begin
   if Assigned(AParentNode) then
   begin
@@ -245,7 +242,7 @@ var
   LNode : TConfigNode;
 begin
   LNode := AddNode(nil, SViewSettings, tsViewSettings);
-  AddNode(LNode, SDisplaySettings, tsDisplayValuesSettings);
+  AddNode(LNode, SDisplaySettings, tsDisplayValueSettings);
   AddNode(LNode, SWatches, tsWatches);
   AddNode(LNode, SCallStack, tsCallstack);
 
@@ -283,7 +280,7 @@ begin
 
   FDisplayValuesSettingsForm :=
     TfrmDisplayValuesSettings.Create(Self, FSettings.DisplayValuesSettings);
-  AssignFormParent(FDisplayValuesSettingsForm, tsDisplayValuesSettings);
+  AssignFormParent(FDisplayValuesSettingsForm, tsDisplayValueSettings);
 
   FViewSettingsForm :=
     TfrmViewSettings.Create(Self, FSettings.MessageListSettings);

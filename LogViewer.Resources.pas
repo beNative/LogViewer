@@ -96,6 +96,10 @@ resourcestring
   SEnter       = 'Enter';
   SLeave       = 'Leave';
 
+  // dashboard columns
+  SId           = 'Id';
+  SMessageCount = 'Messagecount';
+
   STextMessages         = 'Text messages';
   SNotificationMessages = 'Notification messages';
   SValueMessages        = 'Value messages';
@@ -172,6 +176,19 @@ const
   COLUMN_VALUE     = 3;
   COLUMN_VALUETYPE = 4;
   COLUMN_TIMESTAMP = 5;
+
+// column names
+  COLUMNNAME_TIMESTAMP = 'TimeStamp';
+  COLUMNNAME_NAME      = 'Name';
+  COLUMNNAME_VALUE     = 'Value';
+  COLUMNNAME_VALUETYPE = 'ValueType';
+  COLUMNNAME_ID        = 'Id';
+
+// dashboard
+  COLUMN_SOURCENAME   = 0;
+  COLUMN_KEY          = 1;
+  COLUMN_SOURCEID     = 2;
+  COLUMN_MESSAGECOUNT = 3;
 
   { max. amount of characters allowed to be displayed in the value column of the
     logtree. }

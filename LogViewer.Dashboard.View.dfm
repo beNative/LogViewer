@@ -49,13 +49,15 @@ object frmDashboard: TfrmDashboard
       Margins.Bottom = 0
       Align = alClient
       BevelOuter = bvNone
+      Color = clWhite
+      ParentBackground = False
       TabOrder = 0
       object pgcMain: TKPageControl
         Left = 0
         Top = 0
         Width = 314
         Height = 616
-        ActivePageIndex = 3
+        ActivePageIndex = 2
         Align = alClient
         ParentBackground = True
         TabHeight = 0
@@ -67,7 +69,7 @@ object frmDashboard: TfrmDashboard
             Left = 3
             Top = 28
             Width = 308
-            Height = 585
+            Height = 588
             Align = alClient
             Caption = 
               'Messages are exchanged between the source application and LogVie' +
@@ -112,7 +114,7 @@ object frmDashboard: TfrmDashboard
             Left = 3
             Top = 28
             Width = 308
-            Height = 585
+            Height = 588
             Align = alClient
             Caption = 
               'This receiver captures messages from any local applicatiion that' +
@@ -168,6 +170,7 @@ object frmDashboard: TfrmDashboard
             Align = alTop
             Anchors = [akLeft, akTop, akRight, akBottom]
             BevelOuter = bvNone
+            ParentColor = True
             TabOrder = 0
           end
           object Panel4: TPanel
@@ -288,7 +291,6 @@ object frmDashboard: TfrmDashboard
             Anchors = [akLeft, akTop, akRight, akBottom]
             BevelOuter = bvNone
             TabOrder = 1
-            ExplicitLeft = -1
           end
           object edtMQTTPort: TLabeledEdit
             Left = 249
@@ -468,7 +470,7 @@ object frmDashboard: TfrmDashboard
     Left = 408
     Top = 8
     Bitmap = {
-      494C010109000801500110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101090008015C0110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000001001B09532ED308512ED100000010000000000000

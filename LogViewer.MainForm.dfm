@@ -1,6 +1,7 @@
 object frmMain: TfrmMain
   Left = 0
   Top = 0
+  BorderIcons = [biSystemMenu, biMinimize, biMaximize, biHelp]
   Caption = 'Logviewer'
   ClientHeight = 599
   ClientWidth = 997
@@ -392,6 +393,8 @@ object frmMain: TfrmMain
       Margins.Right = 1
       Margins.Bottom = 1
       Align = alLeft
+      BevelEdges = [beRight]
+      BevelKind = bkFlat
       BevelOuter = bvNone
       TabOrder = 0
     end
@@ -406,6 +409,8 @@ object frmMain: TfrmMain
       Margins.Right = 1
       Margins.Bottom = 1
       Align = alLeft
+      BevelEdges = [beRight]
+      BevelKind = bkFlat
       BevelOuter = bvNone
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clBlue
@@ -445,9 +450,12 @@ object frmMain: TfrmMain
       Margins.Right = 1
       Margins.Bottom = 1
       Align = alLeft
+      BevelEdges = [beRight]
+      BevelKind = bkFlat
       BevelOuter = bvNone
       ShowCaption = False
       TabOrder = 3
+      VerticalAlignment = taAlignBottom
     end
     object pnlMemory: TPanel
       AlignWithMargins = True
@@ -461,6 +469,8 @@ object frmMain: TfrmMain
       Margins.Right = 1
       Margins.Bottom = 1
       Align = alRight
+      BevelEdges = [beLeft, beRight]
+      BevelKind = bkFlat
       BevelOuter = bvNone
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clBlack
@@ -500,7 +510,7 @@ object frmMain: TfrmMain
     Left = 208
     Top = 48
     Bitmap = {
-      494C010101000500A80010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000500AC0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
