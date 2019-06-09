@@ -4,11 +4,7 @@ object frmImageView: TfrmImageView
   ClientHeight = 909
   ClientWidth = 682
   Color = clWhite
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
+  ParentFont = True
   OldCreateOrder = False
   PixelsPerInch = 96
   TextHeight = 13
@@ -73,7 +69,6 @@ object frmImageView: TfrmImageView
     Color = clWhite
     ParentColor = False
     TabOrder = 4
-    ExplicitWidth = 1043
     object imgBitmap: TImage
       Left = 3
       Top = 3

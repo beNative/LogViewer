@@ -100,6 +100,9 @@ resourcestring
   SId           = 'Id';
   SMessageCount = 'Messagecount';
 
+  // dashboard action captions
+  SSubscribe = 'Subscribe';
+
   STextMessages         = 'Text messages';
   SNotificationMessages = 'Notification messages';
   SValueMessages        = 'Value messages';

@@ -28,6 +28,12 @@ type
     FDuration : Integer;
 
   public
+    constructor Create(
+      const ATitle : string = '';
+      ALevel       : Integer = 0;
+      ADuration    : Integer = 0
+    );
+
     property Level: Integer
       read FLevel write FLevel;
 
@@ -39,5 +45,16 @@ type
   end;
 
 implementation
+
+{$REGION 'construction and destruction'}
+constructor TCallStackData.Create(const ATitle: string; ALevel,
+  ADuration: Integer);
+begin
+  inherited Create;
+  FTitle    := ATitle;
+  FLevel    := ALevel;
+  FDuration := ADuration;
+end;
+{$ENDREGION}
 
 end.

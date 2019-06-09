@@ -79,9 +79,6 @@ type
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
 
-    property OnReceiveMessage: IEvent<TReceiveMessageEvent>
-      read GetOnReceiveMessage;
-
     property MessageCount: Int64
       read GetMessageCount;
 
@@ -96,6 +93,9 @@ type
 
     property OnChange: IEvent<TNotifyEvent>
       read GetOnChange;
+
+    property OnReceiveMessage: IEvent<TReceiveMessageEvent>
+      read GetOnReceiveMessage;
   end;
 
   IChannelReceiver = interface

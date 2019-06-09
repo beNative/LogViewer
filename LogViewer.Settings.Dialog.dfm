@@ -6,11 +6,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
   ClientWidth = 668
   Color = clWhite
   DoubleBuffered = True
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
+  ParentFont = True
   OldCreateOrder = False
   PopupMode = pmAuto
   Position = poMainFormCenter
@@ -35,9 +31,6 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitLeft = -5
-    ExplicitTop = -6
-    ExplicitHeight = 375
   end
   object pnlBottom: TPanel
     Left = 0
@@ -100,10 +93,6 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     ParentBackground = False
     TabHeight = 0
     TabOrder = 2
-    ExplicitLeft = -544
-    ExplicitTop = 24
-    ExplicitWidth = 745
-    ExplicitHeight = 300
     object tsWatches: TKTabSheet
       Caption = 'Watches'
       ExplicitTop = 24
@@ -124,9 +113,6 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     end
     object tsZeroMQ: TKTabSheet
       Caption = 'ZeroMQ'
-      ExplicitTop = 24
-      ExplicitWidth = 745
-      ExplicitHeight = 276
     end
     object tsWinODS: TKTabSheet
       Caption = 'WinODS'
@@ -231,7 +217,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Left = 568
     Top = 32
     Bitmap = {
-      494C010103000800540010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010103000800580010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

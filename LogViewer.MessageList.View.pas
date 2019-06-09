@@ -227,7 +227,12 @@ type
     );
     procedure FLogTreeViewExpanded(
       Sender : TBaseVirtualTree;
-      Node   : PVirtualNode
+      Node   :  PVirtualNode
+    );
+    procedure FLogTreeViewExpanding(
+      Sender      : TBaseVirtualTree;
+      Node        : PVirtualNode;
+      var Allowed : Boolean
     );
     {$ENDREGION}
 
@@ -493,6 +498,7 @@ begin
   FLogTreeView.OnMeasureItem     := FLogTreeViewMeasureItem;
   FLogTreeView.OnCollapsed       := FLogTreeViewCollapsed;
   FLogTreeView.OnExpanded        := FLogTreeViewExpanded;
+  FLogTreeView.OnExpanding       := FLogTreeViewExpanding;
 
   B := Supports(Subscriber, IWinIPC) or Supports(Subscriber, IZMQ);
 
@@ -651,12 +657,12 @@ var
   G : Boolean;
   H : Boolean;
 begin
-  // SHIFTED and ALTED keycombinations
+  { SHIFT and ALT keycombinations }
   A := (ssAlt in Shift) or (ssShift in Shift);
   { Single keys that need to be handled by the edit control like all displayable
     characters but also HOME and END }
   B := (Key in VK_EDIT_KEYS) and (Shift = []);
-  { CTRL-keycombinations that need to be handled by the edit control like
+  { CTRL keycombinations that need to be handled by the edit control like
     CTRL-C for clipboard copy. }
   C := (Key in VK_CTRL_EDIT_KEYS) {and (Shift = [ssCtrlOS])};
   { SHIFT-keycombinations that need to be handled by the edit control for
@@ -764,6 +770,12 @@ begin
   end
 end;
 
+procedure TfrmMessageList.FLogTreeViewExpanding(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; var Allowed: Boolean);
+begin
+  Allowed := True;
+end;
+
 procedure TfrmMessageList.FLogTreeViewAfterCellPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   CellRect: TRect);
@@ -804,6 +816,11 @@ begin
 //  end;
 end;
 
+{ This handler takes care of the following things:
+    - Coloring the loglevel column background color.
+    - Drawing collapsed tracing nodes as one node (using IsCollapsedTracingNode).
+ }
+
 procedure TfrmMessageList.FLogTreeViewBeforeCellPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
@@ -812,7 +829,6 @@ var
   DVS     : TDisplayValuesSettings;
   LIndent : Integer;
   LNode   : PVirtualNode;
-  S       : string;
 begin
   LN := Sender.GetNodeData<TLogNode>(Node);
   DVS := Manager.Settings.DisplayValuesSettings;
@@ -865,15 +881,14 @@ var
 begin
   //Todo: merge with Changed?
   //The CallStack is only updated if the parent changes
-  Allowed := OldNode <> NewNode;
-  if Allowed and (
-    (OldNode = nil) or (NewNode = nil) or (OldNode.Parent <> NewNode.Parent)
-  ) then
-  begin
+//  if
+//    (OldNode = nil) or (NewNode = nil) or (OldNode.Parent <> NewNode.Parent)
+//  ) then
+//  begin
     LN := Sender.GetNodeData<TLogNode>(NewNode);
-    Guard.CheckNotNull(LN, 'LogNode');
+    Logger.Send ('LN', LN.Value);
     UpdateCallStackDisplay(LN);
-  end;
+  //end;
 end;
 
 procedure TfrmMessageList.FLogTreeViewFocusChanged(Sender: TBaseVirtualTree;
@@ -928,7 +943,7 @@ begin
     begin
       ImageIndex := Integer(ND.MessageType);
       if not (vsExpanded in Node.States) and (ND.MessageType = lmtEnterMethod)
-        and (Node.ChildCount > 0) and Assigned(ND.VTNode.NextSibling) then
+        {and (Node.ChildCount > 0)} and Assigned(ND.VTNode.NextSibling) then
       begin
         ImageIndex := 9;
       end;
@@ -1215,7 +1230,7 @@ begin
 end;
 
 { Triggered before either normal or fixed text is painted to allow finer
-  customization (kind of sub cell painting). Hereit is used to apply custom
+  customization (kind of sub cell painting). Here it is used to apply custom
   settings to TargetCanvas.Font. }
 
 procedure TfrmMessageList.FLogTreeViewPaintText(Sender: TBaseVirtualTree;
@@ -1292,13 +1307,13 @@ begin
     DVS.TimeStamp.AssignTo(TargetCanvas.Font);
   end;
 end;
+{$ENDREGION}
 
 procedure TfrmMessageList.pnlMessagesResize(Sender: TObject);
 begin
   FUpdate          := True;
   FAutoSizeColumns := False;
 end;
-{$ENDREGION}
 
 procedure TfrmMessageList.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
@@ -1346,7 +1361,7 @@ function TfrmMessageList.IsCollapsedTracingNode(ATree: TBaseVirtualTree;
 var
   LN : TLogNode;
 begin
-  if not (vsExpanded in ANode.States) and (ANode.ChildCount > 0) and
+  if not (vsExpanded in ANode.States) {and (ANode.ChildCount > 0)} and
     Assigned(ANode.NextSibling) then
   begin
     LN := ATree.GetNodeData<TLogNode>(ANode);
@@ -1521,8 +1536,6 @@ begin
         FWatchesView.UpdateView(FMessageCount)
       else
         FWatchesView.UpdateView;
-
-      //FWatchesView.UpdateView(FMessageCount);
     end;
     lmtWatch:
     begin
@@ -1649,28 +1662,73 @@ end;
 procedure TfrmMessageList.UpdateCallStackDisplay(ALogNode: TLogNode);
 var
   I   : Integer;
-  CSD : TCallStackData;
   LN  : TLogNode;
   LN2 : TLogNode;
   VN  : PVirtualNode;
 begin
+  Guard.CheckNotNull(ALogNode, 'ALogNode');
   FCallStack.Clear;
-  VN := ALogNode.VTNode;
-  I := FLogTreeView.GetNodeLevel(VN);
-  while I > 0 do
+  LN  := nil;
+  LN2 := nil;
+  VN  := ALogNode.VTNode;
+  I   := 1;
+  while (I > 0) and Assigned(VN) do
   begin
-    LN := FLogTreeView.GetNodeData<TLogNode>(VN.Parent);
-    CSD := TCallStackData.Create;
-    CSD.Title := LN.Text;
-    CSD.Level := I;
-    LN2 :=  FLogTreeView.GetNodeData<TLogNode>(LN.VTNode.NextSibling);
-    if Assigned(LN2) then
+    LN := FLogTreeView.GetNodeData<TLogNode>(VN);
+    I  := FLogTreeView.GetNodeLevel(VN);
+    if LN.MessageType = lmtEnterMethod then
     begin
-      CSD.Duration := MilliSecondsBetween(LN2.TimeStamp, LN.TimeStamp);
+      if Assigned(LN.VTNode.NextSibling) then
+      begin
+        LN2 := FLogTreeView.GetNodeData<TLogNode>(LN.VTNode.NextSibling);
+        if Assigned(VN.Parent) then
+        begin
+          VN := VN.Parent;
+        end
+        else
+          VN := nil;
+      end
+      else
+        VN := nil;
+    end
+    else if LN.MessageType = lmtLeaveMethod then
+    begin
+      if Assigned(VN.PrevSibling) then
+      begin
+        LN2 := LN;
+        LN := FLogTreeView.GetNodeData<TLogNode>(VN.PrevSibling);
+        if Assigned(VN.Parent) then
+          VN := VN.Parent
+        else
+          VN := nil;
+      end
+      else
+        VN := nil;
+    end
+    else if I > 0 then
+    begin
+      if Assigned(VN.Parent) then
+      begin
+//        LN := FLogTreeView.GetNodeData<TLogNode>(VN.Parent);
+//        LN2 := FLogTreeView.GetNodeData<TLogNode>(LN.VTNode.NextSibling);
+        VN := VN.Parent;
+        Dec(I);
+      end
+      else
+      begin
+        VN := nil;
+      end;
+    end
+    else
+    begin
+      VN := nil;
     end;
-    FCallStack.Add(CSD);
-    VN := VN.Parent;
-    Dec(I);
+    if Assigned(LN2) then
+      FCallStack.Add(
+        TCallStackData.Create(
+          LN.Text, I, MilliSecondsBetween(LN2.TimeStamp, LN.TimeStamp)
+        )
+      );
   end;
 end;
 

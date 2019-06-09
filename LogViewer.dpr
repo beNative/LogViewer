@@ -76,6 +76,12 @@ begin
   ReportMemoryLeaksOnShutdown := DebugHook > 0;
   {$WARNINGS ON}
   Application.Initialize;
+//  if CheckWin32Version(6) then // at least Vista
+//  begin
+//   Application.DefaultFont.Name := 'Segoe UI';
+//   Application.DefaultFont.Size := 9;
+//  end;
+
   Application.Title := 'Log viewer';
   // setup logchannel for using a log LogViewer instance to debug itself.
   Logger.Channels.Add(

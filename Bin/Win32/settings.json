@@ -1,20 +1,20 @@
 {
 	"FormSettings": {
-		"Left": 477,
-		"Top": 108,
-		"Width": 1558,
+		"Left": 361,
+		"Top": 47,
+		"Width": 1866,
 		"Height": 913,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
 	"MessageListSettings": {
-		"AutoScrollMessages": false,
+		"AutoScrollMessages": true,
 		"AutoFilterMessages": true,
 		"DynamicAutoSizeColumns": true,
 		"SmartTimeStamps": true,
 		"Positions": [
-			0.250972762645914,
-			0.72568093385214,
+			0.252269779507134,
+			0.654345006485084,
 			1
 		]
 	},
@@ -22,12 +22,12 @@
 		"Enabled": true
 	},
 	"WinIPCSettings": {
-		"Enabled": false
+		"Enabled": true
 	},
 	"ZeroMQSettings": {
 		"Enabled": true,
 		"PollingInterval": 100,
-		"Endpoints": "localhost=tcp://localhost:5555\r\nlocalhost2=tcp://localhost:5556\r\nNew=tcp://\r\n"
+		"Endpoints": "default localhost=tcp://localhost:5555\r\nlocalhost2=tcp://localhost:5556\r\nLogViewer=tcp://localhost:42134\r\n"
 	},
 	"MQTTSettings": {
 		"Broker": "192.168.0.219",

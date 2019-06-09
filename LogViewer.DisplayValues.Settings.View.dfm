@@ -5,11 +5,7 @@ object frmDisplayValuesSettings: TfrmDisplayValuesSettings
   ClientHeight = 378
   ClientWidth = 489
   Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
+  ParentFont = True
   OldCreateOrder = False
   PixelsPerInch = 96
   TextHeight = 13
@@ -31,9 +27,6 @@ object frmDisplayValuesSettings: TfrmDisplayValuesSettings
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitLeft = 152
-    ExplicitWidth = 321
-    ExplicitHeight = 339
   end
   object pnlLeft: TPanel
     Left = 0
@@ -43,6 +36,5 @@ object frmDisplayValuesSettings: TfrmDisplayValuesSettings
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitHeight = 339
   end
 end

@@ -45,9 +45,10 @@ uses
   DDuce.Components.VirtualTrees.Node, DDuce.Components.ValueList,
   DDuce.Components.Factories, DDuce.DynamicRecord, DDuce.EditList,
 
+  OMultiPanel, kcontrols, kpagecontrol,
+
   LogViewer.Interfaces, LogViewer.Dashboard.Data,
-  LogViewer.Receivers.ComPort.Settings.View, OMultiPanel, kcontrols,
-  kpagecontrol;
+  LogViewer.Receivers.ComPort.Settings.View;
 
 type
   TDashboardNode = TVTNode<TDashboardData>;
@@ -290,10 +291,12 @@ begin
   FZMQEndpoints.ValueList.BorderStyle := bsNone;
   // TODO: implement a better way to save changes.
   //FZMQEndpoints.ValueList.OnExit := FValueListExit;
+  FZMQEndpoints.ActionExecute.Caption := SSubscribe;
 
   FMQTTTopics := TEditList.Create(Self, pnlMQTTTopics);
   FMQTTTopics.OnAdd.Add(FMQTTSubscriptionsAdd);
   FMQTTTopics.ValueList.BorderStyle := bsNone;
+  FMQTTTopics.ActionExecute.Caption := SSubscribe;
 
   FCOMPorts := TEditList.Create(Self, pnlCOMPorts);
   FCOMPorts.ValueList.BorderStyle := bsNone;
@@ -303,6 +306,7 @@ begin
   FFSLocations.OnExecuteItem.Add(FFSLocationsExecuteItem);
   FFSLocations.OnExecute.Add(FFSLocationsExecuteItem);
   FFSLocations.ValueList.BorderStyle := bsNone;
+  FFSLocations.ActionExecute.Caption := SSubscribe;
   //FFSLocations.ValueList.OnExit := FValueListExit;
 
   InitializeTreeView;

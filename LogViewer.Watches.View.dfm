@@ -4,11 +4,7 @@ object frmWatchesView: TfrmWatchesView
   ClientHeight = 739
   ClientWidth = 444
   Color = clWhite
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
+  ParentFont = True
   OldCreateOrder = False
   ShowHint = True
   PixelsPerInch = 96
