@@ -155,6 +155,10 @@ type
   ['{254D6F91-FE9F-4B80-B35C-CC00329319A9}']
   end;
 
+  IMIDI = interface
+  ['{C3B84737-A432-493C-B024-EBEB8C87B6CB}']
+  end;
+
   { Provides access to all actions that a ILogViewer instance can perform. }
 
   ILogViewerActions = interface

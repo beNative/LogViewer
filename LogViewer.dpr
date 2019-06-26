@@ -67,7 +67,9 @@ uses
   LogViewer.MessageList.Settings.View in 'LogViewer.MessageList.Settings.View.pas' {frmViewSettings},
   LogViewer.Image.View in 'LogViewer.Image.View.pas' {frmImageView},
   LogViewer.DataSet.View in 'LogViewer.DataSet.View.pas' {frmDataSetView},
-  LogViewer.RawData.View in 'LogViewer.RawData.View.pas' {frmRawDataView};
+  LogViewer.RawData.View in 'LogViewer.RawData.View.pas' {frmRawDataView},
+  LogViewer.Receivers.MIDI in 'LogViewer.Receivers.MIDI.pas',
+  LogViewer.Subscribers.MIDI in 'LogViewer.Subscribers.MIDI.pas';
 
 {$R *.res}
 

@@ -53,34 +53,31 @@ type
       AEnabled          : Boolean
     ); reintroduce; virtual;
     procedure AfterConstruction; override;
-    procedure BeforeDestruction; override;
-
+    destructor Destroy; override;
 
   end;
 
 implementation
 
 {$REGION 'construction and destruction'}
-procedure TMQTTSubscriber.AfterConstruction;
-begin
-  inherited AfterConstruction;
-  FMQTTStream := TStringStream.Create;
-
-end;
-
-procedure TMQTTSubscriber.BeforeDestruction;
-begin
-  FMQTTStream.Free;
-  inherited BeforeDestruction;
-end;
-
 constructor TMQTTSubscriber.Create(const AReceiver: IChannelReceiver;
   AMQTT: TMQTT; ASourceId: UInt32; const AKey, ASourceName: string;
   AEnabled: Boolean);
 begin
   inherited Create(AReceiver, ASourceId, AKey, ASourceName, AEnabled);
   FMQTT := AMQTT;
+end;
 
+procedure TMQTTSubscriber.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  FMQTTStream := TStringStream.Create;
+end;
+
+destructor TMQTTSubscriber.Destroy;
+begin
+  FMQTTStream.Free;
+  inherited Destroy;
 end;
 {$ENDREGION}
 
@@ -88,7 +85,6 @@ end;
 procedure TMQTTSubscriber.SetEnabled(const Value: Boolean);
 begin
   inherited SetEnabled(Value);
-
 end;
 {$ENDREGION}
 

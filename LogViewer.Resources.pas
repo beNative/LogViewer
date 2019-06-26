@@ -162,6 +162,7 @@ const
   RECEIVERNAME_MQTT       = 'MQTT';
   RECEIVERNAME_COMPORT    = 'ComPort';
   RECEIVERNAME_FILESYSTEM = 'FileSystem';
+  RECEIVERNAME_MIDI       = 'MIDI';
 
 resourcestring
   SReceiverCaptionWinIPC     = 'Windows IPC receiver';
@@ -170,6 +171,7 @@ resourcestring
   SReceiverCaptionMQTT       = 'MQTT subscription receiver';
   SReceiverCaptionComPort    = 'ComPort receiver';
   SReceiverCaptionFileSystem = 'File system receiver';
+  SReceiverCaptionMIDI       = 'MIDI message receiver';
 
   // message viewer
 const

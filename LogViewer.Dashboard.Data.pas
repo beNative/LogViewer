@@ -96,6 +96,10 @@ begin
     else if Supports(Receiver, IFileSystem) then
     begin
       FCaption := SReceiverCaptionFileSystem;
+    end
+    else if Supports(Receiver, IMIDI) then
+    begin
+      FCaption := SReceiverCaptionMIDI;
     end;
   end;
   Subscriber := ASubscriber;

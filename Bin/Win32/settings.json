@@ -1,20 +1,20 @@
 {
 	"FormSettings": {
-		"Left": 361,
-		"Top": 47,
-		"Width": 1866,
-		"Height": 913,
+		"Left": 428,
+		"Top": 112,
+		"Width": 1906,
+		"Height": 1018,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
 	"MessageListSettings": {
-		"AutoScrollMessages": true,
+		"AutoScrollMessages": false,
 		"AutoFilterMessages": true,
 		"DynamicAutoSizeColumns": true,
 		"SmartTimeStamps": true,
 		"Positions": [
-			0.252269779507134,
-			0.654345006485084,
+			0.294670846394984,
+			0.628571428571429,
 			1
 		]
 	},
@@ -37,7 +37,7 @@
 	},
 	"FileSystemSettings": {
 		"Enabled": false,
-		"PathNames": "test.txt=tcp://localhost:5555\r\nC:\\Tools\\doublecmd\\doublecmd_2019-03-17.log=tcp://localhost:5556\r\n"
+		"PathNames": "test.txt=tcp://localhost:5555\r\nC:\\Tools\\doublecmd\\doublecmd_2019-06-19.log=tcp://localhost:5556\r\n"
 	},
 	"DisplayValueSettings": {
 		"Id": {
@@ -112,7 +112,7 @@
 		},
 		"Value": {
 			"BackgroundColor": 16777215,
-			"FontName": "Tahoma",
+			"FontName": "Consolas",
 			"FontColor": 0,
 			"FontSize": 8,
 			"FontStyle": "",

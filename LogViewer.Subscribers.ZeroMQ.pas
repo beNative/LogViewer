@@ -56,7 +56,7 @@ type
       AEnabled          : Boolean
     ); reintroduce; virtual;
     procedure AfterConstruction; override;
-    procedure BeforeDestruction; override;
+    destructor Destroy; override;
   end;
 
 implementation
@@ -83,13 +83,13 @@ begin
   FZMQStream := TStringStream.Create;
 end;
 
-procedure TZMQSubscriber.BeforeDestruction;
+destructor TZMQSubscriber.Destroy;
 begin
   FZMQStream.Free;
   FPoll       := nil;
   FSubscriber := nil;
   FZMQ        := nil;
-  inherited BeforeDestruction;
+  inherited Destroy;
 end;
 {$ENDREGION}
 

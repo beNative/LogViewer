@@ -194,30 +194,16 @@ end;
 procedure TComPortSubscriber.Poll;
 var
   S : AnsiString;
-//  I : Integer;
-  //L : string;
 begin
   inherited Poll;
   while FSerialPort.WaitingDataEx <> 0 do
   begin
     S := FSerialPort.RecvPacket(50); // 50ms timeout
-    //S := Trim(FSerialPort.RecvTerminated(10000, #13));
-
     if S <> '' then
     begin
       DoStringReceived(S);
     end;
-//    if Trim(S) <> '' then
-//    begin
-//      FLineBuffer.Text := S;
-//      for I := 0 to FLineBuffer.Count - 1 do
-//      begin
-//        DoStringReceived(AnsiString(FLineBuffer[I]));
-//      end;
-//    end;
   end;
-
-
 end;
 {$ENDREGION}
 

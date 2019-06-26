@@ -50,6 +50,7 @@ uses
 
 type
   TfrmMessageList = class(TForm, ILogViewer)
+    {$REGION 'designer controls'}
     chkSyncWithSelectedMessage : TCheckBox;
     edtMessageFilter           : TButtonedEdit;
     imlMessageTypes            : TImageList;
@@ -89,6 +90,7 @@ type
     procedure edtMessageFilterMouseEnter(Sender: TObject);
     procedure edtMessageFilterMouseLeave(Sender: TObject);
     procedure pnlMessagesResize(Sender: TObject);
+    procedure tsRawDataShow(Sender: TObject);
 
   private class var
     FCounter : Integer;
@@ -249,6 +251,7 @@ type
     ): Boolean;
     function GetMilliSecondsBetweenSelection: Integer;
     procedure EnsureIsActiveViewIfFocused;
+    function ParseValue(const AString: string): Tuple<string, string, string>;
 
   protected
     procedure Clear;
@@ -374,7 +377,7 @@ begin
   FMiliSecondsBetweenSelection := -1;
   edtMessageFilter.OnRightButtonClick :=
     FManager.Actions.Items['actFilterMessages'].OnExecute;
-  FExpandParents           := True;
+  FExpandParents := True;
   CreateEditor;
   CreateLogTreeView;
   CreateWatchesView;
@@ -447,7 +450,7 @@ begin
     pnlTextViewer,
     Manager.EditorManager
   );
-  EditorView.Settings.EditorOptions.WordWrapEnabled := True;
+  //EditorView.Settings.EditorOptions.WordWrapEnabled := True;
 end;
 
 procedure TfrmMessageList.CreateImageView;
@@ -642,7 +645,10 @@ begin
   end;
 
   if Settings.AutoFilterMessages then
-    UpdateLogTreeView;
+  begin
+    FUpdate := True;
+    //UpdateLogTreeView;
+  end;
 end;
 
 procedure TfrmMessageList.edtMessageFilterKeyDown(Sender: TObject;
@@ -876,8 +882,8 @@ end;
 procedure TfrmMessageList.FLogTreeViewFocusChanging(Sender: TBaseVirtualTree;
   OldNode, NewNode: PVirtualNode; OldColumn, NewColumn: TColumnIndex;
   var Allowed: Boolean);
-var
-  LN : TLogNode;
+//var
+//  LN : TLogNode;
 begin
   //Todo: merge with Changed?
   //The CallStack is only updated if the parent changes
@@ -885,10 +891,11 @@ begin
 //    (OldNode = nil) or (NewNode = nil) or (OldNode.Parent <> NewNode.Parent)
 //  ) then
 //  begin
-    LN := Sender.GetNodeData<TLogNode>(NewNode);
-    Logger.Send ('LN', LN.Value);
-    UpdateCallStackDisplay(LN);
+//    LN := Sender.GetNodeData<TLogNode>(NewNode);
+    //Logger.Send ('LN', LN.Value);
+//    UpdateCallStackDisplay(LN);
   //end;
+  //FUpdate := True;
 end;
 
 procedure TfrmMessageList.FLogTreeViewFocusChanged(Sender: TBaseVirtualTree;
@@ -898,7 +905,8 @@ var
 begin
   LN := Sender.GetNodeData<TLogNode>(Node);
   Guard.CheckNotNull(LN, 'LogNode');
-  UpdateMessageDetails(LN);
+  FUpdate := True;
+//  UpdateMessageDetails(LN);
 end;
 
 procedure TfrmMessageList.FLogTreeViewFilterCallback(Sender: TBaseVirtualTree;
@@ -959,6 +967,10 @@ begin
     else if ND.MessageType = lmtText then
     begin
       ImageIndex := 8;
+    end
+    else if ND.MessageType in [lmtColor, lmtAlphaColor] then
+    begin
+      ImageIndex := 22;
     end
     else
     begin
@@ -1031,7 +1043,7 @@ begin
     LTrim := LN.Value.Split(LDelim, 1, TStringSplitOptions.ExcludeEmpty);
     if Length(LTrim) > 0 then
       S := LTrim[0];
-    if (S.Length > MAX_TEXTLENGTH_VALUECOLUMN) then
+    if S.Length > MAX_TEXTLENGTH_VALUECOLUMN then
       S := S.Substring(0, MAX_TEXTLENGTH_VALUECOLUMN);
     CellText := S;
   end
@@ -1092,11 +1104,14 @@ end;
 procedure TfrmMessageList.FLogTreeViewInitNode(Sender: TBaseVirtualTree;
   ParentNode, Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
 var
-  LN    : TLogNode;
-  I     : Integer;
-  S     : string;
-  SL    : TStringList;
-  LText : string;
+  LN     : TLogNode;
+  I      : Integer;
+  S      : string;
+  SL     : TStringList;
+  LText  : string;
+  LName  : string;
+  LValue : string;
+  LType  : string;
 begin
   LN := TLogNode.Create;
   Node.SetData(LN);
@@ -1108,57 +1123,36 @@ begin
   LN.Id          := FMessageCount;
   LText          := string(FCurrentMsg.Text);
   case LN.MessageType of
-    lmtValue, lmtComponent, lmtStrings, lmtPersistent, lmtObject, lmtInterface:
+    lmtValue, lmtComponent, lmtStrings, lmtPersistent, lmtObject, lmtInterface,
+    lmtAlphaColor, lmtColor:
     begin
-      S := LText;
-      I := S.IndexOf('=');
-      LN.ValueName := Copy(S, 1, I);
-      LN.Value := Copy(S, I + 3, S.Length); // ' = '
-      if LN.Value.StartsWith(#13#10) then // multiline values
-        LN.Value := Copy(LN.Value, 3, LN.Value.Length);
-      LN.ValueType := ExtractText(LN.ValueName, '(', ')');
-      I := S.IndexOf('(');
-      if I > 1 then
-        LN.ValueName := Copy(S, 1, I);
-      LN.Text := '';
+      ParseValue(LText).Unpack(LName, LValue, LType);
     end;
     lmtDataSet:
     begin
-      LN.ValueName := LText;
-      LN.ValueType := 'TDataSet';
+      LName := LText;
+      LType := 'TDataSet';
     end;
     lmtAction:
     begin
-      LN.ValueName := LText;
-      LN.ValueType := 'TAction';
+      LName := LText;
+      LType := 'TAction';
     end;
     lmtBitmap, lmtScreenShot:
     begin
-      LN.ValueName := LText;
-      LN.ValueType := 'TBitmap';
-    end;
-    lmtAlphaColor, lmtColor:
-    begin
-      S := string(FCurrentMsg.Text);
-      I := S.IndexOf('=');
-      LN.ValueName := Copy(S, 1, I);
-      LN.Value := Copy(S, I + 3, S.Length);
-      LN.ValueType := ExtractText(LN.ValueName, '(', ')');
-      I := S.IndexOf('(');
-      if I > 1 then
-        LN.ValueName := Copy(S, 1, I);
-      LN.Text := '';
+      LName := LText;
+      LType := 'TBitmap';
     end;
     lmtEnterMethod, lmtLeaveMethod,
     lmtInfo, lmtWarning, lmtError, lmtConditional:
     begin
-      LN.Text := string(FCurrentMsg.Text);
+      LN.Text := LText;
     end;
     lmtText:
     begin
       SL := TStringList.Create;
       try
-        SL.Text := Trim(string(FCurrentMsg.Text));
+        SL.Text := Trim(LText);
         if SL.Count > 0 then
         begin
           S := SL[0];
@@ -1178,12 +1172,14 @@ begin
     end;
     lmtCheckpoint:
     begin
-      S := string(FCurrentMsg.Text);
-      I := S.IndexOf('#');
-      LN.ValueName := Copy(S, 1, I);
-      LN.Value := Copy(S, I + 2, S.Length);
+      I := LText.IndexOf('#');
+      LName := Copy(LText, 1, I);
+      LValue := Copy(LText, I + 2, LText.Length);
     end
   end; // case LN.MessageType of
+  LN.ValueName := LName;
+  LN.Value     := LValue;
+  LN.ValueType := LType;
 end;
 
 procedure TfrmMessageList.FLogTreeViewFreeNode(Sender: TBaseVirtualTree;
@@ -1247,17 +1243,11 @@ begin
   begin
     case LN.MessageType of
       lmtInfo:
-      begin
         DVS.Info.AssignTo(TargetCanvas.Font);
-      end;
       lmtWarning:
-      begin
         DVS.Warning.AssignTo(TargetCanvas.Font);
-      end;
       lmtError:
-      begin
         DVS.Error.AssignTo(TargetCanvas.Font);
-      end;
       lmtValue, lmtComponent, lmtAlphaColor, lmtColor, lmtBitmap, lmtStrings,
       lmtObject, lmtPersistent, lmtInterface:
       begin
@@ -1272,17 +1262,11 @@ begin
           DVS.Enter.AssignTo(TargetCanvas.Font);
       end;
       lmtLeaveMethod:
-      begin
         DVS.Leave.AssignTo(TargetCanvas.Font);
-      end;
       lmtCheckpoint:
-      begin
         DVS.CheckPoint.AssignTo(TargetCanvas.Font);
-      end;
       lmtAction:
-      begin
         DVS.Action.AssignTo(TargetCanvas.Font);
-      end;
     end;
   end
   else if Column = COLUMN_LEVEL then
@@ -1313,6 +1297,18 @@ procedure TfrmMessageList.pnlMessagesResize(Sender: TObject);
 begin
   FUpdate          := True;
   FAutoSizeColumns := False;
+end;
+
+procedure TfrmMessageList.tsRawDataShow(Sender: TObject);
+var
+  LN : TLogNode;
+begin
+  if Assigned(FLogTreeView.FocusedNode) then
+  begin
+    LN := FLogTreeView.GetNodeData<TLogNode>(FLogTreeView.FocusedNode);
+    if Assigned(LN) then
+      UpdateRawDataDisplay(LN);
+  end;
 end;
 
 procedure TfrmMessageList.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -1369,6 +1365,26 @@ begin
   end
   else
     Result := False;
+end;
+
+function TfrmMessageList.ParseValue(
+  const AString: string): Tuple<string, string, string>;
+var
+  I      : Integer;
+  LName  : string;
+  LValue : string;
+  LType  : string;
+begin
+  I := AString.IndexOf('=');
+  LName := Copy(AString, 1, I);
+  LValue := Copy(AString, I + 3, AString.Length); // ' = '
+  if LValue.StartsWith(#13#10) then // multiline values
+    LValue := Copy(LValue, 3, LValue.Length);
+  LType := ExtractText(LName, '(', ')');
+  I := AString.IndexOf('(');
+  if I > 1 then
+    LName := Copy(AString, 1, I);
+  Result.Create(LName, LValue, LType);
 end;
 {$ENDREGION}
 
@@ -1483,11 +1499,10 @@ procedure TfrmMessageList.ProcessMessage(AStream: TStream);
 var
   LTextSize : Integer;
   LDataSize : Integer;
-  S         : string;
-  I         : Integer;
   LName     : string;
   LType     : string;
   LValue    : string;
+  LText     : string;
 begin
   Guard.CheckNotNull(AStream, 'AStream');
   LTextSize := 0;
@@ -1504,6 +1519,7 @@ begin
   begin
     SetLength(FCurrentMsg.Text, LTextSize);
     AStream.ReadBuffer(FCurrentMsg.Text[1], LTextSize);
+    LText := string(FCurrentMsg.Text);
   end;
   AStream.ReadBuffer(LDataSize);
   if LDataSize > 0 then
@@ -1519,18 +1535,9 @@ begin
   case TLogMessageType(FCurrentMsg.MsgType) of
     lmtCounter:
     begin
-      S := string(FCurrentMsg.Text);
-      I := S.IndexOf('=');
-      LName  := Copy(S, 1, I);
-      LValue := Copy(S, I + 2, S.Length);
+      ParseValue(LText).Unpack(LName, LValue, LType);
       FWatches.Add(
-        LName,
-        LType,
-        LValue,
-        FMessageCount,
-        FCurrentMsg.TimeStamp,
-        True,
-        True
+        LName, LType, LValue, FMessageCount, FCurrentMsg.TimeStamp, True, True
       );
       if not chkSyncWithSelectedMessage.Checked then
         FWatchesView.UpdateView(FMessageCount)
@@ -1539,22 +1546,9 @@ begin
     end;
     lmtWatch:
     begin
-      S := string(FCurrentMsg.Text);
-      I := S.IndexOf('=');
-      LName := Copy(S, 1, I);
-      LValue := Copy(S, I + 2, S.Length);
-      LType := ExtractText(LName, '(', ')');
-      I := S.IndexOf('(');
-      if I > 1 then
-        LName := Copy(S, 1, I);
+      ParseValue(LText).Unpack(LName, LValue, LType);
       FWatches.Add(
-        LName,
-        LType,
-        LValue,
-        FMessageCount,
-        FCurrentMsg.TimeStamp,
-        True,
-        False
+        LName, LType, LValue, FMessageCount, FCurrentMsg.TimeStamp, True, False
       );
       if not chkSyncWithSelectedMessage.Checked then
         FWatchesView.UpdateView(FMessageCount)
@@ -1655,7 +1649,7 @@ end;
 {$REGION 'Display updating'}
 procedure TfrmMessageList.UpdateBitmapDisplay(ALogNode: TLogNode);
 begin
-  pgcMessageDetails.ActivePage := tsImageViewer;
+  //pgcMessageDetails.ActivePage := tsImageViewer;
   FImageView.LoadFromStream(ALogNode.MessageData);
 end;
 
@@ -1759,11 +1753,7 @@ begin
   begin
     LStream := TStringStream.Create('', TEncoding.ANSI);
     try
-      tsValueList.Visible   := False;
-      tsImageViewer.Visible := False;
-      tsDataSet.Visible     := False;
-      tsTextViewer.Visible  := False;
-      pgcMessageDetails.ActivePage := tsTextViewer;
+      //pgcMessageDetails.ActivePage := tsTextViewer;
       ALogNode.MessageData.Position := 0;
       ObjectBinaryToText(ALogNode.MessageData, LStream);
       LStream.Position := 0;
@@ -1781,12 +1771,7 @@ end;
 
 procedure TfrmMessageList.UpdateDataSetDisplay(ALogNode: TLogNode);
 begin
-//  tsValueList.Visible   := False;
-//  tsTextViewer.Visible  := False;
-//  tsImageViewer.Visible := False;
-//  tsDataSet.Visible     := True;
-//  pgcMessageDetails.TabHeight  := 0;
-  pgcMessageDetails.ActivePage := tsDataSet;
+  //pgcMessageDetails.ActivePage := tsDataSet;
   FDataSetView.LoadFromStream(ALogNode.MessageData);
 end;
 
@@ -1804,10 +1789,7 @@ begin
     lmtBitmap, lmtScreenShot:
       UpdateBitmapDisplay(ALogNode);
     lmtMemory:
-    begin
-      //edtHex.OpenStream(ALogNode.MessageData);
-//        pgcMessageDetails.ActivePageIndex := 3;
-    end;
+      UpdateRawDataDisplay(ALogNode);
     lmtEnterMethod, lmtLeaveMethod, lmtText,
     lmtInfo, lmtWarning, lmtError, lmtConditional:
       UpdateTextDisplay(ALogNode);
@@ -1819,7 +1801,6 @@ begin
       if chkSyncWithSelectedMessage.Checked then
         FWatchesView.UpdateView(ALogNode.Id);
   end;
-  UpdateRawDataDisplay(ALogNode);
 end;
 
 procedure TfrmMessageList.UpdateRawDataDisplay(ALogNode: TLogNode);
@@ -1832,7 +1813,7 @@ procedure TfrmMessageList.UpdateTextDisplay(ALogNode: TLogNode);
 var
   S : string;
 begin
-  pgcMessageDetails.ActivePage := tsTextViewer;
+  //pgcMessageDetails.ActivePage := tsTextViewer;
   EditorView.Text := ALogNode.Value;
   S := ALogNode.Highlighter;
   if S <> '' then
@@ -1843,7 +1824,7 @@ procedure TfrmMessageList.UpdateTextStreamDisplay(ALogNode: TLogNode);
 var
   LStream : TStringStream;
 begin
-  pgcMessageDetails.ActivePage := tsTextViewer;
+  //pgcMessageDetails.ActivePage := tsTextViewer;
   if ALogNode.MessageData = nil then
   begin
     EditorView.Text := '';
@@ -1891,9 +1872,12 @@ begin
 end;
 
 procedure TfrmMessageList.UpdateLogTreeView;
+var
+  LN : TLogNode;
 begin
   FLogTreeView.BeginUpdate;
   try
+    // filter
     FLogTreeView.IterateSubtree(nil, FLogTreeViewFilterCallback, nil);
     UpdateTreeColumns;
     if not FAutoSizeColumns then
@@ -1907,6 +1891,15 @@ begin
     FLogTreeView.Selected[FLogTreeView.FocusedNode] := True;
     FScrollToLastNode := False;
   end;
+  if Assigned(FLogTreeView.FocusedNode) then
+  begin
+    LN := FLogTreeView.GetNodeData<TLogNode>(FLogTreeView.FocusedNode);
+    if Assigned(LN) then
+    begin
+      UpdateMessageDetails(LN);
+      UpdateCallStackDisplay(LN);
+    end;
+  end;
 end;
 
 procedure TfrmMessageList.UpdateValueDisplay(ALogNode: TLogNode);
@@ -1916,11 +1909,11 @@ var
 begin
   EditorView.Text := ALogNode.Value;
   EditorView.HighlighterName  := 'INI';
-  pgcMessageDetails.ActivePage := tsTextViewer;
+  //pgcMessageDetails.ActivePage := tsTextViewer;
 
   if ALogNode.Value.Contains('=') then
   begin
-    pgcMessageDetails.ActivePage := tsValueList;
+    //pgcMessageDetails.ActivePage := tsValueList;
     DR.FromString(ALogNode.Value);
     FValueList.Data := DR;
   end
@@ -1933,12 +1926,12 @@ begin
     finally
       SL.Free;
     end;
-    pgcMessageDetails.ActivePage := tsValueList;
+    //pgcMessageDetails.ActivePage := tsValueList;
     FValueList.Data := DR;
   end
   else
   begin
-    pgcMessageDetails.ActivePage := tsTextViewer;
+    //pgcMessageDetails.ActivePage := tsTextViewer;
   end;
 end;
 {$ENDREGION}

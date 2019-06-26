@@ -78,7 +78,7 @@ type
 
   public
     procedure AfterConstruction; override;
-    procedure BeforeDestruction; override;
+    destructor Destroy; override;
 
     property Settings: TMQTTSettings
       read GetSettings;
@@ -109,7 +109,7 @@ begin
 //  );
 end;
 
-procedure TMQTTChannelReceiver.BeforeDestruction;
+destructor TMQTTChannelReceiver.Destroy;
 begin
 //  if FMQTT.IsValueCreated then
 //  begin
@@ -121,7 +121,7 @@ begin
     FreeAndNil(FMQTT);
   end;
   //FMQTT.Free;
-  inherited BeforeDestruction;
+  inherited Destroy;
 end;
 {$ENDREGION}
 

@@ -97,6 +97,8 @@ type
     tsCOMPort                  : TKTabSheet;
     pnlCOMPorts                : TPanel;
     pnlCOMPortTitle            : TPanel;
+    tsMIDI: TKTabSheet;
+    pnlMIDITitle: TPanel;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -123,8 +125,10 @@ type
     FComPortReceiver     : IChannelReceiver;
     FWinODSReceiver      : IChannelReceiver;
     FFileSystemReceiver  : IChannelReceiver;
+    FMIDIReceiver        : IChannelReceiver;
     FZeroMQNode          : TDashboardNode;
     FMQTTNode            : TDashboardNode;
+    FMIDINode            : TDashboardNode;
     FWinIPCNode          : TDashboardNode;
     FComPortNode         : TDashboardNode;
     FWinODSNode          : TDashboardNode;
@@ -232,6 +236,7 @@ type
     procedure CreateMQTTReceiver;
     procedure CreateComPortReceiver;
     procedure CreateFileSystemReceiver;
+    procedure CreateMIDIReceiver;
 
     procedure Modified;
     procedure InitializeTreeView;
@@ -262,6 +267,8 @@ implementation
 {$R *.dfm}
 
 uses
+  Winapi.MMSystem,
+
   Spring,
 
   DDuce.Utils, DDuce.Utils.Winapi, DDuce.Logger,
@@ -269,7 +276,8 @@ uses
   DDuce.ObjectInspector.zObjectInspector,
 
   LogViewer.Manager, LogViewer.Factories, LogViewer.Resources,
-  LogViewer.Subscribers.ZeroMQ, LogViewer.Subscribers.FileSystem;
+  LogViewer.Subscribers.ZeroMQ, LogViewer.Subscribers.FileSystem,
+  LogViewer.Subscribers.MIDI;
 
 {$REGION 'construction and destruction'}
 constructor TfrmDashboard.Create(AOwner: TComponent;
@@ -326,6 +334,7 @@ begin
   FWinODSReceiver     := nil;
   FComPortReceiver    := nil;
   FFileSystemReceiver := nil;
+  FMIDIReceiver       := nil;
   FManager            := nil;
   FZeroMQ             := nil;
   FTreeView.Clear;
@@ -602,16 +611,22 @@ begin
   begin
     if LReceiver = FZeroMQReceiver then
     begin
-      ImageIndex := 1
+      ImageIndex := 1;
     end
     else if LReceiver = FComPortReceiver then
     begin
-      ImageIndex := 2
+      ImageIndex := 2;
+    end
+    else if LReceiver = FMIDIReceiver then
+    begin
+      ImageIndex := 9;
+    end
+    else if LReceiver = FMQTTReceiver then
+    begin
+      ImageIndex := 10;
     end
     else
-    begin
-      ImageIndex := 0
-    end;
+      ImageIndex := 0;
   end;
 end;
 
@@ -908,6 +923,7 @@ begin
   CreateMQTTReceiver;
   CreateComPortReceiver;
   CreateFileSystemReceiver;
+  CreateMIDIReceiver;
 
   FTreeView.FullExpand;
 end;
@@ -947,6 +963,40 @@ begin
   else
     FComPortNode.CheckState := csUncheckedNormal;
   FComPortReceiver.Enabled := False;
+end;
+
+procedure TfrmDashboard.CreateMIDIReceiver;
+//var
+//  I           : Integer;
+//  LSubscriber : ISubscriber;
+begin
+  FMIDIReceiver := TLogViewerFactories.CreateMIDIReceiver(FManager);
+  FManager.AddReceiver(FMIDIReceiver);
+  FMIDIReceiver.OnChange.Add(FReceiverChange);
+  FMIDINode := AddNode(nil, FMIDIReceiver, nil);
+  FMIDINode.CheckType := ctCheckBox;
+  if FMIDIReceiver.Enabled then
+    FMIDINode.CheckState := csCheckedNormal;
+
+
+
+    (*
+	if midiInGetNumDevs > 0 then
+  begin
+    for I := 0 to midiInGetNumDevs - 1 do
+    begin
+      LSubscriber := TMIDISubscriber.Create(FMIDIReceiver, I, 'test', 'MIDI', True);
+      FMIDIReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
+
+//       thisControl := TMidiInput.Create(Self);
+//			 thisControl.DeviceID := testDeviceID;
+//			 thisControl.OnMidiInput := Form1.MIDIInput1MidiInput;
+//			 thisControl.Open;
+//			 thisControl.Start;
+//			 MidiInControls.Add(thisControl);
+    end;
+  end;
+  *)
 end;
 
 procedure TfrmDashboard.CreateMQTTReceiver;

@@ -69,12 +69,6 @@ type
 
     procedure SettingsChanged(Sender: TObject);
 
-    function CreateSubscriber(
-      ASourceId         : UInt32;
-      AThreadId         : UInt32;
-      const ASourceName : string
-    ): ISubscriber; override;
-
   public
     procedure AfterConstruction; override;
 
@@ -111,14 +105,6 @@ constructor TZeroMQChannelReceiver.Create(AManager: ILogViewerManager; AZMQ:
 begin
   inherited Create(AManager, AName);
   FZMQ := AZMQ;
-end;
-
-function TZeroMQChannelReceiver.CreateSubscriber(ASourceId, AThreadId: UInt32;
-  const ASourceName: string): ISubscriber;
-begin
-//  Result := TZMQSubscriber.Create(
-//    Self, FZMQ, '', ASourceId, '', ASourceName, False
-//  );
 end;
 {$ENDREGION}
 

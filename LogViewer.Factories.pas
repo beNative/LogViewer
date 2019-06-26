@@ -110,6 +110,10 @@ type
       AManager : ILogViewerManager
     ): IChannelReceiver;
 
+    class function CreateMIDIReceiver(
+      AManager : ILogViewerManager
+    ): IChannelReceiver;
+
     class function CreateFileSystemReceiver(
       AManager    : ILogViewerManager;
       const APath : string
@@ -127,7 +131,8 @@ uses
   LogViewer.Resources, LogViewer.Factories.Toolbars,
   LogViewer.Receivers.WinIPC, LogViewer.Receivers.WinODS,
   LogViewer.Receivers.ZeroMQ, LogViewer.Receivers.MQTT,
-  LogViewer.Receivers.ComPort, LogViewer.Receivers.FileSystem;
+  LogViewer.Receivers.ComPort, LogViewer.Receivers.FileSystem,
+  LogViewer.Receivers.MIDI;
 
 {$REGION 'private class methods'}
 class procedure TLogViewerFactories.OnDropdownMenuButtonClick(Sender: TObject);
@@ -246,6 +251,12 @@ begin
   Result := TFileSystemChannelReceiver.Create(
     AManager, APath, RECEIVERNAME_FILESYSTEM
   );
+end;
+
+class function TLogViewerFactories.CreateMIDIReceiver(
+  AManager: ILogViewerManager): IChannelReceiver;
+begin
+  Result := TMIDIChannelReceiver.Create(AManager, RECEIVERNAME_MIDI);
 end;
 {$ENDREGION}
 
