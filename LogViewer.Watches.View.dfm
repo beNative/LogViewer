@@ -25,7 +25,7 @@ object frmWatchesView: TfrmWatchesView
       item
         Control = pnlWatchHistory
         Position = 1.000000000000000000
-        Visible = True
+        Visible = False
         Index = 1
       end>
     MinPosition = 0.020000000000000000
@@ -52,6 +52,7 @@ object frmWatchesView: TfrmWatchesView
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 1
+      Visible = False
     end
   end
 end

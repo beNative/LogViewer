@@ -213,7 +213,7 @@ object frmMessageList: TfrmMessageList
       PanelCollection = <
         item
           Control = pnlCallStack
-          Position = 0.500000000000000000
+          Position = 0.250000000000000000
           Visible = True
           Index = 0
         end
@@ -233,7 +233,7 @@ object frmMessageList: TfrmMessageList
         Left = 0
         Top = 0
         Width = 416
-        Height = 373
+        Height = 186
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 0
@@ -259,9 +259,9 @@ object frmMessageList: TfrmMessageList
       end
       object pnlWatches: TPanel
         Left = 0
-        Top = 375
+        Top = 188
         Width = 416
-        Height = 371
+        Height = 558
         Align = alClient
         BevelOuter = bvNone
         Caption = 'pnlWatches'
@@ -307,6 +307,23 @@ object frmMessageList: TfrmMessageList
             State = cbChecked
             TabOrder = 0
           end
+          object chkShowWatchHistory: TCheckBox
+            Left = 222
+            Top = 2
+            Width = 92
+            Height = 17
+            Hint = 'Show watch history'
+            Anchors = [akTop, akRight]
+            Caption = 'Show history'
+            Font.Charset = ANSI_CHARSET
+            Font.Color = clGray
+            Font.Height = -11
+            Font.Name = 'Segoe UI'
+            Font.Style = []
+            ParentFont = False
+            TabOrder = 1
+            OnClick = chkShowWatchHistoryClick
+          end
         end
       end
     end
@@ -316,7 +333,7 @@ object frmMessageList: TfrmMessageList
     Left = 55
     Top = 22
     Bitmap = {
-      494C010117001900440110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010117001900480110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

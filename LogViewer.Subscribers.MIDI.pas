@@ -115,7 +115,7 @@ var
 	LEventDesc : string;
 	LTimeLow   : Word;
 	LTimeHigh  : Word;
-  N          : Integer;
+  //N          : Integer;
 begin
 	LStatus    := AEvent.MidiMessage and $F0;
 	LTimeHigh  := Word(AEvent.Time div 65536);
@@ -150,7 +150,7 @@ begin
 			case AEvent.MidiMessage of
         MIDI_BEGINSYSEX:
         begin
-          N := AEvent.SysexLength;
+          //N := AEvent.SysexLength;
           Logger.SendObject(AEvent);
           //EventDesc := 'Sysex : ' + BinaryToHexList(PWideChar(ThisEvent.Sysex), ThisEvent.SysexLength);
           LEventDesc := PWideChar(AEvent.Sysex);

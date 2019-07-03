@@ -33,8 +33,6 @@ type
     FMQTT       : TMQTT;
     FMQTTStream : TStringStream;
 
-    //procedure CreateSubscriberSocket(const AEndPoint: string);
-
   protected
     {$REGION 'property access methods'}
     procedure SetEnabled(const Value: Boolean); override;

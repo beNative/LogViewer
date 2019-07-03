@@ -244,6 +244,7 @@ begin
         .ToSimpleObject(FDisplayValuesSettings.Leave);
       JO['DisplayValueSettings'].ObjectValue['Conditional'].ObjectValue
         .ToSimpleObject(FDisplayValuesSettings.Conditional);
+      JO['WatchSettings'].ObjectValue.ToSimpleObject(FWatchSettings);
       JO.ToSimpleObject(Self);
     finally
       JO.Free;
@@ -310,6 +311,7 @@ begin
       .FromSimpleObject(FDisplayValuesSettings.Leave);
     JO['DisplayValueSettings'].ObjectValue['Conditional'].ObjectValue
       .FromSimpleObject(FDisplayValuesSettings.Conditional);
+    JO['WatchSettings'].ObjectValue.FromSimpleObject(FWatchSettings);
     JO.SaveToFile(FFileName, False);
   finally
     JO.Free;

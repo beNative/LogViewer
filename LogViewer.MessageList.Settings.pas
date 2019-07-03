@@ -50,7 +50,6 @@ type
     FDynamicAutoSizeColumns : Boolean;
     FOnChanged              : Event<TNotifyEvent>;
     FVisibleMessageTypes    : TLogMessageTypes;
-    FWatchSettings          : TWatchSettings;
     FVisibleValueTypes      : TStringList;
     FPanelPositions         : Vector<Double>;
 
@@ -89,9 +88,6 @@ type
     property VisibleValueTypes: TStrings
       read GetVisibleValueTypes;
 
-    property WatchSettings: TWatchSettings
-      read FWatchSettings;
-
     property PanelPositions: Vector<Double>
       read FPanelPositions;
 
@@ -121,7 +117,6 @@ begin
   FVisibleValueTypes.Sorted     := True;
   FVisibleValueTypes.Duplicates := dupIgnore;
   FVisibleMessageTypes := ALL_MESSAGES;
-  FWatchSettings       := TWatchSettings.Create;
   // defaults
   FPanelPositions.Add(0.2);
   FPanelPositions.Add(0.7);
@@ -131,7 +126,6 @@ end;
 procedure TMessageListSettings.BeforeDestruction;
 begin
   FVisibleValueTypes.Free;
-  FWatchSettings.Free;
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
@@ -244,7 +238,6 @@ begin
     AutoScrollMessages     := LSettings.AutoScrollMessages;
     VisibleMessageTypes    := LSettings.VisibleMessageTypes;
     DynamicAutoSizeColumns := LSettings.DynamicAutoSizeColumns;
-    WatchSettings.Assign(LSettings.WatchSettings);
     PanelPositions.Assign(LSettings.PanelPositions.Data);
   end
   else

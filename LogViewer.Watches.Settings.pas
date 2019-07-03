@@ -23,27 +23,23 @@ uses
 
   Spring;
 
-const
-  DEFAULT_WATCH_HISTORY_PANEL_HEIGHT = 100;
-  DEFAULT_HEIGHT                     = 300;
-
 type
   TWatchSettings = class(TPersistent)
   private
-    FWatchHistoryPanelHeight : Integer;
-    FOnChanged               : Event<TNotifyEvent>;
-    FOnlyTrackChanges        : Boolean;
-    FHeight                  : Integer;
+    FOnChanged           : Event<TNotifyEvent>;
+    FOnlyTrackChanges    : Boolean;
+    FWatchHistoryVisible : Boolean;
+    FSyncWithSelection   : Boolean;
 
   protected
     {$REGION 'property access methods'}
-    function GetHeight: Integer;
-    procedure SetHeight(const Value: Integer);
-    function GetWatchHistoryPanelHeight: Integer;
-    procedure SetWatchHistoryPanelHeight(const Value: Integer);
     function GetOnChanged: IEvent<TNotifyEvent>;
+    function GetSyncWithSelection: Boolean;
+    procedure SetSyncWithSelection(const Value: Boolean);
     function GetOnlyTrackChanges: Boolean;
     procedure SetOnlyTrackChanges(const Value: Boolean);
+    function GetWatchHistoryVisible: Boolean;
+    procedure SetWatchHistoryVisible(const Value: Boolean);
     {$ENDREGION}
 
     procedure Changed;
@@ -53,19 +49,18 @@ type
 
     procedure Assign(Source: TPersistent); override;
 
-    property WatchHistoryPanelHeight: Integer
-      read GetWatchHistoryPanelHeight write SetWatchHistoryPanelHeight
-      default DEFAULT_WATCH_HISTORY_PANEL_HEIGHT;
-
-    property Height: Integer
-      read GetHeight write SetHeight default DEFAULT_HEIGHT;
-
-    property OnChanged: IEvent<TNotifyEvent>
-      read GetOnChanged;
-
+  published
     property OnlyTrackChanges: Boolean
       read GetOnlyTrackChanges write SetOnlyTrackChanges;
 
+    property WatchHistoryVisible: Boolean
+      read GetWatchHistoryVisible write SetWatchHistoryVisible;
+
+    property SyncWithSelection: Boolean
+      read GetSyncWithSelection write SetSyncWithSelection;
+
+    property OnChanged: IEvent<TNotifyEvent>
+      read GetOnChanged;
   end;
 
 implementation
@@ -74,26 +69,10 @@ implementation
 procedure TWatchSettings.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FHeight                  := DEFAULT_HEIGHT;
-  FWatchHistoryPanelHeight := DEFAULT_WATCH_HISTORY_PANEL_HEIGHT;
 end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
-function TWatchSettings.GetHeight: Integer;
-begin
-  Result := FHeight;
-end;
-
-procedure TWatchSettings.SetHeight(const Value: Integer);
-begin
-  if Value <> Height then
-  begin
-    FHeight := Value;
-    Changed;
-  end;
-end;
-
 function TWatchSettings.GetOnChanged: IEvent<TNotifyEvent>;
 begin
   Result := FOnChanged;
@@ -104,7 +83,6 @@ begin
   Result := FOnlyTrackChanges;
 end;
 
-
 procedure TWatchSettings.SetOnlyTrackChanges(const Value: Boolean);
 begin
   if Value <> OnlyTrackChanges then
@@ -114,18 +92,29 @@ begin
   end;
 end;
 
-function TWatchSettings.GetWatchHistoryPanelHeight: Integer;
+function TWatchSettings.GetSyncWithSelection: Boolean;
 begin
-  Result := FWatchHistoryPanelHeight;
+  Result := FSyncWithSelection;
 end;
 
-procedure TWatchSettings.SetWatchHistoryPanelHeight(const Value: Integer);
+procedure TWatchSettings.SetSyncWithSelection(const Value: Boolean);
 begin
-  if Value <> WatchHistoryPanelHeight then
+  if Value <> SyncWithSelection then
   begin
-    FWatchHistoryPanelHeight := Value;
+    FSyncWithSelection := Value;
     Changed;
   end;
+end;
+
+function TWatchSettings.GetWatchHistoryVisible: Boolean;
+begin
+  Result := FWatchHistoryVisible;
+end;
+
+procedure TWatchSettings.SetWatchHistoryVisible(const Value: Boolean);
+begin
+  FWatchHistoryVisible := Value;
+  Changed;
 end;
 {$ENDREGION}
 
@@ -145,7 +134,8 @@ begin
   begin
     LSettings               := TWatchSettings(Source);
     OnlyTrackChanges        := LSettings.OnlyTrackChanges;
-    WatchHistoryPanelHeight := LSettings.WatchHistoryPanelHeight;
+    WatchHistoryVisible     := LSettings.WatchHistoryVisible;
+    SyncWithSelection       := LSettings.SyncWithSelection;
   end
   else
     inherited Assign(Source);

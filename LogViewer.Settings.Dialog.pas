@@ -143,8 +143,6 @@ begin
 end;
 
 procedure TfrmLogViewerSettings.AfterConstruction;
-var
-  I : Integer;
 begin
   inherited AfterConstruction;
   CreateSettingsForms;

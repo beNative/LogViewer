@@ -27,15 +27,16 @@ uses
 
 type
   TfrmWatchSettings = class(TForm)
-    chkOnlyTrackChanges : TCheckBox;
+    chkOnlyTrackChanges        : TCheckBox;
+    chkSyncWithSelectedMessage : TCheckBox;
+    chkShowWatchHistory        : TCheckBox;
 
     procedure chkOnlyTrackChangesClick(Sender: TObject);
+    procedure chkShowWatchHistoryClick(Sender: TObject);
+    procedure chkSyncWithSelectedMessageClick(Sender: TObject);
 
   private
     FSettings : TWatchSettings;
-
-  protected
-    procedure UpdateActions; override;
 
   public
     constructor Create(
@@ -56,6 +57,9 @@ constructor TfrmWatchSettings.Create(AOwner: TComponent;
 begin
   inherited Create(AOwner);
   FSettings := ASettings;
+  chkOnlyTrackChanges.Checked        := FSettings.OnlyTrackChanges;
+  chkSyncWithSelectedMessage.Checked := FSettings.SyncWithSelection;
+  chkShowWatchHistory.Checked        := FSettings.WatchHistoryVisible;
 end;
 
 destructor TfrmWatchSettings.Destroy;
@@ -68,15 +72,17 @@ end;
 {$REGION 'event handlers'}
 procedure TfrmWatchSettings.chkOnlyTrackChangesClick(Sender: TObject);
 begin
-  FSettings.OnlyTrackChanges := chkOnlyTrackChanges.Checked;
+  FSettings.OnlyTrackChanges := (Sender as TCheckBox).Checked;
 end;
-{$ENDREGION}
 
-{$REGION 'protected methods'}
-procedure TfrmWatchSettings.UpdateActions;
+procedure TfrmWatchSettings.chkShowWatchHistoryClick(Sender: TObject);
 begin
-  inherited UpdateActions;
-  chkOnlyTrackChanges.Checked := FSettings.OnlyTrackChanges;
+  FSettings.WatchHistoryVisible := (Sender as TCheckBox).Checked;
+end;
+
+procedure TfrmWatchSettings.chkSyncWithSelectedMessageClick(Sender: TObject);
+begin
+  FSettings.SyncWithSelection := (Sender as TCheckBox).Checked;
 end;
 {$ENDREGION}
 

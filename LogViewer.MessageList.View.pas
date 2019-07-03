@@ -51,6 +51,7 @@ uses
 type
   TfrmMessageList = class(TForm, ILogViewer)
     {$REGION 'designer controls'}
+    chkShowWatchHistory        : TCheckBox;
     chkSyncWithSelectedMessage : TCheckBox;
     edtMessageFilter           : TButtonedEdit;
     imlMessageTypes            : TImageList;
@@ -75,6 +76,7 @@ type
     tsValueList                : TKTabSheet;
     {$ENDREGION}
 
+    procedure chkShowWatchHistoryClick(Sender: TObject);
     procedure edtMessageFilterChange(Sender: TObject);
     procedure edtMessageFilterKeyDown(
       Sender  : TObject;
@@ -86,9 +88,9 @@ type
       var Key : Word;
       Shift   : TShiftState
     );
-    procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure edtMessageFilterMouseEnter(Sender: TObject);
     procedure edtMessageFilterMouseLeave(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure pnlMessagesResize(Sender: TObject);
     procedure tsRawDataShow(Sender: TObject);
 
@@ -243,6 +245,7 @@ type
       Sender  : TObject;
       AStream : TStream
     );
+    procedure WatchSettingsChanged(Sender: TObject);
     {$ENDREGION}
 
     function IsCollapsedTracingNode(
@@ -377,6 +380,10 @@ begin
   FMiliSecondsBetweenSelection := -1;
   edtMessageFilter.OnRightButtonClick :=
     FManager.Actions.Items['actFilterMessages'].OnExecute;
+  chkShowWatchHistory.Checked :=
+    Manager.Settings.WatchSettings.WatchHistoryVisible;
+  chkSyncWithSelectedMessage.Checked :=
+    Manager.Settings.WatchSettings.SyncWithSelection;
   FExpandParents := True;
   CreateEditor;
   CreateLogTreeView;
@@ -392,6 +399,7 @@ begin
   ApplySettings;
   Subscriber.OnReceiveMessage.Add(FSubscriberReceiveMessage);
   FSettings.OnChanged.Add(FSettingsChanged);
+  Manager.Settings.WatchSettings.OnChanged.Add(WatchSettingsChanged);
   FLogTreeView.PopupMenu := Manager.Menus.LogTreeViewerPopupMenu;
 end;
 
@@ -416,6 +424,7 @@ begin
     FSubscriber := nil;
   end;
   FCallStack  := nil;
+  Manager.Settings.WatchSettings.OnChanged.Remove(WatchSettingsChanged);
   FreeAndNil(FValueList);
   FreeAndNil(FDataSetView);
   FreeAndNil(FImageView);
@@ -577,7 +586,7 @@ begin
     Self,
     pnlWatches,
     FWatches,
-    FSettings.WatchSettings,
+    Manager.Settings.WatchSettings,
     DisplayValuesSettings
   );
 end;
@@ -823,9 +832,8 @@ begin
 end;
 
 { This handler takes care of the following things:
-    - Coloring the loglevel column background color.
-    - Drawing collapsed tracing nodes as one node (using IsCollapsedTracingNode).
- }
+  - Coloring the loglevel column background color.
+  - Drawing collapsed tracing nodes as one node (using IsCollapsedTracingNode). }
 
 procedure TfrmMessageList.FLogTreeViewBeforeCellPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
@@ -974,7 +982,7 @@ begin
     end
     else
     begin
-      ImageIndex := 0;
+      ImageIndex := 3;
     end;
   end;
 end;
@@ -1299,6 +1307,12 @@ begin
   FAutoSizeColumns := False;
 end;
 
+procedure TfrmMessageList.chkShowWatchHistoryClick(Sender: TObject);
+begin
+  Manager.Settings.WatchSettings.WatchHistoryVisible :=
+    (Sender as TCheckBox).Checked;
+end;
+
 procedure TfrmMessageList.tsRawDataShow(Sender: TObject);
 var
   LN : TLogNode;
@@ -1325,6 +1339,14 @@ end;
 procedure TfrmMessageList.FSettingsChanged(Sender: TObject);
 begin
   ApplySettings;
+end;
+
+procedure TfrmMessageList.WatchSettingsChanged(Sender: TObject);
+begin
+  chkShowWatchHistory.Checked :=
+    Manager.Settings.WatchSettings.WatchHistoryVisible;
+  chkSyncWithSelectedMessage.Checked :=
+    Manager.Settings.WatchSettings.SyncWithSelection;
 end;
 {$ENDREGION}
 
@@ -1662,7 +1684,6 @@ var
 begin
   Guard.CheckNotNull(ALogNode, 'ALogNode');
   FCallStack.Clear;
-  LN  := nil;
   LN2 := nil;
   VN  := ALogNode.VTNode;
   I   := 1;

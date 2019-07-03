@@ -56,6 +56,7 @@ type
     {$ENDREGION}
 
     {$REGION 'event handlers'}
+    procedure SettingsChanged(Sender: TObject);
     procedure FTVPWatchValuesSelectionChanged(Sender: TObject);
     procedure FTVPWatchValuesDoubleClick(Sender: TObject);
     procedure FTVPWatchHistoryDoubleClick(Sender: TObject);
@@ -122,6 +123,8 @@ type
 
   protected
     procedure UpdateWatchHistory;
+    procedure UpdateActions; override;
+
 
     property SelectedWatch: TWatch
       read GetSelectedWatch;
@@ -165,6 +168,7 @@ begin
   inherited Create(AOwner);
   FWatches := AWatches;
   FSettings              := ASettings;
+  FSettings.OnChanged.Add(SettingsChanged);
   FDisplayValuesSettings := ADisplayValuesSettings;
   CreateObjects;
 end;
@@ -172,18 +176,13 @@ end;
 procedure TfrmWatchesView.AfterConstruction;
 begin
   inherited AfterConstruction;
-  Height := FSettings.Height;
-  if FSettings.WatchHistoryPanelHeight < Height then
-    pnlWatchHistory.Height := FSettings.WatchHistoryPanelHeight
-  else
-    pnlWatchHistory.Height := Height div 3;
+  //WatchHistoryVisible := FSettings.WatchHistoryVisible;
 end;
 
 procedure TfrmWatchesView.BeforeDestruction;
 begin
   Logger.Track(Self, 'BeforeDestruction');
-  FSettings.WatchHistoryPanelHeight := pnlWatchHistory.Height;
-  FSettings.Height                  := Height;
+  FSettings.OnChanged.Remove(SettingsChanged);
   FWatches := nil;
   inherited BeforeDestruction;
 end;
@@ -291,6 +290,14 @@ end;
 procedure TfrmWatchesView.FTVPWatchValuesSelectionChanged(Sender: TObject);
 begin
   UpdateWatchHistory;
+end;
+
+procedure TfrmWatchesView.SettingsChanged(Sender: TObject);
+begin
+//  WatchHistoryVisible := FSettings.WatchHistoryVisible;
+
+
+//  pnlMain.PanelCollection[1].Visible
 end;
 {$ENDREGION}
 
@@ -420,6 +427,12 @@ begin
       CD.OnCustomDraw := FCDValueCustomDraw;
     end;
   end;
+end;
+
+procedure TfrmWatchesView.UpdateActions;
+begin
+  inherited;
+//  pnlMain.PanelCollection[1].Visible := FSettings.WatchHistoryVisible;
 end;
 
 procedure TfrmWatchesView.UpdateView(AMessageId: Int64);
