@@ -53,11 +53,11 @@ The Object Pascal (Delphi) sources depend on the following open source libraries
   * [zcontrols](http://github.com/beNative/zcontrols)
   * [TBCEditor](http://github.com/beNative/TBCEditor)
   * [TChromeTabs](http://github.com/norgepaul/TChromeTabs)
-  * [Ararat Synapse](http://sourceforge.net/projects/synalist/)
-  * [OMultiPanel](http://www.kluug.net)
-  * [KControls](http://bitbucket.org/tomkrysl/kcontrols/src/default/)
+  * [Ararat Synapse](http://github.com/beNative/synapse)
+  * [OMultiPanel](http://github.com/beNative/omultipanel)
+  * [KControls](http://github.com/beNative/kcontrols)
   * [JsonDataObjects](http://github.com/ahausladen/JsonDataObjects)
-  * [midiio](https://bitbucket.org/h4ndy/midiio-dev/src/default/)
+  * [midiio](http://github.com/beNative/midiio)
 
 ## Screenshots
 Here is a preliminary look of the application (2018/09/22):
