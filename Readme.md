@@ -23,7 +23,7 @@ The DDuce demo application demonstrates the currently supported message types.
 - method callstack level display
 - message details
 
-## Features currently supported
+## Features currently supported using the ILogger interface methods
 - Info/Warning and Error messages
 - Method tracking with stack display showing execution times
 - Screenshot capture
@@ -57,6 +57,7 @@ The Object Pascal (Delphi) sources depend on the following open source libraries
   * [OMultiPanel](http://www.kluug.net)
   * [KControls](http://bitbucket.org/tomkrysl/kcontrols/src/default/)
   * [JsonDataObjects](http://github.com/ahausladen/JsonDataObjects)
+  * [midiio](https://bitbucket.org/h4ndy/midiio-dev/src/default/)
 
 ## Screenshots
 Here is a preliminary look of the application (2018/09/22):
