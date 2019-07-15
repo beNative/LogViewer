@@ -35,7 +35,6 @@ uses
   LogViewer.MessageList.Settings in 'LogViewer.MessageList.Settings.pas',
   LogViewer.MessageList.Settings.View in 'LogViewer.MessageList.Settings.View.pas' {frmViewSettings},
   LogViewer.MessageList.View in 'LogViewer.MessageList.View.pas' {frmMessageList},
-  LogViewer.Messages.Data in 'LogViewer.Messages.Data.pas',
   LogViewer.RawData.View in 'LogViewer.RawData.View.pas' {frmRawDataView},
   LogViewer.Receivers.Base in 'LogViewer.Receivers.Base.pas',
   LogViewer.Receivers.ComPort in 'LogViewer.Receivers.ComPort.pas',

@@ -39,10 +39,9 @@ uses
   ZeroMQ,
 
   LogViewer.CallStack.View, LogViewer.Watches.View,
-  LogViewer.Watches.Data, LogViewer.Messages.Data, LogViewer.MessageList.View,
-  LogViewer.Interfaces, LogViewer.Manager, LogViewer.Settings,
-  LogViewer.Receivers.ComPort.Settings, LogViewer.DisplayValues.Settings,
-  LogViewer.Watches.Settings;
+  LogViewer.Watches.Data, LogViewer.MessageList.View, LogViewer.Interfaces,
+  LogViewer.Manager, LogViewer.Settings, LogViewer.Receivers.ComPort.Settings,
+  LogViewer.DisplayValues.Settings, LogViewer.Watches.Settings;
 
 type
   TLogViewerFactories = class sealed

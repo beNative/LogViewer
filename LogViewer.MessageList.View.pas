@@ -42,11 +42,11 @@ uses
 
   DDuce.Editor.Interfaces, DDuce.Logger.Interfaces, DDuce.Components.ValueList,
 
-  LogViewer.Messages.Data, LogViewer.Watches.Data, LogViewer.Watches.View,
-  LogViewer.Interfaces, LogViewer.CallStack.Data, LogViewer.CallStack.View,
-  LogViewer.ValueList.View, LogViewer.MessageList.Settings,
-  LogViewer.MessageList.LogNode, LogViewer.DisplayValues.Settings,
-  LogViewer.DataSet.View, LogViewer.Image.View, LogViewer.RawData.View;
+  LogViewer.Watches.Data, LogViewer.Watches.View, LogViewer.Interfaces,
+  LogViewer.CallStack.Data, LogViewer.CallStack.View, LogViewer.ValueList.View,
+  LogViewer.MessageList.Settings, LogViewer.MessageList.LogNode,
+  LogViewer.DisplayValues.Settings, LogViewer.DataSet.View,
+  LogViewer.Image.View, LogViewer.RawData.View;
 
 type
   TfrmMessageList = class(TForm, ILogViewer)

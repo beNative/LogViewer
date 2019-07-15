@@ -167,7 +167,6 @@
             <Form>frmMessageList</Form>
             <FormType>dfm</FormType>
         </DCCReference>
-        <DCCReference Include="LogViewer.Messages.Data.pas"/>
         <DCCReference Include="LogViewer.RawData.View.pas">
             <Form>frmRawDataView</Form>
             <FormType>dfm</FormType>

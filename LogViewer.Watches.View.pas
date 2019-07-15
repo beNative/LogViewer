@@ -31,7 +31,7 @@ uses
 
   DSharp.Windows.TreeViewPresenter, DSharp.Windows.ColumnDefinitions,
 
-  LogViewer.Messages.Data, LogViewer.Watches.Data, LogViewer.Watches.Settings,
+  LogViewer.Watches.Data, LogViewer.Watches.Settings,
   LogViewer.DisplayValues.Settings;
 
 type
