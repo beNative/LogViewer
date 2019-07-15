@@ -135,7 +135,6 @@ type
       ASettings              : TWatchSettings;
       ADisplayValuesSettings : TDisplayValuesSettings
     ); reintroduce; virtual;
-    procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 
     procedure UpdateView(AMessageId: Int64 = 0);
@@ -170,12 +169,6 @@ begin
   FSettings.OnChanged.Add(SettingsChanged);
   FDisplayValuesSettings := ADisplayValuesSettings;
   CreateObjects;
-end;
-
-procedure TfrmWatchesView.AfterConstruction;
-begin
-  inherited AfterConstruction;
-  //WatchHistoryVisible := FSettings.WatchHistoryVisible;
 end;
 
 procedure TfrmWatchesView.BeforeDestruction;
@@ -313,11 +306,8 @@ end;
 
 procedure TfrmWatchesView.SettingsChanged(Sender: TObject);
 begin
-//  WatchHistoryVisible := FSettings.WatchHistoryVisible;
-
-
-
-//  pnlMain.PanelCollection[1].Visible
+  FTVPWatchValues.ShowHeader  := not FSettings.HideColumnHeaders;
+  FTVPWatchHistory.ShowHeader := not FSettings.HideColumnHeaders;
 end;
 {$ENDREGION}
 
@@ -399,6 +389,8 @@ begin
   FVSTWatchHistory.AlignWithMargins := False;
   FTVPWatchHistory := TFactories.CreateTreeViewPresenter(Self, FVSTWatchHistory);
   FTVPWatchHistory.OnDoubleClick := FTVPWatchHistoryDoubleClick;
+  FTVPWatchValues.ShowHeader  := not FSettings.HideColumnHeaders;
+  FTVPWatchHistory.ShowHeader := not FSettings.HideColumnHeaders;
 end;
 
 procedure TfrmWatchesView.ConnectWatchHistoryCDEvents;

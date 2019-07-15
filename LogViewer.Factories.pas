@@ -41,7 +41,8 @@ uses
   LogViewer.CallStack.View, LogViewer.Watches.View,
   LogViewer.Watches.Data, LogViewer.MessageList.View, LogViewer.Interfaces,
   LogViewer.Manager, LogViewer.Settings, LogViewer.Receivers.ComPort.Settings,
-  LogViewer.DisplayValues.Settings, LogViewer.Watches.Settings;
+  LogViewer.DisplayValues.Settings, LogViewer.Watches.Settings,
+  LogViewer.CallStack.Settings;
 
 type
   TLogViewerFactories = class sealed
@@ -55,6 +56,7 @@ type
       AOwner                 : TComponent;
       AParent                : TWinControl;
       AData                  : IObjectList;
+      ASettings              : TCallStackSettings;
       ADisplayValuesSettings : TDisplayValuesSettings
     ): TfrmCallStackView;
 
@@ -142,10 +144,11 @@ end;
 
 {$REGION 'public class methods'}
 class function TLogViewerFactories.CreateCallStackView(AOwner: TComponent;
-  AParent: TWinControl; AData: IObjectList; ADisplayValuesSettings:
-  TDisplayValuesSettings): TfrmCallStackView;
+  AParent: TWinControl; AData: IObjectList; ASettings: TCallStackSettings;
+  ADisplayValuesSettings: TDisplayValuesSettings): TfrmCallStackView;
 begin
-  Result := TfrmCallStackView.Create(AOwner, AData, ADisplayValuesSettings);
+  Result :=
+    TfrmCallStackView.Create(AOwner, AData, ASettings, ADisplayValuesSettings);
   Result.Parent      := AParent;
   Result.Align       := alClient;
   Result.BorderStyle := bsNone;

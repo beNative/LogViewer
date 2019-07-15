@@ -1,7 +1,7 @@
 object frmViewSettings: TfrmViewSettings
   Left = 0
   Top = 0
-  ClientHeight = 106
+  ClientHeight = 153
   ClientWidth = 499
   Color = clBtnFace
   ParentFont = True
@@ -43,5 +43,14 @@ object frmViewSettings: TfrmViewSettings
     Caption = 'Dynamic autosize columns'
     TabOrder = 3
     OnClick = chkDynamicAutoSizeColumnsClick
+  end
+  object chkHideColumnHeaders: TCheckBox
+    Left = 16
+    Top = 100
+    Width = 145
+    Height = 17
+    Caption = 'Hide column headers'
+    TabOrder = 4
+    OnClick = chkHideColumnHeadersClick
   end
 end

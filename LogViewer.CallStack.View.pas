@@ -31,7 +31,7 @@ uses
 
   DSharp.Windows.TreeViewPresenter, DSharp.Windows.ColumnDefinitions,
 
-  LogViewer.DisplayValues.Settings;
+  LogViewer.DisplayValues.Settings, LogViewer.CallStack.Settings;
 
 type
   TfrmCallStackView = class(TForm)
@@ -40,6 +40,7 @@ type
     FVSTCallStack          : TVirtualStringTree;
     FCallStack             : IObjectList;
     FDisplayValuesSettings : TDisplayValuesSettings;
+    FSettings              : TCallStackSettings;
 
     procedure FCallStackChanged(
       Sender     : TObject;
@@ -76,11 +77,13 @@ type
       DrawMode         : TDrawMode;
       Selected         : Boolean
     ): Boolean;
+    procedure SettingsChanged(Sender: TObject);
 
   public
     constructor Create(
       AOwner                 : TComponent;
       AData                  : IObjectList;
+      ASettings              : TCallStackSettings;
       ADisplayValuesSettings : TDisplayValuesSettings
     ); reintroduce; virtual;
     destructor Destroy; override;
@@ -102,15 +105,18 @@ uses
 
 {$REGION 'construction and destruction'}
 constructor TfrmCallStackView.Create(AOwner: TComponent; AData: IObjectList;
-  ADisplayValuesSettings: TDisplayValuesSettings);
+  ASettings: TCallStackSettings; ADisplayValuesSettings: TDisplayValuesSettings);
 var
   CDS : IColumnDefinitions;
   CD  : TColumnDefinition;
 begin
   inherited Create(AOwner);
   Guard.CheckNotNull(AData, 'AData');
+  Guard.CheckNotNull(ASettings, 'ASettings');
   Guard.CheckNotNull(ADisplayValuesSettings, 'ADisplayValuesSettings');
   FDisplayValuesSettings := ADisplayValuesSettings;
+  FSettings              := ASettings;
+  FSettings.OnChanged.Add(SettingsChanged);
   FCallStack := AData;
   FCallStack.OnChanged.Add(FCallStackChanged);
   FVSTCallStack := TVirtualStringTreeFactory.CreateList(Self, Self);
@@ -142,7 +148,8 @@ begin
     FCallStack as IObjectList,
     CDS
   );
-  FTVPCallStack.ShowHeader := True;
+  FTVPCallStack.ShowHeader := not FSettings.HideColumnHeaders;
+
 end;
 
 destructor TfrmCallStackView.Destroy;
@@ -224,6 +231,11 @@ begin
     FDisplayValuesSettings.Tracing.AssignTo(TargetCanvas.Font);
   end;
   Result := True;
+end;
+
+procedure TfrmCallStackView.SettingsChanged(Sender: TObject);
+begin
+  FTVPCallStack.ShowHeader := not FSettings.HideColumnHeaders;
 end;
 {$ENDREGION}
 

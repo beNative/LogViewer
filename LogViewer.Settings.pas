@@ -28,10 +28,10 @@ uses
   DDuce.Settings.Form,
 
   LogViewer.MessageList.Settings, LogViewer.Watches.Settings,
+  LogViewer.CallStack.Settings, LogViewer.DisplayValues.Settings,
   LogViewer.Receivers.ComPort.Settings, LogViewer.Receivers.WinODS.Settings,
   LogViewer.Receivers.WinIPC.Settings, LogViewer.Receivers.ZeroMQ.Settings,
-  LogViewer.Receivers.MQTT.Settings, LogViewer.Receivers.FileSystem.Settings,
-  LogViewer.DisplayValues.Settings;
+  LogViewer.Receivers.MQTT.Settings, LogViewer.Receivers.FileSystem.Settings;
 
 type
   TLogViewerSettings = class(TPersistent)
@@ -46,6 +46,7 @@ type
     FMQTTSettings          : TMQTTSettings;
     FFileSystemSettings    : TFileSystemSettings;
     FWatchSettings         : TWatchSettings;
+    FCallStackSettings     : TCallStackSettings;
     FDisplayValuesSettings : TDisplayValuesSettings;
     FOnChanged             : Event<TNotifyEvent>;
 
@@ -88,6 +89,9 @@ type
     property WatchSettings: TWatchSettings
       read FWatchSettings;
 
+    property CallStackSettings: TCallStackSettings
+      read FCallStackSettings;
+
     property MessageListSettings: TMessageListSettings
       read FMessageListSettings;
 
@@ -125,6 +129,7 @@ begin
   FMQTTSettings          := TMQTTSettings.Create;
   FFileSystemSettings    := TFileSystemSettings.Create;
   FWatchSettings         := TWatchSettings.Create;
+  FCallStackSettings     := TCallStackSettings.Create;
   FDisplayValuesSettings := TDisplayValuesSettings.Create;
   FDisplayValuesSettings.OnChanged.Add(DisplayValuesSettingsChanged);
 end;
@@ -134,6 +139,7 @@ begin
   FDisplayValuesSettings.OnChanged.Remove(DisplayValuesSettingsChanged);
   FreeAndNil(FDisplayValuesSettings);
   FreeAndNil(FWatchSettings);
+  FreeAndNil(FCallStackSettings);
   FreeAndNil(FZeroMQSettings);
   FreeAndNil(FMQTTSettings);
   FreeAndNil(FFileSystemSettings);
@@ -238,6 +244,7 @@ begin
       JO['DisplayValueSettings'].ObjectValue['Conditional'].ObjectValue
         .ToSimpleObject(FDisplayValuesSettings.Conditional);
       JO['WatchSettings'].ObjectValue.ToSimpleObject(FWatchSettings);
+      JO['CallStackSettings'].ObjectValue.ToSimpleObject(FCallStackSettings);
       JO.ToSimpleObject(Self);
     finally
       JO.Free;
@@ -301,6 +308,7 @@ begin
     JO['DisplayValueSettings'].ObjectValue['Conditional'].ObjectValue
       .FromSimpleObject(FDisplayValuesSettings.Conditional);
     JO['WatchSettings'].ObjectValue.FromSimpleObject(FWatchSettings);
+    JO['CallStackSettings'].ObjectValue.FromSimpleObject(FCallStackSettings);
     JO.SaveToFile(FFileName, False);
   finally
     JO.Free;

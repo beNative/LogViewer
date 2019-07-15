@@ -35,4 +35,13 @@ object frmWatchSettings: TfrmWatchSettings
     TabOrder = 2
     OnClick = chkShowWatchHistoryClick
   end
+  object chkHideColumnHeaders: TCheckBox
+    Left = 16
+    Top = 77
+    Width = 281
+    Height = 17
+    Caption = 'Hide column headers'
+    TabOrder = 3
+    OnClick = chkHideColumnHeadersClick
+  end
 end

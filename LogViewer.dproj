@@ -234,6 +234,10 @@
             <Form>frmMessageData</Form>
             <FormType>dfm</FormType>
         </DCCReference>
+        <DCCReference Include="LogViewer.CallStack.Settings.View.pas">
+            <Form>frmCallStackSettings</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <None Include="Readme.md"/>
         <RcItem Include="Bin\Win32\libzmq.dll">
             <ContainerId>ResourceItem</ContainerId>

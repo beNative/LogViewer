@@ -31,11 +31,13 @@ type
     chkAutoScrollMessages     : TCheckBox;
     chkAutoFilterMessages     : TCheckBox;
     chkDynamicAutoSizeColumns : TCheckBox;
+    chkHideColumnHeaders: TCheckBox;
 
     procedure chkSmartTimeStampsClick(Sender: TObject);
     procedure chkAutoScrollMessagesClick(Sender: TObject);
     procedure chkAutoFilterMessagesClick(Sender: TObject);
     procedure chkDynamicAutoSizeColumnsClick(Sender: TObject);
+    procedure chkHideColumnHeadersClick(Sender: TObject);
 
   private
     FSettings : TMessageListSettings;
@@ -80,6 +82,11 @@ begin
   FSettings.DynamicAutoSizeColumns := (Sender as TCheckBox).Checked;
 end;
 
+procedure TfrmViewSettings.chkHideColumnHeadersClick(Sender: TObject);
+begin
+  FSettings.HideColumnHeaders := (Sender as TCheckBox).Checked;
+end;
+
 procedure TfrmViewSettings.chkSmartTimeStampsClick(Sender: TObject);
 begin
   FSettings.SmartTimeStamps := (Sender as TCheckBox).Checked;
@@ -94,6 +101,7 @@ begin
   chkAutoScrollMessages.Checked     := FSettings.AutoScrollMessages;
   chkAutoFilterMessages.Checked     := FSettings.AutoFilterMessages;
   chkDynamicAutoSizeColumns.Checked := FSettings.DynamicAutoSizeColumns;
+  chkHideColumnHeaders.Checked      := FSettings.HideColumnHeaders;
 end;
 {$ENDREGION}
 

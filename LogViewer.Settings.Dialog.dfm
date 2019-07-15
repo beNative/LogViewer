@@ -88,56 +88,34 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Top = 0
     Width = 465
     Height = 384
-    ActivePageIndex = 3
+    ActivePageIndex = 7
     Align = alClient
     ParentBackground = False
     TabHeight = 0
     TabOrder = 2
     object tsWatches: TKTabSheet
       Caption = 'Watches'
-      ExplicitTop = 24
-      ExplicitWidth = 745
-      ExplicitHeight = 276
     end
     object tsCallStack: TKTabSheet
       Caption = 'Callstack'
-      ExplicitTop = 24
-      ExplicitWidth = 745
-      ExplicitHeight = 276
     end
     object tsComPort: TKTabSheet
       Caption = 'ComPort'
-      ExplicitTop = 24
-      ExplicitWidth = 745
-      ExplicitHeight = 276
     end
     object tsZeroMQ: TKTabSheet
       Caption = 'ZeroMQ'
-      ExplicitWidth = 0
-      ExplicitHeight = 0
     end
     object tsWinODS: TKTabSheet
       Caption = 'WinODS'
-      ExplicitTop = 24
-      ExplicitWidth = 745
-      ExplicitHeight = 276
     end
     object tsWinIPC: TKTabSheet
       Caption = 'WinIPC'
-      ExplicitTop = 24
-      ExplicitWidth = 745
-      ExplicitHeight = 276
     end
     object tsDisplayValueSettings: TKTabSheet
       Caption = 'DisplayValueSettings'
-      ExplicitTop = 24
-      ExplicitWidth = 745
-      ExplicitHeight = 276
     end
     object tsAdvanced: TKTabSheet
       Caption = 'Advanced'
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object seSettings: TSynEdit
         Left = 0
         Top = 0
@@ -182,16 +160,10 @@ object frmLogViewerSettings: TfrmLogViewerSettings
         TabWidth = 2
         WordWrap = True
         FontSmoothing = fsmClearType
-        ExplicitLeft = 4
-        ExplicitTop = -6
-        ExplicitHeight = 351
       end
     end
     object tsViewSettings: TKTabSheet
       Caption = 'ViewSettings'
-      ExplicitTop = 24
-      ExplicitWidth = 745
-      ExplicitHeight = 276
     end
   end
   object aclMain: TActionList
@@ -219,7 +191,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Left = 568
     Top = 32
     Bitmap = {
-      494C0101030008005C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010103000800600010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

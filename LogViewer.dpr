@@ -71,7 +71,8 @@ uses
   LogViewer.Watches.Settings in 'LogViewer.Watches.Settings.pas',
   LogViewer.Watches.Settings.View in 'LogViewer.Watches.Settings.View.pas' {frmWatchSettings},
   LogViewer.Watches.View in 'LogViewer.Watches.View.pas' {frmWatchesView},
-  LogViewer.MessageData.View in 'LogViewer.MessageData.View.pas' {frmMessageData};
+  LogViewer.MessageData.View in 'LogViewer.MessageData.View.pas' {frmMessageData},
+  LogViewer.CallStack.Settings.View in 'LogViewer.CallStack.Settings.View.pas' {frmCallStackSettings};
 
 {$R *.res}
 
@@ -90,6 +91,7 @@ begin
   // setup logchannel for using a log LogViewer instance to debug itself.
   Application.CreateForm(TfrmMain, frmMain);
   Application.CreateForm(TfrmMessageData, frmMessageData);
+  Application.CreateForm(TfrmCallStackSettings, frmCallStackSettings);
   Logger.Channels.Add(
     TZeroMQChannel.Create(Format('tcp://*:%d', [LOGVIEWER_ZMQ_PORT]))
   );

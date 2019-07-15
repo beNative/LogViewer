@@ -442,6 +442,7 @@ begin
     Self,
     pnlCallStack,
     FCallStack as IObjectList,
+    Manager.Settings.CallStackSettings,
     DisplayValuesSettings
   );
 end;
@@ -1422,8 +1423,11 @@ begin
   Logger.Track(Self, 'ApplySettings');
   for I := 0 to pnlMain.PanelCollection.Count - 1 do
   begin
-    Logger.Send(Settings.PanelPositions[I]);
     pnlMain.PanelCollection[I].Position := Settings.PanelPositions[I];
+    if Settings.HideColumnHeaders then
+      FLogTreeView.Header.Options := FLogTreeView.Header.Options - [hoVisible]
+    else
+      FLogTreeView.Header.Options := FLogTreeView.Header.Options + [hoVisible];
   end;
   Modified;
 end;

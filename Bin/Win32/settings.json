@@ -1,8 +1,8 @@
 {
 	"FormSettings": {
-		"Left": 378,
-		"Top": 86,
-		"Width": 1681,
+		"Left": 408,
+		"Top": 227,
+		"Width": 1669,
 		"Height": 986,
 		"FormStyle": 0,
 		"WindowState": 0
@@ -12,6 +12,7 @@
 		"AutoFilterMessages": true,
 		"DynamicAutoSizeColumns": true,
 		"SmartTimeStamps": true,
+		"HideColumnHeaders": true,
 		"Positions": [
 			0.225594334850784,
 			0.713671875,
@@ -182,8 +183,12 @@
 		}
 	},
 	"WatchSettings": {
+		"HideColumnHeaders": true,
 		"OnlyTrackChanges": true,
 		"WatchHistoryVisible": true,
 		"SyncWithSelection": true
+	},
+	"CallStackSettings": {
+		"HideColumnHeaders": true
 	}
 }

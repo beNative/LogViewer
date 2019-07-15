@@ -28,10 +28,15 @@ uses
 type
   TCallStackSettings = class(TPersistent)
   private
-    FOnChanged : Event<TNotifyEvent>;
+    FOnChanged         : Event<TNotifyEvent>;
+    FHideColumnHeaders : Boolean;
 
   protected
+    {$REGION 'property access methods'}
+    function GetHideColumnHeaders: Boolean;
+    procedure SetHideColumnHeaders(const Value: Boolean);
     function GetOnChanged: IEvent<TNotifyEvent>;
+    {$ENDREGION}
 
     procedure Changed;
 
@@ -40,11 +45,29 @@ type
 
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
+
+  published
+    property HideColumnHeaders: Boolean
+      read GetHideColumnHeaders write SetHideColumnHeaders;
   end;
 
 implementation
 
 {$REGION 'property access methods'}
+function TCallStackSettings.GetHideColumnHeaders: Boolean;
+begin
+  Result := FHideColumnHeaders;
+end;
+
+procedure TCallStackSettings.SetHideColumnHeaders(const Value: Boolean);
+begin
+  if Value <> HideColumnHeaders then
+  begin
+    FHideColumnHeaders := Value;
+    Changed;
+  end;
+end;
+
 function TCallStackSettings.GetOnChanged: IEvent<TNotifyEvent>;
 begin
   Result := FOnChanged;
@@ -60,14 +83,15 @@ end;
 
 {$REGION 'public methods'}
 procedure TCallStackSettings.Assign(Source: TPersistent);
-//var
-//  LSettings: TCallStackSettings;
+var
+  LSettings: TCallStackSettings;
 begin
-//  if Source is TCallStackSettings then
-//  begin
-//    LSettings := TCallStackSettings(Source);
-//  end
-//  else
+  if Source is TCallStackSettings then
+  begin
+    LSettings := TCallStackSettings(Source);
+    HideColumnHeaders := LSettings.HideColumnHeaders;
+  end
+  else
     inherited Assign(Source);
 end;
 {$ENDREGION}

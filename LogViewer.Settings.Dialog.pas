@@ -26,7 +26,7 @@ uses
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls,
   Vcl.ComCtrls, Vcl.ActnList, Vcl.StdCtrls, Vcl.ImgList,
 
-  VirtualTrees,
+  VirtualTrees, kpagecontrol, kcontrols,
 
   SynEditHighlighter, SynEditCodeFolding, SynHighlighterJScript, SynEdit,
 
@@ -37,8 +37,8 @@ uses
   LogViewer.Receivers.ComPort.Settings.View,
   LogViewer.Receivers.WinODS.Settings.View,
   LogViewer.Receivers.WinIPC.Settings.View, LogViewer.Watches.Settings.View,
-  LogViewer.Receivers.ZeroMQ.Settings.View,
-  LogViewer.DisplayValues.Settings.View, kpagecontrol, kcontrols;
+  LogViewer.CallStack.Settings.View, LogViewer.Receivers.ZeroMQ.Settings.View,
+  LogViewer.DisplayValues.Settings.View;
 
 type
   TConfigNode = TVTNode<TConfigData>;
@@ -81,6 +81,7 @@ type
     FSettings                  : TLogViewerSettings;
     FComportSettingsForm       : TfrmComPortSettings;
     FWatchSettingsForm         : TfrmWatchSettings;
+    FCallStackSettingsForm     : TfrmCallStackSettings;
     FWinIPCSettingsForm        : TfrmWinIPCSettings;
     FWinODSSettingsForm        : TfrmWinODSSettings;
     FZeroMQSettingsForm        : TfrmZeroMQSettings;
@@ -263,6 +264,10 @@ begin
 
   FWatchSettingsForm := TfrmWatchSettings.Create(Self, FSettings.WatchSettings);
   AssignFormParent(FWatchSettingsForm, tsWatches);
+
+  FCallStackSettingsForm :=
+    TfrmCallStackSettings.Create(Self, FSettings.CallStackSettings);
+  AssignFormParent(FCallStackSettingsForm, tsCallStack);
 
   FWinIPCSettingsForm :=
     TfrmWinIPCSettings.Create(Self, FSettings.WinIPCSettings);
