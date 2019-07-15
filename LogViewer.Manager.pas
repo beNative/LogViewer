@@ -892,6 +892,7 @@ var
   B   : Boolean;
   MLS : TMessageListSettings;
 begin
+  Logger.Track(Self, 'UpdateActions');
   MLS := Settings.MessageListSettings;
   actBitmap.Checked       := lmtBitmap in MLS.VisibleMessageTypes;
   actCallStack.Checked    := lmtCallStack in MLS.VisibleMessageTypes;

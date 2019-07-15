@@ -24,7 +24,7 @@ uses
   LogViewer.Interfaces, LogViewer.Subscribers.Base;
 
 type
-  TWinODSSubscriber = class(TSubscriber, ISubscriber, IWinODS)
+  TWinOdsSubscriber = class(TSubscriber, ISubscriber, IWinOds)
   end;
 
 implementation

@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.Subscribers.MIDI;
+unit LogViewer.Subscribers.Midi;
 
 interface
 
@@ -30,7 +30,7 @@ uses
 {  Subscribe to a MIDI device }
 
 type
-  TMIDISubscriber = class(TSubscriber, ISubscriber, IMIDI)
+  TMIDISubscriber = class(TSubscriber, ISubscriber, IMidi)
   private
     FMidiInput : TMidiInput;
     FBuffer    : TMemoryStream;

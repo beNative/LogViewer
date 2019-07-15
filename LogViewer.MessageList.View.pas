@@ -93,6 +93,7 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure pnlMessagesResize(Sender: TObject);
     procedure tsRawDataShow(Sender: TObject);
+    procedure chkSyncWithSelectedMessageClick(Sender: TObject);
 
   private class var
     FCounter : Integer;
@@ -253,7 +254,7 @@ type
       ANode : PVirtualNode
     ): Boolean;
     function GetMilliSecondsBetweenSelection: Integer;
-    procedure EnsureIsActiveViewIfFocused;
+    procedure EnsureCurrentViewIsActiveViewWhenFocused;
     function ParseValue(const AString: string): Tuple<string, string, string>;
 
   protected
@@ -264,6 +265,7 @@ type
     procedure ProcessMessage(AStream: TStream);
 
     procedure AddMessageToTree(const AMessage: TLogMessage);
+    procedure Modified;
 
     procedure UpdateCallStackDisplay(ALogNode: TLogNode);
     procedure UpdateMessageDetails(ALogNode: TLogNode);
@@ -512,7 +514,7 @@ begin
   FLogTreeView.OnExpanded        := FLogTreeViewExpanded;
   FLogTreeView.OnExpanding       := FLogTreeViewExpanding;
 
-  B := Supports(Subscriber, IWinIPC) or Supports(Subscriber, IZMQ);
+  B := Supports(Subscriber, IWinIpc) or Supports(Subscriber, IZmq);
 
   C := FLogTreeView.Header.Columns.Add; // logging level
   C.Text     := '';
@@ -911,10 +913,10 @@ procedure TfrmMessageList.FLogTreeViewFocusChanged(Sender: TBaseVirtualTree;
 var
   LN : TLogNode;
 begin
+  Logger.Track(Self, 'FLogTreeViewFocusChanged');
   LN := Sender.GetNodeData<TLogNode>(Node);
   Guard.CheckNotNull(LN, 'LogNode');
-  FUpdate := True;
-//  UpdateMessageDetails(LN);
+  Modified;
 end;
 
 procedure TfrmMessageList.FLogTreeViewFilterCallback(Sender: TBaseVirtualTree;
@@ -1006,35 +1008,13 @@ begin
   end
   else if Column = COLUMN_MAIN then
   begin
-    case LN.MessageType of
-      lmtValue:
-        CellText := SValue;
-      lmtAlphaColor, lmtColor:
-        CellText := SColor;
-      lmtBitmap:
-        CellText := SBitmap;
-      lmtComponent:
-        CellText := SComponent;
-      lmtObject:
-        CellText := SObject;
-      lmtPersistent:
-        CellText := SPersistent;
-      lmtInterface:
-        CellText := SInterface;
-      lmtStrings:
-        CellText := SStrings;
-      lmtCheckpoint:
-        CellText := SCheckpoint;
-      lmtDataSet:
-        CellText := SDataSet;
-      lmtScreenShot:
-        CellText := SScreenShot;
-      lmtText:
-        CellText := SText;
-      lmtAction:
-        CellText := SAction;
-      else
-        CellText := LN.Text
+    if LN.MessageType in NotificationMessages + TracingMessages then
+    begin
+      CellText := LN.Text
+    end
+    else
+    begin
+      CellText := ' ';
     end;
   end
   else if Column = COLUMN_VALUENAME then
@@ -1303,7 +1283,7 @@ end;
 
 procedure TfrmMessageList.pnlMessagesResize(Sender: TObject);
 begin
-  FUpdate          := True;
+  Modified;
   FAutoSizeColumns := False;
 end;
 
@@ -1311,6 +1291,28 @@ procedure TfrmMessageList.chkShowWatchHistoryClick(Sender: TObject);
 begin
   Manager.Settings.WatchSettings.WatchHistoryVisible :=
     (Sender as TCheckBox).Checked;
+end;
+
+procedure TfrmMessageList.chkSyncWithSelectedMessageClick(Sender: TObject);
+var
+  LN : TLogNode;
+begin
+  Manager.Settings.WatchSettings.SyncWithSelection :=
+    (Sender as TCheckBox).Checked;
+  if Assigned(FWatchesView) then
+  begin
+    if Assigned(FLogTreeView.FocusedNode) then
+    begin
+      LN := FLogTreeView.GetNodeData<TLogNode>(FLogTreeView.FocusedNode);
+      if Assigned(LN) then
+      begin
+        if not chkSyncWithSelectedMessage.Checked then
+          FWatchesView.UpdateView(FMessageCount)
+        else
+          FWatchesView.UpdateView(LN.Id);
+      end;
+    end;
+  end;
 end;
 
 procedure TfrmMessageList.tsRawDataShow(Sender: TObject);
@@ -1353,7 +1355,7 @@ end;
 {$REGION 'private methods'}
 { Makes sure the active view is the current view when it is focused. }
 
-procedure TfrmMessageList.EnsureIsActiveViewIfFocused;
+procedure TfrmMessageList.EnsureCurrentViewIsActiveViewWhenFocused;
 var
   B : Boolean;
 begin
@@ -1389,6 +1391,14 @@ begin
     Result := False;
 end;
 
+{ Called when UpdateLogTreeView needs to be called. }
+
+procedure TfrmMessageList.Modified;
+begin
+  Logger.Track(Self, 'Modified');
+  FUpdate := True;
+end;
+
 function TfrmMessageList.ParseValue(
   const AString: string): Tuple<string, string, string>;
 var
@@ -1421,7 +1431,7 @@ begin
     Logger.Send(Settings.PanelPositions[I]);
     pnlMain.PanelCollection[I].Position := Settings.PanelPositions[I];
   end;
-  FUpdate := True;
+  Modified;
 end;
 
 procedure TfrmMessageList.AutoFitColumns;
@@ -1429,6 +1439,8 @@ begin
   FLogTreeView.Header.AutoFitColumns(False, smaUseColumnOption, 2);
   FAutoSizeColumns := True;
 end;
+
+{ Makes the current view the active view in the Manager. }
 
 procedure TfrmMessageList.Activate;
 begin
@@ -1488,13 +1500,16 @@ begin
   EditorView.Clear;
   if Assigned(FValueList) then
     FValueList.Clear;
+  FRawDataView.Clear;
+  FDataSetView.Clear;
+  FImageView.Clear;
 end;
 
 { Reads the received message stream from the active logchannel. }
 
 {$REGION 'documentation'}
 {
-   Message layout in stream
+   Message layout in the received binary stream
      1. Message type (1 byte)          => TLogMessage.MsgType (TLogMessageType)
      2. Log level    (1 byte)
      3. Reserved     (1 byte)
@@ -1526,6 +1541,7 @@ var
   LValue    : string;
   LText     : string;
 begin
+  Logger.Track(Self, 'ProcessMessage');
   Guard.CheckNotNull(AStream, 'AStream');
   LTextSize := 0;
   LDataSize := 0;
@@ -1559,7 +1575,8 @@ begin
     begin
       ParseValue(LText).Unpack(LName, LValue, LType);
       FWatches.Add(
-        LName, LType, LValue, FMessageCount, FCurrentMsg.TimeStamp, True, True
+        LName, LType, LValue, lmtCounter, FMessageCount, FCurrentMsg.TimeStamp,
+        True, True
       );
       if not chkSyncWithSelectedMessage.Checked then
         FWatchesView.UpdateView(FMessageCount)
@@ -1570,7 +1587,8 @@ begin
     begin
       ParseValue(LText).Unpack(LName, LValue, LType);
       FWatches.Add(
-        LName, LType, LValue, FMessageCount, FCurrentMsg.TimeStamp, True, False
+        LName, LType, LValue, lmtWatch, FMessageCount, FCurrentMsg.TimeStamp,
+        True, False
       );
       if not chkSyncWithSelectedMessage.Checked then
         FWatchesView.UpdateView(FMessageCount)
@@ -1588,7 +1606,7 @@ begin
       begin
         FScrollToLastNode := True;
       end;
-      FUpdate := True;
+      Modified;
     end;
   end; // case
 end;
@@ -1614,20 +1632,22 @@ end;
 
 procedure TfrmMessageList.CollapseAll;
 begin
+  Logger.Track(Self, 'CollapseAll');
   FLogTreeView.FullCollapse;
-  FUpdate := True;
+  Modified;
   FAutoSizeColumns := False;
 end;
 
 procedure TfrmMessageList.ExpandAll;
 begin
   FLogTreeView.FullExpand;
-  FUpdate := True;
+  Modified;
   FAutoSizeColumns := False;
 end;
 
 procedure TfrmMessageList.GotoFirst;
 begin
+  Logger.Track(Self, 'GotoFirst');
   if FWatchesView.HasFocus then
   begin
     FWatchesView.GotoFirst;
@@ -1636,13 +1656,14 @@ begin
   begin
     FLogTreeView.FocusedNode := FLogTreeView.GetFirst;
     FLogTreeView.Selected[FLogTreeView.FocusedNode] := True;
-    FUpdate := True;
+    Modified;
     FAutoSizeColumns := False;
   end;
 end;
 
 procedure TfrmMessageList.GotoLast;
 begin
+  Logger.Track(Self, 'GotoLast');
   if FWatchesView.HasFocus then
   begin
     FWatchesView.GotoLast;
@@ -1651,7 +1672,7 @@ begin
   begin
     FLogTreeView.FocusedNode := FLogTreeView.GetLast;
     FLogTreeView.Selected[FLogTreeView.FocusedNode] := True;
-    FUpdate := True;
+    Modified;
     FAutoSizeColumns := False;
   end;
 end;
@@ -1671,7 +1692,7 @@ end;
 {$REGION 'Display updating'}
 procedure TfrmMessageList.UpdateBitmapDisplay(ALogNode: TLogNode);
 begin
-  //pgcMessageDetails.ActivePage := tsImageViewer;
+  pgcMessageDetails.ActivePage := tsImageViewer;
   FImageView.LoadFromStream(ALogNode.MessageData);
 end;
 
@@ -1774,7 +1795,7 @@ begin
   begin
     LStream := TStringStream.Create('', TEncoding.ANSI);
     try
-      //pgcMessageDetails.ActivePage := tsTextViewer;
+      pgcMessageDetails.ActivePage := tsTextViewer;
       ALogNode.MessageData.Position := 0;
       ObjectBinaryToText(ALogNode.MessageData, LStream);
       LStream.Position := 0;
@@ -1792,41 +1813,55 @@ end;
 
 procedure TfrmMessageList.UpdateDataSetDisplay(ALogNode: TLogNode);
 begin
-  //pgcMessageDetails.ActivePage := tsDataSet;
   FDataSetView.LoadFromStream(ALogNode.MessageData);
 end;
 
 procedure TfrmMessageList.UpdateMessageDetails(ALogNode: TLogNode);
 begin
   ClearMessageDetailsControls;
-  FWatchesView.UpdateView(ALogNode.Id);
   case ALogNode.MessageType of
     lmtCallStack, {lmtException,} lmtHeapInfo, lmtCustomData:
       UpdateTextStreamDisplay(ALogNode);
     lmtAlphaColor, lmtColor:
       UpdateColorDisplay(ALogNode);
     lmtComponent:
+    begin
       UpdateComponentDisplay(ALogNode);
+      pgcMessageDetails.ActivePage := tsTextViewer;
+    end;
     lmtBitmap, lmtScreenShot:
+    begin
       UpdateBitmapDisplay(ALogNode);
+      pgcMessageDetails.ActivePage := tsImageViewer;
+    end;
     lmtMemory:
+    begin
       UpdateRawDataDisplay(ALogNode);
+      pgcMessageDetails.ActivePage := tsRawData;
+    end;
     lmtEnterMethod, lmtLeaveMethod, lmtText,
     lmtInfo, lmtWarning, lmtError, lmtConditional:
-      UpdateTextDisplay(ALogNode);
+    begin
+      UpdateTextStreamDisplay(ALogNode);
+      pgcMessageDetails.ActivePage := tsTextViewer;
+    end;
     lmtValue, lmtObject, lmtPersistent, lmtInterface, lmtStrings, lmtCheckpoint:
+    begin
       UpdateValueDisplay(ALogNode);
+      pgcMessageDetails.ActivePage := tsValueList;
+    end;
     lmtDataSet:
+    begin
       UpdateDataSetDisplay(ALogNode);
-    lmtWatch, lmtCounter:
-      if chkSyncWithSelectedMessage.Checked then
-        FWatchesView.UpdateView(ALogNode.Id);
+      pgcMessageDetails.ActivePage := tsDataSet;
+    end;
   end;
+  if chkSyncWithSelectedMessage.Checked then
+    FWatchesView.UpdateView(ALogNode.Id);
 end;
 
 procedure TfrmMessageList.UpdateRawDataDisplay(ALogNode: TLogNode);
 begin
-  //pgcMessageDetails.ActivePage := tsRawData;
   FRawDataView.LoadFromStream(ALogNode.MessageData);
 end;
 
@@ -1834,7 +1869,7 @@ procedure TfrmMessageList.UpdateTextDisplay(ALogNode: TLogNode);
 var
   S : string;
 begin
-  //pgcMessageDetails.ActivePage := tsTextViewer;
+  pgcMessageDetails.ActivePage := tsTextViewer;
   EditorView.Text := ALogNode.Value;
   S := ALogNode.Highlighter;
   if S <> '' then
@@ -1845,7 +1880,6 @@ procedure TfrmMessageList.UpdateTextStreamDisplay(ALogNode: TLogNode);
 var
   LStream : TStringStream;
 begin
-  //pgcMessageDetails.ActivePage := tsTextViewer;
   if ALogNode.MessageData = nil then
   begin
     EditorView.Text := '';
@@ -1865,6 +1899,36 @@ begin
     end;
   end;
 end;
+
+procedure TfrmMessageList.UpdateValueDisplay(ALogNode: TLogNode);
+var
+  DR : DynamicRecord;
+  SL : TStringList;
+begin
+  EditorView.Text := ALogNode.Value;
+  EditorView.HighlighterName  := 'INI';
+  if ALogNode.Value.Contains('=') then
+  begin
+    DR.FromString(ALogNode.Value);
+    FValueList.Data := DR;
+  end
+  else if ALogNode.Value.Contains(#13#10) then
+  begin
+    SL := TStringList.Create;
+    try
+     SL.Text := ALogNode.Value;
+     DR.FromArray<string>(SL.ToStringArray, True);
+    finally
+      SL.Free;
+    end;
+    FValueList.Data := DR;
+  end
+  else
+  begin
+    //pgcMessageDetails.ActivePage := tsTextViewer;
+  end;
+end;
+{$ENDREGION}
 
 procedure TfrmMessageList.UpdateTreeColumns;
 var
@@ -1896,6 +1960,7 @@ procedure TfrmMessageList.UpdateLogTreeView;
 var
   LN : TLogNode;
 begin
+  Logger.Track(Self, 'UpdateLogTreeView');
   FLogTreeView.BeginUpdate;
   try
     // filter
@@ -1923,43 +1988,10 @@ begin
   end;
 end;
 
-procedure TfrmMessageList.UpdateValueDisplay(ALogNode: TLogNode);
-var
-  DR : DynamicRecord;
-  SL : TStringList;
-begin
-  EditorView.Text := ALogNode.Value;
-  EditorView.HighlighterName  := 'INI';
-  //pgcMessageDetails.ActivePage := tsTextViewer;
-
-  if ALogNode.Value.Contains('=') then
-  begin
-    //pgcMessageDetails.ActivePage := tsValueList;
-    DR.FromString(ALogNode.Value);
-    FValueList.Data := DR;
-  end
-  else if ALogNode.Value.Contains(#13#10) then
-  begin
-    SL := TStringList.Create;
-    try
-     SL.Text := ALogNode.Value;
-     DR.FromArray<string>(SL.ToStringArray, True);
-    finally
-      SL.Free;
-    end;
-    //pgcMessageDetails.ActivePage := tsValueList;
-    FValueList.Data := DR;
-  end
-  else
-  begin
-    //pgcMessageDetails.ActivePage := tsTextViewer;
-  end;
-end;
-{$ENDREGION}
-
 procedure TfrmMessageList.UpdateActions;
 begin
-  EnsureIsActiveViewIfFocused;
+  if FUpdate then
+    EnsureCurrentViewIsActiveViewWhenFocused;
   if IsActiveView and FUpdate then
   begin
     UpdateLogTreeView;
@@ -1976,8 +2008,10 @@ end;
 
 procedure TfrmMessageList.UpdateView;
 begin
-  FUpdate := True;
+  Logger.Track(Self, 'UpdateView');
+  //Modified;
   FAutoSizeColumns := False;
 end;
 {$ENDREGION}
+
 end.

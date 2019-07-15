@@ -24,12 +24,14 @@ interface
   value type (both are case sensitive). }
 
 { This implementation is inspired by the watch implementation made by
-  Luiz Américo Pereira Câmara (FPC-Lazarus). }
+  Luiz Américo Pereira Câmara (FPC-Lazarus) in the Multilog project. }
 
 uses
   System.Classes, System.SysUtils,
 
-  Spring.Collections;
+  Spring.Collections,
+
+  DDuce.Logger.Interfaces;
 
 type
   TUpdateWatchEvent = procedure(
@@ -67,6 +69,7 @@ type
     FCurrentIndex     : Integer;
     FList             : IList<TWatchValue>;
     FOnlyTrackChanges : Boolean;
+    FMessageType      : TLogMessageType;
 
     {$REGION 'property access methods'}
     function GetCount: Integer;
@@ -78,12 +81,14 @@ type
     function GetOnlyTrackChanges: Boolean;
     procedure SetOnlyTrackChanges(const Value: Boolean);
     function GetValueType: string;
+    function GetMessageType: TLogMessageType;
     {$ENDREGION}
 
   public
     constructor Create(
       const AName       : string;
       const AValueType  : string;
+      AMessageType      : TLogMessageType;
       AFirstId          : Int64;
       AOnlyTrackChanges : Boolean = False
     );
@@ -111,6 +116,9 @@ type
     { Last received watch value. }
     property Value: string
       read GetValue;
+
+    property MessageType: TLogMessageType
+      read GetMessageType;
 
     { Timestamp of last received watch value. }
     property TimeStamp: TDateTime
@@ -154,6 +162,7 @@ type
       const AName          : string;
       const AValueType     : string;
       const AValue         : string;
+      AMessageType         : TLogMessageType;
       AId                  : Int64; // Unique Id of the logmessage
       ATimeStamp           : TDateTime;
       AOnlyTrackChanges    : Boolean = False;
@@ -185,22 +194,23 @@ uses
 
 {$REGION 'TWatch'}
 {$REGION 'construction and destruction'}
+constructor TWatch.Create(const AName: string; const AValueType: string;
+  AMessageType: TLogMessageType; AFirstId: Int64; AOnlyTrackChanges: Boolean);
+begin
+  FList := TCollections.CreateObjectList<TWatchValue>;
+  FName             := AName;
+  FValueType        := AValueType;
+  FMessageType      := AMessageType;
+  FFirstId          := AFirstId;
+  FOnlyTrackChanges := AOnlyTrackChanges;
+end;
+
 procedure TWatch.BeforeDestruction;
 begin
   Logger.Track(Self, 'BeforeDestruction');
   FList.Clear;
   FList := nil;
   inherited BeforeDestruction;
-end;
-
-constructor TWatch.Create(const AName: string; const AValueType: string;
-  AFirstId: Int64; AOnlyTrackChanges: Boolean);
-begin
-  FList := TCollections.CreateObjectList<TWatchValue>;
-  FName             := AName;
-  FValueType        := AValueType;
-  FFirstId          := AFirstId;
-  FOnlyTrackChanges := AOnlyTrackChanges;
 end;
 {$ENDREGION}
 
@@ -229,6 +239,11 @@ end;
 function TWatch.GetList: IList<TWatchValue>;
 begin
   Result := FList;
+end;
+
+function TWatch.GetMessageType: TLogMessageType;
+begin
+  Result := FMessageType;
 end;
 
 function TWatch.GetTimeStamp: TDateTime;
@@ -283,7 +298,9 @@ begin
     Result := False;
 end;
 
-{ Locate current watchvalue for a given message Id.  }
+{ Locate current watchvalue for a given message Id.
+  TODO: hide watch when value does not exist for the corresponding Id!
+}
 
 function TWatch.Locate(const AId: Int64): Boolean;
 var
@@ -363,15 +380,18 @@ begin
 end;
 
 procedure TWatchList.Add(const AName: string; const AValueType: string;
-  const AValue: string; AId: Int64; ATimeStamp: TDateTime;
-  AOnlyTrackChanges: Boolean; ASkipOnNewWatchEvent: Boolean);
+  const AValue: string; AMessageType: TLogMessageType; AId: Int64;
+  ATimeStamp: TDateTime; AOnlyTrackChanges: Boolean;
+  ASkipOnNewWatchEvent: Boolean);
 var
   I : Integer;
 begin
   I := IndexOf(AName, AValueType);
   if I = -1 then
   begin
-    I := FList.Add(TWatch.Create(AName, AValueType, AId, AOnlyTrackChanges));
+    I := FList.Add(
+      TWatch.Create(AName, AValueType, AMessageType, AId, AOnlyTrackChanges)
+    );
     if not ASkipOnNewWatchEvent then
       DoNewWatch(AName, I);
   end;
@@ -392,7 +412,7 @@ begin
     if W.Locate(AIndex) then
     begin
       DoUpdateWatch(W.Name, W.Value);
-    end;
+    end
   end;
 end;
 {$ENDREGION}

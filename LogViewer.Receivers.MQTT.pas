@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.Receivers.MQTT;
+unit LogViewer.Receivers.Mqtt;
 
 { MQTT channel receiver. }
 
@@ -46,7 +46,7 @@ uses
 {$ENDREGION}
 
 type
-  TMQTTChannelReceiver = class(TChannelReceiver, IChannelReceiver, IMQTT)
+  TMqttChannelReceiver = class(TChannelReceiver, IChannelReceiver, IMqtt)
   private
     FMQTT : TMQTT;
 
@@ -95,7 +95,7 @@ uses
   DDuce.Logger, DDuce.Logger.Interfaces;
 
 {$REGION 'construction and destruction'}
-procedure TMQTTChannelReceiver.AfterConstruction;
+procedure TMqttChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
 //  FMQTT.Create(function: TMQTT
@@ -109,7 +109,7 @@ begin
 //  );
 end;
 
-destructor TMQTTChannelReceiver.Destroy;
+destructor TMqttChannelReceiver.Destroy;
 begin
 //  if FMQTT.IsValueCreated then
 //  begin
@@ -126,7 +126,7 @@ end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
-procedure TMQTTChannelReceiver.FMQTTPublish(Sender: TObject; ATopic,
+procedure TMqttChannelReceiver.FMQTTPublish(Sender: TObject; ATopic,
   APayload: UTF8String);
 begin
 //  Logger.Send('ATopic', ATopic);
@@ -135,12 +135,12 @@ end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
-function TMQTTChannelReceiver.GetMQTT: TMQTT;
+function TMqttChannelReceiver.GetMQTT: TMQTT;
 begin
   Result := FMQTT;
 end;
 
-procedure TMQTTChannelReceiver.SetEnabled(const Value: Boolean);
+procedure TMqttChannelReceiver.SetEnabled(const Value: Boolean);
 begin
   if Value <> Enabled then
   begin
@@ -161,21 +161,21 @@ begin
   //inherited SetEnabled(MQTT.Connected);
 end;
 
-function TMQTTChannelReceiver.GetSettings: TMQTTSettings;
+function TMqttChannelReceiver.GetSettings: TMQTTSettings;
 begin
   Result := Manager.Settings.MQTTSettings;
 end;
 {$ENDREGION}
 
 {$REGION 'private methods'}
-procedure TMQTTChannelReceiver.SettingsChanged(Sender: TObject);
+procedure TMqttChannelReceiver.SettingsChanged(Sender: TObject);
 begin
 
 end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
-procedure TMQTTChannelReceiver.Connect;
+procedure TMqttChannelReceiver.Connect;
 begin
   if Assigned(FMQTT) then
   begin
@@ -194,7 +194,7 @@ begin
   end;
 end;
 
-function TMQTTChannelReceiver.CreateSubscriber(ASourceId, AThreadId: UInt32;
+function TMqttChannelReceiver.CreateSubscriber(ASourceId, AThreadId: UInt32;
   const ASourceName: string): ISubscriber;
 begin
   //Result := TMQTTS WinODSSubscriber.Create(Self, ASourceId, '', ASourceName, True);

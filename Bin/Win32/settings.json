@@ -1,20 +1,20 @@
 {
 	"FormSettings": {
-		"Left": 395,
+		"Left": 754,
 		"Top": 100,
-		"Width": 1677,
-		"Height": 1060,
+		"Width": 1691,
+		"Height": 986,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
 	"MessageListSettings": {
-		"AutoScrollMessages": true,
+		"AutoScrollMessages": false,
 		"AutoFilterMessages": true,
 		"DynamicAutoSizeColumns": true,
 		"SmartTimeStamps": true,
 		"Positions": [
-			0.249609375,
-			0.724867724867725,
+			0.225594334850784,
+			0.713671875,
 			1
 		]
 	},
@@ -145,7 +145,7 @@
 			"FontName": "Segoe UI",
 			"FontColor": 32896,
 			"FontSize": 8,
-			"FontStyle": "fsUnderline",
+			"FontStyle": "fsBold,fsUnderline",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
@@ -184,6 +184,6 @@
 	"WatchSettings": {
 		"OnlyTrackChanges": true,
 		"WatchHistoryVisible": true,
-		"SyncWithSelection": true
+		"SyncWithSelection": false
 	}
 }

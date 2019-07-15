@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.Subscribers.MQTT;
+unit LogViewer.Subscribers.Mqtt;
 
 interface
 
@@ -28,7 +28,7 @@ uses
   LogViewer.Interfaces, LogViewer.Subscribers.Base;
 
 type
-  TMQTTSubscriber = class(TSubscriber, ISubscriber, IMQTT)
+  TMQTTSubscriber = class(TSubscriber, ISubscriber, IMqtt)
   private
     FMQTT       : TMQTT;
     FMQTTStream : TStringStream;

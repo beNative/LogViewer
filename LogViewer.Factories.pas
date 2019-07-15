@@ -93,11 +93,11 @@ type
       ASettings : TComPortSettings
     ): IChannelReceiver;
 
-    class function CreateWinIPCReceiver(
+    class function CreateWinIpcReceiver(
       AManager : ILogViewerManager
     ): IChannelReceiver;
 
-    class function CreateWinODSReceiver(
+    class function CreateWinOdsReceiver(
       AManager : ILogViewerManager
     ): IChannelReceiver;
 
@@ -106,11 +106,11 @@ type
       AZMQ     : IZeroMQ
     ): IChannelReceiver;
 
-    class function CreateMQTTReceiver(
+    class function CreateMqttReceiver(
       AManager : ILogViewerManager
     ): IChannelReceiver;
 
-    class function CreateMIDIReceiver(
+    class function CreateMidiReceiver(
       AManager : ILogViewerManager
     ): IChannelReceiver;
 
@@ -130,9 +130,9 @@ uses
 
   LogViewer.Resources, LogViewer.Factories.Toolbars,
   LogViewer.Receivers.WinIPC, LogViewer.Receivers.WinODS,
-  LogViewer.Receivers.ZeroMQ, LogViewer.Receivers.MQTT,
+  LogViewer.Receivers.ZeroMQ, LogViewer.Receivers.Mqtt,
   LogViewer.Receivers.ComPort, LogViewer.Receivers.FileSystem,
-  LogViewer.Receivers.MIDI;
+  LogViewer.Receivers.Midi;
 
 {$REGION 'private class methods'}
 class procedure TLogViewerFactories.OnDropdownMenuButtonClick(Sender: TObject);
@@ -215,16 +215,16 @@ begin
   Result.Visible     := True;
 end;
 
-class function TLogViewerFactories.CreateWinIPCReceiver(
+class function TLogViewerFactories.CreateWinIpcReceiver(
   AManager: ILogViewerManager): IChannelReceiver;
 begin
-  Result := TWinIPCChannelReceiver.Create(AManager, RECEIVERNAME_WINIPC);
+  Result := TWinIpcChannelReceiver.Create(AManager, RECEIVERNAME_WINIPC);
 end;
 
-class function TLogViewerFactories.CreateWinODSReceiver(
+class function TLogViewerFactories.CreateWinOdsReceiver(
   AManager: ILogViewerManager): IChannelReceiver;
 begin
-  Result := TWinODSChannelReceiver.Create(AManager, RECEIVERNAME_WINODS);
+  Result := TWinOdsChannelReceiver.Create(AManager, RECEIVERNAME_WINODS);
 end;
 
 class function TLogViewerFactories.CreateZeroMQReceiver(
@@ -233,10 +233,10 @@ begin
   Result := TZeroMQChannelReceiver.Create(AManager, AZMQ, RECEIVERNAME_ZEROMQ);
 end;
 
-class function TLogViewerFactories.CreateMQTTReceiver(
+class function TLogViewerFactories.CreateMqttReceiver(
   AManager: ILogViewerManager): IChannelReceiver;
 begin
-  Result := TMQTTChannelReceiver.Create(AManager, RECEIVERNAME_MQTT);
+  Result := TMqttChannelReceiver.Create(AManager, RECEIVERNAME_MQTT);
 end;
 
 class function TLogViewerFactories.CreateComPortReceiver(
@@ -253,10 +253,10 @@ begin
   );
 end;
 
-class function TLogViewerFactories.CreateMIDIReceiver(
+class function TLogViewerFactories.CreateMidiReceiver(
   AManager: ILogViewerManager): IChannelReceiver;
 begin
-  Result := TMIDIChannelReceiver.Create(AManager, RECEIVERNAME_MIDI);
+  Result := TMidiChannelReceiver.Create(AManager, RECEIVERNAME_MIDI);
 end;
 {$ENDREGION}
 

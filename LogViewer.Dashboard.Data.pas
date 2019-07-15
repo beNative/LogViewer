@@ -73,19 +73,19 @@ begin
   if not Assigned(ASubscriber) then
   begin
     Receiver := AReceiver;
-    if Supports(Receiver, IWinIPC) then
+    if Supports(Receiver, IWinIpc) then
     begin
       FCaption := SReceiverCaptionWinIPC;
     end
-    else if Supports(Receiver, IZMQ) then
+    else if Supports(Receiver, IZmq) then
     begin
       FCaption := SReceiverCaptionZeroMQ;
     end
-    else if Supports(Receiver, IMQTT) then
+    else if Supports(Receiver, IMqtt) then
     begin
       FCaption := SReceiverCaptionMQTT;
     end
-    else if Supports(Receiver, IWinODS) then
+    else if Supports(Receiver, IWinOds) then
     begin
       FCaption := SReceiverCaptionWinODS;
     end
@@ -97,7 +97,7 @@ begin
     begin
       FCaption := SReceiverCaptionFileSystem;
     end
-    else if Supports(Receiver, IMIDI) then
+    else if Supports(Receiver, IMidi) then
     begin
       FCaption := SReceiverCaptionMIDI;
     end;

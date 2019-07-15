@@ -125,7 +125,6 @@ type
     procedure UpdateWatchHistory;
     procedure UpdateActions; override;
 
-
     property SelectedWatch: TWatch
       read GetSelectedWatch;
 
@@ -157,7 +156,7 @@ uses
   DSharp.Windows.ControlTemplates,
 
   DDuce.Factories.TreeViewPresenter, DDuce.Factories.VirtualTrees,
-  DDuce.Logger, DDuce.Utils,
+  DDuce.Logger, DDuce.Logger.Interfaces, DDuce.Utils,
 
   LogViewer.Resources;
 
@@ -265,7 +264,7 @@ function TfrmWatchesView.FCDTypeCustomDraw(Sender: TObject;
 begin
   if DrawMode = dmPaintText then
   begin
-    if TWatch(Item).ValueType = SCounter then // todo, use constant!
+    if TWatch(Item).MessageType = lmtCounter then
     begin
       FDisplayValuesSettings.Counter.AssignTo(TargetCanvas.Font);
     end
@@ -295,6 +294,7 @@ end;
 procedure TfrmWatchesView.SettingsChanged(Sender: TObject);
 begin
 //  WatchHistoryVisible := FSettings.WatchHistoryVisible;
+
 
 
 //  pnlMain.PanelCollection[1].Visible
@@ -432,7 +432,7 @@ end;
 procedure TfrmWatchesView.UpdateActions;
 begin
   inherited;
-//  pnlMain.PanelCollection[1].Visible := FSettings.WatchHistoryVisible;
+  pnlMain.PanelCollection[1].Visible := FSettings.WatchHistoryVisible;
 end;
 
 procedure TfrmWatchesView.UpdateView(AMessageId: Int64);

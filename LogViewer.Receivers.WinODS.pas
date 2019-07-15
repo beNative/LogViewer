@@ -62,7 +62,7 @@ type
   PDBWinBuffer = ^TDBWinBuffer;
   TDBWinBuffer = record
     ProcessId : DWORD;
-    Data      : array[0..(4096-sizeof(DWORD))-1] of AnsiChar;
+    Data      : array[0..(4096 - SizeOf(DWORD)) - 1] of AnsiChar;
   end;
 
   TODSMessageReceivedEvent = procedure(
@@ -100,7 +100,7 @@ type
   end;
 
 type
-  TWinODSChannelReceiver = class(TChannelReceiver, IChannelReceiver, IWinODS)
+  TWinOdsChannelReceiver = class(TChannelReceiver, IChannelReceiver, IWinOds)
   private
      FDebugMonitor : TWinDebugMonitor;
      FBuffer       : TMemoryStream;
@@ -354,7 +354,7 @@ end;
 {$ENDREGION}
 
 {$REGION 'TWinODSChannelReceiver'}
-procedure TWinODSChannelReceiver.AfterConstruction;
+procedure TWinOdsChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
   FBuffer := TMemoryStream.Create;
@@ -364,20 +364,20 @@ begin
   Settings.OnChanged.Add(SettingsChanged);
 end;
 
-procedure TWinODSChannelReceiver.BeforeDestruction;
+procedure TWinOdsChannelReceiver.BeforeDestruction;
 begin
   FDebugMonitor.Free;
   FBuffer.Free;
   inherited BeforeDestruction;
 end;
 
-function TWinODSChannelReceiver.CreateSubscriber(ASourceId, AThreadId: UInt32;
+function TWinOdsChannelReceiver.CreateSubscriber(ASourceId, AThreadId: UInt32;
   const ASourceName: string): ISubscriber;
 begin
   Result := TWinODSSubscriber.Create(Self, ASourceId, '', ASourceName, True);
 end;
 
-procedure TWinODSChannelReceiver.FDebugMonitorMessageReceived(
+procedure TWinOdsChannelReceiver.FDebugMonitorMessageReceived(
   const AString: AnsiString; AProcessId: UInt32);
 const
   ZERO_BUF : Integer = 0;
@@ -415,12 +415,12 @@ begin
   end;
 end;
 
-function TWinODSChannelReceiver.GetSettings: TWinODSSettings;
+function TWinOdsChannelReceiver.GetSettings: TWinODSSettings;
 begin
   Result := Manager.Settings.WinODSSettings;
 end;
 
-procedure TWinODSChannelReceiver.SettingsChanged(Sender: TObject);
+procedure TWinOdsChannelReceiver.SettingsChanged(Sender: TObject);
 begin
   Enabled := Settings.Enabled;
 end;

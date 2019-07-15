@@ -67,38 +67,39 @@ type
     actMoveUpEndpoint          : TAction;
     actSubscribeToLocalHost    : TAction;
     actSubscribeToSelection    : TAction;
-    imlMain                    : TImageList;
-    pnlMain                    : TOMultiPanel;
-    pnlLeft                    : TPanel;
-    pnlRight                   : TPanel;
-    ppmMain                    : TPopupMenu;
-    mniCloseSsubscriber        : TMenuItem;
-    pgcMain                    : TKPageControl;
-    tsWinIPC                   : TKTabSheet;
-    lblWinIPC                  : TLabel;
-    pnlWinIPCTitle             : TPanel;
-    tsWinODS                   : TKTabSheet;
-    lblWinODS                  : TLabel;
-    pnlWinODSTitle             : TPanel;
-    tsZeroMQ                   : TKTabSheet;
-    pnlZMQEndpoints            : TPanel;
-    Panel4                     : TPanel;
-    pnlButtons                 : TGridPanel;
-    btnSubscribeToLocalHost    : TButton;
     btnAddSubscribeToLogViewer : TButton;
-    tsMQTT                     : TKTabSheet;
+    btnSubscribeToLocalHost    : TButton;
     edtBroker                  : TLabeledEdit;
-    pnlMQTTTopics              : TPanel;
     edtMQTTPort                : TLabeledEdit;
-    pnlMQTTTitle               : TPanel;
-    tsFileSystem               : TKTabSheet;
-    pnlFileSystemTitle         : TPanel;
-    pnlFSLocations             : TPanel;
-    tsCOMPort                  : TKTabSheet;
+    imlMain                    : TImageList;
+    lblWinIPC                  : TLabel;
+    lblWinODS                  : TLabel;
+    mniCloseSsubscriber        : TMenuItem;
+    Panel4                     : TPanel;
+    pgcMain                    : TKPageControl;
+    pnlButtons                 : TGridPanel;
     pnlCOMPorts                : TPanel;
     pnlCOMPortTitle            : TPanel;
-    tsMIDI: TKTabSheet;
-    pnlMIDITitle: TPanel;
+    pnlFileSystemTitle         : TPanel;
+    pnlFSLocations             : TPanel;
+    pnlLeft                    : TPanel;
+    pnlMain                    : TOMultiPanel;
+    pnlMidiDevices             : TPanel;
+    pnlMidiTitle               : TPanel;
+    pnlMQTTTitle               : TPanel;
+    pnlMQTTTopics              : TPanel;
+    pnlRight                   : TPanel;
+    pnlWinIPCTitle             : TPanel;
+    pnlWinODSTitle             : TPanel;
+    pnlZMQEndpoints            : TPanel;
+    ppmMain                    : TPopupMenu;
+    tsComPort                  : TKTabSheet;
+    tsFileSystem               : TKTabSheet;
+    tsMidi                     : TKTabSheet;
+    tsMqtt                     : TKTabSheet;
+    tsWinIpc                   : TKTabSheet;
+    tsWinOds                   : TKTabSheet;
+    tsZeroMQ                   : TKTabSheet;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -120,24 +121,25 @@ type
     FTreeView            : TVirtualStringTree;
     FZeroMQ              : IZeroMQ;
     FZeroMQReceiver      : IChannelReceiver;
-    FMQTTReceiver        : IChannelReceiver;
+    FMqttReceiver        : IChannelReceiver;
     FWinIPCReceiver      : IChannelReceiver;
     FComPortReceiver     : IChannelReceiver;
     FWinODSReceiver      : IChannelReceiver;
     FFileSystemReceiver  : IChannelReceiver;
-    FMIDIReceiver        : IChannelReceiver;
+    FMidiReceiver        : IChannelReceiver;
     FZeroMQNode          : TDashboardNode;
-    FMQTTNode            : TDashboardNode;
-    FMIDINode            : TDashboardNode;
+    FMqttNode            : TDashboardNode;
+    FMidiNode            : TDashboardNode;
     FWinIPCNode          : TDashboardNode;
     FComPortNode         : TDashboardNode;
     FWinODSNode          : TDashboardNode;
     FFileSystemNode      : TDashboardNode;
     //FComPortSettingsForm : TfrmComPortSettings;
-    FZMQEndpoints        : TEditList;
-    FMQTTTopics          : TEditList;
-    FCOMPorts            : TEditList;
+    FZmqEndpoints        : TEditList;
+    FMqttTopics          : TEditList;
+    FComPorts            : TEditList;
     FFSLocations         : TEditList;
+    FMidiDevices         : TEditList;
 
     {$REGION 'event handlers'}
     procedure FTreeViewFreeNode(
@@ -276,8 +278,7 @@ uses
   DDuce.ObjectInspector.zObjectInspector,
 
   LogViewer.Manager, LogViewer.Factories, LogViewer.Resources,
-  LogViewer.Subscribers.ZeroMQ, LogViewer.Subscribers.FileSystem,
-  LogViewer.Subscribers.MIDI;
+  LogViewer.Subscribers.ZeroMQ, LogViewer.Subscribers.FileSystem;
 
 {$REGION 'construction and destruction'}
 constructor TfrmDashboard.Create(AOwner: TComponent;
@@ -292,22 +293,25 @@ procedure TfrmDashboard.AfterConstruction;
 begin
   inherited AfterConstruction;
   FTreeView := TVirtualStringTreeFactory.CreateTreeList(Self, pnlRight);
-  FZMQEndpoints := TEditList.Create(Self, pnlZMQEndpoints);
-  FZMQEndpoints.OnAdd.Add(FZMQEndpointsAdd);
-  FZMQEndpoints.OnExecuteItem.Add(FZMQEndpointsExecuteItem);
-  FZMQEndpoints.OnExecute.Add(FZMQEndpointsExecuteItem);
-  FZMQEndpoints.ValueList.BorderStyle := bsNone;
+  FZmqEndpoints := TEditList.Create(Self, pnlZMQEndpoints);
+  FZmqEndpoints.OnAdd.Add(FZMQEndpointsAdd);
+  FZmqEndpoints.OnExecuteItem.Add(FZMQEndpointsExecuteItem);
+  FZmqEndpoints.OnExecute.Add(FZMQEndpointsExecuteItem);
+  FZmqEndpoints.ValueList.BorderStyle := bsNone;
   // TODO: implement a better way to save changes.
   //FZMQEndpoints.ValueList.OnExit := FValueListExit;
-  FZMQEndpoints.ActionExecute.Caption := SSubscribe;
+  FZmqEndpoints.ActionExecute.Caption := SSubscribe;
 
-  FMQTTTopics := TEditList.Create(Self, pnlMQTTTopics);
-  FMQTTTopics.OnAdd.Add(FMQTTSubscriptionsAdd);
-  FMQTTTopics.ValueList.BorderStyle := bsNone;
-  FMQTTTopics.ActionExecute.Caption := SSubscribe;
+  FMqttTopics := TEditList.Create(Self, pnlMQTTTopics);
+  FMqttTopics.OnAdd.Add(FMQTTSubscriptionsAdd);
+  FMqttTopics.ValueList.BorderStyle := bsNone;
+  FMqttTopics.ActionExecute.Caption := SSubscribe;
 
-  FCOMPorts := TEditList.Create(Self, pnlCOMPorts);
-  FCOMPorts.ValueList.BorderStyle := bsNone;
+  FComPorts := TEditList.Create(Self, pnlCOMPorts);
+  FComPorts.ValueList.BorderStyle := bsNone;
+
+  FMidiDevices := TEditList.Create(Self, pnlMidiDevices);
+  FMidiDevices.ValueList.BorderStyle := bsNone;
 
   FFSLocations := TEditList.Create(Self, pnlFSLocations);
   FFSLocations.OnAdd.Add(FFSLocationsAdd);
@@ -326,15 +330,15 @@ destructor TfrmDashboard.Destroy;
 begin
   Logger.Track(Self, 'Destroy');
   // required as this event can be called after FManager is released!
-  FZMQEndpoints.ValueList.OnExit := nil;
+  FZmqEndpoints.ValueList.OnExit := nil;
   SaveSettings;
   FZeroMQReceiver     := nil;
-  FMQTTReceiver       := nil;
+  FMqttReceiver       := nil;
   FWinIPCReceiver     := nil;
   FWinODSReceiver     := nil;
   FComPortReceiver    := nil;
   FFileSystemReceiver := nil;
-  FMIDIReceiver       := nil;
+  FMidiReceiver       := nil;
   FManager            := nil;
   FZeroMQ             := nil;
   FTreeView.Clear;
@@ -486,15 +490,15 @@ begin
     begin
       B := Node.CheckState = csCheckedNormal;
       DN.Data.Receiver.Enabled := B;
-      if Supports(DN.Data.Receiver, IWinIPC) then
+      if Supports(DN.Data.Receiver, IWinIpc) then
       begin
         FManager.Settings.WinIPCSettings.Enabled := B;
       end
-      else if Supports(DN.Data.Receiver, IZMQ) then
+      else if Supports(DN.Data.Receiver, IZeroMQ) then
       begin
         FManager.Settings.ZeroMQSettings.Enabled := B;
       end
-      else if Supports(DN.Data.Receiver, IWinODS) then
+      else if Supports(DN.Data.Receiver, IWinOds) then
       begin
         FManager.Settings.WinODSSettings.Enabled := B;
       end
@@ -555,15 +559,15 @@ begin
   else
     DN := Sender.GetNodeData<TDashboardNode>(Node.Parent);
   LReceiver := DN.Data.Receiver;
-  if Supports(LReceiver, IWinIPC) then
+  if Supports(LReceiver, IWinIpc) then
   begin
     pgcMain.ActivePage := tsWinIPC;
   end
-  else if Supports(LReceiver, IZMQ) then
+  else if Supports(LReceiver, IZmq) then
   begin
     pgcMain.ActivePage := tsZeroMQ;
   end
-  else if Supports(LReceiver, IWinODS) then
+  else if Supports(LReceiver, IWinOds) then
   begin
     pgcMain.ActivePage := tsWinODS;
   end
@@ -571,13 +575,17 @@ begin
   begin
     pgcMain.ActivePage := tsCOMPort;
   end
-  else if Supports(LReceiver, IMQTT) then
+  else if Supports(LReceiver, IMqtt) then
   begin
-    pgcMain.ActivePage := tsMQTT;
+    pgcMain.ActivePage := tsMqtt;
   end
   else if Supports(LReceiver, IFileSystem) then
   begin
     pgcMain.ActivePage := tsFileSystem;
+  end
+  else if Supports(LReceiver, IMidi) then
+  begin
+    pgcMain.ActivePage := tsMidi;
   end;
 end;
 
@@ -617,11 +625,11 @@ begin
     begin
       ImageIndex := 2;
     end
-    else if LReceiver = FMIDIReceiver then
+    else if LReceiver = FMidiReceiver then
     begin
       ImageIndex := 9;
     end
-    else if LReceiver = FMQTTReceiver then
+    else if LReceiver = FMqttReceiver then
     begin
       ImageIndex := 10;
     end
@@ -920,10 +928,10 @@ begin
   CreateWinIPCReceiver;
   //CreateWinODSReceiver;
   CreateZeroMQReceiver;
-  CreateMQTTReceiver;
-  CreateComPortReceiver;
-  CreateFileSystemReceiver;
-  CreateMIDIReceiver;
+  //CreateMQTTReceiver;
+  //CreateComPortReceiver;
+  //CreateFileSystemReceiver;
+  //CreateMIDIReceiver;
 
   FTreeView.FullExpand;
 end;
@@ -966,27 +974,29 @@ begin
 end;
 
 procedure TfrmDashboard.CreateMIDIReceiver;
-//var
-//  I           : Integer;
-//  LSubscriber : ISubscriber;
+var
+  I           : Integer;
+  LSubscriber : ISubscriber;
 begin
-  FMIDIReceiver := TLogViewerFactories.CreateMIDIReceiver(FManager);
-  FManager.AddReceiver(FMIDIReceiver);
-  FMIDIReceiver.OnChange.Add(FReceiverChange);
-  FMIDINode := AddNode(nil, FMIDIReceiver, nil);
-  FMIDINode.CheckType := ctCheckBox;
-  if FMIDIReceiver.Enabled then
-    FMIDINode.CheckState := csCheckedNormal;
+  FMidiReceiver := TLogViewerFactories.CreateMidiReceiver(FManager);
+  FManager.AddReceiver(FMidiReceiver);
+  FMidiReceiver.OnChange.Add(FReceiverChange);
+  FMidiNode := AddNode(nil, FMidiReceiver, nil);
+  FMidiNode.CheckType := ctCheckBox;
+  if FMidiReceiver.Enabled then
+    FMidiNode.CheckState := csCheckedNormal;
 
 
 
-    (*
+//    (*
 	if midiInGetNumDevs > 0 then
   begin
     for I := 0 to midiInGetNumDevs - 1 do
     begin
-      LSubscriber := TMIDISubscriber.Create(FMIDIReceiver, I, 'test', 'MIDI', True);
-      FMIDIReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
+      //LSubscriber := TMIDISubscriber.Create(FMIDIReceiver, I, 'test', 'MIDI', True);
+      //FMIDIReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
+      //FMidiDevices.Data.Values[I.ToString,
+
 
 //       thisControl := TMidiInput.Create(Self);
 //			 thisControl.DeviceID := testDeviceID;
@@ -996,18 +1006,18 @@ begin
 //			 MidiInControls.Add(thisControl);
     end;
   end;
-  *)
+  //*)
 end;
 
 procedure TfrmDashboard.CreateMQTTReceiver;
 begin
-  FMQTTReceiver := TLogViewerFactories.CreateMQTTReceiver(FManager);
-  FManager.AddReceiver(FMQTTReceiver);
-  FMQTTReceiver.OnChange.Add(FReceiverChange);
-  FMQTTNode := AddNode(nil, FMQTTReceiver, nil);
-  FMQTTNode.CheckType := ctCheckBox;
-  if FMQTTReceiver.Enabled then
-    FMQTTNode.CheckState := csCheckedNormal;
+  FMqttReceiver := TLogViewerFactories.CreateMqttReceiver(FManager);
+  FManager.AddReceiver(FMqttReceiver);
+  FMqttReceiver.OnChange.Add(FReceiverChange);
+  FMqttNode := AddNode(nil, FMqttReceiver, nil);
+  FMqttNode.CheckType := ctCheckBox;
+  if FMqttReceiver.Enabled then
+    FMqttNode.CheckState := csCheckedNormal;
 end;
 
 procedure TfrmDashboard.CreateZeroMQReceiver;
@@ -1028,7 +1038,7 @@ end;
 
 procedure TfrmDashboard.CreateWinODSReceiver;
 begin
-  FWinODSReceiver := TLogViewerFactories.CreateWinODSReceiver(FManager);
+  FWinODSReceiver := TLogViewerFactories.CreateWinOdsReceiver(FManager);
   FManager.AddReceiver(FWinODSReceiver);
   FWinODSReceiver.OnChange.Add(FReceiverChange);
   FWinODSReceiver.SubscriberList.OnKeyChanged.Add(FWinODSReceiverSubscriberListChanged);
@@ -1043,7 +1053,7 @@ end;
 
 procedure TfrmDashboard.CreateWinIPCReceiver;
 begin
-  FWinIPCReceiver := TLogViewerFactories.CreateWinIPCReceiver(FManager);
+  FWinIPCReceiver := TLogViewerFactories.CreateWinIpcReceiver(FManager);
   FManager.AddReceiver(FWinIPCReceiver);
   FWinIPCReceiver.OnChange.Add(FReceiverChange);
   FWinIPCReceiver.SubscriberList.OnKeyChanged.Add(FWinIPCReceiverSubscriberListChanged);
@@ -1072,7 +1082,7 @@ begin
   edtMQTTPort.Text := FManager.Settings.MQTTSettings.Port.ToString;
   FManager.Settings.MQTTSettings.Enabled := False;
   pgcMain.ActivePage := tsWinIPC;
-  FZMQEndpoints.Data.FromStrings(FManager.Settings.ZeroMQSettings.Endpoints);
+  FZmqEndpoints.Data.FromStrings(FManager.Settings.ZeroMQSettings.Endpoints);
   FFSLocations.Data.FromStrings(FManager.Settings.FileSystemSettings.PathNames);
 end;
 
@@ -1154,7 +1164,7 @@ var
 begin
   Logger.Track(Self, 'SaveSettings');
   LStrings := TStringList.Create;
-  FZMQEndpoints.Data.ToStrings(LStrings);
+  FZmqEndpoints.Data.ToStrings(LStrings);
   FManager.Settings.ZeroMQSettings.Endpoints.Assign(LStrings.Value);
   FFSLocations.Data.ToStrings(LStrings);
   FManager.Settings.FileSystemSettings.PathNames.Assign(LStrings.Value);

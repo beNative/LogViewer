@@ -24,7 +24,7 @@ uses
   LogViewer.Interfaces, LogViewer.Subscribers.Base;
 
 type
-  TWinIPCSubscriber = class(TSubscriber, ISubscriber, IWinIPC)
+  TWinIPCSubscriber = class(TSubscriber, ISubscriber, IWinIpc)
   end;
 
 implementation

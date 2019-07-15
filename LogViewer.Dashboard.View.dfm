@@ -53,19 +53,19 @@ object frmDashboard: TfrmDashboard
         Top = 0
         Width = 314
         Height = 616
-        ActivePageIndex = 6
+        ActivePageIndex = 1
         Align = alClient
         ParentBackground = True
         TabHeight = 0
         TabOrder = 0
-        object tsWinIPC: TKTabSheet
+        object tsWinIpc: TKTabSheet
           Caption = 'WinIPC'
           object lblWinIPC: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
             Width = 308
-            Height = 585
+            Height = 588
             Align = alClient
             Caption = 
               'Messages are exchanged between the source application and LogVie' +
@@ -103,14 +103,14 @@ object frmDashboard: TfrmDashboard
             TabOrder = 0
           end
         end
-        object tsWinODS: TKTabSheet
+        object tsWinOds: TKTabSheet
           Caption = 'WinODS'
           object lblWinODS: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
             Width = 308
-            Height = 585
+            Height = 588
             Align = alClient
             Caption = 
               'This receiver captures messages from any local applicatiion that' +
@@ -252,7 +252,7 @@ object frmDashboard: TfrmDashboard
             end
           end
         end
-        object tsMQTT: TKTabSheet
+        object tsMqtt: TKTabSheet
           Caption = 'MQTT'
           DesignSize = (
             314
@@ -358,7 +358,7 @@ object frmDashboard: TfrmDashboard
             TabOrder = 1
           end
         end
-        object tsCOMPort: TKTabSheet
+        object tsComPort: TKTabSheet
           Caption = 'COM port'
           object pnlCOMPorts: TPanel
             Left = 0
@@ -388,9 +388,9 @@ object frmDashboard: TfrmDashboard
             TabOrder = 1
           end
         end
-        object tsMIDI: TKTabSheet
+        object tsMidi: TKTabSheet
           Caption = 'KTabSheet1'
-          object pnlMIDITitle: TPanel
+          object pnlMidiTitle: TPanel
             Left = 0
             Top = 0
             Width = 314
@@ -407,6 +407,15 @@ object frmDashboard: TfrmDashboard
             ParentColor = True
             ParentFont = False
             TabOrder = 0
+          end
+          object pnlMidiDevices: TPanel
+            Left = 0
+            Top = 25
+            Width = 314
+            Height = 591
+            Align = alClient
+            BevelOuter = bvNone
+            TabOrder = 1
           end
         end
       end
@@ -487,7 +496,7 @@ object frmDashboard: TfrmDashboard
     Left = 408
     Top = 8
     Bitmap = {
-      494C01010B0008018C0110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01010B0008019C0110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000001001B09532ED308512ED100000010000000000000

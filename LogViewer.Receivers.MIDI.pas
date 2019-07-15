@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.Receivers.MIDI;
+unit LogViewer.Receivers.Midi;
 
 interface
 
@@ -27,7 +27,7 @@ uses
   LogViewer.Receivers.Base, LogViewer.Interfaces;
 
 type
-  TMIDIChannelReceiver = class(TChannelReceiver, IChannelReceiver, IMIDI)
+  TMidiChannelReceiver = class(TChannelReceiver, IChannelReceiver, IMidi)
 
   end;
 

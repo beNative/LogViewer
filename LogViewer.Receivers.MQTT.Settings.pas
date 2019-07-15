@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.Receivers.MQTT.Settings;
+unit LogViewer.Receivers.Mqtt.Settings;
 
 { Persistable settings for MQTT receiver. }
 

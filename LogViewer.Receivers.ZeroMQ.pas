@@ -57,7 +57,7 @@ uses
 {$ENDREGION}
 
 type
-  TZeroMQChannelReceiver = class(TChannelReceiver, IChannelReceiver, IZMQ)
+  TZeroMQChannelReceiver = class(TChannelReceiver, IChannelReceiver, IZmq)
   private
     FZMQ : IZeroMQ;
 

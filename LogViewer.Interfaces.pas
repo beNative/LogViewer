@@ -131,19 +131,19 @@ type
       read GetOnChange;
   end;
 
-  IZMQ = interface
+  IZmq = interface
   ['{89F150A7-414B-4C81-BC08-40227768D317}']
   end;
 
-  IMQTT = interface
+  IMqtt = interface
   ['{4C00B52A-0EA5-4247-A88D-109E15D104DA}']
   end;
 
-  IWinIPC = interface
+  IWinIpc = interface
   ['{CE3BF275-B51C-491E-8DBE-1CA0E8816035}']
   end;
 
-  IWinODS = interface
+  IWinOds = interface
   ['{71CED15C-E2E5-4708-A34F-5BAE4D918A3D}']
   end;
 
@@ -155,7 +155,7 @@ type
   ['{254D6F91-FE9F-4B80-B35C-CC00329319A9}']
   end;
 
-  IMIDI = interface
+  IMidi = interface
   ['{C3B84737-A432-493C-B024-EBEB8C87B6CB}']
   end;
 
