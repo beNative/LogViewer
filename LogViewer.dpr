@@ -70,7 +70,8 @@ uses
   LogViewer.Watches.Data in 'LogViewer.Watches.Data.pas',
   LogViewer.Watches.Settings in 'LogViewer.Watches.Settings.pas',
   LogViewer.Watches.Settings.View in 'LogViewer.Watches.Settings.View.pas' {frmWatchSettings},
-  LogViewer.Watches.View in 'LogViewer.Watches.View.pas' {frmWatchesView};
+  LogViewer.Watches.View in 'LogViewer.Watches.View.pas' {frmWatchesView},
+  LogViewer.MessageData.View in 'LogViewer.MessageData.View.pas' {frmMessageData};
 
 {$R *.res}
 
@@ -88,6 +89,7 @@ begin
   Application.Title := 'Log viewer';
   // setup logchannel for using a log LogViewer instance to debug itself.
   Application.CreateForm(TfrmMain, frmMain);
+  Application.CreateForm(TfrmMessageData, frmMessageData);
   Logger.Channels.Add(
     TZeroMQChannel.Create(Format('tcp://*:%d', [LOGVIEWER_ZMQ_PORT]))
   );

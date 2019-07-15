@@ -230,6 +230,10 @@
             <Form>frmWatchesView</Form>
             <FormType>dfm</FormType>
         </DCCReference>
+        <DCCReference Include="LogViewer.MessageData.View.pas">
+            <Form>frmMessageData</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <None Include="Readme.md"/>
         <RcItem Include="Bin\Win32\libzmq.dll">
             <ContainerId>ResourceItem</ContainerId>

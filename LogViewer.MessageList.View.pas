@@ -34,13 +34,13 @@ uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes, System.ImageList,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
-  Vcl.ExtCtrls, Vcl.Buttons, Vcl.ComCtrls, Vcl.ImgList, Vcl.Grids,
+  Vcl.ExtCtrls, Vcl.Buttons, Vcl.ComCtrls, Vcl.ImgList,
 
   VirtualTrees, kcontrols, kpagecontrol, OMultiPanel,
 
   Spring, Spring.Collections,
 
-  DDuce.Editor.Interfaces, DDuce.Logger.Interfaces, DDuce.Components.ValueList,
+  DDuce.Editor.Interfaces, DDuce.Logger.Interfaces,
 
   LogViewer.Watches.Data, LogViewer.Watches.View, LogViewer.Interfaces,
   LogViewer.CallStack.Data, LogViewer.CallStack.View, LogViewer.ValueList.View,
@@ -201,13 +201,6 @@ type
       Column          : TColumnIndex;
       CellRect        : TRect
     );
-    procedure FLogTreeViewBeforeItemPaint(
-      Sender         : TBaseVirtualTree;
-      TargetCanvas   : TCanvas;
-      Node           : PVirtualNode;
-      ItemRect       : TRect;
-      var CustomDraw : Boolean
-    );
     procedure FLogTreeViewPaintText(
       Sender             : TBaseVirtualTree;
       const TargetCanvas : TCanvas;
@@ -256,6 +249,7 @@ type
     function GetMilliSecondsBetweenSelection: Integer;
     procedure EnsureCurrentViewIsActiveViewWhenFocused;
     function ParseValue(const AString: string): Tuple<string, string, string>;
+    function GetSelectedLogNode: TLogNode;
 
   protected
     procedure Clear;
@@ -332,6 +326,9 @@ type
     property MilliSecondsBetweenSelection: Integer
       read GetMilliSecondsBetweenSelection;
 
+    property SelectedLogNode: TLogNode
+      read GetSelectedLogNode;
+
   public
     constructor Create(
       AOwner      : TComponent;
@@ -348,15 +345,15 @@ implementation
 
 uses
   System.StrUtils, System.UITypes, System.DateUtils, System.Math,
-  System.UIConsts,
+
   Vcl.GraphUtil,
 
   Spring.Helpers,
 
-  DDuce.Factories.VirtualTrees, DDuce.Editor.Factories, DDuce.Reflect,
+  DDuce.Factories.VirtualTrees, DDuce.Editor.Factories,
   DDuce.Utils, DDuce.Logger,
 
-  DDuce.ObjectInspector.zObjectInspector, DDuce.DynamicRecord,
+  DDuce.DynamicRecord,
 
   LogViewer.Manager, LogViewer.Factories, LogViewer.Resources;
 
@@ -496,7 +493,6 @@ begin
   FLogTreeView.ShowHint     := True;
   FLogTreeView.LineMode     := lmBands;
 
-  FLogTreeView.OnBeforeItemPaint := FLogTreeViewBeforeItemPaint;
   FLogTreeView.OnBeforeCellPaint := FLogTreeViewBeforeCellPaint;
   FLogTreeView.OnAfterCellPaint  := FLogTreeViewAfterCellPaint;
   FLogTreeView.OnFocusChanged    := FLogTreeViewFocusChanged;
@@ -634,6 +630,18 @@ begin
   Result := FSubscriber;
 end;
 
+function TfrmMessageList.GetSelectedLogNode: TLogNode;
+begin
+  if Assigned(FLogTreeView.FocusedNode) then
+  begin
+    Result := FLogTreeView.GetNodeData<TLogNode>(FLogTreeView.FocusedNode);
+  end
+  else
+  begin
+    Result := nil;
+  end;
+end;
+
 function TfrmMessageList.GetSettings: TMessageListSettings;
 begin
   Result := FSettings;
@@ -732,27 +740,6 @@ end;
 {$ENDREGION}
 
 {$REGION 'FLogTreeView'}
-procedure TfrmMessageList.FLogTreeViewBeforeItemPaint(Sender: TBaseVirtualTree;
-  TargetCanvas: TCanvas; Node: PVirtualNode; ItemRect: TRect;
-  var CustomDraw: Boolean);
-//var
-//  LN  : TLogNode;
-//  DVS : TDisplayValuesSettings;
-//  S   : string;
-begin
-//  LN := Sender.GetNodeData<TLogNode>(Node);
-//  DVS := Manager.Settings.DisplayValuesSettings;
-//  if LN.MessageType in [lmtEnterMethod, lmtLeaveMethod] then
-//  begin
-//    CustomDraw := True;
-//    DVS.Tracing.AssignTo(TargetCanvas);
-//    TargetCanvas.Brush.Color := $00EEEEEE;
-//    TargetCanvas.FillRect(ItemRect);
-//    S := LN.Text;
-//    TargetCanvas.TextRect(ItemRect, S);
-//  end;
-end;
-
 { Do not show Enter and Leave nodes when collapsed. }
 
 procedure TfrmMessageList.FLogTreeViewCollapsed(Sender: TBaseVirtualTree;
@@ -867,7 +854,29 @@ begin
     else
       TargetCanvas.Brush.Color := clWhite;
     TargetCanvas.FillRect(CellRect);
+  end
+  else if Column = COLUMN_VALUE then
+  begin
+    DVS.Value.AssignTo(TargetCanvas);
+    TargetCanvas.FillRect(CellRect);
+  end
+  else if Column = COLUMN_VALUENAME then
+  begin
+    DVS.ValueName.AssignTo(TargetCanvas);
+    TargetCanvas.FillRect(CellRect);
+  end
+  else if Column = COLUMN_VALUETYPE then
+  begin
+    DVS.ValueType.AssignTo(TargetCanvas);
+    TargetCanvas.FillRect(CellRect);
+  end
+  else if Column = COLUMN_TIMESTAMP then
+  begin
+    DVS.TimeStamp.AssignTo(TargetCanvas);
+    TargetCanvas.FillRect(CellRect);
   end;
+
+
   // draw indentation lines
   if Column = Sender.Header.MainColumn then
   begin
@@ -1060,7 +1069,7 @@ begin
           end;
         end;
       end;
-      if CellText.IsEmpty and (YearOf(LN.TimeStamp) = YearOf(Now)) then // sanity check
+      if CellText.IsEmpty then
       begin
         CellText := FormatDateTime('hh:nn:ss:zzz',  LN.TimeStamp);
       end;
@@ -1239,8 +1248,8 @@ begin
       lmtValue, lmtComponent, lmtAlphaColor, lmtColor, lmtBitmap, lmtStrings,
       lmtObject, lmtPersistent, lmtInterface:
       begin
-        TargetCanvas.Font.Color := clDkGray;
-        TargetCanvas.Font.Size := 7;
+//        TargetCanvas.Font.Color := clDkGray;
+//        TargetCanvas.Font.Size := 7;
       end;
       lmtEnterMethod:
       begin
@@ -1259,8 +1268,8 @@ begin
   end
   else if Column = COLUMN_LEVEL then
   begin
-    TargetCanvas.Font.Color := clDkGray;
-    TargetCanvas.Font.Size := 6;
+//    TargetCanvas.Font.Color := clDkGray;
+//    TargetCanvas.Font.Size := 6;
   end
   else if Column = COLUMN_VALUENAME then
   begin
@@ -1294,37 +1303,22 @@ begin
 end;
 
 procedure TfrmMessageList.chkSyncWithSelectedMessageClick(Sender: TObject);
-var
-  LN : TLogNode;
 begin
   Manager.Settings.WatchSettings.SyncWithSelection :=
     (Sender as TCheckBox).Checked;
-  if Assigned(FWatchesView) then
+  if Assigned(SelectedLogNode) then
   begin
-    if Assigned(FLogTreeView.FocusedNode) then
-    begin
-      LN := FLogTreeView.GetNodeData<TLogNode>(FLogTreeView.FocusedNode);
-      if Assigned(LN) then
-      begin
-        if not chkSyncWithSelectedMessage.Checked then
-          FWatchesView.UpdateView(FMessageCount)
-        else
-          FWatchesView.UpdateView(LN.Id);
-      end;
-    end;
+    if not chkSyncWithSelectedMessage.Checked then
+      FWatchesView.UpdateView(FMessageCount)
+    else
+      FWatchesView.UpdateView(SelectedLogNode.Id);
   end;
 end;
 
 procedure TfrmMessageList.tsRawDataShow(Sender: TObject);
-var
-  LN : TLogNode;
 begin
-  if Assigned(FLogTreeView.FocusedNode) then
-  begin
-    LN := FLogTreeView.GetNodeData<TLogNode>(FLogTreeView.FocusedNode);
-    if Assigned(LN) then
-      UpdateRawDataDisplay(LN);
-  end;
+  if Assigned(SelectedLogNode) then
+    UpdateRawDataDisplay(SelectedLogNode);
 end;
 
 procedure TfrmMessageList.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -1511,7 +1505,7 @@ end;
 {
    Message layout in the received binary stream
      1. Message type (1 byte)          => TLogMessage.MsgType (TLogMessageType)
-     2. Log level    (1 byte)
+     2. Log level    (1 byte)          => TLogMessage.LogLevel (0-127)
      3. Reserved     (1 byte)
      4. Reserved     (1 byte)
      5. Timestamp    (8 byte)          => TLogMessage.TimeStamp

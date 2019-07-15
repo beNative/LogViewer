@@ -57,6 +57,15 @@ type
       Column             : TColumnIndex;
       TextType           : TVSTTextType
     );
+    procedure FValueListViewBeforeCellPaint(
+      Sender          : TBaseVirtualTree;
+      TargetCanvas    : TCanvas;
+      Node            : PVirtualNode;
+      Column          : TColumnIndex;
+      CellPaintMode   : TVTCellPaintMode;
+      CellRect        : TRect;
+      var ContentRect : TRect
+    );
 
   protected
     procedure UpdateData;
@@ -96,23 +105,25 @@ end;
 procedure TfrmValueListView.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FFieldView             := TValueList.Create(Self);
-  FFieldView.Parent      := pnlTop;
-  FFieldView.Align       := alClient;
-  FFieldView.ShowHeader  := False;
-  FFieldView.Editable    := False;
-  FFieldView.BorderStyle := bsNone;
-  FFieldView.ShowGutter  := False;
-  FFieldView.OnPaintText := FValueListViewPaintText;
+  FFieldView                   := TValueList.Create(Self);
+  FFieldView.Parent            := pnlTop;
+  FFieldView.Align             := alClient;
+  FFieldView.ShowHeader        := False;
+  FFieldView.Editable          := False;
+  FFieldView.BorderStyle       := bsNone;
+  FFieldView.ShowGutter        := False;
+  FFieldView.OnPaintText       := FValueListViewPaintText;
+  FFieldView.OnBeforeCellPaint := FValueListViewBeforeCellPaint;
 
-  FPropertyView             := TValueList.Create(Self);
-  FPropertyView.Parent      := pnlBottom;
-  FPropertyView.Align       := alClient;
-  FPropertyView.ShowHeader  := False;
-  FPropertyView.Editable    := False;
-  FPropertyView.BorderStyle := bsNone;
-  FPropertyView.ShowGutter  := False;
-  FPropertyView.OnPaintText := FValueListViewPaintText;
+  FPropertyView                   := TValueList.Create(Self);
+  FPropertyView.Parent            := pnlBottom;
+  FPropertyView.Align             := alClient;
+  FPropertyView.ShowHeader        := False;
+  FPropertyView.Editable          := False;
+  FPropertyView.BorderStyle       := bsNone;
+  FPropertyView.ShowGutter        := False;
+  FPropertyView.OnPaintText       := FValueListViewPaintText;
+  FPropertyView.OnBeforeCellPaint := FValueListViewBeforeCellPaint;
 end;
 
 destructor TfrmValueListView.Destroy;
@@ -125,6 +136,22 @@ end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
+procedure TfrmValueListView.FValueListViewBeforeCellPaint(
+  Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode;
+  Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; CellRect: TRect;
+  var ContentRect: TRect);
+begin
+  if Column = 1 then
+  begin
+    FDisplayValuesSettings.ValueName.AssignTo(TargetCanvas);
+  end
+  else if Column = 2 then
+  begin
+    FDisplayValuesSettings.Value.AssignTo(TargetCanvas);
+  end;
+  TargetCanvas.FillRect(CellRect);
+end;
+
 procedure TfrmValueListView.FValueListViewPaintText(Sender: TBaseVirtualTree;
   const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   TextType: TVSTTextType);

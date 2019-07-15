@@ -206,6 +206,11 @@ begin
   if DrawMode = dmPaintText then
   begin
     FDisplayValuesSettings.Id.AssignTo(TargetCanvas.Font);
+  end
+  else if DrawMode = dmBeforeCellPaint then
+  begin
+    FDisplayValuesSettings.Id.AssignTo(TargetCanvas);
+    TargetCanvas.FillRect(CellRect);
   end;
   Result := True;
 end;
@@ -218,6 +223,11 @@ begin
   if DrawMode = dmPaintText then
   begin
     FDisplayValuesSettings.ValueName.AssignTo(TargetCanvas.Font);
+  end
+  else if DrawMode = dmBeforeCellPaint then
+  begin
+    FDisplayValuesSettings.ValueName.AssignTo(TargetCanvas);
+    TargetCanvas.FillRect(CellRect);
   end;
   Result := True;
 end;
@@ -230,6 +240,11 @@ begin
   if DrawMode = dmPaintText then
   begin
     FDisplayValuesSettings.TimeStamp.AssignTo(TargetCanvas.Font);
+  end
+  else if DrawMode = dmBeforeCellPaint then
+  begin
+    FDisplayValuesSettings.TimeStamp.AssignTo(TargetCanvas);
+    TargetCanvas.FillRect(CellRect);
   end;
   Result := True;
 end;
@@ -242,6 +257,11 @@ begin
   if DrawMode = dmPaintText then
   begin
     FDisplayValuesSettings.Value.AssignTo(TargetCanvas.Font);
+  end
+  else if DrawMode = dmBeforeCellPaint then
+  begin
+    FDisplayValuesSettings.Value.AssignTo(TargetCanvas);
+    TargetCanvas.FillRect(CellRect);
   end;
   Result := True;
 end;
