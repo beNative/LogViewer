@@ -280,7 +280,7 @@ uses
   Vcl.Forms, Vcl.Dialogs,
 
   DDuce.Editor.Factories, DDuce.AboutDialog,
-  DDuce.Logger, DDuce.Logger.Channels.ZeroMQ,
+  DDuce.Logger,
 
   LogViewer.Factories, LogViewer.Resources,
   LogViewer.Settings.Dialog, LogViewer.MessageList.Settings;

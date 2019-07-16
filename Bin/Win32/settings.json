@@ -1,25 +1,25 @@
 {
 	"FormSettings": {
 		"Left": 272,
-		"Top": 90,
-		"Width": 1712,
-		"Height": 948,
+		"Top": 45,
+		"Width": 1483,
+		"Height": 763,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
 	"MessageListSettings": {
-		"AutoScrollMessages": false,
+		"AutoScrollMessages": true,
 		"AutoFilterMessages": true,
 		"DynamicAutoSizeColumns": true,
 		"SmartTimeStamps": true,
 		"HideColumnHeaders": true,
 		"HorizontalPanelPositions": [
-			0.272405660377358,
-			0.732133933033483,
+			0.251973684210526,
+			0.631901840490798,
 			1
 		],
 		"LeftVerticalPanelPositions": [
-			0.0684306569343066,
+			0.120184899845917,
 			1
 		]
 	},

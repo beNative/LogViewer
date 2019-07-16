@@ -20,7 +20,7 @@ object frmMessageDataView: TfrmMessageDataView
     PanelCollection = <
       item
         Control = pnlLeft
-        Position = 0.500000000000000000
+        Position = 0.980000000000000000
         Visible = True
         Index = 0
       end
@@ -37,9 +37,9 @@ object frmMessageDataView: TfrmMessageDataView
       601
       287)
     object pnlRight: TPanel
-      Left = 303
+      Left = 592
       Top = 0
-      Width = 298
+      Width = 9
       Height = 287
       Anchors = []
       BevelOuter = bvNone
@@ -48,7 +48,7 @@ object frmMessageDataView: TfrmMessageDataView
     object pnlLeft: TPanel
       Left = 0
       Top = 0
-      Width = 300
+      Width = 589
       Height = 287
       Anchors = []
       BevelOuter = bvNone

@@ -543,7 +543,7 @@ end;
 
 procedure TfrmMessageList.CreateMessageDataView;
 begin
-  FMessageDataView := TfrmMessageDataView.Create(Self);
+  FMessageDataView := TfrmMessageDataView.Create(Self, DisplayValuesSettings);
   AssignFormParent(FMessageDataView, pnlMessageData);
 end;
 
@@ -860,12 +860,7 @@ end;
 
 procedure TfrmMessageList.FLogTreeViewFocusChanged(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex);
-var
-  LN : TLogNode;
 begin
-  Logger.Track(Self, 'FLogTreeViewFocusChanged');
-  LN := Sender.GetNodeData<TLogNode>(Node);
-  Guard.CheckNotNull(LN, 'LogNode');
   Modified;
 end;
 
@@ -1306,6 +1301,8 @@ begin
   FUpdate := True;
 end;
 
+{ Parses the given string into name, value and type. }
+
 function TfrmMessageList.ParseValue(
   const AString: string): Tuple<string, string, string>;
 var
@@ -1332,11 +1329,11 @@ procedure TfrmMessageList.LoadPanelSettings;
 var
   I : Integer;
 begin
-  for I :=  0 to pnlMain.PanelCollection.Count - 2 do
+  for I := 0 to pnlMain.PanelCollection.Count - 2 do
   begin
     pnlMain.PanelCollection[I].Position := Settings.HorizontalPanelPositions[I];
   end;
-  for I :=  0 to pnlLeft.PanelCollection.Count - 2 do
+  for I := 0 to pnlLeft.PanelCollection.Count - 2 do
   begin
     pnlLeft.PanelCollection[I].Position := Settings.LeftVerticalPanelPositions[I];
   end;
@@ -1350,7 +1347,7 @@ begin
   begin
     FSettings.HorizontalPanelPositions[I] := pnlMain.PanelCollection[I].Position;
   end;
-  for I :=  0 to pnlLeft.PanelCollection.Count - 2 do
+  for I := 0 to pnlLeft.PanelCollection.Count - 2 do
   begin
     FSettings.LeftVerticalPanelPositions[I] := pnlLeft.PanelCollection[I].Position;
   end;
@@ -1382,10 +1379,9 @@ begin
   Manager.EditorManager.ActiveView := FEditorView;
 end;
 
-{ Parses message data from the TLogMessage record. }
-
 procedure TfrmMessageList.AddMessageToTree(const AMessage: TLogMessage);
 begin
+  Logger.Track(Self, 'AddMessageToTree');
   FLogTreeView.BeginUpdate;
   try
     case TLogMessageType(AMessage.MsgType) of
@@ -1554,6 +1550,7 @@ begin
   EditorView.Clear;
   FCallStack.Clear;
   FLogTreeView.Clear;
+  FMessageDataView.Clear;
   FMessageCount := 0;
   FLastNode     := nil;
   FLastParent   := nil;
@@ -1624,11 +1621,10 @@ end;
 {$REGION 'Display updating'}
 procedure TfrmMessageList.UpdateBitmapDisplay(ALogNode: TLogNode);
 begin
-  pgcMessageDetails.ActivePage := tsImageViewer;
   FImageView.LoadFromStream(ALogNode.MessageData);
 end;
 
-{ Calculates the callstack display. }
+{ Calculates and prepares the callstack display for the selected node. }
 
 procedure TfrmMessageList.UpdateCallStackDisplay(ALogNode: TLogNode);
 var
@@ -1750,8 +1746,11 @@ begin
   FDataSetView.LoadFromStream(ALogNode.MessageData);
 end;
 
+{ Updates all information related to the selected message node. }
+
 procedure TfrmMessageList.UpdateMessageDetails(ALogNode: TLogNode);
 begin
+  Logger.Track(Self, 'UpdateMessageDetails');
   ClearMessageDetailsControls;
   case ALogNode.MessageType of
     lmtCallStack, {lmtException,} lmtHeapInfo, lmtCustomData:
@@ -1790,6 +1789,7 @@ begin
       pgcMessageDetails.ActivePage := tsDataSet;
     end;
   end;
+  FMessageDataView.LogNode := ALogNode;
   if chkSyncWithSelectedMessage.Checked then
     FWatchesView.UpdateView(ALogNode.Id);
 end;
@@ -1859,7 +1859,7 @@ begin
   end
   else
   begin
-    //pgcMessageDetails.ActivePage := tsTextViewer;
+    pgcMessageDetails.ActivePage := tsTextViewer;
   end;
 end;
 {$ENDREGION}
@@ -1911,15 +1911,11 @@ begin
     FLogTreeView.Selected[FLogTreeView.FocusedNode] := True;
     FScrollToLastNode := False;
   end;
-  if Assigned(FLogTreeView.FocusedNode) then
+  if Assigned(SelectedLogNode) then
   begin
-    LN := FLogTreeView.GetNodeData<TLogNode>(FLogTreeView.FocusedNode);
-    if Assigned(LN) then
-    begin
-      UpdateMessageDetails(LN);
-      UpdateCallStackDisplay(LN);
-      FMessageDataView.LogNode := LN;
-    end;
+    LN := SelectedLogNode;
+    UpdateMessageDetails(LN);
+    UpdateCallStackDisplay(LN);
   end;
 end;
 
