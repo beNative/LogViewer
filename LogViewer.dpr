@@ -72,7 +72,8 @@ uses
   LogViewer.Watches.Settings.View in 'LogViewer.Watches.Settings.View.pas' {frmWatchSettings},
   LogViewer.Watches.View in 'LogViewer.Watches.View.pas' {frmWatchesView},
   LogViewer.MessageData.View in 'LogViewer.MessageData.View.pas' {frmMessageData},
-  LogViewer.CallStack.Settings.View in 'LogViewer.CallStack.Settings.View.pas' {frmCallStackSettings};
+  LogViewer.CallStack.Settings.View in 'LogViewer.CallStack.Settings.View.pas' {frmCallStackSettings},
+  LogViewer.DisplayValues.Settings.ValueManager in 'LogViewer.DisplayValues.Settings.ValueManager.pas';
 
 {$R *.res}
 

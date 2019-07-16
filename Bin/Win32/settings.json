@@ -1,9 +1,9 @@
 {
 	"FormSettings": {
-		"Left": 408,
-		"Top": 227,
-		"Width": 1669,
-		"Height": 986,
+		"Left": 333,
+		"Top": 40,
+		"Width": 1870,
+		"Height": 990,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -15,7 +15,7 @@
 		"HideColumnHeaders": true,
 		"Positions": [
 			0.225594334850784,
-			0.713671875,
+			0.716828478964401,
 			1
 		]
 	},
@@ -43,8 +43,8 @@
 	"DisplayValueSettings": {
 		"Id": {
 			"BackgroundColor": 16777215,
-			"FontName": "Segoe UI",
-			"FontColor": 8421504,
+			"FontName": "Tahoma",
+			"FontColor": -16777208,
 			"FontSize": 8,
 			"FontStyle": "",
 			"WordWrap": false,
@@ -52,7 +52,7 @@
 			"VerticalAlignment": 0
 		},
 		"Info": {
-			"BackgroundColor": 16777215,
+			"BackgroundColor": 16767411,
 			"FontName": "Segoe UI",
 			"FontColor": 16711680,
 			"FontSize": 8,
@@ -62,17 +62,7 @@
 			"VerticalAlignment": 0
 		},
 		"Warning": {
-			"BackgroundColor": 16777215,
-			"FontName": "Segoe UI",
-			"FontColor": 42495,
-			"FontSize": 8,
-			"FontStyle": "fsBold",
-			"WordWrap": false,
-			"HorizontalAlignment": 0,
-			"VerticalAlignment": 0
-		},
-		"Error": {
-			"BackgroundColor": 16777215,
+			"BackgroundColor": 12177407,
 			"FontName": "Segoe UI",
 			"FontColor": 255,
 			"FontSize": 8,
@@ -81,8 +71,18 @@
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
 		},
+		"Error": {
+			"BackgroundColor": 255,
+			"FontName": "Segoe UI",
+			"FontColor": 16777215,
+			"FontSize": 8,
+			"FontStyle": "fsBold",
+			"WordWrap": false,
+			"HorizontalAlignment": 0,
+			"VerticalAlignment": 0
+		},
 		"TimeStamp": {
-			"BackgroundColor": 16774636,
+			"BackgroundColor": -16777211,
 			"FontName": "Callibri",
 			"FontColor": 16711680,
 			"FontSize": 7,
@@ -92,7 +92,7 @@
 			"VerticalAlignment": 0
 		},
 		"ValueName": {
-			"BackgroundColor": 14013951,
+			"BackgroundColor": 15921919,
 			"FontName": "Segoe UI",
 			"FontColor": 128,
 			"FontSize": 8,
@@ -102,18 +102,18 @@
 			"VerticalAlignment": 0
 		},
 		"ValueType": {
-			"BackgroundColor": -16777188,
-			"FontName": "Consolas",
+			"BackgroundColor": 16774378,
+			"FontName": "Tahoma",
 			"FontColor": 8388608,
 			"FontSize": 8,
 			"FontStyle": "",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
-			"VerticalAlignment": 0
+			"VerticalAlignment": 1
 		},
 		"Value": {
 			"BackgroundColor": 15793151,
-			"FontName": "Consolas",
+			"FontName": "Segoe UI",
 			"FontColor": 0,
 			"FontSize": 8,
 			"FontStyle": "",
@@ -172,7 +172,7 @@
 			"VerticalAlignment": 0
 		},
 		"Conditional": {
-			"BackgroundColor": 16777215,
+			"BackgroundColor": 15597032,
 			"FontName": "Segoe UI",
 			"FontColor": 8421376,
 			"FontSize": 8,

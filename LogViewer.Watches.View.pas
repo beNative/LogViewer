@@ -285,8 +285,13 @@ begin
     begin
       FDisplayValuesSettings.ValueType.AssignTo(TargetCanvas.Font);
     end;
+
+  end
+  else if DrawMode = dmBeforeCellPaint then
+  begin
+    FDisplayValuesSettings.ValueType.AssignTo(TargetCanvas);
+    TargetCanvas.FillRect(CellRect);
   end;
-  Result := True;
 end;
 
 procedure TfrmWatchesView.FTVPWatchHistoryDoubleClick(Sender: TObject);

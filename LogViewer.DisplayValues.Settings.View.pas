@@ -25,7 +25,7 @@ uses
   System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls,
 
-  zObjInspector,
+  zObjInspector, zObjInspTypes,
 
   VirtualTrees,
 
@@ -35,7 +35,7 @@ uses
 
   DDuce.Settings.TextFormat,
 
-  LogViewer.DisplayValues.Settings;
+  LogViewer.DisplayValues.Settings, LogViewer.DisplayValues.Settings.ValueManager;
 
 type
   TfrmDisplayValuesSettings = class(TForm)
@@ -49,6 +49,7 @@ type
     FListViewer    : TVirtualStringTree;
     FList          : IList<TTextFormatSettings>;
     FListPresenter : TTreeViewPresenter;
+    FValueManager  : TDisplayValuesValueManager;
 
     function FCDNameCustomDraw(
       Sender           : TObject;
@@ -63,6 +64,7 @@ type
 
     procedure FListPresenterSelectionChanged(Sender: TObject);
     procedure FFormatSettingsChanged(Sender: TObject);
+    function FInspectorBeforeAddItem(Sender: TControl; PItem: PPropItem): Boolean;
 
   protected
     procedure UpdateActions; override;
@@ -72,6 +74,8 @@ type
       AOwner    : TComponent;
       ASettings : TDisplayValuesSettings
     ); reintroduce;
+    destructor Destroy; override;
+
 
   end;
 
@@ -80,6 +84,8 @@ implementation
 {$R *.dfm}
 
 uses
+  System.TypInfo, System.StrUtils,
+
   DSharp.Windows.ControlTemplates,
 
   DDuce.Factories.TreeViewPresenter, DDuce.Factories.zObjInspector,
@@ -95,8 +101,11 @@ begin
   inherited Create(AOwner);
   FSettings   := ASettings;
   FSettings.OnChanged.Add(FFormatSettingsChanged);
-  FInspector  := TzObjectInspectorFactory.Create(Self, pnlRight);
+  FValueManager := TDisplayValuesValueManager.Create;
+  FInspector  := TzObjectInspectorFactory.Create(Self, pnlRight, nil, FValueManager);
   FInspector.AlignWithMargins := False;
+  FInspector.ObjectVisibility := mvPublished;
+  FInspector.OnBeforeAddItem := FInspectorBeforeAddItem;
 
   FListViewer := TVirtualStringTreeFactory.CreateList(Self, pnlLeft);
   FListViewer.Header.AutoSizeIndex := 0;
@@ -133,6 +142,12 @@ begin
   FListPresenter.ShowHeader := False;
   FListPresenter.OnSelectionChanged := FListPresenterSelectionChanged;
 end;
+
+destructor TfrmDisplayValuesSettings.Destroy;
+begin
+  FValueManager.Free;
+  inherited Destroy;
+end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
@@ -165,6 +180,14 @@ end;
 procedure TfrmDisplayValuesSettings.FFormatSettingsChanged(Sender: TObject);
 begin
   UpdateActions;
+end;
+
+function TfrmDisplayValuesSettings.FInspectorBeforeAddItem(Sender: TControl;
+  PItem: PPropItem): Boolean;
+begin
+  Result := not MatchText(
+    PItem.Name, ['Name', 'HorizontalAlignment', 'VerticalAlignment', 'Wordwrap']
+  );
 end;
 {$ENDREGION}
 

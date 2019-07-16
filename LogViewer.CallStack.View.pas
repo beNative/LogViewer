@@ -149,7 +149,6 @@ begin
     CDS
   );
   FTVPCallStack.ShowHeader := not FSettings.HideColumnHeaders;
-
 end;
 
 destructor TfrmCallStackView.Destroy;
