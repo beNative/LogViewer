@@ -285,7 +285,6 @@ begin
     begin
       FDisplayValuesSettings.ValueType.AssignTo(TargetCanvas.Font);
     end;
-
   end
   else if DrawMode = dmBeforeCellPaint then
   begin
@@ -456,11 +455,7 @@ procedure TfrmWatchesView.UpdateView(AMessageId: Int64);
 begin
   FMessageId := AMessageId;
   FWatches.Update(AMessageId);
-//  FTVPWatchValues.BeginUpdate;
-//  FTVPWatchValues.Refresh; // do not call selectionchanged event
-//  FTVPWatchValues.EndUpdate;//FTVPWatchValues.Refresh;
   FVSTWatchValues.Invalidate;
-  //UpdateWatchHistory;
 end;
 
 procedure TfrmWatchesView.UpdateWatchHistory;

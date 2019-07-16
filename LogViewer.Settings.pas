@@ -198,11 +198,19 @@ begin
       JO.LoadFromFile(FFileName);
       JO['FormSettings'].ObjectValue.ToSimpleObject(FFormSettings);
       JO['MessageListSettings'].ObjectValue.ToSimpleObject(FMessageListSettings);
-      for I := 0 to JO['MessageListSettings'].ObjectValue['Positions'].Count - 1 do
+      for I := 0 to JO['MessageListSettings']
+        .ObjectValue['HorizontalPanelPositions'].Count - 1 do
       begin
-        FMessageListSettings.PanelPositions[I] :=
-          JO['MessageListSettings'].ObjectValue['Positions'].ArrayValue[I];
-        Logger.Send(FMessageListSettings.PanelPositions[I]);
+        FMessageListSettings.HorizontalPanelPositions[I] :=
+          JO['MessageListSettings']
+            .ObjectValue['HorizontalPanelPositions'].ArrayValue[I];
+      end;
+      for I := 0 to JO['MessageListSettings']
+        .ObjectValue['LeftVerticalPanelPositions'].Count - 1 do
+      begin
+        FMessageListSettings.LeftVerticalPanelPositions[I] :=
+          JO['MessageListSettings']
+            .ObjectValue['LeftVerticalPanelPositions'].ArrayValue[I];
       end;
       JO['WinODSSettings'].ObjectValue.ToSimpleObject(FWinODSSettings);
       JO['WinIPCSettings'].ObjectValue.ToSimpleObject(FWinIPCSettings);
@@ -263,10 +271,15 @@ begin
     JO.FromSimpleObject(Self);
     JO['FormSettings'].ObjectValue.FromSimpleObject(FFormSettings);
     JO['MessageListSettings'].ObjectValue.FromSimpleObject(FMessageListSettings);
-    for I := 0 to FMessageListSettings.PanelPositions.Count - 1 do
+    for I := 0 to FMessageListSettings.HorizontalPanelPositions.Count - 1 do
     begin
-      Logger.Send(FMessageListSettings.PanelPositions[I]);
-      JO['MessageListSettings'].A['Positions'].Add(FMessageListSettings.PanelPositions[I]);
+      JO['MessageListSettings'].A['HorizontalPanelPositions']
+        .Add(FMessageListSettings.HorizontalPanelPositions[I]);
+    end;
+    for I := 0 to FMessageListSettings.LeftVerticalPanelPositions.Count - 1 do
+    begin
+      JO['MessageListSettings'].A['LeftVerticalPanelPositions']
+        .Add(FMessageListSettings.LeftVerticalPanelPositions[I]);
     end;
     JO['WinODSSettings'].ObjectValue.FromSimpleObject(FWinODSSettings);
     JO['WinIPCSettings'].ObjectValue.FromSimpleObject(FWinIPCSettings);

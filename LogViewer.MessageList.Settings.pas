@@ -44,15 +44,16 @@ type
 
   TMessageListSettings = class(TPersistent)
   private
-    FAutoScrollMessages     : Boolean;
-    FAutoFilterMessages     : Boolean;
-    FSmartTimeStamps        : Boolean;
-    FDynamicAutoSizeColumns : Boolean;
-    FHideColumnHeaders      : Boolean;
-    FOnChanged              : Event<TNotifyEvent>;
-    FVisibleMessageTypes    : TLogMessageTypes;
-    FVisibleValueTypes      : TStringList;
-    FPanelPositions         : Vector<Double>;
+    FAutoScrollMessages         : Boolean;
+    FAutoFilterMessages         : Boolean;
+    FSmartTimeStamps            : Boolean;
+    FDynamicAutoSizeColumns     : Boolean;
+    FHideColumnHeaders          : Boolean;
+    FOnChanged                  : Event<TNotifyEvent>;
+    FVisibleMessageTypes        : TLogMessageTypes;
+    FVisibleValueTypes          : TStringList;
+    FHorizontalPanelPositions   : Vector<Double>;
+    FLeftVerticalPanelPositions : Vector<Double>;
 
   protected
     {$REGION 'property access methods'}
@@ -91,8 +92,11 @@ type
     property VisibleValueTypes: TStrings
       read GetVisibleValueTypes;
 
-    property PanelPositions: Vector<Double>
-      read FPanelPositions;
+    property HorizontalPanelPositions: Vector<Double>
+      read FHorizontalPanelPositions;
+
+    property LeftVerticalPanelPositions: Vector<Double>
+      read FLeftVerticalPanelPositions;
 
   published
     property AutoScrollMessages: Boolean
@@ -124,9 +128,11 @@ begin
   FVisibleValueTypes.Duplicates := dupIgnore;
   FVisibleMessageTypes := ALL_MESSAGES;
   // defaults
-  FPanelPositions.Add(0.2);
-  FPanelPositions.Add(0.7);
-  FPanelPositions.Add(1);
+  FHorizontalPanelPositions.Add(0.2);
+  FHorizontalPanelPositions.Add(0.7);
+  FHorizontalPanelPositions.Add(1);
+  FLeftVerticalPanelPositions.Add(0.3);
+  FLeftVerticalPanelPositions.Add(1);
 end;
 
 procedure TMessageListSettings.BeforeDestruction;
@@ -256,10 +262,12 @@ begin
   begin
     LSettings := TMessageListSettings(Source);
     AutoScrollMessages     := LSettings.AutoScrollMessages;
+    AutoFilterMessages     := LSettings.AutoFilterMessages;
     VisibleMessageTypes    := LSettings.VisibleMessageTypes;
     DynamicAutoSizeColumns := LSettings.DynamicAutoSizeColumns;
     HideColumnHeaders      := LSettings.HideColumnHeaders;
-    PanelPositions.Assign(LSettings.PanelPositions.Data);
+    HorizontalPanelPositions.Assign(LSettings.HorizontalPanelPositions.Data);
+    LeftVerticalPanelPositions.Assign(LSettings.LeftVerticalPanelPositions.Data);
   end
   else
     inherited Assign(Source);

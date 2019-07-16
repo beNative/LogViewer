@@ -46,7 +46,7 @@ uses
   LogViewer.CallStack.Data, LogViewer.CallStack.View, LogViewer.ValueList.View,
   LogViewer.MessageList.Settings, LogViewer.MessageList.LogNode,
   LogViewer.DisplayValues.Settings, LogViewer.DataSet.View,
-  LogViewer.Image.View, LogViewer.RawData.View;
+  LogViewer.Image.View, LogViewer.RawData.View, LogViewer.MessageData.View;
 
 type
   TfrmMessageList = class(TForm, ILogViewer)
@@ -74,6 +74,7 @@ type
     tsRawData                  : TKTabSheet;
     tsTextViewer               : TKTabSheet;
     tsValueList                : TKTabSheet;
+    pnlMessageData: TPanel;
     {$ENDREGION}
 
     procedure chkShowWatchHistoryClick(Sender: TObject);
@@ -94,6 +95,7 @@ type
     procedure pnlMessagesResize(Sender: TObject);
     procedure tsRawDataShow(Sender: TObject);
     procedure chkSyncWithSelectedMessageClick(Sender: TObject);
+    procedure pnlMainSplitterMoved(Sender: TObject);
 
   private class var
     FCounter : Integer;
@@ -108,6 +110,7 @@ type
     FSubscriber                  : ISubscriber;
     FCallStackView               : TfrmCallStackView;
     FWatchesView                 : TfrmWatchesView;
+    FMessageDataView             : TfrmMessageDataView;
     FManager                     : ILogViewerManager;
     FEditorView                  : IEditorView;
     FExpandParents               : Boolean;
@@ -147,14 +150,6 @@ type
       Sender : TBaseVirtualTree;
       Node   : PVirtualNode;
       Column : TColumnIndex
-    );
-    procedure FLogTreeViewFocusChanging(
-      Sender      : TBaseVirtualTree;
-      OldNode     : PVirtualNode;
-      NewNode     : PVirtualNode;
-      OldColumn   : TColumnIndex;
-      NewColumn   : TColumnIndex;
-      var Allowed : Boolean
     );
     procedure FLogTreeViewFreeNode(
       Sender : TBaseVirtualTree;
@@ -242,6 +237,8 @@ type
     procedure Clear;
     procedure AutoFitColumns;
     procedure ApplySettings;
+    procedure LoadPanelSettings;
+    procedure SavePanelSettings;
 
     procedure ProcessMessage(AStream: TStream);
 
@@ -271,6 +268,7 @@ type
     procedure CreateDataSetView;
     procedure CreateImageView;
     procedure CreateRawDataView;
+    procedure CreateMessageDataView;
 
     procedure CollapseAll;
     procedure ExpandAll;
@@ -379,6 +377,7 @@ begin
   CreateDataSetView;
   CreateImageView;
   CreateRawDataView;
+  CreateMessageDataView;
   pgcMessageData.ActivePage := tsMessageView;
   Caption := Copy(ClassName, 2, Length(ClassName)) + IntToStr(FCounter);
   Logger.Info('Creating new message viewer (%s)', [Caption]);
@@ -390,18 +389,12 @@ begin
 end;
 
 procedure TfrmMessageList.BeforeDestruction;
-var
-  I : Integer;
 begin
   Logger.Track(Self, 'BeforeDestruction');
   if Assigned(FSettings) then
   begin
     FSettings.OnChanged.Remove(FSettingsChanged);
-    for I := 0 to pnlMain.PanelCollection.Count - 1 do
-    begin
-      FSettings.PanelPositions[I] := pnlMain.PanelCollection[I].Position;
-      Logger.Send(pnlMain.PanelCollection[I].Position);
-    end;
+    SavePanelSettings;
     FSettings := nil;
   end;
   if Assigned(FSubscriber) then
@@ -481,7 +474,6 @@ begin
 
   FLogTreeView.OnBeforeCellPaint := FLogTreeViewBeforeCellPaint;
   FLogTreeView.OnFocusChanged    := FLogTreeViewFocusChanged;
-  FLogTreeView.OnFocusChanging   := FLogTreeViewFocusChanging;
   FLogTreeView.OnDblClick        := FLogTreeViewDblClick;
   FLogTreeView.OnHotChange       := FLogTreeViewHotChange;
   FLogTreeView.OnInitNode        := FLogTreeViewInitNode;
@@ -547,6 +539,12 @@ begin
   FLogTreeView.Header.AutoSizeIndex := COLUMN_MAIN;
   FLogTreeView.Header.Options       :=
     FLogTreeView.Header.Options + [hoFullRepaintOnResize];
+end;
+
+procedure TfrmMessageList.CreateMessageDataView;
+begin
+  FMessageDataView := TfrmMessageDataView.Create(Self);
+  AssignFormParent(FMessageDataView, pnlMessageData);
 end;
 
 procedure TfrmMessageList.CreateRawDataView;
@@ -821,10 +819,9 @@ begin
     TargetCanvas.FillRect(CellRect);
   end;
 
-
-  // draw indentation background
   if Column = Sender.Header.MainColumn then
   begin
+    // draw indentation background
     LIndent := Sender.GetNodeLevel(Node) * FLogTreeView.Indent;
     LRect := CellRect;
     Inc(LRect.Left, LIndent);
@@ -859,25 +856,6 @@ begin
       TargetCanvas.FillRect(LRect);
     end;
   end
-end;
-
-procedure TfrmMessageList.FLogTreeViewFocusChanging(Sender: TBaseVirtualTree;
-  OldNode, NewNode: PVirtualNode; OldColumn, NewColumn: TColumnIndex;
-  var Allowed: Boolean);
-//var
-//  LN : TLogNode;
-begin
-  //Todo: merge with Changed?
-  //The CallStack is only updated if the parent changes
-//  if
-//    (OldNode = nil) or (NewNode = nil) or (OldNode.Parent <> NewNode.Parent)
-//  ) then
-//  begin
-//    LN := Sender.GetNodeData<TLogNode>(NewNode);
-    //Logger.Send ('LN', LN.Value);
-//    UpdateCallStackDisplay(LN);
-  //end;
-  //FUpdate := True;
 end;
 
 procedure TfrmMessageList.FLogTreeViewFocusChanged(Sender: TBaseVirtualTree;
@@ -1221,6 +1199,11 @@ begin
 end;
 {$ENDREGION}
 
+procedure TfrmMessageList.pnlMainSplitterMoved(Sender: TObject);
+begin
+  Modified;
+end;
+
 procedure TfrmMessageList.pnlMessagesResize(Sender: TObject);
 begin
   Modified;
@@ -1320,7 +1303,6 @@ end;
 
 procedure TfrmMessageList.Modified;
 begin
-  Logger.Track(Self, 'Modified');
   FUpdate := True;
 end;
 
@@ -1346,19 +1328,42 @@ end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
-procedure TfrmMessageList.ApplySettings;
+procedure TfrmMessageList.LoadPanelSettings;
 var
   I : Integer;
 begin
-  Logger.Track(Self, 'ApplySettings');
-  for I := 0 to pnlMain.PanelCollection.Count - 1 do
+  for I :=  0 to pnlMain.PanelCollection.Count - 2 do
   begin
-    pnlMain.PanelCollection[I].Position := Settings.PanelPositions[I];
-    if Settings.HideColumnHeaders then
-      FLogTreeView.Header.Options := FLogTreeView.Header.Options - [hoVisible]
-    else
-      FLogTreeView.Header.Options := FLogTreeView.Header.Options + [hoVisible];
+    pnlMain.PanelCollection[I].Position := Settings.HorizontalPanelPositions[I];
   end;
+  for I :=  0 to pnlLeft.PanelCollection.Count - 2 do
+  begin
+    pnlLeft.PanelCollection[I].Position := Settings.LeftVerticalPanelPositions[I];
+  end;
+end;
+
+procedure TfrmMessageList.SavePanelSettings;
+var
+  I : Integer;
+begin
+  for I := 0 to pnlMain.PanelCollection.Count - 2 do
+  begin
+    FSettings.HorizontalPanelPositions[I] := pnlMain.PanelCollection[I].Position;
+  end;
+  for I :=  0 to pnlLeft.PanelCollection.Count - 2 do
+  begin
+    FSettings.LeftVerticalPanelPositions[I] := pnlLeft.PanelCollection[I].Position;
+  end;
+end;
+
+procedure TfrmMessageList.ApplySettings;
+begin
+  Logger.Track(Self, 'ApplySettings');
+  if Settings.HideColumnHeaders then
+    FLogTreeView.Header.Options := FLogTreeView.Header.Options - [hoVisible]
+  else
+    FLogTreeView.Header.Options := FLogTreeView.Header.Options + [hoVisible];
+  LoadPanelSettings;
   Modified;
 end;
 
@@ -1540,6 +1545,8 @@ begin
 end;
 
 {$REGION 'Commands'}
+{ Clear all received messages. }
+
 procedure TfrmMessageList.Clear;
 begin
   ClearMessageDetailsControls;
@@ -1560,7 +1567,6 @@ end;
 
 procedure TfrmMessageList.CollapseAll;
 begin
-  Logger.Track(Self, 'CollapseAll');
   FLogTreeView.FullCollapse;
   Modified;
   FAutoSizeColumns := False;
@@ -1575,7 +1581,6 @@ end;
 
 procedure TfrmMessageList.GotoFirst;
 begin
-  Logger.Track(Self, 'GotoFirst');
   if FWatchesView.HasFocus then
   begin
     FWatchesView.GotoFirst;
@@ -1591,7 +1596,6 @@ end;
 
 procedure TfrmMessageList.GotoLast;
 begin
-  Logger.Track(Self, 'GotoLast');
   if FWatchesView.HasFocus then
   begin
     FWatchesView.GotoLast;
@@ -1623,6 +1627,8 @@ begin
   pgcMessageDetails.ActivePage := tsImageViewer;
   FImageView.LoadFromStream(ALogNode.MessageData);
 end;
+
+{ Calculates the callstack display. }
 
 procedure TfrmMessageList.UpdateCallStackDisplay(ALogNode: TLogNode);
 var
@@ -1912,6 +1918,7 @@ begin
     begin
       UpdateMessageDetails(LN);
       UpdateCallStackDisplay(LN);
+      FMessageDataView.LogNode := LN;
     end;
   end;
 end;
@@ -1927,6 +1934,7 @@ begin
     begin
       Actions.UpdateActions;
     end;
+    SavePanelSettings;
     FUpdate := False;
   end;
   inherited UpdateActions;

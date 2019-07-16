@@ -231,7 +231,7 @@
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.MessageData.View.pas">
-            <Form>frmMessageData</Form>
+            <Form>TfrmMessageData</Form>
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.CallStack.Settings.View.pas">

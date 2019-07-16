@@ -168,12 +168,6 @@ end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
-procedure TfrmValueListView.Clear;
-begin
-  FFieldView.Clear;
-  FPropertyView.Clear;
-end;
-
 function TfrmValueListView.GetData: IDynamicRecord;
 begin
   Result := FData;
@@ -205,6 +199,9 @@ procedure TfrmValueListView.SetProperties(const Value: IDynamicRecord);
 begin
   FPropertyView.Data := Value;
 end;
+{$ENDREGION}
+
+{$REGION 'protected methods'}
 procedure TfrmValueListView.UpdateData;
 var
   LFieldData    : DynamicRecord;
@@ -239,6 +236,14 @@ begin
       pnlMain.PanelCollection[1].Visible := False;
     end;
   end;
+end;
+{$ENDREGION}
+
+{$REGION 'public methods'}
+procedure TfrmValueListView.Clear;
+begin
+  FFieldView.Clear;
+  FPropertyView.Clear;
 end;
 {$ENDREGION}
 

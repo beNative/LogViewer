@@ -37,7 +37,7 @@ uses
 {$ENDREGION}
 
 type
-  TLogNode = class
+  TLogNode = class(TPersistent)
   private
     FId          : Int64;
     FText        : string; // warning/info/error
