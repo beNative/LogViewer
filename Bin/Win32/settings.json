@@ -2,7 +2,7 @@
 	"FormSettings": {
 		"Left": 343,
 		"Top": 85,
-		"Width": 1809,
+		"Width": 1817,
 		"Height": 1067,
 		"FormStyle": 0,
 		"WindowState": 0
@@ -11,12 +11,12 @@
 		"AutoScrollMessages": true,
 		"AutoFilterMessages": true,
 		"DynamicAutoSizeColumns": true,
-		"MessageDetailsVisible": true,
+		"MessageDetailsVisible": false,
 		"SmartTimeStamps": true,
 		"ColumnHeadersVisible": false,
 		"HorizontalPanelPositions": [
 			0.208588957055215,
-			0.634132738427217,
+			0.748466257668712,
 			1
 		],
 		"LeftVerticalPanelPositions": [
@@ -33,7 +33,7 @@
 	"ZeroMQSettings": {
 		"Enabled": true,
 		"PollingInterval": 100,
-		"Endpoints": "default localhost=tcp://localhost:5555\r\nlocalhost2=tcp://localhost:5556\r\nLogViewer=tcp://localhost:42134\r\n"
+		"Endpoints": "default localhost=tcp://localhost:5555\r\nlocalhost2=tcp://localhost:5595\r\nLogViewer=tcp://localhost:42134\r\n"
 	},
 	"MQTTSettings": {
 		"Broker": "192.168.0.219",
@@ -87,7 +87,7 @@
 			"VerticalAlignment": 0
 		},
 		"TimeStamp": {
-			"BackgroundColor": -16777211,
+			"BackgroundColor": 15790320,
 			"FontName": "Segoe UI",
 			"FontColor": 16711680,
 			"FontSize": 8,
@@ -117,7 +117,7 @@
 			"VerticalAlignment": 1
 		},
 		"Value": {
-			"BackgroundColor": 15793151,
+			"BackgroundColor": 15794175,
 			"FontName": "Segoe UI",
 			"FontColor": 0,
 			"FontSize": 8,
@@ -177,7 +177,7 @@
 			"VerticalAlignment": 0
 		},
 		"Conditional": {
-			"BackgroundColor": 15597032,
+			"BackgroundColor": 16121836,
 			"FontName": "Segoe UI",
 			"FontColor": 8421376,
 			"FontSize": 8,
@@ -191,7 +191,7 @@
 		"ColumnHeadersVisible": false,
 		"OnlyTrackChanges": true,
 		"WatchHistoryVisible": true,
-		"SyncWithSelection": false
+		"SyncWithSelection": true
 	},
 	"CallStackSettings": {
 		"ColumnHeadersVisible": false

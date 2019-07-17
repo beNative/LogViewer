@@ -51,12 +51,19 @@ var
   S  : string;
   TF : TTextFormatSettings;
 begin
-  S := TFontDialog(Dialog).Font.Name;
-  Result := GetValue(PItem, S);
-  TF := (PItem.Component) as TTextFormatSettings;
-  TF.FontColor := TFontDialog(Dialog).Font.Color;
-  TF.FontSize  := TFontDialog(Dialog).Font.Size;
-  TF.FontStyle := TFontDialog(Dialog).Font.Style;
+  if MatchStr(PItem.Name, ['FontName']) then
+  begin
+    S := TFontDialog(Dialog).Font.Name;
+    Result := GetValue(PItem, S);
+    TF := (PItem.Component) as TTextFormatSettings;
+    TF.FontColor := TFontDialog(Dialog).Font.Color;
+    TF.FontSize  := TFontDialog(Dialog).Font.Size;
+    TF.FontStyle := TFontDialog(Dialog).Font.Style;
+  end
+  else
+  begin
+    Result := inherited DialogResultValue(PItem, Dialog)
+  end;
 end;
 
 function TDisplayValuesValueManager.GetDialog(

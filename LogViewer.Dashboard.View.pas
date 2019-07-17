@@ -976,7 +976,7 @@ end;
 procedure TfrmDashboard.CreateMIDIReceiver;
 var
   I           : Integer;
-  LSubscriber : ISubscriber;
+  //LSubscriber : ISubscriber;
 begin
   FMidiReceiver := TLogViewerFactories.CreateMidiReceiver(FManager);
   FManager.AddReceiver(FMidiReceiver);
