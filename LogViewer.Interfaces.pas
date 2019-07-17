@@ -263,8 +263,6 @@ type
     procedure GotoFirst;
     procedure GotoLast;
     procedure SetFocusToFilter;
-    procedure SelectAll;
-    procedure ClearSelection;
   end;
 
   ILogViewerManager = interface

@@ -148,7 +148,7 @@ begin
     FCallStack as IObjectList,
     CDS
   );
-  FTVPCallStack.ShowHeader := not FSettings.HideColumnHeaders;
+  FTVPCallStack.ShowHeader := FSettings.ColumnHeadersVisible;
 end;
 
 destructor TfrmCallStackView.Destroy;
@@ -234,7 +234,7 @@ end;
 
 procedure TfrmCallStackView.SettingsChanged(Sender: TObject);
 begin
-  FTVPCallStack.ShowHeader := not FSettings.HideColumnHeaders;
+  FTVPCallStack.ShowHeader := FSettings.ColumnHeadersVisible;
 end;
 {$ENDREGION}
 

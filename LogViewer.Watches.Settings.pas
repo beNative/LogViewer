@@ -26,11 +26,11 @@ uses
 type
   TWatchSettings = class(TPersistent)
   private
-    FOnChanged           : Event<TNotifyEvent>;
-    FOnlyTrackChanges    : Boolean;
-    FWatchHistoryVisible : Boolean;
-    FSyncWithSelection   : Boolean;
-    FHideColumnHeaders   : Boolean;
+    FOnChanged            : Event<TNotifyEvent>;
+    FOnlyTrackChanges     : Boolean;
+    FWatchHistoryVisible  : Boolean;
+    FSyncWithSelection    : Boolean;
+    FColumnHeadersVisible : Boolean;
 
   protected
     {$REGION 'property access methods'}
@@ -41,8 +41,8 @@ type
     procedure SetOnlyTrackChanges(const Value: Boolean);
     function GetWatchHistoryVisible: Boolean;
     procedure SetWatchHistoryVisible(const Value: Boolean);
-    function GetHideColumnHeaders: Boolean;
-    procedure SetHideColumnHeaders(const Value: Boolean);
+    function GetColumnHeadersVisible: Boolean;
+    procedure SetColumnHeadersVisible(const Value: Boolean);
     {$ENDREGION}
 
     procedure Changed;
@@ -53,8 +53,8 @@ type
     procedure Assign(Source: TPersistent); override;
 
   published
-    property HideColumnHeaders: Boolean
-      read GetHideColumnHeaders write SetHideColumnHeaders;
+    property ColumnHeadersVisible: Boolean
+      read GetColumnHeadersVisible write SetColumnHeadersVisible;
 
     property OnlyTrackChanges: Boolean
       read GetOnlyTrackChanges write SetOnlyTrackChanges;
@@ -79,16 +79,16 @@ end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
-function TWatchSettings.GetHideColumnHeaders: Boolean;
+function TWatchSettings.GetColumnHeadersVisible: Boolean;
 begin
-  Result := FHideColumnHeaders;
+  Result := FColumnHeadersVisible;
 end;
 
-procedure TWatchSettings.SetHideColumnHeaders(const Value: Boolean);
+procedure TWatchSettings.SetColumnHeadersVisible(const Value: Boolean);
 begin
-  if Value <> HideColumnHeaders then
+  if Value <> ColumnHeadersVisible then
   begin
-    FHideColumnHeaders := Value;
+    FColumnHeadersVisible := Value;
     Changed;
   end;
 end;
@@ -152,11 +152,11 @@ var
 begin
   if Source is TWatchSettings then
   begin
-    LSettings           := TWatchSettings(Source);
-    OnlyTrackChanges    := LSettings.OnlyTrackChanges;
-    WatchHistoryVisible := LSettings.WatchHistoryVisible;
-    SyncWithSelection   := LSettings.SyncWithSelection;
-    HideColumnHeaders   := LSettings.HideColumnHeaders;
+    LSettings            := TWatchSettings(Source);
+    OnlyTrackChanges     := LSettings.OnlyTrackChanges;
+    WatchHistoryVisible  := LSettings.WatchHistoryVisible;
+    SyncWithSelection    := LSettings.SyncWithSelection;
+    ColumnHeadersVisible := LSettings.ColumnHeadersVisible;
   end
   else
     inherited Assign(Source);

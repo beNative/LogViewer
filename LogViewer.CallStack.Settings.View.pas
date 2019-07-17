@@ -44,9 +44,6 @@ type
 
   end;
 
-var
-  frmCallStackSettings: TfrmCallStackSettings;
-
 implementation
 
 {$R *.dfm}
@@ -57,7 +54,7 @@ constructor TfrmCallStackSettings.Create(AOwner: TComponent;
 begin
   inherited Create(AOwner);
   FSettings := ASettings;
-  chkHideColumnHeaders.Checked := FSettings.HideColumnHeaders;
+  chkHideColumnHeaders.Checked := not FSettings.ColumnHeadersVisible;
 end;
 
 destructor TfrmCallStackSettings.Destroy;
@@ -70,7 +67,7 @@ end;
 {$REGION 'event handlers'}
 procedure TfrmCallStackSettings.chkHideColumnHeadersClick(Sender: TObject);
 begin
-  FSettings.HideColumnHeaders := (Sender as TCheckBox).Checked;
+  FSettings.ColumnHeadersVisible := not (Sender as TCheckBox).Checked;
 end;
 {$ENDREGION}
 

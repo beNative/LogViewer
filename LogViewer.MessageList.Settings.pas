@@ -48,12 +48,13 @@ type
     FAutoFilterMessages         : Boolean;
     FSmartTimeStamps            : Boolean;
     FDynamicAutoSizeColumns     : Boolean;
-    FHideColumnHeaders          : Boolean;
+    FColumnHeadersVisible       : Boolean;
     FOnChanged                  : Event<TNotifyEvent>;
     FVisibleMessageTypes        : TLogMessageTypes;
     FVisibleValueTypes          : TStringList;
     FHorizontalPanelPositions   : Vector<Double>;
     FLeftVerticalPanelPositions : Vector<Double>;
+    FMessageDetailsVisible      : Boolean;
 
   protected
     {$REGION 'property access methods'}
@@ -69,8 +70,10 @@ type
     procedure SetAutoFilterMessages(const Value: Boolean);
     function GetDynamicAutoSizeColumns: Boolean;
     procedure SetDynamicAutoSizeColumns(const Value: Boolean);
-    function GetHideColumnHeaders: Boolean;
-    procedure SetHideColumnHeaders(const Value: Boolean);
+    function GetMessageDetailsVisible: Boolean;
+    procedure SetMessageDetailsVisible(const Value: Boolean);
+    function GetColumnHeadersVisible: Boolean;
+    procedure SetColumnHeadersVisible(const Value: Boolean);
     {$ENDREGION}
 
     procedure FVisibleValueTypesChange(Sender: TObject);
@@ -108,11 +111,14 @@ type
     property DynamicAutoSizeColumns: Boolean
       read GetDynamicAutoSizeColumns write SetDynamicAutoSizeColumns;
 
+    property MessageDetailsVisible: Boolean
+      read GetMessageDetailsVisible write SetMessageDetailsVisible;
+
     property SmartTimeStamps: Boolean
       read GetSmartTimeStamps write SetSmartTimeStamps;
 
-    property HideColumnHeaders: Boolean
-      read GetHideColumnHeaders write SetHideColumnHeaders;
+    property ColumnHeadersVisible: Boolean
+      read GetColumnHeadersVisible write SetColumnHeadersVisible;
   end;
 
 implementation
@@ -162,6 +168,20 @@ begin
   Result := FAutoScrollMessages;
 end;
 
+function TMessageListSettings.GetColumnHeadersVisible: Boolean;
+begin
+  Result := FColumnHeadersVisible;
+end;
+
+procedure TMessageListSettings.SetColumnHeadersVisible(const Value: Boolean);
+begin
+  if Value <> ColumnHeadersVisible then
+  begin
+    FColumnHeadersVisible := Value;
+    Changed;
+  end;
+end;
+
 procedure TMessageListSettings.SetAutoScrollMessages(const Value: Boolean);
 begin
   if Value <> AutoScrollMessages then
@@ -176,16 +196,16 @@ begin
   Result := FDynamicAutoSizeColumns;
 end;
 
-function TMessageListSettings.GetHideColumnHeaders: Boolean;
+function TMessageListSettings.GetMessageDetailsVisible: Boolean;
 begin
-  Result := FHideColumnHeaders;
+  Result := FMessageDetailsVisible;
 end;
 
-procedure TMessageListSettings.SetHideColumnHeaders(const Value: Boolean);
+procedure TMessageListSettings.SetMessageDetailsVisible(const Value: Boolean);
 begin
-  if Value <> HideColumnHeaders then
+  if Value <> MessageDetailsVisible then
   begin
-    FHideColumnHeaders := Value;
+    FMessageDetailsVisible := Value;
     Changed;
   end;
 end;
@@ -265,7 +285,8 @@ begin
     AutoFilterMessages     := LSettings.AutoFilterMessages;
     VisibleMessageTypes    := LSettings.VisibleMessageTypes;
     DynamicAutoSizeColumns := LSettings.DynamicAutoSizeColumns;
-    HideColumnHeaders      := LSettings.HideColumnHeaders;
+    ColumnHeadersVisible   := LSettings.ColumnHeadersVisible;
+    MessageDetailsVisible  := LSettings.MessageDetailsVisible;
     HorizontalPanelPositions.Assign(LSettings.HorizontalPanelPositions.Data);
     LeftVerticalPanelPositions.Assign(LSettings.LeftVerticalPanelPositions.Data);
   end

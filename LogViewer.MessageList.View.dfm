@@ -120,7 +120,7 @@ object frmMessageList: TfrmMessageList
         Align = alTop
         Alignment = taLeftJustify
         BevelOuter = bvNone
-        Caption = 'Message Details'
+        Caption = 'Message content'
         Color = clWhite
         Font.Charset = ANSI_CHARSET
         Font.Color = clGray
@@ -130,6 +130,26 @@ object frmMessageList: TfrmMessageList
         ParentBackground = False
         ParentFont = False
         TabOrder = 0
+        DesignSize = (
+          418
+          20)
+        object chkShowDetails: TCheckBox
+          Left = 325
+          Top = 2
+          Width = 92
+          Height = 17
+          Hint = 'Show metadata of selected message.'
+          Anchors = [akTop, akRight]
+          Caption = 'Show details'
+          Font.Charset = ANSI_CHARSET
+          Font.Color = clGray
+          Font.Height = -11
+          Font.Name = 'Segoe UI'
+          Font.Style = []
+          ParentFont = False
+          TabOrder = 0
+          OnClick = chkShowDetailsClick
+        end
       end
       object pgcMessageData: TKPageControl
         Left = 0
@@ -150,11 +170,8 @@ object frmMessageList: TfrmMessageList
         TabPanelOptions.Colors.SelectedBottom = clBtnHighlight
         TabPanelOptions.Colors.TabBorder = cl3DLight
         TabPanelOptions.Options = [toDrag, toBrightTopColors]
-        ExplicitTop = 177
-        ExplicitHeight = 569
         object tsMessageView: TKTabSheet
           Caption = 'MessageView'
-          ExplicitHeight = 569
           object pgcMessageDetails: TKPageControl
             Left = 0
             Top = 0
@@ -174,14 +191,11 @@ object frmMessageList: TfrmMessageList
             TabPanelOptions.Colors.SelectedBottom = clBtnHighlight
             TabPanelOptions.Colors.TabBorder = clBtnHighlight
             TabPanelOptions.Options = []
-            ExplicitHeight = 569
             object tsValueList: TKTabSheet
               Caption = 'Value list'
-              ExplicitHeight = 545
             end
             object tsTextViewer: TKTabSheet
               Caption = 'Text viewer'
-              ExplicitHeight = 545
               object pnlTextViewer: TPanel
                 Left = 0
                 Top = 0
@@ -192,21 +206,17 @@ object frmMessageList: TfrmMessageList
                 BevelOuter = bvNone
                 Color = clWhite
                 TabOrder = 0
-                ExplicitHeight = 545
               end
             end
             object tsImageViewer: TKTabSheet
               Caption = 'Image viewer'
-              ExplicitHeight = 545
             end
             object tsDataSet: TKTabSheet
               Caption = 'Dataset viewer'
-              ExplicitHeight = 545
             end
             object tsRawData: TKTabSheet
               Caption = 'Raw data viewer'
               OnShow = tsRawDataShow
-              ExplicitHeight = 545
             end
           end
         end
@@ -351,7 +361,7 @@ object frmMessageList: TfrmMessageList
     Left = 55
     Top = 22
     Bitmap = {
-      494C010117001900700110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010117001900780110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

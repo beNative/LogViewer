@@ -40,16 +40,19 @@ type
   TLogNode = class(TPersistent)
   private
     FId          : Int64;
-    FText        : string; // warning/info/error
+    FText        : string;
+    FTextSize    : Integer;
     FVTNode      : PVirtualNode;
-    FValueName   : string; // variables
+    FValueName   : string;
     FValueType   : string;
     FValue       : string;
     FMessageType : TLogMessageType;
     FLogLevel    : Byte;
     FMessageData : TStream; // binary data stream for bitmaps, etc.
     FTimeStamp   : TDateTime;
-    FHighlighter : string; // highlighter to use in text editor
+    FHighlighter : string;
+    function GetTextSize: Integer;
+    procedure SetTextSize(const Value: Integer); // highlighter to use in text editor
 
   protected
     {$REGION 'property access methods'}
@@ -80,6 +83,10 @@ type
   public
     procedure BeforeDestruction; override;
 
+    property VTNode: PVirtualNode
+      read GetVTNode write SetVTNode;
+
+  published // for logging
     property Id: Int64
       read GetId write SetId;
 
@@ -91,6 +98,9 @@ type
 
     property Text: string
       read GetText write SetText;
+
+    property TextSize: Integer
+      read GetTextSize write SetTextSize;
 
     property ValueName: string
       read GetValueName write SetValueName;
@@ -110,8 +120,6 @@ type
     property TimeStamp: TDateTime
       read GetTimeStamp write SetTimeStamp;
 
-    property VTNode: PVirtualNode
-      read GetVTNode write SetVTNode;
   end;
 
 implementation
@@ -187,6 +195,16 @@ end;
 procedure TLogNode.SetText(const Value: string);
 begin
   FText := Value;
+end;
+
+function TLogNode.GetTextSize: Integer;
+begin
+  Result := FTextSize;
+end;
+
+procedure TLogNode.SetTextSize(const Value: Integer);
+begin
+  FTextSize := Value;
 end;
 
 function TLogNode.GetTimeStamp: TDateTime;

@@ -45,8 +45,6 @@ type
     procedure GotoFirst;
     procedure GotoLast;
     procedure SetFocusToFilter;
-    procedure SelectAll;
-    procedure ClearSelection;
 
   public
     constructor Create(AManager: ILogViewerManager);
@@ -133,22 +131,6 @@ begin
   if Assigned(ActiveView) then
   begin
     ActiveView.GotoLast;
-  end;
-end;
-
-procedure TLogViewerCommands.SelectAll;
-begin
-  if Assigned(ActiveView) then
-  begin
-//    ActiveView.SelectAll;
-  end;
-end;
-
-procedure TLogViewerCommands.ClearSelection;
-begin
-  if Assigned(ActiveView) then
-  begin
-//    ActiveView.SelectNone;
   end;
 end;
 

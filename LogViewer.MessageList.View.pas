@@ -23,11 +23,6 @@ interface
 {$REGION 'documentation'}
 { Message viewer responsible for displaying all messages from an associated
   log channel (IChannelReceiver receiver instance) }
-
-{
-  TODO:
-    - auto show message details, watches window and callstack (WinODS)
-}
 {$ENDREGION}
 
 uses
@@ -63,6 +58,7 @@ type
     pnlLeft                    : TOMultiPanel;
     pnlMain                    : TOMultiPanel;
     pnlMessageContent          : TPanel;
+    pnlMessageData             : TPanel;
     pnlMessages                : TPanel;
     pnlRight                   : TPanel;
     pnlTextViewer              : TPanel;
@@ -74,7 +70,7 @@ type
     tsRawData                  : TKTabSheet;
     tsTextViewer               : TKTabSheet;
     tsValueList                : TKTabSheet;
-    pnlMessageData: TPanel;
+    chkShowDetails: TCheckBox;
     {$ENDREGION}
 
     procedure chkShowWatchHistoryClick(Sender: TObject);
@@ -96,6 +92,7 @@ type
     procedure tsRawDataShow(Sender: TObject);
     procedure chkSyncWithSelectedMessageClick(Sender: TObject);
     procedure pnlMainSplitterMoved(Sender: TObject);
+    procedure chkShowDetailsClick(Sender: TObject);
 
   private class var
     FCounter : Integer;
@@ -368,6 +365,8 @@ begin
     Manager.Settings.WatchSettings.WatchHistoryVisible;
   chkSyncWithSelectedMessage.Checked :=
     Manager.Settings.WatchSettings.SyncWithSelection;
+  chkShowDetails.Checked := Settings.MessageDetailsVisible;
+  pnlMessageData.Visible := Settings.MessageDetailsVisible;
   FExpandParents := True;
   CreateEditor;
   CreateLogTreeView;
@@ -530,12 +529,11 @@ begin
 
   C := FLogTreeView.Header.Columns.Add; // timestamp
   C.Text     := STimestamp;
-  // TODO: measure with respect of font configuration
-  C.Width    := 68;
-  C.MinWidth := 68;
-  C.MaxWidth := 68;
+  C.MinWidth := 10 * DisplayValuesSettings.TimeStamp.Font.Size;
+  C.Width    := C.MinWidth;
+  C.MaxWidth := C.MinWidth;
   C.Alignment := taRightJustify;
-
+  Logger.SendObject('TimeStampCol', C);
   FLogTreeView.Header.AutoSizeIndex := COLUMN_MAIN;
   FLogTreeView.Header.Options       :=
     FLogTreeView.Header.Options + [hoFullRepaintOnResize];
@@ -614,7 +612,7 @@ end;
 
 function TfrmMessageList.GetSelectedLogNode: TLogNode;
 begin
-  if Assigned(FLogTreeView.FocusedNode) then
+  if Assigned(FLogTreeView) and Assigned(FLogTreeView.FocusedNode) then
   begin
     Result := FLogTreeView.GetNodeData<TLogNode>(FLogTreeView.FocusedNode);
   end
@@ -648,7 +646,6 @@ begin
   if Settings.AutoFilterMessages then
   begin
     FUpdate := True;
-    //UpdateLogTreeView;
   end;
 end;
 
@@ -906,7 +903,7 @@ begin
     begin
       ImageIndex := Integer(ND.MessageType);
       if not (vsExpanded in Node.States) and (ND.MessageType = lmtEnterMethod)
-        {and (Node.ChildCount > 0)} and Assigned(ND.VTNode.NextSibling) then
+        and Assigned(ND.VTNode.NextSibling) then
       begin
         ImageIndex := 9;
       end;
@@ -947,11 +944,7 @@ var
 begin
   LN := Sender.GetNodeData<TLogNode>(Node);
   Guard.CheckNotNull(LN, 'ND');
-  if Column = COLUMN_LEVEL then
-  begin
-    CellText := LN.LogLevel.ToString;
-  end
-  else if Column = COLUMN_MAIN then
+  if Column = COLUMN_MAIN then
   begin
     if LN.MessageType in NotificationMessages + TracingMessages then
     begin
@@ -1054,6 +1047,7 @@ begin
   LN.VTNode      := Node;
   LN.LogLevel    := FCurrentMsg.LogLevel;
   LN.Id          := FMessageCount;
+  LN.TextSize    := Length(FCurrentMsg.Text); // correct as it is a UTF8String
   LText          := string(FCurrentMsg.Text);
   case LN.MessageType of
     lmtValue, lmtComponent, lmtStrings, lmtPersistent, lmtObject, lmtInterface,
@@ -1092,13 +1086,13 @@ begin
           I := S.IndexOf('(');
           if I > 1 then
           begin
-            LN.ValueName := Copy(S, 1, I);
+            LName := Copy(S, 1, I);
             LN.Highlighter := Trim(ExtractText(S, '(', ')'));
           end;
           if I <> -1 then
             SL.Delete(0);
         end;
-        LN.Value := SL.Text;
+        LValue := SL.Text;
       finally
         SL.Free;
       end;
@@ -1118,7 +1112,7 @@ end;
 procedure TfrmMessageList.FLogTreeViewFreeNode(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 var
-  LN: TLogNode;
+  LN : TLogNode;
 begin
   LN := Sender.GetNodeData<TLogNode>(Node);
   LN.Free;
@@ -1137,7 +1131,7 @@ end;
 
 { Triggered before either normal or fixed text is painted to allow finer
   customization (kind of sub cell painting). Here it is used to apply custom
-  settings to TargetCanvas.Font. }
+  font settings. }
 
 procedure TfrmMessageList.FLogTreeViewPaintText(Sender: TBaseVirtualTree;
   const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
@@ -1153,43 +1147,43 @@ begin
   begin
     case LN.MessageType of
       lmtInfo:
-        DVS.Info.AssignTo(TargetCanvas.Font);
+        DVS.Info.AssignTo(TargetCanvas);
       lmtWarning:
-        DVS.Warning.AssignTo(TargetCanvas.Font);
+        DVS.Warning.AssignTo(TargetCanvas);
       lmtError:
-        DVS.Error.AssignTo(TargetCanvas.Font);
+        DVS.Error.AssignTo(TargetCanvas);
       lmtConditional:
-        DVS.Conditional.AssignTo(TargetCanvas.Font);
+        DVS.Conditional.AssignTo(TargetCanvas);
       lmtEnterMethod:
       begin
         if IsCollapsedTracingNode(Sender, Node) then
-          DVS.Tracing.AssignTo(TargetCanvas.Font)
+          DVS.Tracing.AssignTo(TargetCanvas)
         else
-          DVS.Enter.AssignTo(TargetCanvas.Font);
+          DVS.Enter.AssignTo(TargetCanvas);
       end;
       lmtLeaveMethod:
-        DVS.Leave.AssignTo(TargetCanvas.Font);
+        DVS.Leave.AssignTo(TargetCanvas);
       lmtCheckpoint:
-        DVS.CheckPoint.AssignTo(TargetCanvas.Font);
+        DVS.CheckPoint.AssignTo(TargetCanvas);
       lmtAction:
-        DVS.Action.AssignTo(TargetCanvas.Font);
+        DVS.Action.AssignTo(TargetCanvas);
     end;
   end
   else if Column = COLUMN_VALUENAME then
   begin
-    DVS.ValueName.AssignTo(TargetCanvas.Font);
+    DVS.ValueName.AssignTo(TargetCanvas);
   end
   else if Column = COLUMN_VALUETYPE then
   begin
-    DVS.ValueType.AssignTo(TargetCanvas.Font);
+    DVS.ValueType.AssignTo(TargetCanvas);
   end
   else if Column = COLUMN_VALUE then
   begin
-    DVS.Value.AssignTo(TargetCanvas.Font);
+    DVS.Value.AssignTo(TargetCanvas);
   end
   else if Column = COLUMN_TIMESTAMP then
   begin
-    DVS.TimeStamp.AssignTo(TargetCanvas.Font);
+    DVS.TimeStamp.AssignTo(TargetCanvas);
   end;
 end;
 {$ENDREGION}
@@ -1203,6 +1197,11 @@ procedure TfrmMessageList.pnlMessagesResize(Sender: TObject);
 begin
   Modified;
   FAutoSizeColumns := False;
+end;
+
+procedure TfrmMessageList.chkShowDetailsClick(Sender: TObject);
+begin
+  Settings.MessageDetailsVisible := (Sender as TCheckBox).Checked;
 end;
 
 procedure TfrmMessageList.chkShowWatchHistoryClick(Sender: TObject);
@@ -1284,7 +1283,7 @@ function TfrmMessageList.IsCollapsedTracingNode(ATree: TBaseVirtualTree;
 var
   LN : TLogNode;
 begin
-  if not (vsExpanded in ANode.States) {and (ANode.ChildCount > 0)} and
+  if not (vsExpanded in ANode.States) and
     Assigned(ANode.NextSibling) then
   begin
     LN := ATree.GetNodeData<TLogNode>(ANode);
@@ -1356,11 +1355,13 @@ end;
 procedure TfrmMessageList.ApplySettings;
 begin
   Logger.Track(Self, 'ApplySettings');
-  if Settings.HideColumnHeaders then
-    FLogTreeView.Header.Options := FLogTreeView.Header.Options - [hoVisible]
+  if Settings.ColumnHeadersVisible then
+    FLogTreeView.Header.Options := FLogTreeView.Header.Options + [hoVisible]
   else
-    FLogTreeView.Header.Options := FLogTreeView.Header.Options + [hoVisible];
+    FLogTreeView.Header.Options := FLogTreeView.Header.Options - [hoVisible];
+  pnlMessageData.Visible := Settings.MessageDetailsVisible;
   LoadPanelSettings;
+  UpdateTreeColumns;
   Modified;
 end;
 
@@ -1725,7 +1726,6 @@ begin
   begin
     LStream := TStringStream.Create('', TEncoding.ANSI);
     try
-      pgcMessageDetails.ActivePage := tsTextViewer;
       ALogNode.MessageData.Position := 0;
       ObjectBinaryToText(ALogNode.MessageData, LStream);
       LStream.Position := 0;
@@ -1775,7 +1775,9 @@ begin
     lmtEnterMethod, lmtLeaveMethod, lmtText,
     lmtInfo, lmtWarning, lmtError, lmtConditional:
     begin
-      UpdateTextStreamDisplay(ALogNode);
+      //UpdateTextStreamDisplay(ALogNode);
+      Logger.SendPersistent('ALogNode', ALogNode);
+      UpdateTextDisplay(ALogNode);
       pgcMessageDetails.ActivePage := tsTextViewer;
     end;
     lmtValue, lmtObject, lmtPersistent, lmtInterface, lmtStrings, lmtCheckpoint:
@@ -1796,25 +1798,30 @@ end;
 
 procedure TfrmMessageList.UpdateRawDataDisplay(ALogNode: TLogNode);
 begin
-  FRawDataView.LoadFromStream(ALogNode.MessageData);
+  if Assigned(ALogNode.MessageData) then
+    FRawDataView.LoadFromStream(ALogNode.MessageData);
 end;
 
 procedure TfrmMessageList.UpdateTextDisplay(ALogNode: TLogNode);
 var
   S : string;
 begin
-  pgcMessageDetails.ActivePage := tsTextViewer;
-  EditorView.Text := ALogNode.Value;
+  if ALogNode.Value.IsEmpty then
+    EditorView.Text := ALogNode.Text
+  else
+    EditorView.Text := ALogNode.Value;
   S := ALogNode.Highlighter;
   if S <> '' then
    EditorView.HighlighterName := S;
 end;
 
+{ Updates text display with text stream data stored in MessageData. }
+
 procedure TfrmMessageList.UpdateTextStreamDisplay(ALogNode: TLogNode);
 var
   LStream : TStringStream;
 begin
-  if ALogNode.MessageData = nil then
+  if not Assigned(ALogNode.MessageData) then
   begin
     EditorView.Text := '';
   end
@@ -1850,8 +1857,8 @@ begin
   begin
     SL := TStringList.Create;
     try
-     SL.Text := ALogNode.Value;
-     DR.FromArray<string>(SL.ToStringArray, True);
+      SL.Text := ALogNode.Value;
+      DR.FromArray<string>(SL.ToStringArray, True);
     finally
       SL.Free;
     end;
@@ -1887,6 +1894,13 @@ begin
   LColumn := FLogTreeView.Header.Columns[COLUMN_VALUETYPE];
   LColumn.MaxWidth := LTotalWidth div 6;
   LColumn.MinWidth := LTotalWidth div 10;
+  LColumn := FLogTreeView.Header.Columns[COLUMN_TIMESTAMP];
+  LColumn.MinWidth := 10 * DisplayValuesSettings.TimeStamp.Font.Size;
+    //C.MinWidth :=
+    //GetTextWidth('88:88:88:888', DisplayValuesSettings.TimeStamp.Font) + 12;
+  LColumn.Width    := LColumn.MinWidth;
+  LColumn.MaxWidth := LColumn.MinWidth;
+
   FAutoSizeColumns := True;
 end;
 

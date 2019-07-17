@@ -41,6 +41,12 @@ type
     FData                  : DynamicRecord;
     FDisplayValuesSettings : TDisplayValuesSettings;
 
+    procedure ApplyDisplaySettings(
+      const AName   : string;
+      const ACanvas : TCanvas
+    );
+    procedure AssignData;
+
     {$REGION 'property access methods'}
     function GetLogNode: TLogNode;
     procedure SetLogNode(const Value: TLogNode);
@@ -69,8 +75,6 @@ type
       ADisplayValuesSettings : TDisplayValuesSettings
     ); reintroduce; virtual;
     procedure AfterConstruction; override;
-
-
     procedure Clear;
 
     property LogNode: TLogNode
@@ -84,7 +88,7 @@ implementation
 uses
   Spring,
 
-  DDuce.Logger.Interfaces;
+  DDuce.Settings.TextFormat, DDuce.Logger.Interfaces;
 
 {$REGION 'construction and destruction'}
 constructor TfrmMessageDataView.Create(AOwner: TComponent;
@@ -122,12 +126,7 @@ begin
     FLogNode := Value;
     if Assigned(FLogNode) then
     begin
-      FData.From(FLogNode);
-      // we need to use LogMessageTypeNameOf as no RTTI is generated for this
-      // type.
-      FData['MessageType']  := LogMessageTypeNameOf(FLogNode.MessageType);
-      FLogNodeDataView.Data := FData;
-      FLogNodeDataView.Refresh;
+      AssignData;
     end;
   end;
 end;
@@ -141,66 +140,10 @@ procedure TfrmMessageDataView.FLogNodeDataViewBeforeCellPaint(
 var
   N  : TValueListNode;
 begin
-
-  if Column = 1 then
-  begin
-    //FDisplayValuesSettings.ValueName.AssignTo(TargetCanvas);
-  end
-  else if Column = 2 then
+  if Column = 2 then
   begin
     N := Sender.GetNodeData<TValueListNode>(Node);
-    if N.Data.Name = 'Id' then
-      FDisplayValuesSettings.Id.AssignTo(TargetCanvas)
-    else if N.Data.Name = 'ValueName' then
-      FDisplayValuesSettings.ValueName.AssignTo(TargetCanvas)
-    else if N.Data.Name = 'Value' then
-      FDisplayValuesSettings.Value.AssignTo(TargetCanvas)
-    else if N.Data.Name = 'ValueType' then
-      FDisplayValuesSettings.ValueType.AssignTo(TargetCanvas)
-    else if N.Data.Name = 'TimeStamp' then
-      FDisplayValuesSettings.TimeStamp.AssignTo(TargetCanvas)
-    else if N.Data.Name = 'Text' then
-    begin
-      case LogNode.MessageType of
-        lmtInfo:
-          FDisplayValuesSettings.Info.AssignTo(TargetCanvas);
-        lmtError:
-          FDisplayValuesSettings.Error.AssignTo(TargetCanvas);
-        lmtWarning:
-          FDisplayValuesSettings.Warning.AssignTo(TargetCanvas);
-        lmtEnterMethod:
-          FDisplayValuesSettings.Enter.AssignTo(TargetCanvas);
-        lmtLeaveMethod:
-          FDisplayValuesSettings.Leave.AssignTo(TargetCanvas);
-        lmtConditional:
-          FDisplayValuesSettings.Conditional.AssignTo(TargetCanvas);
-        lmtCheckpoint:
-          FDisplayValuesSettings.CheckPoint.AssignTo(TargetCanvas);
-//        lmtStrings: ;
-//        lmtCallStack: ;
-//        lmtComponent: ;
-//        lmtException: ;
-//        lmtBitmap: ;
-//        lmtHeapInfo: ;
-//        lmtMemory: ;
-//        lmtCustomData: ;
-//        lmtObject: ;
-//        lmtInterface: ;
-//        lmtPersistent: ;
-//        lmtReserved: ;
-//        lmtWatch: ;
-//        lmtCounter: ;
-//        lmtColor: ;
-//        lmtAlphaColor: ;
-//        lmtScreenShot: ;
-//        lmtText: ;
-//        lmtDataSet: ;
-//        lmtAction: ;
-//        lmtClear: ;
-//        lmtNone: ;
-//        lmtExtreme: ;
-      end;
-    end;
+    ApplyDisplaySettings(N.Data.Name, TargetCanvas);
   end;
   TargetCanvas.FillRect(CellRect);
 end;
@@ -211,45 +154,83 @@ procedure TfrmMessageDataView.FLogNodeDataViewPaintText(
 var
   N  : TValueListNode;
 begin
-  if Column = 1 then
-  begin
-    //FDisplayValuesSettings.ValueName.AssignTo(TargetCanvas.Font);
-  end
-  else if Column = 2 then
+  if Column = 2 then
   begin
     N := Sender.GetNodeData<TValueListNode>(Node);
-    if N.Data.Name = 'Id' then
-      FDisplayValuesSettings.Id.AssignTo(TargetCanvas)
-    else if N.Data.Name = 'ValueName' then
-      FDisplayValuesSettings.ValueName.AssignTo(TargetCanvas)
-    else if N.Data.Name = 'Value' then
-      FDisplayValuesSettings.Value.AssignTo(TargetCanvas)
-    else if N.Data.Name = 'ValueType' then
-      FDisplayValuesSettings.ValueType.AssignTo(TargetCanvas)
-    else if N.Data.Name = 'TimeStamp' then
-      FDisplayValuesSettings.TimeStamp.AssignTo(TargetCanvas)
-    else if N.Data.Name = 'Text' then
-    begin
-      case LogNode.MessageType of
-        lmtInfo:
-          FDisplayValuesSettings.Info.AssignTo(TargetCanvas);
-        lmtError:
-          FDisplayValuesSettings.Error.AssignTo(TargetCanvas);
-        lmtWarning:
-          FDisplayValuesSettings.Warning.AssignTo(TargetCanvas);
-        lmtEnterMethod:
-          FDisplayValuesSettings.Enter.AssignTo(TargetCanvas);
-        lmtLeaveMethod:
-          FDisplayValuesSettings.Leave.AssignTo(TargetCanvas);
-        lmtConditional:
-          FDisplayValuesSettings.Conditional.AssignTo(TargetCanvas);
-        lmtCheckpoint:
-          FDisplayValuesSettings.CheckPoint.AssignTo(TargetCanvas);
-      end;
-    end;
+    ApplyDisplaySettings(N.Data.Name, TargetCanvas);
   end;
 end;
+{$ENDREGION}
 
+{$REGION 'private methods'}
+procedure TfrmMessageDataView.ApplyDisplaySettings(const AName: string;
+  const ACanvas: TCanvas);
+var
+  TFS : TTextFormatSettings;
+begin
+  TFS := nil;
+  if AName = 'Id' then
+    TFS := FDisplayValuesSettings.Id
+  else if AName = 'ValueName' then
+    TFS := FDisplayValuesSettings.ValueName
+  else if AName = 'Value' then
+    TFS := FDisplayValuesSettings.Value
+  else if AName = 'ValueType' then
+    TFS := FDisplayValuesSettings.ValueType
+  else if AName = 'TimeStamp' then
+    TFS := FDisplayValuesSettings.TimeStamp
+  else if AName = 'Text' then
+  begin
+    case LogNode.MessageType of
+      lmtInfo:
+        TFS := FDisplayValuesSettings.Info;
+      lmtError:
+        TFS := FDisplayValuesSettings.Error;
+      lmtWarning:
+        TFS := FDisplayValuesSettings.Warning;
+      lmtEnterMethod:
+        TFS := FDisplayValuesSettings.Enter;
+      lmtLeaveMethod:
+        TFS := FDisplayValuesSettings.Leave;
+      lmtConditional:
+        TFS := FDisplayValuesSettings.Conditional;
+      lmtCheckpoint:
+        TFS := FDisplayValuesSettings.CheckPoint;
+      lmtAction:
+        TFS := FDisplayValuesSettings.Action;
+    end;
+  end;
+  if Assigned(TFS) then
+    TFS.AssignTo(ACanvas);
+end;
+
+procedure TfrmMessageDataView.AssignData;
+begin
+  FData.Clear;
+  FData['Id']       := FLogNode.Id;
+  FData['LogLevel'] := FLogNode.LogLevel;
+  // we need to use LogMessageTypeNameOf as no RTTI is generated for this
+  // type.
+  FData['MessageType'] := LogMessageTypeNameOf(FLogNode.MessageType);
+  FData['TimeStamp']   := FLogNode.TimeStamp;
+  if not FLogNode.Text.IsEmpty then
+  begin
+    FData['Text']     := FLogNode.Text;
+    FData['TextSize'] := FLogNode.TextSize;
+  end;
+  if not FLogNode.ValueName.IsEmpty then
+    FData['ValueName'] := FLogNode.ValueName;
+  if not FLogNode.ValueType.IsEmpty then
+    FData['ValueType'] := FLogNode.ValueType;
+  if not FLogNode.Highlighter.IsEmpty then
+    FData['Highlighter'] := FLogNode.Highlighter;
+  if Assigned(FLogNode.MessageData) then
+    FData['DataSize'] := FLogNode.MessageData.Size;
+  if not FLogNode.Value.IsEmpty then
+    FData['Value'] := FLogNode.Value;
+  FLogNodeDataView.Data := FData;
+  FLogNodeDataView.Refresh;
+end;
 {$ENDREGION}
 
 {$REGION 'public methods'}

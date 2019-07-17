@@ -167,8 +167,11 @@ type
     procedure BuildLogTreeViewerPopupMenu;
     procedure BuildMessageTypesPopupMenu;
 
-    procedure FViewListChanged(Sender: TObject; const Item: ILogViewer;
-    Action: TCollectionChangedAction);
+    procedure FViewListChanged(
+      Sender     : TObject;
+      const Item : ILogViewer;
+      Action     : TCollectionChangedAction
+    );
     procedure FSettingsChanged(Sender: TObject);
 
   protected
@@ -856,7 +859,6 @@ begin
   FViewList.Add(ALogViewer);
   if not FReceivers.Contains(ALogViewer.Subscriber.Receiver) then
   begin
-    Logger.Info('FReceivers.Add(ALogViewer.Subscriber.Receiver);');
     FReceivers.Add(ALogViewer.Subscriber.Receiver);
   end;
   Events.DoAddLogViewer(ALogViewer);
@@ -876,7 +878,6 @@ begin
       FActiveView := nil;
     S := AView.Subscriber;
     S.Receiver.SubscriberList.Remove(S.SourceId);
-    //Events.DoDeleteLogViewer(FViewList[I]);
     FViewList[I].Form.Close; // instance still exists after closing
     FViewList.Delete(I); // automatically frees the instance
     Result := True;

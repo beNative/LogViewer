@@ -28,13 +28,13 @@ uses
 type
   TCallStackSettings = class(TPersistent)
   private
-    FOnChanged         : Event<TNotifyEvent>;
-    FHideColumnHeaders : Boolean;
+    FOnChanged            : Event<TNotifyEvent>;
+    FColumnHeadersVisible : Boolean;
 
   protected
     {$REGION 'property access methods'}
-    function GetHideColumnHeaders: Boolean;
-    procedure SetHideColumnHeaders(const Value: Boolean);
+    function GetColumnHeadersVisible: Boolean;
+    procedure SetColumnHeadersVisible(const Value: Boolean);
     function GetOnChanged: IEvent<TNotifyEvent>;
     {$ENDREGION}
 
@@ -47,23 +47,23 @@ type
       read GetOnChanged;
 
   published
-    property HideColumnHeaders: Boolean
-      read GetHideColumnHeaders write SetHideColumnHeaders;
+    property ColumnHeadersVisible: Boolean
+      read GetColumnHeadersVisible write SetColumnHeadersVisible;
   end;
 
 implementation
 
 {$REGION 'property access methods'}
-function TCallStackSettings.GetHideColumnHeaders: Boolean;
+function TCallStackSettings.GetColumnHeadersVisible: Boolean;
 begin
-  Result := FHideColumnHeaders;
+  Result := FColumnHeadersVisible;
 end;
 
-procedure TCallStackSettings.SetHideColumnHeaders(const Value: Boolean);
+procedure TCallStackSettings.SetColumnHeadersVisible(const Value: Boolean);
 begin
-  if Value <> HideColumnHeaders then
+  if Value <> ColumnHeadersVisible then
   begin
-    FHideColumnHeaders := Value;
+    FColumnHeadersVisible := Value;
     Changed;
   end;
 end;
@@ -89,7 +89,7 @@ begin
   if Source is TCallStackSettings then
   begin
     LSettings := TCallStackSettings(Source);
-    HideColumnHeaders := LSettings.HideColumnHeaders;
+    ColumnHeadersVisible := LSettings.ColumnHeadersVisible;
   end
   else
     inherited Assign(Source);

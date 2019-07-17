@@ -310,8 +310,8 @@ end;
 
 procedure TfrmWatchesView.SettingsChanged(Sender: TObject);
 begin
-  FTVPWatchValues.ShowHeader  := not FSettings.HideColumnHeaders;
-  FTVPWatchHistory.ShowHeader := not FSettings.HideColumnHeaders;
+  FTVPWatchValues.ShowHeader  := FSettings.ColumnHeadersVisible;
+  FTVPWatchHistory.ShowHeader := FSettings.ColumnHeadersVisible;
 end;
 {$ENDREGION}
 
@@ -393,8 +393,8 @@ begin
   FVSTWatchHistory.AlignWithMargins := False;
   FTVPWatchHistory := TFactories.CreateTreeViewPresenter(Self, FVSTWatchHistory);
   FTVPWatchHistory.OnDoubleClick := FTVPWatchHistoryDoubleClick;
-  FTVPWatchValues.ShowHeader  := not FSettings.HideColumnHeaders;
-  FTVPWatchHistory.ShowHeader := not FSettings.HideColumnHeaders;
+  FTVPWatchValues.ShowHeader  := FSettings.ColumnHeadersVisible;
+  FTVPWatchHistory.ShowHeader := FSettings.ColumnHeadersVisible;
 end;
 
 procedure TfrmWatchesView.ConnectWatchHistoryCDEvents;

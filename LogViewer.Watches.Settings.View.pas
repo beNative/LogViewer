@@ -62,7 +62,7 @@ begin
   chkOnlyTrackChanges.Checked        := FSettings.OnlyTrackChanges;
   chkSyncWithSelectedMessage.Checked := FSettings.SyncWithSelection;
   chkShowWatchHistory.Checked        := FSettings.WatchHistoryVisible;
-  chkHideColumnHeaders.Checked       := FSettings.HideColumnHeaders;
+  chkHideColumnHeaders.Checked       := not FSettings.ColumnHeadersVisible;
 end;
 
 destructor TfrmWatchSettings.Destroy;
@@ -75,7 +75,7 @@ end;
 {$REGION 'event handlers'}
 procedure TfrmWatchSettings.chkHideColumnHeadersClick(Sender: TObject);
 begin
-  FSettings.HideColumnHeaders := (Sender as TCheckBox).Checked;
+  FSettings.ColumnHeadersVisible := not (Sender as TCheckBox).Checked;
 end;
 
 procedure TfrmWatchSettings.chkOnlyTrackChangesClick(Sender: TObject);

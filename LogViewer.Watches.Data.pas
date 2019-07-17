@@ -69,7 +69,7 @@ type
     FCurrentIndex     : Integer;
     FList             : IList<TWatchValue>;
     FOnlyTrackChanges : Boolean;
-    FMessageType      : TLogMessageType;
+    FMessageType      : TLogMessageType; // lmtCounter or lmtWatch
 
     {$REGION 'property access methods'}
     function GetCount: Integer;
@@ -92,7 +92,7 @@ type
       AFirstId          : Int64;
       AOnlyTrackChanges : Boolean = False
     );
-    procedure BeforeDestruction; override;
+    destructor Destroy;
 
     function AddValue(
       const AValue : string;
@@ -197,6 +197,7 @@ uses
 constructor TWatch.Create(const AName: string; const AValueType: string;
   AMessageType: TLogMessageType; AFirstId: Int64; AOnlyTrackChanges: Boolean);
 begin
+  Logger.Track(Self, 'Create');
   FList := TCollections.CreateObjectList<TWatchValue>;
   FName             := AName;
   FValueType        := AValueType;
@@ -205,12 +206,12 @@ begin
   FOnlyTrackChanges := AOnlyTrackChanges;
 end;
 
-procedure TWatch.BeforeDestruction;
+destructor TWatch.Destroy;
 begin
   Logger.Track(Self, 'BeforeDestruction');
   FList.Clear;
   FList := nil;
-  inherited BeforeDestruction;
+  inherited Destroy;
 end;
 {$ENDREGION}
 
@@ -299,8 +300,7 @@ begin
 end;
 
 { Locate current watchvalue for a given message Id.
-  TODO: hide watch when value does not exist for the corresponding Id!
-}
+  TODO: hide watch when value does not exist for the corresponding Id! }
 
 function TWatch.Locate(const AId: Int64): Boolean;
 var

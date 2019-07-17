@@ -25,7 +25,7 @@ uses
   System.SysUtils, System.Variants, System.Classes, System.Actions,
   System.ImageList, System.Win.TaskbarCore,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Vcl.ExtCtrls,
-  Vcl.Taskbar, Vcl.ActnList, Vcl.ImgList, Vcl.ToolWin,
+  Vcl.Taskbar, Vcl.ActnList, Vcl.ImgList,
 
   ChromeTabs, ChromeTabsClasses, ChromeTabsTypes,
 
@@ -33,10 +33,10 @@ uses
 
   Spring,
 
-  DDuce.Settings.TextFormat, DDuce.Utils,
+  DDuce.Utils,
 
-  LogViewer.Interfaces, LogViewer.Factories, LogViewer.Manager,
-  LogViewer.Settings, LogViewer.Receivers.ComPort.Settings,
+  LogViewer.Interfaces, LogViewer.Factories,
+  LogViewer.Settings,
   LogViewer.Dashboard.View;
 
 type
@@ -149,9 +149,9 @@ implementation
 uses
   Spring.Utils,
 
-  DDuce.Factories.VirtualTrees, DDuce.Factories.zObjInspector,
-  DDuce.Factories.GridView,
-  DDuce.ObjectInspector.zObjectInspector, DDuce.Logger, DDuce.Utils.Winapi;
+  DDuce.Factories.VirtualTrees,
+
+  DDuce.Logger, DDuce.Utils.Winapi;
 
 {$REGION 'non-interfaced routines'}
 { Extracts the ZMQ library form resources if it does not exist. }
@@ -493,7 +493,6 @@ begin
     OptimizeStatusBarPanelWidths;
   end;
 end;
-
 {$ENDREGION}
 
 initialization
