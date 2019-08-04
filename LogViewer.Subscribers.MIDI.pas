@@ -25,7 +25,7 @@ uses
 
   LogViewer.Interfaces, LogViewer.Subscribers.Base,
 
-  MidiIn;
+  Midi;
 
 {  Subscribe to a MIDI device }
 
@@ -36,6 +36,10 @@ type
     FBuffer    : TMemoryStream;
 
     procedure FMidiInputMidiInput(Sender: TObject);
+
+//    procedure FMidiInputMidiData(
+//      const aDeviceIndex: integer;
+//      const aStatus, aData1, aData2: byte) of object;
 
   public
     procedure AfterConstruction; override;
@@ -197,12 +201,13 @@ end;
 procedure TMIDISubscriber.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FMidiInput := TMidiInput.Create(nil);
+  FMidiInput := TMidiInput.Create;
   FBuffer    := TMemoryStream.Create;
-  FMidiInput.DeviceID    := SourceId;
-  FMidiInput.OnMidiInput := FMidiInputMidiInput;
-  FMidiInput.Open;
-  FMidiInput.Start;
+  //FMidiInput.DeviceID    := SourceId;
+  //FMidiInput.OnMidiInput := FMidiInputMidiInput;
+  //FMidiInput.OnMidiData := FMidiInputMidiData;
+//  FMidiInput.Open;
+//  FMidiInput.Start;
 end;
 
 destructor TMIDISubscriber.Destroy;
@@ -227,37 +232,37 @@ begin
   FBuffer.Clear;
   LMsgType := Integer(lmtText);
 
-  while FMidiInput.MessageCount > 0 do
-  begin
-    LMidiEvent := FMidiInput.GetMidiEvent;
-    try
-      try
-        LString    := UTF8String(MonitorMessageText(LMidiEvent));
-        LTextSize  := Length(LString);
-
-        LTimeStamp := Now;
-        FBuffer.Seek(0, soFromBeginning);
-        FBuffer.WriteBuffer(LMsgType, SizeOf(Integer));
-        FBuffer.WriteBuffer(LTimeStamp, SizeOf(TDateTime));
-        FBuffer.WriteBuffer(LTextSize, SizeOf(Integer));
-        if LTextSize > 0 then
-          FBuffer.WriteBuffer(LString[1], LTextSize);
-        FBuffer.WriteBuffer(LZero, SizeOf(Integer));
-        Receiver.DoReceiveMessage(FBuffer);
-      except
-        on E:Exception do
-        begin
-          //Logger.SendException('Hier', E);
-          Logger.SendObject(E);
-        end;
-
-      end;
-    finally
-      { Event was dynamically created by GetMidiEvent so must
-            free it here }
-      FreeAndNil(LMidiEvent);
-    end;
-  end;
+//  while FMidiInput.MessageCount > 0 do
+//  begin
+//    LMidiEvent := FMidiInput.GetMidiEvent;
+//    try
+//      try
+//        LString    := UTF8String(MonitorMessageText(LMidiEvent));
+//        LTextSize  := Length(LString);
+//
+//        LTimeStamp := Now;
+//        FBuffer.Seek(0, soFromBeginning);
+//        FBuffer.WriteBuffer(LMsgType, SizeOf(Integer));
+//        FBuffer.WriteBuffer(LTimeStamp, SizeOf(TDateTime));
+//        FBuffer.WriteBuffer(LTextSize, SizeOf(Integer));
+//        if LTextSize > 0 then
+//          FBuffer.WriteBuffer(LString[1], LTextSize);
+//        FBuffer.WriteBuffer(LZero, SizeOf(Integer));
+//        Receiver.DoReceiveMessage(FBuffer);
+//      except
+//        on E:Exception do
+//        begin
+//          //Logger.SendException('Hier', E);
+//          Logger.SendObject(E);
+//        end;
+//
+//      end;
+//    finally
+//      { Event was dynamically created by GetMidiEvent so must
+//            free it here }
+//      FreeAndNil(LMidiEvent);
+//    end;
+  //end;
 end;
 {$ENDREGION}
 

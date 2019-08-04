@@ -23,9 +23,7 @@ interface
 uses
   System.Classes,
 
-  Spring,
-
-  synaser;
+  Spring;
 
 type
   TComPortSettings = class(TPersistent)

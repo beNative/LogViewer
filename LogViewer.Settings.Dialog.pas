@@ -28,9 +28,9 @@ uses
 
   VirtualTrees, kpagecontrol, kcontrols,
 
-  SynEditHighlighter, SynEditCodeFolding, SynHighlighterJScript, SynEdit,
+  SynEditHighlighter, SynHighlighterJScript, SynEdit, SynEditCodeFolding,
 
-  DDuce.Editor.Interfaces, DDuce.Components.VirtualTrees.Node,
+  DDuce.Components.VirtualTrees.Node,
 
   LogViewer.Settings, LogViewer.Settings.Dialog.Data,
   LogViewer.MessageList.Settings.View,
@@ -38,7 +38,7 @@ uses
   LogViewer.Receivers.WinODS.Settings.View,
   LogViewer.Receivers.WinIPC.Settings.View, LogViewer.Watches.Settings.View,
   LogViewer.CallStack.Settings.View, LogViewer.Receivers.ZeroMQ.Settings.View,
-  LogViewer.DisplayValues.Settings.View;
+  LogViewer.DisplayValues.Settings.View, LogViewer.LogLevels.Settings.View;
 
 type
   TConfigNode = TVTNode<TConfigData>;
@@ -70,6 +70,7 @@ type
     tsWinIPC                : TKTabSheet;
     tsWinODS                : TKTabSheet;
     tsZeroMQ                : TKTabSheet;
+    tsLogLevels: TKTabSheet;
     {$ENDREGION}
 
     procedure actCloseExecute(Sender: TObject);
@@ -87,6 +88,7 @@ type
     FZeroMQSettingsForm        : TfrmZeroMQSettings;
     FDisplayValuesSettingsForm : TfrmDisplayValuesSettings;
     FViewSettingsForm          : TfrmViewSettings;
+    FLogLevelSettingsForm      : TfrmLogLevelSettings;
 
     procedure FConfigTreeGetText(
       Sender       : TBaseVirtualTree;
@@ -131,7 +133,7 @@ implementation
 {$R *.dfm}
 
 uses
-  DDuce.Utils, DDuce.Editor.Factories, DDuce.Factories.VirtualTrees,
+  DDuce.Utils, DDuce.Factories.VirtualTrees,
 
   LogViewer.Resources;
 
@@ -242,6 +244,7 @@ var
 begin
   LNode := AddNode(nil, SViewSettings, tsViewSettings);
   AddNode(LNode, SDisplaySettings, tsDisplayValueSettings);
+  AddNode(LNode, SLogLevels, tsLogLevels);
   AddNode(LNode, SWatches, tsWatches);
   AddNode(LNode, SCallStack, tsCallstack);
 
@@ -288,6 +291,10 @@ begin
   FViewSettingsForm :=
     TfrmViewSettings.Create(Self, FSettings.MessageListSettings);
   AssignFormParent(FViewSettingsForm, tsViewSettings);
+
+  FLogLevelSettingsForm :=
+    TfrmLogLevelSettings.Create(Self, FSettings.LogLevelSettings);
+  AssignFormParent(FLogLevelSettingsForm , tsLogLevels);
 end;
 {$ENDREGION}
 

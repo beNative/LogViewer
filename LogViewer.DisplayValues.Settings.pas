@@ -60,8 +60,8 @@ type
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 
-    property OnChanged: IEvent<TNotifyEvent>
-      read GetOnChanged;
+    property Action: TTextFormatSettings
+      read FAction;
 
     property TimeStamp: TTextFormatSettings
       read FTimeStamp;
@@ -105,8 +105,8 @@ type
     property Conditional: TTextFormatSettings
       read FConditional;
 
-    property Action: TTextFormatSettings
-      read FAction;
+    property OnChanged: IEvent<TNotifyEvent>
+      read GetOnChanged;
   end;
 
 implementation

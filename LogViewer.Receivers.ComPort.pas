@@ -71,9 +71,9 @@ type
 implementation
 
 uses
-  System.SysUtils, System.AnsiStrings,
+  System.SysUtils,
 
-  DDuce.Logger.Interfaces, DDuce.Logger,
+  DDuce.Logger,
 
   LogViewer.Subscribers.ComPort;
 

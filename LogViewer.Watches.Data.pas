@@ -92,7 +92,7 @@ type
       AFirstId          : Int64;
       AOnlyTrackChanges : Boolean = False
     );
-    destructor Destroy;
+    destructor Destroy; override;
 
     function AddValue(
       const AValue : string;
@@ -156,6 +156,7 @@ type
 
   public
     procedure AfterConstruction; override;
+    destructor Destroy; override;
 
     function IndexOf(const AName, AValueType: string): Integer;
     procedure Add(
@@ -208,7 +209,7 @@ end;
 
 destructor TWatch.Destroy;
 begin
-  Logger.Track(Self, 'BeforeDestruction');
+  Logger.Track(Self, 'Destroy');
   FList.Clear;
   FList := nil;
   inherited Destroy;
@@ -326,8 +327,17 @@ end;
 {$REGION 'construction and destruction'}
 procedure TWatchList.AfterConstruction;
 begin
+  Logger.Track(Self, 'AfterConstruction');
   inherited AfterConstruction;
   FList := TCollections.CreateObjectList<TWatch>;
+end;
+
+destructor TWatchList.Destroy;
+begin
+  Logger.Track(Self, 'Destroy');
+  FList.Clear;
+  FList := nil;
+  inherited Destroy;
 end;
 {$ENDREGION}
 

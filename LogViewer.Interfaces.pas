@@ -26,7 +26,7 @@ uses
 
   Spring, Spring.Collections,
 
-  DDuce.Editor.Interfaces, DDuce.DynamicRecord,
+  DDuce.Editor.Interfaces,
 
   LogViewer.Settings, LogViewer.Receivers.ComPort.Settings;
 

@@ -112,6 +112,7 @@ resourcestring
   // settings dialog
   SViewSettings    = 'View settings';
   SDisplaySettings = 'Display settings';
+  SLogLevels       = 'Logging levels';
   SWatches         = 'Watches';
   SCallStack       = 'Callstack';
   SChannelSettings = 'Channel settings';
@@ -122,6 +123,8 @@ resourcestring
   SWinODS  = 'OutputDebugString API';
   SComPort = 'Serial port';
   SZeroMQ  = 'ZeroMQ';
+
+  SLogLevelAlias = 'Loglevel alias';
 
 const
   ALL_MESSAGES = [
@@ -167,11 +170,11 @@ const
 resourcestring
   SReceiverCaptionWinIPC     = 'Windows IPC receiver';
   SReceiverCaptionWinODS     = 'Windows API OutputDebugString receiver';
-  SReceiverCaptionZeroMQ     = 'ZeroMQ subscription receiver';
-  SReceiverCaptionMQTT       = 'MQTT subscription receiver';
+  SReceiverCaptionZeroMQ     = 'ZeroMQ receiver';
+  SReceiverCaptionMQTT       = 'MQTT receiver';
   SReceiverCaptionComPort    = 'ComPort receiver';
   SReceiverCaptionFileSystem = 'File system receiver';
-  SReceiverCaptionMIDI       = 'MIDI message receiver';
+  SReceiverCaptionMIDI       = 'MIDI receiver';
 
   // message viewer
 const
@@ -194,6 +197,17 @@ const
   COLUMN_KEY          = 1;
   COLUMN_SOURCEID     = 2;
   COLUMN_MESSAGECOUNT = 3;
+
+// loglevels
+  COLUMN_LOGLEVEL      = 0;
+  COLUMN_LOGCOLOR      = 1;
+  COLUMN_LOGCOLORVALUE = 2;
+  COLUMN_LOGALIAS      = 3;
+
+  COLUMNNAME_LOGLEVEL     = 'Level';
+  COLUMNNAME_LOGCOLOR     = 'Color';
+  COLUMNNAME_LOGCOLORNAME = 'ColorName';
+  COLUMNNAME_LOGALIAS     = 'Alias';
 
   { max. amount of characters allowed to be displayed in the value column of the
     logtree. }

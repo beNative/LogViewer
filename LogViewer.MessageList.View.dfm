@@ -112,6 +112,16 @@ object frmMessageList: TfrmMessageList
       ParentColor = True
       ParentDoubleBuffered = False
       TabOrder = 2
+      object splRightHorizontal: TSplitter
+        Left = 0
+        Top = 186
+        Width = 418
+        Height = 2
+        Cursor = crVSplit
+        Align = alTop
+        Color = clScrollBar
+        ParentColor = False
+      end
       object pnlMessageContent: TPanel
         Left = 0
         Top = 0
@@ -153,9 +163,9 @@ object frmMessageList: TfrmMessageList
       end
       object pgcMessageData: TKPageControl
         Left = 0
-        Top = 186
+        Top = 188
         Width = 418
-        Height = 560
+        Height = 558
         ActivateNewDocked = False
         ActivePageIndex = 0
         Align = alClient
@@ -170,13 +180,16 @@ object frmMessageList: TfrmMessageList
         TabPanelOptions.Colors.SelectedBottom = clBtnHighlight
         TabPanelOptions.Colors.TabBorder = cl3DLight
         TabPanelOptions.Options = [toDrag, toBrightTopColors]
+        ExplicitTop = 186
+        ExplicitHeight = 560
         object tsMessageView: TKTabSheet
           Caption = 'MessageView'
+          ExplicitHeight = 560
           object pgcMessageDetails: TKPageControl
             Left = 0
             Top = 0
             Width = 418
-            Height = 560
+            Height = 558
             ActivateNewDocked = False
             ActivePageIndex = 0
             Align = alClient
@@ -191,32 +204,39 @@ object frmMessageList: TfrmMessageList
             TabPanelOptions.Colors.SelectedBottom = clBtnHighlight
             TabPanelOptions.Colors.TabBorder = clBtnHighlight
             TabPanelOptions.Options = []
+            ExplicitHeight = 560
             object tsValueList: TKTabSheet
               Caption = 'Value list'
+              ExplicitHeight = 536
             end
             object tsTextViewer: TKTabSheet
               Caption = 'Text viewer'
+              ExplicitHeight = 536
               object pnlTextViewer: TPanel
                 Left = 0
                 Top = 0
                 Width = 418
-                Height = 536
+                Height = 534
                 Align = alClient
                 BevelEdges = []
                 BevelOuter = bvNone
                 Color = clWhite
                 TabOrder = 0
+                ExplicitHeight = 536
               end
             end
             object tsImageViewer: TKTabSheet
               Caption = 'Image viewer'
+              ExplicitHeight = 536
             end
             object tsDataSet: TKTabSheet
               Caption = 'Dataset viewer'
+              ExplicitHeight = 536
             end
             object tsRawData: TKTabSheet
               Caption = 'Raw data viewer'
               OnShow = tsRawDataShow
+              ExplicitHeight = 536
             end
           end
         end
@@ -361,7 +381,7 @@ object frmMessageList: TfrmMessageList
     Left = 55
     Top = 22
     Bitmap = {
-      494C010117001900780110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010117001900840110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

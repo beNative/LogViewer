@@ -35,8 +35,6 @@ uses
 
   Spring, Spring.Collections,
 
-  DDuce.DynamicRecord,
-
   LogViewer.Interfaces;
 
 type
@@ -121,9 +119,7 @@ implementation
 uses
   System.SysUtils,
 
-  DDuce.Utils.Winapi, DDuce.Logger,
-
-  LogViewer.Factories;
+  DDuce.Utils.Winapi, DDuce.Logger;
 
 {$REGION 'class construction and destruction'}
 class constructor TChannelReceiver.Create;

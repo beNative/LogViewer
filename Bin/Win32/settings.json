@@ -1,26 +1,26 @@
 {
 	"FormSettings": {
-		"Left": 343,
-		"Top": 85,
-		"Width": 1817,
-		"Height": 1067,
+		"Left": 494,
+		"Top": 339,
+		"Width": 1651,
+		"Height": 970,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
 	"MessageListSettings": {
 		"AutoScrollMessages": true,
 		"AutoFilterMessages": true,
-		"DynamicAutoSizeColumns": true,
-		"MessageDetailsVisible": false,
-		"SmartTimeStamps": true,
 		"ColumnHeadersVisible": false,
+		"DynamicAutoSizeColumns": true,
+		"MessageDetailsVisible": true,
+		"SmartTimeStamps": true,
 		"HorizontalPanelPositions": [
 			0.208588957055215,
-			0.748466257668712,
+			0.747362576346474,
 			1
 		],
 		"LeftVerticalPanelPositions": [
-			0.120184899845917,
+			0.305351521511018,
 			1
 		]
 	},
@@ -45,11 +45,11 @@
 		"Enabled": false,
 		"PathNames": "test.txt=tcp://localhost:5555\r\nC:\\Tools\\doublecmd\\doublecmd_2019-06-19.log=tcp://localhost:5556\r\n"
 	},
-	"DisplayValueSettings": {
+	"DisplayValuesSettings": {
 		"Id": {
 			"BackgroundColor": 16777215,
 			"FontName": "Tahoma",
-			"FontColor": -16777208,
+			"FontColor": 8421504,
 			"FontSize": 8,
 			"FontStyle": "",
 			"WordWrap": false,
@@ -57,9 +57,9 @@
 			"VerticalAlignment": 0
 		},
 		"Info": {
-			"BackgroundColor": 16767411,
-			"FontName": "Segoe UI",
-			"FontColor": 16711680,
+			"BackgroundColor": 16711680,
+			"FontName": "Tahoma",
+			"FontColor": 16777215,
 			"FontSize": 8,
 			"FontStyle": "fsBold",
 			"WordWrap": false,
@@ -67,9 +67,9 @@
 			"VerticalAlignment": 0
 		},
 		"Warning": {
-			"BackgroundColor": 12177407,
-			"FontName": "Segoe UI",
-			"FontColor": 255,
+			"BackgroundColor": 42495,
+			"FontName": "Tahoma",
+			"FontColor": 16777215,
 			"FontSize": 8,
 			"FontStyle": "fsBold",
 			"WordWrap": false,
@@ -78,7 +78,7 @@
 		},
 		"Error": {
 			"BackgroundColor": 255,
-			"FontName": "Segoe UI",
+			"FontName": "Tahoma",
 			"FontColor": 16777215,
 			"FontSize": 8,
 			"FontStyle": "fsBold",
@@ -87,8 +87,8 @@
 			"VerticalAlignment": 0
 		},
 		"TimeStamp": {
-			"BackgroundColor": 15790320,
-			"FontName": "Segoe UI",
+			"BackgroundColor": 16777215,
+			"FontName": "Tahoma",
 			"FontColor": 16711680,
 			"FontSize": 8,
 			"FontStyle": "",
@@ -97,28 +97,28 @@
 			"VerticalAlignment": 0
 		},
 		"ValueName": {
-			"BackgroundColor": 15921919,
-			"FontName": "Segoe UI",
+			"BackgroundColor": 16777215,
+			"FontName": "Tahoma",
 			"FontColor": 128,
 			"FontSize": 8,
-			"FontStyle": "",
+			"FontStyle": "fsUnderline",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
 		},
 		"ValueType": {
-			"BackgroundColor": 16774378,
+			"BackgroundColor": 16777215,
 			"FontName": "Tahoma",
 			"FontColor": 8388608,
 			"FontSize": 8,
 			"FontStyle": "",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
-			"VerticalAlignment": 1
+			"VerticalAlignment": 0
 		},
 		"Value": {
-			"BackgroundColor": 15794175,
-			"FontName": "Segoe UI",
+			"BackgroundColor": 16777215,
+			"FontName": "Tahoma",
 			"FontColor": 0,
 			"FontSize": 8,
 			"FontStyle": "",
@@ -128,57 +128,57 @@
 		},
 		"CheckPoint": {
 			"BackgroundColor": 16777215,
-			"FontName": "Segoe UI",
+			"FontName": "Tahoma",
 			"FontColor": 32768,
 			"FontSize": 8,
-			"FontStyle": "fsBold",
+			"FontStyle": "",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
 		},
 		"Counter": {
 			"BackgroundColor": 16777215,
-			"FontName": "Segoe UI",
+			"FontName": "Tahoma",
 			"FontColor": 8388736,
 			"FontSize": 8,
-			"FontStyle": "fsBold",
+			"FontStyle": "",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
 		},
 		"Tracing": {
-			"BackgroundColor": 15790320,
-			"FontName": "Segoe UI",
-			"FontColor": 32896,
+			"BackgroundColor": 14540253,
+			"FontName": "Tahoma",
+			"FontColor": -16777208,
 			"FontSize": 8,
-			"FontStyle": "fsBold,fsUnderline",
+			"FontStyle": "",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
 		},
 		"Enter": {
-			"BackgroundColor": 15790320,
-			"FontName": "Segoe UI",
-			"FontColor": 32896,
+			"BackgroundColor": 14540253,
+			"FontName": "Tahoma",
+			"FontColor": 32768,
 			"FontSize": 8,
-			"FontStyle": "fsItalic",
+			"FontStyle": "",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
 		},
 		"Leave": {
-			"BackgroundColor": 15790320,
-			"FontName": "Segoe UI",
-			"FontColor": 32896,
+			"BackgroundColor": 14540253,
+			"FontName": "Tahoma",
+			"FontColor": 255,
 			"FontSize": 8,
-			"FontStyle": "fsItalic",
+			"FontStyle": "",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
 		},
 		"Conditional": {
-			"BackgroundColor": 16121836,
-			"FontName": "Segoe UI",
+			"BackgroundColor": 16777215,
+			"FontName": "Tahoma",
 			"FontColor": 8421376,
 			"FontSize": 8,
 			"FontStyle": "",
@@ -195,5 +195,1033 @@
 	},
 	"CallStackSettings": {
 		"ColumnHeadersVisible": false
+	},
+	"LogLevelSettings": {
+		"LogLevels": [
+			{
+				"Alias": "",
+				"Color": 65535
+			},
+			{
+				"Alias": "sdv",
+				"Color": 32768
+			},
+			{
+				"Alias": "Olijf",
+				"Color": 32896
+			},
+			{
+				"Alias": "",
+				"Color": 8454143
+			},
+			{
+				"Alias": "",
+				"Color": 8453888
+			},
+			{
+				"Alias": "vsvcsvs",
+				"Color": 65535
+			},
+			{
+				"Alias": "",
+				"Color": 8454143
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 8454143
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 65535
+			},
+			{
+				"Alias": "",
+				"Color": 8421376
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 65535
+			},
+			{
+				"Alias": "halle",
+				"Color": 65535
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			},
+			{
+				"Alias": "",
+				"Color": 536870911
+			}
+		]
 	}
 }

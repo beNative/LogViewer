@@ -272,7 +272,6 @@ type
     ); reintroduce; virtual;
 
     procedure AfterConstruction; override;
-    procedure BeforeDestruction; override;
     destructor Destroy; override;
 
   end;
@@ -291,6 +290,16 @@ uses
 {$R *.dfm}
 
 {$REGION 'construction and destruction'}
+constructor TdmManager.Create(AOwner: TComponent; ASettings: TLogViewerSettings);
+begin
+  Logger.Track(Self, 'Create');
+  Guard.CheckNotNull(ASettings, 'ASettings');
+  inherited Create(AOwner);
+  FSettings := ASettings;
+  FSettings.OnChanged.UseFreeNotification := False;
+  FSettings.OnChanged.Add(FSettingsChanged);
+end;
+
 procedure TdmManager.AfterConstruction;
 begin
   inherited AfterConstruction;
@@ -298,6 +307,7 @@ begin
   FCommands       := TLogViewerCommands.Create(Self);
   FReceivers      := TCollections.CreateInterfaceList<IChannelReceiver>;
   FViewList       := TCollections.CreateInterfaceList<ILogViewer>;
+  FViewList.OnChanged.UseFreeNotification := False;
   FViewList.OnChanged.Add(FViewListChanged);
   FEditorSettings := TEditorFactories.CreateSettings(Self, 'settings.xml');
   FEditorManager  := TEditorFactories.CreateManager(Self, FEditorSettings);
@@ -309,20 +319,6 @@ begin
     imlMessageTypes
   );
   UpdateActions;
-end;
-
-procedure TdmManager.BeforeDestruction;
-begin
-  Logger.Track(Self, 'BeforeDestruction');
-  inherited BeforeDestruction;
-end;
-
-constructor TdmManager.Create(AOwner: TComponent; ASettings: TLogViewerSettings);
-begin
-  inherited Create(AOwner);
-  Guard.CheckNotNull(ASettings, 'ASettings');
-  FSettings := ASettings;
-  FSettings.OnChanged.Add(FSettingsChanged);
 end;
 
 destructor TdmManager.Destroy;
@@ -849,6 +845,7 @@ begin
   Guard.CheckNotNull(AReceiver, 'AReceiver');
   FReceivers.Add(AReceiver);
   Events.DoAddReceiver(AReceiver);
+  AReceiver.SubscriberList.OnValueChanged.UseFreeNotification := False;
   AReceiver.SubscriberList.OnValueChanged.Add(FReceiverSubscriberListChanged);
 end;
 

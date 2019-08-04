@@ -25,7 +25,7 @@ uses
 
   VirtualTrees,
 
-  DDuce.Logger.Interfaces, DDuce.Components.VirtualTrees.Node;
+  DDuce.Logger.Interfaces;
 
 {$REGION 'documentation'}
 {
@@ -51,11 +51,11 @@ type
     FMessageData : TStream; // binary data stream for bitmaps, etc.
     FTimeStamp   : TDateTime;
     FHighlighter : string;
-    function GetTextSize: Integer;
-    procedure SetTextSize(const Value: Integer); // highlighter to use in text editor
 
   protected
     {$REGION 'property access methods'}
+    function GetTextSize: Integer;
+    procedure SetTextSize(const Value: Integer); // highlighter to use in text editor
     function GetHighlighter: string;
     procedure SetHighlighter(const Value: string);
     function GetLogLevel: Byte;

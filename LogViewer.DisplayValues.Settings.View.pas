@@ -76,7 +76,6 @@ type
     ); reintroduce;
     destructor Destroy; override;
 
-
   end;
 
 implementation
@@ -89,7 +88,7 @@ uses
   DSharp.Windows.ControlTemplates,
 
   DDuce.Factories.TreeViewPresenter, DDuce.Factories.zObjInspector,
-  DDuce.Factories.VirtualTrees;
+  DDuce.Factories.VirtualTrees, DDuce.Logger;
 
 {$REGION 'construction and destruction'}
 constructor TfrmDisplayValuesSettings.Create(AOwner: TComponent;
@@ -102,10 +101,10 @@ begin
   FSettings   := ASettings;
   FSettings.OnChanged.Add(FFormatSettingsChanged);
   FValueManager := TDisplayValuesValueManager.Create;
-  FInspector  := TzObjectInspectorFactory.Create(Self, pnlRight, nil, FValueManager);
+  FInspector := TzObjectInspectorFactory.Create(Self, pnlRight, nil, FValueManager);
   FInspector.AlignWithMargins := False;
   FInspector.ObjectVisibility := mvPublished;
-  FInspector.OnBeforeAddItem := FInspectorBeforeAddItem;
+  FInspector.OnBeforeAddItem  := FInspectorBeforeAddItem;
 
   FListViewer := TVirtualStringTreeFactory.CreateList(Self, pnlLeft);
   FListViewer.Header.AutoSizeIndex := 0;
@@ -154,6 +153,7 @@ end;
 procedure TfrmDisplayValuesSettings.FListPresenterSelectionChanged(
   Sender: TObject);
 begin
+  Logger.SendObject('Sender', Sender);
   FInspector.Component := FListPresenter.SelectedItem;
 end;
 

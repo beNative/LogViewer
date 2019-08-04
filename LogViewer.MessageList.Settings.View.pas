@@ -31,7 +31,7 @@ type
     chkAutoScrollMessages     : TCheckBox;
     chkAutoFilterMessages     : TCheckBox;
     chkDynamicAutoSizeColumns : TCheckBox;
-    chkHideColumnHeaders: TCheckBox;
+    chkHideColumnHeaders      : TCheckBox;
 
     procedure chkSmartTimeStampsClick(Sender: TObject);
     procedure chkAutoScrollMessagesClick(Sender: TObject);

@@ -43,6 +43,8 @@ type
   public
     procedure Assign(Source: TPersistent); override;
     procedure BeforeDestruction; override;
+    procedure AfterConstruction; override;
+
 
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
@@ -56,6 +58,12 @@ type
 implementation
 
 {$REGION 'construction and destruction'}
+procedure TWinIPCSettings.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  FOnChanged.UseFreeNotification := False;
+end;
+
 procedure TWinIPCSettings.BeforeDestruction;
 begin
   FOnChanged.Clear;

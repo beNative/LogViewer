@@ -52,6 +52,9 @@ type
 
     procedure Assign(Source: TPersistent); override;
 
+    property OnChanged: IEvent<TNotifyEvent>
+      read GetOnChanged;
+
   published
     property ColumnHeadersVisible: Boolean
       read GetColumnHeadersVisible write SetColumnHeadersVisible;
@@ -64,9 +67,6 @@ type
 
     property SyncWithSelection: Boolean
       read GetSyncWithSelection write SetSyncWithSelection;
-
-    property OnChanged: IEvent<TNotifyEvent>
-      read GetOnChanged;
   end;
 
 implementation

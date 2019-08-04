@@ -88,7 +88,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Top = 0
     Width = 465
     Height = 384
-    ActivePageIndex = 7
+    ActivePageIndex = 2
     Align = alClient
     ParentBackground = False
     TabHeight = 0
@@ -165,6 +165,11 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     object tsViewSettings: TKTabSheet
       Caption = 'ViewSettings'
     end
+    object tsLogLevels: TKTabSheet
+      Caption = 'KTabSheet1'
+      ExplicitWidth = 0
+      ExplicitHeight = 0
+    end
   end
   object aclMain: TActionList
     Images = imlMain
@@ -191,7 +196,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Left = 568
     Top = 32
     Bitmap = {
-      494C010103000800600010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010103000800680010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

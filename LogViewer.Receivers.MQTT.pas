@@ -32,11 +32,9 @@ uses
   System.Classes,
   Vcl.ExtCtrls,
 
-  Spring, Spring.Collections,
+  Spring,
 
   MQTT,
-
-  DDuce.DynamicRecord,
 
   LogViewer.Interfaces,  LogViewer.Receivers.Base,
   LogViewer.Receivers.MQTT.Settings;
@@ -90,9 +88,9 @@ implementation
 uses
   System.SysUtils,
 
-  LogViewer.Subscribers.MQTT,
 
-  DDuce.Logger, DDuce.Logger.Interfaces;
+
+  DDuce.Logger;
 
 {$REGION 'construction and destruction'}
 procedure TMqttChannelReceiver.AfterConstruction;

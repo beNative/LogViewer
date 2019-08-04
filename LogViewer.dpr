@@ -42,7 +42,6 @@ uses
   LogViewer.Receivers.ComPort.Settings.View in 'LogViewer.Receivers.ComPort.Settings.View.pas' {frmComPortSettings},
   LogViewer.Receivers.FileSystem in 'LogViewer.Receivers.FileSystem.pas',
   LogViewer.Receivers.FileSystem.Settings in 'LogViewer.Receivers.FileSystem.Settings.pas',
-  LogViewer.Receivers.MIDI in 'LogViewer.Receivers.MIDI.pas',
   LogViewer.Receivers.MQTT in 'LogViewer.Receivers.MQTT.pas',
   LogViewer.Receivers.MQTT.Settings in 'LogViewer.Receivers.MQTT.Settings.pas',
   LogViewer.Receivers.WinIPC in 'LogViewer.Receivers.WinIPC.pas',
@@ -61,8 +60,6 @@ uses
   LogViewer.Subscribers.Base in 'LogViewer.Subscribers.Base.pas',
   LogViewer.Subscribers.ComPort in 'LogViewer.Subscribers.ComPort.pas',
   LogViewer.Subscribers.FileSystem in 'LogViewer.Subscribers.FileSystem.pas',
-  LogViewer.Subscribers.MIDI in 'LogViewer.Subscribers.MIDI.pas',
-  LogViewer.Subscribers.MQTT in 'LogViewer.Subscribers.MQTT.pas',
   LogViewer.Subscribers.WinIPC in 'LogViewer.Subscribers.WinIPC.pas',
   LogViewer.Subscribers.WinODS in 'LogViewer.Subscribers.WinODS.pas',
   LogViewer.Subscribers.ZeroMQ in 'LogViewer.Subscribers.ZeroMQ.pas',
@@ -73,7 +70,9 @@ uses
   LogViewer.Watches.View in 'LogViewer.Watches.View.pas' {frmWatchesView},
   LogViewer.MessageData.View in 'LogViewer.MessageData.View.pas' {TfrmMessageData},
   LogViewer.CallStack.Settings.View in 'LogViewer.CallStack.Settings.View.pas' {frmCallStackSettings},
-  LogViewer.DisplayValues.Settings.ValueManager in 'LogViewer.DisplayValues.Settings.ValueManager.pas';
+  LogViewer.DisplayValues.Settings.ValueManager in 'LogViewer.DisplayValues.Settings.ValueManager.pas',
+  LogViewer.LogLevels.Settings in 'LogViewer.LogLevels.Settings.pas',
+  LogViewer.LogLevels.Settings.View in 'LogViewer.LogLevels.Settings.View.pas' {frmLogLevelSettings};
 
 {$R *.res}
 

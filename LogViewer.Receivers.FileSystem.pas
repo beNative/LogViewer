@@ -64,9 +64,7 @@ implementation
 
 uses
   System.SysUtils,
-  Vcl.Forms,
-
-  LogViewer.Subscribers.FileSystem;
+  Vcl.Forms;
 
 {$REGION 'construction and destruction'}
 procedure TFileSystemChannelReceiver.AfterConstruction;

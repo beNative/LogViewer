@@ -37,7 +37,7 @@ uses
 
   DDuce.Logger.Interfaces,
 
-  LogViewer.Resources, LogViewer.Watches.Settings;
+  LogViewer.Resources;
 
 type
   TLogMessageTypes = set of TLogMessageType;
@@ -108,6 +108,9 @@ type
     property AutoFilterMessages: Boolean
       read GetAutoFilterMessages write SetAutoFilterMessages;
 
+    property ColumnHeadersVisible: Boolean
+      read GetColumnHeadersVisible write SetColumnHeadersVisible;
+
     property DynamicAutoSizeColumns: Boolean
       read GetDynamicAutoSizeColumns write SetDynamicAutoSizeColumns;
 
@@ -116,9 +119,6 @@ type
 
     property SmartTimeStamps: Boolean
       read GetSmartTimeStamps write SetSmartTimeStamps;
-
-    property ColumnHeadersVisible: Boolean
-      read GetColumnHeadersVisible write SetColumnHeadersVisible;
   end;
 
 implementation

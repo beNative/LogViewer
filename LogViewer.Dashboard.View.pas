@@ -36,19 +36,18 @@ uses
   System.SysUtils, System.Variants, System.Classes, System.Actions,
   System.UITypes, System.ImageList, System.Rtti,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  Vcl.ActnList, Vcl.ComCtrls, Vcl.ImgList, Vcl.Menus, Vcl.Grids, Vcl.ToolWin,
+  Vcl.ActnList, Vcl.ComCtrls, Vcl.ImgList, Vcl.Menus,
 
   Spring.Collections,
 
-  VirtualTrees, ZeroMQ, MQTT, synaser,
+  VirtualTrees, ZeroMQ,
 
   DDuce.Components.VirtualTrees.Node, DDuce.Components.ValueList,
-  DDuce.Components.Factories, DDuce.DynamicRecord, DDuce.EditList,
+  DDuce.DynamicRecord, DDuce.EditList,
 
   OMultiPanel, kcontrols, kpagecontrol,
 
-  LogViewer.Interfaces, LogViewer.Dashboard.Data,
-  LogViewer.Receivers.ComPort.Settings.View;
+  LogViewer.Interfaces, LogViewer.Dashboard.Data;
 
 type
   TDashboardNode = TVTNode<TDashboardData>;
@@ -116,30 +115,29 @@ type
     {$ENDREGION}
 
   private
-    FUpdate              : Boolean;
-    FManager             : ILogViewerManager;
-    FTreeView            : TVirtualStringTree;
-    FZeroMQ              : IZeroMQ;
-    FZeroMQReceiver      : IChannelReceiver;
-    FMqttReceiver        : IChannelReceiver;
-    FWinIPCReceiver      : IChannelReceiver;
-    FComPortReceiver     : IChannelReceiver;
-    FWinODSReceiver      : IChannelReceiver;
-    FFileSystemReceiver  : IChannelReceiver;
-    FMidiReceiver        : IChannelReceiver;
-    FZeroMQNode          : TDashboardNode;
-    FMqttNode            : TDashboardNode;
-    FMidiNode            : TDashboardNode;
-    FWinIPCNode          : TDashboardNode;
-    FComPortNode         : TDashboardNode;
-    FWinODSNode          : TDashboardNode;
-    FFileSystemNode      : TDashboardNode;
-    //FComPortSettingsForm : TfrmComPortSettings;
-    FZmqEndpoints        : TEditList;
-    FMqttTopics          : TEditList;
-    FComPorts            : TEditList;
-    FFSLocations         : TEditList;
-    FMidiDevices         : TEditList;
+    FUpdate             : Boolean;
+    FManager            : ILogViewerManager;
+    FTreeView           : TVirtualStringTree;
+    FZeroMQ             : IZeroMQ;
+    FZeroMQReceiver     : IChannelReceiver;
+    FMqttReceiver       : IChannelReceiver;
+    FWinIPCReceiver     : IChannelReceiver;
+    FComPortReceiver    : IChannelReceiver;
+    FWinODSReceiver     : IChannelReceiver;
+    FFileSystemReceiver : IChannelReceiver;
+    FMidiReceiver       : IChannelReceiver;
+    FZeroMQNode         : TDashboardNode;
+    FMqttNode           : TDashboardNode;
+    FMidiNode           : TDashboardNode;
+    FWinIPCNode         : TDashboardNode;
+    FComPortNode        : TDashboardNode;
+    FWinODSNode         : TDashboardNode;
+    FFileSystemNode     : TDashboardNode;
+    FZmqEndpoints       : TEditList;
+    FMqttTopics         : TEditList;
+    FComPorts           : TEditList;
+    FFSLocations        : TEditList;
+    FMidiDevices        : TEditList;
 
     {$REGION 'event handlers'}
     procedure FTreeViewFreeNode(
@@ -273,11 +271,11 @@ uses
 
   Spring,
 
-  DDuce.Utils, DDuce.Utils.Winapi, DDuce.Logger,
-  DDuce.Factories.TreeViewPresenter, DDuce.Factories.VirtualTrees,
+  DDuce.Utils.Winapi, DDuce.Logger,
+  DDuce.Factories.VirtualTrees,
   DDuce.ObjectInspector.zObjectInspector,
 
-  LogViewer.Manager, LogViewer.Factories, LogViewer.Resources,
+  LogViewer.Factories, LogViewer.Resources,
   LogViewer.Subscribers.ZeroMQ, LogViewer.Subscribers.FileSystem;
 
 {$REGION 'construction and destruction'}
@@ -926,8 +924,8 @@ procedure TfrmDashboard.CreateChannelReceivers;
 begin
   Logger.Track(Self, 'CreateChannelReceivers');
   CreateWinIPCReceiver;
-  //CreateWinODSReceiver;
   CreateZeroMQReceiver;
+  //CreateWinODSReceiver;
   //CreateMQTTReceiver;
   //CreateComPortReceiver;
   //CreateFileSystemReceiver;
@@ -1025,6 +1023,7 @@ begin
   FZeroMQ := TZeroMQ.Create;
   FZeroMQReceiver := TLogViewerFactories.CreateZeroMQReceiver(FManager, FZeroMQ);
   FManager.AddReceiver(FZeroMQReceiver);
+  FZeroMQReceiver.OnChange.UseFreeNotification := False;
   FZeroMQReceiver.OnChange.Add(FReceiverChange);
   FZeroMQReceiver.SubscriberList.OnKeyChanged.Add(FZeroMQReceiverSubscriberListChanged);
   FZeroMQReceiver.Enabled := FManager.Settings.ZeroMQSettings.Enabled;
@@ -1040,6 +1039,7 @@ procedure TfrmDashboard.CreateWinODSReceiver;
 begin
   FWinODSReceiver := TLogViewerFactories.CreateWinOdsReceiver(FManager);
   FManager.AddReceiver(FWinODSReceiver);
+  FWinODSReceiver.OnChange.UseFreeNotification := False;
   FWinODSReceiver.OnChange.Add(FReceiverChange);
   FWinODSReceiver.SubscriberList.OnKeyChanged.Add(FWinODSReceiverSubscriberListChanged);
   FWinODSReceiver.Enabled := FManager.Settings.WinODSSettings.Enabled;
@@ -1055,6 +1055,7 @@ procedure TfrmDashboard.CreateWinIPCReceiver;
 begin
   FWinIPCReceiver := TLogViewerFactories.CreateWinIpcReceiver(FManager);
   FManager.AddReceiver(FWinIPCReceiver);
+  FWinIPCReceiver.OnChange.UseFreeNotification := False;
   FWinIPCReceiver.OnChange.Add(FReceiverChange);
   FWinIPCReceiver.SubscriberList.OnKeyChanged.Add(FWinIPCReceiverSubscriberListChanged);
   FWinIPCReceiver.Enabled := FManager.Settings.WinIPCSettings.Enabled;

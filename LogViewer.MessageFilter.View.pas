@@ -237,6 +237,7 @@ end;
 procedure TfrmMessageFilter.BuildTree;
 var
   LNode : TFilterNode;
+  I: Integer;
 
   function AddNode(
     ACaption      : string;
@@ -306,6 +307,14 @@ begin
   LNode := AddNode(STrackMethod, 9, [lmtEnterMethod, lmtLeaveMethod]);
   AddNode(SEnter, 4, [lmtEnterMethod]);
   AddNode(SLeave, 5, [lmtLeaveMethod]);
+
+  LNode := nil;
+  LNode := AddNode(SLogLevels);
+  for I := 0 to 255 do
+  begin
+    AddNode(I.ToString);
+  end;
+
   FTree.FullExpand;
 end;
 

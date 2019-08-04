@@ -140,6 +140,7 @@ type
     procedure UpdateView(AMessageId: Int64 = 0);
     procedure GotoFirst;
     procedure GotoLast;
+    procedure Clear;
 
     function HasFocus: Boolean;
 
@@ -155,7 +156,7 @@ uses
   DSharp.Windows.ControlTemplates,
 
   DDuce.Factories.TreeViewPresenter, DDuce.Factories.VirtualTrees,
-  DDuce.Logger, DDuce.Logger.Interfaces, DDuce.Utils,
+  DDuce.Logger, DDuce.Logger.Interfaces,
 
   LogViewer.Resources;
 
@@ -175,6 +176,9 @@ procedure TfrmWatchesView.BeforeDestruction;
 begin
   Logger.Track(Self, 'BeforeDestruction');
   FSettings.OnChanged.Remove(SettingsChanged);
+  FTVPWatchValues.Free;
+  FTVPWatchHistory.Free;
+  FWatches.Clear;
   FWatches := nil;
   inherited BeforeDestruction;
 end;
@@ -291,6 +295,7 @@ begin
     FDisplayValuesSettings.ValueType.AssignTo(TargetCanvas);
     TargetCanvas.FillRect(CellRect);
   end;
+  Result := True;
 end;
 
 procedure TfrmWatchesView.FTVPWatchHistoryDoubleClick(Sender: TObject);
@@ -397,6 +402,13 @@ begin
   FTVPWatchHistory.ShowHeader := FSettings.ColumnHeadersVisible;
 end;
 
+procedure TfrmWatchesView.Clear;
+begin
+  FWatches.Clear;
+  FTVPWatchValues.Refresh;
+  UpdateWatchHistory;
+end;
+
 procedure TfrmWatchesView.ConnectWatchHistoryCDEvents;
 var
   CD : TColumnDefinition;
@@ -447,7 +459,7 @@ end;
 
 procedure TfrmWatchesView.UpdateActions;
 begin
-  inherited;
+  inherited UpdateActions;
   pnlMain.PanelCollection[1].Visible := FSettings.WatchHistoryVisible;
 end;
 

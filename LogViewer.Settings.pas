@@ -31,23 +31,28 @@ uses
   LogViewer.CallStack.Settings, LogViewer.DisplayValues.Settings,
   LogViewer.Receivers.ComPort.Settings, LogViewer.Receivers.WinODS.Settings,
   LogViewer.Receivers.WinIPC.Settings, LogViewer.Receivers.ZeroMQ.Settings,
-  LogViewer.Receivers.MQTT.Settings, LogViewer.Receivers.FileSystem.Settings;
+  LogViewer.Receivers.MQTT.Settings, LogViewer.Receivers.FileSystem.Settings,
+  LogViewer.LogLevels.Settings;
 
 type
   TLogViewerSettings = class(TPersistent)
   private
-    FFormSettings          : TFormSettings;
     FFileName              : string;
+    FFormSettings          : TFormSettings;
     FMessageListSettings   : TMessageListSettings;
+
     FWinODSSettings        : TWinODSSettings;
     FWinIPCSettings        : TWinIPCSettings;
     FComPortSettings       : TComPortSettings;
     FZeroMQSettings        : TZeroMQSettings;
     FMQTTSettings          : TMQTTSettings;
     FFileSystemSettings    : TFileSystemSettings;
+
     FWatchSettings         : TWatchSettings;
     FCallStackSettings     : TCallStackSettings;
     FDisplayValuesSettings : TDisplayValuesSettings;
+    FLogLevelSettings      : TLogLevelSettings;
+
     FOnChanged             : Event<TNotifyEvent>;
 
     procedure FormSettingsChanged(Sender: TObject);
@@ -98,6 +103,9 @@ type
     property DisplayValuesSettings: TDisplayValuesSettings
       read FDisplayValuesSettings;
 
+    property LogLevelSettings: TLogLevelSettings
+      read FLogLevelSettings;
+
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
 
@@ -118,8 +126,10 @@ uses
 procedure TLogViewerSettings.AfterConstruction;
 begin
   inherited AfterConstruction;
+  FOnChanged.UseFreeNotification := False;
   FFileName              := 'settings.json';
   FFormSettings          := TFormSettings.Create;
+  FFormSettings.OnChanged.UseFreeNotification := False;
   FFormSettings.OnChanged.Add(FormSettingsChanged);
   FMessageListSettings   := TMessageListSettings.Create;
   FWinODSSettings        := TWinODSSettings.Create;
@@ -131,7 +141,9 @@ begin
   FWatchSettings         := TWatchSettings.Create;
   FCallStackSettings     := TCallStackSettings.Create;
   FDisplayValuesSettings := TDisplayValuesSettings.Create;
+  FDisplayValuesSettings.OnChanged.UseFreeNotification := False;
   FDisplayValuesSettings.OnChanged.Add(DisplayValuesSettingsChanged);
+  FLogLevelSettings      := TLogLevelSettings.Create;
 end;
 
 procedure TLogViewerSettings.BeforeDestruction;
@@ -149,6 +161,7 @@ begin
   FreeAndNil(FMessageListSettings);
   FFormSettings.OnChanged.Remove(FormSettingsChanged);
   FreeAndNil(FFormSettings);
+  FreeAndNil(FLogLevelSettings);
   inherited BeforeDestruction;
 end;
 {$ENDREGION}
@@ -189,6 +202,7 @@ procedure TLogViewerSettings.Load;
 var
   JO : TJsonObject;
   I  : Integer;
+  S  : string;
 begin
   Logger.Track(Self, 'Load');
   if FileExists(FFileName) then
@@ -223,36 +237,48 @@ begin
       JO['FileSystemSettings'].ObjectValue.ToSimpleObject(FFileSystemSettings);
       FFileSystemSettings.PathNames.Text :=
         JO['FileSystemSettings'].ObjectValue['PathNames'].Value;
-      JO['DisplayValueSettings'].ObjectValue['Id'].ObjectValue
+      S := 'DisplayValuesSettings';
+      JO[S].ObjectValue['Id'].ObjectValue
         .ToSimpleObject(FDisplayValuesSettings.Id);
-      JO['DisplayValueSettings'].ObjectValue['Info'].ObjectValue
+      JO[S].ObjectValue['Info'].ObjectValue
         .ToSimpleObject(FDisplayValuesSettings.Info);
-      JO['DisplayValueSettings'].ObjectValue['Warning'].ObjectValue
+      JO[S].ObjectValue['Warning'].ObjectValue
         .ToSimpleObject(FDisplayValuesSettings.Warning);
-      JO['DisplayValueSettings'].ObjectValue['Error'].ObjectValue
+      JO[S].ObjectValue['Error'].ObjectValue
         .ToSimpleObject(FDisplayValuesSettings.Error);
-      JO['DisplayValueSettings'].ObjectValue['TimeStamp'].ObjectValue
+      JO[S].ObjectValue['TimeStamp'].ObjectValue
         .ToSimpleObject(FDisplayValuesSettings.TimeStamp);
-      JO['DisplayValueSettings'].ObjectValue['ValueName'].ObjectValue
+      JO[S].ObjectValue['ValueName'].ObjectValue
         .ToSimpleObject(FDisplayValuesSettings.ValueName);
-      JO['DisplayValueSettings'].ObjectValue['ValueType'].ObjectValue
+      JO[S].ObjectValue['ValueType'].ObjectValue
         .ToSimpleObject(FDisplayValuesSettings.ValueType);
-      JO['DisplayValueSettings'].ObjectValue['Value'].ObjectValue
+      JO[S].ObjectValue['Value'].ObjectValue
         .ToSimpleObject(FDisplayValuesSettings.Value);
-      JO['DisplayValueSettings'].ObjectValue['CheckPoint'].ObjectValue
+      JO[S].ObjectValue['CheckPoint'].ObjectValue
         .ToSimpleObject(FDisplayValuesSettings.CheckPoint);
-      JO['DisplayValueSettings'].ObjectValue['Counter'].ObjectValue
+      JO[S].ObjectValue['Counter'].ObjectValue
         .ToSimpleObject(FDisplayValuesSettings.Counter);
-      JO['DisplayValueSettings'].ObjectValue['Tracing'].ObjectValue
+      JO[S].ObjectValue['Tracing'].ObjectValue
         .ToSimpleObject(FDisplayValuesSettings.Tracing);
-      JO['DisplayValueSettings'].ObjectValue['Enter'].ObjectValue
+      JO[S].ObjectValue['Enter'].ObjectValue
         .ToSimpleObject(FDisplayValuesSettings.Enter);
-      JO['DisplayValueSettings'].ObjectValue['Leave'].ObjectValue
+      JO[S].ObjectValue['Leave'].ObjectValue
         .ToSimpleObject(FDisplayValuesSettings.Leave);
-      JO['DisplayValueSettings'].ObjectValue['Conditional'].ObjectValue
+      JO[S].ObjectValue['Conditional'].ObjectValue
         .ToSimpleObject(FDisplayValuesSettings.Conditional);
       JO['WatchSettings'].ObjectValue.ToSimpleObject(FWatchSettings);
       JO['CallStackSettings'].ObjectValue.ToSimpleObject(FCallStackSettings);
+
+
+      JO['LogLevelSettings'].ObjectValue.ToSimpleObject(FLogLevelSettings);
+      for I := 0 to JO['LogLevelSettings']
+        .ObjectValue['LogLevels'].Count - 1 do
+      begin
+
+        JO['LogLevelSettings'].ObjectValue['LogLevels'].ArrayValue[I].ObjectValue.ToSimpleObject(FLogLevelSettings.LogLevels[I]);
+      end;
+
+
       JO.ToSimpleObject(Self);
     finally
       JO.Free;
@@ -264,64 +290,81 @@ procedure TLogViewerSettings.Save;
 var
   JO : TJsonObject;
   I  : Integer;
+  S  : string;
 begin
   Logger.Track(Self, 'Save');
   JO := TJsonObject.Create;
   try
     JO.FromSimpleObject(Self);
     JO['FormSettings'].ObjectValue.FromSimpleObject(FFormSettings);
-    JO['MessageListSettings'].ObjectValue.FromSimpleObject(FMessageListSettings);
+
+    S := 'MessageListSettings';
+    JO[S].ObjectValue.FromSimpleObject(FMessageListSettings);
     for I := 0 to FMessageListSettings.HorizontalPanelPositions.Count - 1 do
     begin
-      JO['MessageListSettings'].A['HorizontalPanelPositions']
+      JO[S].A['HorizontalPanelPositions']
         .Add(FMessageListSettings.HorizontalPanelPositions[I]);
     end;
     for I := 0 to FMessageListSettings.LeftVerticalPanelPositions.Count - 1 do
     begin
-      JO['MessageListSettings'].A['LeftVerticalPanelPositions']
+      JO[S].A['LeftVerticalPanelPositions']
         .Add(FMessageListSettings.LeftVerticalPanelPositions[I]);
     end;
+
     JO['WinODSSettings'].ObjectValue.FromSimpleObject(FWinODSSettings);
     JO['WinIPCSettings'].ObjectValue.FromSimpleObject(FWinIPCSettings);
+
     JO['ZeroMQSettings'].ObjectValue.FromSimpleObject(FZeroMQSettings);
     JO['ZeroMQSettings'].ObjectValue['Endpoints'].Value :=
       FZeroMQSettings.Endpoints.Text;
-    JO['MQTTSettings'].ObjectValue.FromSimpleObject(FMQTTSettings);
-    JO['MQTTSettings'].ObjectValue['Endpoints'].Value :=
-      FMQTTSettings.Endpoints.Text;
-    JO['FileSystemSettings'].ObjectValue.FromSimpleObject(FFileSystemSettings);
-    JO['FileSystemSettings'].ObjectValue['PathNames'].Value :=
-      FileSystemSettings.PathNames.Text;
-    JO['DisplayValueSettings'].ObjectValue['Id'].ObjectValue
+
+    S := 'MQTTSettings';
+    JO[S].ObjectValue.FromSimpleObject(FMQTTSettings);
+    JO[S].ObjectValue['Endpoints'].Value := FMQTTSettings.Endpoints.Text;
+
+    S := 'FileSystemSettings';
+    JO[S].ObjectValue.FromSimpleObject(FFileSystemSettings);
+    JO[S].ObjectValue['PathNames'].Value := FileSystemSettings.PathNames.Text;
+
+    S := 'DisplayValuesSettings';
+    JO[S].ObjectValue['Id'].ObjectValue
       .FromSimpleObject(FDisplayValuesSettings.Id);
-    JO['DisplayValueSettings'].ObjectValue['Info'].ObjectValue
+    JO[S].ObjectValue['Info'].ObjectValue
       .FromSimpleObject(FDisplayValuesSettings.Info);
-    JO['DisplayValueSettings'].ObjectValue['Warning'].ObjectValue
+    JO[S].ObjectValue['Warning'].ObjectValue
       .FromSimpleObject(FDisplayValuesSettings.Warning);
-    JO['DisplayValueSettings'].ObjectValue['Error'].ObjectValue
+    JO[S].ObjectValue['Error'].ObjectValue
       .FromSimpleObject(FDisplayValuesSettings.Error);
-    JO['DisplayValueSettings'].ObjectValue['TimeStamp'].ObjectValue
+    JO[S].ObjectValue['TimeStamp'].ObjectValue
       .FromSimpleObject(FDisplayValuesSettings.TimeStamp);
-    JO['DisplayValueSettings'].ObjectValue['ValueName'].ObjectValue
+    JO[S].ObjectValue['ValueName'].ObjectValue
       .FromSimpleObject(FDisplayValuesSettings.ValueName);
-    JO['DisplayValueSettings'].ObjectValue['ValueType'].ObjectValue
+    JO[S].ObjectValue['ValueType'].ObjectValue
       .FromSimpleObject(FDisplayValuesSettings.ValueType);
-    JO['DisplayValueSettings'].ObjectValue['Value'].ObjectValue
+    JO[S].ObjectValue['Value'].ObjectValue
       .FromSimpleObject(FDisplayValuesSettings.Value);
-    JO['DisplayValueSettings'].ObjectValue['CheckPoint'].ObjectValue
+    JO[S].ObjectValue['CheckPoint'].ObjectValue
       .FromSimpleObject(FDisplayValuesSettings.CheckPoint);
-    JO['DisplayValueSettings'].ObjectValue['Counter'].ObjectValue
+    JO[S].ObjectValue['Counter'].ObjectValue
       .FromSimpleObject(FDisplayValuesSettings.Counter);
-    JO['DisplayValueSettings'].ObjectValue['Tracing'].ObjectValue
+    JO[S].ObjectValue['Tracing'].ObjectValue
       .FromSimpleObject(FDisplayValuesSettings.Tracing);
-    JO['DisplayValueSettings'].ObjectValue['Enter'].ObjectValue
+    JO[S].ObjectValue['Enter'].ObjectValue
       .FromSimpleObject(FDisplayValuesSettings.Enter);
-    JO['DisplayValueSettings'].ObjectValue['Leave'].ObjectValue
+    JO[S].ObjectValue['Leave'].ObjectValue
       .FromSimpleObject(FDisplayValuesSettings.Leave);
-    JO['DisplayValueSettings'].ObjectValue['Conditional'].ObjectValue
+    JO[S].ObjectValue['Conditional'].ObjectValue
       .FromSimpleObject(FDisplayValuesSettings.Conditional);
+
     JO['WatchSettings'].ObjectValue.FromSimpleObject(FWatchSettings);
     JO['CallStackSettings'].ObjectValue.FromSimpleObject(FCallStackSettings);
+    S := 'LogLevelSettings';
+    JO[S].ObjectValue.FromSimpleObject(FLogLevelSettings);
+    for I := 0 to FLogLevelSettings.LogLevels.Count - 1 do
+    begin
+      JO[S].A['LogLevels'].AddObject
+        .FromSimpleObject(FLogLevelSettings.LogLevels[I]);
+    end;
     JO.SaveToFile(FFileName, False);
   finally
     JO.Free;

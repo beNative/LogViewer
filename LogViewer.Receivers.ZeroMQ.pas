@@ -24,11 +24,9 @@ uses
   System.Classes,
   Vcl.ExtCtrls,
 
-  Spring, Spring.Collections,
+  Spring,
 
   ZeroMQ,
-
-  DDuce.DynamicRecord,
 
   LogViewer.Interfaces,  LogViewer.Receivers.Base,
   LogViewer.Receivers.ZeroMQ.Settings;
@@ -87,9 +85,7 @@ implementation
 
 uses
   System.SysUtils,
-  Vcl.Forms,
-
-  LogViewer.Subscribers.ZeroMQ;
+  Vcl.Forms;
 
 {$REGION 'construction and destruction'}
 procedure TZeroMQChannelReceiver.AfterConstruction;

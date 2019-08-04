@@ -23,7 +23,7 @@ interface
 uses
   System.Classes,
 
-  Spring, Spring.Collections,
+  Spring,
 
   VirtualTrees,
 
@@ -46,10 +46,9 @@ type
     {$ENDREGION}
 
   public
-    procedure AfterConstruction; override;
     constructor Create(
       const ACaption : string;
-      AMessageTypes : TLogMessageTypes;
+      AMessageTypes : TLogMessageTypes = [];
       AImageIndex   : Integer = -1
     );
 
@@ -67,11 +66,6 @@ type
 implementation
 
 {$REGION 'construction and destruction'}
-procedure TFilterData.AfterConstruction;
-begin
-  inherited AfterConstruction;
-end;
-
 constructor TFilterData.Create(const ACaption: string;
   AMessageTypes: TLogMessageTypes; AImageIndex: Integer);
 begin

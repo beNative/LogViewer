@@ -89,7 +89,7 @@ implementation
 uses
   System.SysUtils,
 
-  DDuce.Utils, DDuce.Utils.Winapi, DDuce.Logger,
+  DDuce.Utils.Winapi, DDuce.Logger,
 
   LogViewer.Subscribers.WinIPC;
 

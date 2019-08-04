@@ -78,6 +78,10 @@ constructor TLogViewerEvents.Create(AManager: ILogViewerManager);
 begin
   Guard.CheckNotNull(AManager, 'AManager');
   FManager := AManager;
+  FOnAddLogViewer.UseFreeNotification     := False;
+  FOnDeleteLogViewer.UseFreeNotification  := False;
+  FOnAddReceiver.UseFreeNotification      := False;
+  FOnActiveViewChange.UseFreeNotification := False;
 end;
 
 destructor TLogViewerEvents.Destroy;

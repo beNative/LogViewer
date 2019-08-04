@@ -46,6 +46,7 @@ uses
 type
   TfrmMessageList = class(TForm, ILogViewer)
     {$REGION 'designer controls'}
+    chkShowDetails             : TCheckBox;
     chkShowWatchHistory        : TCheckBox;
     chkSyncWithSelectedMessage : TCheckBox;
     edtMessageFilter           : TButtonedEdit;
@@ -70,7 +71,7 @@ type
     tsRawData                  : TKTabSheet;
     tsTextViewer               : TKTabSheet;
     tsValueList                : TKTabSheet;
-    chkShowDetails: TCheckBox;
+    splRightHorizontal: TSplitter;
     {$ENDREGION}
 
     procedure chkShowWatchHistoryClick(Sender: TObject);
@@ -365,8 +366,9 @@ begin
     Manager.Settings.WatchSettings.WatchHistoryVisible;
   chkSyncWithSelectedMessage.Checked :=
     Manager.Settings.WatchSettings.SyncWithSelection;
-  chkShowDetails.Checked := Settings.MessageDetailsVisible;
-  pnlMessageData.Visible := Settings.MessageDetailsVisible;
+  chkShowDetails.Checked     := Settings.MessageDetailsVisible;
+  splRightHorizontal.Visible := Settings.MessageDetailsVisible;
+  pnlMessageData.Visible     := Settings.MessageDetailsVisible;
   FExpandParents := True;
   CreateEditor;
   CreateLogTreeView;
@@ -407,10 +409,10 @@ begin
   FreeAndNil(FDataSetView);
   FreeAndNil(FImageView);
   FreeAndNil(FRawDataView);
-  FreeAndNil(FWatches);
   FreeAndNIl(FWatchesView);
   FreeAndNil(FCallStackView);
   FreeAndNil(FLogTreeView);
+  FreeAndNil(FWatches);
   inherited BeforeDestruction;
 end;
 
@@ -789,7 +791,8 @@ begin
   begin
     if LN.LogLevel < WebNamedColorsCount then
     begin
-      TargetCanvas.Brush.Color := WebNamedColors[LN.LogLevel].Value;
+      TargetCanvas.Brush.Color :=
+        Manager.Settings.LogLevelSettings.LogLevels[LN.LogLevel].Color;
     end
     else
       TargetCanvas.Brush.Color := clWhite;
@@ -1359,7 +1362,8 @@ begin
     FLogTreeView.Header.Options := FLogTreeView.Header.Options + [hoVisible]
   else
     FLogTreeView.Header.Options := FLogTreeView.Header.Options - [hoVisible];
-  pnlMessageData.Visible := Settings.MessageDetailsVisible;
+  splRightHorizontal.Visible := Settings.MessageDetailsVisible;
+  pnlMessageData.Visible     := Settings.MessageDetailsVisible;
   LoadPanelSettings;
   UpdateTreeColumns;
   Modified;
@@ -1441,7 +1445,7 @@ end;
 {
    Message layout in the received binary stream
      1. Message type (1 byte)          => TLogMessage.MsgType (TLogMessageType)
-     2. Log level    (1 byte)          => TLogMessage.LogLevel (0-127)
+     2. Log level    (1 byte)          => TLogMessage.LogLevel (0-255)
      3. Reserved     (1 byte)
      4. Reserved     (1 byte)
      5. Timestamp    (8 byte)          => TLogMessage.TimeStamp
@@ -1547,7 +1551,7 @@ end;
 procedure TfrmMessageList.Clear;
 begin
   ClearMessageDetailsControls;
-  FWatches.Clear;
+  FWatchesView.Clear;
   EditorView.Clear;
   FCallStack.Clear;
   FLogTreeView.Clear;
@@ -1896,8 +1900,6 @@ begin
   LColumn.MinWidth := LTotalWidth div 10;
   LColumn := FLogTreeView.Header.Columns[COLUMN_TIMESTAMP];
   LColumn.MinWidth := 10 * DisplayValuesSettings.TimeStamp.Font.Size;
-    //C.MinWidth :=
-    //GetTextWidth('88:88:88:888', DisplayValuesSettings.TimeStamp.Font) + 12;
   LColumn.Width    := LColumn.MinWidth;
   LColumn.MaxWidth := LColumn.MinWidth;
 

@@ -42,7 +42,7 @@ type
 implementation
 
 uses
-  System.SysUtils, System.IOUtils,
+  System.SysUtils,
 
   DDuce.Logger, DDuce.Logger.Interfaces;
 

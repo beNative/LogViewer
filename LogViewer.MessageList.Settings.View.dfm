@@ -2,7 +2,7 @@ object frmViewSettings: TfrmViewSettings
   Left = 0
   Top = 0
   ClientHeight = 153
-  ClientWidth = 499
+  ClientWidth = 214
   Color = clBtnFace
   ParentFont = True
   OldCreateOrder = False
