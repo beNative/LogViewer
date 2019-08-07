@@ -48,7 +48,7 @@ type
 
   public
     constructor Create(AManager: ILogViewerManager);
-    procedure BeforeDestruction; override;
+    destructor Destroy; override;
 
     property ActiveView: ILogViewer
       read GetActiveView;
@@ -71,10 +71,10 @@ begin
   FManager := AManager;
 end;
 
-procedure TLogViewerCommands.BeforeDestruction;
+destructor TLogViewerCommands.Destroy;
 begin
   FManager := nil;
-  inherited BeforeDestruction;
+  inherited Destroy;
 end;
 {$ENDREGION}
 

@@ -148,6 +148,7 @@ end;
 procedure TChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
+  //FOnChange.UseFreeNotification := False;
   FSubscriberList :=  TCollections.CreateDictionary<UInt32, ISubscriber>;
   FPollTimer.Create(function: TTimer
     begin

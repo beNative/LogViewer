@@ -58,7 +58,7 @@ type
 
   public
     procedure AfterConstruction; override;
-    procedure BeforeDestruction; override;
+    destructor Destroy; override;
 
     property Action: TTextFormatSettings
       read FAction;
@@ -118,8 +118,9 @@ begin
   InitializeObjects;
 end;
 
-procedure TDisplayValuesSettings.BeforeDestruction;
+destructor TDisplayValuesSettings.Destroy;
 begin
+  //inherited Destroy;
   FTimeStamp.Free;
   FValueName.Free;
   FValueType.Free;
@@ -135,7 +136,7 @@ begin
   FAction.Free;
   FEnter.Free;
   FLeave.Free;
-  inherited BeforeDestruction;
+inherited Destroy;
 end;
 {$ENDREGION}
 

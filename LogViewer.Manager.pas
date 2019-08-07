@@ -196,6 +196,8 @@ type
       Action     : TCollectionChangedAction
     );
 
+
+
     procedure UpdateVisibleMessageTypes(
       const AMessageType : TLogMessageType;
       const ASender      : TObject;
@@ -207,6 +209,8 @@ type
     function GetItem(AName: string): TCustomAction;
 
     procedure UpdateActions;
+    procedure Notification(AComponent: TComponent; Operation: TOperation);
+      override;
 
     property Items[AName: string]: TCustomAction
       read GetItem; default;
@@ -324,6 +328,8 @@ end;
 destructor TdmManager.Destroy;
 begin
   Logger.Track(Self, 'Destroy');
+  EditorManager.ActiveView := nil;
+
   FSettings.Save;
   FActiveView     := nil;
   FViewList       := nil;
@@ -331,11 +337,10 @@ begin
   FSettings       := nil;
   FEditorSettings := nil;
   FEditorManager  := nil;
-
+  
   FreeAndNil(FEvents);
   FreeAndNil(FCommands);
-  inherited Destroy;
-end;
+  inherited Destroy;end;
 {$ENDREGION}
 
 {$REGION 'action handlers'}
@@ -685,6 +690,14 @@ function TdmManager.GetViews: IList<ILogViewer>;
 begin
   Result := FViewList;
 end;
+procedure TdmManager.Notification(AComponent: TComponent;
+  Operation: TOperation);
+begin
+  Logger.Send(AComponent.Name, AComponent.ClassName);
+  Logger.Send(TValue.From(Operation));
+  inherited Notification(AComponent, Operation);
+end;
+
 {$ENDREGION}
 
 {$REGION 'event handlers'}

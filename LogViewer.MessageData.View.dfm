@@ -20,15 +20,9 @@ object frmMessageDataView: TfrmMessageDataView
     PanelCollection = <
       item
         Control = pnlLeft
-        Position = 0.980000000000000000
-        Visible = True
-        Index = 0
-      end
-      item
-        Control = pnlRight
         Position = 1.000000000000000000
         Visible = True
-        Index = 1
+        Index = 0
       end>
     MinPosition = 0.020000000000000000
     Align = alClient
@@ -36,19 +30,10 @@ object frmMessageDataView: TfrmMessageDataView
     DesignSize = (
       601
       287)
-    object pnlRight: TPanel
-      Left = 592
-      Top = 0
-      Width = 9
-      Height = 287
-      Anchors = []
-      BevelOuter = bvNone
-      TabOrder = 1
-    end
     object pnlLeft: TPanel
       Left = 0
       Top = 0
-      Width = 589
+      Width = 601
       Height = 287
       Anchors = []
       BevelOuter = bvNone

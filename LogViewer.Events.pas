@@ -145,6 +145,7 @@ end;
 procedure TLogViewerEvents.Clear;
 begin
   FOnAddLogViewer.Clear;
+  FOnDeleteLogViewer.Clear;
   FOnAddReceiver.Clear;
   FOnActiveViewChange.Clear;
 end;

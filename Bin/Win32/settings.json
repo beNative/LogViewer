@@ -1,8 +1,8 @@
 {
 	"FormSettings": {
-		"Left": 494,
-		"Top": 339,
-		"Width": 1651,
+		"Left": 529,
+		"Top": 180,
+		"Width": 1645,
 		"Height": 970,
 		"FormStyle": 0,
 		"WindowState": 0
@@ -15,7 +15,7 @@
 		"MessageDetailsVisible": true,
 		"SmartTimeStamps": true,
 		"HorizontalPanelPositions": [
-			0.208588957055215,
+			0.212400245549417,
 			0.747362576346474,
 			1
 		],
@@ -48,7 +48,7 @@
 	"DisplayValuesSettings": {
 		"Id": {
 			"BackgroundColor": 16777215,
-			"FontName": "Tahoma",
+			"FontName": "Segoe UI",
 			"FontColor": 8421504,
 			"FontSize": 8,
 			"FontStyle": "",
@@ -58,7 +58,7 @@
 		},
 		"Info": {
 			"BackgroundColor": 16711680,
-			"FontName": "Tahoma",
+			"FontName": "Segoe UI",
 			"FontColor": 16777215,
 			"FontSize": 8,
 			"FontStyle": "fsBold",
@@ -68,7 +68,7 @@
 		},
 		"Warning": {
 			"BackgroundColor": 42495,
-			"FontName": "Tahoma",
+			"FontName": "Segoe UI",
 			"FontColor": 16777215,
 			"FontSize": 8,
 			"FontStyle": "fsBold",
@@ -78,7 +78,7 @@
 		},
 		"Error": {
 			"BackgroundColor": 255,
-			"FontName": "Tahoma",
+			"FontName": "Segoe UI",
 			"FontColor": 16777215,
 			"FontSize": 8,
 			"FontStyle": "fsBold",
@@ -87,8 +87,8 @@
 			"VerticalAlignment": 0
 		},
 		"TimeStamp": {
-			"BackgroundColor": 16777215,
-			"FontName": "Tahoma",
+			"BackgroundColor": 14540253,
+			"FontName": "Segoe UI",
 			"FontColor": 16711680,
 			"FontSize": 8,
 			"FontStyle": "",
@@ -98,7 +98,7 @@
 		},
 		"ValueName": {
 			"BackgroundColor": 16777215,
-			"FontName": "Tahoma",
+			"FontName": "Segoe UI",
 			"FontColor": 128,
 			"FontSize": 8,
 			"FontStyle": "fsUnderline",
@@ -108,7 +108,7 @@
 		},
 		"ValueType": {
 			"BackgroundColor": 16777215,
-			"FontName": "Tahoma",
+			"FontName": "Segoe UI",
 			"FontColor": 8388608,
 			"FontSize": 8,
 			"FontStyle": "",
@@ -118,7 +118,7 @@
 		},
 		"Value": {
 			"BackgroundColor": 16777215,
-			"FontName": "Tahoma",
+			"FontName": "Segoe UI",
 			"FontColor": 0,
 			"FontSize": 8,
 			"FontStyle": "",
@@ -128,7 +128,7 @@
 		},
 		"CheckPoint": {
 			"BackgroundColor": 16777215,
-			"FontName": "Tahoma",
+			"FontName": "Segoe UI",
 			"FontColor": 32768,
 			"FontSize": 8,
 			"FontStyle": "",
@@ -138,7 +138,7 @@
 		},
 		"Counter": {
 			"BackgroundColor": 16777215,
-			"FontName": "Tahoma",
+			"FontName": "Segoe UI",
 			"FontColor": 8388736,
 			"FontSize": 8,
 			"FontStyle": "",
@@ -148,7 +148,7 @@
 		},
 		"Tracing": {
 			"BackgroundColor": 14540253,
-			"FontName": "Tahoma",
+			"FontName": "Segoe UI",
 			"FontColor": -16777208,
 			"FontSize": 8,
 			"FontStyle": "",
@@ -158,7 +158,7 @@
 		},
 		"Enter": {
 			"BackgroundColor": 14540253,
-			"FontName": "Tahoma",
+			"FontName": "Segoe UI",
 			"FontColor": 32768,
 			"FontSize": 8,
 			"FontStyle": "",
@@ -168,7 +168,7 @@
 		},
 		"Leave": {
 			"BackgroundColor": 14540253,
-			"FontName": "Tahoma",
+			"FontName": "Segoe UI",
 			"FontColor": 255,
 			"FontSize": 8,
 			"FontStyle": "",
@@ -178,7 +178,7 @@
 		},
 		"Conditional": {
 			"BackgroundColor": 16777215,
-			"FontName": "Tahoma",
+			"FontName": "Segoe UI",
 			"FontColor": 8421376,
 			"FontSize": 8,
 			"FontStyle": "",
@@ -200,7 +200,7 @@
 		"LogLevels": [
 			{
 				"Alias": "",
-				"Color": 65535
+				"Color": 15793151
 			},
 			{
 				"Alias": "sdv",

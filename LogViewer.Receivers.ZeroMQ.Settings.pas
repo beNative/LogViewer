@@ -75,7 +75,8 @@ implementation
 procedure TZeroMQSettings.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FEndpoints   := TStringList.Create;
+  //FOnChanged.UseFreeNotification := False;
+  FEndpoints       := TStringList.Create;
   FPollingInterval := DEFAULT_POLLING_INTERVAL;
 end;
 

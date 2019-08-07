@@ -224,7 +224,7 @@ begin
   TB.AllowTextButtons := True;
   CreateToolButton(TB, 'actAbout');
   CreateToolButton(TB);
-  CreateToolButton(TB, 'actToggleFullscreen');
+//  CreateToolButton(TB, 'actToggleFullscreen');
   CreateToolButton(TB, 'actToggleAlwaysOnTop');
   Result := TB;
 end;

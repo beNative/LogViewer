@@ -32,7 +32,6 @@ uses
 type
   TfrmMessageDataView = class(TForm)
     pnlMain  : TOMultiPanel;
-    pnlRight : TPanel;
     pnlLeft  : TPanel;
 
   private

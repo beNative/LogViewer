@@ -3,6 +3,7 @@ program LogViewer;
 {$R *.dres}
 
 uses
+  //LeakCheck,
   System.SysUtils,
   Vcl.Themes,
   Vcl.Styles,
@@ -88,11 +89,11 @@ begin
 //  end;
 
   Application.Title := 'Log viewer';
-  // setup logchannel for using a log LogViewer instance to debug itself.
   Application.CreateForm(TfrmMain, frmMain);
-  Logger.Channels.Add(
-    TZeroMQChannel.Create(Format('tcp://*:%d', [LOGVIEWER_ZMQ_PORT]))
-  );
+  // setup logchannel for using a log LogViewer instance to debug itself.
+//  Logger.Channels.Add(
+//    TZeroMQChannel.Create(Format('tcp://*:%d', [LOGVIEWER_ZMQ_PORT]))
+//  );
   Logger.Clear;
   Logger.Clear;
   Logger.Info('LogViewer Started.');

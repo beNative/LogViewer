@@ -320,7 +320,7 @@ type
       ASettings   : TMessageListSettings
     ); reintroduce; virtual;
     procedure AfterConstruction; override;
-    procedure BeforeDestruction; override;
+    destructor Destroy; override;
 
   end;
 
@@ -389,22 +389,23 @@ begin
   FLogTreeView.PopupMenu := Manager.Menus.LogTreeViewerPopupMenu;
 end;
 
-procedure TfrmMessageList.BeforeDestruction;
+destructor TfrmMessageList.Destroy;
 begin
-  Logger.Track(Self, 'BeforeDestruction');
+  Logger.Track(Self, 'Destroy');
   if Assigned(FSettings) then
   begin
-    FSettings.OnChanged.Remove(FSettingsChanged);
+    FSettings.OnChanged.RemoveAll(Self);
     SavePanelSettings;
     FSettings := nil;
   end;
   if Assigned(FSubscriber) then
   begin
-    FSubscriber.OnReceiveMessage.Remove(FSubscriberReceiveMessage);
+    FSubscriber.OnReceiveMessage.RemoveAll(Self);
     FSubscriber := nil;
   end;
   FCallStack  := nil;
-  Manager.Settings.WatchSettings.OnChanged.Remove(WatchSettingsChanged);
+  FEditorView := nil;
+  Manager.Settings.WatchSettings.OnChanged.RemoveAll(Self);
   FreeAndNil(FValueList);
   FreeAndNil(FDataSetView);
   FreeAndNil(FImageView);
@@ -413,7 +414,7 @@ begin
   FreeAndNil(FCallStackView);
   FreeAndNil(FLogTreeView);
   FreeAndNil(FWatches);
-  inherited BeforeDestruction;
+  inherited Destroy;
 end;
 
 procedure TfrmMessageList.CreateCallStackView;
@@ -886,7 +887,7 @@ begin
     if S <> '' then
     begin
       B := B and (ContainsText(LN.Text, S) or ContainsText(LN.ValueName, S) or
-       ContainsText(LN.Value, S));
+       ContainsText(LN.Value, S) or (LN.MessageType in TracingMessages));
     end;
     Sender.IsVisible[Node] := B;
   end;

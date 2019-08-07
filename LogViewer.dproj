@@ -55,19 +55,19 @@
         <SanitizedProjectName>LogViewer</SanitizedProjectName>
         <DCC_Namespace>Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap;Web;Soap;BCEditor;$(DCC_Namespace)</DCC_Namespace>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.8.38.204;ProductName=LogViewer;ProductVersion=1.8.38;LegalCopyright=2013 - 2019 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.8.39.208;ProductName=LogViewer;ProductVersion=1.8.39;LegalCopyright=2013 - 2019 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
         <DCC_ExeOutput>.\Bin\$(Platform)</DCC_ExeOutput>
         <DCC_DcuOutput>.\Lib\$(Platform)\$(Config)</DCC_DcuOutput>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Debug>true</VerInfo_Debug>
         <VerInfo_MinorVer>8</VerInfo_MinorVer>
-        <VerInfo_Build>204</VerInfo_Build>
-        <VerInfo_Release>38</VerInfo_Release>
+        <VerInfo_Build>208</VerInfo_Build>
+        <VerInfo_Release>39</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
         <BT_BuildType>Debug</BT_BuildType>
-        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.8.38.204;ProductName=LogViewer;ProductVersion=1.8.38;ProgramID=com.embarcadero.$(MSBuildProjectName);LegalCopyright=2013 - 2019 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.8.39.208;ProductName=LogViewer;ProductVersion=1.8.39;ProgramID=com.embarcadero.$(MSBuildProjectName);LegalCopyright=2013 - 2019 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <Icon_MainIcon>LogViewer_Icon2.ico</Icon_MainIcon>
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
@@ -90,21 +90,21 @@
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <AppEnableHighDPI>true</AppEnableHighDPI>
-        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.8.38.204;ProductName=LogViewer;ProductVersion=1.8.38;ProgramID=com.embarcadero.$(MSBuildProjectName);LegalCopyright=2013 - 2019 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.8.39.208;ProductName=LogViewer;ProductVersion=1.8.39;ProgramID=com.embarcadero.$(MSBuildProjectName);LegalCopyright=2013 - 2019 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
         <DCC_Optimize>false</DCC_Optimize>
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
-        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.8.38.204;ProductName=LogViewer;ProductVersion=1.8.38;LegalCopyright=2013 - 2019 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.8.39.208;ProductName=LogViewer;ProductVersion=1.8.39;LegalCopyright=2013 - 2019 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
         <VerInfo_MinorVer>8</VerInfo_MinorVer>
-        <VerInfo_Build>204</VerInfo_Build>
-        <VerInfo_Release>38</VerInfo_Release>
+        <VerInfo_Build>208</VerInfo_Build>
+        <VerInfo_Release>39</VerInfo_Release>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <AppEnableHighDPI>true</AppEnableHighDPI>
-        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.8.38.204;ProductName=LogViewer;ProductVersion=1.8.38;ProgramID=com.embarcadero.$(MSBuildProjectName);LegalCopyright=2013 - 2019 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.8.39.208;ProductName=LogViewer;ProductVersion=1.8.39;ProgramID=com.embarcadero.$(MSBuildProjectName);LegalCopyright=2013 - 2019 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
         <DCC_IntegerOverflowCheck>true</DCC_IntegerOverflowCheck>
         <DCC_RangeChecking>true</DCC_RangeChecking>
         <DCC_DebugDCUs>true</DCC_DebugDCUs>
@@ -117,66 +117,54 @@
         <DCCReference Include="LogViewer.CallStack.Settings.pas"/>
         <DCCReference Include="LogViewer.CallStack.View.pas">
             <Form>frmCallStackView</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.Commands.pas"/>
         <DCCReference Include="LogViewer.ComPort.Settings.pas"/>
         <DCCReference Include="LogViewer.Dashboard.Data.pas"/>
         <DCCReference Include="LogViewer.Dashboard.View.pas">
             <Form>frmDashboard</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.DataSet.View.pas">
             <Form>frmDataSetView</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.DisplayValues.Settings.pas"/>
         <DCCReference Include="LogViewer.DisplayValues.Settings.View.pas">
             <Form>frmDisplayValuesSettings</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.Events.pas"/>
         <DCCReference Include="LogViewer.Factories.pas"/>
         <DCCReference Include="LogViewer.Factories.Toolbars.pas"/>
         <DCCReference Include="LogViewer.Image.View.pas">
             <Form>frmImageView</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.Interfaces.pas"/>
         <DCCReference Include="LogViewer.MainForm.pas">
             <Form>frmMain</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.Manager.pas">
             <Form>dmManager</Form>
-            <FormType>dfm</FormType>
             <DesignClass>TDataModule</DesignClass>
         </DCCReference>
         <DCCReference Include="LogViewer.MessageFilter.Data.pas"/>
         <DCCReference Include="LogViewer.MessageFilter.View.pas">
             <Form>frmMessageFilter</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.MessageList.LogNode.pas"/>
         <DCCReference Include="LogViewer.MessageList.Settings.pas"/>
         <DCCReference Include="LogViewer.MessageList.Settings.View.pas">
             <Form>frmViewSettings</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.MessageList.View.pas">
             <Form>frmMessageList</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.RawData.View.pas">
             <Form>frmRawDataView</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.Receivers.Base.pas"/>
         <DCCReference Include="LogViewer.Receivers.ComPort.pas"/>
         <DCCReference Include="LogViewer.Receivers.ComPort.Settings.pas"/>
         <DCCReference Include="LogViewer.Receivers.ComPort.Settings.View.pas">
             <Form>frmComPortSettings</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.Receivers.FileSystem.pas"/>
         <DCCReference Include="LogViewer.Receivers.FileSystem.Settings.pas"/>
@@ -186,25 +174,21 @@
         <DCCReference Include="LogViewer.Receivers.WinIPC.Settings.pas"/>
         <DCCReference Include="LogViewer.Receivers.WinIPC.Settings.View.pas">
             <Form>frmWinIPCSettings</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.Receivers.WinODS.pas"/>
         <DCCReference Include="LogViewer.Receivers.WinODS.Settings.pas"/>
         <DCCReference Include="LogViewer.Receivers.WinODS.Settings.View.pas">
             <Form>frmWinODSSettings</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.Receivers.ZeroMQ.pas"/>
         <DCCReference Include="LogViewer.Receivers.ZeroMQ.Settings.pas"/>
         <DCCReference Include="LogViewer.Receivers.ZeroMQ.Settings.View.pas">
             <Form>frmZeroMQSettings</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.Resources.pas"/>
         <DCCReference Include="LogViewer.Settings.Dialog.Data.pas"/>
         <DCCReference Include="LogViewer.Settings.Dialog.pas">
             <Form>frmLogViewerSettings</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.Settings.pas"/>
         <DCCReference Include="LogViewer.Subscribers.Base.pas"/>
@@ -215,31 +199,25 @@
         <DCCReference Include="LogViewer.Subscribers.ZeroMQ.pas"/>
         <DCCReference Include="LogViewer.ValueList.View.pas">
             <Form>frmValueListView</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.Watches.Data.pas"/>
         <DCCReference Include="LogViewer.Watches.Settings.pas"/>
         <DCCReference Include="LogViewer.Watches.Settings.View.pas">
             <Form>frmWatchSettings</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.Watches.View.pas">
             <Form>frmWatchesView</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.MessageData.View.pas">
             <Form>TfrmMessageData</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.CallStack.Settings.View.pas">
             <Form>frmCallStackSettings</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="LogViewer.DisplayValues.Settings.ValueManager.pas"/>
         <DCCReference Include="LogViewer.LogLevels.Settings.pas"/>
         <DCCReference Include="LogViewer.LogLevels.Settings.View.pas">
             <Form>frmLogLevelSettings</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <None Include="Readme.md"/>
         <RcItem Include="Bin\Win32\libzmq.dll">

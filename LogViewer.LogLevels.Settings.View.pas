@@ -94,9 +94,6 @@ uses
 {$REGION 'construction and destruction'}
 constructor TfrmLogLevelSettings.Create(AOwner: TComponent;
   ASettings: TLogLevelSettings);
-var
-  CDS : IColumnDefinitions;
-  CD  : TColumnDefinition;
 begin
   inherited Create(AOwner);
   FSettings := ASettings;
@@ -171,6 +168,7 @@ end;
 
 destructor TfrmLogLevelSettings.Destroy;
 begin
+  FSettings.OnChanged.RemoveAll(Self);
   FSettings := nil;
   inherited Destroy;
 end;

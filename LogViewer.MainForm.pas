@@ -224,6 +224,9 @@ end;
 
 destructor TfrmMain.Destroy;
 begin
+  //Events.OnAddLogViewer.RemoveAll(Self);
+  //Events.OnActiveViewChange.RemoveAll(Self);
+  //FSettings.OnChanged.RemoveAll(Self);
   Logger.Track(Self, 'Destroy');
   tmrPoll.Enabled := False;
   Manager.Receivers.Clear;
@@ -231,7 +234,7 @@ begin
   FManager.Settings.OnChanged.Remove(SettingsChanged);
   FManager := nil;
   FreeAndNil(FDashboard); // needs to be freed before manager!
-  inherited Destroy;
+  inherited Destroy; // will destroy manager object
   FSettings.Free;
 end;
 {$ENDREGION}

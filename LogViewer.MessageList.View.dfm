@@ -180,11 +180,8 @@ object frmMessageList: TfrmMessageList
         TabPanelOptions.Colors.SelectedBottom = clBtnHighlight
         TabPanelOptions.Colors.TabBorder = cl3DLight
         TabPanelOptions.Options = [toDrag, toBrightTopColors]
-        ExplicitTop = 186
-        ExplicitHeight = 560
         object tsMessageView: TKTabSheet
           Caption = 'MessageView'
-          ExplicitHeight = 560
           object pgcMessageDetails: TKPageControl
             Left = 0
             Top = 0
@@ -204,13 +201,16 @@ object frmMessageList: TfrmMessageList
             TabPanelOptions.Colors.SelectedBottom = clBtnHighlight
             TabPanelOptions.Colors.TabBorder = clBtnHighlight
             TabPanelOptions.Options = []
-            ExplicitHeight = 560
             object tsValueList: TKTabSheet
               Caption = 'Value list'
+              ExplicitTop = 0
+              ExplicitWidth = 0
               ExplicitHeight = 536
             end
             object tsTextViewer: TKTabSheet
               Caption = 'Text viewer'
+              ExplicitTop = 0
+              ExplicitWidth = 0
               ExplicitHeight = 536
               object pnlTextViewer: TPanel
                 Left = 0
@@ -227,15 +227,21 @@ object frmMessageList: TfrmMessageList
             end
             object tsImageViewer: TKTabSheet
               Caption = 'Image viewer'
+              ExplicitTop = 0
+              ExplicitWidth = 0
               ExplicitHeight = 536
             end
             object tsDataSet: TKTabSheet
               Caption = 'Dataset viewer'
+              ExplicitTop = 0
+              ExplicitWidth = 0
               ExplicitHeight = 536
             end
             object tsRawData: TKTabSheet
               Caption = 'Raw data viewer'
               OnShow = tsRawDataShow
+              ExplicitTop = 0
+              ExplicitWidth = 0
               ExplicitHeight = 536
             end
           end
@@ -381,7 +387,7 @@ object frmMessageList: TfrmMessageList
     Left = 55
     Top = 22
     Bitmap = {
-      494C010117001900840110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101170019008C0110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

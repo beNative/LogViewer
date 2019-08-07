@@ -268,17 +268,13 @@ begin
         .ToSimpleObject(FDisplayValuesSettings.Conditional);
       JO['WatchSettings'].ObjectValue.ToSimpleObject(FWatchSettings);
       JO['CallStackSettings'].ObjectValue.ToSimpleObject(FCallStackSettings);
-
-
       JO['LogLevelSettings'].ObjectValue.ToSimpleObject(FLogLevelSettings);
       for I := 0 to JO['LogLevelSettings']
         .ObjectValue['LogLevels'].Count - 1 do
       begin
-
-        JO['LogLevelSettings'].ObjectValue['LogLevels'].ArrayValue[I].ObjectValue.ToSimpleObject(FLogLevelSettings.LogLevels[I]);
+        JO['LogLevelSettings'].ObjectValue['LogLevels'].ArrayValue[I]
+          .ObjectValue.ToSimpleObject(FLogLevelSettings.LogLevels[I]);
       end;
-
-
       JO.ToSimpleObject(Self);
     finally
       JO.Free;

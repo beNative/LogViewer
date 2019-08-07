@@ -154,7 +154,7 @@ end;
 destructor TfrmCallStackView.Destroy;
 begin
   Logger.Track(Self, 'Destroy');
-  FCallStack.OnChanged.Remove(FCallStackChanged);
+  FCallStack.OnChanged.RemoveAll(Self);
   FCallStack := nil;
   FDisplayValuesSettings := nil;
   inherited Destroy;

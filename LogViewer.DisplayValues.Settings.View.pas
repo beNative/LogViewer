@@ -98,7 +98,7 @@ var
   CD  : TColumnDefinition;
 begin
   inherited Create(AOwner);
-  FSettings   := ASettings;
+  FSettings := ASettings;
   FSettings.OnChanged.Add(FFormatSettingsChanged);
   FValueManager := TDisplayValuesValueManager.Create;
   FInspector := TzObjectInspectorFactory.Create(Self, pnlRight, nil, FValueManager);
@@ -144,6 +144,7 @@ end;
 
 destructor TfrmDisplayValuesSettings.Destroy;
 begin
+  FSettings.OnChanged.RemoveAll(Self);
   FValueManager.Free;
   inherited Destroy;
 end;

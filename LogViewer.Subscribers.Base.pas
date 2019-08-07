@@ -103,6 +103,7 @@ constructor TSubscriber.Create(const AReceiver: IChannelReceiver;
 begin
   inherited Create;
   Guard.CheckNotNull(AReceiver, 'AReceiver');
+  //FOnChange.UseFreeNotification := False;
   FReceiver   := AReceiver;
   FSourceId   := ASourceId;
   FKey        := AKey;
