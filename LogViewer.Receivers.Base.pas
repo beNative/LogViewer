@@ -148,7 +148,6 @@ end;
 procedure TChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
-  //FOnChange.UseFreeNotification := False;
   FSubscriberList :=  TCollections.CreateDictionary<UInt32, ISubscriber>;
   FPollTimer.Create(function: TTimer
     begin
@@ -193,8 +192,7 @@ end;
 {$REGION 'event dispatch methods'}
 procedure TChannelReceiver.DoChange;
 begin
-  if FOnChange.CanInvoke then
-    FOnChange.Invoke(Self);
+  FOnChange.Invoke(Self);
 end;
 
 procedure TChannelReceiver.DoReceiveMessage(AStream: TStream; ASourceId: UInt32;

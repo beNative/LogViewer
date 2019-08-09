@@ -30,12 +30,14 @@ type
     chkOnlyTrackChanges        : TCheckBox;
     chkSyncWithSelectedMessage : TCheckBox;
     chkShowWatchHistory        : TCheckBox;
-    chkHideColumnHeaders: TCheckBox;
+    chkHideColumnHeaders       : TCheckBox;
 
+    {$REGION 'event handlers'}
     procedure chkOnlyTrackChangesClick(Sender: TObject);
     procedure chkShowWatchHistoryClick(Sender: TObject);
     procedure chkSyncWithSelectedMessageClick(Sender: TObject);
     procedure chkHideColumnHeadersClick(Sender: TObject);
+    {$ENDREGION}
 
   private
     FSettings : TWatchSettings;

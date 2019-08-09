@@ -23,7 +23,6 @@ uses
   System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
   Data.DB,
-
   FireDAC.Comp.Client, FireDAC.Stan.Intf, FireDAC.Comp.DataSet,
   FireDAC.Stan.StorageBin,
 
@@ -48,12 +47,12 @@ type
 
 implementation
 
+{$R *.dfm}
+
 uses
   Spring,
 
   DDuce.Factories.GridView;
-
-{$R *.dfm}
 
 {$REGION 'construction and destruction'}
 procedure TfrmDataSetView.AfterConstruction;

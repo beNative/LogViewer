@@ -3,7 +3,6 @@ program LogViewer;
 {$R *.dres}
 
 uses
-  //LeakCheck,
   System.SysUtils,
   Vcl.Themes,
   Vcl.Styles,
@@ -47,10 +46,10 @@ uses
   LogViewer.Receivers.MQTT.Settings in 'LogViewer.Receivers.MQTT.Settings.pas',
   LogViewer.Receivers.WinIPC in 'LogViewer.Receivers.WinIPC.pas',
   LogViewer.Receivers.WinIPC.Settings in 'LogViewer.Receivers.WinIPC.Settings.pas',
-  LogViewer.Receivers.WinIPC.Settings.View in 'LogViewer.Receivers.WinIPC.Settings.View.pas' {frmWinIPCSettings},
+  LogViewer.Receivers.WinIPC.Settings.View in 'LogViewer.Receivers.WinIPC.Settings.View.pas' {frmWinipcSettings},
   LogViewer.Receivers.WinODS in 'LogViewer.Receivers.WinODS.pas',
   LogViewer.Receivers.WinODS.Settings in 'LogViewer.Receivers.WinODS.Settings.pas',
-  LogViewer.Receivers.WinODS.Settings.View in 'LogViewer.Receivers.WinODS.Settings.View.pas' {frmWinODSSettings},
+  LogViewer.Receivers.WinODS.Settings.View in 'LogViewer.Receivers.WinODS.Settings.View.pas' {frmWinodsSettings},
   LogViewer.Receivers.ZeroMQ in 'LogViewer.Receivers.ZeroMQ.pas',
   LogViewer.Receivers.ZeroMQ.Settings in 'LogViewer.Receivers.ZeroMQ.Settings.pas',
   LogViewer.Receivers.ZeroMQ.Settings.View in 'LogViewer.Receivers.ZeroMQ.Settings.View.pas' {frmZeroMQSettings},
@@ -91,9 +90,9 @@ begin
   Application.Title := 'Log viewer';
   Application.CreateForm(TfrmMain, frmMain);
   // setup logchannel for using a log LogViewer instance to debug itself.
-//  Logger.Channels.Add(
-//    TZeroMQChannel.Create(Format('tcp://*:%d', [LOGVIEWER_ZMQ_PORT]))
-//  );
+  Logger.Channels.Add(
+    TZeroMQChannel.Create(Format('tcp://*:%d', [LOGVIEWER_ZMQ_PORT]))
+  );
   Logger.Clear;
   Logger.Clear;
   Logger.Info('LogViewer Started.');

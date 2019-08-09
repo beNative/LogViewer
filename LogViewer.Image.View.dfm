@@ -77,7 +77,25 @@ object frmImageView: TfrmImageView
       AutoSize = True
       Center = True
       IncrementalDisplay = True
+      PopupMenu = ppmMain
       Proportional = True
+    end
+  end
+  object aclMain: TActionList
+    Left = 592
+    Top = 16
+    object actCopy: TAction
+      Caption = 'Copy'
+      Hint = 'Copy image to clipboard'
+      OnExecute = actCopyExecute
+    end
+  end
+  object ppmMain: TPopupMenu
+    Left = 432
+    Top = 179
+    object mniCopy: TMenuItem
+      Action = actCopy
+      ShortCut = 16451
     end
   end
 end

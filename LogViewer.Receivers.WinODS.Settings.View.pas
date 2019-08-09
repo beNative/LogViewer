@@ -26,7 +26,7 @@ uses
   LogViewer.Receivers.WinODS.Settings;
 
 type
-  TfrmWinODSSettings = class(TForm)
+  TfrmWinodsSettings = class(TForm)
     {$REGION 'designer controls'}
     lblProcess   : TLabel;
     lblProcessId : TLabel;
@@ -35,14 +35,14 @@ type
     {$ENDREGION}
 
   private
-    FSettings : TWinODSSettings;
+    FSettings : TWinodsSettings;
 
   public
     constructor Create(
       AOwner    : TComponent;
-      ASettings : TWinODSSettings
+      ASettings : TWinodsSettings
     ); reintroduce;
-    procedure BeforeDestruction; override;
+    destructor Destroy; override;
 
   end;
 
@@ -51,17 +51,17 @@ implementation
 {$R *.dfm}
 
 {$REGION 'construction and destruction'}
-constructor TfrmWinODSSettings.Create(AOwner: TComponent;
-  ASettings: TWinODSSettings);
+constructor TfrmWinodsSettings.Create(AOwner: TComponent;
+  ASettings: TWinodsSettings);
 begin
   inherited Create(AOwner);
   FSettings := ASettings;
 end;
 
-procedure TfrmWinODSSettings.BeforeDestruction;
+destructor TfrmWinodsSettings.Destroy;
 begin
   FSettings := nil;
-  inherited BeforeDestruction;
+  inherited Destroy;
 end;
 {$ENDREGION}
 

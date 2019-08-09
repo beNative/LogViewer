@@ -35,6 +35,7 @@ type
 
   protected
     {$REGION 'property access methods'}
+    procedure SetLevel(const Value: Byte);
     function GetColorName: string;
     function GetOnChanged: IEvent<TNotifyEvent>;
     function GetColor: TColor;
@@ -53,11 +54,10 @@ type
       const AAlias : string = ''
     );
 
+    procedure Assign(Source: TPersistent); override;
+
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
-
-    property Level: Byte
-      read GetLevel;
 
     property ColorName: string
       read GetColorName;
@@ -68,6 +68,9 @@ type
 
     property Color: TColor
       read GetColor write SetColor;
+
+    property Level: Byte
+      read GetLevel write SetLevel;
   end;
 
   TLogLevelSettings = class(TPersistent)
@@ -149,6 +152,15 @@ begin
   Result := FLevel;
 end;
 
+procedure TLogLevel.SetLevel(const Value: Byte);
+begin
+  if Level <> Value then
+  begin
+    FLevel := Value;
+    Changed;
+  end;
+end;
+
 function TLogLevel.GetOnChanged: IEvent<TNotifyEvent>;
 begin
   Result := FOnChanged;
@@ -156,13 +168,27 @@ end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
+procedure TLogLevel.Assign(Source: TPersistent);
+var
+  LLogLevel: TLogLevel;
+begin
+  if Source is TLogLevel then
+  begin
+    LLogLevel := TLogLevel(Source);
+    Level     := LLogLevel.Level;
+    Alias     := LLogLevel.Alias;
+    FColor    := LLogLevel.Color;
+  end
+  else
+    inherited Assign(Source);
+end;
+
 procedure TLogLevel.Changed;
 begin
   if FOnChanged.CanInvoke then
     FOnChanged.Invoke(Self);
 end;
 {$ENDREGION}
-
 {$ENDREGION}
 
 {$REGION 'TLogLevelSettings'}
@@ -208,14 +234,9 @@ end;
 {$REGION 'event handlers'}
 procedure TLogLevelSettings.FLogLevelChanged(Sender: TObject);
 begin
-  if FOnChanged.CanInvoke then
-  begin
-    Logger.Send('Invoked');
-    FOnChanged.Invoke(Self);
-  end;
+  FOnChanged.Invoke(Self);
 end;
 {$ENDREGION}
-
 {$ENDREGION}
 
 end.

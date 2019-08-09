@@ -56,7 +56,7 @@ type
     {$ENDREGION}
 
     {$REGION 'event handlers'}
-    procedure SettingsChanged(Sender: TObject);
+    procedure FSettingsChanged(Sender: TObject);
     procedure FTVPWatchValuesSelectionChanged(Sender: TObject);
     procedure FTVPWatchValuesDoubleClick(Sender: TObject);
     procedure FTVPWatchHistoryDoubleClick(Sender: TObject);
@@ -135,7 +135,7 @@ type
       ASettings              : TWatchSettings;
       ADisplayValuesSettings : TDisplayValuesSettings
     ); reintroduce; virtual;
-    procedure BeforeDestruction; override;
+    destructor Destroy; override;
 
     procedure UpdateView(AMessageId: Int64 = 0);
     procedure GotoFirst;
@@ -167,20 +167,19 @@ begin
   inherited Create(AOwner);
   FWatches := AWatches;
   FSettings              := ASettings;
-  FSettings.OnChanged.Add(SettingsChanged);
+  FSettings.OnChanged.Add(FSettingsChanged);
   FDisplayValuesSettings := ADisplayValuesSettings;
   CreateObjects;
 end;
 
-procedure TfrmWatchesView.BeforeDestruction;
+destructor TfrmWatchesView.Destroy;
 begin
-  Logger.Track(Self, 'BeforeDestruction');
-  FSettings.OnChanged.Remove(SettingsChanged);
+  FSettings.OnChanged.RemoveAll(Self);
   FTVPWatchValues.Free;
   FTVPWatchHistory.Free;
   FWatches.Clear;
   FWatches := nil;
-  inherited BeforeDestruction;
+  inherited Destroy;
 end;
 {$ENDREGION}
 
@@ -313,7 +312,7 @@ begin
   UpdateWatchHistory;
 end;
 
-procedure TfrmWatchesView.SettingsChanged(Sender: TObject);
+procedure TfrmWatchesView.FSettingsChanged(Sender: TObject);
 begin
   FTVPWatchValues.ShowHeader  := FSettings.ColumnHeadersVisible;
   FTVPWatchHistory.ShowHeader := FSettings.ColumnHeadersVisible;

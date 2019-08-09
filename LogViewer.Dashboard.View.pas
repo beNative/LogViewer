@@ -33,8 +33,8 @@ TODO:
 
 uses
   Winapi.Windows, Winapi.Messages,
-  System.SysUtils, System.Variants, System.Classes, System.Actions,
-  System.UITypes, System.ImageList, System.Rtti,
+  System.SysUtils, System.Variants, System.Classes, System.Actions, System.Rtti,
+  System.UITypes, System.ImageList,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
   Vcl.ActnList, Vcl.ComCtrls, Vcl.ImgList, Vcl.Menus,
 
@@ -267,7 +267,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Winapi.MMSystem,
+  //Winapi.MMSystem,
 
   Spring,
 
@@ -972,8 +972,8 @@ begin
 end;
 
 procedure TfrmDashboard.CreateMIDIReceiver;
-var
-  I           : Integer;
+//var
+//  I           : Integer;
   //LSubscriber : ISubscriber;
 begin
   FMidiReceiver := TLogViewerFactories.CreateMidiReceiver(FManager);
@@ -987,10 +987,10 @@ begin
 
 
 //    (*
-	if midiInGetNumDevs > 0 then
-  begin
-    for I := 0 to midiInGetNumDevs - 1 do
-    begin
+//	if midiInGetNumDevs > 0 then
+//  begin
+//    for I := 0 to midiInGetNumDevs - 1 do
+//    begin
       //LSubscriber := TMIDISubscriber.Create(FMIDIReceiver, I, 'test', 'MIDI', True);
       //FMIDIReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
       //FMidiDevices.Data.Values[I.ToString,
@@ -1002,8 +1002,8 @@ begin
 //			 thisControl.Open;
 //			 thisControl.Start;
 //			 MidiInControls.Add(thisControl);
-    end;
-  end;
+//    end;
+//  end;
   //*)
 end;
 

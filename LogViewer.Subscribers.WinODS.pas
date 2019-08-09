@@ -14,9 +14,9 @@
   limitations under the License.
 }
 
-unit LogViewer.Subscribers.WinODS;
+unit LogViewer.Subscribers.Winods;
 
-{ WinODS subscriber. }
+{ Winods subscriber. }
 
 interface
 
@@ -24,7 +24,7 @@ uses
   LogViewer.Interfaces, LogViewer.Subscribers.Base;
 
 type
-  TWinOdsSubscriber = class(TSubscriber, ISubscriber, IWinOds)
+  TWinodsSubscriber = class(TSubscriber, ISubscriber, IWinods)
   end;
 
 implementation

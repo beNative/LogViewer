@@ -120,7 +120,6 @@ end;
 
 destructor TDisplayValuesSettings.Destroy;
 begin
-  //inherited Destroy;
   FTimeStamp.Free;
   FValueName.Free;
   FValueType.Free;
@@ -136,7 +135,7 @@ begin
   FAction.Free;
   FEnter.Free;
   FLeave.Free;
-inherited Destroy;
+  inherited Destroy;
 end;
 {$ENDREGION}
 

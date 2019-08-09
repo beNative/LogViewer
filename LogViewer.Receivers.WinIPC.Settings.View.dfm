@@ -1,4 +1,4 @@
-object frmWinIPCSettings: TfrmWinIPCSettings
+object frmWinipcSettings: TfrmWinipcSettings
   Left = 0
   Top = 0
   ClientHeight = 36

@@ -13,7 +13,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
   PixelsPerInch = 96
   TextHeight = 13
   object splVertical: TSplitter
-    Left = 201
+    Left = 184
     Top = 0
     Width = 2
     Height = 384
@@ -26,7 +26,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
   object pnlConfigTree: TPanel
     Left = 0
     Top = 0
-    Width = 201
+    Width = 184
     Height = 384
     Align = alLeft
     BevelOuter = bvNone
@@ -84,42 +84,52 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     end
   end
   object pgcMain: TKPageControl
-    Left = 203
+    Left = 186
     Top = 0
-    Width = 465
+    Width = 482
     Height = 384
     ActivePageIndex = 2
     Align = alClient
     ParentBackground = False
     TabHeight = 0
     TabOrder = 2
+    ExplicitLeft = 203
+    ExplicitWidth = 465
     object tsWatches: TKTabSheet
       Caption = 'Watches'
+      ExplicitWidth = 465
     end
     object tsCallStack: TKTabSheet
       Caption = 'Callstack'
+      ExplicitWidth = 465
     end
     object tsComPort: TKTabSheet
       Caption = 'ComPort'
+      ExplicitWidth = 465
     end
     object tsZeroMQ: TKTabSheet
       Caption = 'ZeroMQ'
+      ExplicitWidth = 465
     end
     object tsWinODS: TKTabSheet
       Caption = 'WinODS'
+      ExplicitWidth = 465
     end
     object tsWinIPC: TKTabSheet
       Caption = 'WinIPC'
+      ExplicitWidth = 465
     end
     object tsDisplayValueSettings: TKTabSheet
       Caption = 'DisplayValueSettings'
+      ExplicitWidth = 465
     end
     object tsAdvanced: TKTabSheet
       Caption = 'Advanced'
+      ExplicitWidth = 465
       object seSettings: TSynEdit
         Left = 0
         Top = 0
-        Width = 465
+        Width = 482
         Height = 384
         Align = alClient
         ActiveLineColor = clYellow
@@ -160,15 +170,16 @@ object frmLogViewerSettings: TfrmLogViewerSettings
         TabWidth = 2
         WordWrap = True
         FontSmoothing = fsmClearType
+        ExplicitWidth = 465
       end
     end
     object tsViewSettings: TKTabSheet
       Caption = 'ViewSettings'
+      ExplicitWidth = 465
     end
     object tsLogLevels: TKTabSheet
       Caption = 'KTabSheet1'
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitWidth = 465
     end
   end
   object aclMain: TActionList
@@ -196,7 +207,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Left = 568
     Top = 32
     Bitmap = {
-      494C010103000800680010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101030008006C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

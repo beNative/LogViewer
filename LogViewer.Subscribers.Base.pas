@@ -53,6 +53,7 @@ type
     {$ENDREGION}
 
     procedure Poll; virtual;
+    procedure Reset; virtual;
     procedure DoReceiveMessage(AStream: TStream); virtual;
     procedure DoChange; virtual;
 
@@ -103,7 +104,6 @@ constructor TSubscriber.Create(const AReceiver: IChannelReceiver;
 begin
   inherited Create;
   Guard.CheckNotNull(AReceiver, 'AReceiver');
-  //FOnChange.UseFreeNotification := False;
   FReceiver   := AReceiver;
   FSourceId   := ASourceId;
   FKey        := AKey;
@@ -176,8 +176,7 @@ end;
 {$REGION 'event dispatch methods'}
 procedure TSubscriber.DoChange;
 begin
-  if FOnChange.CanInvoke then
-    FOnChange.Invoke(Self);
+  FOnChange.Invoke(Self);
 end;
 
 procedure TSubscriber.DoReceiveMessage(AStream: TStream);
@@ -195,6 +194,12 @@ end;
 procedure TSubscriber.Poll;
 begin
   // override in descendants
+end;
+
+procedure TSubscriber.Reset;
+begin
+  FMessageCount := 0;
+  DoChange;
 end;
 {$ENDREGION}
 

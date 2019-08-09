@@ -71,6 +71,7 @@ type
     function GetOnChange: IEvent<TNotifyEvent>;
     {$ENDREGION}
     procedure Poll;
+    procedure Reset;
     procedure DoReceiveMessage(AStream : TStream);
 
     property Key: string
@@ -139,11 +140,11 @@ type
   ['{4C00B52A-0EA5-4247-A88D-109E15D104DA}']
   end;
 
-  IWinIpc = interface
+  IWinipc = interface
   ['{CE3BF275-B51C-491E-8DBE-1CA0E8816035}']
   end;
 
-  IWinOds = interface
+  IWinods = interface
   ['{71CED15C-E2E5-4708-A34F-5BAE4D918A3D}']
   end;
 

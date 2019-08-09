@@ -1,4 +1,4 @@
-object frmWinODSSettings: TfrmWinODSSettings
+object frmWinodsSettings: TfrmWinodsSettings
   Left = 0
   Top = 0
   ClientHeight = 61

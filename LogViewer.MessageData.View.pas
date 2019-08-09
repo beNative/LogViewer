@@ -67,6 +67,7 @@ type
       CellRect        : TRect;
       var ContentRect : TRect
     );
+    function GetData: IDynamicRecord;
 
   public
     constructor Create(
@@ -75,9 +76,13 @@ type
     ); reintroduce; virtual;
     procedure AfterConstruction; override;
     procedure Clear;
+    procedure Refresh;
 
     property LogNode: TLogNode
       read GetLogNode write SetLogNode;
+
+    property Data: IDynamicRecord
+      read GetData;
   end;
 
 implementation
@@ -113,9 +118,20 @@ end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
+function TfrmMessageDataView.GetData: IDynamicRecord;
+begin
+  Result := FData;
+end;
+
 function TfrmMessageDataView.GetLogNode: TLogNode;
 begin
   Result := FLogNode;
+end;
+
+procedure TfrmMessageDataView.Refresh;
+begin
+  FLogNodeDataView.Data := FData;
+  FLogNodeDataView.Refresh;
 end;
 
 procedure TfrmMessageDataView.SetLogNode(const Value: TLogNode);

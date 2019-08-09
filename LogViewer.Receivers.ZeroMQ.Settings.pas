@@ -29,15 +29,19 @@ type
   TZeroMQSettings = class(TPersistent)
   const
     DEFAULT_POLLING_INTERVAL = 100;
+    DEFAULT_POLLING_TIMEOUT  = 10;
 
   private
     FOnChanged       : Event<TNotifyEvent>;
     FEnabled         : Boolean;
     FEndpoints       : TStrings;
     FPollingInterval : Integer;
+    FPollingTimeout  : Integer;
 
   protected
     {$REGION 'property access methods'}
+    function GetPollingTimeout: Integer;
+    procedure SetPollingTimeout(const Value: Integer);
     function GetPollingInterval: Integer;
     procedure SetPollingInterval(const Value: Integer);
     function GetEndpoints: TStrings;
@@ -50,7 +54,7 @@ type
 
   public
     procedure AfterConstruction; override;
-    procedure BeforeDestruction; override;
+    destructor Destroy; override;
 
     procedure Assign(Source: TPersistent); override;
 
@@ -65,6 +69,10 @@ type
       read GetPollingInterval write SetPollingInterval
       default DEFAULT_POLLING_INTERVAL;
 
+    property PollingTimeout: Integer // in ms
+      read GetPollingTimeout write SetPollingTimeout
+      default DEFAULT_POLLING_TIMEOUT;
+
     property Endpoints: TStrings
       read GetEndpoints;
   end;
@@ -75,15 +83,15 @@ implementation
 procedure TZeroMQSettings.AfterConstruction;
 begin
   inherited AfterConstruction;
-  //FOnChanged.UseFreeNotification := False;
   FEndpoints       := TStringList.Create;
   FPollingInterval := DEFAULT_POLLING_INTERVAL;
+  FPollingTimeout  := DEFAULT_POLLING_TIMEOUT;
 end;
 
-procedure TZeroMQSettings.BeforeDestruction;
+destructor TZeroMQSettings.Destroy;
 begin
   FEndpoints.Free;
-  inherited BeforeDestruction;
+  inherited Destroy;
 end;
 {$ENDREGION}
 
@@ -108,6 +116,20 @@ begin
   if Value <> PollingInterval then
   begin
     FPollingInterval := Value;
+    Changed;
+  end;
+end;
+
+function TZeroMQSettings.GetPollingTimeout: Integer;
+begin
+  Result := FPollingTimeout;
+end;
+
+procedure TZeroMQSettings.SetPollingTimeout(const Value: Integer);
+begin
+  if Value <> PollingTimeout then
+  begin
+    FPollingTimeout := Value;
     Changed;
   end;
 end;
@@ -144,6 +166,7 @@ begin
     LSettings       := TZeroMQSettings(Source);
     Enabled         := LSettings.Enabled;
     PollingInterval := LSettings.PollingInterval;
+    PollingTimeout  := LSettings.PollingTimeout;
     FEndpoints.Assign(LSettings.Endpoints);
   end
   else

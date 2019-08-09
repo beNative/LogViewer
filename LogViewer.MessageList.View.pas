@@ -65,13 +65,13 @@ type
     pnlTextViewer              : TPanel;
     pnlWatches                 : TPanel;
     pnlWatchTitle              : TPanel;
+    splRightHorizontal         : TSplitter;
     tsDataSet                  : TKTabSheet;
     tsImageViewer              : TKTabSheet;
     tsMessageView              : TKTabSheet;
     tsRawData                  : TKTabSheet;
     tsTextViewer               : TKTabSheet;
     tsValueList                : TKTabSheet;
-    splRightHorizontal: TSplitter;
     {$ENDREGION}
 
     procedure chkShowWatchHistoryClick(Sender: TObject);
@@ -100,7 +100,6 @@ type
 
   private
     FUpdate                      : Boolean; // trigger UpdateActions of Manager
-    FMessageCount                : Int64;
     FCurrentMsg                  : TLogMessage;
     FCallStack                   : IList<TCallStackData>;
     FWatches                     : TWatchList;
@@ -230,6 +229,7 @@ type
     procedure EnsureCurrentViewIsActiveViewWhenFocused;
     function ParseValue(const AString: string): Tuple<string, string, string>;
     function GetSelectedLogNode: TLogNode;
+    function GetMessageCount: Int64;
 
   protected
     procedure Clear;
@@ -312,6 +312,9 @@ type
     property SelectedLogNode: TLogNode
       read GetSelectedLogNode;
 
+    property MessageCount: Int64
+      read GetMessageCount;
+
   public
     constructor Create(
       AOwner      : TComponent;
@@ -326,9 +329,10 @@ type
 
 implementation
 
+{$R *.dfm}
+
 uses
   System.StrUtils, System.UITypes, System.DateUtils, System.Math,
-
   Vcl.GraphUtil,
 
   Spring.Helpers,
@@ -339,8 +343,6 @@ uses
   DDuce.DynamicRecord,
 
   LogViewer.Manager, LogViewer.Factories, LogViewer.Resources;
-
-{$R *.dfm}
 
 {$REGION 'construction and destruction'}
 constructor TfrmMessageList.Create(AOwner: TComponent; AManager
@@ -606,6 +608,14 @@ end;
 function TfrmMessageList.GetManager: ILogViewerManager;
 begin
   Result := FManager;
+end;
+
+function TfrmMessageList.GetMessageCount: Int64;
+begin
+  if Assigned(FSubscriber) then
+    Result := FSubscriber.MessageCount
+  else
+    Result := 0;
 end;
 
 function TfrmMessageList.GetSubscriber: ISubscriber;
@@ -1050,7 +1060,7 @@ begin
   LN.MessageType := TLogMessageType(FCurrentMsg.MsgType);
   LN.VTNode      := Node;
   LN.LogLevel    := FCurrentMsg.LogLevel;
-  LN.Id          := FMessageCount;
+  LN.Id          := MessageCount;
   LN.TextSize    := Length(FCurrentMsg.Text); // correct as it is a UTF8String
   LText          := string(FCurrentMsg.Text);
   case LN.MessageType of
@@ -1221,7 +1231,7 @@ begin
   if Assigned(SelectedLogNode) then
   begin
     if not chkSyncWithSelectedMessage.Checked then
-      FWatchesView.UpdateView(FMessageCount)
+      FWatchesView.UpdateView(MessageCount)
     else
       FWatchesView.UpdateView(SelectedLogNode.Id);
   end;
@@ -1480,7 +1490,7 @@ begin
   Guard.CheckNotNull(AStream, 'AStream');
   LTextSize := 0;
   LDataSize := 0;
-  Inc(FMessageCount);
+  //Inc(MessageCount);
   AStream.Seek(0, soFromBeginning);
   AStream.ReadBuffer(FCurrentMsg.MsgType);
   AStream.ReadBuffer(FCurrentMsg.LogLevel);
@@ -1510,11 +1520,11 @@ begin
     begin
       ParseValue(LText).Unpack(LName, LValue, LType);
       FWatches.Add(
-        LName, LType, LValue, lmtCounter, FMessageCount, FCurrentMsg.TimeStamp,
+        LName, LType, LValue, lmtCounter, MessageCount, FCurrentMsg.TimeStamp,
         True, True
       );
       if not chkSyncWithSelectedMessage.Checked then
-        FWatchesView.UpdateView(FMessageCount)
+        FWatchesView.UpdateView(MessageCount)
       else
         FWatchesView.UpdateView;
     end;
@@ -1522,11 +1532,11 @@ begin
     begin
       ParseValue(LText).Unpack(LName, LValue, LType);
       FWatches.Add(
-        LName, LType, LValue, lmtWatch, FMessageCount, FCurrentMsg.TimeStamp,
+        LName, LType, LValue, lmtWatch, MessageCount, FCurrentMsg.TimeStamp,
         True, False
       );
       if not chkSyncWithSelectedMessage.Checked then
-        FWatchesView.UpdateView(FMessageCount)
+        FWatchesView.UpdateView(MessageCount)
       else
         FWatchesView.UpdateView;
     end;
@@ -1557,7 +1567,7 @@ begin
   FCallStack.Clear;
   FLogTreeView.Clear;
   FMessageDataView.Clear;
-  FMessageCount := 0;
+  FSubscriber.Reset;
   FLastNode     := nil;
   FLastParent   := nil;
   FUpdate       := True;
@@ -1757,6 +1767,7 @@ procedure TfrmMessageList.UpdateMessageDetails(ALogNode: TLogNode);
 begin
   Logger.Track(Self, 'UpdateMessageDetails');
   ClearMessageDetailsControls;
+  FMessageDataView.LogNode := ALogNode;
   case ALogNode.MessageType of
     lmtCallStack, {lmtException,} lmtHeapInfo, lmtCustomData:
       UpdateTextStreamDisplay(ALogNode);
@@ -1796,7 +1807,6 @@ begin
       pgcMessageDetails.ActivePage := tsDataSet;
     end;
   end;
-  FMessageDataView.LogNode := ALogNode;
   if chkSyncWithSelectedMessage.Checked then
     FWatchesView.UpdateView(ALogNode.Id);
 end;

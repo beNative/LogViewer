@@ -41,11 +41,11 @@ type
     FFormSettings          : TFormSettings;
     FMessageListSettings   : TMessageListSettings;
 
-    FWinODSSettings        : TWinODSSettings;
-    FWinIPCSettings        : TWinIPCSettings;
+    FWinodsSettings        : TWinodsSettings;
+    FWinipcSettings        : TWinipcSettings;
     FComPortSettings       : TComPortSettings;
     FZeroMQSettings        : TZeroMQSettings;
-    FMQTTSettings          : TMQTTSettings;
+    FMqttSettings          : TMqttSettings;
     FFileSystemSettings    : TFileSystemSettings;
 
     FWatchSettings         : TWatchSettings;
@@ -73,11 +73,11 @@ type
     property FormSettings: TFormSettings
       read FFormSettings;
 
-    property WinODSSettings: TWinODSSettings
-      read FWinODSSettings;
+    property WinodsSettings: TWinodsSettings
+      read FWinodsSettings;
 
-    property WinIPCSettings: TWinIPCSettings
-      read FWinIPCSettings;
+    property WinipcSettings: TWinipcSettings
+      read FWinipcSettings;
 
     property ComPortSettings: TComPortSettings
       read FComPortSettings;
@@ -85,8 +85,8 @@ type
     property ZeroMQSettings: TZeroMQSettings
       read FZeroMQSettings;
 
-    property MQTTSettings: TMQTTSettings
-      read FMQTTSettings;
+    property MqttSettings: TMqttSettings
+      read FMqttSettings;
 
     property FileSystemSettings: TFileSystemSettings
       read FFileSystemSettings;
@@ -132,11 +132,11 @@ begin
   FFormSettings.OnChanged.UseFreeNotification := False;
   FFormSettings.OnChanged.Add(FormSettingsChanged);
   FMessageListSettings   := TMessageListSettings.Create;
-  FWinODSSettings        := TWinODSSettings.Create;
-  FWinIPCSettings        := TWinIPCSettings.Create;
+  FWinodsSettings        := TWinodsSettings.Create;
+  FWinipcSettings        := TWinipcSettings.Create;
   FComPortSettings       := TComPortSettings.Create;
   FZeroMQSettings        := TZeroMQSettings.Create;
-  FMQTTSettings          := TMQTTSettings.Create;
+  FMqttSettings          := TMqttSettings.Create;
   FFileSystemSettings    := TFileSystemSettings.Create;
   FWatchSettings         := TWatchSettings.Create;
   FCallStackSettings     := TCallStackSettings.Create;
@@ -153,11 +153,11 @@ begin
   FreeAndNil(FWatchSettings);
   FreeAndNil(FCallStackSettings);
   FreeAndNil(FZeroMQSettings);
-  FreeAndNil(FMQTTSettings);
+  FreeAndNil(FMqttSettings);
   FreeAndNil(FFileSystemSettings);
   FreeAndNil(FComPortSettings);
-  FreeAndNil(FWinIPCSettings);
-  FreeAndNil(FWinODSSettings);
+  FreeAndNil(FWinipcSettings);
+  FreeAndNil(FWinodsSettings);
   FreeAndNil(FMessageListSettings);
   FFormSettings.OnChanged.Remove(FormSettingsChanged);
   FreeAndNil(FFormSettings);
@@ -226,14 +226,14 @@ begin
           JO['MessageListSettings']
             .ObjectValue['LeftVerticalPanelPositions'].ArrayValue[I];
       end;
-      JO['WinODSSettings'].ObjectValue.ToSimpleObject(FWinODSSettings);
-      JO['WinIPCSettings'].ObjectValue.ToSimpleObject(FWinIPCSettings);
+      JO['WinodsSettings'].ObjectValue.ToSimpleObject(FWinodsSettings);
+      JO['WinipcSettings'].ObjectValue.ToSimpleObject(FWinipcSettings);
       JO['ZeroMQSettings'].ObjectValue.ToSimpleObject(FZeroMQSettings);
       FZeroMQSettings.Endpoints.Text :=
         JO['ZeroMQSettings'].ObjectValue['Endpoints'].Value;
-      JO['MQTTSettings'].ObjectValue.ToSimpleObject(FMQTTSettings);
-      FMQTTSettings.Endpoints.Text :=
-        JO['MQTTSettings'].ObjectValue['Endpoints'].Value;
+      JO['MqttSettings'].ObjectValue.ToSimpleObject(FMqttSettings);
+      FMqttSettings.Endpoints.Text :=
+        JO['MqttSettings'].ObjectValue['Endpoints'].Value;
       JO['FileSystemSettings'].ObjectValue.ToSimpleObject(FFileSystemSettings);
       FFileSystemSettings.PathNames.Text :=
         JO['FileSystemSettings'].ObjectValue['PathNames'].Value;
@@ -307,16 +307,16 @@ begin
         .Add(FMessageListSettings.LeftVerticalPanelPositions[I]);
     end;
 
-    JO['WinODSSettings'].ObjectValue.FromSimpleObject(FWinODSSettings);
-    JO['WinIPCSettings'].ObjectValue.FromSimpleObject(FWinIPCSettings);
+    JO['WinodsSettings'].ObjectValue.FromSimpleObject(FWinodsSettings);
+    JO['WinipcSettings'].ObjectValue.FromSimpleObject(FWinipcSettings);
 
     JO['ZeroMQSettings'].ObjectValue.FromSimpleObject(FZeroMQSettings);
     JO['ZeroMQSettings'].ObjectValue['Endpoints'].Value :=
       FZeroMQSettings.Endpoints.Text;
 
-    S := 'MQTTSettings';
-    JO[S].ObjectValue.FromSimpleObject(FMQTTSettings);
-    JO[S].ObjectValue['Endpoints'].Value := FMQTTSettings.Endpoints.Text;
+    S := 'MqttSettings';
+    JO[S].ObjectValue.FromSimpleObject(FMqttSettings);
+    JO[S].ObjectValue['Endpoints'].Value := FMqttSettings.Endpoints.Text;
 
     S := 'FileSystemSettings';
     JO[S].ObjectValue.FromSimpleObject(FFileSystemSettings);

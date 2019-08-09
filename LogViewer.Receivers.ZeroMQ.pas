@@ -57,7 +57,7 @@ uses
 type
   TZeroMQChannelReceiver = class(TChannelReceiver, IChannelReceiver, IZmq)
   private
-    FZMQ : IZeroMQ;
+    FZmq : IZeroMQ;
 
   protected
     {$REGION 'property access methods'}
@@ -72,9 +72,10 @@ type
 
     constructor Create(
       AManager    : ILogViewerManager;
-      AZMQ        : IZeroMQ;
+      AZmq        : IZeroMQ;
       const AName : string
     ); reintroduce;
+    destructor Destroy; override;
 
     property Settings: TZeroMQSettings
       read GetSettings;
@@ -96,11 +97,19 @@ begin
   Settings.OnChanged.Add(SettingsChanged);
 end;
 
-constructor TZeroMQChannelReceiver.Create(AManager: ILogViewerManager; AZMQ:
+constructor TZeroMQChannelReceiver.Create(AManager: ILogViewerManager; AZmq:
   IZeroMQ; const AName: string);
 begin
   inherited Create(AManager, AName);
-  FZMQ := AZMQ;
+  FZmq := AZmq;
+end;
+
+destructor TZeroMQChannelReceiver.Destroy;
+begin
+  PollTimer.Enabled := False;
+  Settings.OnChanged.RemoveAll(Self);
+  FZmq := nil;
+  inherited Destroy;
 end;
 {$ENDREGION}
 

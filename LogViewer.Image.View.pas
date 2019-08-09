@@ -20,21 +20,34 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages,
-  System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls;
+  System.SysUtils, System.Variants, System.Classes, System.Actions,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls,
+  Vcl.StdCtrls, Vcl.ActnList, Vcl.Menus;
 
 type
   TfrmImageView = class(TForm)
-    edtPixelFormat : TLabeledEdit;
+    aclMain        : TActionList;
+    actCopy        : TAction;
     edtHandleType  : TLabeledEdit;
     edtHeight      : TLabeledEdit;
+    edtPixelFormat : TLabeledEdit;
     edtWidth       : TLabeledEdit;
-    sbxMain        : TScrollBox;
     imgBitmap      : TImage;
+    mniCopy        : TMenuItem;
+    ppmMain        : TPopupMenu;
+    sbxMain        : TScrollBox;
+
+    procedure actCopyExecute(Sender: TObject);
+
+  private
+    function GetBitmap: TBitmap;
 
   public
     procedure Clear;
     procedure LoadFromStream(AStream: TStream);
+
+    property Bitmap : TBitmap
+      read GetBitmap;
 
   end;
 
@@ -43,9 +56,25 @@ implementation
 {$R *.dfm}
 
 uses
+  Vcl.Clipbrd,
+
   Spring,
 
   DDuce.Reflect;
+
+{$REGION 'property access methods'}
+function TfrmImageView.GetBitmap: TBitmap;
+begin
+  Result := imgBitmap.Picture.Bitmap;
+end;
+{$ENDREGION}
+
+{$REGION 'action handlers'}
+procedure TfrmImageView.actCopyExecute(Sender: TObject);
+begin
+  Clipboard.Assign(imgBitmap.Picture.Bitmap);
+end;
+{$ENDREGION}
 
 {$REGION 'public methods'}
 procedure TfrmImageView.Clear;

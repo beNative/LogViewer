@@ -35,8 +35,8 @@ uses
   LogViewer.Settings, LogViewer.Settings.Dialog.Data,
   LogViewer.MessageList.Settings.View,
   LogViewer.Receivers.ComPort.Settings.View,
-  LogViewer.Receivers.WinODS.Settings.View,
-  LogViewer.Receivers.WinIPC.Settings.View, LogViewer.Watches.Settings.View,
+  LogViewer.Receivers.Winods.Settings.View,
+  LogViewer.Receivers.Winipc.Settings.View, LogViewer.Watches.Settings.View,
   LogViewer.CallStack.Settings.View, LogViewer.Receivers.ZeroMQ.Settings.View,
   LogViewer.DisplayValues.Settings.View, LogViewer.LogLevels.Settings.View;
 
@@ -70,7 +70,7 @@ type
     tsWinIPC                : TKTabSheet;
     tsWinODS                : TKTabSheet;
     tsZeroMQ                : TKTabSheet;
-    tsLogLevels: TKTabSheet;
+    tsLogLevels             : TKTabSheet;
     {$ENDREGION}
 
     procedure actCloseExecute(Sender: TObject);

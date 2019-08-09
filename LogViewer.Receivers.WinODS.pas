@@ -14,9 +14,9 @@
   limitations under the License.
 }
 
-unit LogViewer.Receivers.WinODS;
+unit LogViewer.Receivers.Winods;
 
-{ WinODS channel receiver. }
+{ Winods channel receiver. }
 
 interface
 
@@ -27,7 +27,7 @@ uses
   Spring, Spring.Collections,
 
   LogViewer.Interfaces, LogViewer.Receivers.Base,
-  LogViewer.Receivers.WinODS.Settings;
+  LogViewer.Receivers.Winods.Settings;
 
 {$REGION 'documentation'}
 {
@@ -65,14 +65,14 @@ type
     Data      : array[0..(4096 - SizeOf(DWORD)) - 1] of AnsiChar;
   end;
 
-  TODSMessageReceivedEvent = procedure(
+  TOdsMessageReceivedEvent = procedure(
     const AString : AnsiString;
     AProcessId    : UInt32
   ) of object;
 
   TWinDebugMonitor = class
   private
-    FOnMessageReceived      : TODSMessageReceivedEvent;
+    FOnMessageReceived      : TOdsMessageReceivedEvent;
     FHDBWinMutex            : THandle;
     FHDBMonBuffer           : THandle;
     FHEventBufferReady      : THandle;
@@ -95,17 +95,17 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    property OnMessageReceived : TODSMessageReceivedEvent
+    property OnMessageReceived : TOdsMessageReceivedEvent
       read FOnMessageReceived write FOnMessageReceived;
   end;
 
 type
-  TWinOdsChannelReceiver = class(TChannelReceiver, IChannelReceiver, IWinOds)
+  TWinodsChannelReceiver = class(TChannelReceiver, IChannelReceiver, IWinods)
   private
      FDebugMonitor : TWinDebugMonitor;
      FBuffer       : TMemoryStream;
 
-    function GetSettings: TWinODSSettings;
+    function GetSettings: TWinodsSettings;
 
     procedure SettingsChanged(Sender: TObject);
 
@@ -125,7 +125,7 @@ type
     procedure AfterConstruction; override;
     procedure BeforeDestruction; override;
 
-    property Settings: TWinODSSettings
+    property Settings: TWinodsSettings
       read GetSettings;
   end;
 
@@ -354,7 +354,7 @@ end;
 {$ENDREGION}
 
 {$REGION 'TWinODSChannelReceiver'}
-procedure TWinOdsChannelReceiver.AfterConstruction;
+procedure TWinodsChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
   FBuffer := TMemoryStream.Create;
@@ -364,20 +364,20 @@ begin
   Settings.OnChanged.Add(SettingsChanged);
 end;
 
-procedure TWinOdsChannelReceiver.BeforeDestruction;
+procedure TWinodsChannelReceiver.BeforeDestruction;
 begin
   FDebugMonitor.Free;
   FBuffer.Free;
   inherited BeforeDestruction;
 end;
 
-function TWinOdsChannelReceiver.CreateSubscriber(ASourceId, AThreadId: UInt32;
+function TWinodsChannelReceiver.CreateSubscriber(ASourceId, AThreadId: UInt32;
   const ASourceName: string): ISubscriber;
 begin
   Result := TWinODSSubscriber.Create(Self, ASourceId, '', ASourceName, True);
 end;
 
-procedure TWinOdsChannelReceiver.FDebugMonitorMessageReceived(
+procedure TWinodsChannelReceiver.FDebugMonitorMessageReceived(
   const AString: AnsiString; AProcessId: UInt32);
 const
   ZERO_BUF : Integer = 0;
@@ -415,12 +415,12 @@ begin
   end;
 end;
 
-function TWinOdsChannelReceiver.GetSettings: TWinODSSettings;
+function TWinodsChannelReceiver.GetSettings: TWinodsSettings;
 begin
   Result := Manager.Settings.WinODSSettings;
 end;
 
-procedure TWinOdsChannelReceiver.SettingsChanged(Sender: TObject);
+procedure TWinodsChannelReceiver.SettingsChanged(Sender: TObject);
 begin
   Enabled := Settings.Enabled;
 end;

@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.Receivers.WinIPC.Settings.View;
+unit LogViewer.Receivers.Winipc.Settings.View;
 
 interface
 
@@ -23,15 +23,15 @@ uses
   System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
 
-  LogViewer.Receivers.WinIPC.Settings;
+  LogViewer.Receivers.Winipc.Settings;
 
 type
-  TfrmWinIPCSettings = class(TForm)
+  TfrmWinipcSettings = class(TForm)
     lblWindowHandleName : TLabel;
     edtWindowHandleName : TEdit;
 
   private
-    FSettings : TWinIPCSettings;
+    FSettings : TWinipcSettings;
 
   protected
     procedure UpdateActions; override;
@@ -39,9 +39,9 @@ type
   public
     constructor Create(
       AOwner    : TComponent;
-      ASettings : TWinIPCSettings
+      ASettings : TWinipcSettings
     ); reintroduce;
-    procedure BeforeDestruction; override;
+    destructor Destroy; override;
 
   end;
 
@@ -50,23 +50,22 @@ implementation
 {$R *.dfm}
 
 {$REGION 'construction and destruction'}
-procedure TfrmWinIPCSettings.BeforeDestruction;
-begin
-  FSettings := nil;
-  inherited BeforeDestruction;
-end;
-
-constructor TfrmWinIPCSettings.Create(AOwner: TComponent;
-  ASettings: TWinIPCSettings);
+constructor TfrmWinipcSettings.Create(AOwner: TComponent;
+  ASettings: TWinipcSettings);
 begin
   inherited Create(AOwner);
   FSettings := ASettings;
 end;
 
+destructor TfrmWinipcSettings.Destroy;
+begin
+  FSettings := nil;
+  inherited Destroy;
+end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
-procedure TfrmWinIPCSettings.UpdateActions;
+procedure TfrmWinipcSettings.UpdateActions;
 begin
   inherited UpdateActions;
 end;

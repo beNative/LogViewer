@@ -82,6 +82,8 @@ type
 
   public
     procedure AfterConstruction; override;
+    destructor Destroy; override;
+
     procedure BeforeDestruction; override;
 
     procedure Assign(Source: TPersistent); override;
@@ -141,10 +143,10 @@ begin
   FLeftVerticalPanelPositions.Add(1);
 end;
 
-procedure TMessageListSettings.BeforeDestruction;
+destructor TMessageListSettings.Destroy;
 begin
   FVisibleValueTypes.Free;
-  inherited BeforeDestruction;
+  inherited Destroy;
 end;
 {$ENDREGION}
 
@@ -293,6 +295,12 @@ begin
   else
     inherited Assign(Source);
 end;
+procedure TMessageListSettings.BeforeDestruction;
+begin
+  inherited;
+
+end;
+
 {$ENDREGION}
 
 end.

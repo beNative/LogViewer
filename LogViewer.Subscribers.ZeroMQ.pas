@@ -42,6 +42,7 @@ type
     procedure SetEnabled(const Value: Boolean); override;
     function GetSourceId: UInt32; override;
     {$ENDREGION}
+
     procedure SubscribeToAllMessageTypes;
     procedure UnSubscribeToAllMessageTypes;
 

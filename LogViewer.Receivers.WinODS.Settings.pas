@@ -14,9 +14,9 @@
   limitations under the License.
 }
 
-unit LogViewer.Receivers.WinODS.Settings;
+unit LogViewer.Receivers.Winods.Settings;
 
-{ Persistable settings for WinODS receivers. }
+{ Persistable settings for Winods receivers. }
 
 interface
 
@@ -26,7 +26,7 @@ uses
   Spring;
 
 type
-  TWinODSSettings = class(TPersistent)
+  TWinodsSettings = class(TPersistent)
   private
     FOnChanged   : Event<TNotifyEvent>;
     FProcessId   : Integer;
@@ -69,12 +69,12 @@ uses
   DDuce.Utils.Winapi;
 
 {$REGION 'property access methods'}
-function TWinODSSettings.GetEnabled: Boolean;
+function TWinodsSettings.GetEnabled: Boolean;
 begin
   Result := FEnabled;
 end;
 
-procedure TWinODSSettings.SetEnabled(const Value: Boolean);
+procedure TWinodsSettings.SetEnabled(const Value: Boolean);
 begin
   if Value <> Enabled then
   begin
@@ -83,18 +83,18 @@ begin
   end;
 end;
 
-function TWinODSSettings.GetOnChanged: IEvent<TNotifyEvent>;
+function TWinodsSettings.GetOnChanged: IEvent<TNotifyEvent>;
 begin
   Result := FOnChanged;
 end;
 
-function TWinODSSettings.GetProcessId: Integer;
+function TWinodsSettings.GetProcessId: Integer;
 begin
   Result := FProcessId;
 end;
 
 
-procedure TWinODSSettings.SetProcessId(const Value: Integer);
+procedure TWinodsSettings.SetProcessId(const Value: Integer);
 begin
   if Value <> ProcessId then
   begin
@@ -103,12 +103,12 @@ begin
   end;
 end;
 
-function TWinODSSettings.GetProcessName: string;
+function TWinodsSettings.GetProcessName: string;
 begin
   Result := FProcessName;
 end;
 
-procedure TWinODSSettings.SetProcessName(const Value: string);
+procedure TWinodsSettings.SetProcessName(const Value: string);
 begin
   if Value <> ProcessName then
   begin
@@ -119,20 +119,20 @@ end;
 {$ENDREGION}
 
 {$REGION 'event dispatch methods'}
-procedure TWinODSSettings.Changed;
+procedure TWinodsSettings.Changed;
 begin
   FOnChanged.Invoke(Self);
 end;
 {$ENDREGION}
 
 {$REGION 'public methods'}
-procedure TWinODSSettings.Assign(Source: TPersistent);
+procedure TWinodsSettings.Assign(Source: TPersistent);
 var
-  LSettings: TWinODSSettings;
+  LSettings: TWinodsSettings;
 begin
-  if Source is TWinODSSettings then
+  if Source is TWinodsSettings then
   begin
-    LSettings   := TWinODSSettings(Source);
+    LSettings   := TWinodsSettings(Source);
     ProcessName := LSettings.ProcessName;
     ProcessId   := LSettings.ProcessId;
     Enabled     := LSettings.Enabled;

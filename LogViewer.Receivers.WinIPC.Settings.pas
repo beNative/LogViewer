@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.Receivers.WinIPC.Settings;
+unit LogViewer.Receivers.Winipc.Settings;
 
 { Persistable settings for WinIPC receivers. }
 
@@ -26,7 +26,7 @@ uses
   Spring;
 
 type
-  TWinIPCSettings = class(TPersistent)
+  TWinipcSettings = class(TPersistent)
   private
     FOnChanged : Event<TNotifyEvent>;
     FEnabled   : Boolean;
@@ -41,10 +41,10 @@ type
     procedure Changed;
 
   public
-    procedure Assign(Source: TPersistent); override;
-    procedure BeforeDestruction; override;
     procedure AfterConstruction; override;
+    destructor Destroy; override;
 
+    procedure Assign(Source: TPersistent); override;
 
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
@@ -58,26 +58,26 @@ type
 implementation
 
 {$REGION 'construction and destruction'}
-procedure TWinIPCSettings.AfterConstruction;
+procedure TWinipcSettings.AfterConstruction;
 begin
   inherited AfterConstruction;
   FOnChanged.UseFreeNotification := False;
 end;
 
-procedure TWinIPCSettings.BeforeDestruction;
+destructor TWinipcSettings.Destroy;
 begin
-  FOnChanged.Clear;
-  inherited BeforeDestruction;
+  FOnChanged.RemoveAll(Self);
+  inherited Destroy;
 end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
-function TWinIPCSettings.GetEnabled: Boolean;
+function TWinipcSettings.GetEnabled: Boolean;
 begin
   Result := FEnabled;
 end;
 
-procedure TWinIPCSettings.SetEnabled(const Value: Boolean);
+procedure TWinipcSettings.SetEnabled(const Value: Boolean);
 begin
   if Value <> Enabled then
   begin
@@ -86,27 +86,27 @@ begin
   end;
 end;
 
-function TWinIPCSettings.GetOnChanged: IEvent<TNotifyEvent>;
+function TWinipcSettings.GetOnChanged: IEvent<TNotifyEvent>;
 begin
   Result := FOnChanged;
 end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
-procedure TWinIPCSettings.Changed;
+procedure TWinipcSettings.Changed;
 begin
   FOnChanged.Invoke(Self);
 end;
 {$ENDREGION}
 
 {$REGION 'public methods'}
-procedure TWinIPCSettings.Assign(Source: TPersistent);
+procedure TWinipcSettings.Assign(Source: TPersistent);
 var
-  LSettings: TWinIPCSettings;
+  LSettings: TWinipcSettings;
 begin
-  if Source is TWinIPCSettings then
+  if Source is TWinipcSettings then
   begin
-    LSettings := TWinIPCSettings(Source);
+    LSettings := TWinipcSettings(Source);
     Enabled := LSettings.Enabled;
   end
   else

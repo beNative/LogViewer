@@ -21,13 +21,19 @@ interface
 uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
 
   LogViewer.Receivers.ZeroMQ.Settings;
 
 type
   TfrmZeroMQSettings = class(TForm)
-    mmoSubscriptions : TMemo;
+    edtPollingTimeout    : TLabeledEdit;
+    edtPollingInterval   : TLabeledEdit;
+    lblPollingTimeoutMs  : TLabel;
+    lblPollingIntervalMs : TLabel;
+
+    procedure edtPollingTimeoutChange(Sender: TObject);
+    procedure edtPollingIntervalChange(Sender: TObject);
 
   private
     FSettings : TZeroMQSettings;
@@ -54,6 +60,20 @@ begin
   inherited Create(AOwner);
   Guard.CheckNotNull(ASettings, 'ASettings');
   FSettings := ASettings;
+  edtPollingTimeout.Text  := FSettings.PollingTimeout.ToString;
+  edtPollingInterval.Text := FSettings.PollingInterval.ToString;
+end;
+{$ENDREGION}
+
+{$REGION 'event handlers'}
+procedure TfrmZeroMQSettings.edtPollingIntervalChange(Sender: TObject);
+begin
+  FSettings.PollingInterval := StrToIntDef(edtPollingInterval.Text, 100);
+end;
+
+procedure TfrmZeroMQSettings.edtPollingTimeoutChange(Sender: TObject);
+begin
+  FSettings.PollingTimeout := StrToIntDef(edtPollingTimeout.Text, 10);
 end;
 {$ENDREGION}
 

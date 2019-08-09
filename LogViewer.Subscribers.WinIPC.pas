@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.Subscribers.WinIPC;
+unit LogViewer.Subscribers.Winipc;
 
 { WinIPC subscriber. }
 
