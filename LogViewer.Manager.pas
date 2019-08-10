@@ -196,8 +196,6 @@ type
       Action     : TCollectionChangedAction
     );
 
-
-
     procedure UpdateVisibleMessageTypes(
       const AMessageType : TLogMessageType;
       const ASender      : TObject;
@@ -209,8 +207,6 @@ type
     function GetItem(AName: string): TCustomAction;
 
     procedure UpdateActions;
-    procedure Notification(AComponent: TComponent; Operation: TOperation);
-      override;
 
     property Items[AName: string]: TCustomAction
       read GetItem; default;
@@ -282,16 +278,16 @@ type
 
 implementation
 
+{$R *.dfm}
+
 uses
   Vcl.Forms, Vcl.Dialogs,
 
   DDuce.Editor.Factories, DDuce.AboutDialog,
   DDuce.Logger,
 
-  LogViewer.Factories, LogViewer.Resources,
-  LogViewer.Settings.Dialog, LogViewer.MessageList.Settings;
-
-{$R *.dfm}
+  LogViewer.Factories, LogViewer.Resources, LogViewer.Settings.Dialog,
+  LogViewer.MessageList.Settings;
 
 {$REGION 'construction and destruction'}
 constructor TdmManager.Create(AOwner: TComponent; ASettings: TLogViewerSettings);
@@ -690,14 +686,6 @@ function TdmManager.GetViews: IList<ILogViewer>;
 begin
   Result := FViewList;
 end;
-procedure TdmManager.Notification(AComponent: TComponent;
-  Operation: TOperation);
-begin
-  Logger.Send(AComponent.Name, AComponent.ClassName);
-  Logger.Send(TValue.From(Operation));
-  inherited Notification(AComponent, Operation);
-end;
-
 {$ENDREGION}
 
 {$REGION 'event handlers'}

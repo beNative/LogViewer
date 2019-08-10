@@ -1397,7 +1397,6 @@ end;
 
 procedure TfrmMessageList.AddMessageToTree(const AMessage: TLogMessage);
 begin
-  Logger.Track(Self, 'AddMessageToTree');
   FLogTreeView.BeginUpdate;
   try
     case TLogMessageType(AMessage.MsgType) of
@@ -1486,11 +1485,9 @@ var
   LValue    : string;
   LText     : string;
 begin
-  Logger.Track(Self, 'ProcessMessage');
   Guard.CheckNotNull(AStream, 'AStream');
   LTextSize := 0;
   LDataSize := 0;
-  //Inc(MessageCount);
   AStream.Seek(0, soFromBeginning);
   AStream.ReadBuffer(FCurrentMsg.MsgType);
   AStream.ReadBuffer(FCurrentMsg.LogLevel);

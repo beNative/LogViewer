@@ -89,7 +89,7 @@ type
       const ASourceName : string;
       AEnabled          : Boolean
     );
-    procedure BeforeDestruction; override;
+    destructor Destroy; override;
 
   end;
 
@@ -111,14 +111,11 @@ begin
   Enabled     := AEnabled;
 end;
 
-procedure TSubscriber.BeforeDestruction;
+destructor TSubscriber.Destroy;
 begin
-  Logger.Track(Self, 'BeforeDestruction');
-  Logger.Send('SourceId', SourceId);
-  Logger.Send('SourceName', SourceName);
   FOnReceiveMessage.Clear;
   FReceiver := nil;
-  inherited BeforeDestruction;
+  inherited Destroy;
 end;
 {$ENDREGION}
 
