@@ -188,7 +188,7 @@ begin
   if LTextSize > 0 then
     FBuffer.WriteBuffer(LString[1], LTextSize);
   FBuffer.WriteBuffer(LZero, SizeOf(Integer));
-  Receiver.DoReceiveMessage(FBuffer);
+  DoReceiveMessage(FBuffer);
 end;
 
 procedure TComPortSubscriber.Poll;

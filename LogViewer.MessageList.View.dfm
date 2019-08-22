@@ -203,9 +203,6 @@ object frmMessageList: TfrmMessageList
             TabPanelOptions.Options = []
             object tsValueList: TKTabSheet
               Caption = 'Value list'
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 536
             end
             object tsTextViewer: TKTabSheet
               Caption = 'Text viewer'
@@ -387,7 +384,7 @@ object frmMessageList: TfrmMessageList
     Left = 55
     Top = 22
     Bitmap = {
-      494C0101170019008C0110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101170019009C0110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

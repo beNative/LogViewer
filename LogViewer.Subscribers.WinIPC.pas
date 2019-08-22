@@ -21,12 +21,108 @@ unit LogViewer.Subscribers.Winipc;
 interface
 
 uses
+  System.Classes,
+
+  Spring, ZeroMQ,
+
   LogViewer.Interfaces, LogViewer.Subscribers.Base;
 
 type
-  TWinIPCSubscriber = class(TSubscriber, ISubscriber, IWinIpc)
+  TWinipcSubscriber = class(TSubscriber, ISubscriber, IWinipc)
+  private
+    FZmq        : Weak<IZeroMQ>;
+    FSubscriber : IZMQPair;
+    FPoll       : IZMQPoll;
+    FZmqStream  : TStringStream;
+
+  protected
+    procedure CreateSubscriberSocket(const AEndPoint: string);
+    procedure Close; override;
+    procedure Poll; override;
+
+  public
+    constructor Create(
+      const AReceiver   : IChannelReceiver;
+      const AZmq        : IZeroMQ;
+      const AEndPoint   : string;
+      ASourceId         : UInt32;
+      const AKey        : string;
+      const ASourceName : string;
+      AEnabled          : Boolean
+    ); reintroduce; virtual;
+    destructor Destroy; override;
+
   end;
 
 implementation
+
+uses
+  System.SysUtils,
+
+  DDuce.Logger;
+
+{$REGION 'construction and destruction'}
+constructor TWinipcSubscriber.Create(const AReceiver: IChannelReceiver;
+  const AZmq: IZeroMQ; const AEndPoint: string; ASourceId: UInt32; const AKey,
+  ASourceName: string; AEnabled: Boolean);
+begin
+  Logger.Track(Self, 'Create');
+  FZmq := AZmq;
+  FZmqStream := TStringStream.Create;
+  CreateSubscriberSocket(AEndPoint);
+  inherited Create(AReceiver, ASourceId, AKey, ASourceName, AEnabled);
+end;
+
+destructor TWinipcSubscriber.Destroy;
+begin
+  Logger.Track(Self, 'Destroy');
+  FZmqStream.Free;
+  FSubscriber.Close;
+  FPoll       := nil;
+  FSubscriber := nil;
+  FZmq        := nil;
+  inherited Destroy;
+end;
+
+procedure TWinipcSubscriber.CreateSubscriberSocket(const AEndPoint: string);
+begin
+  FSubscriber := FZmq.Target.Start(ZMQSocket.Subscriber);
+  Guard.CheckTrue(
+    FSubscriber.Connect(AEndPoint) = 0,
+    Format('Connect to %s failed.', [AEndPoint])
+  );
+  Guard.CheckTrue(FSubscriber.Subscribe('') = 0, 'Subscribe failed');
+  FPoll := FZmq.Target.Poller;
+  FPoll.RegisterPair(
+    FSubscriber,
+    [PollEvent.PollIn],
+    procedure(Event: PollEvents)
+    begin
+      FZmqStream.WriteString(FSubscriber.ReceiveString);
+      DoReceiveMessage(FZmqStream);
+      FZmqStream.Clear;
+    end
+  );
+end;
+{$ENDREGION}
+
+{$REGION 'protected methods'}
+procedure TWinipcSubscriber.Poll;
+begin
+  if Enabled then
+  begin
+    while FPoll.PollOnce(10) > 0 do
+    begin
+      FPoll.FireEvents;
+    end;
+  end;
+end;
+
+procedure TWinipcSubscriber.Close;
+begin
+  inherited Close;
+  FSubscriber.Close;
+end;
+{$ENDREGION}
 
 end.

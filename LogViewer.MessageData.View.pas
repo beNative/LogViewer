@@ -90,6 +90,8 @@ implementation
 {$R *.dfm}
 
 uses
+  System.Rtti,
+
   Spring,
 
   DDuce.Settings.TextFormat, DDuce.Logger.Interfaces;

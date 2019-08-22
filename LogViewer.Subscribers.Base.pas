@@ -54,6 +54,7 @@ type
 
     procedure Poll; virtual;
     procedure Reset; virtual;
+    procedure Close; virtual;
     procedure DoReceiveMessage(AStream: TStream); virtual;
     procedure DoChange; virtual;
 
@@ -99,6 +100,11 @@ uses
   DDuce.Logger;
 
 {$REGION 'construction and destruction'}
+procedure TSubscriber.Close;
+begin
+//
+end;
+
 constructor TSubscriber.Create(const AReceiver: IChannelReceiver;
   ASourceId: Integer; const AKey, ASourceName: string; AEnabled: Boolean);
 begin

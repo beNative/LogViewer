@@ -65,18 +65,6 @@ type
     {$ENDREGION}
 
     procedure PollTimerTimer(Sender: TObject);
-
-    function CreateSubscriber(
-      ASourceId         : UInt32;
-      AThreadId         : UInt32;
-      const ASourceName : string
-    ): ISubscriber; virtual;
-    procedure DoReceiveMessage(
-      AStream           : TStream;
-      ASourceId         : UInt32 = 0;
-      AThreadId         : UInt32 = 0;
-      const ASourceName : string = ''
-    ); virtual;
     procedure DoChange; virtual;
 
     property PollTimer: TTimer
@@ -94,7 +82,7 @@ type
       const AName : string
     ); reintroduce; virtual;
     procedure AfterConstruction; override;
-    procedure BeforeDestruction; override;
+    destructor Destroy; override;
 
     function ToString: string; override;
 
@@ -145,30 +133,6 @@ end;
 {$ENDREGION}
 
 {$REGION 'construction and destruction'}
-procedure TChannelReceiver.AfterConstruction;
-begin
-  inherited AfterConstruction;
-  FSubscriberList :=  TCollections.CreateDictionary<UInt32, ISubscriber>;
-  FPollTimer.Create(function: TTimer
-    begin
-      Result := TTimer.Create(nil);
-    end
-  );
-end;
-
-procedure TChannelReceiver.BeforeDestruction;
-begin
-  Logger.Track(Self, 'BeforeDestruction');
-  if FPollTimer.IsValueCreated then
-    FPollTimer.Value.Free;
-  FSubscriberList.OnChanged.Clear;
-  FSubscriberList.OnValueChanged.Clear;
-  FSubscriberList.OnKeyChanged.Clear;
-  FSubscriberList.Clear;
-  FSubscriberList := nil;
-  inherited BeforeDestruction;
-end;
-
 constructor TChannelReceiver.Create(AManager: ILogViewerManager;
   const AName: string);
 begin
@@ -182,10 +146,29 @@ begin
     Name := AName;
 end;
 
-function TChannelReceiver.CreateSubscriber(ASourceId: UInt32; AThreadId: UInt32;
-  const ASourceName : string): ISubscriber;
+procedure TChannelReceiver.AfterConstruction;
 begin
-  Result := nil;
+  inherited AfterConstruction;
+  FSubscriberList := TCollections.CreateDictionary<UInt32, ISubscriber>;
+  FPollTimer.Create(function: TTimer
+    begin
+      Result := TTimer.Create(nil);
+      Result.OnTimer := PollTimerTimer;
+    end
+  );
+end;
+
+destructor TChannelReceiver.Destroy;
+begin
+  Logger.Track(Self, 'Destroy');
+  if FPollTimer.IsValueCreated then
+    FPollTimer.Value.Free;
+  FSubscriberList.OnChanged.Clear;
+  FSubscriberList.OnValueChanged.Clear;
+  FSubscriberList.OnKeyChanged.Clear;
+  FSubscriberList.Clear;
+  FSubscriberList := nil;
+  inherited Destroy;
 end;
 {$ENDREGION}
 
@@ -193,22 +176,6 @@ end;
 procedure TChannelReceiver.DoChange;
 begin
   FOnChange.Invoke(Self);
-end;
-
-procedure TChannelReceiver.DoReceiveMessage(AStream: TStream; ASourceId: UInt32;
-  AThreadId: UInt32; const ASourceName : string);
-var
-  LSubscriber : ISubscriber;
-begin
-  Guard.CheckNotNull(AStream, 'AStream');
-  if not FSubscriberList.TryGetValue(ASourceId, LSubscriber) then
-  begin
-    Logger.Info('CreateSubscriber(%d, %d, %s)', [ASourceId, AThreadId, ASourceName]);
-    LSubscriber := CreateSubscriber(ASourceId, AThreadId, ASourceName);
-    FSubscriberList.AddOrSetValue(ASourceId, LSubscriber);
-  end;
-  LSubscriber.DoReceiveMessage(AStream);
-  DoChange;
 end;
 {$ENDREGION}
 
@@ -268,15 +235,10 @@ procedure TChannelReceiver.PollTimerTimer(Sender: TObject);
 var
   LSubscriber : ISubscriber;
 begin
-  PollTimer.Enabled := False;
-  try
-    for LSubscriber in SubscriberList.Values do
-    begin
-      if LSubscriber.Enabled then
-        LSubscriber.Poll;
-    end;
-  finally
-    PollTimer.Enabled := True;
+  for LSubscriber in SubscriberList.Values do
+  begin
+    if LSubscriber.Enabled then
+      LSubscriber.Poll;
   end;
 end;
 {$ENDREGION}

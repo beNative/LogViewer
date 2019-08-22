@@ -28,12 +28,12 @@ uses
   LogViewer.Interfaces, LogViewer.Subscribers.Base;
 
 type
-  TZMQSubscriber = class(TSubscriber, ISubscriber, IZmq)
+  TZmqSubscriber = class(TSubscriber, ISubscriber, IZmq)
   private
-    FZMQ        : IZeroMQ;
+    FZmq        : IZeroMQ;
     FSubscriber : IZMQPair;
     FPoll       : IZMQPoll;
-    FZMQStream  : TStringStream;
+    FZmqStream  : TStringStream;
 
     procedure CreateSubscriberSocket(const AEndPoint: string);
 
@@ -51,14 +51,13 @@ type
   public
     constructor Create(
       const AReceiver   : IChannelReceiver;
-      const AZMQ        : IZeroMQ;
+      const AZmq        : IZeroMQ;
       const AEndPoint   : string;
       ASourceId         : UInt32;
       const AKey        : string;
       const ASourceName : string;
       AEnabled          : Boolean
     ); reintroduce; virtual;
-    procedure AfterConstruction; override;
     destructor Destroy; override;
   end;
 
@@ -70,34 +69,30 @@ uses
   DDuce.Logger, DDuce.Logger.Interfaces;
 
 {$REGION 'construction and destruction'}
-constructor TZMQSubscriber.Create(const AReceiver: IChannelReceiver; const AZMQ:
+constructor TZmqSubscriber.Create(const AReceiver: IChannelReceiver; const AZmq:
   IZeroMQ; const AEndPoint: string; ASourceId: UInt32; const AKey: string;
   const ASourceName: string; AEnabled: Boolean);
 begin
-  Guard.CheckNotNull(AZMQ, 'AZMQ');
-  FZMQ := AZMQ;
+  Guard.CheckNotNull(AZmq, 'AZmq');
+  FZmq := AZmq;
+  FZmqStream := TStringStream.Create('', TEncoding.ANSI);
   CreateSubscriberSocket(AEndPoint);
   inherited Create(AReceiver, ASourceId, AKey, ASourceName, AEnabled);
 end;
 
-procedure TZMQSubscriber.AfterConstruction;
+destructor TZmqSubscriber.Destroy;
 begin
-  inherited AfterConstruction;
-  FZMQStream := TStringStream.Create;
-end;
-
-destructor TZMQSubscriber.Destroy;
-begin
-  FZMQStream.Free;
+  FZmqStream.Free;
+  FSubscriber.Close;
   FPoll       := nil;
   FSubscriber := nil;
-  FZMQ        := nil;
+  FZmq        := nil;
   inherited Destroy;
 end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
-procedure TZMQSubscriber.SetEnabled(const Value: Boolean);
+procedure TZmqSubscriber.SetEnabled(const Value: Boolean);
 begin
   if Value <> Enabled then
   begin
@@ -115,7 +110,7 @@ begin
   end;
 end;
 
-procedure TZMQSubscriber.SubscribeToAllMessageTypes;
+procedure TZmqSubscriber.SubscribeToAllMessageTypes;
 var
   I : TLogMessageType;
   R : RawByteString;
@@ -137,7 +132,7 @@ begin
   end;
 end;
 
-procedure TZMQSubscriber.UnSubscribeToAllMessageTypes;
+procedure TZmqSubscriber.UnSubscribeToAllMessageTypes;
 var
   I : TLogMessageType;
   R : RawByteString;
@@ -149,7 +144,7 @@ begin
   end;
 end;
 
-function TZMQSubscriber.GetSourceId: UInt32;
+function TZmqSubscriber.GetSourceId: UInt32;
 begin
   Result := UInt32(Self);
 end;
@@ -159,28 +154,27 @@ end;
 { Creates a ZMQ subscriber socket, connects it to the given endpoint and
   registers a dedicated poller to handle incomming messages. }
 
-procedure TZMQSubscriber.CreateSubscriberSocket(const AEndPoint: string);
+procedure TZmqSubscriber.CreateSubscriberSocket(const AEndPoint: string);
 begin
-  FSubscriber := FZMQ.Start(ZMQSocket.Subscriber);
+  FSubscriber := FZmq.Start(ZMQSocket.Subscriber);
   FSubscriber.Connect(AEndPoint);
-  FPoll := FZMQ.Poller;
+  FPoll := FZmq.Poller;
+  FZmqStream.Clear;
   FPoll.RegisterPair(
     FSubscriber,
     [PollEvent.PollIn],
     procedure(Event: PollEvents)
     begin
-      FZMQStream.WriteString(FSubscriber.ReceiveString);
-      Receiver.DoReceiveMessage(
-        FZMQStream, SourceId, 0, FSubscriber.LastEndPoint
-      );
-      FZMQStream.Clear;
+      FZmqStream.WriteString(FSubscriber.ReceiveString);
+      DoReceiveMessage(FZmqStream);
+      FZmqStream.Clear;
     end
   );
 end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
-procedure TZMQSubscriber.Poll;
+procedure TZmqSubscriber.Poll;
 begin
   if Enabled then
   begin

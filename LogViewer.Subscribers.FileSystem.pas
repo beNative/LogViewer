@@ -93,7 +93,8 @@ begin
     FBuffer.WriteBuffer(LTextSize);
     FBuffer.WriteBuffer(LStringStream.Value.Bytes, LTextSize);
     FBuffer.WriteBuffer(ZERO_BUF);
-    Receiver.DoReceiveMessage(FBuffer, SourceId, 0, SourceName);
+    DoReceiveMessage(FBuffer);
+    //Receiver.DoReceiveMessage(FBuffer, SourceId, 0, SourceName);
     FPosition := FStream.Size;
   end;
 end;

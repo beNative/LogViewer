@@ -180,6 +180,7 @@ function TfrmLogLevelSettings.FCDLogColorCustomDraw(Sender: TObject;
   CellRect: TRect; ImageList: TCustomImageList; DrawMode: TDrawMode;
   Selected: Boolean): Boolean;
 begin
+  Result := False;
   if DrawMode = dmAfterCellPaint then
   begin
     TargetCanvas.Brush.Color := TLogLevel(Item).Color;

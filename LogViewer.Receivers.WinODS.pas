@@ -102,8 +102,8 @@ type
 type
   TWinodsChannelReceiver = class(TChannelReceiver, IChannelReceiver, IWinods)
   private
-     FDebugMonitor : TWinDebugMonitor;
-     FBuffer       : TMemoryStream;
+    FDebugMonitor : TWinDebugMonitor;
+    FBuffer       : TMemoryStream;
 
     function GetSettings: TWinodsSettings;
 
@@ -114,16 +114,9 @@ type
       AProcessId    : UInt32
     );
 
-  protected
-    function CreateSubscriber(
-      ASourceId         : UInt32;
-      AThreadId         : UInt32;
-      const ASourceName : string
-    ): ISubscriber; override;
-
   public
     procedure AfterConstruction; override;
-    procedure BeforeDestruction; override;
+    destructor Destroy; override;
 
     property Settings: TWinodsSettings
       read GetSettings;
@@ -354,6 +347,7 @@ end;
 {$ENDREGION}
 
 {$REGION 'TWinODSChannelReceiver'}
+{$REGION 'construction and destruction'}
 procedure TWinodsChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
@@ -364,19 +358,22 @@ begin
   Settings.OnChanged.Add(SettingsChanged);
 end;
 
-procedure TWinodsChannelReceiver.BeforeDestruction;
+destructor TWinodsChannelReceiver.Destroy;
 begin
   FDebugMonitor.Free;
   FBuffer.Free;
-  inherited BeforeDestruction;
+  inherited Destroy;
 end;
+{$ENDREGION}
 
-function TWinodsChannelReceiver.CreateSubscriber(ASourceId, AThreadId: UInt32;
-  const ASourceName: string): ISubscriber;
+{$REGION 'property access methods'}
+function TWinodsChannelReceiver.GetSettings: TWinodsSettings;
 begin
-  Result := TWinODSSubscriber.Create(Self, ASourceId, '', ASourceName, True);
+  Result := Manager.Settings.WinODSSettings;
 end;
+{$ENDREGION}
 
+{$REGION 'event handlers'}
 procedure TWinodsChannelReceiver.FDebugMonitorMessageReceived(
   const AString: AnsiString; AProcessId: UInt32);
 const
@@ -410,20 +407,17 @@ begin
         LProcessName := GetExenameForProcess(AProcessId);
         Processes.AddOrSetValue(AProcessId, LProcessName);
       end;
-      DoReceiveMessage(FBuffer, AProcessId, 0, LProcessName);
+      //todo: call corresponding subscriber
+      //DoReceiveMessage(FBuffer, AProcessId, 0, LProcessName);
     end;
   end;
-end;
-
-function TWinodsChannelReceiver.GetSettings: TWinodsSettings;
-begin
-  Result := Manager.Settings.WinODSSettings;
 end;
 
 procedure TWinodsChannelReceiver.SettingsChanged(Sender: TObject);
 begin
   Enabled := Settings.Enabled;
 end;
+{$ENDREGION}
 {$ENDREGION}
 
 end.

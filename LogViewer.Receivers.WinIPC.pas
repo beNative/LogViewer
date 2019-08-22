@@ -25,10 +25,17 @@ interface
 
   The communication with the message source is synchronous, so when the source
   application sends a message, it blocks until it is received by the receiver.
+  This is because WM_COPYDATA messages are always sent and not posted.
+
+  To avoid that the processing of these messages blocks the main thread, these
+  are handled by a background thread (TWinipcBroker) and queued using a inproc
+  ZeroMQ publisher socket. In the main thread a corresponding subscriber socket
+  is created which polls for incoming messages.
 
   REMARK:
    - the sending application and the logviewer need to be started with the same
-     windows user credentials.
+     windows user credentials. This is required to be able to exchange
+     WM_COPYDATA messages between applications.
 }
 {$ENDREGION}
 
@@ -36,57 +43,44 @@ uses
   System.Classes,
   Vcl.ExtCtrls,
 
-  Spring,
+  Spring, Spring.Collections,
 
-  DDuce.WinIPC.Server,
+  ZeroMQ.API, ZeroMQ,
 
   LogViewer.Receivers.Base, LogViewer.Interfaces,
-  LogViewer.Receivers.WinIPC.Settings;
+  LogViewer.Receivers.Winipc.Settings, LogViewer.WinipcBroker;
 
 type
   TWinipcChannelReceiver = class(TChannelReceiver, IChannelReceiver, IWinipc)
   private
-    FIpcServer : TWinipcServer;
+    FZmq    : IZeroMQ;
+    FBroker : TWinipcBroker;
 
   protected
     {$REGION 'property access methods'}
-    function GetWindowName: string;
-    function GetMsgWindowClassName: string;
     function GetSettings: TWinipcSettings;
     procedure SetEnabled(const Value: Boolean); override;
     {$ENDREGION}
 
-    procedure FIpcServerMessage(
-      Sender    : TObject;
-      ASourceId : UInt32;
-      AData     : TStream
-    );
-
-    function CreateSubscriber(
-      ASourceId         : UInt32;
-      AThreadId         : UInt32;
-      const ASourceName : string
-    ): ISubscriber; override;
-
     procedure SettingsChanged(Sender: TObject);
+    procedure FBrokerAddSubscriber(
+      Sender          : TObject;
+      const AEndpoint : string;
+      ASourceId       : UInt32
+    );
 
   public
     procedure AfterConstruction; override;
-    procedure BeforeDestruction; override;
+    destructor Destroy; override;
 
     property Settings: TWinipcSettings
       read GetSettings;
-
-    property WindowName: string
-      read GetWindowName;
-
-    property MsgWindowClassName: string
-      read GetMsgWindowClassName;
   end;
 
 implementation
 
 uses
+  Winapi.Windows,
   System.SysUtils,
 
   DDuce.Utils.Winapi, DDuce.Logger,
@@ -96,24 +90,52 @@ uses
 {$REGION 'construction and destruction'}
 procedure TWinipcChannelReceiver.AfterConstruction;
 begin
+  Logger.Track(Self, 'AfterConstruction');
   inherited AfterConstruction;
-  FIpcServer           := TWinipcServer.Create;
-  FIpcServer.OnMessage := FIpcServerMessage;
-  FIpcServer.Active    := True;
+  FZmq := TZeroMQ.Create;
+
+  FBroker := TWinipcBroker.Create(FZmq);
+  FBroker.OnAddSubscriber := FBrokerAddSubscriber;
   Settings.OnChanged.Add(SettingsChanged);
+
+  PollTimer.Enabled := True;
+  FBroker.FreeOnTerminate := False;
+  FBroker.Start;
 end;
 
-procedure TWinipcChannelReceiver.BeforeDestruction;
+destructor TWinipcChannelReceiver.Destroy;
+var
+  LSubscriber : ISubscriber;
 begin
-  FIpcServer.Active := False;
-  FIpcServer.Free;
-  inherited BeforeDestruction;
+  Logger.Track(Self, 'Destroy Outer');
+  PollTimer.Enabled := False;
+  Settings.OnChanged.RemoveAll(Self);
+  for LSubscriber in SubscriberList.Values do
+  begin
+    // if we don't close all subscribers, the ZeroMQ library will prevent
+    // the application from closing.
+    LSubscriber.Close;
+  end;
+  FBroker.OnAddSubscriber := nil;
+  FBroker.Terminate;
+  FBroker.WaitFor;
+  FreeAndNIl(FBroker);
+  inherited Destroy;
 end;
 
-function TWinipcChannelReceiver.CreateSubscriber(ASourceId, AThreadId: UInt32;
-  const ASourceName: string): ISubscriber;
+procedure TWinipcChannelReceiver.FBrokerAddSubscriber(Sender: TObject;
+  const AEndpoint: string; ASourceId: UInt32);
+var
+  LSubscriber : ISubscriber;
 begin
-  Result := TWinIPCSubscriber.Create(Self, ASourceId, '', ASourceName, True);
+  if not SubscriberList.TryGetValue(ASourceId, LSubscriber) then
+  begin
+    Logger.Info('Create subscriber %s', [AEndPoint]);
+    LSubscriber := TWinipcSubscriber.Create(
+      Self, FZmq,  AEndPoint, ASourceId, '', ''{LProcessName}, True
+    );
+    SubscriberList.AddOrSetValue(ASourceId, LSubscriber);
+  end;
 end;
 {$ENDREGION}
 
@@ -121,46 +143,20 @@ end;
 procedure TWinipcChannelReceiver.SetEnabled(const Value: Boolean);
 begin
   inherited SetEnabled(Value);
-  if Value then
-    FIpcServer.OnMessage := FIpcServerMessage
-  else
-    FIpcServer.OnMessage := nil;
-  FIpcServer.Active := Value;
-end;
-
-function TWinipcChannelReceiver.GetMsgWindowClassName: string;
-begin
-  Result := FIpcServer.MsgWindowClassName;
+  PollTimer.Enabled := Value;
 end;
 
 function TWinipcChannelReceiver.GetSettings: TWinipcSettings;
 begin
   Result := Manager.Settings.WinIPCSettings;
 end;
-
-function TWinipcChannelReceiver.GetWindowName: string;
-begin
-  Result := FIpcServer.WindowName;
-end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
-procedure TWinipcChannelReceiver.FIpcServerMessage(Sender: TObject;
-  ASourceId: UInt32; AData: TStream);
-var
-  LProcessName : string;
-begin
-  if not Processes.TryGetValue(ASourceId, LProcessName) then
-  begin
-    LProcessName := GetExenameForProcess(ASourceId);
-    Processes.AddOrSetValue(ASourceId, LProcessName);
-  end;
-  DoReceiveMessage(AData, ASourceId, 0, LProcessName);
-end;
-
 procedure TWinipcChannelReceiver.SettingsChanged(Sender: TObject);
 begin
   Enabled := Settings.Enabled;
+  PollTimer.Enabled := True;
 end;
 {$ENDREGION}
 

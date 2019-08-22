@@ -53,21 +53,21 @@ object frmDashboard: TfrmDashboard
         Top = 0
         Width = 314
         Height = 616
-        ActivePageIndex = 1
+        ActivePageIndex = 0
         Align = alClient
         ParentBackground = True
         TabHeight = 0
         TabOrder = 0
         object tsWinIpc: TKTabSheet
           Caption = 'WinIPC'
-          ExplicitWidth = 0
-          ExplicitHeight = 0
+          ExplicitTop = 20
+          ExplicitHeight = 596
           object lblWinIPC: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
-            Width = 307
-            Height = 221
+            Width = 308
+            Height = 588
             Align = alClient
             Caption = 
               'Messages are exchanged between the source application and LogVie' +
@@ -83,6 +83,8 @@ object frmDashboard: TfrmDashboard
               'a process is detected that sends compatible log messages.'#13#10
             Transparent = True
             WordWrap = True
+            ExplicitWidth = 307
+            ExplicitHeight = 221
           end
           object pnlWinIPCTitle: TPanel
             Left = 0
@@ -105,14 +107,14 @@ object frmDashboard: TfrmDashboard
         end
         object tsWinOds: TKTabSheet
           Caption = 'WinODS'
-          ExplicitWidth = 0
-          ExplicitHeight = 0
+          ExplicitTop = 20
+          ExplicitHeight = 596
           object lblWinODS: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
             Width = 308
-            Height = 234
+            Height = 588
             Align = alClient
             Caption = 
               'This receiver captures messages from any local applicatiion that' +
@@ -137,6 +139,7 @@ object frmDashboard: TfrmDashboard
             ParentFont = False
             Transparent = True
             WordWrap = True
+            ExplicitHeight = 234
           end
           object pnlWinODSTitle: TPanel
             Left = 0
@@ -159,8 +162,8 @@ object frmDashboard: TfrmDashboard
         end
         object tsZeroMQ: TKTabSheet
           Caption = 'ZeroMQ'
-          ExplicitWidth = 0
-          ExplicitHeight = 0
+          ExplicitTop = 20
+          ExplicitHeight = 596
           object pnlZMQEndpoints: TPanel
             Left = 0
             Top = 25
@@ -171,6 +174,7 @@ object frmDashboard: TfrmDashboard
             BevelOuter = bvNone
             ParentColor = True
             TabOrder = 0
+            ExplicitHeight = 854
           end
           object Panel4: TPanel
             Left = 0
@@ -231,6 +235,7 @@ object frmDashboard: TfrmDashboard
                 SizeStyle = ssAuto
               end>
             TabOrder = 2
+            ExplicitTop = 548
             object btnSubscribeToLocalHost: TButton
               AlignWithMargins = True
               Left = 3
@@ -257,8 +262,8 @@ object frmDashboard: TfrmDashboard
         end
         object tsMqtt: TKTabSheet
           Caption = 'MQTT'
-          ExplicitWidth = 0
-          ExplicitHeight = 0
+          ExplicitTop = 20
+          ExplicitHeight = 596
           DesignSize = (
             314
             616)
@@ -292,6 +297,7 @@ object frmDashboard: TfrmDashboard
             Anchors = [akLeft, akTop, akRight, akBottom]
             BevelOuter = bvNone
             TabOrder = 1
+            ExplicitHeight = 538
           end
           object edtMQTTPort: TLabeledEdit
             Left = 249
@@ -335,8 +341,8 @@ object frmDashboard: TfrmDashboard
         end
         object tsFileSystem: TKTabSheet
           Caption = 'FileSystem'
-          ExplicitWidth = 0
-          ExplicitHeight = 0
+          ExplicitTop = 20
+          ExplicitHeight = 596
           object pnlFileSystemTitle: TPanel
             Left = 0
             Top = 0
@@ -363,12 +369,13 @@ object frmDashboard: TfrmDashboard
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 1
+            ExplicitHeight = 571
           end
         end
         object tsComPort: TKTabSheet
           Caption = 'COM port'
-          ExplicitWidth = 0
-          ExplicitHeight = 0
+          ExplicitTop = 20
+          ExplicitHeight = 596
           object pnlCOMPorts: TPanel
             Left = 0
             Top = 25
@@ -377,6 +384,7 @@ object frmDashboard: TfrmDashboard
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 0
+            ExplicitHeight = 571
           end
           object pnlCOMPortTitle: TPanel
             Left = 0
@@ -399,8 +407,8 @@ object frmDashboard: TfrmDashboard
         end
         object tsMidi: TKTabSheet
           Caption = 'KTabSheet1'
-          ExplicitWidth = 0
-          ExplicitHeight = 0
+          ExplicitTop = 20
+          ExplicitHeight = 596
           object pnlMidiTitle: TPanel
             Left = 0
             Top = 0
@@ -427,6 +435,7 @@ object frmDashboard: TfrmDashboard
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 1
+            ExplicitHeight = 571
           end
         end
       end
@@ -459,13 +468,6 @@ object frmDashboard: TfrmDashboard
     object actAddSubscribeToLogViewer: TAction
       Caption = 'Subscribe to LogViewer instance (tcp://localhost:42134)'
       OnExecute = actAddSubscribeToLogViewerExecute
-    end
-    object actSubscribeToSelection: TAction
-      Category = 'ZMQEndpoints'
-      Caption = 'Subscribe'
-      Hint = 'Subscribe to selected endpoint(s).'
-      ImageIndex = 8
-      OnExecute = actSubscribeToSelectionExecute
     end
     object actCloseSubscriber: TAction
       Caption = 'Close subscriber'
@@ -507,7 +509,7 @@ object frmDashboard: TfrmDashboard
     Left = 408
     Top = 8
     Bitmap = {
-      494C01010B000801B40110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01010B000801C80110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000001001B09532ED308512ED100000010000000000000

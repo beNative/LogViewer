@@ -65,11 +65,11 @@ type
       APayload : UTF8String
     );
 
-    function CreateSubscriber(
-      ASourceId         : UInt32;
-      AThreadId         : UInt32;
-      const ASourceName : string
-    ): ISubscriber; override;
+//    function CreateSubscriber(
+//      ASourceId         : UInt32;
+//      AThreadId         : UInt32;
+//      const ASourceName : string
+//    ): ISubscriber; override;
 
     property MQTT: TMQTT
       read GetMQTT;
@@ -87,8 +87,6 @@ implementation
 
 uses
   System.SysUtils,
-
-
 
   DDuce.Logger;
 
@@ -192,11 +190,11 @@ begin
   end;
 end;
 
-function TMqttChannelReceiver.CreateSubscriber(ASourceId, AThreadId: UInt32;
-  const ASourceName: string): ISubscriber;
-begin
-  //Result := TMQTTS WinODSSubscriber.Create(Self, ASourceId, '', ASourceName, True);
-end;
+//function TMqttChannelReceiver.CreateSubscriber(ASourceId, AThreadId: UInt32;
+//  const ASourceName: string): ISubscriber;
+//begin
+//  //Result := TMQTTS WinODSSubscriber.Create(Self, ASourceId, '', ASourceName, True);
+//end;
 {$ENDREGION}
 
 end.

@@ -1919,27 +1919,28 @@ var
   LN : TLogNode;
 begin
   Logger.Track(Self, 'UpdateLogTreeView');
-  FLogTreeView.BeginUpdate;
-  try
-    // filter
-    FLogTreeView.IterateSubtree(nil, FLogTreeViewFilterCallback, nil);
-    UpdateTreeColumns;
-    if not FAutoSizeColumns then
-      AutoFitColumns;
-  finally
-    FLogTreeView.EndUpdate;
+// TODO: this causes scrolling issues
+//  FLogTreeView.BeginUpdate;
+//  try
+//    // filter
+//    FLogTreeView.IterateSubtree(nil, FLogTreeViewFilterCallback, nil);
+//    UpdateTreeColumns;
+//    if not FAutoSizeColumns then
+//      AutoFitColumns;
+//  finally
+//    FLogTreeView.EndUpdate;
+//  end;
+  if Assigned(SelectedLogNode) then
+  begin
+    LN := SelectedLogNode;
+    UpdateMessageDetails(LN);
+    UpdateCallStackDisplay(LN);
   end;
   if FScrollToLastNode then
   begin
     FLogTreeView.FocusedNode := FLogTreeView.GetLast;
     FLogTreeView.Selected[FLogTreeView.FocusedNode] := True;
     FScrollToLastNode := False;
-  end;
-  if Assigned(SelectedLogNode) then
-  begin
-    LN := SelectedLogNode;
-    UpdateMessageDetails(LN);
-    UpdateCallStackDisplay(LN);
   end;
 end;
 

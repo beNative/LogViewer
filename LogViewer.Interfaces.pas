@@ -72,6 +72,7 @@ type
     {$ENDREGION}
     procedure Poll;
     procedure Reset;
+    procedure Close;
     procedure DoReceiveMessage(AStream : TStream);
 
     property Key: string
@@ -111,13 +112,6 @@ type
     {$ENDREGION}
 
     function ToString: string;
-
-    procedure DoReceiveMessage(
-      AStream           : TStream;
-      ASourceId         : UInt32 = 0;
-      AThreadId         : UInt32 = 0;
-      const ASourceName : string = ''
-    );
 
     property Name: string
       read GetName write SetName;

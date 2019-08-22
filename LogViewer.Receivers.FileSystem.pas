@@ -41,11 +41,11 @@ type
     procedure SettingsChanged(Sender: TObject);
 
   protected
-    function CreateSubscriber(
-      ASourceId         : UInt32;
-      AThreadId         : UInt32;
-      const ASourceName : string
-    ): ISubscriber; override;
+//    function CreateSubscriber(
+//      ASourceId         : UInt32;
+//      AThreadId         : UInt32;
+//      const ASourceName : string
+//    ): ISubscriber; override;
 
   public
     constructor Create(
@@ -102,25 +102,25 @@ end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
-function TFileSystemChannelReceiver.CreateSubscriber(ASourceId,
-  AThreadId: UInt32; const ASourceName: string): ISubscriber;
-begin
-  //Settings.Port := ASourceName;
-//  if ASourceName <> '' then
-//  begin
-//    Result := TFileSystemSubscriber.Create(
-//      Self,
-//      ASourceId,
-//      ASourceName,
-//      ASourceName,
-//      False
-//    );
-//  end
-//  else
-//  begin
-//    Result := nil;
-//  end;
-end;
+//function TFileSystemChannelReceiver.CreateSubscriber(ASourceId,
+//  AThreadId: UInt32; const ASourceName: string): ISubscriber;
+//begin
+//  //Settings.Port := ASourceName;
+////  if ASourceName <> '' then
+////  begin
+////    Result := TFileSystemSubscriber.Create(
+////      Self,
+////      ASourceId,
+////      ASourceName,
+////      ASourceName,
+////      False
+////    );
+////  end
+////  else
+////  begin
+////    Result := nil;
+////  end;
+//end;
 {$ENDREGION}
 
 end.
