@@ -463,7 +463,7 @@ begin
       begin
         FManager.Settings.WinIPCSettings.Enabled := B;
       end
-      else if Supports(DN.Data.Receiver, IZeroMQ) then
+      else if Supports(DN.Data.Receiver, IZmq) then
       begin
         FManager.Settings.ZeroMQSettings.Enabled := B;
       end
@@ -896,11 +896,11 @@ begin
   Logger.Track(Self, 'CreateChannelReceivers');
   CreateWinipcReceiver;
   CreateZeroMQReceiver;
-  //CreateWinODSReceiver;
-  //CreateMQTTReceiver;
+  CreateWinodsReceiver;
+  //CreateMqttReceiver;
   //CreateComPortReceiver;
   //CreateFileSystemReceiver;
-  //CreateMIDIReceiver;
+  CreateMidiReceiver;
 
   FTreeView.FullExpand;
 end;

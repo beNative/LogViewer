@@ -25,10 +25,13 @@ uses
 
   Spring,
 
+  DDuce.Logger.Interfaces,
+
   LogViewer.Interfaces, LogViewer.Subscribers.Base;
 
 type
-  TZmqSubscriber = class(TSubscriber, ISubscriber, IZmq)
+  TZmqSubscriber = class(TSubscriber, ISubscriber, IZmq,
+    ILogMessageSubscriptionFilter)
   private
     FZmq        : IZeroMQ;
     FSubscriber : IZMQPair;
@@ -41,10 +44,12 @@ type
     {$REGION 'property access methods'}
     procedure SetEnabled(const Value: Boolean); override;
     function GetSourceId: UInt32; override;
+    procedure SetLogMessageLevels(const Value: TLogMessageLevels); override;
+    procedure SetLogMessageTypes(const Value: TLogMessageTypes); override;
     {$ENDREGION}
 
-    procedure SubscribeToAllMessageTypes;
-    procedure UnSubscribeToAllMessageTypes;
+    procedure SubscribeToMessages;
+    procedure UnSubscribeToMessages;
 
     procedure Poll; override;
 
@@ -59,6 +64,7 @@ type
       AEnabled          : Boolean
     ); reintroduce; virtual;
     destructor Destroy; override;
+
   end;
 
 implementation
@@ -66,7 +72,7 @@ implementation
 uses
   System.SysUtils,
 
-  DDuce.Logger, DDuce.Logger.Interfaces;
+  DDuce.Logger;
 
 {$REGION 'construction and destruction'}
 constructor TZmqSubscriber.Create(const AReceiver: IChannelReceiver; const AZmq:
@@ -99,48 +105,34 @@ begin
     inherited SetEnabled(Value);
     if Enabled then
     begin
-      FSubscriber.Subscribe('')
-      //SubscribeToAllMessageTypes;
+      SubscribeToMessages;
     end
     else
     begin
-      //UnSubscribeToAllMessageTypes;
-      FSubscriber.UnSubscribe('');
+      UnSubscribeToMessages;
     end;
   end;
 end;
 
-procedure TZmqSubscriber.SubscribeToAllMessageTypes;
-var
-  I : TLogMessageType;
-  R : RawByteString;
-  J : Byte;
+procedure TZmqSubscriber.SetLogMessageLevels(const Value: TLogMessageLevels);
 begin
-  for I := Low(TLogMessageType) to High(TLogMessageType) do
+  if Value <> LogMessageLevels then
   begin
-//    if I = lmtError then
-    begin
-      for J := Low(Byte) to High(Byte) do
-      begin
-        if (J > 15) and (J < 44) then
-        begin
-          R := AnsiChar(Byte(I)) + AnsiChar(J);
-          FSubscriber.Subscribe(R);
-        end;
-      end;
-    end;
+    inherited SetLogMessageLevels(Value);
+    if Enabled then
+      SubscribeToMessages;
+    DoChange;
   end;
 end;
 
-procedure TZmqSubscriber.UnSubscribeToAllMessageTypes;
-var
-  I : TLogMessageType;
-  R : RawByteString;
+procedure TZmqSubscriber.SetLogMessageTypes(const Value: TLogMessageTypes);
 begin
-  for I := Low(TLogMessageType) to High(TLogMessageType) do
+  if Value <> LogMessageTypes then
   begin
-    R := AnsiChar(Byte(I));
-    FSubscriber.UnSubscribe(R);
+    inherited SetLogMessageTypes(Value);
+    if Enabled then
+      SubscribeToMessages;
+    DoChange;
   end;
 end;
 
@@ -170,6 +162,53 @@ begin
       FZmqStream.Clear;
     end
   );
+end;
+
+procedure TZmqSubscriber.SubscribeToMessages;
+var
+  I : TLogMessageType;
+  R : RawByteString;
+  J : Byte;
+begin
+  Logger.Track(Self, 'SubscribeToMessages');
+  //UnSubscribeToMessages;
+  //FSubscriber.Subscribe('');
+  for I := Low(TLogMessageType) to High(TLogMessageType) do
+  begin
+    Logger.Send('LMT', LogMessageTypeNameOf(I));
+    if I in LogMessageTypes then
+    begin
+      R := AnsiChar(Byte(I));
+      FSubscriber.Subscribe(R);
+
+//      for J := Low(Byte) to High(Byte) do
+//      begin
+//        if J in LogMessageLevels then
+//        begin
+//          R := AnsiChar(Byte(I)) + AnsiChar(J);
+//          //Logger.Send('Subscribe', R);
+//          FSubscriber.Subscribe(R);
+//        end;
+//      end;
+    end;
+  end;
+end;
+
+procedure TZmqSubscriber.UnSubscribeToMessages;
+var
+  I : TLogMessageType;
+  R : RawByteString;
+  J : Byte;
+begin
+  for I := Low(TLogMessageType) to High(TLogMessageType) do
+  begin
+    for J := Low(Byte) to High(Byte) do
+    begin
+      R := AnsiChar(Byte(I)) + AnsiChar(J);
+      //Logger.Send('UnSubscribe', R);
+      FSubscriber.UnSubscribe(R);
+    end;
+  end;
 end;
 {$ENDREGION}
 

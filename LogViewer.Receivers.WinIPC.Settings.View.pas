@@ -23,12 +23,15 @@ uses
   System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
 
-  LogViewer.Receivers.Winipc.Settings;
+  LogViewer.Receivers.Winipc.Settings, Vcl.ExtCtrls;
 
 type
   TfrmWinipcSettings = class(TForm)
     lblWindowHandleName : TLabel;
     edtWindowHandleName : TEdit;
+    edtPollingInterval: TLabeledEdit;
+    lblPollingIntervalMs: TLabel;
+    procedure edtPollingIntervalChange(Sender: TObject);
 
   private
     FSettings : TWinipcSettings;
@@ -55,12 +58,20 @@ constructor TfrmWinipcSettings.Create(AOwner: TComponent;
 begin
   inherited Create(AOwner);
   FSettings := ASettings;
+  edtPollingInterval.Text := FSettings.PollingInterval.ToString;
 end;
 
 destructor TfrmWinipcSettings.Destroy;
 begin
   FSettings := nil;
   inherited Destroy;
+end;
+{$ENDREGION}
+
+{$REGION 'event handlers'}
+procedure TfrmWinipcSettings.edtPollingIntervalChange(Sender: TObject);
+begin
+  FSettings.PollingInterval := StrToIntDef(edtPollingInterval.Text, 100);
 end;
 {$ENDREGION}
 

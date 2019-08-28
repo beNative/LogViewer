@@ -63,10 +63,16 @@ type
     {$ENDREGION}
 
     procedure SettingsChanged(Sender: TObject);
+    procedure SubscriberListChanged(
+      Sender     : TObject;
+      const Item : ISubscriber;
+      Action     : TCollectionChangedAction
+    );
     procedure FBrokerAddSubscriber(
-      Sender          : TObject;
-      const AEndpoint : string;
-      ASourceId       : UInt32
+      Sender             : TObject;
+      const AEndpoint    : string;
+      AProcessId         : UInt32;
+      const AProcessName : string
     );
 
   public
@@ -97,8 +103,10 @@ begin
   FBroker := TWinipcBroker.Create(FZmq);
   FBroker.OnAddSubscriber := FBrokerAddSubscriber;
   Settings.OnChanged.Add(SettingsChanged);
+  SubscriberList.OnValueChanged.Add(SubscriberListChanged);
 
-  PollTimer.Enabled := True;
+  PollTimer.Interval := 50;
+  PollTimer.Enabled  := True;
   FBroker.FreeOnTerminate := False;
   FBroker.Start;
 end;
@@ -107,7 +115,6 @@ destructor TWinipcChannelReceiver.Destroy;
 var
   LSubscriber : ISubscriber;
 begin
-  Logger.Track(Self, 'Destroy Outer');
   PollTimer.Enabled := False;
   Settings.OnChanged.RemoveAll(Self);
   for LSubscriber in SubscriberList.Values do
@@ -120,22 +127,8 @@ begin
   FBroker.Terminate;
   FBroker.WaitFor;
   FreeAndNIl(FBroker);
+  SubscriberList.OnValueChanged.RemoveAll(Self);
   inherited Destroy;
-end;
-
-procedure TWinipcChannelReceiver.FBrokerAddSubscriber(Sender: TObject;
-  const AEndpoint: string; ASourceId: UInt32);
-var
-  LSubscriber : ISubscriber;
-begin
-  if not SubscriberList.TryGetValue(ASourceId, LSubscriber) then
-  begin
-    Logger.Info('Create subscriber %s', [AEndPoint]);
-    LSubscriber := TWinipcSubscriber.Create(
-      Self, FZmq,  AEndPoint, ASourceId, '', ''{LProcessName}, True
-    );
-    SubscriberList.AddOrSetValue(ASourceId, LSubscriber);
-  end;
 end;
 {$ENDREGION}
 
@@ -157,6 +150,36 @@ procedure TWinipcChannelReceiver.SettingsChanged(Sender: TObject);
 begin
   Enabled := Settings.Enabled;
   PollTimer.Enabled := True;
+end;
+
+procedure TWinipcChannelReceiver.SubscriberListChanged(Sender: TObject;
+  const Item: ISubscriber; Action: TCollectionChangedAction);
+begin
+  if Action = caRemoved then
+  begin
+    Item.Close;
+  end;
+end;
+
+procedure TWinipcChannelReceiver.FBrokerAddSubscriber(Sender: TObject;
+  const AEndpoint: string; AProcessId: UInt32; const AProcessName : string);
+var
+  LSubscriber : ISubscriber;
+  LProcessName : string;
+begin
+  if not SubscriberList.TryGetValue(AProcessId, LSubscriber) then
+  begin
+    Logger.Info('Create subscriber %s', [AEndPoint]);
+    LSubscriber := TWinipcSubscriber.Create(
+      Self, FZmq,  AEndPoint, AProcessId, '', AProcessName, True
+    );
+    SubscriberList.AddOrSetValue(AProcessId, LSubscriber);
+    if not Processes.TryGetValue(AProcessId, LProcessName) then
+    begin
+      LProcessName := GetExenameForProcess(AProcessId);
+      Processes.AddOrSetValue(AProcessId, LProcessName);
+    end;
+  end;
 end;
 {$ENDREGION}
 

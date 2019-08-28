@@ -24,7 +24,7 @@ interface
 { A IChannelReceiver instance maintains a dictionary of subscribers
   (ISubscriber instances) with SourceId as the key.
 
-  TChannelReceiver has a class property Processes that keeps track of
+  TChannelReceiver has a class property Processes that keeps track of monitored
   (Windows) ProcessId/ProcessName pairs.
 }
 {$ENDREGION}

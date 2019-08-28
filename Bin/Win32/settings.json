@@ -1,9 +1,9 @@
 {
 	"FormSettings": {
-		"Left": 393,
-		"Top": 71,
-		"Width": 1676,
-		"Height": 1019,
+		"Left": 753,
+		"Top": 166,
+		"Width": 1323,
+		"Height": 560,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -15,7 +15,7 @@
 		"MessageDetailsVisible": true,
 		"SmartTimeStamps": true,
 		"HorizontalPanelPositions": [
-			0.212400245549417,
+			0.208433734939759,
 			0.701898734177215,
 			1
 		],
@@ -28,10 +28,11 @@
 		"Enabled": false
 	},
 	"WinipcSettings": {
-		"Enabled": true
+		"Enabled": true,
+		"PollingInterval": 100
 	},
 	"ZeroMQSettings": {
-		"Enabled": true,
+		"Enabled": false,
 		"PollingInterval": 100,
 		"PollingTimeout": 10,
 		"Endpoints": "default localhost=tcp://localhost:5555\r\nlocalhost2=tcp://localhost:5595\r\nLogViewer=tcp://localhost:42134\r\nNew=tcp://localhost:5556\r\n"

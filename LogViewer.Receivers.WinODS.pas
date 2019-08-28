@@ -129,7 +129,7 @@ uses
 
   Spring.Helpers,
 
-  DDuce.Logger.Interfaces, DDuce.Utils.Winapi,
+  DDuce.Logger, DDuce.Logger.Interfaces, DDuce.Utils.Winapi,
 
   LogViewer.Subscribers.WinODS;
 
@@ -147,6 +147,7 @@ uses
 
 constructor TWinDebugMonitor.Create;
 begin
+  Logger.Track(Self, 'Create');
   inherited Create;
   if Initialize <> 0 then
   begin
@@ -285,6 +286,7 @@ end;
 
 procedure TWinDebugMonitor.Uninitialize;
 begin
+  Logger.Track(Self, 'Uninitialize');
   if FHWinDebugMonitorThread <> 0 then
   begin
     FWinDebugMonStopped := True;
@@ -333,7 +335,8 @@ begin
 
   if Result = WAIT_OBJECT_0 then
   begin
-    TThread.CurrentThread.Queue(
+    //TThread.CurrentThread.Queue(
+    TThread.CurrentThread.Synchronize(
       TThread.CurrentThread,
       procedure
       begin
@@ -350,6 +353,7 @@ end;
 {$REGION 'construction and destruction'}
 procedure TWinodsChannelReceiver.AfterConstruction;
 begin
+  Logger.Track(Self, 'AfterConstruction');
   inherited AfterConstruction;
   FBuffer := TMemoryStream.Create;
   FDebugMonitor := TWinDebugMonitor.Create;
@@ -360,6 +364,7 @@ end;
 
 destructor TWinodsChannelReceiver.Destroy;
 begin
+  Logger.Track(Self, 'Destroy');
   FDebugMonitor.Free;
   FBuffer.Free;
   inherited Destroy;
@@ -384,7 +389,9 @@ var
   LMsgType     : Byte;
   LDummy       : Byte;
   LProcessName : string;
+  LSubscriber  : ISubscriber;
 begin
+  Logger.Track(Self, 'FDebugMonitorMessageReceived');
   if Enabled then
   begin
     LDummy := 0;
@@ -407,8 +414,15 @@ begin
         LProcessName := GetExenameForProcess(AProcessId);
         Processes.AddOrSetValue(AProcessId, LProcessName);
       end;
-      //todo: call corresponding subscriber
-      //DoReceiveMessage(FBuffer, AProcessId, 0, LProcessName);
+
+      if not SubscriberList.TryGetValue(AProcessId, LSubscriber) then
+      begin
+        LSubscriber := TWinodsSubscriber.Create(
+          Self, AProcessId, '', LProcessName, True
+        );
+        SubscriberList.AddOrSetValue(AProcessId, LSubscriber);
+      end;
+      LSubscriber.DoReceiveMessage(FBuffer);
     end;
   end;
 end;

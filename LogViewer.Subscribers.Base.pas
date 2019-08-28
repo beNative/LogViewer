@@ -25,6 +25,8 @@ uses
 
   Spring,
 
+  DDuce.Logger.Interfaces,
+
   LogViewer.Interfaces;
 
 type
@@ -38,6 +40,8 @@ type
     FSourceName       : string;
     FKey              : string;
     FOnChange         : Event<TNotifyEvent>;
+    FLogMessageLevels : TLogMessageLevels;
+    FLogMessageTypes  : TLogMessageTypes;
 
   protected
     {$REGION 'property access methods'}
@@ -50,6 +54,10 @@ type
     function GetSourceId: UInt32; virtual;
     function GetSourceName: string;
     function GetOnChange: IEvent<TNotifyEvent>;
+    function GetLogMessageLevels: TLogMessageLevels;
+    function GetLogMessageTypes: TLogMessageTypes;
+    procedure SetLogMessageLevels(const Value: TLogMessageLevels); virtual;
+    procedure SetLogMessageTypes(const Value: TLogMessageTypes); virtual;
     {$ENDREGION}
 
     procedure Poll; virtual;
@@ -57,9 +65,6 @@ type
     procedure Close; virtual;
     procedure DoReceiveMessage(AStream: TStream); virtual;
     procedure DoChange; virtual;
-
-    property Key: string
-      read GetKey;
 
     property Receiver: IChannelReceiver
       read GetReceiver;
@@ -75,6 +80,12 @@ type
 
     property SourceName: string
       read GetSourceName;
+
+    property LogMessageTypes: TLogMessageTypes
+      read GetLogMessageTypes write SetLogMessageTypes;
+
+    property LogMessageLevels: TLogMessageLevels
+      read GetLogMessageLevels write SetLogMessageLevels;
 
     property OnReceiveMessage: IEvent<TReceiveMessageEvent>
       read GetOnReceiveMessage;
@@ -102,7 +113,7 @@ uses
 {$REGION 'construction and destruction'}
 procedure TSubscriber.Close;
 begin
-//
+// implemented in descendants
 end;
 
 constructor TSubscriber.Create(const AReceiver: IChannelReceiver;
@@ -137,6 +148,32 @@ begin
   begin
     FEnabled := Value;
     DoChange;
+  end;
+end;
+
+function TSubscriber.GetLogMessageLevels: TLogMessageLevels;
+begin
+  Result := FLogMessageLevels;
+end;
+
+procedure TSubscriber.SetLogMessageLevels(const Value: TLogMessageLevels);
+begin
+  if Value <> LogMessageLevels then
+  begin
+    FLogMessageLevels := Value;
+  end;
+end;
+
+function TSubscriber.GetLogMessageTypes: TLogMessageTypes;
+begin
+  Result := FLogMessageTypes;
+end;
+
+procedure TSubscriber.SetLogMessageTypes(const Value: TLogMessageTypes);
+begin
+  if Value <> LogMessageTypes then
+  begin
+    FLogMessageTypes := Value;
   end;
 end;
 

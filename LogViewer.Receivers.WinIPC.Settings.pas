@@ -27,15 +27,21 @@ uses
 
 type
   TWinipcSettings = class(TPersistent)
+  const
+    DEFAULT_POLLING_INTERVAL = 100;
+
   private
-    FOnChanged : Event<TNotifyEvent>;
-    FEnabled   : Boolean;
+    FOnChanged       : Event<TNotifyEvent>;
+    FEnabled         : Boolean;
+    FPollingInterval : Integer;
 
   protected
     {$REGION 'property access methods'}
     function GetOnChanged: IEvent<TNotifyEvent>;
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
+    function GetPollingInterval: Integer;
+    procedure SetPollingInterval(const Value: Integer);
     {$ENDREGION}
 
     procedure Changed;
@@ -53,6 +59,10 @@ type
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
 
+    property PollingInterval: Integer // in ms
+      read GetPollingInterval write SetPollingInterval
+      default DEFAULT_POLLING_INTERVAL;
+
   end;
 
 implementation
@@ -61,6 +71,7 @@ implementation
 procedure TWinipcSettings.AfterConstruction;
 begin
   inherited AfterConstruction;
+  FPollingInterval := DEFAULT_POLLING_INTERVAL;
   FOnChanged.UseFreeNotification := False;
 end;
 
@@ -89,6 +100,20 @@ end;
 function TWinipcSettings.GetOnChanged: IEvent<TNotifyEvent>;
 begin
   Result := FOnChanged;
+end;
+
+function TWinipcSettings.GetPollingInterval: Integer;
+begin
+  Result := FPollingInterval;
+end;
+
+procedure TWinipcSettings.SetPollingInterval(const Value: Integer);
+begin
+  if Value <> PollingInterval then
+  begin
+    FPollingInterval := Value;
+    Changed;
+  end;
 end;
 {$ENDREGION}
 

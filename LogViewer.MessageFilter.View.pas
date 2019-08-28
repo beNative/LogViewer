@@ -96,7 +96,7 @@ type
       AImageList : TImageList
     ); reintroduce; virtual;
     procedure AfterConstruction; override;
-    procedure BeforeDestruction; override;
+    destructor Destroy; override;
 
   end;
 
@@ -147,10 +147,10 @@ begin
   FImageList := AImageList;
 end;
 
-procedure TfrmMessageFilter.BeforeDestruction;
+destructor TfrmMessageFilter.Destroy;
 begin
   FTree.Free;
-  inherited BeforeDestruction;
+  inherited Destroy;
 end;
 {$ENDREGION}
 
@@ -160,6 +160,7 @@ begin
 //
 end;
 
+{$REGION 'FTree'}
 procedure TfrmMessageFilter.FTreeChecked(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 var
@@ -187,7 +188,8 @@ begin
       end;
     end;
   end;
-  Logger.SendStrings(FSettings.VisibleValueTypes);
+  Logger.SendStrings('VisibleValueTypes', FSettings.VisibleValueTypes);
+  Logger.Send('VisibleMessageTypes', TValue.From(FSettings.VisibleMessageTypes));
   UpdateChildren(FN, FN.VNode.CheckState);
   UpdateParent(FN, FN.VNode.CheckState);
 end;
@@ -232,12 +234,13 @@ begin
     CellText := FN.Data.Caption;
 end;
 {$ENDREGION}
+{$ENDREGION}
 
 {$REGION 'protected methods'}
 procedure TfrmMessageFilter.BuildTree;
 var
   LNode : TFilterNode;
-  I: Integer;
+  I     : Integer;
 
   function AddNode(
     ACaption      : string;

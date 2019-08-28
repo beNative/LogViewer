@@ -30,16 +30,21 @@ uses
 
 type
   TAddSubscriberEvent = procedure(
-    Sender          : TObject;
-    const AEndpoint : string;
-    ASourceId       : UInt32
+    Sender             : TObject;
+    const AEndpoint    : string;
+    AProcessId         : UInt32;
+    const AProcessName : string
   ) of object;
 
 type
  TWinipcBroker = class(TThread)
   private
-    FWnd             : HWND;
+    // Contains the window class attributes that are registered by the
+    // RegisterClass function.
     FWndClass        : WNDCLASS;
+    // window handle
+    FWnd             : HWND;
+
     FMsgData         : TBytesStream;
     FBuffer          : TStringStream;
     FZmq             : Weak<IZeroMQ>;
@@ -56,8 +61,9 @@ type
     {$ENDREGION}
 
     procedure DoAddSubscriber(
-      const AEndpoint : string;
-      ASourceId       : UInt32
+      const AEndpoint    : string;
+      AProcessId         : UInt32;
+      const AProcessName : string
     );
 
   public
@@ -69,9 +75,9 @@ type
   end;
 
 const
-// old name maintained for backwards compatibility
-  MSG_WND_CLASSNAME : PChar = 'FPCMsgWindowCls';
-  SERVER_WINDOWNAME : PChar = 'ipc_log_server';
+// old names are maintained for backwards compatibility
+  MSG_WND_CLASSNAME : PChar = 'FPCMsgWindowCls'; // window class name
+  SERVER_WINDOWNAME : PChar = 'ipc_log_server';  // window instance name
 
 resourcestring
   SFailedToRegisterWindowClass = 'Failed to register message window class';
@@ -82,28 +88,32 @@ implementation
 uses
   System.SysUtils,
 
-  DDuce.Logger,
+  DDuce.Logger, DDuce.Utils.Winapi,
 
   LogViewer.Subscribers.Winipc;
 
 {$REGION 'non-interfaced routines'}
-function TWndThreadWindowProc(hWnd: HWND; uMsg: UINT; wParam: WPARAM; lParam: LPARAM): LRESULT; stdcall;
+{ This is the window procedure or 'window proc'. It defines most of the behavior
+  of the associated window. }
+
+function ThreadWindowProc(AHWnd: HWND; AMsg: UINT; AWParam: WPARAM;
+  ALParam: LPARAM): LRESULT; stdcall;
 var
   LBroker  : TWinipcBroker;
   LMessage : TMessage;
 begin
-  LBroker := TWinipcBroker(GetWindowLongPtr(hWnd, GWL_USERDATA));
+  LBroker := TWinipcBroker(GetWindowLongPtr(AHWnd, GWL_USERDATA));
   if LBroker <> nil then
   begin
-    LMessage.Msg    := uMsg;
-    LMessage.WParam := wParam;
-    LMessage.LParam := lParam;
+    LMessage.Msg    := AMsg;
+    LMessage.WParam := AWParam;
+    LMessage.LParam := ALParam;
     LMessage.Result := 0;
     LBroker.WndProc(LMessage);
     Result := LMessage.Result;
   end
   else
-    Result := DefWindowProc(hWnd, uMsg, wParam, lParam);
+    Result := DefWindowProc(AHWnd, AMsg, AWParam, ALParam);
 end;
 {$ENDREGION}
 
@@ -113,20 +123,25 @@ begin
   Logger.Track(Self, 'Create');
   inherited Create(True);
   FMsgData := TBytesStream.Create;
+  FZmq    := AZeroMQ;
+  FBuffer := TStringStream.Create('', TEncoding.ANSI);
+
+  { register the window class by filling in the WNDCLASS structure }
+  // initialize the WNDCLASS structure
   FillChar(FWndClass, SizeOf(FWndClass), 0);
-  FWndClass.lpfnWndProc   := @TWndThreadWindowProc;
+  // a pointer to the window procedure
+  FWndClass.lpfnWndProc   := @ThreadWindowProc;
+  // the handle to the application instance
   FWndClass.hInstance     := HInstance;
+  // string that identifies the window class
   FWndClass.lpszClassName := MSG_WND_CLASSNAME;
-  FZmq                    := AZeroMQ;
-  FBuffer                 := TStringStream.Create('', TEncoding.ANSI);
-  Logger.Send('ThreadId', TThread.CurrentThread.ThreadID);
 end;
 
 destructor TWinipcBroker.Destroy;
 begin
   Logger.Track(Self, 'Destroy');
-  FPublishers  := nil;
-  FZmq         := nil;
+  FPublishers := nil;
+  FZmq        := nil;
   FreeAndNil(FMsgData);
   FreeAndNil(FBuffer);
   inherited Destroy;
@@ -136,10 +151,11 @@ end;
 {$REGION 'private methods'}
 procedure TWinipcBroker.WndProc(var AMessage: TMessage);
 var
-  LEndPoint        : string;
-  LPublisher       : IZMQPair;
-  CDS              : PCopyDataStruct;
-  LClientProcessId : Integer;
+  CDS                : PCopyDataStruct;
+  LEndPoint          : string;
+  LPublisher         : IZMQPair;
+  LClientProcessId   : Integer;
+  LClientProcessName : string;
 begin
   if AMessage.Msg = WM_COPYDATA then
   begin
@@ -148,6 +164,10 @@ begin
     FMsgData.Seek(0, soFrombeginning);
     FMsgData.WriteBuffer(CDS^.lpData^, CDS^.cbData);
     LClientProcessId := CDS.dwData;
+    if LClientProcessId = 0 then
+    begin
+      LClientProcessId := GetWindowThreadProcessId(AMessage.WParam);
+    end;
     LEndPoint := Format('inproc://%d', [LClientProcessId]);
     if not FPublishers.TryGetValue(LEndPoint, LPublisher) then
     begin
@@ -157,7 +177,8 @@ begin
       Synchronize(
         procedure
         begin
-          DoAddSubscriber(LEndPoint, LClientProcessId);
+          LClientProcessName := GetExenameForProcess(LClientProcessId);
+          DoAddSubscriber(LEndPoint, LClientProcessId, LClientProcessName);
         end
       );
     end;
@@ -172,6 +193,7 @@ end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
+{$REGION 'TThread overrides'}
 procedure TWinipcBroker.Execute;
 var
   LMsg       : TMsg;
@@ -179,7 +201,7 @@ var
 begin
   NameThreadForDebugging('WinipcBroker');
   try
-    FPublishers             := TCollections.CreateDictionary<string, IZMQPair>;
+    FPublishers := TCollections.CreateDictionary<string, IZMQPair>;
     if Winapi.Windows.RegisterClass(FWndClass) = 0 then
       Exit;
     FWnd := CreateWindow(
@@ -215,11 +237,11 @@ begin
 end;
 
 procedure TWinipcBroker.DoAddSubscriber(const AEndpoint: string;
-  ASourceId: UInt32);
+  AProcessId: UInt32; const AProcessName: string);
 begin
   Logger.Track(Self, 'DoAddSubscriber');
   if Assigned(OnAddSubscriber) then
-    OnAddSubscriber(Self, AEndpoint, ASourceId);
+    OnAddSubscriber(Self, AEndpoint, AProcessId, AProcessName);
 end;
 
 procedure TWinipcBroker.DoTerminate;
@@ -229,6 +251,7 @@ begin
   Winapi.Windows.UnregisterClass(FWndClass.lpszClassName, FWndClass.hInstance);
   inherited DoTerminate;
 end;
+{$ENDREGION}
 {$ENDREGION}
 
 end.

@@ -23,11 +23,12 @@ interface
 uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes, System.Actions,
+  System.Win.TaskbarCore, System.ImageList,
 
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Vcl.ExtCtrls,
-  Vcl.Taskbar, Vcl.ActnList,
+  Vcl.Taskbar, Vcl.ActnList, Vcl.ImgList,
 
-  ChromeTabs, ChromeTabsClasses, ChromeTabsTypes,
+  ChromeTabs, ChromeTabsClasses, ChromeTabsTypes, GDIPOBJ,
 
   kcontrols, kprogress,
 
@@ -35,10 +36,8 @@ uses
 
   DDuce.Utils,
 
-  LogViewer.Interfaces, LogViewer.Factories,
-  LogViewer.Settings,
-  LogViewer.Dashboard.View, System.Win.TaskbarCore, System.ImageList,
-  Vcl.ImgList;
+  LogViewer.Interfaces, LogViewer.Factories, LogViewer.Settings,
+  LogViewer.Dashboard.View;
 
 type
   TfrmMain = class(TForm)
@@ -83,6 +82,9 @@ type
     );
     procedure FormShortCut(var Msg: TWMKey; var Handled: Boolean);
     procedure tmrPollTimer(Sender: TObject);
+    procedure ctMainBeforeDrawItem(Sender: TObject; TargetCanvas: TGPGraphics;
+      ItemRect: TRect; ItemType: TChromeTabItemType; TabIndex: Integer;
+      var Handled: Boolean);
     {$ENDREGION}
 
   private
@@ -224,9 +226,6 @@ end;
 
 destructor TfrmMain.Destroy;
 begin
-  //Events.OnAddLogViewer.RemoveAll(Self);
-  //Events.OnActiveViewChange.RemoveAll(Self);
-  //FSettings.OnChanged.RemoveAll(Self);
   Logger.Track(Self, 'Destroy');
   tmrPoll.Enabled := False;
   Manager.Receivers.Clear;
@@ -234,7 +233,7 @@ begin
   FManager.Settings.OnChanged.Remove(SettingsChanged);
   FManager := nil;
   FreeAndNil(FDashboard); // needs to be freed before manager!
-  inherited Destroy; // will destroy manager object
+  inherited Destroy; // will destroy manager object as the mainform is its owner
   FSettings.Free;
 end;
 {$ENDREGION}
@@ -286,6 +285,20 @@ begin
     UpdateStatusBar;
     OptimizeStatusBarPanelWidths;
   end;
+end;
+
+procedure TfrmMain.ctMainBeforeDrawItem(Sender: TObject;
+  TargetCanvas: TGPGraphics; ItemRect: TRect; ItemType: TChromeTabItemType;
+  TabIndex: Integer; var Handled: Boolean);
+//var
+//  V : ILogViewer;
+begin
+//  if ItemType = itTabText then
+//  begin
+//    V := ILogViewer(ctMain.Tabs[TabIndex].Data);
+//    TargetCanvas.DrawString()
+//    Handled := True;
+//  end;
 end;
 
 procedure TfrmMain.ctMainButtonCloseTabClick(Sender: TObject; ATab: TChromeTab;
@@ -342,10 +355,10 @@ begin
   ctMain.Tabs.Add;
   ctMain.ActiveTab.Data := Pointer(ALogViewer);
   ctMain.ActiveTab.Caption :=
-    Format('%s (%s, %d)         . ', [
-      ALogViewer.Subscriber.Receiver.ToString,
+    Format('%s (%d, %s)', [
       S,
-      ALogViewer.Subscriber.SourceId
+      ALogViewer.Subscriber.SourceId,
+      ALogViewer.Subscriber.Receiver.ToString
     ]);
   ALogViewer.Form.Show;
   UpdateStatusBar;

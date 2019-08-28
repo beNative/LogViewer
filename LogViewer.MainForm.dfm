@@ -32,13 +32,14 @@ object frmMain: TfrmMain
       OnActiveTabChanged = ctMainActiveTabChanged
       OnButtonCloseTabClick = ctMainButtonCloseTabClick
       OnNeedDragImageControl = ctMainNeedDragImageControl
+      OnBeforeDrawItem = ctMainBeforeDrawItem
       ActiveTabIndex = -1
       Options.Display.CloseButton.Offsets.Vertical = 6
-      Options.Display.CloseButton.Offsets.Horizontal = -10
+      Options.Display.CloseButton.Offsets.Horizontal = -8
       Options.Display.CloseButton.Height = 15
       Options.Display.CloseButton.Width = 15
       Options.Display.CloseButton.AutoHide = True
-      Options.Display.CloseButton.Visibility = bvActive
+      Options.Display.CloseButton.Visibility = bvAll
       Options.Display.CloseButton.AutoHideWidth = 10
       Options.Display.CloseButton.CrossRadialOffset = 4
       Options.Display.AddButton.Offsets.Vertical = 10
@@ -66,21 +67,21 @@ object frmMain: TfrmMain
       Options.Display.Tabs.SeeThroughTabs = False
       Options.Display.Tabs.TabOverlap = 15
       Options.Display.Tabs.ContentOffsetLeft = 15
-      Options.Display.Tabs.ContentOffsetRight = 22
+      Options.Display.Tabs.ContentOffsetRight = 15
       Options.Display.Tabs.OffsetLeft = 5
       Options.Display.Tabs.OffsetTop = 0
       Options.Display.Tabs.OffsetRight = 5
       Options.Display.Tabs.OffsetBottom = 0
-      Options.Display.Tabs.MinWidth = 80
-      Options.Display.Tabs.MaxWidth = 200
+      Options.Display.Tabs.MinWidth = 120
+      Options.Display.Tabs.MaxWidth = 600
       Options.Display.Tabs.TabWidthFromContent = True
       Options.Display.Tabs.PinnedWidth = 80
       Options.Display.Tabs.ImageOffsetLeft = 15
-      Options.Display.Tabs.TextTrimType = tttFade
+      Options.Display.Tabs.TextTrimType = tttNone
       Options.Display.Tabs.Orientation = toTop
       Options.Display.Tabs.BaseLineTabRegionOnly = False
       Options.Display.Tabs.WordWrap = False
-      Options.Display.Tabs.TextAlignmentHorizontal = taLeftJustify
+      Options.Display.Tabs.TextAlignmentHorizontal = taCenter
       Options.Display.Tabs.TextAlignmentVertical = taVerticalCenter
       Options.Display.Tabs.ShowImages = True
       Options.Display.Tabs.ShowPinnedTabText = True
@@ -201,7 +202,7 @@ object frmMain: TfrmMain
       LookAndFeel.Tabs.NotActive.Font.Size = 8
       LookAndFeel.Tabs.NotActive.Font.Alpha = 255
       LookAndFeel.Tabs.NotActive.Font.TextRenderingMode = TextRenderingHintClearTypeGridFit
-      LookAndFeel.Tabs.NotActive.Font.UseDefaultFont = True
+      LookAndFeel.Tabs.NotActive.Font.UseDefaultFont = False
       LookAndFeel.Tabs.NotActive.Style.StartColor = clSilver
       LookAndFeel.Tabs.NotActive.Style.StopColor = clSilver
       LookAndFeel.Tabs.NotActive.Style.StartAlpha = 255
@@ -354,7 +355,7 @@ object frmMain: TfrmMain
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
       Font.Height = -11
-      Font.Name = 'Segoe UI'
+      Font.Name = 'Segoe UI Semibold'
       Font.Style = [fsBold]
       TabOrder = 0
     end
@@ -506,7 +507,7 @@ object frmMain: TfrmMain
     Left = 208
     Top = 48
     Bitmap = {
-      494C010101000500B00010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000500C80010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

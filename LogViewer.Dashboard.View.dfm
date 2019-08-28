@@ -60,27 +60,28 @@ object frmDashboard: TfrmDashboard
         TabOrder = 0
         object tsWinIpc: TKTabSheet
           Caption = 'WinIPC'
-          ExplicitTop = 20
-          ExplicitHeight = 596
           object lblWinIPC: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
             Width = 308
-            Height = 588
+            Height = 585
             Align = alClient
             Caption = 
               'Messages are exchanged between the source application and LogVie' +
               'wer using WM_COPY Windows messages. These messages have a specif' +
-              'ic signature and payload that is recognized by LogViewer. '#13#10#13#10'Th' +
-              'e messages are sent from the originating process using the SendM' +
-              'essage method from the Windows API. The SendMessage function cal' +
-              'ls the window procedure for the specified window and does not re' +
-              'turn until the window procedure has processed the message. This ' +
-              'means that each message the application logs is always in sync w' +
-              'ith LogViewer. As a result this method is slower than receivers ' +
-              'based on queueuing.'#13#10#13#10'A new node is automatically created when ' +
-              'a process is detected that sends compatible log messages.'#13#10
+              'ic signature and payload that is recognized by LogViewer. '#13#10'The ' +
+              'messages are sent from the originating process using the SendMes' +
+              'sage method from the Windows API. They are queued in a backgroun' +
+              'd thread and processed asynchronically in the main thread.'#13#10#13#10'A ' +
+              'new node is automatically created when a process is detected tha' +
+              't sends compatible log messages.'#13#10
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -13
+            Font.Name = 'Segoe UI'
+            Font.Style = []
+            ParentFont = False
             Transparent = True
             WordWrap = True
             ExplicitWidth = 307
@@ -107,14 +108,12 @@ object frmDashboard: TfrmDashboard
         end
         object tsWinOds: TKTabSheet
           Caption = 'WinODS'
-          ExplicitTop = 20
-          ExplicitHeight = 596
           object lblWinODS: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
             Width = 308
-            Height = 588
+            Height = 585
             Align = alClient
             Caption = 
               'This receiver captures messages from any local applicatiion that' +
@@ -133,13 +132,13 @@ object frmDashboard: TfrmDashboard
               'at sends these messages.'#13#10
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
+            Font.Height = -13
+            Font.Name = 'Segoe UI'
             Font.Style = []
             ParentFont = False
             Transparent = True
             WordWrap = True
-            ExplicitHeight = 234
+            ExplicitHeight = 374
           end
           object pnlWinODSTitle: TPanel
             Left = 0
@@ -162,8 +161,6 @@ object frmDashboard: TfrmDashboard
         end
         object tsZeroMQ: TKTabSheet
           Caption = 'ZeroMQ'
-          ExplicitTop = 20
-          ExplicitHeight = 596
           object pnlZMQEndpoints: TPanel
             Left = 0
             Top = 25
@@ -174,7 +171,6 @@ object frmDashboard: TfrmDashboard
             BevelOuter = bvNone
             ParentColor = True
             TabOrder = 0
-            ExplicitHeight = 854
           end
           object Panel4: TPanel
             Left = 0
@@ -235,7 +231,6 @@ object frmDashboard: TfrmDashboard
                 SizeStyle = ssAuto
               end>
             TabOrder = 2
-            ExplicitTop = 548
             object btnSubscribeToLocalHost: TButton
               AlignWithMargins = True
               Left = 3
@@ -262,8 +257,6 @@ object frmDashboard: TfrmDashboard
         end
         object tsMqtt: TKTabSheet
           Caption = 'MQTT'
-          ExplicitTop = 20
-          ExplicitHeight = 596
           DesignSize = (
             314
             616)
@@ -297,7 +290,6 @@ object frmDashboard: TfrmDashboard
             Anchors = [akLeft, akTop, akRight, akBottom]
             BevelOuter = bvNone
             TabOrder = 1
-            ExplicitHeight = 538
           end
           object edtMQTTPort: TLabeledEdit
             Left = 249
@@ -341,8 +333,6 @@ object frmDashboard: TfrmDashboard
         end
         object tsFileSystem: TKTabSheet
           Caption = 'FileSystem'
-          ExplicitTop = 20
-          ExplicitHeight = 596
           object pnlFileSystemTitle: TPanel
             Left = 0
             Top = 0
@@ -369,13 +359,10 @@ object frmDashboard: TfrmDashboard
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 1
-            ExplicitHeight = 571
           end
         end
         object tsComPort: TKTabSheet
           Caption = 'COM port'
-          ExplicitTop = 20
-          ExplicitHeight = 596
           object pnlCOMPorts: TPanel
             Left = 0
             Top = 25
@@ -384,7 +371,6 @@ object frmDashboard: TfrmDashboard
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 0
-            ExplicitHeight = 571
           end
           object pnlCOMPortTitle: TPanel
             Left = 0
@@ -407,8 +393,6 @@ object frmDashboard: TfrmDashboard
         end
         object tsMidi: TKTabSheet
           Caption = 'KTabSheet1'
-          ExplicitTop = 20
-          ExplicitHeight = 596
           object pnlMidiTitle: TPanel
             Left = 0
             Top = 0
@@ -435,7 +419,6 @@ object frmDashboard: TfrmDashboard
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 1
-            ExplicitHeight = 571
           end
         end
       end
@@ -509,7 +492,7 @@ object frmDashboard: TfrmDashboard
     Left = 408
     Top = 8
     Bitmap = {
-      494C01010B000801C80110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01010B000801D40110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000001001B09532ED308512ED100000010000000000000

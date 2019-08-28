@@ -183,18 +183,8 @@ begin
   FMQTT.WillMsg := 'a';   // required by some brokers
   if FMQTT.Connect then
   begin
-//    FLogTree.Log('Socket connected to broker.', llInfo);
-//    FLogTree.Header.AutoFitColumns;
-//    if chkSubscribeToAllTopics.Checked then
-//      SubscribeToAllTopics;
   end;
 end;
-
-//function TMqttChannelReceiver.CreateSubscriber(ASourceId, AThreadId: UInt32;
-//  const ASourceName: string): ISubscriber;
-//begin
-//  //Result := TMQTTS WinODSSubscriber.Create(Self, ASourceId, '', ASourceName, True);
-//end;
 {$ENDREGION}
 
 end.
