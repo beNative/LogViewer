@@ -23,9 +23,10 @@ interface
 uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes, System.Actions,
+  System.Win.TaskbarCore, System.ImageList,
 
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Vcl.ExtCtrls,
-  Vcl.Taskbar, Vcl.ActnList,
+  Vcl.Taskbar, Vcl.ActnList, Vcl.ImgList,
 
   ChromeTabs, ChromeTabsClasses, ChromeTabsTypes,
 
@@ -35,10 +36,8 @@ uses
 
   DDuce.Utils,
 
-  LogViewer.Interfaces, LogViewer.Factories,
-  LogViewer.Settings,
-  LogViewer.Dashboard.View, System.Win.TaskbarCore, System.ImageList,
-  Vcl.ImgList;
+  LogViewer.Interfaces, LogViewer.Factories, LogViewer.Settings,
+  LogViewer.Dashboard.View;
 
 type
   TfrmMain = class(TForm)

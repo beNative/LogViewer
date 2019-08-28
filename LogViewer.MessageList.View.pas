@@ -99,29 +99,37 @@ type
     FCounter : Integer;
 
   private
-    FUpdate                      : Boolean; // trigger UpdateActions of Manager
-    FCurrentMsg                  : TLogMessage;
-    FCallStack                   : IList<TCallStackData>;
-    FWatches                     : TWatchList;
-    FLogTreeView                 : TVirtualStringTree;
-    FSubscriber                  : ISubscriber;
-    FCallStackView               : TfrmCallStackView;
-    FWatchesView                 : TfrmWatchesView;
-    FMessageDataView             : TfrmMessageDataView;
     FManager                     : ILogViewerManager;
-    FEditorView                  : IEditorView;
-    FExpandParents               : Boolean;
+
+    // state information
+    FUpdate                      : Boolean; // trigger UpdateActions of Manager
+    FSubscriber                  : ISubscriber;
     FLastParent                  : PVirtualNode;
     FLastNode                    : PVirtualNode;
     FVKPressed                   : Boolean;
-    FSettings                    : TMessageListSettings;
-    FAutoSizeColumns             : Boolean;
-    FValueList                   : TfrmValueListView;
-    FDataSetView                 : TfrmDataSetView;
-    FImageView                   : TfrmImageView;
-    FRawDataView                 : TfrmRawDataView;
     FMiliSecondsBetweenSelection : Integer;
-    FScrollToLastNode            : Boolean;
+
+    // data
+    FWatches    : TWatchList;
+    FCurrentMsg : TLogMessage;
+    FCallStack  : IList<TCallStackData>;
+
+    // views
+    FLogTreeView     : TVirtualStringTree;
+    FCallStackView   : TfrmCallStackView;
+    FWatchesView     : TfrmWatchesView;
+    FMessageDataView : TfrmMessageDataView;
+    FValueList       : TfrmValueListView;
+    FDataSetView     : TfrmDataSetView;
+    FImageView       : TfrmImageView;
+    FRawDataView     : TfrmRawDataView;
+    FEditorView      : IEditorView;
+
+    // settings
+    FSettings         : TMessageListSettings;
+    FExpandParents    : Boolean;
+    FAutoSizeColumns  : Boolean;
+    FScrollToLastNode : Boolean;
 
     {$REGION 'property access methods'}
     function GetManager: ILogViewerManager;
@@ -394,6 +402,7 @@ end;
 destructor TfrmMessageList.Destroy;
 begin
   Logger.Track(Self, 'Destroy');
+  Manager.Settings.WatchSettings.OnChanged.RemoveAll(Self);
   if Assigned(FSettings) then
   begin
     FSettings.OnChanged.RemoveAll(Self);
@@ -407,7 +416,6 @@ begin
   end;
   FCallStack  := nil;
   FEditorView := nil;
-  Manager.Settings.WatchSettings.OnChanged.RemoveAll(Self);
   FreeAndNil(FValueList);
   FreeAndNil(FDataSetView);
   FreeAndNil(FImageView);
@@ -443,7 +451,7 @@ begin
     pnlTextViewer,
     Manager.EditorManager
   );
-  //EditorView.Settings.EditorOptions.WordWrapEnabled := True;
+  EditorView.Settings.EditorOptions.WordWrapEnabled := True;
 end;
 
 procedure TfrmMessageList.CreateImageView;
@@ -878,12 +886,12 @@ end;
 procedure TfrmMessageList.FLogTreeViewFilterCallback(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Data: Pointer; var Abort: Boolean);
 var
-  LN : TLogNode;
-  B  : Boolean;
-  S  : string;
+  LN      : TLogNode;
+  B       : Boolean;
+  LFilter : string;
 begin
   LN := Sender.GetNodeData<TLogNode>(Node);
-  S  := edtMessageFilter.Text;
+  LFilter := edtMessageFilter.Text;
   if Assigned(LN) then
   begin
     if (LN.MessageType = lmtText) and (LN.Highlighter <> '') then
@@ -894,10 +902,10 @@ begin
     begin
       B := LN.MessageType in Settings.VisibleMessageTypes;
     end;
-    if S <> '' then
+    if LFilter <> '' then
     begin
-      B := B and (ContainsText(LN.Text, S) or ContainsText(LN.ValueName, S) or
-       ContainsText(LN.Value, S) or (LN.MessageType in TracingMessages));
+      B := B and (ContainsText(LN.Text, LFilter) or ContainsText(LN.ValueName, LFilter) or
+       ContainsText(LN.Value, LFilter) or (LN.MessageType in TracingMessages));
     end;
     Sender.IsVisible[Node] := B;
   end;
@@ -1367,7 +1375,12 @@ begin
 end;
 
 procedure TfrmMessageList.ApplySettings;
+var
+  LFilter : ILogMessageSubscriptionFilter;
+  LLevels : TLogMessageLevels;
+  I       : Byte;
 begin
+  LLevels := [];
   Logger.Track(Self, 'ApplySettings');
   if Settings.ColumnHeadersVisible then
     FLogTreeView.Header.Options := FLogTreeView.Header.Options + [hoVisible]
@@ -1375,6 +1388,17 @@ begin
     FLogTreeView.Header.Options := FLogTreeView.Header.Options - [hoVisible];
   splRightHorizontal.Visible := Settings.MessageDetailsVisible;
   pnlMessageData.Visible     := Settings.MessageDetailsVisible;
+
+  if Supports(Subscriber, ILogMessageSubscriptionFilter, LFilter) then
+  begin
+    LFilter.LogMessageTypes := Settings.VisibleMessageTypes;
+    for I :=  0 to 255 do
+      LLevels := LLevels + [I];
+    LFilter.LogMessageLevels := LLevels;
+    Logger.Send('LogMessageTypes', TValue.From(LFilter.LogMessageTypes));
+    Logger.Send('LogMessageLevels', TValue.From(LFilter.LogMessageLevels));
+  end;
+
   LoadPanelSettings;
   UpdateTreeColumns;
   Modified;
@@ -1565,9 +1589,9 @@ begin
   FLogTreeView.Clear;
   FMessageDataView.Clear;
   FSubscriber.Reset;
-  FLastNode     := nil;
-  FLastParent   := nil;
-  FUpdate       := True;
+  FLastNode   := nil;
+  FLastParent := nil;
+  FUpdate     := True;
 end;
 
 procedure TfrmMessageList.ClearSelection;
@@ -1919,17 +1943,20 @@ var
   LN : TLogNode;
 begin
   Logger.Track(Self, 'UpdateLogTreeView');
-// TODO: this causes scrolling issues
-//  FLogTreeView.BeginUpdate;
-//  try
-//    // filter
-//    FLogTreeView.IterateSubtree(nil, FLogTreeViewFilterCallback, nil);
-//    UpdateTreeColumns;
-//    if not FAutoSizeColumns then
-//      AutoFitColumns;
-//  finally
-//    FLogTreeView.EndUpdate;
-//  end;
+
+  //if edtMessageFilter.Text <> '' then
+  begin
+    // TODO: this causes scrolling issues
+    FLogTreeView.BeginUpdate;
+    try
+      FLogTreeView.IterateSubtree(nil, FLogTreeViewFilterCallback, nil);
+      UpdateTreeColumns;
+      if not FAutoSizeColumns then
+        AutoFitColumns;
+    finally
+      FLogTreeView.EndUpdate;
+    end;
+  end;
   if Assigned(SelectedLogNode) then
   begin
     LN := SelectedLogNode;

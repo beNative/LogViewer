@@ -1,7 +1,7 @@
 {
 	"FormSettings": {
-		"Left": 393,
-		"Top": 71,
+		"Left": 752,
+		"Top": 207,
 		"Width": 1676,
 		"Height": 1019,
 		"FormStyle": 0,
@@ -15,7 +15,7 @@
 		"MessageDetailsVisible": true,
 		"SmartTimeStamps": true,
 		"HorizontalPanelPositions": [
-			0.212400245549417,
+			0.208433734939759,
 			0.701898734177215,
 			1
 		],
@@ -28,7 +28,7 @@
 		"Enabled": false
 	},
 	"WinipcSettings": {
-		"Enabled": true
+		"Enabled": false
 	},
 	"ZeroMQSettings": {
 		"Enabled": true,

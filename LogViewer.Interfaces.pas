@@ -26,7 +26,7 @@ uses
 
   Spring, Spring.Collections,
 
-  DDuce.Editor.Interfaces,
+  DDuce.Editor.Interfaces, DDuce.Logger.Interfaces,
 
   LogViewer.Settings, LogViewer.Receivers.ComPort.Settings;
 
@@ -320,6 +320,20 @@ type
       AOwner  : TComponent;
       AParent : TWinControl
     ): TToolbar;
+  end;
+
+  ILogMessageSubscriptionFilter = interface
+  ['{7C2819FF-FE3D-462E-AA99-A1EE56DDE7C6}']
+    function GetLogMessageLevels: TLogMessageLevels;
+    function GetLogMessageTypes: TLogMessageTypes;
+    procedure SetLogMessageLevels(const Value: TLogMessageLevels);
+    procedure SetLogMessageTypes(const Value: TLogMessageTypes);
+
+    property LogMessageTypes: TLogMessageTypes
+      read GetLogMessageTypes write SetLogMessageTypes;
+
+    property LogMessageLevels: TLogMessageLevels
+      read GetLogMessageLevels write SetLogMessageLevels;
   end;
 
 implementation
