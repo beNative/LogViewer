@@ -229,12 +229,12 @@ begin
   Logger.Track(Self, 'Destroy');
   tmrPoll.Enabled := False;
   Manager.Receivers.Clear;
-  FManager.Settings.FormSettings.Assign(Self);
-  FManager.Settings.OnChanged.Remove(SettingsChanged);
+  FSettings.FormSettings.Assign(Self);
+  FSettings.OnChanged.RemoveAll(Self);
   FManager := nil;
   FreeAndNil(FDashboard); // needs to be freed before manager!
   inherited Destroy; // will destroy manager object as the mainform is its owner
-  FSettings.Free;
+  FreeAndNil(FSettings);
 end;
 {$ENDREGION}
 
@@ -294,6 +294,12 @@ procedure TfrmMain.ctMainBeforeDrawItem(Sender: TObject;
 //  V : ILogViewer;
 begin
 //  if ItemType = itTabText then
+//  begin
+//    V := ILogViewer(ctMain.Tabs[TabIndex].Data);
+//    TargetCanvas.DrawString()
+//    Handled := True;
+//  end;
+//  if ItemType = itBackground then
 //  begin
 //    V := ILogViewer(ctMain.Tabs[TabIndex].Data);
 //    TargetCanvas.DrawString()
@@ -360,6 +366,7 @@ begin
       ALogViewer.Subscriber.SourceId,
       ALogViewer.Subscriber.Receiver.ToString
     ]);
+  //.ActiveTab.SpinnerState := tssRenderedDownload;
   ALogViewer.Form.Show;
   UpdateStatusBar;
   OptimizeStatusBarPanelWidths;

@@ -42,6 +42,7 @@ object frmMessageList: TfrmMessageList
     OnSplitterMoved = pnlMainSplitterMoved
     Align = alClient
     BevelEdges = []
+    OnCanResize = pnlMainCanResize
     TabOrder = 0
     object pnlMessages: TPanel
       Left = 418
@@ -203,15 +204,12 @@ object frmMessageList: TfrmMessageList
             TabPanelOptions.Options = []
             object tsValueList: TKTabSheet
               Caption = 'Value list'
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
             end
             object tsTextViewer: TKTabSheet
               Caption = 'Text viewer'
               ExplicitTop = 0
               ExplicitWidth = 0
-              ExplicitHeight = 536
+              ExplicitHeight = 0
               object pnlTextViewer: TPanel
                 Left = 0
                 Top = 0
@@ -222,27 +220,26 @@ object frmMessageList: TfrmMessageList
                 BevelOuter = bvNone
                 Color = clWhite
                 TabOrder = 0
-                ExplicitHeight = 536
               end
             end
             object tsImageViewer: TKTabSheet
               Caption = 'Image viewer'
               ExplicitTop = 0
               ExplicitWidth = 0
-              ExplicitHeight = 536
+              ExplicitHeight = 0
             end
             object tsDataSet: TKTabSheet
               Caption = 'Dataset viewer'
               ExplicitTop = 0
               ExplicitWidth = 0
-              ExplicitHeight = 536
+              ExplicitHeight = 0
             end
             object tsRawData: TKTabSheet
               Caption = 'Raw data viewer'
               OnShow = tsRawDataShow
               ExplicitTop = 0
               ExplicitWidth = 0
-              ExplicitHeight = 536
+              ExplicitHeight = 0
             end
           end
         end
@@ -387,7 +384,7 @@ object frmMessageList: TfrmMessageList
     Left = 55
     Top = 22
     Bitmap = {
-      494C010117001900AC0110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010117001900BC0110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

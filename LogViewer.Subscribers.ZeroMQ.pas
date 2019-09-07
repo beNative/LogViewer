@@ -168,7 +168,7 @@ procedure TZmqSubscriber.SubscribeToMessages;
 var
   I : TLogMessageType;
   R : RawByteString;
-  J : Byte;
+  //J : Byte;
 begin
   Logger.Track(Self, 'SubscribeToMessages');
   //UnSubscribeToMessages;

@@ -324,19 +324,21 @@ end;
 destructor TdmManager.Destroy;
 begin
   Logger.Track(Self, 'Destroy');
-  EditorManager.ActiveView := nil;
-
+  FSettings.OnChanged.RemoveAll(Self);
   FSettings.Save;
+
+  EditorManager.ActiveView := nil;
   FActiveView     := nil;
   FViewList       := nil;
   FReceivers      := nil;
   FSettings       := nil;
   FEditorSettings := nil;
   FEditorManager  := nil;
-  
+
   FreeAndNil(FEvents);
   FreeAndNil(FCommands);
-  inherited Destroy;end;
+  inherited Destroy;
+end;
 {$ENDREGION}
 
 {$REGION 'action handlers'}
@@ -695,6 +697,7 @@ begin
   if Action = caAdded then
   begin
     AddView(TLogViewerFactories.CreateLogViewer(Self, Item{, Owner as TWinControl}));
+//    AddView(TLogViewerFactories.CreateLogViewer(Self, Item, Owner as TWinControl));
   end;
 end;
 
@@ -954,10 +957,8 @@ begin
   actToggleAlwaysOnTop.Checked := Settings.FormSettings.FormStyle = fsStayOnTop;
   actToggleFullscreen.Checked := Settings.FormSettings.WindowState = wsMaximized;
   actAutoScrollMessages.Checked := MLS.AutoScrollMessages;
-  Logger.Watch('actAutoScrollMessages.Checked', actAutoScrollMessages.Checked);
   if B then
     ActiveView.UpdateView;
-  Logger.IncCounter('UpdateActions');
   if Assigned(FViewList) then
     Logger.Watch('ViewCount', FViewList.Count);
   if Assigned(FReceivers) then

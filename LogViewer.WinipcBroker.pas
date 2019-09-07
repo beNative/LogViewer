@@ -123,8 +123,8 @@ begin
   Logger.Track(Self, 'Create');
   inherited Create(True);
   FMsgData := TBytesStream.Create;
-  FZmq    := AZeroMQ;
-  FBuffer := TStringStream.Create('', TEncoding.ANSI);
+  FZmq     := AZeroMQ;
+  FBuffer  := TStringStream.Create('', TEncoding.ANSI);
 
   { register the window class by filling in the WNDCLASS structure }
   // initialize the WNDCLASS structure
@@ -174,7 +174,7 @@ begin
       LPublisher := FZmq.Target.Start(ZMQSocket.Publisher);
       Guard.CheckTrue(LPublisher.Bind(LEndPoint) = 0, 'Bind failed');
       FPublishers.AddOrSetValue(LEndPoint, LPublisher);
-      Synchronize(
+      Queue(
         procedure
         begin
           LClientProcessName := GetExenameForProcess(LClientProcessId);
@@ -185,7 +185,7 @@ begin
     FBuffer.Clear;
     FBuffer.LoadFromStream(FMsgData);
     LPublisher.SendString(FBuffer.DataString);
-    Exit;
+    //Exit;
   end;
   AMessage.Result :=
     DefWindowProc(FWnd, AMessage.Msg, AMessage.WParam, AMessage.LParam);

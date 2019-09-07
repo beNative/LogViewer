@@ -20,15 +20,22 @@ unit LogViewer.CallStack.Data;
 
 interface
 
+uses
+  LogViewer.MessageList.LogNode;
+
 type
   TCallStackData = class
   private
     FTitle    : string;
     FLevel    : Integer;
     FDuration : Integer;
+    FNode1    : TLogNode;
+    FNode2    : TLogNode;
 
   public
     constructor Create(
+      ANode1       : TLogNode;
+      ANode2       : TLogNode;
       const ATitle : string = '';
       ALevel       : Integer = 0;
       ADuration    : Integer = 0
@@ -42,15 +49,23 @@ type
 
     property Duration: Integer
       read FDuration write FDuration;
+
+    property Node1: TLogNode
+      read FNode1 write FNode1;
+
+    property Node2: TLogNode
+      read FNode2 write FNode2;
   end;
 
 implementation
 
 {$REGION 'construction and destruction'}
-constructor TCallStackData.Create(const ATitle: string; ALevel,
-  ADuration: Integer);
+constructor TCallStackData.Create(ANode1: TLogNode; ANode2: TLogNode;
+  const ATitle: string; ALevel, ADuration: Integer);
 begin
   inherited Create;
+  FNode1    := ANode1;
+  FNode2    := ANode2;
   FTitle    := ATitle;
   FLevel    := ALevel;
   FDuration := ADuration;

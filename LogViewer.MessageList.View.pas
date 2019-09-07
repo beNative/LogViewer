@@ -94,12 +94,15 @@ type
     procedure chkSyncWithSelectedMessageClick(Sender: TObject);
     procedure pnlMainSplitterMoved(Sender: TObject);
     procedure chkShowDetailsClick(Sender: TObject);
+    procedure pnlMainCanResize(Sender: TObject; var NewWidth,
+      NewHeight: Integer; var Resize: Boolean);
 
   private class var
     FCounter : Integer;
 
   private
     FManager                     : ILogViewerManager;
+    FUpdating                    : Boolean;
 
     // state information
     FUpdate                      : Boolean; // trigger UpdateActions of Manager
@@ -140,6 +143,11 @@ type
     function GetDisplayValuesSettings: TDisplayValuesSettings;
     function GetIsActiveView: Boolean;
     function GetEditorView: IEditorView;
+
+    function GetSelectedLogNode: TLogNode;
+    procedure SetSelectedLogNode(const Value: TLogNode);
+    function GetMessageCount: Int64;
+    function GetMilliSecondsBetweenSelection: Integer;
     {$ENDREGION}
 
     {$REGION 'event handlers'}
@@ -194,6 +202,11 @@ type
       CellRect        : TRect;
       var ContentRect : TRect
     );
+    procedure FLogTreeViewAfterItemPaint(
+      Sender       : TBaseVirtualTree;
+      TargetCanvas : TCanvas;
+      Node         : PVirtualNode;
+      ItemRect     : TRect);
     procedure FLogTreeViewPaintText(
       Sender             : TBaseVirtualTree;
       const TargetCanvas : TCanvas;
@@ -233,11 +246,9 @@ type
       ATree : TBaseVirtualTree;
       ANode : PVirtualNode
     ): Boolean;
-    function GetMilliSecondsBetweenSelection: Integer;
+
     procedure EnsureCurrentViewIsActiveViewWhenFocused;
     function ParseValue(const AString: string): Tuple<string, string, string>;
-    function GetSelectedLogNode: TLogNode;
-    function GetMessageCount: Int64;
 
   protected
     procedure Clear;
@@ -318,7 +329,7 @@ type
       read GetMilliSecondsBetweenSelection;
 
     property SelectedLogNode: TLogNode
-      read GetSelectedLogNode;
+      read GetSelectedLogNode write SetSelectedLogNode;
 
     property MessageCount: Int64
       read GetMessageCount;
@@ -403,16 +414,16 @@ destructor TfrmMessageList.Destroy;
 begin
   Logger.Track(Self, 'Destroy');
   Manager.Settings.WatchSettings.OnChanged.RemoveAll(Self);
+  if Assigned(FSubscriber) then
+  begin
+    FSubscriber.OnReceiveMessage.RemoveAll(Self);
+    FSubscriber := nil;
+  end;
   if Assigned(FSettings) then
   begin
     FSettings.OnChanged.RemoveAll(Self);
     SavePanelSettings;
     FSettings := nil;
-  end;
-  if Assigned(FSubscriber) then
-  begin
-    FSubscriber.OnReceiveMessage.RemoveAll(Self);
-    FSubscriber := nil;
   end;
   FCallStack  := nil;
   FEditorView := nil;
@@ -472,11 +483,9 @@ begin
   FLogTreeView.TreeOptions.AutoOptions := FLogTreeView.TreeOptions.AutoOptions +
     [toAutoSpanColumns];
   FLogTreeView.TreeOptions.PaintOptions := [
-    toHideFocusRect, toHotTrack, toPopupMode, toShowBackground, toShowButtons,
-    toShowDropmark, toStaticBackground, toShowRoot, {toShowVertGridLines,}
-    {toShowHorzGridLines,}
-    toThemeAware, toUseBlendedImages, toUseBlendedSelection, {toShowTreeLines,}
-    toStaticBackground, toUseExplorerTheme
+    toHotTrack, toPopupMode, toShowBackground, toShowButtons, toShowDropmark,
+    toStaticBackground, toShowRoot, toThemeAware, toUseBlendedImages,
+    toUseBlendedSelection, toStaticBackground, toUseExplorerTheme
   ];
   FLogTreeView.NodeDataSize := SizeOf(TLogNode);
   FLogTreeView.Images       := imlMessageTypes;
@@ -485,6 +494,7 @@ begin
   FLogTreeView.LineMode     := lmBands;
 
   FLogTreeView.OnBeforeCellPaint := FLogTreeViewBeforeCellPaint;
+  FLogTreeView.OnAfterItemPaint  := FLogTreeViewAfterItemPaint;
   FLogTreeView.OnFocusChanged    := FLogTreeViewFocusChanged;
   FLogTreeView.OnDblClick        := FLogTreeViewDblClick;
   FLogTreeView.OnHotChange       := FLogTreeViewHotChange;
@@ -501,6 +511,8 @@ begin
   B := Supports(Subscriber, IWinIpc) or Supports(Subscriber, IZmq);
 
   C := FLogTreeView.Header.Columns.Add; // logging level
+  if not B then
+    C.Options  := C.Options - [coVisible];
   C.Text     := '';
   C.Margin   := 0;
   C.Spacing  := 0;
@@ -511,15 +523,26 @@ begin
   C := FLogTreeView.Header.Columns.Add; // message type
   C.Text     := '';
   C.Options  := C.Options - [coSmartResize, coAutoSpring];
-  C.Width    := 100;
-  C.MinWidth := 100;
-  C.MaxWidth := 2000;
+  if B then
+  begin
+    C.Width    := 100;
+    C.MinWidth := 100;
+    C.MaxWidth := 2000;
+  end
+  else
+  begin
+    C.Width    := 20;
+    C.MinWidth := 20;
+    C.MaxWidth := 40;
+  end;
 
   C := FLogTreeView.Header.Columns.Add; // name
   C.Text     := SName;
-  C.Options  := C.Options + [coSmartResize, coAutoSpring];
   if not B then
-    C.Options  := C.Options - [coVisible];
+    C.Options  := C.Options - [coVisible, coSmartResize, coAutoSpring]
+  else
+    C.Options  := C.Options + [coSmartResize, coAutoSpring];
+
   C.Width    := 100;
   C.MinWidth := 100;
   C.MaxWidth := 2000;
@@ -533,9 +556,11 @@ begin
 
   C := FLogTreeView.Header.Columns.Add;
   C.Text    := SType;
-  C.Options := C.Options + [coSmartResize, coAutoSpring];
+
   if not B then
-    C.Options  := C.Options - [coVisible];
+    C.Options  := C.Options - [coVisible, coSmartResize, coAutoSpring]
+  else
+    C.Options := C.Options + [coSmartResize, coAutoSpring];
   C.Width     := 70;
   C.MinWidth  := 75;
   C.MaxWidth  := 2000;
@@ -546,7 +571,6 @@ begin
   C.Width    := C.MinWidth;
   C.MaxWidth := C.MinWidth;
   C.Alignment := taRightJustify;
-  Logger.SendObject('TimeStampCol', C);
   FLogTreeView.Header.AutoSizeIndex := COLUMN_MAIN;
   FLogTreeView.Header.Options       :=
     FLogTreeView.Header.Options + [hoFullRepaintOnResize];
@@ -633,13 +657,30 @@ end;
 
 function TfrmMessageList.GetSelectedLogNode: TLogNode;
 begin
-  if Assigned(FLogTreeView) and Assigned(FLogTreeView.FocusedNode) then
+  if Assigned(FLogTreeView) and Assigned(FLogTreeView.FocusedNode)
+    and FLogTreeView.Selected[FLogTreeView.FocusedNode]
+  then
   begin
     Result := FLogTreeView.GetNodeData<TLogNode>(FLogTreeView.FocusedNode);
   end
   else
   begin
     Result := nil;
+  end;
+end;
+
+procedure TfrmMessageList.SetSelectedLogNode(const Value: TLogNode);
+begin
+  if Assigned(Value) and Assigned(Value.VTNode) then
+  begin
+    if Value <> SelectedLogNode then
+    begin
+      FLogTreeView.FocusedNode := Value.VTNode;
+      FLogTreeView.Selected[Value.VTNode] := True;
+      FLogTreeView.ScrollIntoView(Value.VTNode, True, True);
+    end;
+//    FLogTreeView.Expanded[Value.VTNode] :=
+//        not FLogTreeView.Expanded[Value.VTNode];
   end;
 end;
 
@@ -780,6 +821,25 @@ begin
   Allowed := True;
 end;
 
+procedure TfrmMessageList.FLogTreeViewAfterItemPaint(Sender: TBaseVirtualTree;
+  TargetCanvas: TCanvas; Node: PVirtualNode; ItemRect: TRect);
+begin
+  if FLogTreeView.FocusedNode = Node then
+  begin
+    TargetCanvas.Pen.Color := clBlue;
+    TargetCanvas.Pen.Width := 2;
+    ItemRect.Inflate(-1, -1);
+    TargetCanvas.MoveTo(ItemRect.Left, ItemRect.Top);
+    TargetCanvas.LineTo(ItemRect.Right, ItemRect.Top);
+    TargetCanvas.MoveTo(ItemRect.Left, ItemRect.Top);
+    TargetCanvas.LineTo(ItemRect.Left, ItemRect.Bottom);
+    TargetCanvas.MoveTo(ItemRect.Left, ItemRect.Bottom);
+    TargetCanvas.LineTo(ItemRect.Right, ItemRect.Bottom);
+    TargetCanvas.MoveTo(ItemRect.Right, ItemRect.Top);
+    TargetCanvas.LineTo(ItemRect.Right, ItemRect.Bottom);
+  end;
+end;
+
 { This handler takes care of the following things:
   - Coloring the loglevel column background color.
   - Drawing collapsed tracing nodes as one node (using IsCollapsedTracingNode). }
@@ -880,7 +940,10 @@ end;
 procedure TfrmMessageList.FLogTreeViewFocusChanged(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex);
 begin
-  Modified;
+  if FUpdate then
+    UpdateActions
+  else
+    Modified;
 end;
 
 procedure TfrmMessageList.FLogTreeViewFilterCallback(Sender: TBaseVirtualTree;
@@ -1210,6 +1273,12 @@ begin
 end;
 {$ENDREGION}
 
+procedure TfrmMessageList.pnlMainCanResize(Sender: TObject; var NewWidth,
+  NewHeight: Integer; var Resize: Boolean);
+begin
+  Resize := pnlMain.CanFocus;
+end;
+
 procedure TfrmMessageList.pnlMainSplitterMoved(Sender: TObject);
 begin
   Modified;
@@ -1217,8 +1286,11 @@ end;
 
 procedure TfrmMessageList.pnlMessagesResize(Sender: TObject);
 begin
-  Modified;
-  FAutoSizeColumns := False;
+  if IsActiveView then
+  begin
+    Modified;
+    FAutoSizeColumns := False;
+  end;
 end;
 
 procedure TfrmMessageList.chkShowDetailsClick(Sender: TObject);
@@ -1414,9 +1486,9 @@ end;
 
 procedure TfrmMessageList.Activate;
 begin
-  inherited Activate;
   Manager.ActiveView := Self as ILogViewer;
   Manager.EditorManager.ActiveView := FEditorView;
+  inherited Activate;
 end;
 
 procedure TfrmMessageList.AddMessageToTree(const AMessage: TLogMessage);
@@ -1670,6 +1742,7 @@ var
   LN2 : TLogNode;
   VN  : PVirtualNode;
 begin
+  Logger.Track(Self, 'UpdateCallStackDisplay');
   Guard.CheckNotNull(ALogNode, 'ALogNode');
   FCallStack.Clear;
   LN2 := nil;
@@ -1729,7 +1802,7 @@ begin
     if Assigned(LN2) then
       FCallStack.Add(
         TCallStackData.Create(
-          LN.Text, I, MilliSecondsBetween(LN2.TimeStamp, LN.TimeStamp)
+          LN, LN2, LN.Text, I, MilliSecondsBetween(LN2.TimeStamp, LN.TimeStamp)
         )
       );
   end;
@@ -1943,18 +2016,20 @@ var
   LN : TLogNode;
 begin
   Logger.Track(Self, 'UpdateLogTreeView');
-
+  if not FUpdating then
+  begin
+  FUpdating := True;
   //if edtMessageFilter.Text <> '' then
   begin
     // TODO: this causes scrolling issues
-    FLogTreeView.BeginUpdate;
+    //FLogTreeView.BeginUpdate;
     try
-      FLogTreeView.IterateSubtree(nil, FLogTreeViewFilterCallback, nil);
+      //FLogTreeView.IterateSubtree(nil, FLogTreeViewFilterCallback, nil);
       UpdateTreeColumns;
       if not FAutoSizeColumns then
         AutoFitColumns;
     finally
-      FLogTreeView.EndUpdate;
+      //FLogTreeView.EndUpdate;
     end;
   end;
   if Assigned(SelectedLogNode) then
@@ -1969,6 +2044,8 @@ begin
     FLogTreeView.Selected[FLogTreeView.FocusedNode] := True;
     FScrollToLastNode := False;
   end;
+  FUpdating := False;
+  end;
 end;
 
 procedure TfrmMessageList.UpdateActions;
@@ -1977,6 +2054,7 @@ begin
     EnsureCurrentViewIsActiveViewWhenFocused;
   if IsActiveView and FUpdate then
   begin
+    Logger.IncCounter(Name);
     UpdateLogTreeView;
     if Assigned(Actions) then
     begin

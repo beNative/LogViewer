@@ -198,7 +198,6 @@ uses
 constructor TWatch.Create(const AName: string; const AValueType: string;
   AMessageType: TLogMessageType; AFirstId: Int64; AOnlyTrackChanges: Boolean);
 begin
-  Logger.Track(Self, 'Create');
   FList := TCollections.CreateObjectList<TWatchValue>;
   FName             := AName;
   FValueType        := AValueType;
@@ -209,7 +208,6 @@ end;
 
 destructor TWatch.Destroy;
 begin
-  Logger.Track(Self, 'Destroy');
   FList.Clear;
   FList := nil;
   inherited Destroy;

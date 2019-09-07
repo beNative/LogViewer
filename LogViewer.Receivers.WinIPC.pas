@@ -100,15 +100,12 @@ begin
   inherited AfterConstruction;
   FZmq := TZeroMQ.Create;
 
-  FBroker := TWinipcBroker.Create(FZmq);
-  FBroker.OnAddSubscriber := FBrokerAddSubscriber;
+
   Settings.OnChanged.Add(SettingsChanged);
   SubscriberList.OnValueChanged.Add(SubscriberListChanged);
 
-  PollTimer.Interval := 50;
+  PollTimer.Interval := 10;
   PollTimer.Enabled  := True;
-  FBroker.FreeOnTerminate := False;
-  FBroker.Start;
 end;
 
 destructor TWinipcChannelReceiver.Destroy;
@@ -123,10 +120,14 @@ begin
     // the application from closing.
     LSubscriber.Close;
   end;
-  FBroker.OnAddSubscriber := nil;
-  FBroker.Terminate;
-  FBroker.WaitFor;
-  FreeAndNIl(FBroker);
+  if Assigned(FBroker) then
+  begin
+    FBroker.OnAddSubscriber := nil;
+    FBroker.Terminate;
+    FBroker.WaitFor;
+    FreeAndNIl(FBroker);
+  end;
+
   SubscriberList.OnValueChanged.RemoveAll(Self);
   inherited Destroy;
 end;
@@ -135,7 +136,30 @@ end;
 {$REGION 'property access methods'}
 procedure TWinipcChannelReceiver.SetEnabled(const Value: Boolean);
 begin
-  inherited SetEnabled(Value);
+  if Value <> Enabled then
+  begin
+    inherited SetEnabled(Value);
+    if Value then
+    begin
+      if not Assigned(FBroker) then
+      begin
+        FBroker := TWinipcBroker.Create(FZmq);
+        FBroker.OnAddSubscriber := FBrokerAddSubscriber;
+        FBroker.FreeOnTerminate := False;
+        FBroker.Start;
+      end
+    end
+    else
+    begin
+      if Assigned(FBroker) then
+      begin
+        FBroker.OnAddSubscriber := nil;
+        FBroker.Terminate;
+        FBroker.WaitFor;
+        FreeAndNIl(FBroker);
+      end;
+    end;
+  end;
   PollTimer.Enabled := Value;
 end;
 
@@ -164,7 +188,7 @@ end;
 procedure TWinipcChannelReceiver.FBrokerAddSubscriber(Sender: TObject;
   const AEndpoint: string; AProcessId: UInt32; const AProcessName : string);
 var
-  LSubscriber : ISubscriber;
+  LSubscriber  : ISubscriber;
   LProcessName : string;
 begin
   if not SubscriberList.TryGetValue(AProcessId, LSubscriber) then
