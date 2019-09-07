@@ -1,22 +1,22 @@
 {
 	"FormSettings": {
-		"Left": 753,
-		"Top": 166,
-		"Width": 1323,
-		"Height": 560,
+		"Left": 710,
+		"Top": 62,
+		"Width": 1569,
+		"Height": 996,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
 	"MessageListSettings": {
-		"AutoScrollMessages": true,
+		"AutoScrollMessages": false,
 		"AutoFilterMessages": true,
-		"ColumnHeadersVisible": false,
+		"ColumnHeadersVisible": true,
 		"DynamicAutoSizeColumns": true,
 		"MessageDetailsVisible": true,
 		"SmartTimeStamps": true,
 		"HorizontalPanelPositions": [
 			0.208433734939759,
-			0.701898734177215,
+			0.768435561681599,
 			1
 		],
 		"LeftVerticalPanelPositions": [
@@ -25,7 +25,7 @@
 		]
 	},
 	"WinodsSettings": {
-		"Enabled": false
+		"Enabled": true
 	},
 	"WinipcSettings": {
 		"Enabled": true,
@@ -151,9 +151,9 @@
 		"Tracing": {
 			"BackgroundColor": 14540253,
 			"FontName": "Segoe UI",
-			"FontColor": -16777208,
+			"FontColor": 32896,
 			"FontSize": 8,
-			"FontStyle": "",
+			"FontStyle": "fsItalic,fsUnderline",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
@@ -161,9 +161,9 @@
 		"Enter": {
 			"BackgroundColor": 14540253,
 			"FontName": "Segoe UI",
-			"FontColor": 32768,
+			"FontColor": 32896,
 			"FontSize": 8,
-			"FontStyle": "",
+			"FontStyle": "fsItalic",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
@@ -171,9 +171,9 @@
 		"Leave": {
 			"BackgroundColor": 14540253,
 			"FontName": "Segoe UI",
-			"FontColor": 255,
+			"FontColor": 32896,
 			"FontSize": 8,
-			"FontStyle": "",
+			"FontStyle": "fsItalic",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0

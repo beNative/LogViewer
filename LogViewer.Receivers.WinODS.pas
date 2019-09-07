@@ -365,6 +365,7 @@ end;
 destructor TWinodsChannelReceiver.Destroy;
 begin
   Logger.Track(Self, 'Destroy');
+  PollTimer.Enabled := False;
   FDebugMonitor.Free;
   FBuffer.Free;
   inherited Destroy;

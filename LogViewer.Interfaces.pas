@@ -28,7 +28,8 @@ uses
 
   DDuce.Editor.Interfaces, DDuce.Logger.Interfaces,
 
-  LogViewer.Settings, LogViewer.Receivers.ComPort.Settings;
+  LogViewer.Settings, LogViewer.Receivers.ComPort.Settings,
+  LogViewer.MessageList.LogNode;
 
 type
   ILogViewer       = interface;
@@ -193,6 +194,8 @@ type
     function GetForm: TCustomForm;
     function GetIsActiveView: Boolean;
     function GetMilliSecondsBetweenSelection: Integer;
+    function GetSelectedLogNode: TLogNode;
+    procedure SetSelectedLogNode(const Value: TLogNode);
     {$ENDREGION}
 
     procedure Clear;
@@ -214,8 +217,11 @@ type
     property Form: TCustomForm
       read GetForm;
 
-     property MilliSecondsBetweenSelection: Integer
+    property MilliSecondsBetweenSelection: Integer
       read GetMilliSecondsBetweenSelection;
+
+    property SelectedLogNode: TLogNode
+      read GetSelectedLogNode write SetSelectedLogNode;
   end;
 
   ILogViewerEvents = interface

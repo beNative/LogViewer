@@ -896,11 +896,11 @@ begin
   Logger.Track(Self, 'CreateChannelReceivers');
   CreateWinipcReceiver;
   CreateZeroMQReceiver;
-  CreateWinodsReceiver;
+  //CreateWinodsReceiver;
   //CreateMqttReceiver;
   //CreateComPortReceiver;
   //CreateFileSystemReceiver;
-  CreateMidiReceiver;
+  //CreateMidiReceiver;
 
   FTreeView.FullExpand;
 end;

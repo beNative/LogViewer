@@ -153,7 +153,8 @@ begin
   FPollTimer.Create(function: TTimer
     begin
       Result := TTimer.Create(nil);
-      Result.OnTimer := PollTimerTimer;
+      Result.Interval := 1000;
+      Result.OnTimer  := PollTimerTimer;
     end
   );
 end;

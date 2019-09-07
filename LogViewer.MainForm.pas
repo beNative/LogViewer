@@ -299,6 +299,12 @@ begin
 //    TargetCanvas.DrawString()
 //    Handled := True;
 //  end;
+//  if ItemType = itBackground then
+//  begin
+//    V := ILogViewer(ctMain.Tabs[TabIndex].Data);
+//    TargetCanvas.DrawString()
+//    Handled := True;
+//  end;
 end;
 
 procedure TfrmMain.ctMainButtonCloseTabClick(Sender: TObject; ATab: TChromeTab;
@@ -360,6 +366,7 @@ begin
       ALogViewer.Subscriber.SourceId,
       ALogViewer.Subscriber.Receiver.ToString
     ]);
+  //.ActiveTab.SpinnerState := tssRenderedDownload;
   ALogViewer.Form.Show;
   UpdateStatusBar;
   OptimizeStatusBarPanelWidths;

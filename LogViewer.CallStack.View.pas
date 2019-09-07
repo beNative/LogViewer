@@ -78,6 +78,7 @@ type
       Selected         : Boolean
     ): Boolean;
     procedure SettingsChanged(Sender: TObject);
+    procedure FTVPCallStackDoubleClick(Sender: TObject);
 
   public
     constructor Create(
@@ -100,8 +101,9 @@ uses
   DSharp.Windows.ControlTemplates,
 
   DDuce.Factories.TreeViewPresenter, DDuce.Factories.VirtualTrees,
+  DDuce.Logger,
 
-  DDuce.Logger;
+  LogViewer.CallStack.Data, LogViewer.Interfaces;
 
 {$REGION 'construction and destruction'}
 constructor TfrmCallStackView.Create(AOwner: TComponent; AData: IObjectList;
@@ -148,7 +150,8 @@ begin
     FCallStack as IObjectList,
     CDS
   );
-  FTVPCallStack.ShowHeader := FSettings.ColumnHeadersVisible;
+  FTVPCallStack.ShowHeader    := FSettings.ColumnHeadersVisible;
+  FTVPCallStack.OnDoubleClick := FTVPCallStackDoubleClick;
 end;
 
 destructor TfrmCallStackView.Destroy;
@@ -230,6 +233,19 @@ begin
     FDisplayValuesSettings.Tracing.AssignTo(TargetCanvas.Font);
   end;
   Result := True;
+end;
+
+procedure TfrmCallStackView.FTVPCallStackDoubleClick(Sender: TObject);
+var
+  LV : ILogViewer;
+begin
+  if Supports(Owner, ILogViewer, LV) then
+  begin
+    if Assigned(FTVPCallStack.SelectedItem) then
+    begin
+      LV.SelectedLogNode := (FTVPCallStack.SelectedItem as TCallStackData).Node1;
+    end;
+  end
 end;
 
 procedure TfrmCallStackView.SettingsChanged(Sender: TObject);

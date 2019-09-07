@@ -179,7 +179,7 @@ resourcestring
   // message viewer
 const
   COLUMN_LEVEL     = 0;
-  COLUMN_MAIN      = 1;
+  COLUMN_MAIN      = 1; // make variable
   COLUMN_VALUENAME = 2;
   COLUMN_VALUE     = 3;
   COLUMN_VALUETYPE = 4;
@@ -211,7 +211,8 @@ const
 
   { max. amount of characters allowed to be displayed in the value column of the
     logtree. }
-  MAX_TEXTLENGTH_VALUECOLUMN = 80;
+  //MAX_TEXTLENGTH_VALUECOLUMN = 80;
+  MAX_TEXTLENGTH_VALUECOLUMN = 200;
 
   { TCP port used for debugging another LogViewer instance using ZMQ. }
   LOGVIEWER_ZMQ_PORT : Integer = 42134;
