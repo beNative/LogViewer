@@ -356,10 +356,8 @@ uses
 
   Spring.Helpers,
 
-  DDuce.Factories.VirtualTrees, DDuce.Editor.Factories,
-  DDuce.Utils, DDuce.Logger,
-
-  DDuce.DynamicRecord,
+  DDuce.Factories.VirtualTrees, DDuce.Editor.Factories, DDuce.Utils,
+  DDuce.Logger, DDuce.DynamicRecord,
 
   LogViewer.Manager, LogViewer.Factories, LogViewer.Resources;
 
@@ -425,8 +423,10 @@ begin
     SavePanelSettings;
     FSettings := nil;
   end;
-  FCallStack  := nil;
+  FEditorView.Form.Free; // prevents the instance to be freed by the owning
+                         // manager instance or the parent control.
   FEditorView := nil;
+  FCallStack  := nil;
   FreeAndNil(FValueList);
   FreeAndNil(FDataSetView);
   FreeAndNil(FImageView);

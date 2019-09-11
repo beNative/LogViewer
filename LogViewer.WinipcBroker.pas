@@ -185,7 +185,7 @@ begin
     FBuffer.Clear;
     FBuffer.LoadFromStream(FMsgData);
     LPublisher.SendString(FBuffer.DataString);
-    //Exit;
+    Exit;
   end;
   AMessage.Result :=
     DefWindowProc(FWnd, AMessage.Msg, AMessage.WParam, AMessage.LParam);

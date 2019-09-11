@@ -24,14 +24,11 @@ uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes, System.Actions,
   System.Win.TaskbarCore, System.ImageList,
-
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Vcl.ExtCtrls,
-  Vcl.Taskbar, Vcl.ActnList, Vcl.ImgList,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Vcl.Taskbar,
+  Vcl.ExtCtrls, Vcl.ActnList, Vcl.ImgList,
 
   ChromeTabs, ChromeTabsClasses, ChromeTabsTypes, GDIPOBJ,
-
   kcontrols, kprogress,
-
   Spring,
 
   DDuce.Utils,
@@ -219,9 +216,9 @@ begin
   ctMain.LookAndFeel.Tabs.NotActive.Style.StartColor := ColorToRGB(clBtnFace);
   ctMain.LookAndFeel.Tabs.NotActive.Style.StopColor  := ColorToRGB(clBtnFace);
   ctMain.LookAndFeel.Tabs.Active.Style.StartColor    := ColorToRGB(clWindowFrame);
-  ctMain.LookAndFeel.Tabs.Active.Style.StopColor     := ColorToRGB(clWindowFrame);
-  ctMain.LookAndFeel.Tabs.Hot.Style.StartColor       := clSilver;
-  ctMain.LookAndFeel.Tabs.Hot.Style.StopColor        := clSilver;
+  ctMain.LookAndFeel.Tabs.Active.Style.StopColor := ColorToRGB(clWindowFrame);
+  ctMain.LookAndFeel.Tabs.Hot.Style.StartColor   := clSilver;
+  ctMain.LookAndFeel.Tabs.Hot.Style.StopColor    := clSilver;
 end;
 
 destructor TfrmMain.Destroy;
