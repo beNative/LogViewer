@@ -358,6 +358,7 @@ procedure TdmManager.actAutoScrollMessagesExecute(Sender: TObject);
 begin
   FSettings.MessageListSettings.AutoScrollMessages :=
     not FSettings.MessageListSettings.AutoScrollMessages;
+  UpdateActions;
 end;
 
 procedure TdmManager.actBitmapExecute(Sender: TObject);
@@ -388,7 +389,6 @@ end;
 procedure TdmManager.actCloseOtherMessageViewsExecute(Sender: TObject);
 begin
   //
-
 end;
 
 procedure TdmManager.actCollapseAllExecute(Sender: TObject);
@@ -860,7 +860,9 @@ begin
     FReceivers.Add(ALogViewer.Subscriber.Receiver);
   end;
   Events.DoAddLogViewer(ALogViewer);
-  FActiveView := ALogViewer;
+  ActiveView := ALogViewer;
+  ActiveView.UpdateView;
+  UpdateActions;
 end;
 
 function TdmManager.DeleteView(AView: ILogViewer): Boolean;

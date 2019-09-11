@@ -2019,17 +2019,16 @@ begin
   if not FUpdating then
   begin
   FUpdating := True;
-  //if edtMessageFilter.Text <> '' then
+  if edtMessageFilter.Focused then
   begin
-    // TODO: this causes scrolling issues
-    //FLogTreeView.BeginUpdate;
+    FLogTreeView.BeginUpdate;
     try
-      //FLogTreeView.IterateSubtree(nil, FLogTreeViewFilterCallback, nil);
+      FLogTreeView.IterateSubtree(nil, FLogTreeViewFilterCallback, nil);
       UpdateTreeColumns;
       if not FAutoSizeColumns then
         AutoFitColumns;
     finally
-      //FLogTreeView.EndUpdate;
+      FLogTreeView.EndUpdate;
     end;
   end;
   if Assigned(SelectedLogNode) then

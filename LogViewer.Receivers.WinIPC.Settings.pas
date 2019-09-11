@@ -28,7 +28,7 @@ uses
 type
   TWinipcSettings = class(TPersistent)
   const
-    DEFAULT_POLLING_INTERVAL = 100;
+    DEFAULT_POLLING_INTERVAL = 10;
 
   private
     FOnChanged       : Event<TNotifyEvent>;

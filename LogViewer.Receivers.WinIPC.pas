@@ -99,11 +99,8 @@ begin
   Logger.Track(Self, 'AfterConstruction');
   inherited AfterConstruction;
   FZmq := TZeroMQ.Create;
-
-
   Settings.OnChanged.Add(SettingsChanged);
   SubscriberList.OnValueChanged.Add(SubscriberListChanged);
-
   PollTimer.Interval := 10;
   PollTimer.Enabled  := True;
 end;
@@ -127,7 +124,6 @@ begin
     FBroker.WaitFor;
     FreeAndNIl(FBroker);
   end;
-
   SubscriberList.OnValueChanged.RemoveAll(Self);
   inherited Destroy;
 end;
