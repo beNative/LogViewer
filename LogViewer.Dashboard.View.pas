@@ -258,6 +258,8 @@ type
     procedure AfterConstruction; override;
     destructor Destroy; override;
 
+    procedure Update; override;
+
   end;
 
 implementation
@@ -1147,6 +1149,15 @@ begin
     Logger.Watch('FUpdate', FUpdate);
     FTreeView.Repaint;
   end;
+end;
+{$ENDREGION}
+
+{$REGION 'public methods'}
+procedure TfrmDashboard.Update;
+begin
+  inherited Update;
+  Modified;
+  UpdateActions;
 end;
 {$ENDREGION}
 

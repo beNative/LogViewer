@@ -88,14 +88,15 @@ type
     );
     procedure edtMessageFilterMouseEnter(Sender: TObject);
     procedure edtMessageFilterMouseLeave(Sender: TObject);
+    procedure chkShowDetailsClick(Sender: TObject);
+    procedure chkSyncWithSelectedMessageClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure pnlMainSplitterMoved(Sender: TObject);
     procedure pnlMessagesResize(Sender: TObject);
     procedure tsRawDataShow(Sender: TObject);
-    procedure chkSyncWithSelectedMessageClick(Sender: TObject);
-    procedure pnlMainSplitterMoved(Sender: TObject);
-    procedure chkShowDetailsClick(Sender: TObject);
     procedure pnlMainCanResize(Sender: TObject; var NewWidth,
       NewHeight: Integer; var Resize: Boolean);
+    procedure edtMessageFilterExit(Sender: TObject);
 
   private class var
     FCounter : Integer;
@@ -254,6 +255,7 @@ type
     procedure Clear;
     procedure AutoFitColumns;
     procedure ApplySettings;
+    procedure ApplyFilter;
     procedure LoadPanelSettings;
     procedure SavePanelSettings;
 
@@ -697,18 +699,23 @@ begin
   if edtMessageFilter.Text <> '' then
   begin
     edtMessageFilter.Font.Style := [fsBold];
-    edtMessageFilter.Color := clYellow;
+    edtMessageFilter.Color      := clYellow;
   end
   else
   begin
     edtMessageFilter.Font.Style := [];
-    edtMessageFilter.Color := clWhite;
+    edtMessageFilter.Color      := clWhite;
   end;
 
   if Settings.AutoFilterMessages then
   begin
     FUpdate := True;
   end;
+end;
+
+procedure TfrmMessageList.edtMessageFilterExit(Sender: TObject);
+begin
+  ApplyFilter;
 end;
 
 procedure TfrmMessageList.edtMessageFilterKeyDown(Sender: TObject;
@@ -967,8 +974,10 @@ begin
     end;
     if LFilter <> '' then
     begin
-      B := B and (ContainsText(LN.Text, LFilter) or ContainsText(LN.ValueName, LFilter) or
-       ContainsText(LN.Value, LFilter) or (LN.MessageType in TracingMessages));
+      B := B and (
+       ContainsText(LN.Text, LFilter) or ContainsText(LN.ValueName, LFilter) or
+       ContainsText(LN.Value, LFilter) or (LN.MessageType in TracingMessages)
+      );
     end;
     Sender.IsVisible[Node] := B;
   end;
@@ -1446,6 +1455,19 @@ begin
   end;
 end;
 
+procedure TfrmMessageList.ApplyFilter;
+begin
+  FLogTreeView.BeginUpdate;
+  try
+    FLogTreeView.IterateSubtree(nil, FLogTreeViewFilterCallback, nil);
+    UpdateTreeColumns;
+    if not FAutoSizeColumns then
+      AutoFitColumns;
+  finally
+    FLogTreeView.EndUpdate;
+  end;
+end;
+
 procedure TfrmMessageList.ApplySettings;
 var
   LFilter : ILogMessageSubscriptionFilter;
@@ -1472,7 +1494,8 @@ begin
   end;
 
   LoadPanelSettings;
-  UpdateTreeColumns;
+  ApplyFilter;
+//  UpdateTreeColumns;
   Modified;
 end;
 
@@ -2018,32 +2041,25 @@ begin
   Logger.Track(Self, 'UpdateLogTreeView');
   if not FUpdating then
   begin
-  FUpdating := True;
-  if edtMessageFilter.Focused then
-  begin
-    FLogTreeView.BeginUpdate;
-    try
-      FLogTreeView.IterateSubtree(nil, FLogTreeViewFilterCallback, nil);
-      UpdateTreeColumns;
-      if not FAutoSizeColumns then
-        AutoFitColumns;
-    finally
-      FLogTreeView.EndUpdate;
+    FUpdating := True;
+    if edtMessageFilter.Focused then
+    begin
+      ApplyFilter;
+    end
+    else if Assigned(SelectedLogNode) then
+    begin
+      LN := SelectedLogNode;
+      UpdateMessageDetails(LN);
+      UpdateCallStackDisplay(LN);
+      ApplyFilter;
     end;
-  end;
-  if Assigned(SelectedLogNode) then
-  begin
-    LN := SelectedLogNode;
-    UpdateMessageDetails(LN);
-    UpdateCallStackDisplay(LN);
-  end;
-  if FScrollToLastNode then
-  begin
-    FLogTreeView.FocusedNode := FLogTreeView.GetLast;
-    FLogTreeView.Selected[FLogTreeView.FocusedNode] := True;
-    FScrollToLastNode := False;
-  end;
-  FUpdating := False;
+    if FScrollToLastNode then
+    begin
+      FLogTreeView.FocusedNode := FLogTreeView.GetLast;
+      FLogTreeView.Selected[FLogTreeView.FocusedNode] := True;
+      FScrollToLastNode := False;
+    end;
+    FUpdating := False;
   end;
 end;
 

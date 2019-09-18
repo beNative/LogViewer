@@ -21,6 +21,8 @@ unit LogViewer.Events;
 interface
 
 uses
+  System.Classes,
+
   Spring,
 
   LogViewer.Interfaces;
@@ -33,6 +35,7 @@ type
     FOnDeleteLogViewer  : Event<TLogViewerEvent>;
     FOnAddReceiver      : Event<TChannelReceiverEvent>;
     FOnActiveViewChange : Event<TLogViewerEvent>;
+    FOnShowDashboard    : Event<TNotifyEvent>;
 
   protected
     {$REGION 'property access methods'}
@@ -40,6 +43,7 @@ type
     function GetOnAddLogViewer: IEvent<TLogViewerEvent>;
     function GetOnDeleteLogViewer: IEvent<TLogViewerEvent>;
     function GetOnAddReceiver: IEvent<TChannelReceiverEvent>;
+    function GetOnShowDashboard: IEvent<TNotifyEvent>;
     {$ENDREGION}
 
     {$REGION 'event dispatch methods'}
@@ -47,6 +51,7 @@ type
     procedure DoDeleteLogViewer(ALogViewer: ILogViewer); virtual;
     procedure DoActiveViewChange(ALogViewer: ILogViewer); virtual;
     procedure DoAddReceiver(AReceiver: IChannelReceiver); virtual;
+    procedure DoShowDashboard; virtual;
     {$ENDREGION}
 
     procedure Clear;
@@ -66,6 +71,9 @@ type
 
     property OnAddReceiver: IEvent<TChannelReceiverEvent>
       read GetOnAddReceiver;
+
+    property OnShowDashboard: IEvent<TNotifyEvent>
+      read GetOnShowDashboard;
   end;
 
 implementation
@@ -113,6 +121,11 @@ function TLogViewerEvents.GetOnDeleteLogViewer: IEvent<TLogViewerEvent>;
 begin
   Result := FOnDeleteLogViewer;
 end;
+
+function TLogViewerEvents.GetOnShowDashboard: IEvent<TNotifyEvent>;
+begin
+  Result := FOnShowDashboard;
+end;
 {$ENDREGION}
 
 {$REGION 'event dispatch methods'}
@@ -139,6 +152,12 @@ begin
   Logger.Track(Self, 'DoDeleteLogViewer');
   FOnDeleteLogViewer.Invoke(Self, ALogViewer);
 end;
+
+procedure TLogViewerEvents.DoShowDashboard;
+begin
+  Logger.Track(Self, 'DoShowDashboard');
+  FOnShowDashboard.Invoke(Self);
+end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
@@ -148,6 +167,7 @@ begin
   FOnDeleteLogViewer.Clear;
   FOnAddReceiver.Clear;
   FOnActiveViewChange.Clear;
+  FOnShowDashboard.Clear;
 end;
 {$ENDREGION}
 

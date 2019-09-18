@@ -87,6 +87,7 @@ implementation
 
 uses
   System.SysUtils,
+  Vcl.Forms,
 
   DDuce.Logger, DDuce.Utils.Winapi,
 
@@ -132,7 +133,7 @@ begin
   // a pointer to the window procedure
   FWndClass.lpfnWndProc   := @ThreadWindowProc;
   // the handle to the application instance
-  FWndClass.hInstance     := HInstance;
+    FWndClass.hInstance := HInstance;
   // string that identifies the window class
   FWndClass.lpszClassName := MSG_WND_CLASSNAME;
 end;
@@ -156,6 +157,7 @@ var
   LPublisher         : IZMQPair;
   LClientProcessId   : Integer;
   LClientProcessName : string;
+  LMsg               : TMsg;
 begin
   if AMessage.Msg = WM_COPYDATA then
   begin
@@ -185,9 +187,9 @@ begin
     FBuffer.Clear;
     FBuffer.LoadFromStream(FMsgData);
     LPublisher.SendString(FBuffer.DataString);
-    Exit;
-  end;
-  AMessage.Result :=
+  end
+  else
+   AMessage.Result :=
     DefWindowProc(FWnd, AMessage.Msg, AMessage.WParam, AMessage.LParam);
 end;
 {$ENDREGION}
@@ -214,8 +216,7 @@ begin
     if FWnd = 0 then
       Exit;
     SetWindowLongPtr(FWnd, GWL_USERDATA, ULONG_PTR(Self));
-
-    while GetMessage(LMsg, 0, 0, 0) and (not Terminated) do
+    while not Terminated and GetMessage(LMsg, 0, 0, 0) do
     begin
       TranslateMessage(LMsg);
       DispatchMessage(LMsg);

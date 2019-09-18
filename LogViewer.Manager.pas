@@ -93,6 +93,7 @@ type
     ppmMessageTypes           : TPopupMenu;
     actCloseMessageView       : TAction;
     actCloseOtherMessageViews : TAction;
+    actDashboard: TAction;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -142,6 +143,7 @@ type
     procedure actSaveBitmapAsExecute(Sender: TObject);
     procedure actCloseMessageViewExecute(Sender: TObject);
     procedure actCloseOtherMessageViewsExecute(Sender: TObject);
+    procedure actDashboardExecute(Sender: TObject);
     {$ENDREGION}
 
   private
@@ -388,7 +390,15 @@ end;
 
 procedure TdmManager.actCloseOtherMessageViewsExecute(Sender: TObject);
 begin
-  //
+  while Views.Count > 1 do
+  begin
+    if Views.First <> FActiveView then
+      DeleteView(Views.First)
+    else
+    begin
+      DeleteView(Views.Last);
+    end;
+  end;
 end;
 
 procedure TdmManager.actCollapseAllExecute(Sender: TObject);
@@ -409,6 +419,11 @@ end;
 procedure TdmManager.actCustomDataExecute(Sender: TObject);
 begin
   UpdateVisibleMessageTypes(lmtCustomData, Sender);
+end;
+
+procedure TdmManager.actDashboardExecute(Sender: TObject);
+begin
+  Events.DoShowDashboard;
 end;
 
 procedure TdmManager.actDataSetExecute(Sender: TObject);
@@ -873,6 +888,7 @@ begin
   Logger.Track(Self, 'DeleteView');
   if Assigned(AView) then
   begin
+    Events.DoDeleteLogViewer(AView);
     I := FViewList.IndexOf(AView);
     if ActiveView = AView then
       FActiveView := nil;

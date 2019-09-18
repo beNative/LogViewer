@@ -144,11 +144,14 @@ begin
   Guard.CheckNotNull(ASettings, 'ASettings');
   Guard.CheckNotNull(AImageList, 'AImageList');
   FSettings  := ASettings;
+  FSettings.OnChanged.Add(FSettingsChanged);
   FImageList := AImageList;
 end;
 
 destructor TfrmMessageFilter.Destroy;
 begin
+  FSettings.OnChanged.RemoveAll(Self);
+  FSettings := nil;
   FTree.Free;
   inherited Destroy;
 end;
@@ -157,7 +160,13 @@ end;
 {$REGION 'event handlers'}
 procedure TfrmMessageFilter.FSettingsChanged(Sender: TObject);
 begin
-//
+  if not FTree.Focused then
+  begin
+    FTree.BeginUpdate;
+    FTree.Clear;
+    BuildTree;
+    FTree.EndUpdate;
+  end;
 end;
 
 {$REGION 'FTree'}
@@ -259,7 +268,14 @@ var
     Result.ImageIndex := AImageIndex;
     Result.CheckType  := ctCheckBox;
     if AMessageTypes * FSettings.VisibleMessageTypes = AMessageTypes then
-      Result.CheckState := csCheckedNormal;
+      Result.CheckState := csCheckedNormal
+    else
+      Result.CheckState := csUncheckedNormal;
+
+    if Result.Level = 1 then
+    begin
+      UpdateParent(Result, Result.CheckState);
+    end;
   end;
 
 begin
@@ -296,8 +312,6 @@ begin
   FSettings.VisibleValueTypes.Add('XML');
   FSettings.VisibleValueTypes.Add('INI');
   FSettings.VisibleValueTypes.Add('JSON');
-
-  Logger.SendStrings(FSettings.VisibleValueTypes);
 
   LNode := nil;
   LNode := AddNode(
@@ -343,6 +357,8 @@ begin
   else
     Result := False;
 end;
+
+{ Update checkstate of parent node between csChecked, csUnchecked and csMixedNormal.  }
 
 function TfrmMessageFilter.UpdateParent(ANode: TFilterNode;
   ACheckState: TCheckState): Boolean;

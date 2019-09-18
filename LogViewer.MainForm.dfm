@@ -357,6 +357,7 @@ object frmMain: TfrmMain
       Font.Height = -11
       Font.Name = 'Segoe UI Semibold'
       Font.Style = [fsBold]
+      PopupMenu = ppmTabs
       TabOrder = 0
     end
   end
@@ -507,7 +508,7 @@ object frmMain: TfrmMain
     Left = 208
     Top = 48
     Bitmap = {
-      494C010101000500D00010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000500DC0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -1271,5 +1272,12 @@ object frmMain: TfrmMain
     OnTimer = tmrPollTimer
     Left = 32
     Top = 112
+  end
+  object ppmTabs: TPopupMenu
+    Left = 112
+    Top = 104
+    object mniCloseOthers: TMenuItem
+      Caption = 'Close all others'
+    end
   end
 end

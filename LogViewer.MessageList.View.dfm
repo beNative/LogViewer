@@ -94,6 +94,7 @@ object frmMessageList: TfrmMessageList
           TabOrder = 0
           TextHint = 'Start typing to filter messages'
           OnChange = edtMessageFilterChange
+          OnExit = edtMessageFilterExit
           OnKeyDown = edtMessageFilterKeyDown
           OnKeyUp = edtMessageFilterKeyUp
           OnMouseEnter = edtMessageFilterMouseEnter
@@ -204,15 +205,9 @@ object frmMessageList: TfrmMessageList
             TabPanelOptions.Options = []
             object tsValueList: TKTabSheet
               Caption = 'Value list'
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
             end
             object tsTextViewer: TKTabSheet
               Caption = 'Text viewer'
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object pnlTextViewer: TPanel
                 Left = 0
                 Top = 0
@@ -227,22 +222,13 @@ object frmMessageList: TfrmMessageList
             end
             object tsImageViewer: TKTabSheet
               Caption = 'Image viewer'
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
             end
             object tsDataSet: TKTabSheet
               Caption = 'Dataset viewer'
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
             end
             object tsRawData: TKTabSheet
               Caption = 'Raw data viewer'
               OnShow = tsRawDataShow
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
             end
           end
         end
@@ -387,7 +373,7 @@ object frmMessageList: TfrmMessageList
     Left = 55
     Top = 22
     Bitmap = {
-      494C010117001900C80110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010117001900CC0110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000006000000001002000000000000060
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

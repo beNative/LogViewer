@@ -34,7 +34,7 @@ uses
   DDuce.Utils,
 
   LogViewer.Interfaces, LogViewer.Factories, LogViewer.Settings,
-  LogViewer.Dashboard.View;
+  LogViewer.Dashboard.View, Vcl.Menus;
 
 type
   TfrmMain = class(TForm)
@@ -55,6 +55,8 @@ type
     shpLine           : TShape;
     tmrPoll           : TTimer;
     tskbrMain         : TTaskbar;
+    ppmTabs           : TPopupMenu;
+    mniCloseOthers    : TMenuItem;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -82,13 +84,15 @@ type
     procedure ctMainBeforeDrawItem(Sender: TObject; TargetCanvas: TGPGraphics;
       ItemRect: TRect; ItemType: TChromeTabItemType; TabIndex: Integer;
       var Handled: Boolean);
+    procedure actDashboardExecute(Sender: TObject);
     {$ENDREGION}
 
   private
-    FManager     : ILogViewerManager;
-    FSettings    : TLogViewerSettings;
-    FMainToolbar : TToolBar;
-    FDashboard   : TfrmDashboard;
+    FManager      : ILogViewerManager;
+    FSettings     : TLogViewerSettings;
+    FMainToolbar  : TToolBar;
+    FDashboard    : TfrmDashboard;
+    FDashboardTab : TChromeTab;
 
     procedure SettingsChanged(Sender: TObject);
 
@@ -96,10 +100,15 @@ type
       Sender     : TObject;
       ALogViewer : ILogViewer
     );
+    procedure EventsDeleteLogViewer(
+      Sender     : TObject;
+      ALogViewer : ILogViewer
+    );
     procedure EventsActiveViewChange(
       Sender     : TObject;
       ALogViewer : ILogViewer
     );
+    procedure EventsShowDashboard(Sender: TObject);
 
   protected
     {$REGION 'property access methods'}
@@ -203,7 +212,9 @@ begin
   end;
   FManager := TLogViewerFactories.CreateManager(Self, FSettings);
   Events.OnAddLogViewer.Add(EventsAddLogViewer);
+  Events.OnDeleteLogViewer.Add(EventsDeleteLogViewer);
   Events.OnActiveViewChange.Add(EventsActiveViewChange);
+  Events.OnShowDashboard.Add(EventsShowDashboard);
   FSettings.FormSettings.AssignTo(Self);
   FSettings.OnChanged.Add(SettingsChanged);
   FMainToolbar := TLogViewerFactories.CreateMainToolbar(
@@ -219,6 +230,7 @@ begin
   ctMain.LookAndFeel.Tabs.Active.Style.StopColor := ColorToRGB(clWindowFrame);
   ctMain.LookAndFeel.Tabs.Hot.Style.StartColor   := clSilver;
   ctMain.LookAndFeel.Tabs.Hot.Style.StopColor    := clSilver;
+  mniCloseOthers.Action := Actions.Items['actCloseOtherMessageViews'];
 end;
 
 destructor TfrmMain.Destroy;
@@ -226,6 +238,10 @@ begin
   Logger.Track(Self, 'Destroy');
   tmrPoll.Enabled := False;
   Manager.Receivers.Clear;
+  Events.OnDeleteLogViewer.RemoveAll(Self);
+  Events.OnAddLogViewer.RemoveAll(Self);
+  Events.OnActiveViewChange.RemoveAll(Self);
+  Events.OnShowDashboard.RemoveAll(Self);
   FSettings.FormSettings.Assign(Self);
   FSettings.OnChanged.RemoveAll(Self);
   FManager := nil;
@@ -242,6 +258,11 @@ begin
   Top  := 0;
   Left := 0;
   WindowState := wsMaximized;
+end;
+
+procedure TfrmMain.actDashboardExecute(Sender: TObject);
+begin
+  FDashboardTab.Active := True;
 end;
 
 procedure TfrmMain.actShowVersionExecute(Sender: TObject);
@@ -263,7 +284,7 @@ var
   MV : ILogViewer;
 begin
   Logger.Track(Self, 'ctMainActiveTabChanged');
-  if ATab.DisplayName = 'Dashboard' then
+  if ATab = FDashboardTab then
   begin
     FDashboard.Show;
     FDashboard.SetFocus;
@@ -310,8 +331,8 @@ var
   V : ILogViewer;
 begin
   Logger.Track(Self, 'ctMainButtonCloseTabClick');
-  Close := ATab.DisplayName <> 'Dashboard';
-  if Close then
+  Close := False; // cleanup happens in EventsDeleteLogViewer
+  if ATab <> FDashboardTab then
   begin
     V := ILogViewer(ATab.Data);
     Manager.DeleteView(V);
@@ -369,6 +390,33 @@ begin
   OptimizeStatusBarPanelWidths;
 end;
 
+procedure TfrmMain.EventsDeleteLogViewer(Sender: TObject;
+  ALogViewer: ILogViewer);
+var
+  I        : Integer;
+  LDeleted : Boolean;
+begin
+  LDeleted := False;
+  I := 1; // zero is dashboard
+  while (I < ctMain.Tabs.Count) and not LDeleted do
+  begin
+    if ILogViewer(ctMain.Tabs[I].Data) = ALogViewer then
+    begin
+      ctMain.Tabs.Delete(I);
+      LDeleted := True;
+    end
+    else
+    begin
+      Inc(I);
+    end;
+  end;
+end;
+
+procedure TfrmMain.EventsShowDashboard(Sender: TObject);
+begin
+  FDashboardTab.Active := True;
+end;
+
 procedure TfrmMain.SettingsChanged(Sender: TObject);
 begin
   FormStyle   := FSettings.FormSettings.FormStyle;
@@ -379,6 +427,10 @@ procedure TfrmMain.tmrPollTimer(Sender: TObject);
 begin
   pbrCPU.Position   := Round(GetProcessCpuUsagePct(GetCurrentProcessId));
   pnlMemory.Caption := FormatBytes(MemoryUsed);
+//  if Assigned(ctMain.ActiveTab) and (ctMain.ActiveTab = FDashboardTab) then
+//  begin
+//    FDashboard.Update;
+//  end;
 end;
 
 procedure TfrmMain.FormShortCut(var Msg: TWMKey; var Handled: Boolean);
@@ -422,6 +474,7 @@ begin
   ctMain.ActiveTab.Caption     := 'Dashboard';
   ctMain.ActiveTab.DisplayName := 'Dashboard';
   ctMain.ActiveTab.Pinned      := True;
+  FDashboardTab := ctMain.ActiveTab;
   FDashboard.Show;
 end;
 
@@ -483,7 +536,7 @@ begin
   if Assigned(ctMain.ActiveTab) and Assigned(Manager)
     and Assigned(Manager.ActiveView)
     and Assigned(Manager.ActiveView.Subscriber)
-    and (ctMain.ActiveTab.Caption <> 'Dashboard') then
+    and (ctMain.ActiveTab <> FDashboardTab) then
   begin
     pnlSourceName.Caption := Format('%s (%d)', [
       Manager.ActiveView.Subscriber.SourceName,

@@ -199,6 +199,7 @@ begin
   CreateToolButton(TB, 'actStop', tbsTextButton);
   CreateToolButton(TB);
   CreateToolButton(TB, 'actSettings', tbsTextButton);
+  CreateToolButton(TB, 'actDashboard', tbsTextButton);
   CreateToolButton(TB);
   CreateToolButton(TB, 'actShowFilterView');
   CreateToolButton(TB, 'actClearMessages', tbsTextButton);
