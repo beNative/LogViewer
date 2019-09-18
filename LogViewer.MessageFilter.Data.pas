@@ -81,6 +81,11 @@ begin
   Result := FCaption;
 end;
 
+procedure TFilterData.SetCaption(const Value: string);
+begin
+  FCaption := Value;
+end;
+
 function TFilterData.GetImageIndex: Integer;
 begin
   Result := FImageIndex;
@@ -89,11 +94,6 @@ end;
 procedure TFilterData.SetImageIndex(const Value: Integer);
 begin
   FImageIndex := Value;
-end;
-
-procedure TFilterData.SetCaption(const Value: string);
-begin
-  FCaption := Value;
 end;
 
 function TFilterData.GetMessageTypes: TLogMessageTypes;

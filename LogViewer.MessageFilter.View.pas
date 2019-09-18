@@ -62,16 +62,15 @@ type
       var Ghosted    : Boolean;
       var ImageIndex : TImageIndex
     );
-    procedure FTreeFocusChanged(
-      Sender : TBaseVirtualTree;
-      Node   : PVirtualNode;
-      Column : TColumnIndex
-    );
     procedure FTreeFreeNode(
       Sender: TBaseVirtualTree;
       Node: PVirtualNode
     );
     procedure FTreeChecked(
+      Sender : TBaseVirtualTree;
+      Node   : PVirtualNode
+    );
+    procedure FTreeBeforeGetCheckState(
       Sender : TBaseVirtualTree;
       Node   : PVirtualNode
     );
@@ -120,11 +119,11 @@ procedure TfrmMessageFilter.AfterConstruction;
 begin
   inherited AfterConstruction;
   FTree := TVirtualStringTreeFactory.CreateTree(Self, pnlMessageFilter);
-  FTree.OnGetText       := FTreeGetText;
-  FTree.OnGetImageIndex := FTreeGetImageIndex;
-  FTree.OnFreeNode      := FTreeFreeNode;
-  FTree.OnFocusChanged  := FTreeFocusChanged;
-  FTree.OnChecked       := FTreeChecked;
+  FTree.OnGetText             := FTreeGetText;
+  FTree.OnGetImageIndex       := FTreeGetImageIndex;
+  FTree.OnFreeNode            := FTreeFreeNode;
+  FTree.OnChecked             := FTreeChecked;
+  FTree.OnBeforeGetCheckState := FTreeBeforeGetCheckState;
 
   FTree.Header.Options := FTree.Header.Options - [hoVisible];
   FTree.TreeOptions.PaintOptions := FTree.TreeOptions.PaintOptions
@@ -144,11 +143,14 @@ begin
   Guard.CheckNotNull(ASettings, 'ASettings');
   Guard.CheckNotNull(AImageList, 'AImageList');
   FSettings  := ASettings;
+  FSettings.OnChanged.Add(FSettingsChanged);
   FImageList := AImageList;
 end;
 
 destructor TfrmMessageFilter.Destroy;
 begin
+  FSettings.OnChanged.RemoveAll(Self);
+  FSettings := nil;
   FTree.Free;
   inherited Destroy;
 end;
@@ -157,10 +159,30 @@ end;
 {$REGION 'event handlers'}
 procedure TfrmMessageFilter.FSettingsChanged(Sender: TObject);
 begin
-//
+  if not FTree.Focused then
+  begin
+    FTree.Refresh;
+  end;
 end;
 
 {$REGION 'FTree'}
+procedure TfrmMessageFilter.FTreeBeforeGetCheckState(Sender: TBaseVirtualTree;
+  Node: PVirtualNode);
+var
+  FN : TFilterNode;
+begin
+  FN := Sender.GetNodeData<TFilterNode>(Node);
+  if FN.Level = 1 then
+  begin
+    if FN.Data.MessageTypes * FSettings.VisibleMessageTypes
+      = FN.Data.MessageTypes then
+      Node.CheckState := csCheckedNormal
+    else
+      Node.CheckState := csUncheckedNormal;
+    UpdateParent(FN, Node.CheckState);
+  end;
+end;
+
 procedure TfrmMessageFilter.FTreeChecked(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 var
@@ -194,12 +216,6 @@ begin
   UpdateParent(FN, FN.VNode.CheckState);
 end;
 
-procedure TfrmMessageFilter.FTreeFocusChanged(Sender: TBaseVirtualTree;
-  Node: PVirtualNode; Column: TColumnIndex);
-begin
-//
-end;
-
 procedure TfrmMessageFilter.FTreeFreeNode(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 var
@@ -231,7 +247,9 @@ var
 begin
   FN := Sender.GetNodeData<TFilterNode>(Node);
   if Assigned(FN) and Assigned(FN.Data) then
+  begin
     CellText := FN.Data.Caption;
+  end;
 end;
 {$ENDREGION}
 {$ENDREGION}
@@ -259,7 +277,14 @@ var
     Result.ImageIndex := AImageIndex;
     Result.CheckType  := ctCheckBox;
     if AMessageTypes * FSettings.VisibleMessageTypes = AMessageTypes then
-      Result.CheckState := csCheckedNormal;
+      Result.CheckState := csCheckedNormal
+    else
+      Result.CheckState := csUncheckedNormal;
+
+    if Result.Level = 1 then
+    begin
+      UpdateParent(Result, Result.CheckState);
+    end;
   end;
 
 begin
@@ -297,8 +322,6 @@ begin
   FSettings.VisibleValueTypes.Add('INI');
   FSettings.VisibleValueTypes.Add('JSON');
 
-  Logger.SendStrings(FSettings.VisibleValueTypes);
-
   LNode := nil;
   LNode := AddNode(
     STraceMessages,
@@ -335,7 +358,7 @@ begin
     begin
       N := ANode.Items[I];
       N.CheckState := ACheckState;
-      FTree.RepaintNode(N.VNode);
+      FTree.InvalidateNode(N.VNode);
       UpdateChildren(N, ACheckState);
     end;
     Result := True;
@@ -343,6 +366,8 @@ begin
   else
     Result := False;
 end;
+
+{ Update checkstate of parent node between csChecked, csUnchecked and csMixedNormal.  }
 
 function TfrmMessageFilter.UpdateParent(ANode: TFilterNode;
   ACheckState: TCheckState): Boolean;
@@ -372,7 +397,7 @@ begin
     begin
       ANode.VNode.Parent.CheckState := csMixedNormal;
     end;
-    FTree.RepaintNode(ANode.VNode.Parent);
+    FTree.InvalidateNode(ANode.VNode.Parent);
     Result := B;
   end
   else

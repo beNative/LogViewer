@@ -231,12 +231,14 @@ type
     function GetOnDeleteLogViewer: IEvent<TLogViewerEvent>;
     function GetOnAddReceiver: IEvent<TChannelReceiverEvent>;
     function GetOnActiveViewChange: IEvent<TLogViewerEvent>;
+    function GetOnShowDashboard: IEvent<TNotifyEvent>;
     {$ENDREGION}
 
     procedure DoActiveViewChange(ALogViewer: ILogViewer);
     procedure DoAddLogViewer(ALogViewer: ILogViewer);
     procedure DoDeleteLogViewer(ALogViewer: ILogViewer);
     procedure DoAddReceiver(AReceiver: IChannelReceiver);
+    procedure DoShowDashboard;
 
     procedure Clear;
 
@@ -251,6 +253,9 @@ type
 
     property OnDeleteLogViewer: IEvent<TLogViewerEvent>
       read GetOnDeleteLogViewer;
+
+    property OnShowDashboard: IEvent<TNotifyEvent>
+      read GetOnShowDashboard;
   end;
 
   ILogViewerCommands = interface

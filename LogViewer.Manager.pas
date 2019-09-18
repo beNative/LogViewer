@@ -93,6 +93,7 @@ type
     ppmMessageTypes           : TPopupMenu;
     actCloseMessageView       : TAction;
     actCloseOtherMessageViews : TAction;
+    actDashboard              : TAction;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -142,6 +143,7 @@ type
     procedure actSaveBitmapAsExecute(Sender: TObject);
     procedure actCloseMessageViewExecute(Sender: TObject);
     procedure actCloseOtherMessageViewsExecute(Sender: TObject);
+    procedure actDashboardExecute(Sender: TObject);
     {$ENDREGION}
 
   private
@@ -388,7 +390,15 @@ end;
 
 procedure TdmManager.actCloseOtherMessageViewsExecute(Sender: TObject);
 begin
-  //
+  while Views.Count > 1 do
+  begin
+    if Views.First <> FActiveView then
+      DeleteView(Views.First)
+    else
+    begin
+      DeleteView(Views.Last);
+    end;
+  end;
 end;
 
 procedure TdmManager.actCollapseAllExecute(Sender: TObject);
@@ -409,6 +419,11 @@ end;
 procedure TdmManager.actCustomDataExecute(Sender: TObject);
 begin
   UpdateVisibleMessageTypes(lmtCustomData, Sender);
+end;
+
+procedure TdmManager.actDashboardExecute(Sender: TObject);
+begin
+  Events.DoShowDashboard;
 end;
 
 procedure TdmManager.actDataSetExecute(Sender: TObject);
@@ -873,6 +888,7 @@ begin
   Logger.Track(Self, 'DeleteView');
   if Assigned(AView) then
   begin
+    Events.DoDeleteLogViewer(AView);
     I := FViewList.IndexOf(AView);
     if ActiveView = AView then
       FActiveView := nil;
@@ -895,27 +911,7 @@ var
 begin
   Logger.Track(Self, 'UpdateActions');
   MLS := Settings.MessageListSettings;
-  actBitmap.Checked       := lmtBitmap in MLS.VisibleMessageTypes;
-  actCallStack.Checked    := lmtCallStack in MLS.VisibleMessageTypes;
-  actCheckPoint.Checked   := lmtCheckpoint in MLS.VisibleMessageTypes;
-  actConditional.Checked  := lmtConditional in MLS.VisibleMessageTypes;
-  actInfo.Checked         := lmtInfo in MLS.VisibleMessageTypes;
-  actWarning.Checked      := lmtWarning in MLS.VisibleMessageTypes;
-  actValue.Checked        := lmtValue in MLS.VisibleMessageTypes;
-  actError.Checked        := lmtError in MLS.VisibleMessageTypes;
-  actMethodTraces.Checked := lmtEnterMethod in MLS.VisibleMessageTypes;
-  actException.Checked    := lmtException in MLS.VisibleMessageTypes;
-  actComponent.Checked    := lmtComponent in MLS.VisibleMessageTypes;
-  actObject.Checked       := lmtObject in MLS.VisibleMessageTypes;
-  actPersistent.Checked   := lmtPersistent in MLS.VisibleMessageTypes;
-  actInterface.Checked    := lmtInterface in MLS.VisibleMessageTypes;
-  actHeapInfo.Checked     := lmtHeapInfo in MLS.VisibleMessageTypes;
-  actCustomData.Checked   := lmtCustomData in MLS.VisibleMessageTypes;
-  actStrings.Checked      := lmtStrings in MLS.VisibleMessageTypes;
-  actMemory.Checked       := lmtMemory in MLS.VisibleMessageTypes;
-  actText.Checked         := lmtText in MLS.VisibleMessageTypes;
-  actDataSet.Checked      := lmtDataSet in MLS.VisibleMessageTypes;
-  actAction.Checked       := lmtAction in MLS.VisibleMessageTypes;
+
   B := Assigned(ActiveView) and Assigned(ActiveView.Subscriber);
   // workaround toolbar issue which refuses to reflect checked state when button
   // is first Disabled, then Enabled and Checked
@@ -956,8 +952,33 @@ begin
   actToggleAlwaysOnTop.Checked := Settings.FormSettings.FormStyle = fsStayOnTop;
   actToggleFullscreen.Checked := Settings.FormSettings.WindowState = wsMaximized;
   actAutoScrollMessages.Checked := MLS.AutoScrollMessages;
+
+  actBitmap.Checked       := lmtBitmap in MLS.VisibleMessageTypes;
+  actCallStack.Checked    := lmtCallStack in MLS.VisibleMessageTypes;
+  actCheckPoint.Checked   := lmtCheckpoint in MLS.VisibleMessageTypes;
+  actConditional.Checked  := lmtConditional in MLS.VisibleMessageTypes;
+  actInfo.Checked         := lmtInfo in MLS.VisibleMessageTypes;
+  actWarning.Checked      := lmtWarning in MLS.VisibleMessageTypes;
+  actValue.Checked        := lmtValue in MLS.VisibleMessageTypes;
+  actError.Checked        := lmtError in MLS.VisibleMessageTypes;
+  actMethodTraces.Checked := lmtEnterMethod in MLS.VisibleMessageTypes;
+  actException.Checked    := lmtException in MLS.VisibleMessageTypes;
+  actComponent.Checked    := lmtComponent in MLS.VisibleMessageTypes;
+  actObject.Checked       := lmtObject in MLS.VisibleMessageTypes;
+  actPersistent.Checked   := lmtPersistent in MLS.VisibleMessageTypes;
+  actInterface.Checked    := lmtInterface in MLS.VisibleMessageTypes;
+  actHeapInfo.Checked     := lmtHeapInfo in MLS.VisibleMessageTypes;
+  actCustomData.Checked   := lmtCustomData in MLS.VisibleMessageTypes;
+  actStrings.Checked      := lmtStrings in MLS.VisibleMessageTypes;
+  actMemory.Checked       := lmtMemory in MLS.VisibleMessageTypes;
+  actText.Checked         := lmtText in MLS.VisibleMessageTypes;
+  actDataSet.Checked      := lmtDataSet in MLS.VisibleMessageTypes;
+  actAction.Checked       := lmtAction in MLS.VisibleMessageTypes;
+
+
   if B then
     ActiveView.UpdateView;
+
   if Assigned(FViewList) then
     Logger.Watch('ViewCount', FViewList.Count);
   if Assigned(FReceivers) then
@@ -975,12 +996,14 @@ begin
   if Assigned(FActiveView.Target) then
   begin
     A := ASender as TAction;
+    Logger.Send('A.Name', A.Name);
     if AToggle then
       A.Checked := not A.Checked;
     if A.Checked then
       MLS.VisibleMessageTypes := MLS.VisibleMessageTypes + [AMessageType]
     else
       MLS.VisibleMessageTypes := MLS.VisibleMessageTypes - [AMessageType];
+    UpdateActions;
     FActiveView.Target.UpdateView;
   end;
 end;
