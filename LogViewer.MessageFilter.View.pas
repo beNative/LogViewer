@@ -216,6 +216,7 @@ begin
   UpdateParent(FN, FN.VNode.CheckState);
 end;
 
+
 procedure TfrmMessageFilter.FTreeFreeNode(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 var
@@ -321,8 +322,7 @@ begin
   FSettings.VisibleValueTypes.Add('XML');
   FSettings.VisibleValueTypes.Add('INI');
   FSettings.VisibleValueTypes.Add('JSON');
-
-  LNode := nil;
+    LNode := nil;
   LNode := AddNode(
     STraceMessages,
     25,
@@ -396,7 +396,7 @@ begin
     else
     begin
       ANode.VNode.Parent.CheckState := csMixedNormal;
-    end;
+    end;    
     FTree.InvalidateNode(ANode.VNode.Parent);
     Result := B;
   end
