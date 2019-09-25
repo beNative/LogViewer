@@ -226,6 +226,10 @@ begin
           JO['MessageListSettings']
             .ObjectValue['LeftVerticalPanelPositions'].ArrayValue[I];
       end;
+      // TODO MessageListSettings.VisibleMessageTypes
+      // TODO MessageListSettings.VisibleValueTypes
+      // TODO MessageListSettings.VisibleMessageLevels
+
       JO['WinodsSettings'].ObjectValue.ToSimpleObject(FWinodsSettings);
       JO['WinipcSettings'].ObjectValue.ToSimpleObject(FWinipcSettings);
       JO['ZeroMQSettings'].ObjectValue.ToSimpleObject(FZeroMQSettings);

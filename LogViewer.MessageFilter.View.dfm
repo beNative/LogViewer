@@ -3,6 +3,7 @@ object frmMessageFilter: TfrmMessageFilter
   Top = 0
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSizeToolWin
+  Caption = 'Message filter'
   ClientHeight = 627
   ClientWidth = 167
   Color = clBtnFace

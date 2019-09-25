@@ -23,24 +23,26 @@ interface
 uses
   System.Classes, System.UITypes,
 
-  Spring, Spring.Collections;
+  Spring, Spring.Collections,
+
+  DDuce.Logger.Interfaces;
 
 type
-  TLogLevel = class(TPersistent)
+  TLogLevelProperties = class(TPersistent)
   private
-    FLevel     : Byte;
+    FLevel     : TLogMessageLevel;
     FAlias     : string;
     FColor     : TColor;
     FOnChanged : Event<TNotifyEvent>;
 
   protected
     {$REGION 'property access methods'}
-    procedure SetLevel(const Value: Byte);
+    procedure SetLevel(const Value: TLogMessageLevel);
     function GetColorName: string;
     function GetOnChanged: IEvent<TNotifyEvent>;
     function GetColor: TColor;
     procedure SetColor(const Value: TColor);
-    function GetLevel: Byte;
+    function GetLevel: TLogMessageLevel;
     function GetAlias: string;
     procedure SetAlias(const Value: string);
     {$ENDREGION}
@@ -49,7 +51,7 @@ type
 
   public
     constructor Create(
-      ALevel       : Byte;
+      ALevel       : TLogMessageLevel;
       AColor       : TColor = TColors.SysNone;
       const AAlias : string = ''
     );
@@ -69,13 +71,13 @@ type
     property Color: TColor
       read GetColor write SetColor;
 
-    property Level: Byte
+    property Level: TLogMessageLevel
       read GetLevel write SetLevel;
   end;
 
   TLogLevelSettings = class(TPersistent)
   private
-    FLogLevels : IList<TLogLevel>;
+    FLogLevels : IList<TLogLevelProperties>;
     FOnChanged : Event<TNotifyEvent>;
 
     procedure FLogLevelChanged(Sender: TObject);
@@ -89,7 +91,7 @@ type
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
 
-    property LogLevels: IList<TLogLevel>
+    property LogLevels: IList<TLogLevelProperties>
       read FLogLevels;
   end;
 
@@ -102,7 +104,7 @@ uses
 
 {$REGION 'TLogLevel'}
 {$REGION 'construction and destruction'}
-constructor TLogLevel.Create(ALevel: Byte; AColor: TColor;
+constructor TLogLevelProperties.Create(ALevel: TLogMessageLevel; AColor: TColor;
   const AAlias: string);
 begin
   FLevel := ALevel;
@@ -113,12 +115,12 @@ end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
-function TLogLevel.GetAlias: string;
+function TLogLevelProperties.GetAlias: string;
 begin
   Result := FAlias;
 end;
 
-procedure TLogLevel.SetAlias(const Value: string);
+procedure TLogLevelProperties.SetAlias(const Value: string);
 begin
   if Value <> Alias then
   begin
@@ -127,12 +129,12 @@ begin
   end;
 end;
 
-function TLogLevel.GetColor: TColor;
+function TLogLevelProperties.GetColor: TColor;
 begin
   Result := FColor;
 end;
 
-procedure TLogLevel.SetColor(const Value: TColor);
+procedure TLogLevelProperties.SetColor(const Value: TColor);
 begin
   if Color <> Value then
   begin
@@ -141,18 +143,17 @@ begin
   end;
 end;
 
-function TLogLevel.GetColorName: string;
+function TLogLevelProperties.GetColorName: string;
 begin
-  //Result := ColorToString(FColor);
   Result := ColorToWebColorName(FColor);
 end;
 
-function TLogLevel.GetLevel: Byte;
+function TLogLevelProperties.GetLevel: TLogMessageLevel;
 begin
   Result := FLevel;
 end;
 
-procedure TLogLevel.SetLevel(const Value: Byte);
+procedure TLogLevelProperties.SetLevel(const Value: TLogMessageLevel);
 begin
   if Level <> Value then
   begin
@@ -161,20 +162,20 @@ begin
   end;
 end;
 
-function TLogLevel.GetOnChanged: IEvent<TNotifyEvent>;
+function TLogLevelProperties.GetOnChanged: IEvent<TNotifyEvent>;
 begin
   Result := FOnChanged;
 end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
-procedure TLogLevel.Assign(Source: TPersistent);
+procedure TLogLevelProperties.Assign(Source: TPersistent);
 var
-  LLogLevel: TLogLevel;
+  LLogLevel: TLogLevelProperties;
 begin
-  if Source is TLogLevel then
+  if Source is TLogLevelProperties then
   begin
-    LLogLevel := TLogLevel(Source);
+    LLogLevel := TLogLevelProperties(Source);
     Level     := LLogLevel.Level;
     Alias     := LLogLevel.Alias;
     FColor    := LLogLevel.Color;
@@ -183,7 +184,7 @@ begin
     inherited Assign(Source);
 end;
 
-procedure TLogLevel.Changed;
+procedure TLogLevelProperties.Changed;
 begin
   if FOnChanged.CanInvoke then
     FOnChanged.Invoke(Self);
@@ -195,15 +196,15 @@ end;
 {$REGION 'construction and destruction'}
 procedure TLogLevelSettings.AfterConstruction;
 var
-  B  : Byte;
-  LL : TLogLevel;
+  LL  : TLogLevelProperties;
+  LML : TLogMessageLevel;
 begin
   inherited AfterConstruction;
-  FLogLevels := TCollections.CreateObjectList<TLogLevel>;
+  FLogLevels := TCollections.CreateObjectList<TLogLevelProperties>;
   FOnChanged.UseFreeNotification := False;
-  for B := 0 to 255 do
+  for LML := Low(TLogMessageLevel) to High(TLogMessageLevel) do
   begin
-    LL := TLogLevel.Create(B);
+    LL := TLogLevelProperties.Create(LML);
     LL.OnChanged.Add(FLogLevelChanged);
     FLogLevels.Add(LL);
   end;
@@ -211,12 +212,12 @@ end;
 
 destructor TLogLevelSettings.Destroy;
 var
-  B  : Byte;
-  LL : TLogLevel;
+  LML : TLogMessageLevel;
+  LL  : TLogLevelProperties;
 begin
-  for B := 0 to 255 do
+  for LML := Low(TLogMessageLevel) to High(TLogMessageLevel) do
   begin
-    LL := LogLevels[B];
+    LL := LogLevels[LML];
     LL.OnChanged.Remove(FLogLevelChanged);
   end;
   FLogLevels := nil;

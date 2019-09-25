@@ -101,6 +101,7 @@ type
       const ASourceName : string;
       AEnabled          : Boolean
     );
+
     destructor Destroy; override;
 
   end;
@@ -111,14 +112,16 @@ uses
   DDuce.Logger;
 
 {$REGION 'construction and destruction'}
-procedure TSubscriber.Close;
-begin
-// implemented in descendants
-end;
-
 constructor TSubscriber.Create(const AReceiver: IChannelReceiver;
   ASourceId: Integer; const AKey, ASourceName: string; AEnabled: Boolean);
+var
+  B: Byte;
 begin
+  FLogMessageTypes := AllMessages;
+  for B := 0 to 255 do
+  begin
+    FLogMessageLevels := FLogMessageLevels + [B];
+  end;
   inherited Create;
   Guard.CheckNotNull(AReceiver, 'AReceiver');
   FReceiver   := AReceiver;
@@ -231,9 +234,14 @@ end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
+procedure TSubscriber.Close;
+begin
+// implemented in descendants
+end;
+
 procedure TSubscriber.Poll;
 begin
-  // override in descendants
+// implemented in descendants
 end;
 
 procedure TSubscriber.Reset;

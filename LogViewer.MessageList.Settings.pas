@@ -51,6 +51,7 @@ type
     FColumnHeadersVisible       : Boolean;
     FOnChanged                  : Event<TNotifyEvent>;
     FVisibleMessageTypes        : TLogMessageTypes;
+    FVisibleMessageLevels       : TLogMessageLevels;
     FVisibleValueTypes          : TStringList;
     FHorizontalPanelPositions   : Vector<Double>;
     FLeftVerticalPanelPositions : Vector<Double>;
@@ -74,6 +75,8 @@ type
     procedure SetMessageDetailsVisible(const Value: Boolean);
     function GetColumnHeadersVisible: Boolean;
     procedure SetColumnHeadersVisible(const Value: Boolean);
+    function GetVisibleMessageLevels: TLogMessageLevels;
+    procedure SetVisibleMessageLevels(const Value: TLogMessageLevels);
     {$ENDREGION}
 
     procedure FVisibleValueTypesChange(Sender: TObject);
@@ -93,6 +96,9 @@ type
 
     property VisibleMessageTypes: TLogMessageTypes
       read GetVisibleMessageTypes write SetVisibleMessageTypes;
+
+    property VisibleMessageLevels: TLogMessageLevels
+      read GetVisibleMessageLevels write SetVisibleMessageLevels;
 
     property VisibleValueTypes: TStrings
       read GetVisibleValueTypes;
@@ -134,7 +140,8 @@ begin
   FVisibleValueTypes.OnChange   := FVisibleValueTypesChange;
   FVisibleValueTypes.Sorted     := True;
   FVisibleValueTypes.Duplicates := dupIgnore;
-  FVisibleMessageTypes := ALL_MESSAGES;
+  FVisibleMessageTypes  := ALL_MESSAGES;
+  FVisibleMessageLevels := AllLevels;
   // defaults
   FHorizontalPanelPositions.Add(0.2);
   FHorizontalPanelPositions.Add(0.7);
@@ -217,6 +224,21 @@ begin
   if Value <> DynamicAutoSizeColumns then
   begin
     FDynamicAutoSizeColumns := Value;
+    Changed;
+  end;
+end;
+
+function TMessageListSettings.GetVisibleMessageLevels: TLogMessageLevels;
+begin
+  Result := FVisibleMessageLevels;
+end;
+
+procedure TMessageListSettings.SetVisibleMessageLevels(
+  const Value: TLogMessageLevels);
+begin
+  if Value <> VisibleMessageLevels then
+  begin
+    FVisibleMessageLevels := Value;
     Changed;
   end;
 end;

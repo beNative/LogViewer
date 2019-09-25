@@ -335,10 +335,12 @@ type
 
   ILogMessageSubscriptionFilter = interface
   ['{7C2819FF-FE3D-462E-AA99-A1EE56DDE7C6}']
+    {$REGION 'property access methods'}
     function GetLogMessageLevels: TLogMessageLevels;
     function GetLogMessageTypes: TLogMessageTypes;
     procedure SetLogMessageLevels(const Value: TLogMessageLevels);
     procedure SetLogMessageTypes(const Value: TLogMessageTypes);
+    {$ENDREGION}
 
     property LogMessageTypes: TLogMessageTypes
       read GetLogMessageTypes write SetLogMessageTypes;
