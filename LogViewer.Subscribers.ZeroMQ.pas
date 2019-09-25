@@ -30,8 +30,9 @@ uses
   LogViewer.Interfaces, LogViewer.Subscribers.Base;
 
 type
-  TZmqSubscriber = class(TSubscriber, ISubscriber, IZmq,
-    ILogMessageSubscriptionFilter)
+  TZmqSubscriber = class(TSubscriber,
+    ISubscriber, IZmq, ILogMessageSubscriptionFilter
+  )
   private
     FZmq        : IZeroMQ;
     FSubscriber : IZMQPair;
@@ -116,9 +117,9 @@ end;
 
 procedure TZmqSubscriber.SetLogMessageLevels(const Value: TLogMessageLevels);
 begin
+  inherited SetLogMessageLevels(Value);
   if Value <> LogMessageLevels then
   begin
-    inherited SetLogMessageLevels(Value);
     if Enabled then
       SubscribeToMessages;
     DoChange;
@@ -127,9 +128,9 @@ end;
 
 procedure TZmqSubscriber.SetLogMessageTypes(const Value: TLogMessageTypes);
 begin
+  inherited SetLogMessageTypes(Value);
   if Value <> LogMessageTypes then
   begin
-    inherited SetLogMessageTypes(Value);
     if Enabled then
       SubscribeToMessages;
     DoChange;
@@ -166,30 +167,34 @@ end;
 
 procedure TZmqSubscriber.SubscribeToMessages;
 var
-  I : TLogMessageType;
-  R : RawByteString;
-  //J : Byte;
+  LLogMessageType  : TLogMessageType;
+  LLogMessageLevel : TLogMessageLevel;
+  LTopic           : RawByteString;
+  N : Integer;
 begin
   Logger.Track(Self, 'SubscribeToMessages');
   //UnSubscribeToMessages;
   //FSubscriber.Subscribe('');
-  for I := Low(TLogMessageType) to High(TLogMessageType) do
+  N := 0;
+  for LLogMessageType := Low(TLogMessageType) to High(TLogMessageType) do
   begin
-    Logger.Send('LMT', LogMessageTypeNameOf(I));
-    if I in LogMessageTypes then
+    if LLogMessageType in LogMessageTypes then
     begin
-      R := AnsiChar(Byte(I));
-      FSubscriber.Subscribe(R);
-
-//      for J := Low(Byte) to High(Byte) do
-//      begin
-//        if J in LogMessageLevels then
-//        begin
-//          R := AnsiChar(Byte(I)) + AnsiChar(J);
-//          //Logger.Send('Subscribe', R);
-//          FSubscriber.Subscribe(R);
-//        end;
-//      end;
+      for LLogMessageLevel := Low(TLogMessageLevel) to High(TLogMessageLevel) do
+      begin
+        if LLogMessageLevel in LogMessageLevels then
+        begin
+          LTopic := AnsiChar(Byte(LLogMessageType)) + AnsiChar(LLogMessageLevel);
+          FSubscriber.Subscribe(LTopic);
+          Logger.Info('LMT %s/%d',  [LogMessageTypeNameOf(LLogMessageType), LLogMessageLevel]);
+         Logger.Send('N', N);
+         Inc(N);
+        end;
+      end;
+    end
+    else
+    begin
+      Logger.Warn('%d not in LogMessageTypes', [Integer(LLogMessageType)]);
     end;
   end;
 end;

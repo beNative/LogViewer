@@ -60,9 +60,8 @@ type
 
     procedure FSettingsChanged(Sender: TObject);
 
-
-
     procedure CreateObjects;
+
   protected
     procedure UpdateActions; override;
 
@@ -72,8 +71,6 @@ type
       ASettings : TLogLevelSettings
     ); reintroduce;
     destructor Destroy; override;
-
-
 
   end;
 
@@ -87,7 +84,7 @@ uses
   DSharp.Windows.ControlTemplates,
 
   DDuce.Factories.TreeViewPresenter, DDuce.Factories.zObjInspector,
-  DDuce.Factories.VirtualTrees, DDuce.Logger,
+  DDuce.Factories.VirtualTrees, DDuce.Logger, DDuce.Logger.Interfaces,
 
   LogViewer.Resources;
 
@@ -183,7 +180,7 @@ begin
   Result := False;
   if DrawMode = dmAfterCellPaint then
   begin
-    TargetCanvas.Brush.Color := TLogLevel(Item).Color;
+    TargetCanvas.Brush.Color := TLogLevelProperties(Item).Color;
     TargetCanvas.FillRect(CellRect);
     Result := True;
   end;

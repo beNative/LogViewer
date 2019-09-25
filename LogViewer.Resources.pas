@@ -111,7 +111,7 @@ resourcestring
 
   // settings dialog
   SViewSettings    = 'View settings';
-  SDisplaySettings = 'Display settings';
+  SDisplaySettings = 'Message display';
   SLogLevels       = 'Logging levels';
   SWatches         = 'Watches';
   SCallStack       = 'Callstack';
@@ -211,7 +211,6 @@ const
 
   { max. amount of characters allowed to be displayed in the value column of the
     logtree. }
-  //MAX_TEXTLENGTH_VALUECOLUMN = 80;
   MAX_TEXTLENGTH_VALUECOLUMN = 200;
 
   { TCP port used for debugging another LogViewer instance using ZMQ. }

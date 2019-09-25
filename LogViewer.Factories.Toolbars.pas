@@ -201,7 +201,7 @@ begin
   CreateToolButton(TB, 'actSettings', tbsTextButton);
   CreateToolButton(TB, 'actDashboard', tbsTextButton);
   CreateToolButton(TB);
-  CreateToolButton(TB, 'actShowFilterView');
+  CreateToolButton(TB, 'actShowFilterView', tbsTextButton);
   CreateToolButton(TB, 'actClearMessages', tbsTextButton);
   CreateToolButton(TB);
   CreateToolButton(TB, 'actCollapseAll', tbsTextButton);
