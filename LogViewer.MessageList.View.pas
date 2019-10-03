@@ -260,7 +260,6 @@ type
     procedure SavePanelSettings;
 
     procedure ProcessMessage(AStream: TStream);
-
     procedure AddMessageToTree(const AMessage: TLogMessage);
     procedure Modified;
 
@@ -875,13 +874,7 @@ begin
   end;
   if Column = COLUMN_LEVEL then
   begin
-    if LN.LogLevel < WebNamedColorsCount then
-    begin
-      TargetCanvas.Brush.Color :=
-        Manager.Settings.LogLevelSettings.LogLevels[LN.LogLevel].Color;
-    end
-    else
-      TargetCanvas.Brush.Color := clWhite;
+    Manager.Settings.LogLevelSettings.LogLevels[LN.LogLevel].Color;
     TargetCanvas.FillRect(CellRect);
   end
   else if Column = COLUMN_VALUE then
@@ -972,6 +965,7 @@ begin
     begin
       B := LN.MessageType in Settings.VisibleMessageTypes;
     end;
+    B := B and (LN.LogLevel in Settings.VisibleMessageLevels);
     if LFilter <> '' then
     begin
       B := B and (
@@ -1472,7 +1466,7 @@ procedure TfrmMessageList.ApplySettings;
 var
   LFilter : ILogMessageSubscriptionFilter;
   LLevels : TLogMessageLevels;
-  I       : Byte;
+  I       : TLogMessageLevel;
 begin
   LLevels := [];
   Logger.Track(Self, 'ApplySettings');
@@ -1486,16 +1480,14 @@ begin
   if Supports(Subscriber, ILogMessageSubscriptionFilter, LFilter) then
   begin
     LFilter.LogMessageTypes := Settings.VisibleMessageTypes;
-    for I :=  0 to 255 do
+    for I := Low(TLogMessageLevel) to High(TLogMessageLevel) do
       LLevels := LLevels + [I];
     LFilter.LogMessageLevels := LLevels;
     Logger.Send('LogMessageTypes', TValue.From(LFilter.LogMessageTypes));
     Logger.Send('LogMessageLevels', TValue.From(LFilter.LogMessageLevels));
   end;
-
   LoadPanelSettings;
   ApplyFilter;
-//  UpdateTreeColumns;
   Modified;
 end;
 
@@ -1909,7 +1901,6 @@ begin
     lmtInfo, lmtWarning, lmtError, lmtConditional:
     begin
       //UpdateTextStreamDisplay(ALogNode);
-      Logger.SendPersistent('ALogNode', ALogNode);
       UpdateTextDisplay(ALogNode);
       pgcMessageDetails.ActivePage := tsTextViewer;
     end;

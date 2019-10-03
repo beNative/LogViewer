@@ -27,8 +27,7 @@ uses
 
   VirtualTrees,
 
-  DDuce.Logger.Interfaces,
-  DDuce.Components.VirtualTrees.Node,
+  DDuce.Logger.Interfaces, DDuce.Components.VirtualTrees.Node,
 
   LogViewer.MessageList.Settings, LogViewer.MessageFilter.Data;
 
@@ -319,7 +318,10 @@ var
     end;
     Result.Data.Color := AColor;
     Result.CheckType  := ctCheckBox;
-    Result.ImageIndex := -1;
+    if AColor = clNone then // root node
+      Result.ImageIndex := 29
+    else
+      Result.ImageIndex := -1;
     if AMessageLevels * FSettings.VisibleMessageLevels = AMessageLevels then
       Result.CheckState := csCheckedNormal
     else
@@ -381,7 +383,7 @@ begin
   AddMessageTypeNode(SLeave, 5, [lmtLeaveMethod]);
 
   LNode := nil;
-  LNode := AddMessageLevelNode(SLogLevels, clBlack, AllLevels);
+  LNode := AddMessageLevelNode(SLogLevels, clNone, AllLevels);
   for LLogMessageLevel := Low(TLogMessageLevel) to High(TLogMessageLevel) do
   begin
     AddMessageLevelNode(
@@ -415,7 +417,8 @@ begin
     Result := False;
 end;
 
-{ Update checkstate of parent node between csChecked, csUnchecked and csMixedNormal.  }
+{ Update checkstate of parent node between csChecked, csUnchecked and
+  csMixedNormal.  }
 
 function TfrmMessageFilter.UpdateParent(ANode: TFilterNode;
   ACheckState: TCheckState): Boolean;

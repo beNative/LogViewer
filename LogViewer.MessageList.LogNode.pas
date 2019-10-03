@@ -47,7 +47,7 @@ type
     FValueType   : string;
     FValue       : string;
     FMessageType : TLogMessageType;
-    FLogLevel    : Byte;
+    FLogLevel    : TLogMessageLevel;
     FMessageData : TStream; // binary data stream for bitmaps, etc.
     FTimeStamp   : TDateTime;
     FHighlighter : string;
@@ -58,8 +58,8 @@ type
     procedure SetTextSize(const Value: Integer); // highlighter to use in text editor
     function GetHighlighter: string;
     procedure SetHighlighter(const Value: string);
-    function GetLogLevel: Byte;
-    procedure SetLogLevel(const Value: Byte);
+    function GetLogLevel: TLogMessageLevel;
+    procedure SetLogLevel(const Value: TLogMessageLevel);
     function GetMessageData: TStream;
     procedure SetMessageData(const Value: TStream);
     function GetTimeStamp: TDateTime;
@@ -93,7 +93,7 @@ type
     property Highlighter: string
       read GetHighlighter write SetHighlighter;
 
-    property LogLevel: Byte
+    property LogLevel: TLogMessageLevel
       read GetLogLevel write SetLogLevel;
 
     property Text: string
@@ -157,12 +157,12 @@ begin
   FId := Value;
 end;
 
-function TLogNode.GetLogLevel: Byte;
+function TLogNode.GetLogLevel: TLogMessageLevel;
 begin
   Result := FLogLevel;
 end;
 
-procedure TLogNode.SetLogLevel(const Value: Byte);
+procedure TLogNode.SetLogLevel(const Value: TLogMessageLevel);
 begin
   FLogLevel := Value;
 end;
