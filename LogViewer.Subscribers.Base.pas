@@ -63,6 +63,7 @@ type
     procedure Poll; virtual;
     procedure Reset; virtual;
     procedure Close; virtual;
+
     procedure DoReceiveMessage(AStream: TStream); virtual;
     procedure DoChange; virtual;
 

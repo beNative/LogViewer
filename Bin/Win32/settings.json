@@ -1,7 +1,7 @@
 {
 	"FormSettings": {
-		"Left": 418,
-		"Top": 100,
+		"Left": 435,
+		"Top": 119,
 		"Width": 1861,
 		"Height": 1073,
 		"FormStyle": 0,
@@ -15,12 +15,12 @@
 		"MessageDetailsVisible": true,
 		"SmartTimeStamps": true,
 		"HorizontalPanelPositions": [
-			0.208433734939759,
-			0.705110497237569,
+			0.215176151761518,
+			0.666666666666667,
 			1
 		],
 		"LeftVerticalPanelPositions": [
-			0.305351521511018,
+			0.25,
 			1
 		]
 	},

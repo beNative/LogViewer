@@ -340,6 +340,7 @@ begin
   FMidiReceiver       := nil;
   FManager            := nil;
   FZeroMQ             := nil;
+  Logger.Info('Dashboard TreeView clear');
   FTreeView.Clear;
   FTreeView.Free;
   inherited Destroy;

@@ -50,11 +50,14 @@ type
     actCallStack              : TAction;
     actCheckPoint             : TAction;
     actClearMessages          : TAction;
+    actCloseMessageView       : TAction;
+    actCloseOtherMessageViews : TAction;
     actCollapseAll            : TAction;
     actComponent              : TAction;
     actConditional            : TAction;
     actCounter                : TAction;
     actCustomData             : TAction;
+    actDashboard              : TAction;
     actDataSet                : TAction;
     actError                  : TAction;
     actException              : TAction;
@@ -91,9 +94,6 @@ type
     imlMessageTypes           : TImageList;
     ppmLogTreeViewer          : TPopupMenu;
     ppmMessageTypes           : TPopupMenu;
-    actCloseMessageView       : TAction;
-    actCloseOtherMessageViews : TAction;
-    actDashboard              : TAction;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -642,7 +642,8 @@ end;
 
 procedure TdmManager.SetActiveView(const Value: ILogViewer);
 begin
-  if Assigned(Value) {and (Value <> FActiveView)} then // TODO FActiveView should be nil if dashboard has focus
+  Logger.Track(Self, 'SetActiveView');
+  if Assigned(Value) and (Value <> FActiveView) then
   begin
     FActiveView := Value;
     if Assigned(FActiveView.Target) then
@@ -651,6 +652,10 @@ begin
       Logger.Watch('FActiveView', FActiveView.Target.Form.Caption);
     end;
     UpdateActions;
+  end
+  else
+  begin
+    FActiveView := nil;
   end;
 end;
 

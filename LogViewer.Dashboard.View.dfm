@@ -60,14 +60,12 @@ object frmDashboard: TfrmDashboard
         TabOrder = 0
         object tsWinIpc: TKTabSheet
           Caption = 'WinIPC'
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object lblWinIPC: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
-            Width = 307
-            Height = 221
+            Width = 308
+            Height = 588
             Align = alClient
             Caption = 
               'Messages are exchanged between the source application and LogVie' +
@@ -86,6 +84,8 @@ object frmDashboard: TfrmDashboard
             ParentFont = False
             Transparent = True
             WordWrap = True
+            ExplicitWidth = 307
+            ExplicitHeight = 221
           end
           object pnlWinIPCTitle: TPanel
             Left = 0
@@ -503,7 +503,7 @@ object frmDashboard: TfrmDashboard
     Left = 408
     Top = 8
     Bitmap = {
-      494C01010B000801DC0110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01010B000801E00110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000001001B09532ED308512ED100000010000000000000

@@ -44,6 +44,7 @@ type
     actShowVersion    : TAction;
     ctMain            : TChromeTabs;
     imlMain           : TImageList;
+    mniCloseOthers    : TMenuItem;
     pbrCPU            : TKPercentProgressBar;
     pnlDelta          : TPanel;
     pnlMainClient     : TPanel;
@@ -52,15 +53,15 @@ type
     pnlSourceName     : TPanel;
     pnlStatusBar      : TPanel;
     pnlTop            : TPanel;
+    ppmTabs           : TPopupMenu;
     shpLine           : TShape;
     tmrPoll           : TTimer;
     tskbrMain         : TTaskbar;
-    ppmTabs           : TPopupMenu;
-    mniCloseOthers    : TMenuItem;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
     procedure actCenterToScreenExecute(Sender: TObject);
+    procedure actDashboardExecute(Sender: TObject);
     procedure actShowVersionExecute(Sender: TObject);
     {$ENDREGION}
 
@@ -79,12 +80,16 @@ type
       Sender : TObject;
       ATab   : TChromeTab
     );
+    procedure ctMainBeforeDrawItem(
+      Sender       : TObject;
+      TargetCanvas : TGPGraphics;
+      ItemRect     : TRect;
+      ItemType     : TChromeTabItemType;
+      TabIndex     : Integer;
+      var Handled  : Boolean
+    );
     procedure FormShortCut(var Msg: TWMKey; var Handled: Boolean);
     procedure tmrPollTimer(Sender: TObject);
-    procedure ctMainBeforeDrawItem(Sender: TObject; TargetCanvas: TGPGraphics;
-      ItemRect: TRect; ItemType: TChromeTabItemType; TabIndex: Integer;
-      var Handled: Boolean);
-    procedure actDashboardExecute(Sender: TObject);
     {$ENDREGION}
 
   private
@@ -237,6 +242,7 @@ destructor TfrmMain.Destroy;
 begin
   Logger.Track(Self, 'Destroy');
   tmrPoll.Enabled := False;
+  Logger.SendIf('Manager is not assigned!', not Assigned(Manager));
   Manager.Receivers.Clear;
   Events.OnDeleteLogViewer.RemoveAll(Self);
   Events.OnAddLogViewer.RemoveAll(Self);
@@ -255,8 +261,8 @@ end;
 procedure TfrmMain.actCenterToScreenExecute(Sender: TObject);
 begin
   WindowState := wsMinimized;
-  Top  := 0;
-  Left := 0;
+  Top         := 0;
+  Left        := 0;
   WindowState := wsMaximized;
 end;
 
@@ -291,7 +297,6 @@ begin
     pnlSourceName.Caption   := '';
     pnlMessageCount.Caption := '';
     pnlDelta.Caption        := '';
-    Manager.ActiveView      := nil;
     OptimizeStatusBarPanelWidths;
   end
   else if Assigned(ATab.Data) then
@@ -299,7 +304,6 @@ begin
     MV := ILogViewer(ATab.Data);
     MV.Form.Show;
     MV.Form.SetFocus;
-    Manager.ActiveView := MV;
     UpdateStatusBar;
     OptimizeStatusBarPanelWidths;
   end;
@@ -410,6 +414,7 @@ begin
       Inc(I);
     end;
   end;
+  ctMain.Resize;
 end;
 
 procedure TfrmMain.EventsShowDashboard(Sender: TObject);
@@ -468,7 +473,6 @@ begin
   FDashboard.Parent      := pnlMainClient;
   FDashboard.Align       := alClient;
   FDashboard.BorderStyle := bsNone;
-
   ctMain.Tabs.Add;
   ctMain.ActiveTab.Data        := Pointer(FDashboard);
   ctMain.ActiveTab.Caption     := 'Dashboard';

@@ -148,6 +148,7 @@ end;
 
 procedure TLogViewerSettings.BeforeDestruction;
 begin
+  Logger.Track(Self, 'BeforeDestruction');
   FDisplayValuesSettings.OnChanged.Remove(DisplayValuesSettingsChanged);
   FreeAndNil(FDisplayValuesSettings);
   FreeAndNil(FWatchSettings);

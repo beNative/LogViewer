@@ -49,8 +49,8 @@ type
     procedure SetLogMessageTypes(const Value: TLogMessageTypes); override;
     {$ENDREGION}
 
-    procedure SubscribeToMessages;
-    procedure UnSubscribeToMessages;
+    procedure Subscribe;
+    procedure UnSubscribe;
 
     procedure Poll; override;
 
@@ -106,11 +106,11 @@ begin
     inherited SetEnabled(Value);
     if Enabled then
     begin
-      SubscribeToMessages;
+      Subscribe;
     end
     else
     begin
-      UnSubscribeToMessages;
+      UnSubscribe;
     end;
   end;
 end;
@@ -121,7 +121,7 @@ begin
   if Value <> LogMessageLevels then
   begin
     if Enabled then
-      SubscribeToMessages;
+      Subscribe;
     DoChange;
   end;
 end;
@@ -132,7 +132,7 @@ begin
   if Value <> LogMessageTypes then
   begin
     if Enabled then
-      SubscribeToMessages;
+      Subscribe;
     DoChange;
   end;
 end;
@@ -165,16 +165,16 @@ begin
   );
 end;
 
-procedure TZmqSubscriber.SubscribeToMessages;
+procedure TZmqSubscriber.Subscribe;
 var
   LLogMessageType  : TLogMessageType;
   LLogMessageLevel : TLogMessageLevel;
   LTopic           : RawByteString;
-  N : Integer;
+  N                : Integer;
 begin
-  Logger.Track(Self, 'SubscribeToMessages');
+  Logger.Track(Self, 'Subscribe');
   //UnSubscribeToMessages;
-  //FSubscriber.Subscribe('');
+  //FSubscriber.Subscribe(''); // subscribe to all
   N := 0;
   for LLogMessageType := Low(TLogMessageType) to High(TLogMessageType) do
   begin
@@ -199,18 +199,18 @@ begin
   end;
 end;
 
-procedure TZmqSubscriber.UnSubscribeToMessages;
+procedure TZmqSubscriber.UnSubscribe;
 var
   I : TLogMessageType;
   R : RawByteString;
   J : Byte;
 begin
+  Logger.Track(Self, 'UnSubscribe');
   for I := Low(TLogMessageType) to High(TLogMessageType) do
   begin
     for J := Low(Byte) to High(Byte) do
     begin
       R := AnsiChar(Byte(I)) + AnsiChar(J);
-      //Logger.Send('UnSubscribe', R);
       FSubscriber.UnSubscribe(R);
     end;
   end;

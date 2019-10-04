@@ -1031,7 +1031,7 @@ var
   N      : Int64;
 begin
   LN := Sender.GetNodeData<TLogNode>(Node);
-  Guard.CheckNotNull(LN, 'ND');
+  Guard.CheckNotNull(LN, 'LN');
   if Column = COLUMN_MAIN then
   begin
     if LN.MessageType in NotificationMessages + TracingMessages then
@@ -1800,10 +1800,7 @@ begin
     begin
       if Assigned(VN.Parent) then
       begin
-//        LN := FLogTreeView.GetNodeData<TLogNode>(VN.Parent);
-//        LN2 := FLogTreeView.GetNodeData<TLogNode>(LN.VTNode.NextSibling);
         VN := VN.Parent;
-        Dec(I);
       end
       else
       begin
