@@ -653,9 +653,10 @@ begin
     end;
     UpdateActions;
   end
-  else
+  else if not Assigned(Value) then  
   begin
     FActiveView := nil;
+    Logger.Warn('FActiveView set to nil');
   end;
 end;
 
@@ -950,7 +951,7 @@ begin
   actCollapseAll.Enabled        := B;
   actExpandAll.Enabled          := B;
   actClearMessages.Enabled      := B;
-  actSelectAll.Enabled          := MLS.VisibleMessageTypes <> ALL_MESSAGES;
+  actSelectAll.Enabled          := MLS.VisibleMessageTypes <> AllMessages;
   actSelectNone.Enabled         := MLS.VisibleMessageTypes <> [];
   actFilterMessages.Enabled := B and
     not Settings.MessageListSettings.AutoFilterMessages;
