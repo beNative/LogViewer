@@ -96,6 +96,7 @@ begin
   );
   Logger.Clear;
   Logger.Clear;
+  Logger.Clear;
   Logger.Info('LogViewer Started.');
   Application.Run;
 end.

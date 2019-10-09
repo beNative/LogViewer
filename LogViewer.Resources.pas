@@ -126,37 +126,6 @@ resourcestring
 
   SLogLevelAlias = 'Loglevel alias';
 
-const
-  ALL_MESSAGES = [
-    lmtInfo,
-    lmtError,
-    lmtWarning,
-    lmtValue,
-    lmtAlphaColor,
-    lmtColor,
-    lmtEnterMethod,
-    lmtLeaveMethod,
-    lmtConditional,
-    lmtCheckpoint,
-    lmtStrings,
-    lmtCallStack,
-    lmtComponent,
-    lmtObject,
-    lmtInterface,
-    lmtPersistent,
-    lmtException,
-    lmtBitmap,
-    lmtHeapInfo,
-    lmtMemory,
-    lmtCustomData,
-    lmtWatch,
-    lmtCounter,
-    lmtText,
-    lmtScreenShot,
-    lmtDataSet,
-    lmtAction
-  ];
-
   // channel receiver names
 const
   RECEIVERNAME_WINIPC     = 'WinIPC';

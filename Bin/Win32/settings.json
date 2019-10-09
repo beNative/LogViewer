@@ -1,9 +1,9 @@
 {
 	"FormSettings": {
-		"Left": 435,
-		"Top": 119,
-		"Width": 1861,
-		"Height": 1073,
+		"Left": 587,
+		"Top": 218,
+		"Width": 1726,
+		"Height": 1084,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -16,7 +16,7 @@
 		"SmartTimeStamps": true,
 		"HorizontalPanelPositions": [
 			0.215176151761518,
-			0.666666666666667,
+			0.695906432748538,
 			1
 		],
 		"LeftVerticalPanelPositions": [
@@ -35,7 +35,7 @@
 		"Enabled": true,
 		"PollingInterval": 100,
 		"PollingTimeout": 10,
-		"Endpoints": "default localhost=tcp://localhost:5555\r\nlocalhost2=tcp://localhost:5595\r\nLogViewer=tcp://localhost:42134\r\nNew=tcp://localhost:5556\r\n"
+		"Endpoints": "default localhost=tcp://localhost:5555\r\nlocalhost2=tcp://localhost:5595\r\nLogViewer=tcp://localhost:42134\r\nGANYMEDES=tcp://192.168.0.107:5555\r\n"
 	},
 	"MqttSettings": {
 		"Broker": "localhost",

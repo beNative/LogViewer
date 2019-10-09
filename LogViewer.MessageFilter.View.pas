@@ -168,23 +168,45 @@ end;
 procedure TfrmMessageFilter.FTreeBeforeGetCheckState(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 var
-  FN : TFilterNode;
+  FN            : TFilterNode;
+  I             : Integer;
+  LUpdateParent : Boolean;
 begin
+  LUpdateParent := True;
   FN := Sender.GetNodeData<TFilterNode>(Node);
   if FN.Level = 1 then
   begin
-    if FN.Data.MessageTypes * FSettings.VisibleMessageTypes
-      = FN.Data.MessageTypes then
-      Node.CheckState := csCheckedNormal
-    else
-      Node.CheckState := csUncheckedNormal;
-
-    if FN.Data.MessageLevels * FSettings.VisibleMessageLevels
-      = FN.Data.MessageLevels then
-      Node.CheckState := csCheckedNormal
-    else
-      Node.CheckState := csUncheckedNormal;
-    UpdateParent(FN, Node.CheckState);
+    if FN.Data.IsMessageTypeFilter then
+    begin
+      if MatchText(FN.Data.Caption, ['SQL', 'XML', 'INI', 'JSON']) then
+      begin
+        I := FSettings.VisibleValueTypes.IndexOf(FN.Data.Caption);
+        if I <> -1 then
+        begin
+          Node.CheckState := csCheckedNormal
+        end
+        else
+        begin
+          Node.CheckState := csUncheckedNormal;
+        end;
+        LUpdateParent := False;
+      end
+      else if FN.Data.MessageTypes * FSettings.VisibleMessageTypes
+        = FN.Data.MessageTypes then
+        Node.CheckState := csCheckedNormal
+      else
+        Node.CheckState := csUncheckedNormal;
+    end;
+    if FN.Data.IsMessageLevelFilter then
+    begin
+      if FN.Data.MessageLevels * FSettings.VisibleMessageLevels
+        = FN.Data.MessageLevels then
+        Node.CheckState := csCheckedNormal
+      else
+        Node.CheckState := csUncheckedNormal;
+    end;
+    if LUpdateParent then
+      UpdateParent(FN, Node.CheckState);
   end;
 end;
 
@@ -197,18 +219,20 @@ begin
   FN := Sender.GetNodeData<TFilterNode>(Node);
   if FN.VNode.CheckState.IsChecked then
   begin
-    FSettings.VisibleMessageTypes := FSettings.VisibleMessageTypes +
-      FN.Data.MessageTypes;
     if MatchText(FN.Data.Caption, ['SQL', 'XML', 'INI', 'JSON']) then
+    begin
       FSettings.VisibleValueTypes.Add(FN.Data.Caption);
-
+    end
+    else
+    begin
+      FSettings.VisibleMessageTypes := FSettings.VisibleMessageTypes +
+        FN.Data.MessageTypes;
+    end;
     FSettings.VisibleMessageLevels := FSettings.VisibleMessageLevels +
       FN.Data.MessageLevels;
   end
   else
   begin
-    FSettings.VisibleMessageTypes := FSettings.VisibleMessageTypes -
-      FN.Data.MessageTypes;
     if MatchText(FN.Data.Caption, ['SQL', 'XML', 'INI', 'JSON']) then
     begin
       I := FSettings.VisibleValueTypes.IndexOf(FN.Data.Caption);
@@ -216,12 +240,16 @@ begin
       begin
         FSettings.VisibleValueTypes.Delete(I);
       end;
+    end
+    else
+    begin
+      FSettings.VisibleMessageTypes := FSettings.VisibleMessageTypes -
+        FN.Data.MessageTypes;
     end;
     FSettings.VisibleMessageLevels := FSettings.VisibleMessageLevels -
       FN.Data.MessageLevels;
   end;
-  Logger.SendStrings('VisibleValueTypes', FSettings.VisibleValueTypes);
-  Logger.Send('VisibleMessageTypes', TValue.From(FSettings.VisibleMessageTypes));
+  FSettings.Changed; // not automatically triggered!
   UpdateChildren(FN, FN.VNode.CheckState);
   if FN.Level > 0 then
     UpdateParent(FN, FN.VNode.CheckState);
@@ -360,7 +388,7 @@ begin
   AddMessageTypeNode(SException, 11, [lmtException]);
 
   LNode := nil;
-  LNode := AddMessageTypeNode(STextMessages, 24);
+  LNode := AddMessageTypeNode(STextMessages, 24, [lmtText]);
   AddMessageTypeNode('SQL', 27, [lmtText]);
   AddMessageTypeNode('XML', 28, [lmtText]);
   AddMessageTypeNode('INI', 0, [lmtText]);

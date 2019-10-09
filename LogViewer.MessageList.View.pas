@@ -144,7 +144,6 @@ type
     function GetDisplayValuesSettings: TDisplayValuesSettings;
     function GetIsActiveView: Boolean;
     function GetEditorView: IEditorView;
-
     function GetSelectedLogNode: TLogNode;
     procedure SetSelectedLogNode(const Value: TLogNode);
     function GetMessageCount: Int64;
@@ -957,6 +956,7 @@ begin
   LFilter := edtMessageFilter.Text;
   if Assigned(LN) then
   begin
+    B := True;
     if (LN.MessageType = lmtText) and (LN.Highlighter <> '') then
     begin
       B := Settings.VisibleValueTypes.IndexOf(LN.Highlighter) <> -1;
@@ -995,8 +995,8 @@ begin
       begin
         ImageIndex := 9;
       end;
-    end
-    else if ND.MessageType = lmtDataSet then
+    end;
+    if ND.MessageType = lmtDataSet then
     begin
       ImageIndex := 20;
     end
@@ -1012,10 +1012,6 @@ begin
     begin
       ImageIndex := 22;
     end
-    else
-    begin
-      ImageIndex := 3;
-    end;
   end;
 end;
 
@@ -1358,6 +1354,7 @@ procedure TfrmMessageList.EnsureCurrentViewIsActiveViewWhenFocused;
 var
   B : Boolean;
 begin
+  Logger.Track(Self, 'EnsureCurrentViewIsActiveViewWhenFocused');
   B := Focused;
   if not B and Assigned(Parent) then
   begin
@@ -1463,12 +1460,9 @@ begin
 end;
 
 procedure TfrmMessageList.ApplySettings;
-var
-  LFilter : ILogMessageSubscriptionFilter;
-  LLevels : TLogMessageLevels;
-  I       : TLogMessageLevel;
+//var
+//  LFilter : ILogMessageSubscriptionFilter;
 begin
-  LLevels := [];
   Logger.Track(Self, 'ApplySettings');
   if Settings.ColumnHeadersVisible then
     FLogTreeView.Header.Options := FLogTreeView.Header.Options + [hoVisible]
@@ -1477,15 +1471,14 @@ begin
   splRightHorizontal.Visible := Settings.MessageDetailsVisible;
   pnlMessageData.Visible     := Settings.MessageDetailsVisible;
 
-  if Supports(Subscriber, ILogMessageSubscriptionFilter, LFilter) then
-  begin
-    LFilter.LogMessageTypes := Settings.VisibleMessageTypes;
-    for I := Low(TLogMessageLevel) to High(TLogMessageLevel) do
-      LLevels := LLevels + [I];
-    LFilter.LogMessageLevels := LLevels;
-    Logger.Send('LogMessageTypes', TValue.From(LFilter.LogMessageTypes));
-    Logger.Send('LogMessageLevels', TValue.From(LFilter.LogMessageLevels));
-  end;
+  // TODO
+//  if Supports(Subscriber, ILogMessageSubscriptionFilter, LFilter) then
+//  begin
+//    LFilter.LogMessageTypes := Settings.VisibleMessageTypes;
+//    LFilter.LogMessageLevels := Settings.VisibleMessageLevels;
+//    Logger.Send('LogMessageTypes', TValue.From(LFilter.LogMessageTypes));
+//    Logger.Send('LogMessageLevels', TValue.From(LFilter.LogMessageLevels));
+//  end;
   LoadPanelSettings;
   ApplyFilter;
   Modified;
@@ -1501,6 +1494,7 @@ end;
 
 procedure TfrmMessageList.Activate;
 begin
+  Logger.Track(Self, 'Activate');
   Manager.ActiveView := Self as ILogViewer;
   Manager.EditorManager.ActiveView := FEditorView;
   inherited Activate;
@@ -2053,7 +2047,7 @@ end;
 
 procedure TfrmMessageList.UpdateActions;
 begin
-  if FUpdate then
+  if FUpdate and not IsActiveView then
     EnsureCurrentViewIsActiveViewWhenFocused;
   if IsActiveView and FUpdate then
   begin

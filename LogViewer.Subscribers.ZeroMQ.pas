@@ -34,10 +34,11 @@ type
     ISubscriber, IZmq, ILogMessageSubscriptionFilter
   )
   private
-    FZmq        : IZeroMQ;
-    FSubscriber : IZMQPair;
-    FPoll       : IZMQPoll;
-    FZmqStream  : TStringStream;
+    FEndPoint      : string;
+    FZmq           : IZeroMQ;
+    FSubscriber    : IZMQPair;
+    FPoll          : IZMQPoll;
+    FZmqStream     : TStringStream;
 
     procedure CreateSubscriberSocket(const AEndPoint: string);
 
@@ -117,9 +118,9 @@ end;
 
 procedure TZmqSubscriber.SetLogMessageLevels(const Value: TLogMessageLevels);
 begin
-  inherited SetLogMessageLevels(Value);
   if Value <> LogMessageLevels then
   begin
+    inherited SetLogMessageLevels(Value);
     if Enabled then
       Subscribe;
     DoChange;
@@ -128,9 +129,9 @@ end;
 
 procedure TZmqSubscriber.SetLogMessageTypes(const Value: TLogMessageTypes);
 begin
-  inherited SetLogMessageTypes(Value);
   if Value <> LogMessageTypes then
   begin
+    inherited SetLogMessageTypes(Value);
     if Enabled then
       Subscribe;
     DoChange;
@@ -149,6 +150,7 @@ end;
 
 procedure TZmqSubscriber.CreateSubscriberSocket(const AEndPoint: string);
 begin
+  FEndPoint := AEndPoint;
   FSubscriber := FZmq.Start(ZMQSocket.Subscriber);
   FSubscriber.Connect(AEndPoint);
   FPoll := FZmq.Poller;
@@ -169,13 +171,10 @@ procedure TZmqSubscriber.Subscribe;
 var
   LLogMessageType  : TLogMessageType;
   LLogMessageLevel : TLogMessageLevel;
-  LTopic           : RawByteString;
-  N                : Integer;
+  LTopic           : UTF8String;
 begin
   Logger.Track(Self, 'Subscribe');
-  //UnSubscribeToMessages;
-  //FSubscriber.Subscribe(''); // subscribe to all
-  N := 0;
+  UnSubscribe;
   for LLogMessageType := Low(TLogMessageType) to High(TLogMessageType) do
   begin
     if LLogMessageType in LogMessageTypes then
@@ -184,36 +183,23 @@ begin
       begin
         if LLogMessageLevel in LogMessageLevels then
         begin
-          LTopic := AnsiChar(Byte(LLogMessageType)) + AnsiChar(LLogMessageLevel);
+          LTopic := AnsiChar(Byte(LLogMessageType))
+            + AnsiChar(LLogMessageLevel);
           FSubscriber.Subscribe(LTopic);
-          Logger.Info('LMT %s/%d',  [LogMessageTypeNameOf(LLogMessageType), LLogMessageLevel]);
-         Logger.Send('N', N);
-         Inc(N);
         end;
       end;
     end
-    else
-    begin
-      Logger.Warn('%d not in LogMessageTypes', [Integer(LLogMessageType)]);
-    end;
   end;
 end;
 
 procedure TZmqSubscriber.UnSubscribe;
-var
-  I : TLogMessageType;
-  R : RawByteString;
-  J : Byte;
 begin
   Logger.Track(Self, 'UnSubscribe');
-  for I := Low(TLogMessageType) to High(TLogMessageType) do
-  begin
-    for J := Low(Byte) to High(Byte) do
-    begin
-      R := AnsiChar(Byte(I)) + AnsiChar(J);
-      FSubscriber.UnSubscribe(R);
-    end;
-  end;
+  // simplest way to unsubscribe from all subscrîption is just to create a new
+  // socket.
+  // See answer of Pieter Hintjens on this discussion:
+  // https://grokbase.com/t/zeromq/zeromq-dev/165zwq8dxx/unsubscribe-from-all-topics
+  CreateSubscriberSocket(FEndPoint);
 end;
 {$ENDREGION}
 

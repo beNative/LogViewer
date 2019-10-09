@@ -99,6 +99,10 @@ begin
   if Assigned(ActiveView) then
   begin
     ActiveView.Clear;
+  end
+  else
+  begin
+    Logger.Warn('No active view assigned!');
   end;
 end;
 

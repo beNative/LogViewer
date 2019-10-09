@@ -81,13 +81,12 @@ type
 
     procedure FVisibleValueTypesChange(Sender: TObject);
 
-    procedure Changed;
-
   public
     procedure AfterConstruction; override;
     destructor Destroy; override;
 
     procedure Assign(Source: TPersistent); override;
+    procedure Changed;
 
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
@@ -138,7 +137,7 @@ begin
   FVisibleValueTypes.OnChange   := FVisibleValueTypesChange;
   FVisibleValueTypes.Sorted     := True;
   FVisibleValueTypes.Duplicates := dupIgnore;
-  FVisibleMessageTypes  := ALL_MESSAGES;
+  FVisibleMessageTypes  := AllMessages;
   FVisibleMessageLevels := AllLevels;
   // defaults
   FHorizontalPanelPositions.Add(0.2);
@@ -175,6 +174,15 @@ begin
   Result := FAutoScrollMessages;
 end;
 
+procedure TMessageListSettings.SetAutoScrollMessages(const Value: Boolean);
+begin
+  if Value <> AutoScrollMessages then
+  begin
+    FAutoScrollMessages := Value;
+    Changed;
+  end;
+end;
+
 function TMessageListSettings.GetColumnHeadersVisible: Boolean;
 begin
   Result := FColumnHeadersVisible;
@@ -189,18 +197,18 @@ begin
   end;
 end;
 
-procedure TMessageListSettings.SetAutoScrollMessages(const Value: Boolean);
-begin
-  if Value <> AutoScrollMessages then
-  begin
-    FAutoScrollMessages := Value;
-    Changed;
-  end;
-end;
-
 function TMessageListSettings.GetDynamicAutoSizeColumns: Boolean;
 begin
   Result := FDynamicAutoSizeColumns;
+end;
+
+procedure TMessageListSettings.SetDynamicAutoSizeColumns(const Value: Boolean);
+begin
+  if Value <> DynamicAutoSizeColumns then
+  begin
+    FDynamicAutoSizeColumns := Value;
+    Changed;
+  end;
 end;
 
 function TMessageListSettings.GetMessageDetailsVisible: Boolean;
@@ -213,15 +221,6 @@ begin
   if Value <> MessageDetailsVisible then
   begin
     FMessageDetailsVisible := Value;
-    Changed;
-  end;
-end;
-
-procedure TMessageListSettings.SetDynamicAutoSizeColumns(const Value: Boolean);
-begin
-  if Value <> DynamicAutoSizeColumns then
-  begin
-    FDynamicAutoSizeColumns := Value;
     Changed;
   end;
 end;
@@ -306,11 +305,13 @@ begin
     AutoScrollMessages     := LSettings.AutoScrollMessages;
     AutoFilterMessages     := LSettings.AutoFilterMessages;
     VisibleMessageTypes    := LSettings.VisibleMessageTypes;
+    VisibleMessageLevels   := LSettings.VisibleMessageLevels;
     DynamicAutoSizeColumns := LSettings.DynamicAutoSizeColumns;
     ColumnHeadersVisible   := LSettings.ColumnHeadersVisible;
     MessageDetailsVisible  := LSettings.MessageDetailsVisible;
     HorizontalPanelPositions.Assign(LSettings.HorizontalPanelPositions.Data);
     LeftVerticalPanelPositions.Assign(LSettings.LeftVerticalPanelPositions.Data);
+    VisibleValueTypes.Assign(LSettings.VisibleValueTypes);
   end
   else
     inherited Assign(Source);

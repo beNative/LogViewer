@@ -33,11 +33,13 @@ uses
 type
   TFilterData = class
   private
-    FMessageTypes  : TLogMessageTypes;
-    FMessageLevels : TLogMessageLevels;
-    FCaption       : string;
-    FImageIndex    : Integer;
-    FColor         : TColor;
+    FMessageTypes         : TLogMessageTypes;
+    FMessageLevels        : TLogMessageLevels;
+    FIsMessageTypeFilter  : Boolean; // two seperate flags to allow for more
+    FIsMessageLevelFilter : Boolean; // finetuned control in the future.
+    FCaption              : string;
+    FImageIndex           : Integer;
+    FColor                : TColor;
 
     {$REGION 'property access methods'}
     function GetMessageTypes: TLogMessageTypes;
@@ -50,6 +52,8 @@ type
     procedure SetMessageLevels(const Value: TLogMessageLevels);
     function GetColor: TColor;
     procedure SetColor(const Value: TColor);
+    function GetIsMessageLevelFilter: Boolean;
+    function GetIsMessageTypeFilter: Boolean;
     {$ENDREGION}
 
   public
@@ -64,6 +68,12 @@ type
       AMessageLevels : TLogMessageLevels = [];
       AColor         : TColor = clNone
     ); overload;
+
+    property IsMessageTypeFilter: Boolean
+      read GetIsMessageTypeFilter;
+
+    property IsMessageLevelFilter: Boolean
+      read GetIsMessageLevelFilter;
 
     property MessageTypes: TLogMessageTypes
       read GetMessageTypes write SetMessageTypes;
@@ -88,17 +98,19 @@ implementation
 constructor TFilterData.Create(const ACaption: string;
   AMessageTypes: TLogMessageTypes; AImageIndex: Integer);
 begin
-  FMessageTypes := AMessageTypes;
-  FCaption      := ACaption;
-  FImageIndex   := AImageIndex;
+  FMessageTypes        := AMessageTypes;
+  FCaption             := ACaption;
+  FImageIndex          := AImageIndex;
+  FIsMessageTypeFilter := True;
 end;
 
 constructor TFilterData.Create(const ACaption: string;
   AMessageLevels: TLogMessageLevels; AColor: TColor);
 begin
-  FMessageLevels := AMessageLevels;
-  FCaption       := ACaption;
-  FColor         := AColor;
+  FMessageLevels        := AMessageLevels;
+  FCaption              := ACaption;
+  FColor                := AColor;
+  FIsMessageLevelFilter := True;
 end;
 {$ENDREGION}
 
@@ -126,6 +138,16 @@ end;
 function TFilterData.GetImageIndex: Integer;
 begin
   Result := FImageIndex;
+end;
+
+function TFilterData.GetIsMessageLevelFilter: Boolean;
+begin
+  Result := FIsMessageLevelFilter;
+end;
+
+function TFilterData.GetIsMessageTypeFilter: Boolean;
+begin
+  Result := FIsMessageTypeFilter;
 end;
 
 procedure TFilterData.SetImageIndex(const Value: Integer);

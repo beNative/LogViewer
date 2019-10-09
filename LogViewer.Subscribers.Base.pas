@@ -115,16 +115,11 @@ uses
 {$REGION 'construction and destruction'}
 constructor TSubscriber.Create(const AReceiver: IChannelReceiver;
   ASourceId: Integer; const AKey, ASourceName: string; AEnabled: Boolean);
-var
-  B: Byte;
 begin
-  FLogMessageTypes := AllMessages;
-  for B := 0 to 255 do
-  begin
-    FLogMessageLevels := FLogMessageLevels + [B];
-  end;
   inherited Create;
   Guard.CheckNotNull(AReceiver, 'AReceiver');
+  FLogMessageTypes  := AllMessages;
+  FLogMessageLevels := AllLevels;
   FReceiver   := AReceiver;
   FSourceId   := ASourceId;
   FKey        := AKey;
@@ -165,6 +160,7 @@ begin
   if Value <> LogMessageLevels then
   begin
     FLogMessageLevels := Value;
+    DoChange;
   end;
 end;
 
@@ -178,6 +174,7 @@ begin
   if Value <> LogMessageTypes then
   begin
     FLogMessageTypes := Value;
+    DoChange;
   end;
 end;
 
