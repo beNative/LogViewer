@@ -25,7 +25,7 @@ uses
   System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls,
 
-  VirtualTrees,
+  VirtualTrees, kpagecontrol, kcontrols,
 
   DDuce.Logger.Interfaces, DDuce.Components.VirtualTrees.Node,
 
@@ -37,13 +37,20 @@ type
 type
   TfrmMessageFilter = class(TForm)
     pnlMessageFilter : TPanel;
+    pgcMain: TKPageControl;
+    tsClientSide: TKTabSheet;
+    tsSourceSide: TKTabSheet;
   private
-    FTree      : TVirtualStringTree;
+    FCSTree    : TVirtualStringTree;
+    FSSTree    : TVirtualStringTree;
     FImageList : TImageList;
     FSettings  : TMessageListSettings;
 
   protected
-    procedure BuildTree;
+    procedure BuildTree(
+      ATree         : TVirtualStringTree;
+      AIsSourceSide : Boolean = False
+    );
 
     {$REGION 'event handlers'}
     procedure FTreeGetText(
@@ -78,11 +85,13 @@ type
     {$ENDREGION}
 
     function UpdateChildren(
+      ATree       : TBaseVirtualTree;
       ANode       : TFilterNode;
       ACheckState : TCheckState
     ): Boolean;
 
     function UpdateParent(
+      ATree       : TBaseVirtualTree;
       ANode       : TFilterNode;
       ACheckState : TCheckState
     ): Boolean;
@@ -117,22 +126,39 @@ uses
 procedure TfrmMessageFilter.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FTree := TVirtualStringTreeFactory.CreateTree(Self, pnlMessageFilter);
-  FTree.OnGetText             := FTreeGetText;
-  FTree.OnGetImageIndex       := FTreeGetImageIndex;
-  FTree.OnFreeNode            := FTreeFreeNode;
-  FTree.OnChecked             := FTreeChecked;
-  FTree.OnBeforeGetCheckState := FTreeBeforeGetCheckState;
+  FCSTree := TVirtualStringTreeFactory.CreateTree(Self, tsClientSide);
+  FCSTree.OnGetText             := FTreeGetText;
+  FCSTree.OnGetImageIndex       := FTreeGetImageIndex;
+  FCSTree.OnFreeNode            := FTreeFreeNode;
+  FCSTree.OnChecked             := FTreeChecked;
+  FCSTree.OnBeforeGetCheckState := FTreeBeforeGetCheckState;
 
-  FTree.Header.Options               := FTree.Header.Options - [hoVisible];
-  FTree.TreeOptions.PaintOptions     := FTree.TreeOptions.PaintOptions
+  FCSTree.Header.Options               := FCSTree.Header.Options - [hoVisible];
+  FCSTree.TreeOptions.PaintOptions     := FCSTree.TreeOptions.PaintOptions
     + [toShowTreeLines];
-  FTree.TreeOptions.SelectionOptions := FTree.TreeOptions.SelectionOptions
+  FCSTree.TreeOptions.SelectionOptions := FCSTree.TreeOptions.SelectionOptions
     + [toMultiSelect];
-  FTree.Margins.Right := 0;
-  FTree.Images        := FImageList;
-  FTree.StateImages   := FImageList;
-  BuildTree;
+  FCSTree.Margins.Right := 0;
+  FCSTree.Images        := FImageList;
+  FCSTree.StateImages   := FImageList;
+  BuildTree(FCSTree);
+
+  FSSTree := TVirtualStringTreeFactory.CreateTree(Self, tsSourceSide);
+  FSSTree.OnGetText             := FTreeGetText;
+  FSSTree.OnGetImageIndex       := FTreeGetImageIndex;
+  FSSTree.OnFreeNode            := FTreeFreeNode;
+  FSSTree.OnChecked             := FTreeChecked;
+  FSSTree.OnBeforeGetCheckState := FTreeBeforeGetCheckState;
+
+  FSSTree.Header.Options               := FSSTree.Header.Options - [hoVisible];
+  FSSTree.TreeOptions.PaintOptions     := FSSTree.TreeOptions.PaintOptions
+    + [toShowTreeLines];
+  FSSTree.TreeOptions.SelectionOptions := FSSTree.TreeOptions.SelectionOptions
+    + [toMultiSelect];
+  FSSTree.Margins.Right := 0;
+  FSSTree.Images        := FImageList;
+  FSSTree.StateImages   := FImageList;
+  BuildTree(FSSTree, True);
 end;
 
 constructor TfrmMessageFilter.Create(AOwner: TComponent;
@@ -148,9 +174,11 @@ end;
 
 destructor TfrmMessageFilter.Destroy;
 begin
+  Logger.Track(Self, 'Destroy');
   FSettings.OnChanged.RemoveAll(Self);
   FSettings := nil;
-  FTree.Free;
+  FCSTree.Free;
+  FSSTree.Free;
   inherited Destroy;
 end;
 {$ENDREGION}
@@ -158,9 +186,9 @@ end;
 {$REGION 'event handlers'}
 procedure TfrmMessageFilter.FSettingsChanged(Sender: TObject);
 begin
-  if not FTree.Focused then
+  if not FCSTree.Focused then
   begin
-    FTree.Refresh;
+    FCSTree.Refresh;
   end;
 end;
 
@@ -206,7 +234,7 @@ begin
         Node.CheckState := csUncheckedNormal;
     end;
     if LUpdateParent then
-      UpdateParent(FN, Node.CheckState);
+      UpdateParent(Sender, FN, Node.CheckState);
   end;
 end;
 
@@ -250,9 +278,9 @@ begin
       FN.Data.MessageLevels;
   end;
   FSettings.Changed; // not automatically triggered!
-  UpdateChildren(FN, FN.VNode.CheckState);
+  UpdateChildren(Sender, FN, FN.VNode.CheckState);
   if FN.Level > 0 then
-    UpdateParent(FN, FN.VNode.CheckState);
+    UpdateParent(Sender, FN, FN.VNode.CheckState);
 end;
 
 procedure TfrmMessageFilter.FTreeFreeNode(Sender: TBaseVirtualTree;
@@ -294,7 +322,8 @@ end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
-procedure TfrmMessageFilter.BuildTree;
+procedure TfrmMessageFilter.BuildTree(ATree: TVirtualStringTree;
+  AIsSourceSide: Boolean);
 var
   LNode            : TFilterNode;
   LLogMessageLevel : TLogMessageLevel;
@@ -312,7 +341,7 @@ var
     else
     begin
       Result := TFilterNode.Create(
-        FTree, TFilterData.Create(ACaption, AMessageTypes)
+        ATree, TFilterData.Create(ACaption, AMessageTypes)
       );
     end;
     Result.ImageIndex := AImageIndex;
@@ -324,7 +353,7 @@ var
 
     if Result.Level = 1 then
     begin
-      UpdateParent(Result, Result.CheckState);
+      UpdateParent(ATree, Result, Result.CheckState);
     end;
   end;
 
@@ -341,7 +370,7 @@ var
     else
     begin
       Result := TFilterNode.Create(
-        FTree, TFilterData.Create(ACaption, AMessageLevels)
+        ATree, TFilterData.Create(ACaption, AMessageLevels)
       );
     end;
     Result.Data.Color := AColor;
@@ -357,7 +386,7 @@ var
 
     if Result.Level = 1 then
     begin
-      UpdateParent(Result, Result.CheckState);
+      UpdateParent(ATree, Result, Result.CheckState);
     end;
   end;
 
@@ -389,14 +418,17 @@ begin
 
   LNode := nil;
   LNode := AddMessageTypeNode(STextMessages, 24, [lmtText]);
-  AddMessageTypeNode('SQL', 27, [lmtText]);
-  AddMessageTypeNode('XML', 28, [lmtText]);
-  AddMessageTypeNode('INI', 0, [lmtText]);
-  AddMessageTypeNode('JSON', 26, [lmtText]);
-  FSettings.VisibleValueTypes.Add('SQL');
-  FSettings.VisibleValueTypes.Add('XML');
-  FSettings.VisibleValueTypes.Add('INI');
-  FSettings.VisibleValueTypes.Add('JSON');
+  if not AIsSourceSide then
+  begin
+    AddMessageTypeNode('SQL', 27, [lmtText]);
+    AddMessageTypeNode('XML', 28, [lmtText]);
+    AddMessageTypeNode('INI', 0, [lmtText]);
+    AddMessageTypeNode('JSON', 26, [lmtText]);
+    FSettings.VisibleValueTypes.Add('SQL');
+    FSettings.VisibleValueTypes.Add('XML');
+    FSettings.VisibleValueTypes.Add('INI');
+    FSettings.VisibleValueTypes.Add('JSON');
+  end;
 
   LNode := nil;
   LNode := AddMessageTypeNode(
@@ -419,13 +451,13 @@ begin
     );
   end;
 
-  FTree.FullExpand;
+  ATree.FullExpand;
 end;
 
 { Updates checkbox state of children if applicable. }
 
-function TfrmMessageFilter.UpdateChildren(ANode: TFilterNode;
-  ACheckState: TCheckState): Boolean;
+function TfrmMessageFilter.UpdateChildren(ATree: TBaseVirtualTree;
+  ANode: TFilterNode; ACheckState: TCheckState): Boolean;
 var
   N : TFilterNode;
   I : Integer;
@@ -436,8 +468,8 @@ begin
     begin
       N := ANode.Items[I];
       N.CheckState := ACheckState;
-      FTree.InvalidateNode(N.VNode);
-      UpdateChildren(N, ACheckState);
+      ATree.InvalidateNode(N.VNode);
+      UpdateChildren(ATree, N, ACheckState);
     end;
     Result := True;
   end
@@ -448,8 +480,8 @@ end;
 { Update checkstate of parent node between csChecked, csUnchecked and
   csMixedNormal.  }
 
-function TfrmMessageFilter.UpdateParent(ANode: TFilterNode;
-  ACheckState: TCheckState): Boolean;
+function TfrmMessageFilter.UpdateParent(ATree: TBaseVirtualTree;
+  ANode: TFilterNode; ACheckState: TCheckState): Boolean;
 var
   LFirstChild : PVirtualNode;
   LLastChild  : PVirtualNode;
@@ -474,8 +506,8 @@ begin
     else
     begin
       ANode.VNode.Parent.CheckState := csMixedNormal;
-    end;    
-    FTree.InvalidateNode(ANode.VNode.Parent);
+    end;
+    ATree.InvalidateNode(ANode.VNode.Parent);
     Result := B;
   end
   else

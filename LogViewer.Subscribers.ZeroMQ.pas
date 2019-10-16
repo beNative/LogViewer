@@ -34,11 +34,11 @@ type
     ISubscriber, IZmq, ILogMessageSubscriptionFilter
   )
   private
-    FEndPoint      : string;
-    FZmq           : IZeroMQ;
-    FSubscriber    : IZMQPair;
-    FPoll          : IZMQPoll;
-    FZmqStream     : TStringStream;
+    FEndPoint   : string;
+    FZmq        : IZeroMQ;
+    FSubscriber : IZMQPair;
+    FPoll       : IZMQPoll;
+    FZmqStream  : TStringStream;
 
     procedure CreateSubscriberSocket(const AEndPoint: string);
 

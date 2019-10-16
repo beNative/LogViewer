@@ -298,7 +298,6 @@ begin
   Guard.CheckNotNull(ASettings, 'ASettings');
   inherited Create(AOwner);
   FSettings := ASettings;
-  FSettings.OnChanged.UseFreeNotification := False;
   FSettings.OnChanged.Add(FSettingsChanged);
 end;
 
@@ -326,16 +325,20 @@ end;
 destructor TdmManager.Destroy;
 begin
   Logger.Track(Self, 'Destroy');
-  FSettings.OnChanged.RemoveAll(Self);
-  FSettings.Save;
   FActiveView     := nil;
+  FreeAndNil(FFilterView);
+  FSettings.OnChanged.RemoveAll(Self);
+  FViewList.OnChanged.RemoveAll(Self);
+  FViewList.Clear;
+  FSettings.Save;
+  FreeAndNil(FEvents);
+  FreeAndNil(FCommands);
   FViewList       := nil;
   FReceivers      := nil;
   FSettings       := nil;
   FEditorSettings := nil;
   FEditorManager  := nil;
-  FreeAndNil(FEvents);
-  FreeAndNil(FCommands);
+
   inherited Destroy;
 end;
 {$ENDREGION}
@@ -980,7 +983,6 @@ begin
   actText.Checked         := lmtText in MLS.VisibleMessageTypes;
   actDataSet.Checked      := lmtDataSet in MLS.VisibleMessageTypes;
   actAction.Checked       := lmtAction in MLS.VisibleMessageTypes;
-
 
   if B then
     ActiveView.UpdateView;

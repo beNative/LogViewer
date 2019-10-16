@@ -25,5 +25,27 @@ object frmMessageFilter: TfrmMessageFilter
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
+    object pgcMain: TKPageControl
+      Left = 0
+      Top = 0
+      Width = 167
+      Height = 627
+      ActivePageIndex = 0
+      Align = alClient
+      ParentBackground = False
+      TabOrder = 0
+      object tsClientSide: TKTabSheet
+        Caption = 'Client side'
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
+      end
+      object tsSourceSide: TKTabSheet
+        Caption = 'Source side'
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
+      end
+    end
   end
 end

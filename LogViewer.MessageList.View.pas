@@ -956,7 +956,6 @@ begin
   LFilter := edtMessageFilter.Text;
   if Assigned(LN) then
   begin
-    B := True;
     if (LN.MessageType = lmtText) and (LN.Highlighter <> '') then
     begin
       B := Settings.VisibleValueTypes.IndexOf(LN.Highlighter) <> -1;
