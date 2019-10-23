@@ -37,9 +37,10 @@ type
 type
   TfrmMessageFilter = class(TForm)
     pnlMessageFilter : TPanel;
-    pgcMain: TKPageControl;
-    tsClientSide: TKTabSheet;
-    tsSourceSide: TKTabSheet;
+    pgcMain          : TKPageControl;
+    tsClientSide     : TKTabSheet;
+    tsSourceSide     : TKTabSheet;
+
   private
     FCSTree    : TVirtualStringTree;
     FSSTree    : TVirtualStringTree;
@@ -437,7 +438,6 @@ begin
     [lmtCheckpoint, lmtCounter, lmtEnterMethod, lmtLeaveMethod]
   );
   AddMessageTypeNode(SCheckpoint, 7, [lmtCheckpoint]);
-  AddMessageTypeNode(SCounter, 23, [lmtCounter]);
   LNode := AddMessageTypeNode(STrackMethod, 9, [lmtEnterMethod, lmtLeaveMethod]);
   AddMessageTypeNode(SEnter, 4, [lmtEnterMethod]);
   AddMessageTypeNode(SLeave, 5, [lmtLeaveMethod]);

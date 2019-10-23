@@ -128,9 +128,18 @@ end;
 
 {$REGION 'event handlers'}
 procedure TZeroMQChannelReceiver.SettingsChanged(Sender: TObject);
+var
+  LSubscriber : ISubscriber;
 begin
   Enabled            := Settings.Enabled;
   PollTimer.Interval := Settings.PollingInterval;
+  for LSubscriber in SubscriberList.Values do
+  begin
+    (LSubscriber as ILogMessageSubscriptionFilter).LogMessageTypes :=
+      Settings.LogMessageTypes;
+    (LSubscriber as ILogMessageSubscriptionFilter).LogMessageLevels :=
+      Settings.LogMessageLevels;
+  end;
 end;
 {$ENDREGION}
 

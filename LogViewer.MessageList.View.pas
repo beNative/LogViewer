@@ -826,6 +826,8 @@ begin
   Allowed := True;
 end;
 
+{ Draws custom focus rectangle. }
+
 procedure TfrmMessageList.FLogTreeViewAfterItemPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; ItemRect: TRect);
 begin
@@ -861,7 +863,7 @@ var
 begin
   LN := Sender.GetNodeData<TLogNode>(Node);
   DVS := Manager.Settings.DisplayValuesSettings;
-  if (LN.MessageType in [lmtEnterMethod, lmtLeaveMethod])
+  if (LN.MessageType in TracingMessages)
     and ((Column = COLUMN_MAIN) or (Column = COLUMN_TIMESTAMP)) then
   begin
     DVS.Tracing.AssignTo(TargetCanvas);
@@ -901,7 +903,7 @@ begin
   begin
     // draw indentation background
     LIndent := Sender.GetNodeLevel(Node) * FLogTreeView.Indent;
-    LRect := CellRect;
+    LRect   := CellRect;
     Inc(LRect.Left, LIndent);
     LIndent := -Integer(FLogTreeView.Indent);
     LRect.Right := LRect.Left + Integer(FLogTreeView.Indent);
@@ -930,6 +932,8 @@ begin
           DVS.Warning.AssignTo(TargetCanvas);
         lmtConditional:
           DVS.Conditional.AssignTo(TargetCanvas);
+        lmtCheckpoint:
+          DVS.CheckPoint.AssignTo(TargetCanvas);
       end;
       TargetCanvas.FillRect(LRect);
     end;
@@ -1182,9 +1186,10 @@ begin
     end;
     lmtCheckpoint:
     begin
-      I := LText.IndexOf('#');
-      LName := Copy(LText, 1, I);
-      LValue := Copy(LText, I + 2, LText.Length);
+//      I      := LText.IndexOf('#');
+//      LName  := Copy(LText, 1, I);
+//      LValue := Copy(LText, I + 2, LText.Length);
+      LN.Text := LText;
     end
   end; // case LN.MessageType of
   LN.ValueName := LName;

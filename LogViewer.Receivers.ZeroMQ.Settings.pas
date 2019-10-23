@@ -23,7 +23,9 @@ interface
 uses
   System.Classes,
 
-  Spring;
+  Spring,
+
+  DDuce.Logger.Interfaces;
 
 type
   TZeroMQSettings = class(TPersistent)
@@ -32,11 +34,13 @@ type
     DEFAULT_POLLING_TIMEOUT  = 10;
 
   private
-    FOnChanged       : Event<TNotifyEvent>;
-    FEnabled         : Boolean;
-    FEndpoints       : TStrings;
-    FPollingInterval : Integer;
-    FPollingTimeout  : Integer;
+    FOnChanged        : Event<TNotifyEvent>;
+    FEnabled          : Boolean;
+    FEndpoints        : TStrings;
+    FPollingInterval  : Integer;
+    FPollingTimeout   : Integer;
+    FLogMessageTypes  : TLogMessageTypes;
+    FLogMessageLevels : TLogMessageLevels;
 
   protected
     {$REGION 'property access methods'}
@@ -48,6 +52,10 @@ type
     function GetEnabled: Boolean;
     procedure SetEnabled(const Value: Boolean);
     function GetOnChanged: IEvent<TNotifyEvent>;
+    function GetLogMessageLevels: TLogMessageLevels;
+    function GetLogMessageTypes: TLogMessageTypes;
+    procedure SetLogMessageLevels(const Value: TLogMessageLevels);
+    procedure SetLogMessageTypes(const Value: TLogMessageTypes);
     {$ENDREGION}
 
     procedure Changed;
@@ -60,6 +68,12 @@ type
 
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
+
+    property LogMessageTypes: TLogMessageTypes
+      read GetLogMessageTypes write SetLogMessageTypes;
+
+    property LogMessageLevels: TLogMessageLevels
+      read GetLogMessageLevels write SetLogMessageLevels;
 
   published
     property Enabled: Boolean
@@ -75,6 +89,7 @@ type
 
     property Endpoints: TStrings
       read GetEndpoints;
+
   end;
 
 implementation
@@ -83,9 +98,11 @@ implementation
 procedure TZeroMQSettings.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FEndpoints       := TStringList.Create;
-  FPollingInterval := DEFAULT_POLLING_INTERVAL;
-  FPollingTimeout  := DEFAULT_POLLING_TIMEOUT;
+  FEndpoints        := TStringList.Create;
+  FPollingInterval  := DEFAULT_POLLING_INTERVAL;
+  FPollingTimeout   := DEFAULT_POLLING_TIMEOUT;
+  FLogMessageTypes  := AllMessages;
+  FLogMessageLevels := AllLevels;
 end;
 
 destructor TZeroMQSettings.Destroy;
@@ -104,6 +121,34 @@ end;
 function TZeroMQSettings.GetEndpoints: TStrings;
 begin
   Result := FEndpoints;
+end;
+
+function TZeroMQSettings.GetLogMessageLevels: TLogMessageLevels;
+begin
+  Result := FLogMessageLevels;
+end;
+
+procedure TZeroMQSettings.SetLogMessageLevels(const Value: TLogMessageLevels);
+begin
+  if Value <> LogMessageLevels then
+  begin
+    FLogMessageLevels := Value;
+    Changed;
+  end;
+end;
+
+function TZeroMQSettings.GetLogMessageTypes: TLogMessageTypes;
+begin
+  Result := FLogMessageTypes;
+end;
+
+procedure TZeroMQSettings.SetLogMessageTypes(const Value: TLogMessageTypes);
+begin
+  if Value <> LogMessageTypes then
+  begin
+    FLogMessageTypes := Value;
+    Changed;
+  end;
 end;
 
 function TZeroMQSettings.GetPollingInterval: Integer;
@@ -163,10 +208,12 @@ var
 begin
   if Source is TZeroMQSettings then
   begin
-    LSettings       := TZeroMQSettings(Source);
-    Enabled         := LSettings.Enabled;
-    PollingInterval := LSettings.PollingInterval;
-    PollingTimeout  := LSettings.PollingTimeout;
+    LSettings        := TZeroMQSettings(Source);
+    Enabled          := LSettings.Enabled;
+    PollingInterval  := LSettings.PollingInterval;
+    PollingTimeout   := LSettings.PollingTimeout;
+    LogMessageTypes  := LSettings.LogMessageTypes;
+    LogMessageLevels := LSettings.LogMessageLevels;
     FEndpoints.Assign(LSettings.Endpoints);
   end
   else

@@ -1,9 +1,9 @@
 {
 	"FormSettings": {
-		"Left": 559,
-		"Top": 131,
+		"Left": 724,
+		"Top": 88,
 		"Width": 1726,
-		"Height": 1084,
+		"Height": 1202,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -129,11 +129,11 @@
 			"VerticalAlignment": 0
 		},
 		"CheckPoint": {
-			"BackgroundColor": 16777215,
+			"BackgroundColor": 32768,
 			"FontName": "Segoe UI",
-			"FontColor": 32768,
+			"FontColor": 16777215,
 			"FontSize": 8,
-			"FontStyle": "",
+			"FontStyle": "fsBold",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
