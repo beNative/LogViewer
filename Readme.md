@@ -38,7 +38,7 @@ The DDuce demo application demonstrates the currently supported message types.
 - Native value types with type information
 - Text with suppport for multiple highlighters
 - Actions
-- Up to 255 logging levels
+- Up to 32 logging levels
 
 ## Overview
 A mindmap with a technical overview of the application: [LogViewer.xmind](https://github.com/beNative/LogViewer/blob/master/Documents/LogViewer.xmind)
