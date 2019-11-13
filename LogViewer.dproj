@@ -105,9 +105,6 @@
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <AppEnableHighDPI>true</AppEnableHighDPI>
         <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.8.58.304;ProductName=LogViewer;ProductVersion=1.8.58;ProgramID=com.embarcadero.$(MSBuildProjectName);LegalCopyright=2013 - 2019 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
-        <DCC_IntegerOverflowCheck>true</DCC_IntegerOverflowCheck>
-        <DCC_RangeChecking>true</DCC_RangeChecking>
-        <DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
