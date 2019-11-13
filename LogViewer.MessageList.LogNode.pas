@@ -81,7 +81,9 @@ type
     {$ENDREGION}
 
   public
+
     procedure BeforeDestruction; override;
+    procedure AfterConstruction; override;
 
     property VTNode: PVirtualNode
       read GetVTNode write SetVTNode;
@@ -128,6 +130,13 @@ uses
   System.SysUtils;
 
 {$REGION 'construction and destruction'}
+procedure TLogNode.AfterConstruction;
+begin
+  inherited AfterConstruction;
+  FMessageData := TMemoryStream.Create;
+
+end;
+
 procedure TLogNode.BeforeDestruction;
 begin
   if Assigned(FMessageData) then

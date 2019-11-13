@@ -162,6 +162,7 @@ begin
     begin
       FZmqStream.WriteString(FSubscriber.ReceiveString);
       DoReceiveMessage(FZmqStream);
+      Logger.Send('ZMQStreamSize', FZmqStream.Size);
       FZmqStream.Clear;
     end
   );

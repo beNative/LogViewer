@@ -333,6 +333,8 @@ begin
   CDS                  := TFactories.CreateColumnDefinitions;
   CD                   := CDS.Add(COLUMNNAME_NAME);
   CD.ValuePropertyName := COLUMNNAME_NAME;
+  CD.MinWidth          := 20;
+  CD.Width             := 40;
   CD.HintPropertyName  := CD.ValuePropertyName;
   CD.OnCustomDraw      := FCDNameCustomDraw;
 
@@ -468,6 +470,7 @@ end;
 
 procedure TfrmWatchesView.UpdateView(AMessageId: Int64);
 begin
+  Logger.Track(Self, 'UpdateView');
   FMessageId := AMessageId;
   FWatches.Update(AMessageId);
   FVSTWatchValues.Invalidate;
@@ -485,11 +488,11 @@ begin
       FWatchHistoryColumnDefinitions
     );
     ConnectWatchHistoryCDEvents;
+    FTVPWatchHistory.EndUpdate;
     if SelectedWatch.Count > 0 then
     begin
       FTVPWatchHistory.SelectedItem := SelectedWatch.CurrentWatchValue;
     end;
-    FTVPWatchHistory.EndUpdate;
   end
   else
   begin

@@ -242,8 +242,6 @@ destructor TfrmMain.Destroy;
 begin
   Logger.Track(Self, 'Destroy');
   tmrPoll.Enabled := False;
-  Logger.SendIf('Manager is not assigned!', not Assigned(Manager));
-  Manager.Receivers.Clear;
   Events.OnDeleteLogViewer.RemoveAll(Self);
   Events.OnAddLogViewer.RemoveAll(Self);
   Events.OnActiveViewChange.RemoveAll(Self);

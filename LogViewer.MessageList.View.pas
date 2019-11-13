@@ -427,6 +427,7 @@ begin
                          // manager instance or the parent control.
   FEditorView := nil;
   FCallStack  := nil;
+  FreeAndNil(FCurrentMsg.Data);
   FreeAndNil(FValueList);
   FreeAndNil(FDataSetView);
   FreeAndNil(FImageView);
@@ -1128,7 +1129,18 @@ var
 begin
   LN := TLogNode.Create;
   Node.SetData(LN);
-  LN.MessageData := FCurrentMsg.Data;
+  //LN.MessageData := FCurrentMsg.Data;
+//      FCurrentMsg.Data.Size     := 0;
+//    FCurrentMsg.Data.Position := 0;
+//    FCurrentMsg.Data.CopyFrom(AStream, LDataSize);
+  if Assigned(FCurrentMsg.Data) then
+  begin
+    FCurrentMsg.Data.Position := 0;
+    Logger.Send('DataSize', FCurrentMsg.Data.Size);
+    LN.MessageData.CopyFrom(FCurrentMsg.Data, FCurrentMsg.Data.Size);
+    FreeAndNil(FCurrentMsg.Data);
+  end;
+
   LN.TimeStamp   := FCurrentMsg.TimeStamp;
   LN.MessageType := TLogMessageType(FCurrentMsg.MsgType);
   LN.VTNode      := Node;
@@ -1608,16 +1620,24 @@ begin
     LText := string(FCurrentMsg.Text);
   end;
   AStream.ReadBuffer(LDataSize);
+  Logger.Info('DataSize = %d', [LDataSize]);
   if LDataSize > 0 then
   begin
+
+    if Assigned(FCurrentMsg.Data) then
+      FCurrentMsg.Data.Free;
+
     FCurrentMsg.Data          := TMemoryStream.Create;
     FCurrentMsg.Data.Size     := 0;
     FCurrentMsg.Data.Position := 0;
     FCurrentMsg.Data.CopyFrom(AStream, LDataSize);
+    Logger.Info('FCurrentMsg.Data.Size = %d', [FCurrentMsg.Data.Size]);
   end
   else
-    FCurrentMsg.Data := nil;
-
+  begin
+    FreeAndNil(FCurrentMsg.Data);
+    //FCurrentMsg.Data := nil;
+  end;
   case TLogMessageType(FCurrentMsg.MsgType) of
     lmtCounter:
     begin
