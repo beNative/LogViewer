@@ -60,9 +60,9 @@ type
     procedure SettingsChanged(Sender: TObject);
     // event called when message is received
     procedure FMQTTPublish(
-      Sender   : TObject;
-      ATopic   : UTF8String;
-      APayload : UTF8String
+      Sender         : TObject;
+      const ATopic   : UTF8String;
+      const APayload : UTF8String
     );
 
 //    function CreateSubscriber(
@@ -107,22 +107,13 @@ end;
 
 destructor TMqttChannelReceiver.Destroy;
 begin
-//  if FMQTT.IsValueCreated then
-//  begin
-//    FMQTT.Value.Free; // we need to do an explicit call to Free
-//  end;
-  if Assigned(FMQTT) then
-  begin
-    FMQTT.OnPublish := nil;
-    FreeAndNil(FMQTT);
-  end;
-  //FMQTT.Free;
+  FMQTT.Free;
   inherited Destroy;
 end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
-procedure TMqttChannelReceiver.FMQTTPublish(Sender: TObject; ATopic,
+procedure TMqttChannelReceiver.FMQTTPublish(Sender: TObject; const ATopic,
   APayload: UTF8String);
 begin
 //  Logger.Send('ATopic', ATopic);
@@ -140,12 +131,12 @@ procedure TMqttChannelReceiver.SetEnabled(const Value: Boolean);
 begin
   if Value <> Enabled then
   begin
-    if Value {and not MQTT.Connected }then
+    if Value  then
     begin
       Connect;
       MQTT.Subscribe('#', 0);
     end
-    else if not Value {and MQTT.Connected} then
+    else if not Value then
     begin
       if Assigned(FMQTT) then
       begin
@@ -154,7 +145,6 @@ begin
     end;
   end;
   inherited SetEnabled(Value);
-  //inherited SetEnabled(MQTT.Connected);
 end;
 
 function TMqttChannelReceiver.GetSettings: TMQTTSettings;
@@ -181,9 +171,6 @@ begin
   FMQTT.OnPublish := FMQTTPublish;
   FMQTT.WillTopic := 'a'; // required by some brokers
   FMQTT.WillMsg := 'a';   // required by some brokers
-  if FMQTT.Connect then
-  begin
-  end;
 end;
 {$ENDREGION}
 

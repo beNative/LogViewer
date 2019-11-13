@@ -5,7 +5,7 @@ object frmMessageFilter: TfrmMessageFilter
   BorderStyle = bsSizeToolWin
   Caption = 'Message filter'
   ClientHeight = 627
-  ClientWidth = 167
+  ClientWidth = 215
   Color = clBtnFace
   DoubleBuffered = True
   ParentFont = True
@@ -18,27 +18,27 @@ object frmMessageFilter: TfrmMessageFilter
   object pnlMessageFilter: TPanel
     Left = 0
     Top = 0
-    Width = 167
+    Width = 215
     Height = 627
     Align = alClient
     BevelOuter = bvNone
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
+    ExplicitWidth = 167
     object pgcMain: TKPageControl
       Left = 0
       Top = 0
-      Width = 167
+      Width = 215
       Height = 627
       ActivePageIndex = 0
       Align = alClient
       ParentBackground = False
       TabOrder = 0
+      ExplicitWidth = 167
       object tsClientSide: TKTabSheet
         Caption = 'Client side'
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
+        ExplicitWidth = 167
       end
       object tsSourceSide: TKTabSheet
         Caption = 'Source side'

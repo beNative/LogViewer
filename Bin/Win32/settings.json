@@ -1,21 +1,21 @@
 {
 	"FormSettings": {
-		"Left": 724,
-		"Top": 88,
-		"Width": 1726,
+		"Left": 406,
+		"Top": 155,
+		"Width": 1858,
 		"Height": 1202,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
 	"MessageListSettings": {
-		"AutoScrollMessages": true,
+		"AutoScrollMessages": false,
 		"AutoFilterMessages": true,
 		"ColumnHeadersVisible": true,
 		"DynamicAutoSizeColumns": true,
 		"MessageDetailsVisible": true,
 		"SmartTimeStamps": true,
 		"HorizontalPanelPositions": [
-			0.215176151761518,
+			0.269272529858849,
 			0.695906432748538,
 			1
 		],
@@ -38,14 +38,14 @@
 		"Endpoints": "default localhost=tcp://localhost:5555\r\nlocalhost2=tcp://localhost:5595\r\nLogViewer=tcp://localhost:42134\r\nGANYMEDES=tcp://192.168.0.107:5555\r\n"
 	},
 	"MqttSettings": {
-		"Broker": "localhost",
+		"Broker": "192.168.0.219",
 		"Port": 1883,
 		"Enabled": false,
 		"Endpoints": ""
 	},
 	"FileSystemSettings": {
 		"Enabled": false,
-		"PathNames": "test.txt=tcp://localhost:5555\r\nC:\\Tools\\doublecmd\\doublecmd_2019-06-19.log=tcp://localhost:5556\r\n"
+		"PathNames": "test.txt=tcp://localhost:5555\r\nC:\\Tools\\doublecmd\\doublecmd_2019-11-06.log=tcp://localhost:5556\r\n"
 	},
 	"DisplayValuesSettings": {
 		"Id": {

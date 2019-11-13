@@ -188,6 +188,11 @@ type
       var AName  : string;
       var AValue : TValue
     );
+    procedure FMqttTopicsExecuteItem(
+      ASender    : TObject;
+      var AName  : string;
+      var AValue : TValue
+    );
     procedure FFSLocationsAdd(
       ASender    : TObject;
       var AName  : string;
@@ -277,6 +282,7 @@ uses
 
   LogViewer.Factories, LogViewer.Resources,
   LogViewer.Subscribers.ZeroMQ, LogViewer.Subscribers.FileSystem,
+  LogViewer.Subscribers.Mqtt,
   LogViewer.Receivers.Base;
 
 {$REGION 'construction and destruction'}
@@ -305,6 +311,8 @@ begin
   FMqttTopics.OnAdd.Add(FMQTTSubscriptionsAdd);
   FMqttTopics.ValueList.BorderStyle := bsNone;
   FMqttTopics.ActionExecute.Caption := SSubscribe;
+  FMqttTopics.OnExecuteItem.Add(FMqttTopicsExecuteItem);
+  FMqttTopics.OnExecute.Add(FMqttTopicsExecuteItem);
 
   FComPorts := TEditList.Create(Self, pnlCOMPorts);
   FComPorts.ValueList.BorderStyle := bsNone;
@@ -851,6 +859,31 @@ procedure TfrmDashboard.FMQTTSubscriptionsAdd(ASender: TObject;
 begin
 //
 end;
+
+
+procedure TfrmDashboard.FMqttTopicsExecuteItem(ASender: TObject;
+  var AName: string; var AValue: TValue);
+var
+  LSubscriber : ISubscriber;
+  LEndPoint   : string;
+  LName       : string;
+begin
+  LEndPoint   := AValue.ToString;
+  LName       := AName;
+//  LSubscriber := TMqttSubscriber.Create(
+//    FMqttReceiver,
+//
+//    FZeroMQ,
+//    LEndPoint,
+//    0,         // ASourceId
+//    LEndPoint, // AKey
+//    LName,     // ASourceName
+//    FMqttReceiver.Enabled
+//  );
+  FMqttReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
+  Modified;
+end;
+
 {$ENDREGION}
 
 procedure TfrmDashboard.FReceiverChange(Sender: TObject);
@@ -900,9 +933,9 @@ begin
   CreateWinipcReceiver;
   CreateZeroMQReceiver;
   //CreateWinodsReceiver;
-  //CreateMqttReceiver;
-  //CreateComPortReceiver;
-  //CreateFileSystemReceiver;
+  CreateMqttReceiver;
+  CreateComPortReceiver;
+  CreateFileSystemReceiver;
   //CreateMidiReceiver;
 
   FTreeView.FullExpand;

@@ -175,6 +175,8 @@ end;
 destructor TfrmWatchesView.Destroy;
 begin
   FSettings.OnChanged.RemoveAll(Self);
+  FTVPWatchValues.View.ItemsSource := nil;
+  FTVPWatchHistory.View.ItemsSource := nil;
   FTVPWatchValues.Free;
   FTVPWatchHistory.Free;
   FWatches.Clear;
@@ -348,13 +350,15 @@ begin
   CD                   := CDS.Add(COLUMNNAME_VALUETYPE);
   CD.ValuePropertyName := COLUMNNAME_VALUETYPE;
   CD.HintPropertyName  := CD.ValuePropertyName;
+  CD.MinWidth          := 0;
+  CD.Width             := 60;
   CD.Caption           := SType;
   CD.OnCustomDraw      := FCDTypeCustomDraw;
 
   CD                   := CDS.Add(COLUMNNAME_TIMESTAMP);
-  CD.MinWidth          := 68;
-  CD.Width             := 68;
   CD.ValuePropertyName := COLUMNNAME_TIMESTAMP;
+  CD.MinWidth          := 80;
+  CD.Width             := 80;
   CD.HintPropertyName  := CD.ValuePropertyName;
   CD.Alignment         := taCenter;
   CD.OnGetText         := FCDTimeStampGetText;
@@ -364,7 +368,7 @@ begin
   CD                   := FWatchHistoryColumnDefinitions.Add(COLUMNNAME_ID);
   CD.ValuePropertyName := COLUMNNAME_ID;
   CD.HintPropertyName  := CD.ValuePropertyName;
-  CD.Width             := 50;
+  CD.Width             := 40;
   CD.OnCustomDraw      := FCDIdCustomDraw;
 
   CD                   := FWatchHistoryColumnDefinitions.Add(COLUMNNAME_VALUE);
@@ -375,8 +379,8 @@ begin
   CD.ColumnOptions     := CD.ColumnOptions - [coSortable];
 
   CD                   := FWatchHistoryColumnDefinitions.Add(COLUMNNAME_TIMESTAMP);
-  CD.MinWidth          := 68;
-  CD.Width             := 68;
+  CD.MinWidth          := 80;
+  CD.Width             := 80;
   CD.ValuePropertyName := COLUMNNAME_TIMESTAMP;
   CD.HintPropertyName  := CD.ValuePropertyName;
   CD.Alignment         := taCenter;

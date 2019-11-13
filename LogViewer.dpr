@@ -73,7 +73,8 @@ uses
   LogViewer.DisplayValues.Settings.ValueManager in 'LogViewer.DisplayValues.Settings.ValueManager.pas',
   LogViewer.LogLevels.Settings in 'LogViewer.LogLevels.Settings.pas',
   LogViewer.LogLevels.Settings.View in 'LogViewer.LogLevels.Settings.View.pas' {frmLogLevelSettings},
-  LogViewer.WinipcBroker in 'LogViewer.WinipcBroker.pas';
+  LogViewer.WinipcBroker in 'LogViewer.WinipcBroker.pas',
+  LogViewer.Subscribers.MQTT in 'LogViewer.Subscribers.MQTT.pas';
 
 {$R *.res}
 

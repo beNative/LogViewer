@@ -148,7 +148,7 @@ begin
   FSSTree.OnGetText             := FTreeGetText;
   FSSTree.OnGetImageIndex       := FTreeGetImageIndex;
   FSSTree.OnFreeNode            := FTreeFreeNode;
-  FSSTree.OnChecked             := FTreeChecked;
+//  FSSTree.OnChecked             := FTreeChecked;
   FSSTree.OnBeforeGetCheckState := FTreeBeforeGetCheckState;
 
   FSSTree.Header.Options               := FSSTree.Header.Options - [hoVisible];
@@ -423,7 +423,7 @@ begin
   begin
     AddMessageTypeNode('SQL', 27, [lmtText]);
     AddMessageTypeNode('XML', 28, [lmtText]);
-    AddMessageTypeNode('INI', 0, [lmtText]);
+    AddMessageTypeNode('INI', 30, [lmtText]);
     AddMessageTypeNode('JSON', 26, [lmtText]);
     FSettings.VisibleValueTypes.Add('SQL');
     FSettings.VisibleValueTypes.Add('XML');
@@ -478,7 +478,7 @@ begin
 end;
 
 { Update checkstate of parent node between csChecked, csUnchecked and
-  csMixedNormal.  }
+  csMixedNormal. }
 
 function TfrmMessageFilter.UpdateParent(ATree: TBaseVirtualTree;
   ANode: TFilterNode; ACheckState: TCheckState): Boolean;

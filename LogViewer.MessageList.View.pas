@@ -1186,9 +1186,6 @@ begin
     end;
     lmtCheckpoint:
     begin
-//      I      := LText.IndexOf('#');
-//      LName  := Copy(LText, 1, I);
-//      LValue := Copy(LText, I + 2, LText.Length);
       LN.Text := LText;
     end
   end; // case LN.MessageType of
