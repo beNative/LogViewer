@@ -175,7 +175,7 @@ end;
 destructor TfrmWatchesView.Destroy;
 begin
   FSettings.OnChanged.RemoveAll(Self);
-  FTVPWatchValues.View.ItemsSource := nil;
+  FTVPWatchValues.View.ItemsSource  := nil;
   FTVPWatchHistory.View.ItemsSource := nil;
   FTVPWatchValues.Free;
   FTVPWatchHistory.Free;
@@ -470,10 +470,10 @@ end;
 
 procedure TfrmWatchesView.UpdateView(AMessageId: Int64);
 begin
-  Logger.Track(Self, 'UpdateView');
   FMessageId := AMessageId;
   FWatches.Update(AMessageId);
   FVSTWatchValues.Invalidate;
+  FVSTWatchHistory.Invalidate;
 end;
 
 procedure TfrmWatchesView.UpdateWatchHistory;

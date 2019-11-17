@@ -101,7 +101,7 @@ begin
   FZmq := TZeroMQ.Create;
   Settings.OnChanged.Add(SettingsChanged);
   SubscriberList.OnValueChanged.Add(SubscriberListChanged);
-  PollTimer.Interval := 10;
+  PollTimer.Interval := 1000; // Should be > 10 or windows message queue will be overloaded.
   PollTimer.Enabled  := True;
 end;
 

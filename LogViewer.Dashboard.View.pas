@@ -933,9 +933,9 @@ begin
   CreateWinipcReceiver;
   CreateZeroMQReceiver;
   //CreateWinodsReceiver;
-  CreateMqttReceiver;
-  CreateComPortReceiver;
-  CreateFileSystemReceiver;
+//  CreateMqttReceiver;
+//  CreateComPortReceiver;
+//  CreateFileSystemReceiver;
   //CreateMidiReceiver;
 
   FTreeView.FullExpand;

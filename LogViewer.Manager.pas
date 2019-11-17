@@ -646,7 +646,7 @@ end;
 procedure TdmManager.SetActiveView(const Value: ILogViewer);
 begin
   Logger.Track(Self, 'SetActiveView');
-  if Assigned(Value) and (Value <> FActiveView) then
+  if Assigned(Value) {and (Value <> FActiveView) }then
   begin
     FActiveView := Value;
     if Assigned(FActiveView.Target) then

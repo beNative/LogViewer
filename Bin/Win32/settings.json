@@ -1,9 +1,9 @@
 {
 	"FormSettings": {
-		"Left": 0,
-		"Top": 76,
-		"Width": 2576,
-		"Height": 1086,
+		"Left": 448,
+		"Top": 114,
+		"Width": 1995,
+		"Height": 1127,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -15,8 +15,8 @@
 		"MessageDetailsVisible": true,
 		"SmartTimeStamps": true,
 		"HorizontalPanelPositions": [
-			0.300217155266015,
-			0.695906432748538,
+			0.261748357756443,
+			0.683173319858514,
 			1
 		],
 		"LeftVerticalPanelPositions": [
@@ -28,7 +28,7 @@
 		"Enabled": true
 	},
 	"WinipcSettings": {
-		"Enabled": false,
+		"Enabled": true,
 		"PollingInterval": 100
 	},
 	"ZeroMQSettings": {
@@ -193,7 +193,7 @@
 		"ColumnHeadersVisible": false,
 		"OnlyTrackChanges": true,
 		"WatchHistoryVisible": true,
-		"SyncWithSelection": true
+		"SyncWithSelection": false
 	},
 	"CallStackSettings": {
 		"ColumnHeadersVisible": false

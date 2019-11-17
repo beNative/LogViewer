@@ -145,6 +145,10 @@ resourcestring
   SReceiverCaptionFileSystem = 'File system receiver';
   SReceiverCaptionMIDI       = 'MIDI receiver';
 
+// main form
+  SReceivedCount    = 'Received: <b>%d</b>';
+  SSubscriberSource = '<x=4>Source:</x> <b>%s</b> (%d)';
+
   // message viewer
 const
   COLUMN_LEVEL     = 0;

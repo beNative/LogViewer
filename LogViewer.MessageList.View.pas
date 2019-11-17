@@ -943,6 +943,8 @@ end;
 
 procedure TfrmMessageList.FLogTreeViewFocusChanged(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex);
+var
+  LN      : TLogNode;
 begin
   if FUpdate then
     UpdateActions
@@ -1129,18 +1131,12 @@ var
 begin
   LN := TLogNode.Create;
   Node.SetData(LN);
-  //LN.MessageData := FCurrentMsg.Data;
-//      FCurrentMsg.Data.Size     := 0;
-//    FCurrentMsg.Data.Position := 0;
-//    FCurrentMsg.Data.CopyFrom(AStream, LDataSize);
   if Assigned(FCurrentMsg.Data) then
   begin
     FCurrentMsg.Data.Position := 0;
-    Logger.Send('DataSize', FCurrentMsg.Data.Size);
     LN.MessageData.CopyFrom(FCurrentMsg.Data, FCurrentMsg.Data.Size);
     FreeAndNil(FCurrentMsg.Data);
   end;
-
   LN.TimeStamp   := FCurrentMsg.TimeStamp;
   LN.MessageType := TLogMessageType(FCurrentMsg.MsgType);
   LN.VTNode      := Node;
@@ -1367,7 +1363,6 @@ procedure TfrmMessageList.EnsureCurrentViewIsActiveViewWhenFocused;
 var
   B : Boolean;
 begin
-  Logger.Track(Self, 'EnsureCurrentViewIsActiveViewWhenFocused');
   B := Focused;
   if not B and Assigned(Parent) then
   begin
@@ -1620,23 +1615,18 @@ begin
     LText := string(FCurrentMsg.Text);
   end;
   AStream.ReadBuffer(LDataSize);
-  Logger.Info('DataSize = %d', [LDataSize]);
   if LDataSize > 0 then
   begin
-
     if Assigned(FCurrentMsg.Data) then
       FCurrentMsg.Data.Free;
-
     FCurrentMsg.Data          := TMemoryStream.Create;
     FCurrentMsg.Data.Size     := 0;
     FCurrentMsg.Data.Position := 0;
     FCurrentMsg.Data.CopyFrom(AStream, LDataSize);
-    Logger.Info('FCurrentMsg.Data.Size = %d', [FCurrentMsg.Data.Size]);
   end
   else
   begin
     FreeAndNil(FCurrentMsg.Data);
-    //FCurrentMsg.Data := nil;
   end;
   case TLogMessageType(FCurrentMsg.MsgType) of
     lmtCounter:
@@ -1772,7 +1762,6 @@ var
   LN2 : TLogNode;
   VN  : PVirtualNode;
 begin
-  Logger.Track(Self, 'UpdateCallStackDisplay');
   Guard.CheckNotNull(ALogNode, 'ALogNode');
   FCallStack.Clear;
   LN2 := nil;

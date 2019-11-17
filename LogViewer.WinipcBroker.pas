@@ -133,7 +133,7 @@ begin
   // a pointer to the window procedure
   FWndClass.lpfnWndProc   := @ThreadWindowProc;
   // the handle to the application instance
-    FWndClass.hInstance := HInstance;
+  FWndClass.hInstance     := HInstance;
   // string that identifies the window class
   FWndClass.lpszClassName := MSG_WND_CLASSNAME;
 end;

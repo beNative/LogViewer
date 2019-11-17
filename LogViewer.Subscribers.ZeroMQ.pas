@@ -90,7 +90,8 @@ end;
 
 destructor TZmqSubscriber.Destroy;
 begin
-  FZmqStream.Free;
+  Logger.Track(Self, 'Destroy');
+  FreeAndNil(FZmqStream);
   FSubscriber.Close;
   FPoll       := nil;
   FSubscriber := nil;
@@ -162,7 +163,6 @@ begin
     begin
       FZmqStream.WriteString(FSubscriber.ReceiveString);
       DoReceiveMessage(FZmqStream);
-      Logger.Send('ZMQStreamSize', FZmqStream.Size);
       FZmqStream.Clear;
     end
   );

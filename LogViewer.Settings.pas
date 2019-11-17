@@ -126,10 +126,8 @@ uses
 procedure TLogViewerSettings.AfterConstruction;
 begin
   inherited AfterConstruction;
-  FOnChanged.UseFreeNotification := False;
   FFileName              := 'settings.json';
   FFormSettings          := TFormSettings.Create;
-  FFormSettings.OnChanged.UseFreeNotification := False;
   FFormSettings.OnChanged.Add(FormSettingsChanged);
   FMessageListSettings   := TMessageListSettings.Create;
   FWinodsSettings        := TWinodsSettings.Create;
@@ -141,15 +139,15 @@ begin
   FWatchSettings         := TWatchSettings.Create;
   FCallStackSettings     := TCallStackSettings.Create;
   FDisplayValuesSettings := TDisplayValuesSettings.Create;
-  FDisplayValuesSettings.OnChanged.UseFreeNotification := False;
   FDisplayValuesSettings.OnChanged.Add(DisplayValuesSettingsChanged);
   FLogLevelSettings      := TLogLevelSettings.Create;
 end;
 
 procedure TLogViewerSettings.BeforeDestruction;
 begin
-  Logger.Track(Self, 'BeforeDestruction');
-  FDisplayValuesSettings.OnChanged.Remove(DisplayValuesSettingsChanged);
+  //Logger.Track(Self, 'BeforeDestruction');
+  FDisplayValuesSettings.OnChanged.RemoveAll(Self);
+  FFormSettings.OnChanged.RemoveAll(Self);
   FreeAndNil(FDisplayValuesSettings);
   FreeAndNil(FWatchSettings);
   FreeAndNil(FCallStackSettings);
@@ -160,7 +158,6 @@ begin
   FreeAndNil(FWinipcSettings);
   FreeAndNil(FWinodsSettings);
   FreeAndNil(FMessageListSettings);
-  FFormSettings.OnChanged.Remove(FormSettingsChanged);
   FreeAndNil(FFormSettings);
   FreeAndNil(FLogLevelSettings);
   inherited BeforeDestruction;

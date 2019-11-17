@@ -164,8 +164,9 @@ uses
   Spring.Utils,
 
   DDuce.Factories.VirtualTrees,
+  DDuce.Logger, DDuce.Utils.Winapi,
 
-  DDuce.Logger, DDuce.Utils.Winapi;
+  LogViewer.Resources;
 
 {$REGION 'non-interfaced routines'}
 { Extracts the ZMQ library form resources if it does not exist. }
@@ -247,7 +248,7 @@ begin
   Events.OnActiveViewChange.RemoveAll(Self);
   Events.OnShowDashboard.RemoveAll(Self);
   FSettings.FormSettings.Assign(Self);
-  FSettings.OnChanged.RemoveAll(Self);
+//  FSettings.OnChanged.RemoveAll(Self);
   FManager := nil;
   FreeAndNil(FDashboard); // needs to be freed before manager!
   inherited Destroy; // will destroy manager object as the mainform is its owner
@@ -303,6 +304,7 @@ begin
     MV.Form.Show;
     MV.Form.SetFocus;
     UpdateStatusBar;
+    Manager.ActiveView := MV;
     OptimizeStatusBarPanelWidths;
   end;
 end;
@@ -430,10 +432,6 @@ procedure TfrmMain.tmrPollTimer(Sender: TObject);
 begin
   pbrCPU.Position   := Round(GetProcessCpuUsagePct(GetCurrentProcessId));
   pnlMemory.Caption := FormatBytes(MemoryUsed);
-//  if Assigned(ctMain.ActiveTab) and (ctMain.ActiveTab = FDashboardTab) then
-//  begin
-//    FDashboard.Update;
-//  end;
 end;
 
 procedure TfrmMain.FormShortCut(var Msg: TWMKey; var Handled: Boolean);
@@ -485,10 +483,9 @@ var
   LCanvas : Shared<TControlCanvas>;
   LBitmap : Shared<TBitmap>;
   LWidth  : Integer;
-  X       : Integer;
 begin
   LBitmap := TBitmap.Create;
-  LBitmap.Value.SetSize(APanel.Width, APanel.Height);
+  LBitmap.Value.SetSize(APanel.Width, APanel.Height - 2);
   LBitmap.Value.Canvas.Brush.Color := APanel.Color;
   LBitmap.Value.Canvas.FillRect(LBitmap.Value.Canvas.ClipRect);
   LWidth := DrawFormattedText(
@@ -496,21 +493,22 @@ begin
     LBitmap.Value.Canvas,
     AText
   );
-  X := (APanel.Width - LWidth) div 2;
+
   LCanvas := TControlCanvas.Create;
   LCanvas.Value.Control := APanel;
-  LCanvas.Value.Draw(X, 0, LBitmap);
+  LCanvas.Value.Draw(0, 0, LBitmap);
 end;
 
 procedure TfrmMain.UpdateActions;
 begin
   UpdateStatusBar;
+  OptimizeStatusBarPanelWidths;
   inherited UpdateActions;
 end;
 
 procedure TfrmMain.OptimizeStatusBarPanelWidths;
 begin
-  OptimizeWidth(pnlSourceName);
+  //OptimizeWidth(pnlSourceName);
 end;
 
 procedure TfrmMain.OptimizeWidth(APanel: TPanel);
@@ -540,10 +538,11 @@ begin
     and Assigned(Manager.ActiveView.Subscriber)
     and (ctMain.ActiveTab <> FDashboardTab) then
   begin
-    pnlSourceName.Caption := Format('%s (%d)', [
-      Manager.ActiveView.Subscriber.SourceName,
-      Manager.ActiveView.Subscriber.SourceId
-    ]);
+//    S := Format(SSubscriberSource, [
+//      Manager.ActiveView.Subscriber.SourceName,
+//      Manager.ActiveView.Subscriber.SourceId
+//    ]);
+//    DrawPanelText(pnlSourceName, S);
     N := Manager.ActiveView.MilliSecondsBetweenSelection;
     if N <> -1 then
     begin
@@ -555,11 +554,8 @@ begin
       pnlDelta.Caption := '';
       pnlDelta.Color := clBtnFace;
     end;
-    S := Format(
-      '<b>%d</b></x>',
-      [Manager.ActiveView.Subscriber.MessageCount]
-    );
-    DrawPanelText(pnlMessageCount, S);
+//    S := Format(SReceivedCount, [Manager.ActiveView.Subscriber.MessageCount]);
+//    DrawPanelText(pnlMessageCount, S);
   end
   else
   begin

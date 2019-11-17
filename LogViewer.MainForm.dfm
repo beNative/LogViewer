@@ -381,9 +381,9 @@ object frmMain: TfrmMain
     end
     object pnlSourceName: TPanel
       AlignWithMargins = True
-      Left = 1
+      Left = 89
       Top = 2
-      Width = 224
+      Width = 304
       Height = 17
       Hint = 'Source'
       Margins.Left = 1
@@ -395,10 +395,11 @@ object frmMain: TfrmMain
       BevelKind = bkFlat
       BevelOuter = bvNone
       TabOrder = 0
+      ExplicitLeft = 1
     end
     object pnlDelta: TPanel
       AlignWithMargins = True
-      Left = 291
+      Left = 776
       Top = 2
       Width = 110
       Height = 17
@@ -406,8 +407,8 @@ object frmMain: TfrmMain
       Margins.Top = 1
       Margins.Right = 1
       Margins.Bottom = 1
-      Align = alLeft
-      BevelEdges = [beRight]
+      Align = alRight
+      BevelEdges = [beLeft]
       BevelKind = bkFlat
       BevelOuter = bvNone
       Font.Charset = DEFAULT_CHARSET
@@ -438,9 +439,9 @@ object frmMain: TfrmMain
     end
     object pnlMessageCount: TPanel
       AlignWithMargins = True
-      Left = 227
+      Left = 1
       Top = 2
-      Width = 62
+      Width = 86
       Height = 17
       Hint = 'Messages received'
       Margins.Left = 1
@@ -451,9 +452,9 @@ object frmMain: TfrmMain
       BevelEdges = [beRight]
       BevelKind = bkFlat
       BevelOuter = bvNone
-      ShowCaption = False
       TabOrder = 3
-      VerticalAlignment = taAlignBottom
+      ExplicitLeft = 0
+      ExplicitTop = 5
     end
     object pnlMemory: TPanel
       AlignWithMargins = True
@@ -508,7 +509,7 @@ object frmMain: TfrmMain
     Left = 208
     Top = 48
     Bitmap = {
-      494C010101000500DC0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000500E80010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

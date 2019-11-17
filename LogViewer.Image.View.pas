@@ -72,7 +72,7 @@ end;
 {$REGION 'action handlers'}
 procedure TfrmImageView.actCopyExecute(Sender: TObject);
 begin
-  Clipboard.Assign(imgBitmap.Picture.Bitmap);
+  Clipboard.Assign(imgBitmap.Picture);
 end;
 {$ENDREGION}
 
@@ -90,13 +90,13 @@ procedure TfrmImageView.LoadFromStream(AStream: TStream);
 begin
   Guard.CheckNotNull(AStream, 'AStream');
   AStream.Position := 0;
-  imgBitmap.Picture.Bitmap.LoadFromStream(AStream);
+  imgBitmap.Picture.LoadFromStream(AStream);
   with imgBitmap.Picture do
   begin
-    edtWidth.Text       := Bitmap.Width.ToString;
-    edtHeight.Text      := Bitmap.Height.ToString;
-    edtPixelFormat.Text := Reflect.EnumName(Bitmap.PixelFormat);
-    edtHandleType.Text  := Reflect.EnumName(Bitmap.HandleType);
+    edtWidth.Text       := imgBitmap.Width.ToString;
+    edtHeight.Text      := imgBitmap.Height.ToString;
+    //edtPixelFormat.Text := Reflect.EnumName(Bitmap.PixelFormat);
+    //edtHandleType.Text  := Reflect.EnumName(Bitmap.HandleType);
   end;
 end;
 {$ENDREGION}
