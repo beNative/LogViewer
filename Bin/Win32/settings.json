@@ -1,9 +1,9 @@
 {
 	"FormSettings": {
-		"Left": 448,
-		"Top": 114,
-		"Width": 1995,
-		"Height": 1127,
+		"Left": 539,
+		"Top": 105,
+		"Width": 1887,
+		"Height": 1126,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -15,8 +15,8 @@
 		"MessageDetailsVisible": true,
 		"SmartTimeStamps": true,
 		"HorizontalPanelPositions": [
-			0.261748357756443,
-			0.683173319858514,
+			0.33,
+			0.666666666666667,
 			1
 		],
 		"LeftVerticalPanelPositions": [
@@ -28,7 +28,7 @@
 		"Enabled": true
 	},
 	"WinipcSettings": {
-		"Enabled": true,
+		"Enabled": false,
 		"PollingInterval": 100
 	},
 	"ZeroMQSettings": {

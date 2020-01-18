@@ -1,5 +1,5 @@
 {
-  Copyright (C) 2013-2019 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2020 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -21,20 +21,20 @@ unit LogViewer.MainForm;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages,
+  Winapi.Windows, Winapi.Messages, Winapi.GDIPOBJ,
   System.SysUtils, System.Variants, System.Classes, System.Actions,
   System.Win.TaskbarCore, System.ImageList,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Vcl.Taskbar,
-  Vcl.ExtCtrls, Vcl.ActnList, Vcl.ImgList,
+  Vcl.ExtCtrls, Vcl.ActnList, Vcl.ImgList, Vcl.Menus,
 
-  ChromeTabs, ChromeTabsClasses, ChromeTabsTypes, GDIPOBJ,
+  ChromeTabs, ChromeTabsClasses, ChromeTabsTypes,
   kcontrols, kprogress,
   Spring,
 
   DDuce.Utils,
 
   LogViewer.Interfaces, LogViewer.Factories, LogViewer.Settings,
-  LogViewer.Dashboard.View, Vcl.Menus;
+  LogViewer.Dashboard.View;
 
 type
   TfrmMain = class(TForm)
@@ -163,6 +163,8 @@ implementation
 uses
   Spring.Utils,
 
+  Grijjy.CloudLogging,
+
   DDuce.Factories.VirtualTrees,
   DDuce.Logger, DDuce.Utils.Winapi,
 
@@ -203,6 +205,10 @@ var
   FVI : TFileVersionInfo;
 begin
   inherited AfterConstruction;
+
+//  GrijjyLog.Connect('tcp://localhost:7337', 'Default');
+//  GrijjyLog.SetLogLevel(TgoLogLevel.Info);
+
   TVirtualStringTreeFactory.DefaultTreeOptions.BorderStyle     := bsNone;
   TVirtualStringTreeFactory.DefaultGridOptions.BorderStyle     := bsNone;
   TVirtualStringTreeFactory.DefaultListOptions.BorderStyle     := bsNone;
@@ -248,7 +254,7 @@ begin
   Events.OnActiveViewChange.RemoveAll(Self);
   Events.OnShowDashboard.RemoveAll(Self);
   FSettings.FormSettings.Assign(Self);
-//  FSettings.OnChanged.RemoveAll(Self);
+  FSettings.OnChanged.RemoveAll(Self);
   FManager := nil;
   FreeAndNil(FDashboard); // needs to be freed before manager!
   inherited Destroy; // will destroy manager object as the mainform is its owner
@@ -482,13 +488,12 @@ procedure TfrmMain.DrawPanelText(APanel: TPanel; const AText: string);
 var
   LCanvas : Shared<TControlCanvas>;
   LBitmap : Shared<TBitmap>;
-  LWidth  : Integer;
 begin
   LBitmap := TBitmap.Create;
   LBitmap.Value.SetSize(APanel.Width, APanel.Height - 2);
   LBitmap.Value.Canvas.Brush.Color := APanel.Color;
   LBitmap.Value.Canvas.FillRect(LBitmap.Value.Canvas.ClipRect);
-  LWidth := DrawFormattedText(
+  DrawFormattedText(
     LBitmap.Value.Canvas.ClipRect,
     LBitmap.Value.Canvas,
     AText
@@ -531,7 +536,7 @@ end;
 procedure TfrmMain.UpdateStatusBar;
 var
   N : Integer;
-  S : string;
+//S : string;
 begin
   if Assigned(ctMain.ActiveTab) and Assigned(Manager)
     and Assigned(Manager.ActiveView)

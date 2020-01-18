@@ -98,34 +98,42 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     object tsWatches: TKTabSheet
       Caption = 'Watches'
       ExplicitWidth = 465
+      ExplicitHeight = 0
     end
     object tsCallStack: TKTabSheet
       Caption = 'Callstack'
       ExplicitWidth = 465
+      ExplicitHeight = 0
     end
     object tsComPort: TKTabSheet
       Caption = 'ComPort'
       ExplicitWidth = 465
+      ExplicitHeight = 0
     end
     object tsZeroMQ: TKTabSheet
       Caption = 'ZeroMQ'
       ExplicitWidth = 465
+      ExplicitHeight = 0
     end
     object tsWinODS: TKTabSheet
       Caption = 'WinODS'
       ExplicitWidth = 465
+      ExplicitHeight = 0
     end
     object tsWinIPC: TKTabSheet
       Caption = 'WinIPC'
       ExplicitWidth = 465
+      ExplicitHeight = 0
     end
     object tsDisplayValueSettings: TKTabSheet
       Caption = 'DisplayValueSettings'
       ExplicitWidth = 465
+      ExplicitHeight = 0
     end
     object tsAdvanced: TKTabSheet
       Caption = 'Advanced'
       ExplicitWidth = 465
+      ExplicitHeight = 0
       object seSettings: TSynEdit
         Left = 0
         Top = 0
@@ -176,10 +184,12 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     object tsViewSettings: TKTabSheet
       Caption = 'ViewSettings'
       ExplicitWidth = 465
+      ExplicitHeight = 0
     end
     object tsLogLevels: TKTabSheet
       Caption = 'KTabSheet1'
       ExplicitWidth = 465
+      ExplicitHeight = 0
     end
   end
   object aclMain: TActionList
@@ -207,7 +217,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Left = 568
     Top = 32
     Bitmap = {
-      494C0101030008006C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010103000800740010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

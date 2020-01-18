@@ -1,5 +1,5 @@
 {
-  Copyright (C) 2013-2019 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2020 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -148,7 +148,7 @@ begin
   FSSTree.OnGetText             := FTreeGetText;
   FSSTree.OnGetImageIndex       := FTreeGetImageIndex;
   FSSTree.OnFreeNode            := FTreeFreeNode;
-//  FSSTree.OnChecked             := FTreeChecked;
+  FSSTree.OnChecked             := FTreeChecked;
   FSSTree.OnBeforeGetCheckState := FTreeBeforeGetCheckState;
 
   FSSTree.Header.Options               := FSSTree.Header.Options - [hoVisible];

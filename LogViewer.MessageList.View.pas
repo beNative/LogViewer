@@ -1,5 +1,5 @@
 {
-  Copyright (C) 2013-2019 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2020 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -943,8 +943,6 @@ end;
 
 procedure TfrmMessageList.FLogTreeViewFocusChanged(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex);
-var
-  LN      : TLogNode;
 begin
   if FUpdate then
     UpdateActions
@@ -1617,9 +1615,8 @@ begin
   AStream.ReadBuffer(LDataSize);
   if LDataSize > 0 then
   begin
-    if Assigned(FCurrentMsg.Data) then
-      FCurrentMsg.Data.Free;
-    FCurrentMsg.Data          := TMemoryStream.Create;
+    if not Assigned(FCurrentMsg.Data) then
+      FCurrentMsg.Data          := TMemoryStream.Create;
     FCurrentMsg.Data.Size     := 0;
     FCurrentMsg.Data.Position := 0;
     FCurrentMsg.Data.CopyFrom(AStream, LDataSize);
@@ -1875,7 +1872,6 @@ end;
 
 procedure TfrmMessageList.UpdateMessageDetails(ALogNode: TLogNode);
 begin
-  Logger.Track(Self, 'UpdateMessageDetails');
   ClearMessageDetailsControls;
   FMessageDataView.LogNode := ALogNode;
   case ALogNode.MessageType of
@@ -2030,7 +2026,6 @@ procedure TfrmMessageList.UpdateLogTreeView;
 var
   LN : TLogNode;
 begin
-  Logger.Track(Self, 'UpdateLogTreeView');
   if not FUpdating then
   begin
     FUpdating := True;
@@ -2077,7 +2072,6 @@ end;
 
 procedure TfrmMessageList.UpdateView;
 begin
-  Logger.Track(Self, 'UpdateView');
   Modified;
   FAutoSizeColumns := False;
 end;

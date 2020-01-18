@@ -36,7 +36,6 @@ object frmMessageList: TfrmMessageList
         Index = 2
       end>
     MinPosition = 0.020000000000000000
-    SplitterSize = 2
     SplitterColor = clScrollBar
     SplitterHoverColor = clScrollBar
     OnSplitterMoved = pnlMainSplitterMoved
@@ -45,9 +44,9 @@ object frmMessageList: TfrmMessageList
     OnCanResize = pnlMainCanResize
     TabOrder = 0
     object pnlMessages: TPanel
-      Left = 418
+      Left = 419
       Top = 0
-      Width = 423
+      Width = 422
       Height = 746
       Align = alClient
       BevelOuter = bvNone
@@ -58,17 +57,18 @@ object frmMessageList: TfrmMessageList
       object pnlFilter: TPanel
         Left = 0
         Top = 0
-        Width = 423
+        Width = 422
         Height = 18
         Align = alTop
         BevelOuter = bvNone
         ParentColor = True
         TabOrder = 0
         StyleElements = [seFont, seBorder]
+        ExplicitWidth = 423
         object edtMessageFilter: TButtonedEdit
           Left = 0
           Top = 0
-          Width = 423
+          Width = 422
           Height = 18
           Margins.Left = 0
           Margins.Top = 0
@@ -99,13 +99,14 @@ object frmMessageList: TfrmMessageList
           OnKeyUp = edtMessageFilterKeyUp
           OnMouseEnter = edtMessageFilterMouseEnter
           OnMouseLeave = edtMessageFilterMouseLeave
+          ExplicitWidth = 423
         end
       end
     end
     object pnlRight: TPanel
-      Left = 843
+      Left = 844
       Top = 0
-      Width = 418
+      Width = 417
       Height = 746
       Align = alClient
       BevelOuter = bvNone
@@ -117,8 +118,8 @@ object frmMessageList: TfrmMessageList
       object splRightHorizontal: TSplitter
         Left = 0
         Top = 186
-        Width = 418
-        Height = 2
+        Width = 417
+        Height = 3
         Cursor = crVSplit
         Align = alTop
         Color = clScrollBar
@@ -127,7 +128,7 @@ object frmMessageList: TfrmMessageList
       object pnlMessageContent: TPanel
         Left = 0
         Top = 0
-        Width = 418
+        Width = 417
         Height = 20
         Align = alTop
         Alignment = taLeftJustify
@@ -142,11 +143,12 @@ object frmMessageList: TfrmMessageList
         ParentBackground = False
         ParentFont = False
         TabOrder = 0
+        ExplicitWidth = 418
         DesignSize = (
-          418
+          417
           20)
         object chkShowDetails: TCheckBox
-          Left = 325
+          Left = 324
           Top = 2
           Width = 92
           Height = 17
@@ -161,13 +163,14 @@ object frmMessageList: TfrmMessageList
           ParentFont = False
           TabOrder = 0
           OnClick = chkShowDetailsClick
+          ExplicitLeft = 325
         end
       end
       object pgcMessageData: TKPageControl
         Left = 0
-        Top = 188
-        Width = 418
-        Height = 558
+        Top = 189
+        Width = 417
+        Height = 557
         ActivateNewDocked = False
         ActivePageIndex = 0
         Align = alClient
@@ -187,8 +190,8 @@ object frmMessageList: TfrmMessageList
           object pgcMessageDetails: TKPageControl
             Left = 0
             Top = 0
-            Width = 418
-            Height = 558
+            Width = 417
+            Height = 557
             ActivateNewDocked = False
             ActivePageIndex = 0
             Align = alClient
@@ -206,44 +209,46 @@ object frmMessageList: TfrmMessageList
             object tsValueList: TKTabSheet
               Caption = 'Value list'
               ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
+              ExplicitWidth = 418
+              ExplicitHeight = 534
             end
             object tsTextViewer: TKTabSheet
               Caption = 'Text viewer'
               ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
+              ExplicitWidth = 418
+              ExplicitHeight = 534
               object pnlTextViewer: TPanel
                 Left = 0
                 Top = 0
-                Width = 418
-                Height = 534
+                Width = 417
+                Height = 533
                 Align = alClient
                 BevelEdges = []
                 BevelOuter = bvNone
                 Color = clWhite
                 TabOrder = 0
+                ExplicitWidth = 418
+                ExplicitHeight = 534
               end
             end
             object tsImageViewer: TKTabSheet
               Caption = 'Image viewer'
               ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
+              ExplicitWidth = 418
+              ExplicitHeight = 534
             end
             object tsDataSet: TKTabSheet
               Caption = 'Dataset viewer'
               ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
+              ExplicitWidth = 418
+              ExplicitHeight = 534
             end
             object tsRawData: TKTabSheet
               Caption = 'Raw data viewer'
               OnShow = tsRawDataShow
               ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
+              ExplicitWidth = 418
+              ExplicitHeight = 534
             end
           end
         end
@@ -251,11 +256,12 @@ object frmMessageList: TfrmMessageList
       object pnlMessageData: TPanel
         Left = 0
         Top = 20
-        Width = 418
+        Width = 417
         Height = 166
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 2
+        ExplicitWidth = 418
       end
     end
     object pnlLeft: TOMultiPanel
@@ -278,7 +284,6 @@ object frmMessageList: TfrmMessageList
           Index = 1
         end>
       MinPosition = 0.020000000000000000
-      SplitterSize = 2
       SplitterColor = clScrollBar
       SplitterHoverColor = clScrollBar
       Align = alClient
@@ -313,9 +318,9 @@ object frmMessageList: TfrmMessageList
       end
       object pnlWatches: TPanel
         Left = 0
-        Top = 188
+        Top = 189
         Width = 416
-        Height = 558
+        Height = 557
         Align = alClient
         BevelOuter = bvNone
         Caption = 'pnlWatches'
@@ -388,7 +393,7 @@ object frmMessageList: TfrmMessageList
     Left = 55
     Top = 22
     Bitmap = {
-      494C010118001900140210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010118001900200210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000007000000001002000000000000070
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

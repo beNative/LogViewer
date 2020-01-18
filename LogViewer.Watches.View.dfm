@@ -29,7 +29,6 @@ object frmWatchesView: TfrmWatchesView
         Index = 1
       end>
     MinPosition = 0.020000000000000000
-    SplitterSize = 2
     SplitterColor = clScrollBar
     SplitterHoverColor = clScrollBar
     Align = alClient
@@ -46,9 +45,9 @@ object frmWatchesView: TfrmWatchesView
     end
     object pnlWatchHistory: TPanel
       Left = 0
-      Top = 372
+      Top = 373
       Width = 444
-      Height = 367
+      Height = 366
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 1

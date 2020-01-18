@@ -19,3 +19,8 @@
 *.skincfg
 /__recovery
 /*.cbk
+*.d
+*.drc
+*.map
+*.tds
+/Bin/Win32/LogViewer_MemoryManager_EventLog.txt

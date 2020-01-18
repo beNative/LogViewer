@@ -29,7 +29,6 @@ object frmDashboard: TfrmDashboard
         Index = 1
       end>
     MinPosition = 0.020000000000000000
-    SplitterSize = 2
     SplitterColor = clScrollBar
     SplitterHoverColor = clScrollBar
     Align = alClient
@@ -436,9 +435,9 @@ object frmDashboard: TfrmDashboard
     end
     object pnlRight: TPanel
       AlignWithMargins = True
-      Left = 316
+      Left = 317
       Top = 0
-      Width = 730
+      Width = 729
       Height = 616
       Margins.Left = 0
       Margins.Bottom = 0
@@ -503,7 +502,7 @@ object frmDashboard: TfrmDashboard
     Left = 408
     Top = 8
     Bitmap = {
-      494C01010B000801EC0110001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01010B000801000210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000001001B09532ED308512ED100000010000000000000

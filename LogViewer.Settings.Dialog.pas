@@ -1,5 +1,5 @@
 {
-  Copyright (C) 2013-2019 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2020 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -73,9 +73,11 @@ type
     tsLogLevels             : TKTabSheet;
     {$ENDREGION}
 
+    {$REGION 'action handlers'}
     procedure actCloseExecute(Sender: TObject);
     procedure actApplyExecute(Sender: TObject);
     procedure actCancelExecute(Sender: TObject);
+    {$ENDREGION}
 
   private
     FConfigTree                : TVirtualStringTree;
@@ -174,7 +176,7 @@ end;
 procedure TfrmLogViewerSettings.FConfigTreeFocusChanged(
   Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
 var
-  CN: TConfigNode;
+  CN : TConfigNode;
 begin
   CN := Sender.GetNodeData<TConfigNode>(Node);
   if Assigned(CN.Data.TabSheet) then
