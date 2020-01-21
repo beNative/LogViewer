@@ -282,7 +282,7 @@ uses
 
   LogViewer.Factories, LogViewer.Resources,
   LogViewer.Subscribers.ZeroMQ, LogViewer.Subscribers.FileSystem,
-  LogViewer.Subscribers.Mqtt,
+  //LogViewer.Subscribers.Mqtt,
   LogViewer.Receivers.Base;
 
 {$REGION 'construction and destruction'}
@@ -898,12 +898,12 @@ end;
 
 procedure TfrmDashboard.edtBrokerExit(Sender: TObject);
 begin
-  FManager.Settings.MQTTSettings.Broker := edtBroker.Text;
+ // FManager.Settings.MQTTSettings.Broker := edtBroker.Text;
 end;
 
 procedure TfrmDashboard.edtMQTTPortExit(Sender: TObject);
 begin
-  FManager.Settings.MQTTSettings.Port := StrToInt(edtMQTTPort.Text);
+//  FManager.Settings.MQTTSettings.Port := StrToInt(edtMQTTPort.Text);
 end;
 {$ENDREGION}
 
@@ -1081,9 +1081,9 @@ begin
 //    Self, FManager.Settings.ComPortSettings
 //  );
 //  AssignFormParent(FComPortSettingsForm, tsCOMPort);
-  edtBroker.Text   := FManager.Settings.MQTTSettings.Broker;
-  edtMQTTPort.Text := FManager.Settings.MQTTSettings.Port.ToString;
-  FManager.Settings.MQTTSettings.Enabled := False;
+//  edtBroker.Text   := FManager.Settings.MQTTSettings.Broker;
+//  edtMQTTPort.Text := FManager.Settings.MQTTSettings.Port.ToString;
+//  FManager.Settings.MQTTSettings.Enabled := False;
   pgcMain.ActivePage := tsWinIPC;
   FZmqEndpoints.Data.FromStrings(FManager.Settings.ZeroMQSettings.Endpoints);
   FFSLocations.Data.FromStrings(FManager.Settings.FileSystemSettings.PathNames);

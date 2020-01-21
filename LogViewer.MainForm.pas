@@ -163,8 +163,6 @@ implementation
 uses
   Spring.Utils,
 
-  Grijjy.CloudLogging,
-
   DDuce.Factories.VirtualTrees,
   DDuce.Logger, DDuce.Utils.Winapi,
 

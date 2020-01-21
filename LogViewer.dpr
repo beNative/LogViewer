@@ -42,8 +42,6 @@ uses
   LogViewer.Receivers.ComPort.Settings.View in 'LogViewer.Receivers.ComPort.Settings.View.pas' {frmComPortSettings},
   LogViewer.Receivers.FileSystem in 'LogViewer.Receivers.FileSystem.pas',
   LogViewer.Receivers.FileSystem.Settings in 'LogViewer.Receivers.FileSystem.Settings.pas',
-  LogViewer.Receivers.MQTT in 'LogViewer.Receivers.MQTT.pas',
-  LogViewer.Receivers.MQTT.Settings in 'LogViewer.Receivers.MQTT.Settings.pas',
   LogViewer.Receivers.WinIPC in 'LogViewer.Receivers.WinIPC.pas',
   LogViewer.Receivers.WinIPC.Settings in 'LogViewer.Receivers.WinIPC.Settings.pas',
   LogViewer.Receivers.WinIPC.Settings.View in 'LogViewer.Receivers.WinIPC.Settings.View.pas' {frmWinipcSettings},
@@ -73,8 +71,7 @@ uses
   LogViewer.DisplayValues.Settings.ValueManager in 'LogViewer.DisplayValues.Settings.ValueManager.pas',
   LogViewer.LogLevels.Settings in 'LogViewer.LogLevels.Settings.pas',
   LogViewer.LogLevels.Settings.View in 'LogViewer.LogLevels.Settings.View.pas' {frmLogLevelSettings},
-  LogViewer.WinipcBroker in 'LogViewer.WinipcBroker.pas',
-  LogViewer.Subscribers.MQTT in 'LogViewer.Subscribers.MQTT.pas';
+  LogViewer.WinipcBroker in 'LogViewer.WinipcBroker.pas';
 
 {$R *.res}
 
