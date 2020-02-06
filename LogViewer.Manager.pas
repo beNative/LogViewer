@@ -332,14 +332,16 @@ begin
   FViewList.OnChanged.RemoveAll(Self);
   FViewList.Clear;
   FSettings.Save;
-  FreeAndNil(FEvents);
-  FreeAndNil(FCommands);
+//  FreeAndNil(FEvents);    // this causes AV's on close
+//  FreeAndNil(FCommands);
   FViewList       := nil;
   FReceivers      := nil;
   FSettings       := nil;
   FEditorSettings := nil;
   FEditorManager  := nil;
 
+  FreeAndNil(FEvents);
+  FreeAndNil(FCommands);
   inherited Destroy;
 end;
 {$ENDREGION}

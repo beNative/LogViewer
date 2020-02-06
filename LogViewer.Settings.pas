@@ -124,6 +124,7 @@ uses
 {$REGION 'construction and destruction'}
 procedure TLogViewerSettings.AfterConstruction;
 begin
+  Logger.Track(Self, 'AfterConstruction');
   inherited AfterConstruction;
   FFileName              := 'settings.json';
   FFormSettings          := TFormSettings.Create;
@@ -144,6 +145,7 @@ end;
 
 procedure TLogViewerSettings.BeforeDestruction;
 begin
+  Logger.Track(Self, 'BeforeDestruction');
   FDisplayValuesSettings.OnChanged.RemoveAll(Self);
   FFormSettings.OnChanged.RemoveAll(Self);
   FreeAndNil(FDisplayValuesSettings);
