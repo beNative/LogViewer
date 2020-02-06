@@ -37,12 +37,6 @@
 		"PollingTimeout": 10,
 		"Endpoints": "default localhost=tcp://localhost:5555\r\nlocalhost2=tcp://localhost:5595\r\nLogViewer=tcp://localhost:42134\r\n"
 	},
-	"MqttSettings": {
-		"Broker": "192.168.0.219",
-		"Port": 1883,
-		"Enabled": false,
-		"Endpoints": ""
-	},
 	"FileSystemSettings": {
 		"Enabled": false,
 		"PathNames": "test.txt=tcp://localhost:5555\r\nC:\\Tools\\doublecmd\\doublecmd_2019-11-06.log=tcp://localhost:5556\r\n"

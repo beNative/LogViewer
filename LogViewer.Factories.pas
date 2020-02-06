@@ -131,7 +131,7 @@ uses
 
   LogViewer.Resources, LogViewer.Factories.Toolbars,
   LogViewer.Receivers.WinIPC, LogViewer.Receivers.WinODS,
-  LogViewer.Receivers.ZeroMQ, LogViewer.Receivers.Mqtt,
+  LogViewer.Receivers.ZeroMQ,
   LogViewer.Receivers.ComPort, LogViewer.Receivers.FileSystem,
   LogViewer.Receivers.Midi;
 
@@ -238,7 +238,7 @@ end;
 class function TLogViewerFactories.CreateMqttReceiver(
   AManager: ILogViewerManager): IChannelReceiver;
 begin
-  Result := TMqttChannelReceiver.Create(AManager, RECEIVERNAME_MQTT);
+  //Result := TMqttChannelReceiver.Create(AManager, RECEIVERNAME_MQTT);
 end;
 
 class function TLogViewerFactories.CreateComPortReceiver(

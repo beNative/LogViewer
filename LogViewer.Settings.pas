@@ -31,8 +31,7 @@ uses
   LogViewer.CallStack.Settings, LogViewer.DisplayValues.Settings,
   LogViewer.Receivers.ComPort.Settings, LogViewer.Receivers.WinODS.Settings,
   LogViewer.Receivers.WinIPC.Settings, LogViewer.Receivers.ZeroMQ.Settings,
-  LogViewer.Receivers.MQTT.Settings, LogViewer.Receivers.FileSystem.Settings,
-  LogViewer.LogLevels.Settings;
+  LogViewer.Receivers.FileSystem.Settings, LogViewer.LogLevels.Settings;
 
 type
   TLogViewerSettings = class(TPersistent)
@@ -45,7 +44,7 @@ type
     FWinipcSettings        : TWinipcSettings;
     FComPortSettings       : TComPortSettings;
     FZeroMQSettings        : TZeroMQSettings;
-    FMqttSettings          : TMqttSettings;
+    //FMqttSettings          : TMqttSettings;
     FFileSystemSettings    : TFileSystemSettings;
 
     FWatchSettings         : TWatchSettings;
@@ -85,8 +84,8 @@ type
     property ZeroMQSettings: TZeroMQSettings
       read FZeroMQSettings;
 
-    property MqttSettings: TMqttSettings
-      read FMqttSettings;
+//    property MqttSettings: TMqttSettings
+//      read FMqttSettings;
 
     property FileSystemSettings: TFileSystemSettings
       read FFileSystemSettings;
@@ -134,7 +133,7 @@ begin
   FWinipcSettings        := TWinipcSettings.Create;
   FComPortSettings       := TComPortSettings.Create;
   FZeroMQSettings        := TZeroMQSettings.Create;
-  FMqttSettings          := TMqttSettings.Create;
+  //FMqttSettings          := TMqttSettings.Create;
   FFileSystemSettings    := TFileSystemSettings.Create;
   FWatchSettings         := TWatchSettings.Create;
   FCallStackSettings     := TCallStackSettings.Create;
@@ -151,7 +150,7 @@ begin
   FreeAndNil(FWatchSettings);
   FreeAndNil(FCallStackSettings);
   FreeAndNil(FZeroMQSettings);
-  FreeAndNil(FMqttSettings);
+  //FreeAndNil(FMqttSettings);
   FreeAndNil(FFileSystemSettings);
   FreeAndNil(FComPortSettings);
   FreeAndNil(FWinipcSettings);
@@ -232,9 +231,9 @@ begin
       JO['ZeroMQSettings'].ObjectValue.ToSimpleObject(FZeroMQSettings);
       FZeroMQSettings.Endpoints.Text :=
         JO['ZeroMQSettings'].ObjectValue['Endpoints'].Value;
-      JO['MqttSettings'].ObjectValue.ToSimpleObject(FMqttSettings);
-      FMqttSettings.Endpoints.Text :=
-        JO['MqttSettings'].ObjectValue['Endpoints'].Value;
+    //  JO['MqttSettings'].ObjectValue.ToSimpleObject(FMqttSettings);
+//      FMqttSettings.Endpoints.Text :=
+//        JO['MqttSettings'].ObjectValue['Endpoints'].Value;
       JO['FileSystemSettings'].ObjectValue.ToSimpleObject(FFileSystemSettings);
       FFileSystemSettings.PathNames.Text :=
         JO['FileSystemSettings'].ObjectValue['PathNames'].Value;
@@ -316,8 +315,8 @@ begin
       FZeroMQSettings.Endpoints.Text;
 
     S := 'MqttSettings';
-    JO[S].ObjectValue.FromSimpleObject(FMqttSettings);
-    JO[S].ObjectValue['Endpoints'].Value := FMqttSettings.Endpoints.Text;
+//    JO[S].ObjectValue.FromSimpleObject(FMqttSettings);
+//    JO[S].ObjectValue['Endpoints'].Value := FMqttSettings.Endpoints.Text;
 
     S := 'FileSystemSettings';
     JO[S].ObjectValue.FromSimpleObject(FFileSystemSettings);
