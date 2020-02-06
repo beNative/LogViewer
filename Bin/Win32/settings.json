@@ -1,9 +1,9 @@
 {
 	"FormSettings": {
-		"Left": 539,
-		"Top": 105,
-		"Width": 1887,
-		"Height": 1126,
+		"Left": 269,
+		"Top": 265,
+		"Width": 1611,
+		"Height": 981,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -15,8 +15,8 @@
 		"MessageDetailsVisible": true,
 		"SmartTimeStamps": true,
 		"HorizontalPanelPositions": [
-			0.33,
-			0.666666666666667,
+			0.2640625,
+			0.725726435152374,
 			1
 		],
 		"LeftVerticalPanelPositions": [
@@ -28,14 +28,14 @@
 		"Enabled": true
 	},
 	"WinipcSettings": {
-		"Enabled": false,
+		"Enabled": true,
 		"PollingInterval": 100
 	},
 	"ZeroMQSettings": {
 		"Enabled": true,
 		"PollingInterval": 100,
 		"PollingTimeout": 10,
-		"Endpoints": "default localhost=tcp://localhost:5555\r\nlocalhost2=tcp://localhost:5595\r\nLogViewer=tcp://localhost:42134\r\nGANYMEDES=tcp://192.168.0.107:5555\r\n"
+		"Endpoints": "default localhost=tcp://localhost:5555\r\nlocalhost2=tcp://localhost:5595\r\nLogViewer=tcp://localhost:42134\r\n"
 	},
 	"MqttSettings": {
 		"Broker": "192.168.0.219",

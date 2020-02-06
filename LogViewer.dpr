@@ -83,16 +83,16 @@ begin
   ReportMemoryLeaksOnShutdown := DebugHook > 0;
   {$WARNINGS ON}
   Application.Initialize;
+  // setup logchannel for using a log LogViewer instance to debug itself.
+  Logger.Channels.Add(
+    TZeroMQChannel.Create(Format('tcp://*:%d', [LOGVIEWER_ZMQ_PORT]))
+  );
   Application.Title := 'Log viewer';
   Application.CreateForm(TfrmMain, frmMain);
-  // setup logchannel for using a log LogViewer instance to debug itself.
-//  Logger.Channels.Add(
-//    TZeroMQChannel.Create(Format('tcp://*:%d', [LOGVIEWER_ZMQ_PORT]))
-//  );
-//  Logger.Clear;
-//  Logger.Clear;
-//  Logger.Clear;
-//  Logger.Info('LogViewer Started.');
+  Logger.Clear;
+  Logger.Clear;
+  Logger.Clear;
+  Logger.Info('LogViewer Started.');
   Application.Run;
 end.
 

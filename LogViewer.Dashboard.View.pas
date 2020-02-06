@@ -178,7 +178,7 @@ type
       var AName  : string;
       var AValue : TValue
     );
-    procedure FZMQEndpointsExecuteItem(
+    procedure FZMQEndpointsItemExecute(
       ASender    : TObject;
       var AName  : string;
       var AValue : TValue
@@ -188,7 +188,7 @@ type
       var AName  : string;
       var AValue : TValue
     );
-    procedure FMqttTopicsExecuteItem(
+    procedure FMqttTopicsItemExecute(
       ASender    : TObject;
       var AName  : string;
       var AValue : TValue
@@ -198,7 +198,7 @@ type
       var AName  : string;
       var AValue : TValue
     );
-    procedure FFSLocationsExecuteItem(
+    procedure FFSLocationsItemExecute(
       ASender    : TObject;
       var AName  : string;
       var AValue : TValue
@@ -300,8 +300,8 @@ begin
   FTreeView := TVirtualStringTreeFactory.CreateTreeList(Self, pnlRight);
   FZmqEndpoints := TEditList.Create(Self, pnlZMQEndpoints);
   FZmqEndpoints.OnAdd.Add(FZMQEndpointsAdd);
-  FZmqEndpoints.OnExecuteItem.Add(FZMQEndpointsExecuteItem);
-  FZmqEndpoints.OnExecute.Add(FZMQEndpointsExecuteItem);
+  FZmqEndpoints.OnItemExecute.Add(FZMQEndpointsItemExecute);
+  FZmqEndpoints.OnExecute.Add(FZMQEndpointsItemExecute);
   FZmqEndpoints.ValueList.BorderStyle := bsNone;
   // TODO: implement a better way to save changes.
   //FZMQEndpoints.ValueList.OnExit := FValueListExit;
@@ -311,8 +311,8 @@ begin
   FMqttTopics.OnAdd.Add(FMQTTSubscriptionsAdd);
   FMqttTopics.ValueList.BorderStyle := bsNone;
   FMqttTopics.ActionExecute.Caption := SSubscribe;
-  FMqttTopics.OnExecuteItem.Add(FMqttTopicsExecuteItem);
-  FMqttTopics.OnExecute.Add(FMqttTopicsExecuteItem);
+  FMqttTopics.OnItemExecute.Add(FMqttTopicsItemExecute);
+  FMqttTopics.OnExecute.Add(FMqttTopicsItemExecute);
 
   FComPorts := TEditList.Create(Self, pnlCOMPorts);
   FComPorts.ValueList.BorderStyle := bsNone;
@@ -322,8 +322,8 @@ begin
 
   FFSLocations := TEditList.Create(Self, pnlFSLocations);
   FFSLocations.OnAdd.Add(FFSLocationsAdd);
-  FFSLocations.OnExecuteItem.Add(FFSLocationsExecuteItem);
-  FFSLocations.OnExecute.Add(FFSLocationsExecuteItem);
+  FFSLocations.OnItemExecute.Add(FFSLocationsItemExecute);
+  FFSLocations.OnExecute.Add(FFSLocationsItemExecute);
   FFSLocations.ValueList.BorderStyle := bsNone;
   FFSLocations.ActionExecute.Caption := SSubscribe;
   //FFSLocations.ValueList.OnExit := FValueListExit;
@@ -337,7 +337,26 @@ destructor TfrmDashboard.Destroy;
 begin
   Logger.Track(Self, 'Destroy');
   // required as this event can be called after FManager is released!
+
+  FZmqEndpoints.OnExecute.RemoveAll(Self);
+  FZmqEndpoints.OnItemExecute.RemoveAll(Self);
+  FZmqEndpoints.OnAdd.RemoveAll(Self);
+  FZmqEndpoints.OnDelete.RemoveAll(Self);
+
+  FMqttTopics.OnExecute.RemoveAll(Self);
+  FMqttTopics.OnItemExecute.RemoveAll(Self);
+  FMqttTopics.OnAdd.RemoveAll(Self);
+  FMqttTopics.OnDelete.RemoveAll(Self);
+
+  FFSLocations.OnExecute.RemoveAll(Self);
+  FFSLocations.OnItemExecute.RemoveAll(Self);
+  FFSLocations.OnAdd.RemoveAll(Self);
+  FFSLocations.OnDelete.RemoveAll(Self);
+
   FZmqEndpoints.ValueList.OnExit := nil;
+  FZeroMQReceiver.OnChange.RemoveAll(Self);
+  FWinipcReceiver.OnChange.RemoveAll(Self);
+
   SaveSettings;
   FZeroMQReceiver     := nil;
   FMqttReceiver       := nil;
@@ -352,6 +371,9 @@ begin
   FTreeView.Clear;
   FTreeView.Free;
   inherited Destroy;
+//  FreeAndNil(FZmqEndpoints);
+//  FreeAndNil(FMqttTopics);
+//  FreeAndNil(FFSLocations);
 end;
 {$ENDREGION}
 
@@ -745,11 +767,10 @@ end;
 procedure TfrmDashboard.FZMQEndpointsAdd(ASender: TObject; var AName: string;
   var AValue: TValue);
 begin
-  AName  := 'New';
   AValue := 'tcp://';
 end;
 
-procedure TfrmDashboard.FZMQEndpointsExecuteItem(ASender: TObject;
+procedure TfrmDashboard.FZMQEndpointsItemExecute(ASender: TObject;
   var AName: string; var AValue: TValue);
 var
   LSubscriber : ISubscriber;
@@ -836,7 +857,7 @@ begin
   AValue := '';
 end;
 
-procedure TfrmDashboard.FFSLocationsExecuteItem(ASender: TObject;
+procedure TfrmDashboard.FFSLocationsItemExecute(ASender: TObject;
   var AName: string; var AValue: TValue);
 var
   LSubscriber : ISubscriber;
@@ -861,7 +882,7 @@ begin
 end;
 
 
-procedure TfrmDashboard.FMqttTopicsExecuteItem(ASender: TObject;
+procedure TfrmDashboard.FMqttTopicsItemExecute(ASender: TObject;
   var AName: string; var AValue: TValue);
 var
   LSubscriber : ISubscriber;
@@ -1025,7 +1046,7 @@ begin
   FZeroMQ := TZeroMQ.Create;
   FZeroMQReceiver := TLogViewerFactories.CreateZeroMQReceiver(FManager, FZeroMQ);
   FManager.AddReceiver(FZeroMQReceiver);
-  FZeroMQReceiver.OnChange.UseFreeNotification := False;
+  FZeroMQReceiver.OnChange.UseFreeNotification := True;
   FZeroMQReceiver.OnChange.Add(FReceiverChange);
   FZeroMQReceiver.SubscriberList.OnKeyChanged.Add(FZeroMQReceiverSubscriberListChanged);
   FZeroMQReceiver.Enabled := FManager.Settings.ZeroMQSettings.Enabled;
