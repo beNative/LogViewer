@@ -252,10 +252,10 @@ begin
   Events.OnActiveViewChange.RemoveAll(Self);
   Events.OnShowDashboard.RemoveAll(Self);
   FSettings.FormSettings.Assign(Self);
-  FSettings.OnChanged.RemoveAll(Self);
   FManager := nil;
   FreeAndNil(FDashboard); // needs to be freed before manager!
   inherited Destroy; // will destroy manager object as the mainform is its owner
+  FSettings.OnChanged.RemoveAll(Self);
   FreeAndNil(FSettings);
 end;
 {$ENDREGION}
