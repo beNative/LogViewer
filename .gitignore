@@ -24,3 +24,4 @@
 *.map
 *.tds
 /Bin/Win32/LogViewer_MemoryManager_EventLog.txt
+/LogViewer_project.tvsconfig
