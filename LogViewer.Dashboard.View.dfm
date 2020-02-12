@@ -107,14 +107,12 @@ object frmDashboard: TfrmDashboard
         end
         object tsWinOds: TKTabSheet
           Caption = 'WinODS'
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object lblWinODS: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
             Width = 308
-            Height = 374
+            Height = 588
             Align = alClient
             Caption = 
               'This receiver captures messages from any local applicatiion that' +
@@ -139,6 +137,7 @@ object frmDashboard: TfrmDashboard
             ParentFont = False
             Transparent = True
             WordWrap = True
+            ExplicitHeight = 374
           end
           object pnlWinODSTitle: TPanel
             Left = 0
@@ -161,8 +160,6 @@ object frmDashboard: TfrmDashboard
         end
         object tsZeroMQ: TKTabSheet
           Caption = 'ZeroMQ'
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object pnlZMQEndpoints: TPanel
             Left = 0
             Top = 25
@@ -257,86 +254,8 @@ object frmDashboard: TfrmDashboard
             end
           end
         end
-        object tsMqtt: TKTabSheet
-          Caption = 'MQTT'
-          DesignSize = (
-            314
-            616)
-          object edtBroker: TLabeledEdit
-            Left = 48
-            Top = 31
-            Width = 161
-            Height = 21
-            Alignment = taCenter
-            Anchors = [akLeft, akTop, akRight]
-            EditLabel.Width = 35
-            EditLabel.Height = 13
-            EditLabel.Caption = 'Broker:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            LabelPosition = lpLeft
-            ParentFont = False
-            TabOrder = 0
-            Text = 'localhost'
-            OnExit = edtBrokerExit
-          end
-          object pnlMQTTTopics: TPanel
-            Left = 0
-            Top = 58
-            Width = 314
-            Height = 558
-            Align = alBottom
-            Anchors = [akLeft, akTop, akRight, akBottom]
-            BevelOuter = bvNone
-            TabOrder = 1
-          end
-          object edtMQTTPort: TLabeledEdit
-            Left = 249
-            Top = 31
-            Width = 56
-            Height = 21
-            Alignment = taCenter
-            Anchors = [akTop, akRight]
-            EditLabel.Width = 24
-            EditLabel.Height = 13
-            EditLabel.Caption = 'Port:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            LabelPosition = lpLeft
-            ParentFont = False
-            TabOrder = 2
-            Text = '1883'
-            OnExit = edtMQTTPortExit
-          end
-          object pnlMQTTTitle: TPanel
-            Left = 0
-            Top = 0
-            Width = 314
-            Height = 25
-            Align = alTop
-            Alignment = taLeftJustify
-            BevelOuter = bvNone
-            Caption = 'MQTT'
-            Font.Charset = ANSI_CHARSET
-            Font.Color = clGray
-            Font.Height = -16
-            Font.Name = 'Segoe UI'
-            Font.Style = []
-            ParentColor = True
-            ParentFont = False
-            TabOrder = 3
-          end
-        end
         object tsFileSystem: TKTabSheet
           Caption = 'FileSystem'
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object pnlFileSystemTitle: TPanel
             Left = 0
             Top = 0
@@ -367,8 +286,6 @@ object frmDashboard: TfrmDashboard
         end
         object tsComPort: TKTabSheet
           Caption = 'COM port'
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object pnlCOMPorts: TPanel
             Left = 0
             Top = 25
@@ -394,38 +311,6 @@ object frmDashboard: TfrmDashboard
             Font.Style = []
             ParentColor = True
             ParentFont = False
-            TabOrder = 1
-          end
-        end
-        object tsMidi: TKTabSheet
-          Caption = 'KTabSheet1'
-          ExplicitWidth = 0
-          ExplicitHeight = 0
-          object pnlMidiTitle: TPanel
-            Left = 0
-            Top = 0
-            Width = 314
-            Height = 25
-            Align = alTop
-            Alignment = taLeftJustify
-            BevelOuter = bvNone
-            Caption = 'MIDI'
-            Font.Charset = ANSI_CHARSET
-            Font.Color = clGray
-            Font.Height = -16
-            Font.Name = 'Segoe UI'
-            Font.Style = []
-            ParentColor = True
-            ParentFont = False
-            TabOrder = 0
-          end
-          object pnlMidiDevices: TPanel
-            Left = 0
-            Top = 25
-            Width = 314
-            Height = 591
-            Align = alClient
-            BevelOuter = bvNone
             TabOrder = 1
           end
         end
@@ -500,7 +385,7 @@ object frmDashboard: TfrmDashboard
     Left = 408
     Top = 8
     Bitmap = {
-      494C01010B000801040210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01010B000801080210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000001001B09532ED308512ED100000010000000000000

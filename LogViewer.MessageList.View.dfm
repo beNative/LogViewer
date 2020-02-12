@@ -64,7 +64,6 @@ object frmMessageList: TfrmMessageList
         ParentColor = True
         TabOrder = 0
         StyleElements = [seFont, seBorder]
-        ExplicitWidth = 423
         object edtMessageFilter: TButtonedEdit
           Left = 0
           Top = 0
@@ -99,7 +98,6 @@ object frmMessageList: TfrmMessageList
           OnKeyUp = edtMessageFilterKeyUp
           OnMouseEnter = edtMessageFilterMouseEnter
           OnMouseLeave = edtMessageFilterMouseLeave
-          ExplicitWidth = 423
         end
       end
     end
@@ -143,7 +141,6 @@ object frmMessageList: TfrmMessageList
         ParentBackground = False
         ParentFont = False
         TabOrder = 0
-        ExplicitWidth = 418
         DesignSize = (
           417
           20)
@@ -163,7 +160,6 @@ object frmMessageList: TfrmMessageList
           ParentFont = False
           TabOrder = 0
           OnClick = chkShowDetailsClick
-          ExplicitLeft = 325
         end
       end
       object pgcMessageData: TKPageControl
@@ -208,15 +204,10 @@ object frmMessageList: TfrmMessageList
             TabPanelOptions.Options = []
             object tsValueList: TKTabSheet
               Caption = 'Value list'
-              ExplicitTop = 0
-              ExplicitWidth = 418
-              ExplicitHeight = 534
+              ExplicitLeft = 3
             end
             object tsTextViewer: TKTabSheet
               Caption = 'Text viewer'
-              ExplicitTop = 0
-              ExplicitWidth = 418
-              ExplicitHeight = 534
               object pnlTextViewer: TPanel
                 Left = 0
                 Top = 0
@@ -227,28 +218,17 @@ object frmMessageList: TfrmMessageList
                 BevelOuter = bvNone
                 Color = clWhite
                 TabOrder = 0
-                ExplicitWidth = 418
-                ExplicitHeight = 534
               end
             end
             object tsImageViewer: TKTabSheet
               Caption = 'Image viewer'
-              ExplicitTop = 0
-              ExplicitWidth = 418
-              ExplicitHeight = 534
             end
             object tsDataSet: TKTabSheet
               Caption = 'Dataset viewer'
-              ExplicitTop = 0
-              ExplicitWidth = 418
-              ExplicitHeight = 534
             end
             object tsRawData: TKTabSheet
               Caption = 'Raw data viewer'
               OnShow = tsRawDataShow
-              ExplicitTop = 0
-              ExplicitWidth = 418
-              ExplicitHeight = 534
             end
           end
         end
@@ -261,7 +241,6 @@ object frmMessageList: TfrmMessageList
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 2
-        ExplicitWidth = 418
       end
     end
     object pnlLeft: TOMultiPanel
@@ -393,7 +372,7 @@ object frmMessageList: TfrmMessageList
     Left = 55
     Top = 22
     Bitmap = {
-      494C010118001900200210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010118001900240210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000007000000001002000000000000070
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

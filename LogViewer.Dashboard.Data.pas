@@ -81,10 +81,6 @@ begin
     begin
       FCaption := SReceiverCaptionZeroMQ;
     end
-    else if Supports(Receiver, IMqtt) then
-    begin
-      FCaption := SReceiverCaptionMQTT;
-    end
     else if Supports(Receiver, IWinOds) then
     begin
       FCaption := SReceiverCaptionWinODS;
@@ -97,10 +93,6 @@ begin
     begin
       FCaption := SReceiverCaptionFileSystem;
     end
-    else if Supports(Receiver, IMidi) then
-    begin
-      FCaption := SReceiverCaptionMIDI;
-    end;
   end;
   Subscriber := ASubscriber;
   if Assigned(Subscriber) then

@@ -107,14 +107,6 @@ type
       AZMQ     : IZeroMQ
     ): IChannelReceiver;
 
-    class function CreateMqttReceiver(
-      AManager : ILogViewerManager
-    ): IChannelReceiver;
-
-    class function CreateMidiReceiver(
-      AManager : ILogViewerManager
-    ): IChannelReceiver;
-
     class function CreateFileSystemReceiver(
       AManager    : ILogViewerManager;
       const APath : string
@@ -131,9 +123,8 @@ uses
 
   LogViewer.Resources, LogViewer.Factories.Toolbars,
   LogViewer.Receivers.WinIPC, LogViewer.Receivers.WinODS,
-  LogViewer.Receivers.ZeroMQ,
-  LogViewer.Receivers.ComPort, LogViewer.Receivers.FileSystem,
-  LogViewer.Receivers.Midi;
+  LogViewer.Receivers.ZeroMQ, LogViewer.Receivers.ComPort,
+  LogViewer.Receivers.FileSystem;
 
 {$REGION 'private class methods'}
 class procedure TLogViewerFactories.OnDropdownMenuButtonClick(Sender: TObject);
@@ -235,12 +226,6 @@ begin
   Result := TZeroMQChannelReceiver.Create(AManager, AZMQ, RECEIVERNAME_ZEROMQ);
 end;
 
-class function TLogViewerFactories.CreateMqttReceiver(
-  AManager: ILogViewerManager): IChannelReceiver;
-begin
-  //Result := TMqttChannelReceiver.Create(AManager, RECEIVERNAME_MQTT);
-end;
-
 class function TLogViewerFactories.CreateComPortReceiver(
   AManager: ILogViewerManager; ASettings: TComPortSettings): IChannelReceiver;
 begin
@@ -253,12 +238,6 @@ begin
   Result := TFileSystemChannelReceiver.Create(
     AManager, APath, RECEIVERNAME_FILESYSTEM
   );
-end;
-
-class function TLogViewerFactories.CreateMidiReceiver(
-  AManager: ILogViewerManager): IChannelReceiver;
-begin
-  Result := TMidiChannelReceiver.Create(AManager, RECEIVERNAME_MIDI);
 end;
 {$ENDREGION}
 

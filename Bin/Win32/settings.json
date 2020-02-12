@@ -1,9 +1,9 @@
 {
 	"FormSettings": {
-		"Left": 64,
-		"Top": 259,
-		"Width": 1611,
-		"Height": 981,
+		"Left": 406,
+		"Top": 219,
+		"Width": 1529,
+		"Height": 938,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -28,7 +28,7 @@
 		"Enabled": true
 	},
 	"WinipcSettings": {
-		"Enabled": true,
+		"Enabled": false,
 		"PollingInterval": 100
 	},
 	"ZeroMQSettings": {

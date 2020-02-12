@@ -131,19 +131,15 @@ const
   RECEIVERNAME_WINIPC     = 'WinIPC';
   RECEIVERNAME_WINODS     = 'WinODS';
   RECEIVERNAME_ZEROMQ     = 'ZeroMQ';
-  RECEIVERNAME_MQTT       = 'MQTT';
   RECEIVERNAME_COMPORT    = 'ComPort';
   RECEIVERNAME_FILESYSTEM = 'FileSystem';
-  RECEIVERNAME_MIDI       = 'MIDI';
 
 resourcestring
   SReceiverCaptionWinIPC     = 'Windows IPC receiver';
   SReceiverCaptionWinODS     = 'Windows API OutputDebugString receiver';
   SReceiverCaptionZeroMQ     = 'ZeroMQ receiver';
-  SReceiverCaptionMQTT       = 'MQTT receiver';
   SReceiverCaptionComPort    = 'ComPort receiver';
   SReceiverCaptionFileSystem = 'File system receiver';
-  SReceiverCaptionMIDI       = 'MIDI receiver';
 
 // main form
   SReceivedCount    = 'Received: <b>%d</b>';
