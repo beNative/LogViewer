@@ -440,7 +440,7 @@ begin
       DN.Data.Receiver.Enabled := B;
       if Supports(DN.Data.Receiver, IWinipc) then
       begin
-        FManager.Settings.WinIPCSettings.Enabled := B;
+        FManager.Settings.WinipcSettings.Enabled := B;
       end
       else if Supports(DN.Data.Receiver, IZmq) then
       begin
@@ -448,7 +448,7 @@ begin
       end
       else if Supports(DN.Data.Receiver, IWinods) then
       begin
-        FManager.Settings.WinODSSettings.Enabled := B;
+        FManager.Settings.WinodsSettings.Enabled := B;
       end
       else if Supports(DN.Data.Receiver, IComPort) then
       begin
@@ -909,7 +909,7 @@ begin
   FWinodsReceiver.OnChange.UseFreeNotification := False;
   FWinodsReceiver.OnChange.Add(FReceiverChange);
   FWinodsReceiver.SubscriberList.OnKeyChanged.Add(FWinodsReceiverSubscriberListChanged);
-  FWinodsReceiver.Enabled := FManager.Settings.WinODSSettings.Enabled;
+  FWinodsReceiver.Enabled := FManager.Settings.WinodsSettings.Enabled;
   FWinODSNode := AddNode(nil, FWinodsReceiver, nil);
   FWinODSNode.CheckType := ctCheckBox;
   if FWinodsReceiver.Enabled then
@@ -925,7 +925,7 @@ begin
   FWinipcReceiver.OnChange.UseFreeNotification := False;
   FWinipcReceiver.OnChange.Add(FReceiverChange);
   FWinipcReceiver.SubscriberList.OnKeyChanged.Add(FWinipcReceiverSubscriberListChanged);
-  FWinipcReceiver.Enabled := FManager.Settings.WinIPCSettings.Enabled;
+  FWinipcReceiver.Enabled := FManager.Settings.WinipcSettings.Enabled;
   FWinipcNode := AddNode(nil, FWinipcReceiver, nil);
   FWinipcNode.CheckType := ctCheckBox;
   if FWinipcReceiver.Enabled then

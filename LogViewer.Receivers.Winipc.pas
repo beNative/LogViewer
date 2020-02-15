@@ -161,7 +161,7 @@ end;
 
 function TWinipcChannelReceiver.GetSettings: TWinipcSettings;
 begin
-  Result := Manager.Settings.WinIPCSettings;
+  Result := Manager.Settings.WinipcSettings;
 end;
 {$ENDREGION}
 

@@ -131,7 +131,7 @@ uses
 
   DDuce.Logger, DDuce.Logger.Interfaces, DDuce.Utils.Winapi,
 
-  LogViewer.Subscribers.WinODS;
+  LogViewer.Subscribers.Winods;
 
 {$REGION 'TWinDebugMonitor'}
 // ----------------------------------------------------------------------------
@@ -377,7 +377,7 @@ end;
 {$REGION 'property access methods'}
 function TWinodsChannelReceiver.GetSettings: TWinodsSettings;
 begin
-  Result := Manager.Settings.WinODSSettings;
+  Result := Manager.Settings.WinodsSettings;
 end;
 {$ENDREGION}
 

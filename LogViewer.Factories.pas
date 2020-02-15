@@ -121,7 +121,7 @@ uses
   Spring,
 
   LogViewer.Resources, LogViewer.Factories.Toolbars,
-  LogViewer.Receivers.WinIPC, LogViewer.Receivers.WinODS,
+  LogViewer.Receivers.Winipc, LogViewer.Receivers.Winods,
   LogViewer.Receivers.ZeroMQ, LogViewer.Receivers.ComPort,
   LogViewer.Receivers.FileSystem;
 

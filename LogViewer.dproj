@@ -92,10 +92,10 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
-        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.8.59.326;ProductName=LogViewer;ProductVersion=1.9.0;ProgramID=com.embarcadero.$(MSBuildProjectName);LegalCopyright=2013 - 2020 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.8.59.327;ProductName=LogViewer;ProductVersion=1.9.0;ProgramID=com.embarcadero.$(MSBuildProjectName);LegalCopyright=2013 - 2020 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
         <AppDPIAwarenessMode>PerMonitor</AppDPIAwarenessMode>
         <VerInfo_Release>59</VerInfo_Release>
-        <VerInfo_Build>326</VerInfo_Build>
+        <VerInfo_Build>327</VerInfo_Build>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
@@ -179,14 +179,14 @@
         </DCCReference>
         <DCCReference Include="LogViewer.Receivers.FileSystem.pas"/>
         <DCCReference Include="LogViewer.Receivers.FileSystem.Settings.pas"/>
-        <DCCReference Include="LogViewer.Receivers.WinIPC.pas"/>
-        <DCCReference Include="LogViewer.Receivers.WinIPC.Settings.pas"/>
-        <DCCReference Include="LogViewer.Receivers.WinIPC.Settings.View.pas">
+        <DCCReference Include="LogViewer.Receivers.Winipc.pas"/>
+        <DCCReference Include="LogViewer.Receivers.Winipc.Settings.pas"/>
+        <DCCReference Include="LogViewer.Receivers.Winipc.Settings.View.pas">
             <Form>frmWinipcSettings</Form>
         </DCCReference>
-        <DCCReference Include="LogViewer.Receivers.WinODS.pas"/>
-        <DCCReference Include="LogViewer.Receivers.WinODS.Settings.pas"/>
-        <DCCReference Include="LogViewer.Receivers.WinODS.Settings.View.pas">
+        <DCCReference Include="LogViewer.Receivers.Winods.pas"/>
+        <DCCReference Include="LogViewer.Receivers.Winods.Settings.pas"/>
+        <DCCReference Include="LogViewer.Receivers.Winods.Settings.View.pas">
             <Form>frmWinodsSettings</Form>
         </DCCReference>
         <DCCReference Include="LogViewer.Receivers.ZeroMQ.pas"/>
@@ -203,8 +203,8 @@
         <DCCReference Include="LogViewer.Subscribers.Base.pas"/>
         <DCCReference Include="LogViewer.Subscribers.ComPort.pas"/>
         <DCCReference Include="LogViewer.Subscribers.FileSystem.pas"/>
-        <DCCReference Include="LogViewer.Subscribers.WinIPC.pas"/>
-        <DCCReference Include="LogViewer.Subscribers.WinODS.pas"/>
+        <DCCReference Include="LogViewer.Subscribers.Winipc.pas"/>
+        <DCCReference Include="LogViewer.Subscribers.Winods.pas"/>
         <DCCReference Include="LogViewer.Subscribers.ZeroMQ.pas"/>
         <DCCReference Include="LogViewer.ValueList.View.pas">
             <Form>frmValueListView</Form>

@@ -286,11 +286,11 @@ begin
   AssignFormParent(FCallStackSettingsForm, tsCallStack);
 
   FWinIPCSettingsForm :=
-    TfrmWinIPCSettings.Create(Self, FSettings.WinIPCSettings);
+    TfrmWinIPCSettings.Create(Self, FSettings.WinipcSettings);
   AssignFormParent(FWinIPCSettingsForm, tsWinIPC);
 
   FWinODSSettingsForm :=
-    TfrmWinODSSettings.Create(Self, FSettings.WinODSSettings);
+    TfrmWinODSSettings.Create(Self, FSettings.WinodsSettings);
   AssignFormParent(FWinODSSettingsForm, tsWinODS);
 
   FZeroMQSettingsForm :=

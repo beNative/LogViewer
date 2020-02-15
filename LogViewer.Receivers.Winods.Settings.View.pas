@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.Receivers.WinODS.Settings.View;
+unit LogViewer.Receivers.Winods.Settings.View;
 
 interface
 
@@ -23,7 +23,7 @@ uses
   System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
 
-  LogViewer.Receivers.WinODS.Settings;
+  LogViewer.Receivers.Winods.Settings;
 
 type
   TfrmWinodsSettings = class(TForm)

@@ -29,8 +29,8 @@ uses
 
   LogViewer.MessageList.Settings, LogViewer.Watches.Settings,
   LogViewer.CallStack.Settings, LogViewer.DisplayValues.Settings,
-  LogViewer.Receivers.ComPort.Settings, LogViewer.Receivers.WinODS.Settings,
-  LogViewer.Receivers.WinIPC.Settings, LogViewer.Receivers.ZeroMQ.Settings,
+  LogViewer.Receivers.ComPort.Settings, LogViewer.Receivers.Winods.Settings,
+  LogViewer.Receivers.Winipc.Settings, LogViewer.Receivers.ZeroMQ.Settings,
   LogViewer.Receivers.FileSystem.Settings, LogViewer.LogLevels.Settings;
 
 type
