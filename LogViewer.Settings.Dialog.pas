@@ -53,6 +53,7 @@ type
     btnCancel               : TButton;
     btnClose                : TButton;
     btnClose1               : TButton;
+    chkEmitLogMessages      : TCheckBox;
     imlMain                 : TImageList;
     pgcMain                 : TKPageControl;
     pnlBottom               : TPanel;
@@ -65,12 +66,13 @@ type
     tsCallStack             : TKTabSheet;
     tsComPort               : TKTabSheet;
     tsDisplayValueSettings  : TKTabSheet;
+    tsGeneralSettings       : TKTabSheet;
+    tsLogLevels             : TKTabSheet;
     tsViewSettings          : TKTabSheet;
     tsWatches               : TKTabSheet;
     tsWinIPC                : TKTabSheet;
     tsWinODS                : TKTabSheet;
     tsZeroMQ                : TKTabSheet;
-    tsLogLevels             : TKTabSheet;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -78,6 +80,8 @@ type
     procedure actApplyExecute(Sender: TObject);
     procedure actCancelExecute(Sender: TObject);
     {$ENDREGION}
+
+    procedure chkEmitLogMessagesClick(Sender: TObject);
 
   private
     FConfigTree                : TVirtualStringTree;
@@ -127,7 +131,6 @@ type
       ASettings : TLogViewerSettings
     ); reintroduce;
     destructor Destroy; override;
-
   end;
 
 implementation
@@ -163,6 +166,7 @@ begin
   BuildTree;
   pgcMain.ActivePage := tsViewSettings;
   seSettings.Lines.LoadFromFile(FSettings.FileName);
+  chkEmitLogMessages.Checked := FSettings.EmitLogMessages;
 end;
 
 destructor TfrmLogViewerSettings.Destroy;
@@ -173,6 +177,11 @@ end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
+procedure TfrmLogViewerSettings.chkEmitLogMessagesClick(Sender: TObject);
+begin
+  FSettings.EmitLogMessages := (Sender as TCheckBox).Checked;
+end;
+
 procedure TfrmLogViewerSettings.FConfigTreeFocusChanged(
   Sender: TBaseVirtualTree; Node: PVirtualNode; Column: TColumnIndex);
 var
@@ -240,6 +249,8 @@ begin
   Result.Text := AText;
 end;
 
+{ Sets up the configuration tree nodes and the associated tab sheets. }
+
 procedure TfrmLogViewerSettings.BuildTree;
 var
   LNode : TConfigNode;
@@ -256,7 +267,7 @@ begin
   AddNode(LNode, SComPort, tsComport);
   AddNode(LNode, SZeroMQ, tsZeroMQ);
 
-  AddNode(nil, SGeneralSettings, nil);
+  AddNode(nil, SGeneralSettings, tsGeneralSettings);
   AddNode(nil, SAdvanced, tsAdvanced);
   FConfigTree.FullExpand;
 end;

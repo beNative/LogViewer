@@ -10,6 +10,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
   OldCreateOrder = False
   PopupMode = pmAuto
   Position = poMainFormCenter
+  ShowHint = True
   PixelsPerInch = 96
   TextHeight = 13
   object splVertical: TSplitter
@@ -88,52 +89,34 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Top = 0
     Width = 482
     Height = 384
-    ActivePageIndex = 2
+    ActivePageIndex = 10
     Align = alClient
     ParentBackground = False
     TabHeight = 0
     TabOrder = 2
-    ExplicitLeft = 203
-    ExplicitWidth = 465
     object tsWatches: TKTabSheet
       Caption = 'Watches'
-      ExplicitWidth = 465
-      ExplicitHeight = 0
     end
     object tsCallStack: TKTabSheet
       Caption = 'Callstack'
-      ExplicitWidth = 465
-      ExplicitHeight = 0
     end
     object tsComPort: TKTabSheet
       Caption = 'ComPort'
-      ExplicitWidth = 465
-      ExplicitHeight = 0
     end
     object tsZeroMQ: TKTabSheet
       Caption = 'ZeroMQ'
-      ExplicitWidth = 465
-      ExplicitHeight = 0
     end
     object tsWinODS: TKTabSheet
       Caption = 'WinODS'
-      ExplicitWidth = 465
-      ExplicitHeight = 0
     end
     object tsWinIPC: TKTabSheet
       Caption = 'WinIPC'
-      ExplicitWidth = 465
-      ExplicitHeight = 0
     end
     object tsDisplayValueSettings: TKTabSheet
       Caption = 'DisplayValueSettings'
-      ExplicitWidth = 465
-      ExplicitHeight = 0
     end
     object tsAdvanced: TKTabSheet
       Caption = 'Advanced'
-      ExplicitWidth = 465
-      ExplicitHeight = 0
       object seSettings: TSynEdit
         Left = 0
         Top = 0
@@ -178,18 +161,32 @@ object frmLogViewerSettings: TfrmLogViewerSettings
         TabWidth = 2
         WordWrap = True
         FontSmoothing = fsmClearType
-        ExplicitWidth = 465
       end
     end
     object tsViewSettings: TKTabSheet
       Caption = 'ViewSettings'
-      ExplicitWidth = 465
-      ExplicitHeight = 0
     end
     object tsLogLevels: TKTabSheet
       Caption = 'KTabSheet1'
-      ExplicitWidth = 465
+    end
+    object tsGeneralSettings: TKTabSheet
+      Caption = 'KTabSheet1'
+      ExplicitWidth = 0
       ExplicitHeight = 0
+      object chkEmitLogMessages: TCheckBox
+        Left = 17
+        Top = 16
+        Width = 128
+        Height = 17
+        Hint = 
+          'Enables a remote logviewer instance to subscribe to '#13#10'log messag' +
+          'es sent by the application. When enabled'#13#10'you can connect a logv' +
+          'iewer by subscribing to this '#13#10'ZeroMQ endpoint: tcp://localhost:' +
+          '42134.'#13#10
+        Caption = 'Emit log messages'
+        TabOrder = 0
+        OnClick = chkEmitLogMessagesClick
+      end
     end
   end
   object aclMain: TActionList
@@ -217,7 +214,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Left = 568
     Top = 32
     Bitmap = {
-      494C010103000800740010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101030008007C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
