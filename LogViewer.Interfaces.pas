@@ -188,6 +188,10 @@ type
     function GetMilliSecondsBetweenSelection: Integer;
     function GetSelectedLogNode: TLogNode;
     procedure SetSelectedLogNode(const Value: TLogNode);
+    function GetLeftPanelVisible: Boolean;
+    procedure SetLeftPanelVisible(const Value: Boolean);
+    function GetRightPanelVisible: Boolean;
+    procedure SetRightPanelVisible(const Value: Boolean);
     {$ENDREGION}
 
     procedure Clear;
@@ -214,6 +218,12 @@ type
 
     property SelectedLogNode: TLogNode
       read GetSelectedLogNode write SetSelectedLogNode;
+
+    property LeftPanelVisible: Boolean
+      read GetLeftPanelVisible write SetLeftPanelVisible;
+
+    property RightPanelVisible: Boolean
+      read GetRightPanelVisible write SetRightPanelVisible;
   end;
 
   ILogViewerEvents = interface

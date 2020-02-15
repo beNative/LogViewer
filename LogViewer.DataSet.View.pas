@@ -42,7 +42,6 @@ type
 
     procedure Clear;
     procedure LoadFromStream(AStream: TStream);
-
   end;
 
 implementation

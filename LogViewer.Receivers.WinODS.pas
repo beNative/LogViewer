@@ -157,6 +157,7 @@ end;
 
 destructor TWinDebugMonitor.Destroy;
 begin
+  Logger.Track(Self, 'Destroy');
   Uninitialize;
   inherited Destroy;
 end;
@@ -366,6 +367,7 @@ destructor TWinodsChannelReceiver.Destroy;
 begin
   Logger.Track(Self, 'Destroy');
   PollTimer.Enabled := False;
+  FDebugMonitor.OnMessageReceived := nil;
   FDebugMonitor.Free;
   FBuffer.Free;
   inherited Destroy;

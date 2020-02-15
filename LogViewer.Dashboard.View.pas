@@ -233,7 +233,6 @@ type
     destructor Destroy; override;
 
     procedure Update; override;
-
   end;
 
 implementation
@@ -264,6 +263,7 @@ procedure TfrmDashboard.AfterConstruction;
 begin
   inherited AfterConstruction;
   FTreeView := TVirtualStringTreeFactory.CreateTreeList(Self, pnlRight);
+  FTreeView.PopupMenu := ppmMain;
   FZmqEndpoints := TEditList.Create(Self, pnlZMQEndpoints);
   FZmqEndpoints.OnAdd.Add(FZMQEndpointsAdd);
   FZmqEndpoints.OnItemExecute.Add(FZMQEndpointsItemExecute);
@@ -946,9 +946,6 @@ begin
 //    Self, FManager.Settings.ComPortSettings
 //  );
 //  AssignFormParent(FComPortSettingsForm, tsCOMPort);
-//  edtBroker.Text   := FManager.Settings.MQTTSettings.Broker;
-//  edtMQTTPort.Text := FManager.Settings.MQTTSettings.Port.ToString;
-//  FManager.Settings.MQTTSettings.Enabled := False;
   pgcMain.ActivePage := tsWinIPC;
   FZmqEndpoints.Data.FromStrings(FManager.Settings.ZeroMQSettings.Endpoints);
   FFSLocations.Data.FromStrings(FManager.Settings.FileSystemSettings.PathNames);

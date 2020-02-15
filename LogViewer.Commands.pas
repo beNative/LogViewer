@@ -55,7 +55,6 @@ type
 
     property Receiver: IChannelReceiver
       read GetReceiver;
-
   end;
 
 implementation

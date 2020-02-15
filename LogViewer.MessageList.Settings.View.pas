@@ -50,7 +50,6 @@ type
       AOwner    : TComponent;
       ASettings : TMessageListSettings
     ); reintroduce; virtual;
-
   end;
 
 implementation

@@ -39,29 +39,29 @@ uses
 type
   TfrmMain = class(TForm)
     {$REGION 'designer controls'}
-    aclMain           : TActionList;
-    actCenterToScreen : TAction;
-    actShowVersion    : TAction;
-    ctMain            : TChromeTabs;
-    imlMain           : TImageList;
-    mniCloseOthers    : TMenuItem;
-    pbrCPU            : TKPercentProgressBar;
-    pnlDelta          : TPanel;
-    pnlMainClient     : TPanel;
-    pnlMemory         : TPanel;
-    pnlMessageCount   : TPanel;
-    pnlSourceName     : TPanel;
-    pnlStatusBar      : TPanel;
-    pnlTop            : TPanel;
-    ppmTabs           : TPopupMenu;
-    shpLine           : TShape;
-    tmrPoll           : TTimer;
-    tskbrMain         : TTaskbar;
+    aclMain            : TActionList;
+    actCenterToScreen  : TAction;
+    actShowVersion     : TAction;
+    ctMain             : TChromeTabs;
+    imlMain            : TImageList;
+    mniCloseOthers     : TMenuItem;
+    pbrCPU             : TKPercentProgressBar;
+    pnlDelta           : TPanel;
+    pnlMainClient      : TPanel;
+    pnlMemory          : TPanel;
+    pnlMessageCount    : TPanel;
+    pnlSourceName      : TPanel;
+    pnlStatusBar       : TPanel;
+    pnlTop             : TPanel;
+    ppmTabs            : TPopupMenu;
+    shpLine            : TShape;
+    tmrPoll            : TTimer;
+    tskbrMain          : TTaskbar;
+    mniCloseTerminated : TMenuItem;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
     procedure actCenterToScreenExecute(Sender: TObject);
-    procedure actDashboardExecute(Sender: TObject);
     procedure actShowVersionExecute(Sender: TObject);
     {$ENDREGION}
 
@@ -164,7 +164,7 @@ uses
   Spring.Utils,
 
   DDuce.Factories.VirtualTrees,
-  DDuce.Logger, DDuce.Utils.Winapi,
+  DDuce.Logger, DDuce.Logger.Channels.ZeroMQ, DDuce.Utils.Winapi,
 
   LogViewer.Resources;
 
@@ -203,10 +203,6 @@ var
   FVI : TFileVersionInfo;
 begin
   inherited AfterConstruction;
-
-//  GrijjyLog.Connect('tcp://localhost:7337', 'Default');
-//  GrijjyLog.SetLogLevel(TgoLogLevel.Info);
-
   TVirtualStringTreeFactory.DefaultTreeOptions.BorderStyle     := bsNone;
   TVirtualStringTreeFactory.DefaultGridOptions.BorderStyle     := bsNone;
   TVirtualStringTreeFactory.DefaultListOptions.BorderStyle     := bsNone;
@@ -220,6 +216,15 @@ begin
   except
     // ignore it and continue with defaults
   end;
+  if FSettings.EmitLogMessages then
+  begin
+    // setup logchannel for using a log LogViewer instance to debug itself.
+    Logger.Channels.Add(
+      TZeroMQChannel.Create(Format('tcp://*:%d', [LOGVIEWER_ZMQ_PORT]))
+    );
+  end;
+  Logger.Clear;
+
   FManager := TLogViewerFactories.CreateManager(Self, FSettings);
   Events.OnAddLogViewer.Add(EventsAddLogViewer);
   Events.OnDeleteLogViewer.Add(EventsDeleteLogViewer);
@@ -240,7 +245,8 @@ begin
   ctMain.LookAndFeel.Tabs.Active.Style.StopColor := ColorToRGB(clWindowFrame);
   ctMain.LookAndFeel.Tabs.Hot.Style.StartColor   := clSilver;
   ctMain.LookAndFeel.Tabs.Hot.Style.StopColor    := clSilver;
-  mniCloseOthers.Action := Actions.Items['actCloseOtherMessageViews'];
+  mniCloseOthers.Action     := Actions.Items['actCloseOtherMessageViews'];
+  mniCloseTerminated.Action := Actions.Items['actCloseTerminatedProcesses'];
 end;
 
 destructor TfrmMain.Destroy;
@@ -267,11 +273,6 @@ begin
   Top         := 0;
   Left        := 0;
   WindowState := wsMaximized;
-end;
-
-procedure TfrmMain.actDashboardExecute(Sender: TObject);
-begin
-  FDashboardTab.Active := True;
 end;
 
 procedure TfrmMain.actShowVersionExecute(Sender: TObject);
@@ -392,7 +393,7 @@ begin
       ALogViewer.Subscriber.SourceId,
       ALogViewer.Subscriber.Receiver.ToString
     ]);
-  //.ActiveTab.SpinnerState := tssRenderedDownload;
+  ctMain.ActiveTab.SpinnerState := tssRenderedDownload;
   ALogViewer.Form.Show;
   UpdateStatusBar;
   OptimizeStatusBarPanelWidths;
@@ -424,6 +425,8 @@ end;
 procedure TfrmMain.EventsShowDashboard(Sender: TObject);
 begin
   FDashboardTab.Active := True;
+  FDashboardTab.Visible := False;
+  FDashboard.Show;
 end;
 
 procedure TfrmMain.SettingsChanged(Sender: TObject);
@@ -496,7 +499,6 @@ begin
     LBitmap.Value.Canvas,
     AText
   );
-
   LCanvas := TControlCanvas.Create;
   LCanvas.Value.Control := APanel;
   LCanvas.Value.Draw(0, 0, LBitmap);
@@ -506,6 +508,8 @@ procedure TfrmMain.UpdateActions;
 begin
   UpdateStatusBar;
   OptimizeStatusBarPanelWidths;
+  if Assigned(Actions) then
+    Actions.Items['actDashboard'].Checked := FDashboard.Visible;
   inherited UpdateActions;
 end;
 
@@ -538,8 +542,8 @@ var
 begin
   if Assigned(ctMain.ActiveTab) and Assigned(Manager)
     and Assigned(Manager.ActiveView)
-    and Assigned(Manager.ActiveView.Subscriber)
-    and (ctMain.ActiveTab <> FDashboardTab) then
+    and Assigned(Manager.ActiveView.Subscriber) then
+    //and (ctMain.ActiveTab <> FDashboardTab) then
   begin
 //    S := Format(SSubscriberSource, [
 //      Manager.ActiveView.Subscriber.SourceName,

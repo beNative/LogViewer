@@ -71,7 +71,6 @@ type
       ASettings : TLogLevelSettings
     ); reintroduce;
     destructor Destroy; override;
-
   end;
 
 implementation

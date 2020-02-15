@@ -111,7 +111,6 @@ type
       AManager    : ILogViewerManager;
       const APath : string
     ): IChannelReceiver;
-
   end;
 
 implementation

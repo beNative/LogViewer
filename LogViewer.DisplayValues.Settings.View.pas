@@ -75,7 +75,6 @@ type
       ASettings : TDisplayValuesSettings
     ); reintroduce;
     destructor Destroy; override;
-
   end;
 
 implementation

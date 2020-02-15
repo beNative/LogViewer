@@ -79,7 +79,6 @@ type
 
     property Settings: TZeroMQSettings
       read GetSettings;
-
   end;
 
 implementation

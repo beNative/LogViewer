@@ -45,7 +45,6 @@ type
       ASettings : TWinipcSettings
     ); reintroduce;
     destructor Destroy; override;
-
   end;
 
 implementation

@@ -39,9 +39,7 @@ type
       AOwner    : TComponent;
       ASettings : TCallStackSettings
     ); reintroduce;
-
     destructor Destroy; override;
-
   end;
 
 implementation

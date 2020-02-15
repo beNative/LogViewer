@@ -251,6 +251,12 @@ type
     function ParseValue(const AString: string): Tuple<string, string, string>;
 
   protected
+    function GetLeftPanelVisible: Boolean;
+    procedure SetLeftPanelVisible(const Value: Boolean);
+    function GetRightPanelVisible: Boolean;
+    procedure SetRightPanelVisible(const Value: Boolean);
+
+
     procedure Clear;
     procedure AutoFitColumns;
     procedure ApplySettings;
@@ -334,6 +340,12 @@ type
     property MessageCount: Int64
       read GetMessageCount;
 
+    property LeftPanelVisible: Boolean
+      read GetLeftPanelVisible write SetLeftPanelVisible;
+
+    property RightPanelVisible: Boolean
+      read GetRightPanelVisible write SetRightPanelVisible;
+
   public
     constructor Create(
       AOwner      : TComponent;
@@ -343,7 +355,6 @@ type
     ); reintroduce; virtual;
     procedure AfterConstruction; override;
     destructor Destroy; override;
-
   end;
 
 implementation
@@ -636,6 +647,19 @@ function TfrmMessageList.GetIsActiveView: Boolean;
 begin
   Result := Assigned(Manager.ActiveView)
     and (Manager.ActiveView = (Self as ILogViewer));
+end;
+
+function TfrmMessageList.GetLeftPanelVisible: Boolean;
+begin
+  Result := pnlLeft.Visible;
+end;
+
+procedure TfrmMessageList.SetLeftPanelVisible(const Value: Boolean);
+begin
+  if Value <> LeftPanelVisible then
+  begin
+    pnlMain.PanelCollection[0].Visible := Value;
+  end;
 end;
 
 function TfrmMessageList.GetManager: ILogViewerManager;
@@ -1376,6 +1400,20 @@ end;
 function TfrmMessageList.GetMilliSecondsBetweenSelection: Integer;
 begin
   Result := FMiliSecondsBetweenSelection;
+end;
+
+function TfrmMessageList.GetRightPanelVisible: Boolean;
+begin
+  Result := pnlRight.Visible;
+end;
+
+procedure TfrmMessageList.SetRightPanelVisible(const Value: Boolean);
+begin
+  if Value <> RightPanelVisible then
+  begin
+    pnlMain.PanelCollection[2].Visible := Value;
+    //pnlRight.Visible := Value;
+  end;
 end;
 
 function TfrmMessageList.IsCollapsedTracingNode(ATree: TBaseVirtualTree;

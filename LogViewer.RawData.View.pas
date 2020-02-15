@@ -29,12 +29,9 @@ type
   TfrmRawDataView = class(TForm)
     heMain : TKHexEditor;
 
-  private
-
   public
     procedure Clear;
     procedure LoadFromStream(AStream: TStream);
-
   end;
 
 implementation

@@ -102,9 +102,7 @@ type
       const ASourceName : string;
       AEnabled          : Boolean
     );
-
     destructor Destroy; override;
-
   end;
 
 implementation

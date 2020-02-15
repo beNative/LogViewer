@@ -43,7 +43,6 @@ type
       AOwner    : TComponent;
       ASettings : TZeroMQSettings
     ); reintroduce; virtual;
-
   end;
 
 implementation

@@ -88,7 +88,6 @@ type
       ADisplayValuesSettings : TDisplayValuesSettings
     ); reintroduce; virtual;
     destructor Destroy; override;
-
   end;
 
 implementation

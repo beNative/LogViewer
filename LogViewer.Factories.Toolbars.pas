@@ -195,18 +195,23 @@ begin
   TB.Images           := FActions.ActionList.Images;
   TB.ButtonWidth      := 10;
   TB.AllowTextButtons := True;
+  CreateToolButton(TB, 'actDashboard', tbsTextButton);
+  CreateToolButton(TB);
   CreateToolButton(TB, 'actStart', tbsTextButton);
   CreateToolButton(TB, 'actStop', tbsTextButton);
   CreateToolButton(TB);
   CreateToolButton(TB, 'actSettings', tbsTextButton);
-  CreateToolButton(TB, 'actDashboard', tbsTextButton);
   CreateToolButton(TB);
   CreateToolButton(TB, 'actShowFilterView', tbsTextButton);
   CreateToolButton(TB, 'actClearMessages', tbsTextButton);
   CreateToolButton(TB);
+  CreateToolButton(TB, 'actCloseTerminatedProcesses', tbsTextButton);
+  CreateToolButton(TB);
   CreateToolButton(TB, 'actCollapseAll', tbsTextButton);
   CreateToolButton(TB, 'actExpandAll', tbsTextButton);
   CreateToolButton(TB, 'actAutoScrollMessages', tbsTextButton);
+  CreateToolButton(TB, 'actToggleLeftPanelVisible', tbsTextButton);
+  CreateToolButton(TB, 'actToggleRightPanelVisible', tbsTextButton);
   Result := TB;
 end;
 

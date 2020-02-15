@@ -121,7 +121,6 @@ type
 
     property TimeStamp: TDateTime
       read GetTimeStamp write SetTimeStamp;
-
   end;
 
 implementation

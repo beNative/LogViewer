@@ -94,6 +94,9 @@ type
     imlMessageTypes           : TImageList;
     ppmLogTreeViewer          : TPopupMenu;
     ppmMessageTypes           : TPopupMenu;
+    actCloseTerminatedProcesses: TAction;
+    actToggleLeftPanelVisible: TAction;
+    actToggleRightPanelVisible: TAction;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -144,6 +147,9 @@ type
     procedure actCloseMessageViewExecute(Sender: TObject);
     procedure actCloseOtherMessageViewsExecute(Sender: TObject);
     procedure actDashboardExecute(Sender: TObject);
+    procedure actCloseTerminatedProcessesExecute(Sender: TObject);
+    procedure actToggleRightPanelVisibleExecute(Sender: TObject);
+    procedure actToggleLeftPanelVisibleExecute(Sender: TObject);
     {$ENDREGION}
 
   private
@@ -275,7 +281,6 @@ type
 
     procedure AfterConstruction; override;
     destructor Destroy; override;
-
   end;
 
 implementation
@@ -285,7 +290,7 @@ implementation
 uses
   Vcl.Forms, Vcl.Dialogs,
 
-  DDuce.Editor.Factories, DDuce.AboutDialog,
+  DDuce.Editor.Factories, DDuce.AboutDialog, DDuce.Utils.Winapi,
   DDuce.Logger,
 
   LogViewer.Factories, LogViewer.Resources, LogViewer.Settings.Dialog,
@@ -403,6 +408,31 @@ begin
     else
     begin
       DeleteView(Views.Last);
+    end;
+  end;
+end;
+
+procedure TdmManager.actCloseTerminatedProcessesExecute(Sender: TObject);
+var
+  I : Integer;
+  V : ILogViewer;
+begin
+  I := 0;
+  while I < Views.Count do
+  begin
+    V := Views[I];
+    if Supports(V.Subscriber, IWinipc) then
+    begin
+      if not CheckProcessExists(V.Subscriber.SourceId) then
+        DeleteView(V)
+      else
+      begin
+        Inc(I);
+      end;
+    end
+    else
+    begin
+      Inc(I);
     end;
   end;
 end;
@@ -592,6 +622,18 @@ begin
     Settings.FormSettings.WindowState := wsMaximized
   else
     Settings.FormSettings.WindowState := wsNormal;
+end;
+
+procedure TdmManager.actToggleLeftPanelVisibleExecute(Sender: TObject);
+begin
+  if Assigned(ActiveView) then
+    ActiveView.LeftPanelVisible := actToggleLeftPanelVisible.Checked;
+end;
+
+procedure TdmManager.actToggleRightPanelVisibleExecute(Sender: TObject);
+begin
+  if Assigned(ActiveView) then
+    ActiveView.RightPanelVisible := actToggleRightPanelVisible.Checked;
 end;
 
 procedure TdmManager.actInfoExecute(Sender: TObject);
@@ -816,8 +858,12 @@ begin
   AddMenuItem(MI);
   AddMenuItem(MI, MessageTypesPopupMenu);
   AddMenuItem(MI);
+  AddMenuItem(MI, actToggleLeftPanelVisible);
+  AddMenuItem(MI, actToggleRightPanelVisible);
+  AddMenuItem(MI);
   AddMenuItem(MI, actCloseMessageView);
   AddMenuItem(MI, actCloseOtherMessageViews);
+  AddMenuItem(MI, actCloseTerminatedProcesses);
 end;
 
 procedure TdmManager.BuildMessageTypesPopupMenu;
@@ -927,7 +973,9 @@ begin
   B := Assigned(ActiveView) and Assigned(ActiveView.Subscriber);
   // workaround toolbar issue which refuses to reflect checked state when button
   // is first Disabled, then Enabled and Checked
-  actAutoScrollMessages.Visible := B;
+  actAutoScrollMessages.Visible      := B;
+//  actToggleRightPanelVisible.Visible := B;
+//  actToggleLeftPanelVisible.Visible  := B;
 
   actMessageTypesMenu.Enabled   := B;
   actShowFilterView.Enabled     := B;
