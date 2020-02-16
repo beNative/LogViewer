@@ -72,13 +72,9 @@ type
     actMessageTypesMenu       : TAction;
     actMethodTraces           : TAction;
     actObject                 : TAction;
-    actOpen                   : TAction;
     actPersistent             : TAction;
-    actSave                   : TAction;
     actSaveBitmapAs           : TAction;
     actScreenshot             : TAction;
-    actSelectAll              : TAction;
-    actSelectNone             : TAction;
     actSetFocusToFilter       : TAction;
     actSettings               : TAction;
     actShowFilterView         : TAction;
@@ -97,6 +93,7 @@ type
     actCloseTerminatedProcesses: TAction;
     actToggleLeftPanelVisible: TAction;
     actToggleRightPanelVisible: TAction;
+    ppmSubscriber: TPopupMenu;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -119,10 +116,6 @@ type
     procedure actMemoryExecute(Sender: TObject);
     procedure actMethodTracesExecute(Sender: TObject);
     procedure actComponentExecute(Sender: TObject);
-    procedure actOpenExecute(Sender: TObject);
-    procedure actSaveExecute(Sender: TObject);
-    procedure actSelectAllExecute(Sender: TObject);
-    procedure actSelectNoneExecute(Sender: TObject);
     procedure actSetFocusToFilterExecute(Sender: TObject);
     procedure actSettingsExecute(Sender: TObject);
     procedure actStopExecute(Sender: TObject);
@@ -143,7 +136,6 @@ type
     procedure actTextExecute(Sender: TObject);
     procedure actScreenshotExecute(Sender: TObject);
     procedure actShowFilterViewExecute(Sender: TObject);
-    procedure actSaveBitmapAsExecute(Sender: TObject);
     procedure actCloseMessageViewExecute(Sender: TObject);
     procedure actCloseOtherMessageViewsExecute(Sender: TObject);
     procedure actDashboardExecute(Sender: TObject);
@@ -174,12 +166,8 @@ type
 
     procedure BuildLogTreeViewerPopupMenu;
     procedure BuildMessageTypesPopupMenu;
+    procedure BuildSubscriberPopupMenu;
 
-    procedure FViewListChanged(
-      Sender     : TObject;
-      const Item : ILogViewer;
-      Action     : TCollectionChangedAction
-    );
     procedure FSettingsChanged(Sender: TObject);
 
   protected
@@ -192,6 +180,7 @@ type
     function GetReceivers: IList<IChannelReceiver>;
     function GetMessageTypesPopupMenu: TPopupMenu;
     function GetLogTreeViewerPopupMenu: TPopupMenu;
+    function GetSubscriberPopupMenu: TPopupMenu;
     {$ENDREGION}
 
     procedure FeatureNotImplemented;
@@ -234,6 +223,9 @@ type
 
     property MessageTypesPopupMenu: TPopupMenu
       read GetMessageTypesPopupMenu;
+
+    property SubscriberPopupMenu: TPopupMenu
+      read GetSubscriberPopupMenu;
     {$ENDREGION}
 
     {$REGION 'ILogViewerManager'}
@@ -314,12 +306,11 @@ begin
   FCommands       := TLogViewerCommands.Create(Self);
   FReceivers      := TCollections.CreateInterfaceList<IChannelReceiver>;
   FViewList       := TCollections.CreateInterfaceList<ILogViewer>;
-  FViewList.OnChanged.UseFreeNotification := False;
-  FViewList.OnChanged.Add(FViewListChanged);
   FEditorSettings := TEditorFactories.CreateSettings(Self, 'settings.xml');
   FEditorManager  := TEditorFactories.CreateManager(Self, FEditorSettings);
   BuildMessageTypesPopupMenu;
   BuildLogTreeViewerPopupMenu;
+  BuildSubscriberPopupMenu;
   FFilterView := TfrmMessageFilter.Create(
     Self,
     Settings.MessageListSettings,
@@ -421,7 +412,7 @@ begin
   while I < Views.Count do
   begin
     V := Views[I];
-    if Supports(V.Subscriber, IWinipc) then
+    if Supports(V.Subscriber, IWinipc) or Supports(V.Subscriber, IWinods) then
     begin
       if not CheckProcessExists(V.Subscriber.SourceId) then
         DeleteView(V)
@@ -523,39 +514,14 @@ begin
   UpdateVisibleMessageTypes(lmtObject, Sender);
 end;
 
-procedure TdmManager.actOpenExecute(Sender: TObject);
-begin
-//
-end;
-
 procedure TdmManager.actPersistentExecute(Sender: TObject);
 begin
   UpdateVisibleMessageTypes(lmtPersistent, Sender);
 end;
 
-procedure TdmManager.actSaveBitmapAsExecute(Sender: TObject);
-begin
-  //
-end;
-
-procedure TdmManager.actSaveExecute(Sender: TObject);
-begin
-//
-end;
-
 procedure TdmManager.actScreenshotExecute(Sender: TObject);
 begin
   UpdateVisibleMessageTypes(lmtScreenShot, Sender);
-end;
-
-procedure TdmManager.actSelectAllExecute(Sender: TObject);
-begin
-//
-end;
-
-procedure TdmManager.actSelectNoneExecute(Sender: TObject);
-begin
-//
 end;
 
 procedure TdmManager.actSetFocusToFilterExecute(Sender: TObject);
@@ -691,7 +657,7 @@ end;
 procedure TdmManager.SetActiveView(const Value: ILogViewer);
 begin
   Logger.Track(Self, 'SetActiveView');
-  if Assigned(Value) {and (Value <> FActiveView) }then
+  if Assigned(Value) then
   begin
     FActiveView := Value;
     if Assigned(FActiveView.Target) then
@@ -750,6 +716,11 @@ begin
   Result := FSettings;
 end;
 
+function TdmManager.GetSubscriberPopupMenu: TPopupMenu;
+begin
+  Result := ppmSubscriber;
+end;
+
 function TdmManager.GetViews: IList<ILogViewer>;
 begin
   Result := FViewList;
@@ -762,25 +733,13 @@ procedure TdmManager.FReceiverSubscriberListChanged(Sender: TObject;
 begin
   if Action = caAdded then
   begin
-    AddView(TLogViewerFactories.CreateLogViewer(Self, Item{, Owner as TWinControl}));
-//    AddView(TLogViewerFactories.CreateLogViewer(Self, Item, Owner as TWinControl));
+    AddView(TLogViewerFactories.CreateLogViewer(Self, Item));
   end;
 end;
 
 procedure TdmManager.FSettingsChanged(Sender: TObject);
 begin
 //  UpdateActions;
-end;
-
-procedure TdmManager.FViewListChanged(Sender: TObject; const Item: ILogViewer;
-  Action: TCollectionChangedAction);
-begin
-  if Assigned(Item) then
-  begin
-    //Logger.SendInterface('Item', Item);
-//    UpdateActions;
-    //Logger.Send('Action', TValue.From(Action));
-  end;
 end;
 {$ENDREGION}
 
@@ -868,7 +827,7 @@ end;
 
 procedure TdmManager.BuildMessageTypesPopupMenu;
 var
-  MI: TMenuItem;
+  MI : TMenuItem;
 begin
   actMessageTypesMenu.DisableIfNoHandler := False;
   MI := MessageTypesPopupMenu.Items;
@@ -899,6 +858,19 @@ begin
   AddMenuItem(MI, actMemory);
   AddMenuItem(MI);
   AddMenuItem(MI, actCheckPoint);
+end;
+
+procedure TdmManager.BuildSubscriberPopupMenu;
+var
+  MI : TMenuItem;
+begin
+  MI := SubscriberPopupMenu.Items;
+  AddMenuItem(MI, actStart);
+  AddMenuItem(MI, actStop);
+  AddMenuItem(MI);
+  AddMenuItem(MI, actCloseMessageView);
+  AddMenuItem(MI, actCloseOtherMessageViews);
+  AddMenuItem(MI, actCloseTerminatedProcesses);
 end;
 
 procedure TdmManager.FeatureNotImplemented;
@@ -974,8 +946,10 @@ begin
   // workaround toolbar issue which refuses to reflect checked state when button
   // is first Disabled, then Enabled and Checked
   actAutoScrollMessages.Visible      := B;
-//  actToggleRightPanelVisible.Visible := B;
-//  actToggleLeftPanelVisible.Visible  := B;
+  actToggleRightPanelVisible.Visible := B;
+  actToggleLeftPanelVisible.Visible  := B;
+  actToggleLeftPanelVisible.Checked := B and ActiveView.LeftPanelVisible;
+  actToggleRightPanelVisible.Checked := B and ActiveView.RightPanelVisible;
 
   actMessageTypesMenu.Enabled   := B;
   actShowFilterView.Enabled     := B;
@@ -1005,8 +979,6 @@ begin
   actCollapseAll.Enabled        := B;
   actExpandAll.Enabled          := B;
   actClearMessages.Enabled      := B;
-  actSelectAll.Enabled          := MLS.VisibleMessageTypes <> AllMessages;
-  actSelectNone.Enabled         := MLS.VisibleMessageTypes <> [];
   actFilterMessages.Enabled := B and
     not Settings.MessageListSettings.AutoFilterMessages;
   actToggleAlwaysOnTop.Checked := Settings.FormSettings.FormStyle = fsStayOnTop;

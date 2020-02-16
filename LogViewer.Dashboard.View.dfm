@@ -59,12 +59,14 @@ object frmDashboard: TfrmDashboard
         TabOrder = 0
         object tsWinIpc: TKTabSheet
           Caption = 'WinIPC'
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object lblWinIPC: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
-            Width = 308
-            Height = 585
+            Width = 307
+            Height = 221
             Align = alClient
             Caption = 
               'Messages are exchanged between the source application and LogVie' +
@@ -83,8 +85,6 @@ object frmDashboard: TfrmDashboard
             ParentFont = False
             Transparent = True
             WordWrap = True
-            ExplicitWidth = 307
-            ExplicitHeight = 221
           end
           object pnlWinIPCTitle: TPanel
             Left = 0
@@ -107,12 +107,14 @@ object frmDashboard: TfrmDashboard
         end
         object tsWinOds: TKTabSheet
           Caption = 'WinODS'
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object lblWinODS: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
             Width = 308
-            Height = 585
+            Height = 374
             Align = alClient
             Caption = 
               'This receiver captures messages from any local applicatiion that' +
@@ -137,7 +139,6 @@ object frmDashboard: TfrmDashboard
             ParentFont = False
             Transparent = True
             WordWrap = True
-            ExplicitHeight = 374
           end
           object pnlWinODSTitle: TPanel
             Left = 0
@@ -160,6 +161,8 @@ object frmDashboard: TfrmDashboard
         end
         object tsZeroMQ: TKTabSheet
           Caption = 'ZeroMQ'
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object pnlZMQEndpoints: TPanel
             Left = 0
             Top = 25
@@ -256,6 +259,8 @@ object frmDashboard: TfrmDashboard
         end
         object tsFileSystem: TKTabSheet
           Caption = 'FileSystem'
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object pnlFileSystemTitle: TPanel
             Left = 0
             Top = 0
@@ -286,6 +291,8 @@ object frmDashboard: TfrmDashboard
         end
         object tsComPort: TKTabSheet
           Caption = 'COM port'
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object pnlCOMPorts: TPanel
             Left = 0
             Top = 25
@@ -345,10 +352,6 @@ object frmDashboard: TfrmDashboard
       Caption = 'Subscribe to LogViewer instance (tcp://localhost:42134)'
       OnExecute = actAddSubscribeToLogViewerExecute
     end
-    object actCloseSubscriber: TAction
-      Caption = 'Close subscriber'
-      OnExecute = actCloseSubscriberExecute
-    end
     object actMoveUpEndpoint: TAction
       Category = 'ZMQEndpoints'
       Caption = 'Move up'
@@ -385,7 +388,7 @@ object frmDashboard: TfrmDashboard
     Left = 408
     Top = 8
     Bitmap = {
-      494C01010B000801100210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01010B000801180210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000001001B09532ED308512ED100000010000000000000
@@ -788,11 +791,8 @@ object frmDashboard: TfrmDashboard
       0000E001000000000000F81B0000000000000000000000000000000000000000
       000000000000}
   end
-  object ppmMain: TPopupMenu
+  object ppmSubscriber: TPopupMenu
     Left = 520
     Top = 8
-    object mniCloseSsubscriber: TMenuItem
-      Action = actCloseSubscriber
-    end
   end
 end

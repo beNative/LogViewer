@@ -1,10 +1,10 @@
 {
 	"EmitLogMessages": true,
 	"FormSettings": {
-		"Left": 389,
-		"Top": 227,
-		"Width": 1402,
-		"Height": 1042,
+		"Left": 607,
+		"Top": 266,
+		"Width": 1514,
+		"Height": 952,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -16,17 +16,17 @@
 		"MessageDetailsVisible": true,
 		"SmartTimeStamps": true,
 		"HorizontalPanelPositions": [
-			0.2640625,
-			0.726551226551227,
+			0.235474006116208,
+			0.666666666666667,
 			1
 		],
 		"LeftVerticalPanelPositions": [
-			0.118534482758621,
+			0.25,
 			1
 		]
 	},
 	"WinodsSettings": {
-		"Enabled": true
+		"Enabled": false
 	},
 	"WinipcSettings": {
 		"Enabled": true,
@@ -188,7 +188,7 @@
 		"ColumnHeadersVisible": false,
 		"OnlyTrackChanges": true,
 		"WatchHistoryVisible": true,
-		"SyncWithSelection": false
+		"SyncWithSelection": true
 	},
 	"CallStackSettings": {
 		"ColumnHeadersVisible": false

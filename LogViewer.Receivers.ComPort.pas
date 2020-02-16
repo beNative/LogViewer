@@ -61,11 +61,11 @@ type
   public
     procedure AfterConstruction; override;
 
-//    function CreateSubscriber(
-//      ASourceId         : UInt32;
-//      AThreadId         : UInt32;
-//      const ASourceName : string
-//    ): ISubscriber; override;
+    function CreateSubscriber(
+      ASourceId         : UInt32;
+      AThreadId         : UInt32;
+      const ASourceName : string
+    ): ISubscriber;
   end;
 
 implementation
@@ -118,43 +118,43 @@ end;
 
 {$REGION 'protected methods'}
 procedure TComPortChannelReceiver.UpdateSubscribers;
-//var
-//  I  : Integer;
-//  SL : Shared<TStringList>;
-//  S  : ISubscriber;
+var
+  I  : Integer;
+  SL : Shared<TStringList>;
+  S  : ISubscriber;
 begin
-//  SL := TStringList.Create;
-//  SL.Value.CommaText := GetSerialPortNames;
-//  for I := 0 to SL.Value.Count - 1 do
-//  begin
-//    S := CreateSubscriber(I, 0, SL.Value[I]);
-//    if Assigned(S) then
-//      SubscriberList.AddOrSetValue(I, S);
-//  end;
+  SL := TStringList.Create;
+  SL.Value.CommaText := GetSerialPortNames;
+  for I := 0 to SL.Value.Count - 1 do
+  begin
+    S := CreateSubscriber(I, 0, SL.Value[I]);
+    if Assigned(S) then
+      SubscriberList.AddOrSetValue(I, S);
+  end;
 end;
 {$ENDREGION}
 
 {$REGION 'public methods'}
-//function TComPortChannelReceiver.CreateSubscriber(ASourceId, AThreadId: UInt32;
-//  const ASourceName: string): ISubscriber;
-//begin
-//  Settings.Port := ASourceName;
-//  if ASourceName <> '' then
-//  begin
-//    Result := TComPortSubscriber.Create(
-//      Self,
-//      ASourceId,
-//      ASourceName,
-//      ASourceName,
-//      False,
-//      Settings
-//    );
-//  end
-//  else
-//  begin
-//    Result := nil;
-//  end;
-//end;
+function TComPortChannelReceiver.CreateSubscriber(ASourceId, AThreadId: UInt32;
+  const ASourceName: string): ISubscriber;
+begin
+  Settings.Port := ASourceName;
+  if ASourceName <> '' then
+  begin
+    Result := TComPortSubscriber.Create(
+      Self,
+      ASourceId,
+      ASourceName,
+      ASourceName,
+      False,
+      Settings
+    );
+  end
+  else
+  begin
+    Result := nil;
+  end;
+end;
 {$ENDREGION}
 
 end.

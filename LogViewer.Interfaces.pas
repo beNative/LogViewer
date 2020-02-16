@@ -170,6 +170,7 @@ type
     {$REGION 'property access methods'}
     function GetLogTreeViewerPopupMenu: TPopupMenu;
     function GetMessageTypesPopupMenu: TPopupMenu;
+    function GetSubscriberPopupMenu: TPopupMenu;
     {$ENDREGION}
 
     property LogTreeViewerPopupMenu: TPopupMenu
@@ -177,6 +178,9 @@ type
 
     property MessageTypesPopupMenu: TPopupMenu
       read GetMessageTypesPopupMenu;
+
+    property SubscriberPopupMenu: TPopupMenu
+      read GetSubscriberPopupMenu;
   end;
 
   ILogViewer = interface

@@ -44,7 +44,6 @@ type
     actShowVersion     : TAction;
     ctMain             : TChromeTabs;
     imlMain            : TImageList;
-    mniCloseOthers     : TMenuItem;
     pbrCPU             : TKPercentProgressBar;
     pnlDelta           : TPanel;
     pnlMainClient      : TPanel;
@@ -53,11 +52,10 @@ type
     pnlSourceName      : TPanel;
     pnlStatusBar       : TPanel;
     pnlTop             : TPanel;
-    ppmTabs            : TPopupMenu;
     shpLine            : TShape;
     tmrPoll            : TTimer;
     tskbrMain          : TTaskbar;
-    mniCloseTerminated : TMenuItem;
+    imlTabStates: TImageList;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -130,6 +128,7 @@ type
     );
     procedure UpdateStatusBar;
     procedure UpdateActions; override;
+    procedure UpdateTabStates;
     procedure OptimizeWidth(APanel: TPanel);
     procedure OptimizeStatusBarPanelWidths;
 
@@ -216,7 +215,8 @@ begin
   except
     // ignore it and continue with defaults
   end;
-  if FSettings.EmitLogMessages then
+  Logger.Enabled := FSettings.EmitLogMessages;
+  if Logger.Enabled then
   begin
     // setup logchannel for using a log LogViewer instance to debug itself.
     Logger.Channels.Add(
@@ -245,8 +245,8 @@ begin
   ctMain.LookAndFeel.Tabs.Active.Style.StopColor := ColorToRGB(clWindowFrame);
   ctMain.LookAndFeel.Tabs.Hot.Style.StartColor   := clSilver;
   ctMain.LookAndFeel.Tabs.Hot.Style.StopColor    := clSilver;
-  mniCloseOthers.Action     := Actions.Items['actCloseOtherMessageViews'];
-  mniCloseTerminated.Action := Actions.Items['actCloseTerminatedProcesses'];
+  ctMain.PopupMenu := Manager.Menus.SubscriberPopupMenu;
+  tmrPoll.Enabled := True;
 end;
 
 destructor TfrmMain.Destroy;
@@ -393,7 +393,6 @@ begin
       ALogViewer.Subscriber.SourceId,
       ALogViewer.Subscriber.Receiver.ToString
     ]);
-  ctMain.ActiveTab.SpinnerState := tssRenderedDownload;
   ALogViewer.Form.Show;
   UpdateStatusBar;
   OptimizeStatusBarPanelWidths;
@@ -425,7 +424,6 @@ end;
 procedure TfrmMain.EventsShowDashboard(Sender: TObject);
 begin
   FDashboardTab.Active := True;
-  FDashboardTab.Visible := False;
   FDashboard.Show;
 end;
 
@@ -439,6 +437,7 @@ procedure TfrmMain.tmrPollTimer(Sender: TObject);
 begin
   pbrCPU.Position   := Round(GetProcessCpuUsagePct(GetCurrentProcessId));
   pnlMemory.Caption := FormatBytes(MemoryUsed);
+  UpdateTabStates;
 end;
 
 procedure TfrmMain.FormShortCut(var Msg: TWMKey; var Handled: Boolean);
@@ -509,7 +508,7 @@ begin
   UpdateStatusBar;
   OptimizeStatusBarPanelWidths;
   if Assigned(Actions) then
-    Actions.Items['actDashboard'].Checked := FDashboard.Visible;
+    Actions.Items['actDashboard'].Checked := FDashboard.Focused;
   inherited UpdateActions;
 end;
 
@@ -542,8 +541,8 @@ var
 begin
   if Assigned(ctMain.ActiveTab) and Assigned(Manager)
     and Assigned(Manager.ActiveView)
-    and Assigned(Manager.ActiveView.Subscriber) then
-    //and (ctMain.ActiveTab <> FDashboardTab) then
+    and Assigned(Manager.ActiveView.Subscriber)
+    and (ctMain.ActiveTab <> FDashboardTab) then
   begin
 //    S := Format(SSubscriberSource, [
 //      Manager.ActiveView.Subscriber.SourceName,
@@ -570,6 +569,47 @@ begin
     pnlMessageCount.Caption := '';
     pnlDelta.Caption        := '';
     OptimizeStatusBarPanelWidths;
+  end;
+end;
+
+procedure TfrmMain.UpdateTabStates;
+var
+  I  : Integer;
+  S  : ISubscriber;
+  LV : ILogViewer;
+begin
+  for I := 0 to ctMain.Tabs.Count - 1 do
+  begin
+    if ctMain.Tabs[I] <> FDashboardTab then
+    begin
+      LV := ILogViewer(ctMain.Tabs[I].Data);
+      S  := LV.Subscriber;
+      if Supports(S, IWinipc) or Supports(S, IWinods) then
+      begin
+        if CheckProcessExists(S.SourceId) then
+        begin
+          if S.Enabled then
+            ctMain.Tabs[I].ImageIndex := 0 // Green
+          else
+          begin
+            ctMain.Tabs[I].ImageIndex := 2 // Red
+          end;
+        end
+        else
+        begin
+          ctMain.Tabs[I].ImageIndex := 1; // Off
+        end;
+      end
+      else
+      begin
+        if S.Enabled then
+          ctMain.Tabs[I].ImageIndex := 0 // Green
+        else
+        begin
+          ctMain.Tabs[I].ImageIndex := 2 // Red
+        end;
+      end;
+    end;
   end;
 end;
 {$ENDREGION}

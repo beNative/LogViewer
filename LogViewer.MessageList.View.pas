@@ -1361,7 +1361,10 @@ end;
 procedure TfrmMessageList.FSubscriberReceiveMessage(Sender: TObject;
   AStream: TStream);
 begin
-  ProcessMessage(AStream);
+  if Supports(Sender, IZmq) or Supports(Sender, IWinipc) then
+  begin
+    ProcessMessage(AStream);
+  end;
 end;
 
 procedure TfrmMessageList.FSettingsChanged(Sender: TObject);

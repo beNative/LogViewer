@@ -58,7 +58,6 @@ type
     aclMain                    : TActionList;
     actAddEndpoint             : TAction;
     actAddSubscribeToLogViewer : TAction;
-    actCloseSubscriber         : TAction;
     actCopyEndpoint            : TAction;
     actDeleteEndpoint          : TAction;
     actInspectTreeview         : TAction;
@@ -70,7 +69,6 @@ type
     imlMain                    : TImageList;
     lblWinIPC                  : TLabel;
     lblWinODS                  : TLabel;
-    mniCloseSsubscriber        : TMenuItem;
     Panel4                     : TPanel;
     pgcMain                    : TKPageControl;
     pnlButtons                 : TGridPanel;
@@ -84,7 +82,7 @@ type
     pnlWinIPCTitle             : TPanel;
     pnlWinODSTitle             : TPanel;
     pnlZMQEndpoints            : TPanel;
-    ppmMain                    : TPopupMenu;
+    ppmSubscriber              : TPopupMenu;
     tsComPort                  : TKTabSheet;
     tsFileSystem               : TKTabSheet;
     tsWinIpc                   : TKTabSheet;
@@ -96,7 +94,6 @@ type
     procedure actSubscribeToLocalHostExecute(Sender: TObject);
     procedure actInspectTreeviewExecute(Sender: TObject);
     procedure actAddSubscribeToLogViewerExecute(Sender: TObject);
-    procedure actCloseSubscriberExecute(Sender: TObject);
     {$ENDREGION}
 
   private
@@ -129,6 +126,14 @@ type
       Column       : TColumnIndex;
       TextType     : TVSTTextType;
       var CellText : string
+    );
+    procedure FTreeViewGetPopupMenu(
+      Sender        : TBaseVirtualTree;
+      Node          : PVirtualNode;
+      Column        : TColumnIndex;
+      const P       : TPoint;
+      var AskParent : Boolean;
+      var PopupMenu : TPopupMenu
     );
     procedure FTreeViewBeforeCellPaint(
       Sender          : TBaseVirtualTree;
@@ -263,7 +268,6 @@ procedure TfrmDashboard.AfterConstruction;
 begin
   inherited AfterConstruction;
   FTreeView := TVirtualStringTreeFactory.CreateTreeList(Self, pnlRight);
-  FTreeView.PopupMenu := ppmMain;
   FZmqEndpoints := TEditList.Create(Self, pnlZMQEndpoints);
   FZmqEndpoints.OnAdd.Add(FZMQEndpointsAdd);
   FZmqEndpoints.OnItemExecute.Add(FZMQEndpointsItemExecute);
@@ -387,11 +391,6 @@ begin
   finally
     SL.Free;
   end;
-end;
-
-procedure TfrmDashboard.actCloseSubscriberExecute(Sender: TObject);
-begin
-// TODO
 end;
 
 procedure TfrmDashboard.actInspectTreeviewExecute(Sender: TObject);
@@ -567,6 +566,20 @@ begin
     end
     else
       ImageIndex := 0;
+  end;
+end;
+
+procedure TfrmDashboard.FTreeViewGetPopupMenu(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; Column: TColumnIndex; const P: TPoint;
+  var AskParent: Boolean; var PopupMenu: TPopupMenu);
+var
+  DN          : TDashboardNode;
+  LSubscriber : ISubscriber;
+begin
+  DN := Sender.GetNodeData<TDashboardNode>(Node);
+  if Assigned(DN) and (Sender.GetNodeLevel(Node) = 1) then
+  begin
+    PopupMenu := FManager.Menus.SubscriberPopupMenu;
   end;
 end;
 
@@ -843,7 +856,7 @@ begin
   CreateWinipcReceiver;
   CreateZeroMQReceiver;
   //CreateWinodsReceiver;
-  //CreateComPortReceiver;
+//  CreateComPortReceiver;
 //  CreateFileSystemReceiver;
   FTreeView.FullExpand;
 end;
@@ -946,6 +959,8 @@ begin
 //    Self, FManager.Settings.ComPortSettings
 //  );
 //  AssignFormParent(FComPortSettingsForm, tsCOMPort);
+
+
   pgcMain.ActivePage := tsWinIPC;
   FZmqEndpoints.Data.FromStrings(FManager.Settings.ZeroMQSettings.Endpoints);
   FFSLocations.Data.FromStrings(FManager.Settings.FileSystemSettings.PathNames);
@@ -963,6 +978,7 @@ begin
   FTreeView.OnFocusChanged    := FTreeViewFocusChanged;
   FTreeView.OnDblClick        := FTreeViewDblClick;
   FTreeView.OnGetImageIndex   := FTreeViewGetImageIndex;
+  FTreeView.OnGetPopupMenu    := FTreeViewGetPopupMenu;
   with FTreeView do
   begin
     with Header.Columns.Add do
