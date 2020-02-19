@@ -168,6 +168,8 @@ type
     procedure BuildMessageTypesPopupMenu;
     procedure BuildSubscriberPopupMenu;
 
+    procedure InitializeEditorActions;
+
     procedure FSettingsChanged(Sender: TObject);
 
   protected
@@ -308,6 +310,7 @@ begin
   FViewList       := TCollections.CreateInterfaceList<ILogViewer>;
   FEditorSettings := TEditorFactories.CreateSettings(Self, 'settings.xml');
   FEditorManager  := TEditorFactories.CreateManager(Self, FEditorSettings);
+  InitializeEditorActions;
   BuildMessageTypesPopupMenu;
   BuildLogTreeViewerPopupMenu;
   BuildSubscriberPopupMenu;
@@ -328,15 +331,13 @@ begin
   FViewList.OnChanged.RemoveAll(Self);
   FViewList.Clear;
   FSettings.Save;
-//  FreeAndNil(FEvents);    // this causes AV's on close
-//  FreeAndNil(FCommands);
   FViewList       := nil;
   FReceivers      := nil;
   FSettings       := nil;
   FEditorSettings := nil;
   FEditorManager  := nil;
 
-  FreeAndNil(FEvents);
+  FreeAndNil(FEvents);   // needs to happen just before inherited call
   FreeAndNil(FCommands);
   inherited Destroy;
 end;
@@ -876,6 +877,41 @@ end;
 procedure TdmManager.FeatureNotImplemented;
 begin
   ShowMessage('This feature is not implemented yet.');
+end;
+
+procedure TdmManager.InitializeEditorActions;
+begin
+  FEditorManager.Actions['actSettings'].Visible          := False;
+  FEditorManager.Actions['actOpen'].Visible              := False;
+  FEditorManager.Actions['actSave'].Visible              := False;
+  FEditorManager.Actions['actSmartSelect'].Visible       := False;
+  FEditorManager.Actions['actClose'].Visible             := False;
+  FEditorManager.Actions['actCloseOthers'].Visible       := False;
+  FEditorManager.Actions['actSaveAll'].Visible           := False;
+  FEditorManager.Actions['actSingleInstance'].Visible    := False;
+  FEditorManager.Actions['actToggleMaximized'].Visible   := False;
+  FEditorManager.Actions['actStayOnTop'].Visible         := False;
+  FEditorManager.Actions['actReload'].Visible            := False;
+  FEditorManager.Actions['actNew'].Visible               := False;
+  FEditorManager.Actions['actMonitorChanges'].Visible    := False;
+  FEditorManager.Actions['actCreateDesktopLink'].Visible := False;
+  FEditorManager.Actions['actShowCharacterMap'].Visible  := False;
+
+  FEditorManager.Actions['actSettings'].Enabled          := False;
+  FEditorManager.Actions['actOpen'].Enabled              := False;
+  FEditorManager.Actions['actSave'].Enabled              := False;
+  FEditorManager.Actions['actSmartSelect'].Enabled       := False;
+  FEditorManager.Actions['actClose'].Enabled             := False;
+  FEditorManager.Actions['actCloseOthers'].Enabled       := False;
+  FEditorManager.Actions['actSaveAll'].Enabled           := False;
+  FEditorManager.Actions['actSingleInstance'].Enabled    := False;
+  FEditorManager.Actions['actToggleMaximized'].Enabled   := False;
+  FEditorManager.Actions['actStayOnTop'].Enabled         := False;
+  FEditorManager.Actions['actReload'].Enabled            := False;
+  FEditorManager.Actions['actNew'].Enabled               := False;
+  FEditorManager.Actions['actMonitorChanges'].Enabled    := False;
+  FEditorManager.Actions['actCreateDesktopLink'].Enabled := False;
+  FEditorManager.Actions['actShowCharacterMap'].Enabled  := False;
 end;
 {$ENDREGION}
 

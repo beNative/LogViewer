@@ -608,7 +608,7 @@ end;
 
 procedure TfrmMessageList.CreateWatchesView;
 begin
-  FWatches := TWatchList.Create;
+  FWatches     := TWatchList.Create;
   FWatchesView := TLogViewerFactories.CreateWatchesView(
     Self,
     pnlWatches,
@@ -651,7 +651,7 @@ end;
 
 function TfrmMessageList.GetLeftPanelVisible: Boolean;
 begin
-  Result := pnlLeft.Visible;
+  Result := pnlMain.PanelCollection[0].Visible;
 end;
 
 procedure TfrmMessageList.SetLeftPanelVisible(const Value: Boolean);
@@ -1407,7 +1407,7 @@ end;
 
 function TfrmMessageList.GetRightPanelVisible: Boolean;
 begin
-  Result := pnlRight.Visible;
+  Result := pnlMain.PanelCollection[2].Visible;
 end;
 
 procedure TfrmMessageList.SetRightPanelVisible(const Value: Boolean);
@@ -1415,7 +1415,6 @@ begin
   if Value <> RightPanelVisible then
   begin
     pnlMain.PanelCollection[2].Visible := Value;
-    //pnlRight.Visible := Value;
   end;
 end;
 
@@ -1424,8 +1423,7 @@ function TfrmMessageList.IsCollapsedTracingNode(ATree: TBaseVirtualTree;
 var
   LN : TLogNode;
 begin
-  if not (vsExpanded in ANode.States) and
-    Assigned(ANode.NextSibling) then
+  if not (vsExpanded in ANode.States) and Assigned(ANode.NextSibling) then
   begin
     LN := ATree.GetNodeData<TLogNode>(ANode);
     Result := LN.MessageType = lmtEnterMethod;
@@ -1469,6 +1467,7 @@ procedure TfrmMessageList.LoadPanelSettings;
 var
   I : Integer;
 begin
+  Logger.Track(Self, 'LoadPanelSettings');
   for I := 0 to pnlMain.PanelCollection.Count - 2 do
   begin
     pnlMain.PanelCollection[I].Position := Settings.HorizontalPanelPositions[I];
@@ -1483,6 +1482,7 @@ procedure TfrmMessageList.SavePanelSettings;
 var
   I : Integer;
 begin
+  Logger.Track(Self, 'SavePanelSettings');
   for I := 0 to pnlMain.PanelCollection.Count - 2 do
   begin
     FSettings.HorizontalPanelPositions[I] := pnlMain.PanelCollection[I].Position;
@@ -1719,9 +1719,10 @@ begin
   FLogTreeView.Clear;
   FMessageDataView.Clear;
   FSubscriber.Reset;
-  FLastNode   := nil;
-  FLastParent := nil;
-  FUpdate     := True;
+  SelectedLogNode := nil;
+  FLastNode       := nil;
+  FLastParent     := nil;
+  FUpdate         := True;
 end;
 
 procedure TfrmMessageList.ClearSelection;
@@ -2103,7 +2104,6 @@ begin
     begin
       Actions.UpdateActions;
     end;
-    SavePanelSettings;
     FUpdate := False;
   end;
   inherited UpdateActions;

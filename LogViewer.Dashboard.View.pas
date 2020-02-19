@@ -68,20 +68,20 @@ type
     btnSubscribeToLocalHost    : TButton;
     imlMain                    : TImageList;
     lblWinIPC                  : TLabel;
-    lblWinODS                  : TLabel;
-    Panel4                     : TPanel;
+    lblWinods                  : TLabel;
+    pnlZeroMQTitle             : TPanel;
     pgcMain                    : TKPageControl;
     pnlButtons                 : TGridPanel;
-    pnlCOMPorts                : TPanel;
-    pnlCOMPortTitle            : TPanel;
+    pnlComPorts                : TPanel;
+    pnlComPortTitle            : TPanel;
     pnlFileSystemTitle         : TPanel;
     pnlFSLocations             : TPanel;
     pnlLeft                    : TPanel;
     pnlMain                    : TOMultiPanel;
     pnlRight                   : TPanel;
     pnlWinIPCTitle             : TPanel;
-    pnlWinODSTitle             : TPanel;
-    pnlZMQEndpoints            : TPanel;
+    pnlWinodsTitle             : TPanel;
+    pnlZmqEndpoints            : TPanel;
     ppmSubscriber              : TPopupMenu;
     tsComPort                  : TKTabSheet;
     tsFileSystem               : TKTabSheet;
@@ -574,7 +574,6 @@ procedure TfrmDashboard.FTreeViewGetPopupMenu(Sender: TBaseVirtualTree;
   var AskParent: Boolean; var PopupMenu: TPopupMenu);
 var
   DN          : TDashboardNode;
-  LSubscriber : ISubscriber;
 begin
   DN := Sender.GetNodeData<TDashboardNode>(Node);
   if Assigned(DN) and (Sender.GetNodeLevel(Node) = 1) then

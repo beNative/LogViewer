@@ -1,10 +1,10 @@
 {
 	"EmitLogMessages": true,
 	"FormSettings": {
-		"Left": 607,
-		"Top": 266,
-		"Width": 1514,
-		"Height": 952,
+		"Left": 721,
+		"Top": 191,
+		"Width": 1420,
+		"Height": 1108,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -16,8 +16,8 @@
 		"MessageDetailsVisible": true,
 		"SmartTimeStamps": true,
 		"HorizontalPanelPositions": [
-			0.235474006116208,
-			0.666666666666667,
+			0.237166991552956,
+			0.680961663417804,
 			1
 		],
 		"LeftVerticalPanelPositions": [
