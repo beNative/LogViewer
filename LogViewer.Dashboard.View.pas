@@ -277,8 +277,8 @@ begin
   //FZMQEndpoints.ValueList.OnExit := FValueListExit;
   FZmqEndpoints.ActionExecute.Caption := SSubscribe;
 
-  FComPorts := TEditList.Create(Self, pnlCOMPorts);
-  FComPorts.ValueList.BorderStyle := bsNone;
+//  FComPorts := TEditList.Create(Self, pnlCOMPorts);
+//  FComPorts.ValueList.BorderStyle := bsNone;
 
   FFSLocations := TEditList.Create(Self, pnlFSLocations);
   FFSLocations.OnAdd.Add(FFSLocationsAdd);

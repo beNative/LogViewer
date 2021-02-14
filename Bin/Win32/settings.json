@@ -1,10 +1,10 @@
 {
 	"EmitLogMessages": true,
 	"FormSettings": {
-		"Left": 721,
-		"Top": 191,
-		"Width": 1420,
-		"Height": 1108,
+		"Left": 0,
+		"Top": 0,
+		"Width": 2552,
+		"Height": 1426,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -16,8 +16,8 @@
 		"MessageDetailsVisible": true,
 		"SmartTimeStamps": true,
 		"HorizontalPanelPositions": [
-			0.237166991552956,
-			0.680961663417804,
+			0.158203125,
+			0.666666666666667,
 			1
 		],
 		"LeftVerticalPanelPositions": [
@@ -29,14 +29,14 @@
 		"Enabled": false
 	},
 	"WinipcSettings": {
-		"Enabled": true,
+		"Enabled": false,
 		"PollingInterval": 100
 	},
 	"ZeroMQSettings": {
-		"Enabled": false,
+		"Enabled": true,
 		"PollingInterval": 100,
 		"PollingTimeout": 10,
-		"Endpoints": "default localhost=tcp://localhost:5555\r\nlocalhost2=tcp://localhost:5595\r\nLogViewer=tcp://localhost:42134\r\n"
+		"Endpoints": "default localhost=tcp://localhost:5555\r\nlocalhost2=tcp://localhost:5595\r\nLogViewer=tcp://localhost:42134\r\nBalta PC=tcp://SBVCTITPO47:5555\r\n"
 	},
 	"FileSystemSettings": {
 		"Enabled": false,
@@ -148,7 +148,7 @@
 			"FontName": "Segoe UI",
 			"FontColor": 32896,
 			"FontSize": 8,
-			"FontStyle": "fsItalic,fsUnderline",
+			"FontStyle": "fsBold,fsUnderline",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
@@ -158,7 +158,7 @@
 			"FontName": "Segoe UI",
 			"FontColor": 32896,
 			"FontSize": 8,
-			"FontStyle": "fsItalic",
+			"FontStyle": "fsBold",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
@@ -168,7 +168,7 @@
 			"FontName": "Segoe UI",
 			"FontColor": 32896,
 			"FontSize": 8,
-			"FontStyle": "fsItalic",
+			"FontStyle": "fsBold",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0

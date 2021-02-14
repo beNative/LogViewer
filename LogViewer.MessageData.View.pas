@@ -113,7 +113,7 @@ begin
   FLogNodeDataView.ShowHeader        := False;
   FLogNodeDataView.Editable          := False;
   FLogNodeDataView.BorderStyle       := bsNone;
-  FLogNodeDataView.ShowGutter        := False;
+  //FLogNodeDataView.ShowGutter        := False;
   FLogNodeDataView.OnPaintText       := FLogNodeDataViewPaintText;
   FLogNodeDataView.OnBeforeCellPaint := FLogNodeDataViewBeforeCellPaint;
 end;

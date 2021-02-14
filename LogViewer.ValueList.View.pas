@@ -94,6 +94,9 @@ implementation
 
 {$R *.dfm}
 
+uses
+  DDuce.Logger;
+
 {$REGION 'construction and destruction'}
 constructor TfrmValueListView.Create(AOwner: TComponent;
   ADisplayValuesSettings: TDisplayValuesSettings);
@@ -104,6 +107,7 @@ end;
 
 procedure TfrmValueListView.AfterConstruction;
 begin
+  Logger.Track(Self, 'AfterConstruction');
   inherited AfterConstruction;
   FFieldView                   := TValueList.Create(Self);
   FFieldView.Parent            := pnlTop;
@@ -111,7 +115,7 @@ begin
   FFieldView.ShowHeader        := False;
   FFieldView.Editable          := False;
   FFieldView.BorderStyle       := bsNone;
-  FFieldView.ShowGutter        := False;
+  //FFieldView.ShowGutter        := False;
   FFieldView.OnPaintText       := FValueListViewPaintText;
   FFieldView.OnBeforeCellPaint := FValueListViewBeforeCellPaint;
 
@@ -121,7 +125,7 @@ begin
   FPropertyView.ShowHeader        := False;
   FPropertyView.Editable          := False;
   FPropertyView.BorderStyle       := bsNone;
-  FPropertyView.ShowGutter        := False;
+  //FPropertyView.ShowGutter        := False;
   FPropertyView.OnPaintText       := FValueListViewPaintText;
   FPropertyView.OnBeforeCellPaint := FValueListViewBeforeCellPaint;
 end;
