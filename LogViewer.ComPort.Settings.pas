@@ -1,5 +1,5 @@
 {
-  Copyright (C) 2013-2020 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2021 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -138,6 +138,15 @@ begin
   Result := FPollingInterval;
 end;
 
+procedure TComPortSettings.SetPollingInterval(const Value: Integer);
+begin
+  if Value <> PollingInterval then
+  begin
+    FPollingInterval := Value;
+    Changed;
+  end;
+end;
+
 function TComPortSettings.GetParity: Char;
 begin
   Result := FParity;
@@ -148,15 +157,6 @@ begin
   if Value <> Parity then
   begin
     FParity := Value;
-    Changed;
-  end;
-end;
-
-procedure TComPortSettings.SetPollingInterval(const Value: Integer);
-begin
-  if Value <> PollingInterval then
-  begin
-    FPollingInterval := Value;
     Changed;
   end;
 end;

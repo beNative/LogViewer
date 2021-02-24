@@ -6,13 +6,11 @@ LogViewer is a general purpose message viewer for log messages with support for 
 * Windows IPC (using ``WM_COPY`` messages)
 * [ZeroMQ](https://github.com/zeromq/libzmq) (`PUB`/`SUB` socket) for logging over the network. It demonstrates the brilliant performance of ZMQ sockets.
 * Serial port
-* MQTT
-* File change monitor
 
 Each of these receivers support multiple subscribers for which messages can be displayed in
 a dedicated logviewer.
 
-The [DDuce](http://github.com/beNative/dduce) library provides the Logger module to add logging to your application (currently only Delphi support, but FPC-Lazarus support will be added soon).
+The [DDuce](http://github.com/beNative/dduce) library provides the Logger module to add logging to your application (Delphi/FreePascal-Lazarus).
 The DDuce demo application demonstrates the currently supported message types.
 
 ![Logger demo](https://github.com/beNative/LogViewer/blob/master/Wiki/DDuce%20Logger24-10-2018%2022-12-44.png)
@@ -57,7 +55,6 @@ The Object Pascal (Delphi) sources depend on the following open source libraries
   * [OMultiPanel](http://github.com/beNative/omultipanel)
   * [KControls](http://github.com/beNative/kcontrols)
   * [JsonDataObjects](http://github.com/ahausladen/JsonDataObjects)
-  * [midiio](http://github.com/beNative/midiio)
 
 ## Screenshots
 Here is a preliminary look of the application (2018/09/22):

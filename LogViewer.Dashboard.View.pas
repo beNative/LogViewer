@@ -1,5 +1,5 @@
 {
-  Copyright (C) 2013-2020 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2021 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ type
     FZeroMQNode         : TDashboardNode;
     FWinipcNode         : TDashboardNode;
     FComPortNode        : TDashboardNode;
-    FWinODSNode         : TDashboardNode;
+    FWinodsNode         : TDashboardNode;
     FFileSystemNode     : TDashboardNode;
     FZmqEndpoints       : TEditList;
     FComPorts           : TEditList;
@@ -277,8 +277,8 @@ begin
   //FZMQEndpoints.ValueList.OnExit := FValueListExit;
   FZmqEndpoints.ActionExecute.Caption := SSubscribe;
 
-//  FComPorts := TEditList.Create(Self, pnlCOMPorts);
-//  FComPorts.ValueList.BorderStyle := bsNone;
+  FComPorts := TEditList.Create(Self, pnlCOMPorts);
+  FComPorts.ValueList.BorderStyle := bsNone;
 
   FFSLocations := TEditList.Create(Self, pnlFSLocations);
   FFSLocations.OnAdd.Add(FFSLocationsAdd);
@@ -573,7 +573,7 @@ procedure TfrmDashboard.FTreeViewGetPopupMenu(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex; const P: TPoint;
   var AskParent: Boolean; var PopupMenu: TPopupMenu);
 var
-  DN          : TDashboardNode;
+  DN : TDashboardNode;
 begin
   DN := Sender.GetNodeData<TDashboardNode>(Node);
   if Assigned(DN) and (Sender.GetNodeLevel(Node) = 1) then
@@ -659,7 +659,7 @@ begin
   LDelete := nil;
   if Action = caRemoved then
   begin
-    for LDelete in FWinODSNode do
+    for LDelete in FWinodsNode do
     begin
       if LDelete.Data.Subscriber.SourceId = AKey then
         Break;
@@ -672,7 +672,7 @@ begin
   else if Action = caAdded then
   begin
     LSubscriber := FWinodsReceiver.SubscriberList[AKey];
-    AddNode(FWinODSNode, nil, LSubscriber);
+    AddNode(FWinodsNode, nil, LSubscriber);
     LSubscriber.OnChange.Add(FSubscriberChange);
   end;
 end;
@@ -855,7 +855,7 @@ begin
   CreateWinipcReceiver;
   CreateZeroMQReceiver;
   //CreateWinodsReceiver;
-//  CreateComPortReceiver;
+  CreateComPortReceiver;
 //  CreateFileSystemReceiver;
   FTreeView.FullExpand;
 end;
@@ -922,12 +922,12 @@ begin
   FWinodsReceiver.OnChange.Add(FReceiverChange);
   FWinodsReceiver.SubscriberList.OnKeyChanged.Add(FWinodsReceiverSubscriberListChanged);
   FWinodsReceiver.Enabled := FManager.Settings.WinodsSettings.Enabled;
-  FWinODSNode := AddNode(nil, FWinodsReceiver, nil);
-  FWinODSNode.CheckType := ctCheckBox;
+  FWinodsNode := AddNode(nil, FWinodsReceiver, nil);
+  FWinodsNode.CheckType := ctCheckBox;
   if FWinodsReceiver.Enabled then
-    FWinODSNode.CheckState := csCheckedNormal
+    FWinodsNode.CheckState := csCheckedNormal
   else
-    FWinODSNode.CheckState := csUncheckedNormal;
+    FWinodsNode.CheckState := csUncheckedNormal;
 end;
 
 procedure TfrmDashboard.CreateWinipcReceiver;
@@ -958,8 +958,6 @@ begin
 //    Self, FManager.Settings.ComPortSettings
 //  );
 //  AssignFormParent(FComPortSettingsForm, tsCOMPort);
-
-
   pgcMain.ActivePage := tsWinIPC;
   FZmqEndpoints.Data.FromStrings(FManager.Settings.ZeroMQSettings.Endpoints);
   FFSLocations.Data.FromStrings(FManager.Settings.FileSystemSettings.PathNames);
