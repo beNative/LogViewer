@@ -171,12 +171,12 @@ var
   LString    : UTF8String;
 begin
   FBuffer.Clear;
-  if ContainsStr(AString, '=') then
-  begin
-    LMsgType := Integer(lmtWatch);
-  end
-  else
-    LMsgType := Integer(lmtText);
+//  if ContainsStr(AString, '=') then
+//  begin
+//    LMsgType := Integer(lmtWatch);
+//  end
+//  else
+  LMsgType := Integer(lmtText);
   LString    := UTF8String(AString);
   LTextSize  := Length(LString);
   LTimeStamp := Now;

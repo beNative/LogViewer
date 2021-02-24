@@ -1,7 +1,7 @@
 {
 	"FormSettings": {
-		"Left": 2731,
-		"Top": 36,
+		"Left": 2648,
+		"Top": 23,
 		"Width": 1462,
 		"Height": 960,
 		"FormStyle": 0,
@@ -97,7 +97,7 @@
 			"FontName": "Segoe UI",
 			"FontColor": 128,
 			"FontSize": 8,
-			"FontStyle": "fsUnderline",
+			"FontStyle": "fsBold,fsUnderline",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
@@ -117,7 +117,7 @@
 			"FontName": "Segoe UI",
 			"FontColor": 0,
 			"FontSize": 8,
-			"FontStyle": "",
+			"FontStyle": "fsBold",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
@@ -127,7 +127,7 @@
 			"FontName": "Segoe UI",
 			"FontColor": 32768,
 			"FontSize": 8,
-			"FontStyle": "",
+			"FontStyle": "fsBold",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
@@ -147,7 +147,7 @@
 			"FontName": "Segoe UI",
 			"FontColor": 32896,
 			"FontSize": 8,
-			"FontStyle": "fsItalic,fsUnderline",
+			"FontStyle": "fsBold,fsUnderline",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
@@ -157,7 +157,7 @@
 			"FontName": "Segoe UI",
 			"FontColor": 32896,
 			"FontSize": 8,
-			"FontStyle": "fsItalic",
+			"FontStyle": "fsBold",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
@@ -167,7 +167,7 @@
 			"FontName": "Segoe UI",
 			"FontColor": 32896,
 			"FontSize": 8,
-			"FontStyle": "fsItalic",
+			"FontStyle": "fsBold",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0

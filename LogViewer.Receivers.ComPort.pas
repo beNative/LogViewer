@@ -123,6 +123,7 @@ var
   SL : Shared<TStringList>;
   S  : ISubscriber;
 begin
+  Logger.Track(Self, 'UpdateSubscribers');
   SL := TStringList.Create;
   SL.Value.CommaText := GetSerialPortNames;
   for I := 0 to SL.Value.Count - 1 do
@@ -138,6 +139,7 @@ end;
 function TComPortChannelReceiver.CreateSubscriber(ASourceId, AThreadId: UInt32;
   const ASourceName: string): ISubscriber;
 begin
+  Logger.Track(Self, 'CreateSubscriber');
   Settings.Port := ASourceName;
   if ASourceName <> '' then
   begin

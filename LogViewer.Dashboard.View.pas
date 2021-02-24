@@ -451,8 +451,7 @@ begin
       end
       else if Supports(DN.Data.Receiver, IComPort) then
       begin
-        //
-        //FManager.Settings.ComPortSettings.E
+        //FManager.Settings.ComPortSettings.Enabled := B;
       end
       else if Supports(DN.Data.Receiver, IFileSystem)  then
       begin
@@ -740,6 +739,7 @@ var
   LDelete     : TDashboardNode;
   LSubscriber : ISubscriber;
 begin
+  Logger.Track(Self, 'FComPortReceiverSubscriberListChanged');
   LDelete := nil;
   if Action = caRemoved then
   begin

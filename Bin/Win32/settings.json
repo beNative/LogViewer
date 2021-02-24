@@ -1,15 +1,15 @@
 {
 	"EmitLogMessages": true,
 	"FormSettings": {
-		"Left": 2552,
-		"Top": -8,
-		"Width": 2576,
-		"Height": 1426,
+		"Left": 2765,
+		"Top": 214,
+		"Width": 1961,
+		"Height": 976,
 		"FormStyle": 0,
 		"WindowState": 2
 	},
 	"MessageListSettings": {
-		"AutoScrollMessages": true,
+		"AutoScrollMessages": false,
 		"AutoFilterMessages": true,
 		"ColumnHeadersVisible": true,
 		"DynamicAutoSizeColumns": true,
@@ -29,11 +29,11 @@
 		"Enabled": false
 	},
 	"WinipcSettings": {
-		"Enabled": true,
+		"Enabled": false,
 		"PollingInterval": 100
 	},
 	"ZeroMQSettings": {
-		"Enabled": true,
+		"Enabled": false,
 		"PollingInterval": 100,
 		"PollingTimeout": 10,
 		"Endpoints": "default localhost=tcp://localhost:5555\r\nlocalhost2=tcp://localhost:5595\r\nLogViewer=tcp://localhost:42134\r\nBalta PC=tcp://SBVCTITPO47:5555\r\n"

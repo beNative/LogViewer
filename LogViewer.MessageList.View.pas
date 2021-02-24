@@ -112,6 +112,7 @@ type
     FLastNode                    : PVirtualNode;
     FVKPressed                   : Boolean;
     FMiliSecondsBetweenSelection : Integer;
+    FLastSelectedNode            : TLogNode;
 
     // data
     FWatches    : TWatchList;
@@ -159,6 +160,12 @@ type
       var Abort : Boolean
     );
     procedure FLogTreeViewDblClick(Sender: TObject);
+    procedure FLogTreeViewFocusChanging(
+      Sender               : TBaseVirtualTree;
+      OldNode, NewNode     : PVirtualNode;
+      OldColumn, NewColumn : TColumnIndex;
+      var Allowed          : Boolean
+    );
     procedure FLogTreeViewFocusChanged(
       Sender : TBaseVirtualTree;
       Node   : PVirtualNode;
@@ -255,7 +262,6 @@ type
     procedure SetLeftPanelVisible(const Value: Boolean);
     function GetRightPanelVisible: Boolean;
     procedure SetRightPanelVisible(const Value: Boolean);
-
 
     procedure Clear;
     procedure AutoFitColumns;
@@ -508,6 +514,8 @@ begin
   FLogTreeView.OnBeforeCellPaint := FLogTreeViewBeforeCellPaint;
   FLogTreeView.OnAfterItemPaint  := FLogTreeViewAfterItemPaint;
   FLogTreeView.OnFocusChanged    := FLogTreeViewFocusChanged;
+  FLogTreeView.OnFocusChanging   := FLogTreeViewFocusChanging;
+
   FLogTreeView.OnDblClick        := FLogTreeViewDblClick;
   FLogTreeView.OnHotChange       := FLogTreeViewHotChange;
   FLogTreeView.OnInitNode        := FLogTreeViewInitNode;
@@ -974,6 +982,13 @@ begin
     Modified;
 end;
 
+procedure TfrmMessageList.FLogTreeViewFocusChanging(Sender: TBaseVirtualTree;
+  OldNode, NewNode: PVirtualNode; OldColumn, NewColumn: TColumnIndex;
+  var Allowed: Boolean);
+begin
+  FLastSelectedNode := Sender.GetNodeData<TLogNode>(OldNode);
+end;
+
 procedure TfrmMessageList.FLogTreeViewFilterCallback(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Data: Pointer; var Abort: Boolean);
 var
@@ -1361,10 +1376,11 @@ end;
 procedure TfrmMessageList.FSubscriberReceiveMessage(Sender: TObject;
   AStream: TStream);
 begin
-  if Supports(Sender, IZmq) or Supports(Sender, IWinipc) then
+  if Supports(Sender, IZmq) or Supports(Sender, IWinipc)
+    or Supports(Sender, IComPort) then
   begin
     ProcessMessage(AStream);
-  end;
+  end
 end;
 
 procedure TfrmMessageList.FSettingsChanged(Sender: TObject);
@@ -1657,7 +1673,7 @@ begin
   if LDataSize > 0 then
   begin
     if not Assigned(FCurrentMsg.Data) then
-      FCurrentMsg.Data          := TMemoryStream.Create;
+      FCurrentMsg.Data := TMemoryStream.Create;
     FCurrentMsg.Data.Size     := 0;
     FCurrentMsg.Data.Position := 0;
     FCurrentMsg.Data.CopyFrom(AStream, LDataSize);
@@ -1706,7 +1722,6 @@ begin
     end;
   end; // case
 end;
-
 {$REGION 'Commands'}
 { Clear all received messages. }
 
@@ -1719,10 +1734,11 @@ begin
   FLogTreeView.Clear;
   FMessageDataView.Clear;
   FSubscriber.Reset;
-  SelectedLogNode := nil;
-  FLastNode       := nil;
-  FLastParent     := nil;
-  FUpdate         := True;
+  SelectedLogNode   := nil;
+  FLastSelectedNode := nil;
+  FLastNode         := nil;
+  FLastParent       := nil;
+  FUpdate           := True;
 end;
 
 procedure TfrmMessageList.ClearSelection;
@@ -2078,9 +2094,13 @@ begin
     else if Assigned(SelectedLogNode) then
     begin
       LN := SelectedLogNode;
-      UpdateMessageDetails(LN);
-      UpdateCallStackDisplay(LN);
-      ApplyFilter;
+      if LN <> FLastSelectedNode then
+      begin
+        UpdateMessageDetails(LN);
+        UpdateCallStackDisplay(LN);
+        FLastSelectedNode := LN;
+        ApplyFilter;
+      end;
     end;
     if FScrollToLastNode then
     begin
