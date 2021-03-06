@@ -1,9 +1,10 @@
 {
+	"EmitLogMessages": false,
 	"FormSettings": {
-		"Left": 2648,
-		"Top": 23,
-		"Width": 1462,
-		"Height": 960,
+		"Left": 114,
+		"Top": 70,
+		"Width": 1368,
+		"Height": 858,
 		"FormStyle": 0,
 		"WindowState": 0
 	},

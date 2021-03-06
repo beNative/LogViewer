@@ -39,6 +39,7 @@ type
     FFileName              : string;
     FFormSettings          : TFormSettings;
     FMessageListSettings   : TMessageListSettings;
+    FDebugMode             : Boolean;
     FEmitLogMessages       : Boolean;
 
     FWinodsSettings        : TWinodsSettings;
@@ -56,11 +57,13 @@ type
 
     procedure FormSettingsChanged(Sender: TObject);
     procedure DisplayValuesSettingsChanged(Sender: TObject);
+    function GetEmitLogMessages: Boolean;
+    procedure SetEmitLogMessages(const Value: Boolean);
 
   protected
     {$REGION 'property access methods'}
-    function GetEmitLogMessages: Boolean;
-    procedure SetEmitLogMessages(const Value: Boolean);
+    function GetDebugMode: Boolean;
+    procedure SetDebugMode(const Value: Boolean);
     function GetOnChanged: IEvent<TNotifyEvent>;
     function GetFileName: string;
     {$ENDREGION}
@@ -113,6 +116,9 @@ type
       read GetFileName;
 
   published
+    property DebugMode: Boolean
+      read GetDebugMode write SetDebugMode;
+
     property EmitLogMessages: Boolean
       read GetEmitLogMessages write SetEmitLogMessages;
 
@@ -169,6 +175,20 @@ end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
+function TLogViewerSettings.GetDebugMode: Boolean;
+begin
+  Result := FDebugMode;
+end;
+
+procedure TLogViewerSettings.SetDebugMode(const Value: Boolean);
+begin
+  if Value <> DebugMode then
+  begin
+    FDebugMode := Value;
+    Changed;
+  end;
+end;
+
 function TLogViewerSettings.GetEmitLogMessages: Boolean;
 begin
   Result := FEmitLogMessages;

@@ -171,8 +171,8 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     end
     object tsGeneralSettings: TKTabSheet
       Caption = 'KTabSheet1'
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+      ExplicitLeft = 4
+      ExplicitTop = -2
       object chkEmitLogMessages: TCheckBox
         Left = 17
         Top = 16
@@ -180,12 +180,26 @@ object frmLogViewerSettings: TfrmLogViewerSettings
         Height = 17
         Hint = 
           'Enables a remote logviewer instance to subscribe to '#13#10'log messag' +
-          'es sent by the application. When enabled'#13#10'you can connect a logv' +
-          'iewer by subscribing to this '#13#10'ZeroMQ endpoint: tcp://localhost:' +
-          '42134.'#13#10
+          'es sent by the application. '#13#10'When enabled you can connect a log' +
+          'viewer by subscribing to this '#13#10'ZeroMQ endpoint: tcp://localhost' +
+          ':42134.'#13#10
         Caption = 'Emit log messages'
         TabOrder = 0
         OnClick = chkEmitLogMessagesClick
+      end
+      object chkDebugMode: TCheckBox
+        Left = 17
+        Top = 39
+        Width = 80
+        Height = 17
+        Hint = 
+          'In Debug mode, the application is able to capture log messages f' +
+          'rom another LogViewer instance '#13#10'which is configured to emit log' +
+          ' messages.'#13#10'In this special mode the option to emit log messages' +
+          ' is disabled to avoid crosstalk with other instances.'
+        Caption = 'Debug mode'
+        TabOrder = 1
+        OnClick = chkDebugModeClick
       end
     end
   end
@@ -214,7 +228,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     Left = 568
     Top = 32
     Bitmap = {
-      494C0101030008007C0010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010103000800840010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

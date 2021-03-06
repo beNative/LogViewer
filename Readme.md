@@ -30,7 +30,7 @@ The DDuce demo application demonstrates the currently supported message types.
 - Counters
 - Watches + value history support
 - Datasets
-- Bitmaps
+- Bitmaps, and various other image formats
 - Objects
 - Components
 - Native value types with type information

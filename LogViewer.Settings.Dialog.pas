@@ -73,6 +73,7 @@ type
     tsWinIPC                : TKTabSheet;
     tsWinODS                : TKTabSheet;
     tsZeroMQ                : TKTabSheet;
+    chkDebugMode: TCheckBox;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -82,6 +83,7 @@ type
     {$ENDREGION}
 
     procedure chkEmitLogMessagesClick(Sender: TObject);
+    procedure chkDebugModeClick(Sender: TObject);
 
   private
     FConfigTree                : TVirtualStringTree;
@@ -177,6 +179,11 @@ end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
+procedure TfrmLogViewerSettings.chkDebugModeClick(Sender: TObject);
+begin
+  FSettings.DebugMode := (Sender as TCheckBox).Checked;
+end;
+
 procedure TfrmLogViewerSettings.chkEmitLogMessagesClick(Sender: TObject);
 begin
   FSettings.EmitLogMessages := (Sender as TCheckBox).Checked;
