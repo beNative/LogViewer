@@ -61,3 +61,9 @@ Here is a preliminary look of the application:
 
 ![LogViewer](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.png)
 
+![LogViewer](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer1.png)
+
+![LogViewer](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer2.png)
+
+![LogViewer](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer3.png)
+
