@@ -57,7 +57,7 @@ The Object Pascal (Delphi) sources depend on the following open source libraries
   * [JsonDataObjects](http://github.com/ahausladen/JsonDataObjects)
 
 ## Screenshots
-Here is a preliminary look of the application (2018/09/22):
+Here is a preliminary look of the application:
 
-![LogViewer](https://github.com/beNative/LogViewer/blob/master/Wiki/LogViewer_22-09-2018%2013-21-07.png)
+![LogViewer](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.png)
 
