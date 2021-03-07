@@ -49,6 +49,9 @@ In the [Documents](https://github.com/beNative/LogViewer/tree/master/Documents) 
 ![ILogViewerManager](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.ILogViewerManager.png)
 ![TLogViewerSettings](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.TLogViewerSettings.png)
 
+There is also a mindmap with a technical overview of the application: [LogViewer.xmind](https://github.com/beNative/LogViewer/blob/master/Documents/LogViewer.xmind)
+You need XMind to open this document. You can download a free version from:
+
 ## ILogger API
 
 The [DDuce](http://github.com/beNative/dduce) library provides the Logger module to add logging to your application (Delphi/FreePascal-Lazarus).
@@ -76,9 +79,6 @@ A subset of this API has been ported to FPC/Lazarus. Take a look at my Lazarus p
 - Text with suppport for multiple highlighters
 - Actions
 - Up to 32 logging levels
-
-## Overview
-A mindmap with a technical overview of the application: [LogViewer.xmind](https://github.com/beNative/LogViewer/blob/master/Documents/LogViewer.xmind)
 
 ## Libraries used
 The Object Pascal (Delphi) sources depend on the following open source libraries and components:
