@@ -10,7 +10,7 @@ Currently supported are:
 Currently in progress:
 * Serial port (both native RS232 or Bluetooth)
 * Windows ``OutputDebugString`` API
-* MQTT
+* MQTT (commonly used by IOT devices)
 
 Each of these receivers support multiple subscribers for which messages can be displayed in a dedicated logviewer.
 
