@@ -42,6 +42,13 @@ Fully customizable message display settings.
 
 ![Settings](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.SettingsDialog.png)
 
+## UML
+
+In the Documents folder you will find some UML diagrams which reveal the main application architecture. 
+
+![ILogViewerManager](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.ILogViewerManager.png)
+![TLogViewerSettings](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.TLogViewerSettings.png)
+
 ## ILogger API
 
 The [DDuce](http://github.com/beNative/dduce) library provides the Logger module to add logging to your application (Delphi/FreePascal-Lazarus).
