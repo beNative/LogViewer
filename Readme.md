@@ -67,5 +67,7 @@ Here is a preliminary look of the application:
 
 ![LogViewer](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer3.png)
 
+Fully customizable display settings.
+
 ![LogViewer](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.SettingsDialog.png)
 
