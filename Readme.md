@@ -1,6 +1,6 @@
 # LogViewer
 
-LogViewer is a general purpose message viewer for log messages with support for multiple sources to receive messages from. The application is a modular design which can easily extended to support multiple message types and transfer protocols.
+LogViewer is a general purpose message viewer for log messages with support for multiple sources to receive messages from. The application is a modular design which can easily be extended to support other message types and transfer protocols.
 
 Currently supported are:
 
@@ -61,7 +61,7 @@ The DDuce demo application demonstrates the currently supported message types.
 
 ![Logger demo](https://github.com/beNative/LogViewer/blob/master/Wiki/DDuce%20Logger24-10-2018%2022-12-44.png)
 
-More examples can be found in my other Delphi projects listed on Github. LogViewer is also able to emmit log messages by itself which can be monitored in another instance. Therefor the source instance needs to have the setting 'Emmit log messages' enabled. The other instance needs to be started in 'debug mode' which also can be configured in the application settings.
+More examples can be found in my other Delphi projects listed on Github. LogViewer is also able to emit log messages by itself which can be monitored in another instance. Therefore the source instance needs to have the setting 'Emit log messages' enabled. The other instance needs to be started in 'debug mode' which also can be configured in the application settings.
 
 A subset of this API has been ported to FPC/Lazarus. Take a look at my Lazarus projects to see examples how they are used.
 
