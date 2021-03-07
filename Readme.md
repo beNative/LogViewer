@@ -49,6 +49,10 @@ The DDuce demo application demonstrates the currently supported message types.
 
 ![Logger demo](https://github.com/beNative/LogViewer/blob/master/Wiki/DDuce%20Logger24-10-2018%2022-12-44.png)
 
+More examples can be found in my other Delphi projects listed on Github.
+
+A subset of this API has been ported to FPC/Lazarus. Take a look at my Lazarus projects to see examples how they are used.
+
 ## Features currently supported using the ILogger interface methods
 - Info/Warning and Error messages
 - Method tracking with stack display showing execution times
