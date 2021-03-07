@@ -1,25 +1,53 @@
 # LogViewer
 
-LogViewer is a general purpose message viewer for log messages with support for multiple sources to receive messages from.
+LogViewer is a general purpose message viewer for log messages with support for multiple sources to receive messages from. The application is a modular design which can easily extended to support multiple message types and transfer protocols.
 
-* Windows ``OutputDebugString`` API
+Currently supported are:
+
 * Windows IPC (using ``WM_COPY`` messages)
 * [ZeroMQ](https://github.com/zeromq/libzmq) (`PUB`/`SUB` socket) for logging over the network. It demonstrates the brilliant performance of ZMQ sockets.
-* Serial port
 
-Each of these receivers support multiple subscribers for which messages can be displayed in
-a dedicated logviewer.
+Currently in progress:
+* Serial port (both native RS232 or Bluetooth)
+* Windows ``OutputDebugString`` API
+* MQTT
+
+Each of these receivers support multiple subscribers for which messages can be displayed in a dedicated logviewer.
+
+## Screenshots
+
+### Message viewer
+
+![LogViewer](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.png)
+
+![LogViewer](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer1.png)
+
+![LogViewer](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer2.png)
+
+![LogViewer](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer3.png)
+
+### Call Stack
+
+![CallStack](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.CallStack.png)
+
+### Watch List
+
+Watch list with value history support. The history list can be automatically synchronize with the message list to monitor the value at any given time.
+
+![WatchList](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.WatchList.png)
+
+### Settings Dialog
+
+Fully customizable message display settings.
+
+![Settings](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.SettingsDialog.png)
+
+## ILogger API
 
 The [DDuce](http://github.com/beNative/dduce) library provides the Logger module to add logging to your application (Delphi/FreePascal-Lazarus).
 The DDuce demo application demonstrates the currently supported message types.
 
 ![Logger demo](https://github.com/beNative/LogViewer/blob/master/Wiki/DDuce%20Logger24-10-2018%2022-12-44.png)
-
-## General layout
-- the main log treeview
-- watches with history 
-- method callstack level display
-- message details
 
 ## Features currently supported using the ILogger interface methods
 - Info/Warning and Error messages
@@ -55,32 +83,3 @@ The Object Pascal (Delphi) sources depend on the following open source libraries
   * [OMultiPanel](http://github.com/beNative/omultipanel)
   * [KControls](http://github.com/beNative/kcontrols)
   * [JsonDataObjects](http://github.com/ahausladen/JsonDataObjects)
-
-## Screenshots
-
-### Message viewer
-
-![LogViewer](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.png)
-
-![LogViewer](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer1.png)
-
-![LogViewer](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer2.png)
-
-![LogViewer](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer3.png)
-
-### Call Stack
-
-![CallStack](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.CallStack.png)
-
-### Watch List
-
-Watch list with value history support. The history list can be automatically synchronize with the message list to monitor the value at any given time.
-
-![WatchList](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.WatchList.png)
-
-### Settings Dialog
-
-Fully customizable message display settings.
-
-![Settings](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.SettingsDialog.png)
-
