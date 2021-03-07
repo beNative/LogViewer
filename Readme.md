@@ -50,7 +50,7 @@ In the [Documents](https://github.com/beNative/LogViewer/tree/master/Documents) 
 ![TLogViewerSettings](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.TLogViewerSettings.png)
 
 There is also a mindmap with a technical overview of the application: [LogViewer.xmind](https://github.com/beNative/LogViewer/blob/master/Documents/LogViewer.xmind)
-You need XMind to open this document. You can download a free version from:
+You need XMind to open this document. You can download a free version from the main website: [XMind](https://www.xmind.net/).
 
 ## ILogger API
 
