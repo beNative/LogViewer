@@ -57,7 +57,8 @@ The Object Pascal (Delphi) sources depend on the following open source libraries
   * [JsonDataObjects](http://github.com/ahausladen/JsonDataObjects)
 
 ## Screenshots
-Here is a preliminary look of the application:
+
+### Message viewer
 
 ![LogViewer](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.png)
 
@@ -67,7 +68,19 @@ Here is a preliminary look of the application:
 
 ![LogViewer](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer3.png)
 
-Fully customizable display settings.
+### Call Stack
 
-![LogViewer](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.SettingsDialog.png)
+![CallStack](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.CallStack.png)
+
+### Watch List
+
+Watch list with value history support. The history list can be automatically synchronize with the message list to monitor the value at any given time.
+
+![WatchList](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.WatchList.png)
+
+### Settings Dialog
+
+Fully customizable message display settings.
+
+![Settings](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.SettingsDialog.png)
 
