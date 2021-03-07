@@ -44,7 +44,7 @@ Fully customizable message display settings.
 
 ## UML
 
-In the Documents folder you will find some UML diagrams which reveal the main application architecture. 
+In the [Documents](https://github.com/beNative/LogViewer/tree/master/Documents) folder you will find some UML diagrams which reveal the main application architecture. 
 
 ![ILogViewerManager](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.ILogViewerManager.png)
 ![TLogViewerSettings](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.TLogViewerSettings.png)
