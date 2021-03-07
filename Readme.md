@@ -52,7 +52,7 @@ In the [Documents](https://github.com/beNative/LogViewer/tree/master/Documents) 
 There is also a mindmap with a technical overview of the application: [LogViewer.xmind](https://github.com/beNative/LogViewer/blob/master/Documents/LogViewer.xmind)
 You need XMind to open this document. You can download a free version from the main website: [XMind](https://www.xmind.net/).
 
-I made an image snapshot of the mindmap that you can open here: [LogViewer Mindmap](https://github.com/beNative/LogViewer/blob/master/Documents/LogViewer.Mindmap.png)
+I made an image snapshot of the mindmap that you can open here: [LogViewer.Mindmap.png](https://raw.githubusercontent.com/beNative/LogViewer/master/Documents/LogViewer.Mindmap.png)
 
 ## ILogger API
 
