@@ -52,6 +52,8 @@ In the [Documents](https://github.com/beNative/LogViewer/tree/master/Documents) 
 There is also a mindmap with a technical overview of the application: [LogViewer.xmind](https://github.com/beNative/LogViewer/blob/master/Documents/LogViewer.xmind)
 You need XMind to open this document. You can download a free version from the main website: [XMind](https://www.xmind.net/).
 
+I made an image snapshot of the mindmap that you can open here: [LogViewer Mindmap](https://github.com/beNative/LogViewer/blob/master/Documents/LogViewer.Mindmap.png)
+
 ## ILogger API
 
 The [DDuce](http://github.com/beNative/dduce) library provides the Logger module to add logging to your application (Delphi/FreePascal-Lazarus).
