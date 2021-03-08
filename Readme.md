@@ -14,6 +14,8 @@ Currently in progress:
 
 Each of these receivers support multiple subscribers for which messages can be displayed in a dedicated logviewer.
 
+I compiled a pre-release version in the releases section.
+
 ## Screenshots
 
 ### Message viewer
