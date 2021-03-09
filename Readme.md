@@ -1,6 +1,6 @@
 # LogViewer
 
-LogViewer is a general purpose message viewer for log messages with support for multiple sources to receive messages from. The application is a modular design which can easily be extended to support other message types and transfer protocols.
+**LogViewer** is a general purpose message viewer for log messages with support for multiple sources to receive messages from. The application is a modular design which can easily be extended to support other message types and transfer protocols.
 
 Currently supported are:
 
@@ -12,7 +12,7 @@ Currently in progress:
 * Windows ``OutputDebugString`` API
 * MQTT (commonly used by IOT devices)
 
-Each of these receivers support multiple subscribers for which messages can be displayed in a dedicated logviewer.
+Each of these **receivers** support multiple **subscribers** for which messages can be displayed in a dedicated logviewer.
 
 I compiled a pre-release version to play with in the [releases](https://github.com/beNative/LogViewer/releases) section. I included the unit test executable that can be used to generate some sample logging.
 
