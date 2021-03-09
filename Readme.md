@@ -1,6 +1,6 @@
 # LogViewer
 
-LogViewer is a general purpose message viewer for log messages with support for multiple sources to receive messages from. The application is a modular design which can easily extended to support multiple message types and transfer protocols.
+**LogViewer** is a general purpose message viewer for log messages with support for multiple sources to receive messages from. The application is a modular design which can easily be extended to support other message types and transfer protocols.
 
 Currently supported are:
 
@@ -12,7 +12,9 @@ Currently in progress:
 * Windows ``OutputDebugString`` API
 * MQTT (commonly used by IOT devices)
 
-Each of these receivers support multiple subscribers for which messages can be displayed in a dedicated logviewer.
+Each of these **receivers** support multiple **subscribers** for which messages can be displayed in a dedicated logviewer.
+
+I compiled a pre-release version to play with in the [releases](https://github.com/beNative/LogViewer/releases) section. I included the unit test executable that can be used to generate some sample logging.
 
 ## Screenshots
 
@@ -52,6 +54,8 @@ In the [Documents](https://github.com/beNative/LogViewer/tree/master/Documents) 
 There is also a mindmap with a technical overview of the application: [LogViewer.xmind](https://github.com/beNative/LogViewer/blob/master/Documents/LogViewer.xmind)
 You need XMind to open this document. You can download a free version from the main website: [XMind](https://www.xmind.net/).
 
+I made an image snapshot of the mindmap that you can open here: [LogViewer.Mindmap.png](https://raw.githubusercontent.com/beNative/LogViewer/master/Documents/LogViewer.Mindmap.png)
+
 ## ILogger API
 
 The [DDuce](http://github.com/beNative/dduce) library provides the Logger module to add logging to your application (Delphi/FreePascal-Lazarus).
@@ -59,7 +63,7 @@ The DDuce demo application demonstrates the currently supported message types.
 
 ![Logger demo](https://github.com/beNative/LogViewer/blob/master/Wiki/DDuce%20Logger24-10-2018%2022-12-44.png)
 
-More examples can be found in my other Delphi projects listed on Github.
+More examples can be found in my other Delphi projects listed on Github. LogViewer is also able to emit log messages by itself which can be monitored in another instance. Therefore the source instance needs to have the setting 'Emit log messages' enabled. The other instance needs to be started in 'debug mode' which also can be configured in the application settings.
 
 A subset of this API has been ported to FPC/Lazarus. Take a look at my Lazarus projects to see examples how they are used.
 
