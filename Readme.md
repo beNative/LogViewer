@@ -14,7 +14,7 @@ Currently in progress:
 
 Each of these receivers support multiple subscribers for which messages can be displayed in a dedicated logviewer.
 
-I compiled a pre-release version in the [releases](https://github.com/beNative/LogViewer/releases) section.
+I compiled a pre-release version to play with in the [releases](https://github.com/beNative/LogViewer/releases) section. I included the unit test executable that can be used to generate some sample logging.
 
 ## Screenshots
 
