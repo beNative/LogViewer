@@ -42,6 +42,9 @@ type
     FOnChange         : Event<TNotifyEvent>;
     FLogMessageLevels : TLogMessageLevels;
     FLogMessageTypes  : TLogMessageTypes;
+    FTimeStampFirst   : TDateTime;
+    FTimeStampLast    : TDateTime;
+    FBytesReceived    : Int64;
 
   protected
     {$REGION 'property access methods'}
@@ -58,6 +61,9 @@ type
     function GetLogMessageTypes: TLogMessageTypes;
     procedure SetLogMessageLevels(const Value: TLogMessageLevels); virtual;
     procedure SetLogMessageTypes(const Value: TLogMessageTypes); virtual;
+    function GetTimeStampFirst: TDateTime;
+    function GetTimeStampLast: TDateTime;
+    function GetBytesReceived: Int64;
     {$ENDREGION}
 
     procedure Poll; virtual;
@@ -70,6 +76,9 @@ type
     property Receiver: IChannelReceiver
       read GetReceiver;
 
+    property BytesReceived: Int64
+      read GetBytesReceived;
+
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
 
@@ -81,6 +90,12 @@ type
 
     property SourceName: string
       read GetSourceName;
+
+    property TimeStampFirst: TDateTime
+      read GetTimeStampFirst;
+
+    property TimeStampLast: TDateTime
+      read GetTimeStampLast;
 
     property LogMessageTypes: TLogMessageTypes
       read GetLogMessageTypes write SetLogMessageTypes;
@@ -108,6 +123,8 @@ type
 implementation
 
 uses
+  System.SysUtils,
+
   DDuce.Logger;
 
 {$REGION 'construction and destruction'}
@@ -134,6 +151,11 @@ end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
+function TSubscriber.GetBytesReceived: Int64;
+begin
+  Result := FBytesReceived;
+end;
+
 function TSubscriber.GetEnabled: Boolean;
 begin
   Result := FEnabled;
@@ -210,6 +232,16 @@ function TSubscriber.GetSourceName: string;
 begin
   Result := FSourceName;
 end;
+
+function TSubscriber.GetTimeStampFirst: TDateTime;
+begin
+  Result := FTimeStampFirst;
+end;
+
+function TSubscriber.GetTimeStampLast: TDateTime;
+begin
+  Result := FTimeStampLast;
+end;
 {$ENDREGION}
 
 {$REGION 'event dispatch methods'}
@@ -223,7 +255,11 @@ begin
   Guard.CheckNotNull(AStream, 'AStream');
   if Enabled then
   begin
+    if FMessageCount = 0 then
+      FTimeStampFirst := Now;
+    FTimeStampLast := Now;
     Inc(FMessageCount);
+    Inc(FBytesReceived, AStream.Size);
     FOnReceiveMessage.Invoke(Self, AStream);
   end;
 end;

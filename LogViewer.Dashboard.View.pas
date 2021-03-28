@@ -247,7 +247,7 @@ implementation
 uses
   Spring,
 
-  DDuce.Utils.Winapi, DDuce.Logger,
+  DDuce.Utils, DDuce.Utils.Winapi, DDuce.Logger,
   DDuce.Factories.VirtualTrees,
   DDuce.ObjectInspector.zObjectInspector,
 
@@ -614,7 +614,13 @@ begin
         else if Column = COLUMN_SOURCEID then
           CellText := LSubscriber.SourceId.ToString
         else if Column = COLUMN_MESSAGECOUNT then
-          CellText := LSubscriber.MessageCount.ToString;
+          CellText := LSubscriber.MessageCount.ToString
+        else if Column = COLUMN_BYTES_RECEIVED then
+          CellText :=  FormatBytes(LSubscriber.BytesReceived)
+        else if Column = COLUMN_TIMESTAMP_FIRST then
+          CellText := DateTimeToStr(LSubscriber.TimeStampFirst)
+        else if Column = COLUMN_TIMESTAMP_LAST then
+          CellText := DateTimeToStr(LSubscriber.TimeStampLast);
       end
     end;
   end;
@@ -985,7 +991,7 @@ begin
       MinWidth := 100;
       Options  := [coAllowClick, coEnabled, coParentBidiMode, coResizable,
         coVisible, coSmartResize, coAllowFocus];
-      Position := 0;
+      Position := COLUMN_SOURCENAME;
       Indent   := 8;
       Width    := 100;
       Text     := SName;
@@ -996,29 +1002,62 @@ begin
       MinWidth := 150;
       Options  := [coAllowClick, coEnabled, coParentBidiMode, coResizable,
         coVisible, coSmartResize, coAllowFocus];
-      Position := 1;
+      Position := COLUMN_KEY;
       Width    := 200;
       Text     := SValue;
     end;
     with Header.Columns.Add do
     begin
-      MaxWidth := 100;
-      MinWidth := 100;
-      Options  := [coAllowClick, coEnabled, coParentBidiMode, coVisible,
+      MaxWidth  := 80;
+      MinWidth  := 80;
+      Options   := [coAllowClick, coEnabled, coParentBidiMode, coVisible,
         coAutoSpring, coAllowFocus];
-      Position := 2;
-      Width    := 100;
-      Text     := SId;
+      Position  := COLUMN_SOURCEID;
+      Width     := 80;
+      Alignment := taCenter;
+      Text      := SId;
     end;
     with Header.Columns.Add do
     begin
-      MaxWidth := 100;
-      MinWidth := 100;
+      MaxWidth  := 90;
+      MinWidth  := 90;
+      Options   := [coAllowClick, coEnabled, coParentBidiMode, coShowDropMark,
+        coVisible, coAllowFocus];
+      Position  := COLUMN_MESSAGECOUNT;
+      Width     := 90;
+      Alignment := taCenter;
+      Text      := SMessageCount;
+    end;
+    with Header.Columns.Add do
+    begin
+      MaxWidth  := 80;
+      MinWidth  := 80;
+      Options   := [coAllowClick, coEnabled, coParentBidiMode, coShowDropMark,
+        coVisible, coAllowFocus];
+      Position  := COLUMN_BYTES_RECEIVED;
+      Width     := 80;
+      Alignment := taCenter;
+      Text      := SBytesReceived;
+    end;
+    with Header.Columns.Add do
+    begin
+      MaxWidth := 120;
+      MinWidth := 120;
       Options  := [coAllowClick, coEnabled, coParentBidiMode, coShowDropMark,
         coVisible, coAllowFocus];
-      Position := 3;
-      Width    := 100;
-      Text     := SMessageCount;
+      Position := COLUMN_TIMESTAMP_FIRST;
+      Width    := 120;
+      Text     := STimeStampFirst;
+    end;
+    with Header.Columns.Add do
+    begin
+      MaxWidth := 120;
+      MinWidth := 120;
+      Options  := [coAllowClick, coEnabled, coParentBidiMode, coShowDropMark,
+        coVisible, coAllowFocus];
+      Position := COLUMN_TIMESTAMP_LAST;
+      Width    := 120;
+      Text     := STimeStampLast;
     end;
     Header.MainColumn := 0;
     TreeOptions.AutoOptions := TreeOptions.AutoOptions + [toAutoSpanColumns];

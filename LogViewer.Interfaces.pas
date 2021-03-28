@@ -70,6 +70,9 @@ type
     function GetSourceName: string;
     function GetMessageCount: Int64;
     function GetOnChange: IEvent<TNotifyEvent>;
+    function GetTimeStampFirst: TDateTime;
+    function GetTimeStampLast: TDateTime;
+    function GetBytesReceived: Int64;
     {$ENDREGION}
     procedure Poll;
     procedure Reset;
@@ -78,6 +81,9 @@ type
 
     property Key: string
       read GetKey;
+
+    property BytesReceived: Int64
+      read GetBytesReceived;
 
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
@@ -93,6 +99,12 @@ type
 
     property SourceName: string
       read GetSourceName;
+
+    property TimeStampFirst: TDateTime
+      read GetTimeStampFirst;
+
+    property TimeStampLast: TDateTime
+      read GetTimeStampLast;
 
     property OnChange: IEvent<TNotifyEvent>
       read GetOnChange;

@@ -126,6 +126,10 @@ resourcestring
 
   SLogLevelAlias = 'Loglevel alias';
 
+  STimeStampFirst = 'Time first message';
+  STimeStampLast  = 'Time last message';
+  SBytesReceived  = 'Data received';
+
   // channel receiver names
 const
   RECEIVERNAME_WINIPC     = 'WinIPC';
@@ -141,12 +145,12 @@ resourcestring
   SReceiverCaptionComPort    = 'ComPort receiver';
   SReceiverCaptionFileSystem = 'File system receiver';
 
-// main form
+  // main form
   SReceivedCount    = 'Received: <b>%d</b>';
   SSubscriberSource = '<x=4>Source:</x> <b>%s</b> (%d)';
 
-  // message viewer
 const
+  // message viewer
   COLUMN_LEVEL     = 0;
   COLUMN_MAIN      = 1; // make variable
   COLUMN_VALUENAME = 2;
@@ -154,20 +158,23 @@ const
   COLUMN_VALUETYPE = 4;
   COLUMN_TIMESTAMP = 5;
 
-// column names
+  // column names
   COLUMNNAME_TIMESTAMP = 'TimeStamp';
   COLUMNNAME_NAME      = 'Name';
   COLUMNNAME_VALUE     = 'Value';
   COLUMNNAME_VALUETYPE = 'ValueType';
   COLUMNNAME_ID        = 'Id';
 
-// dashboard
-  COLUMN_SOURCENAME   = 0;
-  COLUMN_KEY          = 1;
-  COLUMN_SOURCEID     = 2;
-  COLUMN_MESSAGECOUNT = 3;
+  // dashboard
+  COLUMN_SOURCENAME      = 0;
+  COLUMN_KEY             = 1;
+  COLUMN_SOURCEID        = 2;
+  COLUMN_MESSAGECOUNT    = 3;
+  COLUMN_BYTES_RECEIVED  = 4;
+  COLUMN_TIMESTAMP_FIRST = 5;
+  COLUMN_TIMESTAMP_LAST  = 6;
 
-// loglevels
+  // loglevels
   COLUMN_LOGLEVEL      = 0;
   COLUMN_LOGCOLOR      = 1;
   COLUMN_LOGCOLORVALUE = 2;
