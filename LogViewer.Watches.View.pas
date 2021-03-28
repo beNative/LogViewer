@@ -18,6 +18,8 @@ unit LogViewer.Watches.View;
 
 { View displaying watch values and value history as a master-detail. }
 
+{ TODO: synchronise selected record in history list in sync mode. }
+
 interface
 
 uses
@@ -332,8 +334,8 @@ begin
   CDS                  := TFactories.CreateColumnDefinitions;
   CD                   := CDS.Add(COLUMNNAME_NAME);
   CD.ValuePropertyName := COLUMNNAME_NAME;
-  CD.MinWidth          := 20;
-  CD.Width             := 40;
+  CD.MinWidth          := 60;
+  CD.Width             := 100;
   CD.HintPropertyName  := CD.ValuePropertyName;
   CD.OnCustomDraw      := FCDNameCustomDraw;
 
@@ -369,7 +371,7 @@ begin
   CD                   := FWatchHistoryColumnDefinitions.Add(COLUMNNAME_ID);
   CD.ValuePropertyName := COLUMNNAME_ID;
   CD.HintPropertyName  := CD.ValuePropertyName;
-  CD.Width             := 40;
+  CD.Width             := 100;
   CD.OnCustomDraw      := FCDIdCustomDraw;
 
   CD                   := FWatchHistoryColumnDefinitions.Add(COLUMNNAME_VALUE);
