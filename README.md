@@ -90,7 +90,7 @@ A subset of this API has been ported to FPC/Lazarus. Take a look at my Lazarus p
 - Native value types with type information
 - Text with suppport for multiple highlighters
 - Actions
-- Up to 32 logging levels
+- Up to 32 user-definable logging levels
 
 ## Libraries used
 The Object Pascal (Delphi) sources depend on the following open source libraries and components:
