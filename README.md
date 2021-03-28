@@ -38,6 +38,12 @@ Watch list with value history support. The history list can be automatically syn
 
 ![WatchList](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.WatchList.png)
 
+### Message Filter
+
+![MessageFilterClient](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.MessageFilter.Client.png)
+
+![MessageFilterSource](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.MessageFilter.Source.png)
+
 ### Settings Dialog
 
 Fully customizable message display settings.
