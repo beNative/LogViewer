@@ -40,8 +40,10 @@ Watch list with value history support. The history list can be automatically syn
 
 ### Message Filter
 
+#### Client side
 ![MessageFilterClient](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.MessageFilter.Client.png)
 
+#### Source side
 ![MessageFilterSource](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.MessageFilter.Source.png)
 
 ### Settings Dialog
