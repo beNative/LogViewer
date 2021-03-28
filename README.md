@@ -52,7 +52,7 @@ Fully customizable message display settings.
 
 ![Settings](https://github.com/beNative/LogViewer/blob/master/Images/LogViewer.SettingsDialog.png)
 
-## UML
+## UML diagrams
 
 In the [Documents](https://github.com/beNative/LogViewer/tree/master/Documents) folder you will find some UML diagrams which reveal the main application architecture. 
 
