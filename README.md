@@ -8,7 +8,7 @@ Currently supported are:
 * [ZeroMQ](https://github.com/zeromq/libzmq) (`PUB`/`SUB` socket) for logging over the network. It demonstrates the brilliant performance of ZMQ sockets.
 
 Currently in progress:
-* Serial port (both native RS232 or Bluetooth)
+* Serial port (native RS232, USB or Bluetooth)
 * Windows ``OutputDebugString`` API
 * MQTT (commonly used by IOT devices)
 
