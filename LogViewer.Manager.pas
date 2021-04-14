@@ -42,58 +42,58 @@ type
                                   ILogViewerManager
   )
     {$REGION 'designer controls'}
-    aclMain                   : TActionList;
-    actAbout                  : TAction;
-    actAction                 : TAction;
-    actAutoScrollMessages     : TAction;
-    actBitmap                 : TAction;
-    actCallStack              : TAction;
-    actCheckPoint             : TAction;
-    actClearMessages          : TAction;
-    actCloseMessageView       : TAction;
-    actCloseOtherMessageViews : TAction;
-    actCollapseAll            : TAction;
-    actComponent              : TAction;
-    actConditional            : TAction;
-    actCounter                : TAction;
-    actCustomData             : TAction;
-    actDashboard              : TAction;
-    actDataSet                : TAction;
-    actError                  : TAction;
-    actException              : TAction;
-    actExpandAll              : TAction;
-    actFilterMessages         : TAction;
-    actGotoFirst              : TAction;
-    actGotoLast               : TAction;
-    actHeapInfo               : TAction;
-    actInfo                   : TAction;
-    actInterface              : TAction;
-    actMemory                 : TAction;
-    actMessageTypesMenu       : TAction;
-    actMethodTraces           : TAction;
-    actObject                 : TAction;
-    actPersistent             : TAction;
-    actSaveBitmapAs           : TAction;
-    actScreenshot             : TAction;
-    actSetFocusToFilter       : TAction;
-    actSettings               : TAction;
-    actShowFilterView         : TAction;
-    actStart                  : TAction;
-    actStop                   : TAction;
-    actStrings                : TAction;
-    actText                   : TAction;
-    actToggleAlwaysOnTop      : TAction;
-    actToggleFullscreen       : TAction;
-    actValue                  : TAction;
-    actWarning                : TAction;
-    imlMain                   : TImageList;
-    imlMessageTypes           : TImageList;
-    ppmLogTreeViewer          : TPopupMenu;
-    ppmMessageTypes           : TPopupMenu;
-    actCloseTerminatedProcesses: TAction;
-    actToggleLeftPanelVisible: TAction;
-    actToggleRightPanelVisible: TAction;
-    ppmSubscriber: TPopupMenu;
+    aclMain                     : TActionList;
+    actAbout                    : TAction;
+    actAction                   : TAction;
+    actAutoScrollMessages       : TAction;
+    actBitmap                   : TAction;
+    actCallStack                : TAction;
+    actCheckPoint               : TAction;
+    actClearMessages            : TAction;
+    actCloseMessageView         : TAction;
+    actCloseOtherMessageViews   : TAction;
+    actCloseTerminatedProcesses : TAction;
+    actCollapseAll              : TAction;
+    actComponent                : TAction;
+    actConditional              : TAction;
+    actCounter                  : TAction;
+    actCustomData               : TAction;
+    actDashboard                : TAction;
+    actDataSet                  : TAction;
+    actError                    : TAction;
+    actException                : TAction;
+    actExpandAll                : TAction;
+    actFilterMessages           : TAction;
+    actGotoFirst                : TAction;
+    actGotoLast                 : TAction;
+    actHeapInfo                 : TAction;
+    actInfo                     : TAction;
+    actInterface                : TAction;
+    actMemory                   : TAction;
+    actMessageTypesMenu         : TAction;
+    actMethodTraces             : TAction;
+    actObject                   : TAction;
+    actPersistent               : TAction;
+    actSaveBitmapAs             : TAction;
+    actScreenshot               : TAction;
+    actSetFocusToFilter         : TAction;
+    actSettings                 : TAction;
+    actShowFilterView           : TAction;
+    actStart                    : TAction;
+    actStop                     : TAction;
+    actStrings                  : TAction;
+    actText                     : TAction;
+    actToggleAlwaysOnTop        : TAction;
+    actToggleFullscreen         : TAction;
+    actToggleLeftPanelVisible   : TAction;
+    actToggleRightPanelVisible  : TAction;
+    actValue                    : TAction;
+    actWarning                  : TAction;
+    imlMain                     : TImageList;
+    imlMessageTypes             : TImageList;
+    ppmLogTreeViewer            : TPopupMenu;
+    ppmMessageTypes             : TPopupMenu;
+    ppmSubscriber               : TPopupMenu;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -255,8 +255,12 @@ type
       read GetEvents implements ILogViewerEvents;
     {$ENDREGION}
 
+    (*
     property Settings: TLogViewerSettings
       read GetSettings;
+    property EditorManager: IEditorManager
+      read GetEditorManager;
+    *)
 
     property Views: IList<ILogViewer>
       read GetViews;
@@ -264,8 +268,7 @@ type
     property Receivers: IList<IChannelReceiver>
       read GetReceivers;
 
-    property EditorManager: IEditorManager
-      read GetEditorManager;
+
 
   public
     constructor Create(
@@ -308,38 +311,55 @@ begin
   FCommands       := TLogViewerCommands.Create(Self);
   FReceivers      := TCollections.CreateInterfaceList<IChannelReceiver>;
   FViewList       := TCollections.CreateInterfaceList<ILogViewer>;
-  FEditorSettings := TEditorFactories.CreateSettings(Self, 'settings.xml');
-  FEditorManager  := TEditorFactories.CreateManager(Self, FEditorSettings);
+//  FEditorSettings := TEditorFactories.CreateSettings(Self, 'settings.xml');
+//  FEditorManager  := TEditorFactories.CreateManager(Self, FEditorSettings);
+  //FEditorSettings := TEditorFactories.CreateSettings(Application, 'settings.xml');
+  FEditorManager  := TEditorFactories.CreateManager(nil, nil);
   InitializeEditorActions;
   BuildMessageTypesPopupMenu;
   BuildLogTreeViewerPopupMenu;
   BuildSubscriberPopupMenu;
   FFilterView := TfrmMessageFilter.Create(
     Self,
-    Settings.MessageListSettings,
+    FSettings.MessageListSettings,
     imlMessageTypes
   );
   UpdateActions;
 end;
 
 destructor TdmManager.Destroy;
+//var
+//  C : TComponent;
 begin
   Logger.Track(Self, 'Destroy');
   FActiveView     := nil;
+
   FreeAndNil(FFilterView);
   FSettings.OnChanged.RemoveAll(Self);
   FViewList.OnChanged.RemoveAll(Self);
+  FReceivers.OnChanged.RemoveAll(Self);
   FViewList.Clear;
   FSettings.Save;
   FViewList       := nil;
   FReceivers      := nil;
   FSettings       := nil;
+//  C := FEditorManager.AsComponent;
   FEditorSettings := nil;
   FEditorManager  := nil;
 
+
+
   FreeAndNil(FEvents);   // needs to happen just before inherited call
   FreeAndNil(FCommands);
-  inherited Destroy;
+
+  //Logger.SendComponent('Manager', Self);
+  //Logger.SendObject('Manager', Self);
+
+  inherited Destroy; // results in exception when application is closed with
+                     //   - one message viewer
+                     //   - that has not been focused
+
+//FreeAndNil(C);
 end;
 {$ENDREGION}
 
@@ -575,9 +595,9 @@ var
 begin
   A := Sender as TAction;
   if A.Checked then
-    Settings.FormSettings.FormStyle := fsStayOnTop
+    FSettings.FormSettings.FormStyle := fsStayOnTop
   else
-    Settings.FormSettings.FormStyle := fsNormal;
+    FSettings.FormSettings.FormStyle := fsNormal;
 end;
 
 procedure TdmManager.actToggleFullscreenExecute(Sender: TObject);
@@ -586,9 +606,9 @@ var
 begin
   A := Sender as TAction;
   if A.Checked then
-    Settings.FormSettings.WindowState := wsMaximized
+    FSettings.FormSettings.WindowState := wsMaximized
   else
-    Settings.FormSettings.WindowState := wsNormal;
+    FSettings.FormSettings.WindowState := wsNormal;
 end;
 
 procedure TdmManager.actToggleLeftPanelVisibleExecute(Sender: TObject);
@@ -975,7 +995,7 @@ var
   B   : Boolean;
   MLS : TMessageListSettings;
 begin
-  MLS := Settings.MessageListSettings;
+  MLS := FSettings.MessageListSettings;
 
   B := Assigned(ActiveView) and Assigned(ActiveView.Subscriber);
   // workaround toolbar issue which refuses to reflect checked state when button
@@ -1015,9 +1035,9 @@ begin
   actExpandAll.Enabled        := B;
   actClearMessages.Enabled    := B;
   actFilterMessages.Enabled := B and
-    not Settings.MessageListSettings.AutoFilterMessages;
-  actToggleAlwaysOnTop.Checked := Settings.FormSettings.FormStyle = fsStayOnTop;
-  actToggleFullscreen.Checked := Settings.FormSettings.WindowState = wsMaximized;
+    not FSettings.MessageListSettings.AutoFilterMessages;
+  actToggleAlwaysOnTop.Checked := FSettings.FormSettings.FormStyle = fsStayOnTop;
+  actToggleFullscreen.Checked := FSettings.FormSettings.WindowState = wsMaximized;
   actAutoScrollMessages.Checked := MLS.AutoScrollMessages;
 
   actBitmap.Checked       := lmtBitmap in MLS.VisibleMessageTypes;
@@ -1058,7 +1078,7 @@ var
   A   : TAction;
   MLS : TMessageListSettings;
 begin
-  MLS := Settings.MessageListSettings;
+  MLS := FSettings.MessageListSettings;
   if Assigned(FActiveView.Target) then
   begin
     A := ASender as TAction;

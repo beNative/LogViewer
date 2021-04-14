@@ -9,6 +9,7 @@ object frmMessageList: TfrmMessageList
   OldCreateOrder = False
   ShowHint = True
   OnClose = FormClose
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object pnlMain: TOMultiPanel
@@ -189,7 +190,7 @@ object frmMessageList: TfrmMessageList
             Width = 417
             Height = 557
             ActivateNewDocked = False
-            ActivePageIndex = 1
+            ActivePageIndex = 0
             Align = alClient
             HotTrack = False
             ParentBackground = True
@@ -204,9 +205,15 @@ object frmMessageList: TfrmMessageList
             TabPanelOptions.Options = []
             object tsValueList: TKTabSheet
               Caption = 'Value list'
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
             end
             object tsTextViewer: TKTabSheet
               Caption = 'Text viewer'
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
               object pnlTextViewer: TPanel
                 Left = 0
                 Top = 0
@@ -221,13 +228,22 @@ object frmMessageList: TfrmMessageList
             end
             object tsImageViewer: TKTabSheet
               Caption = 'Image viewer'
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
             end
             object tsDataSet: TKTabSheet
               Caption = 'Dataset viewer'
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
             end
             object tsRawData: TKTabSheet
               Caption = 'Raw data viewer'
               OnShow = tsRawDataShow
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
             end
           end
         end
@@ -371,7 +387,7 @@ object frmMessageList: TfrmMessageList
     Left = 55
     Top = 22
     Bitmap = {
-      494C010118001900400210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C0101180019004C0210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000007000000001002000000000000070
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

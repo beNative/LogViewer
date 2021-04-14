@@ -1,10 +1,10 @@
 {
 	"EmitLogMessages": false,
 	"FormSettings": {
-		"Left": 114,
-		"Top": 70,
-		"Width": 1368,
-		"Height": 858,
+		"Left": 2560,
+		"Top": 0,
+		"Width": 2576,
+		"Height": 1426,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -13,11 +13,11 @@
 		"AutoFilterMessages": true,
 		"ColumnHeadersVisible": true,
 		"DynamicAutoSizeColumns": true,
-		"MessageDetailsVisible": true,
+		"MessageDetailsVisible": false,
 		"SmartTimeStamps": true,
 		"HorizontalPanelPositions": [
-			0.22173193601765,
-			0.679341657207719,
+			0.272189349112426,
+			0.630859375,
 			1
 		],
 		"LeftVerticalPanelPositions": [

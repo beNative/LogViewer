@@ -97,6 +97,7 @@ type
     procedure pnlMainCanResize(Sender: TObject; var NewWidth,
       NewHeight: Integer; var Resize: Boolean);
     procedure edtMessageFilterExit(Sender: TObject);
+    procedure FormShow(Sender: TObject);
 
   private class var
     FCounter : Integer;
@@ -453,6 +454,7 @@ begin
   FreeAndNil(FCallStackView);
   FreeAndNil(FLogTreeView);
   FreeAndNil(FWatches);
+
   inherited Destroy;
 end;
 
@@ -1371,6 +1373,15 @@ end;
 procedure TfrmMessageList.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Action := caFree;
+end;
+
+procedure TfrmMessageList.FormShow(Sender: TObject);
+begin
+//  FLogTreeView.SetFocus;
+//  ApplySettings;
+//  RightPanelVisible := False;
+//    RightPanelVisible := True;
+
 end;
 
 procedure TfrmMessageList.FSubscriberReceiveMessage(Sender: TObject;

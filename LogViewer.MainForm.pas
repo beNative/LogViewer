@@ -55,7 +55,7 @@ type
     shpLine            : TShape;
     tmrPoll            : TTimer;
     tskbrMain          : TTaskbar;
-    imlTabStates: TImageList;
+    imlTabStates       : TImageList;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -233,7 +233,7 @@ begin
   FSettings.FormSettings.AssignTo(Self);
   FSettings.OnChanged.Add(SettingsChanged);
   FMainToolbar := TLogViewerFactories.CreateMainToolbar(
-    FManager.AsComponent,
+    Self,
     pnlTop,
     Actions,
     Menus
@@ -260,9 +260,13 @@ begin
   FSettings.FormSettings.Assign(Self);
   FManager := nil;
   FreeAndNil(FDashboard); // needs to be freed before manager!
-  inherited Destroy; // will destroy manager object as the mainform is its owner
-  FSettings.OnChanged.RemoveAll(Self);
-  FreeAndNil(FSettings);
+
+  try
+    inherited Destroy; // will destroy manager object as the mainform is its owner
+  finally
+    FSettings.OnChanged.RemoveAll(Self);
+    FreeAndNil(FSettings);
+  end;
 end;
 {$ENDREGION}
 

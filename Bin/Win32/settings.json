@@ -2,8 +2,8 @@
 	"DebugMode": false,
 	"EmitLogMessages": true,
 	"FormSettings": {
-		"Left": 0,
-		"Top": 0,
+		"Left": -8,
+		"Top": -8,
 		"Width": 2576,
 		"Height": 1426,
 		"FormStyle": 0,
@@ -14,7 +14,7 @@
 		"AutoFilterMessages": true,
 		"ColumnHeadersVisible": true,
 		"DynamicAutoSizeColumns": true,
-		"MessageDetailsVisible": true,
+		"MessageDetailsVisible": false,
 		"SmartTimeStamps": true,
 		"HorizontalPanelPositions": [
 			0.25678496868476,
@@ -30,7 +30,7 @@
 		"Enabled": false
 	},
 	"WinipcSettings": {
-		"Enabled": true,
+		"Enabled": false,
 		"PollingInterval": 100
 	},
 	"ZeroMQSettings": {
@@ -188,7 +188,7 @@
 	"WatchSettings": {
 		"ColumnHeadersVisible": false,
 		"OnlyTrackChanges": true,
-		"WatchHistoryVisible": true,
+		"WatchHistoryVisible": false,
 		"SyncWithSelection": false
 	},
 	"CallStackSettings": {

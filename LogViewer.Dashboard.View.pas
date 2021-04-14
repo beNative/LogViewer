@@ -311,12 +311,13 @@ begin
   FZmqEndpoints.ValueList.OnExit := nil;
   FZeroMQReceiver.OnChange.RemoveAll(Self);
   FWinipcReceiver.OnChange.RemoveAll(Self);
+//  FComPortReceiver.OnChange.RemoveAll(Self);
 
   SaveSettings;
   FZeroMQReceiver     := nil;
   FWinipcReceiver     := nil;
   FWinodsReceiver     := nil;
-  FComPortReceiver    := nil;
+//  FComPortReceiver    := nil;
   FFileSystemReceiver := nil;
   FManager            := nil;
   FZeroMQ             := nil;
@@ -861,7 +862,7 @@ begin
   CreateWinipcReceiver;
   CreateZeroMQReceiver;
   //CreateWinodsReceiver;
-  CreateComPortReceiver;
+//  CreateComPortReceiver;
 //  CreateFileSystemReceiver;
   FTreeView.FullExpand;
 end;

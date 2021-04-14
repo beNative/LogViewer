@@ -60,6 +60,7 @@ type
 
   public
     procedure AfterConstruction; override;
+    destructor Destroy; override;
 
     function CreateSubscriber(
       ASourceId         : UInt32;
@@ -85,6 +86,12 @@ begin
   PollTimer.Interval := Settings.PollingInterval;
   PollTimer.Enabled  := False;
   PollTimer.OnTimer  := PollTimerTimer;
+end;
+
+destructor TComPortChannelReceiver.Destroy;
+begin
+  PollTimer.Enabled  := False;
+  inherited Destroy;
 end;
 {$ENDREGION}
 
