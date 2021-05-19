@@ -260,13 +260,9 @@ begin
   FSettings.FormSettings.Assign(Self);
   FManager := nil;
   FreeAndNil(FDashboard); // needs to be freed before manager!
-
-  try
-    inherited Destroy; // will destroy manager object as the mainform is its owner
-  finally
-    FSettings.OnChanged.RemoveAll(Self);
-    FreeAndNil(FSettings);
-  end;
+  inherited Destroy; // will destroy manager object as the mainform is its owner
+  FSettings.OnChanged.RemoveAll(Self);
+  FreeAndNil(FSettings);
 end;
 {$ENDREGION}
 

@@ -98,7 +98,7 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
-        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.9.6.366;ProductName=LogViewer;ProductVersion=1.9.6;LegalCopyright=2013 - 2021 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.9.6.367;ProductName=LogViewer;ProductVersion=1.9.6;LegalCopyright=2013 - 2021 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
         <DCC_IntegerOverflowCheck>true</DCC_IntegerOverflowCheck>
         <DCC_RangeChecking>true</DCC_RangeChecking>
         <DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
@@ -109,7 +109,7 @@
         <DCC_RunTimeTypeInfo>true</DCC_RunTimeTypeInfo>
         <DCC_DebugInfoInTds>true</DCC_DebugInfoInTds>
         <AppDPIAwarenessMode>PerMonitor</AppDPIAwarenessMode>
-        <VerInfo_Build>366</VerInfo_Build>
+        <VerInfo_Build>367</VerInfo_Build>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
