@@ -311,10 +311,8 @@ begin
   FCommands       := TLogViewerCommands.Create(Self);
   FReceivers      := TCollections.CreateInterfaceList<IChannelReceiver>;
   FViewList       := TCollections.CreateInterfaceList<ILogViewer>;
-//  FEditorSettings := TEditorFactories.CreateSettings(Self, 'settings.xml');
-//  FEditorManager  := TEditorFactories.CreateManager(Self, FEditorSettings);
-  //FEditorSettings := TEditorFactories.CreateSettings(Application, 'settings.xml');
-  FEditorManager  := TEditorFactories.CreateManager(nil, nil);
+  FEditorSettings := TEditorFactories.CreateSettings(Self, 'settings.xml');
+  FEditorManager  := TEditorFactories.CreateManager(Self, FEditorSettings);
   InitializeEditorActions;
   BuildMessageTypesPopupMenu;
   BuildLogTreeViewerPopupMenu;
@@ -328,8 +326,6 @@ begin
 end;
 
 destructor TdmManager.Destroy;
-//var
-//  C : TComponent;
 begin
   Logger.Track(Self, 'Destroy');
   FActiveView     := nil;
@@ -343,23 +339,15 @@ begin
   FViewList       := nil;
   FReceivers      := nil;
   FSettings       := nil;
-//  C := FEditorManager.AsComponent;
   FEditorSettings := nil;
   FEditorManager  := nil;
 
-
-
   FreeAndNil(FEvents);   // needs to happen just before inherited call
   FreeAndNil(FCommands);
-
-  //Logger.SendComponent('Manager', Self);
-  //Logger.SendObject('Manager', Self);
-
   inherited Destroy; // results in exception when application is closed with
                      //   - one message viewer
                      //   - that has not been focused
-
-//FreeAndNil(C);
+  //TODO  => This issue is caused by the EditorManager instance
 end;
 {$ENDREGION}
 

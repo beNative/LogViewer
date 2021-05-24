@@ -5,7 +5,12 @@ object frmDashboard: TfrmDashboard
   ClientHeight = 616
   ClientWidth = 1046
   Color = clWhite
-  ParentFont = True
+  DoubleBuffered = True
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Segoe UI'
+  Font.Style = []
   OldCreateOrder = False
   ShowHint = True
   PixelsPerInch = 96
@@ -54,7 +59,6 @@ object frmDashboard: TfrmDashboard
         Height = 616
         ActivePageIndex = 2
         Align = alClient
-        ParentBackground = True
         TabHeight = 0
         TabOrder = 0
         object tsWinIpc: TKTabSheet
@@ -161,8 +165,6 @@ object frmDashboard: TfrmDashboard
         end
         object tsZeroMQ: TKTabSheet
           Caption = 'ZeroMQ'
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object pnlZmqEndpoints: TPanel
             Left = 0
             Top = 25
@@ -388,7 +390,7 @@ object frmDashboard: TfrmDashboard
     Left = 408
     Top = 8
     Bitmap = {
-      494C01010B000801400210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C01010B000801040010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000003000000001002000000000000030
       0000000000000000000000000000000000000000000000000000000000000000
       000000000000000000000001001B09532ED308512ED100000010000000000000

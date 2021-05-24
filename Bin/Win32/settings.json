@@ -2,10 +2,10 @@
 	"DebugMode": false,
 	"EmitLogMessages": true,
 	"FormSettings": {
-		"Left": -8,
-		"Top": -8,
-		"Width": 2576,
-		"Height": 1426,
+		"Left": -9,
+		"Top": -9,
+		"Width": 1938,
+		"Height": 1058,
 		"FormStyle": 0,
 		"WindowState": 2
 	},
@@ -14,7 +14,7 @@
 		"AutoFilterMessages": true,
 		"ColumnHeadersVisible": true,
 		"DynamicAutoSizeColumns": true,
-		"MessageDetailsVisible": false,
+		"MessageDetailsVisible": true,
 		"SmartTimeStamps": true,
 		"HorizontalPanelPositions": [
 			0.25678496868476,
@@ -22,7 +22,7 @@
 			1
 		],
 		"LeftVerticalPanelPositions": [
-			0.0978147762747138,
+			0.363896848137536,
 			1
 		]
 	},
@@ -30,11 +30,11 @@
 		"Enabled": false
 	},
 	"WinipcSettings": {
-		"Enabled": false,
+		"Enabled": true,
 		"PollingInterval": 100
 	},
 	"ZeroMQSettings": {
-		"Enabled": true,
+		"Enabled": false,
 		"PollingInterval": 100,
 		"PollingTimeout": 10,
 		"Endpoints": "default localhost=tcp://localhost:5555\r\nLogViewer=tcp://localhost:42134\r\nBaltaPC=tcp://SBVCTITPO47:5555\r\n"

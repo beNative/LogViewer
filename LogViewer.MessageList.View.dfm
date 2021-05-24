@@ -5,7 +5,11 @@ object frmMessageList: TfrmMessageList
   ClientWidth = 1261
   Color = clWhite
   DoubleBuffered = True
-  ParentFont = True
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Segoe UI'
+  Font.Style = []
   OldCreateOrder = False
   ShowHint = True
   OnClose = FormClose
@@ -110,7 +114,7 @@ object frmMessageList: TfrmMessageList
       Align = alClient
       BevelOuter = bvNone
       Constraints.MinWidth = 100
-      DoubleBuffered = False
+      DoubleBuffered = True
       ParentColor = True
       ParentDoubleBuffered = False
       TabOrder = 2
@@ -172,7 +176,6 @@ object frmMessageList: TfrmMessageList
         ActivePageIndex = 0
         Align = alClient
         HotTrack = False
-        ParentBackground = True
         TabHeight = 0
         TabOrder = 1
         TabPanelOptions.Colors.HotTop = clBtnHighlight
@@ -193,7 +196,6 @@ object frmMessageList: TfrmMessageList
             ActivePageIndex = 0
             Align = alClient
             HotTrack = False
-            ParentBackground = True
             TabOrder = 0
             TabPanelOptions.Colors.HotTop = clBtnHighlight
             TabPanelOptions.Colors.HotBottom = clBtnHighlight
@@ -205,15 +207,9 @@ object frmMessageList: TfrmMessageList
             TabPanelOptions.Options = []
             object tsValueList: TKTabSheet
               Caption = 'Value list'
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
             end
             object tsTextViewer: TKTabSheet
               Caption = 'Text viewer'
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
               object pnlTextViewer: TPanel
                 Left = 0
                 Top = 0
@@ -223,27 +219,20 @@ object frmMessageList: TfrmMessageList
                 BevelEdges = []
                 BevelOuter = bvNone
                 Color = clWhite
+                DoubleBuffered = True
+                ParentDoubleBuffered = False
                 TabOrder = 0
               end
             end
             object tsImageViewer: TKTabSheet
               Caption = 'Image viewer'
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
             end
             object tsDataSet: TKTabSheet
               Caption = 'Dataset viewer'
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
             end
             object tsRawData: TKTabSheet
               Caption = 'Raw data viewer'
               OnShow = tsRawDataShow
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
             end
           end
         end
@@ -387,7 +376,7 @@ object frmMessageList: TfrmMessageList
     Left = 55
     Top = 22
     Bitmap = {
-      494C0101180019004C0210001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010118001900040010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000007000000001002000000000000070
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

@@ -79,6 +79,11 @@ begin
   {$WARNINGS OFF}
   ReportMemoryLeaksOnShutdown := DebugHook > 0;
   {$WARNINGS ON}
+//  if CheckWin32Version(6) then // at least Vista
+//  begin
+//   Application.DefaultFont.Name := 'Segoe UI';
+//   Application.DefaultFont.Size := 9;
+//  end;
   Application.Initialize;
   Application.Title := 'Log viewer';
   Application.CreateForm(TfrmMain, frmMain);

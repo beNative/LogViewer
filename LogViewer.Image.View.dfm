@@ -4,7 +4,12 @@ object frmImageView: TfrmImageView
   ClientHeight = 909
   ClientWidth = 682
   Color = clWhite
-  ParentFont = True
+  DoubleBuffered = True
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Segoe UI'
+  Font.Style = []
   OldCreateOrder = False
   PixelsPerInch = 96
   TextHeight = 13
@@ -13,7 +18,7 @@ object frmImageView: TfrmImageView
     Top = 6
     Width = 73
     Height = 21
-    EditLabel.Width = 61
+    EditLabel.Width = 63
     EditLabel.Height = 13
     EditLabel.Caption = 'Pixel format:'
     LabelPosition = lpLeft
@@ -24,7 +29,7 @@ object frmImageView: TfrmImageView
     Top = 8
     Width = 73
     Height = 21
-    EditLabel.Width = 62
+    EditLabel.Width = 65
     EditLabel.Height = 13
     EditLabel.Caption = 'Handle type:'
     LabelPosition = lpLeft
@@ -35,7 +40,7 @@ object frmImageView: TfrmImageView
     Top = 6
     Width = 73
     Height = 21
-    EditLabel.Width = 35
+    EditLabel.Width = 38
     EditLabel.Height = 13
     EditLabel.Caption = 'Height:'
     LabelPosition = lpLeft
@@ -46,7 +51,7 @@ object frmImageView: TfrmImageView
     Top = 6
     Width = 73
     Height = 21
-    EditLabel.Width = 32
+    EditLabel.Width = 35
     EditLabel.Height = 13
     EditLabel.Caption = 'Width:'
     LabelPosition = lpLeft

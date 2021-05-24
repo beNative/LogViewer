@@ -4,10 +4,11 @@ object frmLogLevelSettings: TfrmLogLevelSettings
   ClientHeight = 411
   ClientWidth = 516
   Color = clBtnFace
+  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
-  Font.Name = 'Tahoma'
+  Font.Name = 'Segoe UI'
   Font.Style = []
   OldCreateOrder = False
   PixelsPerInch = 96
