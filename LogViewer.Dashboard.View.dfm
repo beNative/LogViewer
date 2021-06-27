@@ -165,6 +165,8 @@ object frmDashboard: TfrmDashboard
         end
         object tsZeroMQ: TKTabSheet
           Caption = 'ZeroMQ'
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object pnlZmqEndpoints: TPanel
             Left = 0
             Top = 25

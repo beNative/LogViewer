@@ -245,6 +245,8 @@ implementation
 {$R *.dfm}
 
 uses
+  VirtualTrees.Types, VirtualTrees.Header,
+
   Spring,
 
   DDuce.Utils, DDuce.Utils.Winapi, DDuce.Logger,

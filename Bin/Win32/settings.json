@@ -2,10 +2,10 @@
 	"DebugMode": false,
 	"EmitLogMessages": true,
 	"FormSettings": {
-		"Left": 1912,
-		"Top": -851,
+		"Left": -8,
+		"Top": -8,
 		"Width": 2576,
-		"Height": 1426,
+		"Height": 1424,
 		"FormStyle": 0,
 		"WindowState": 2
 	},

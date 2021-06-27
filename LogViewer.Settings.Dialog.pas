@@ -140,6 +140,8 @@ implementation
 {$R *.dfm}
 
 uses
+  VirtualTrees.Types, VirtualTrees.Header,
+
   DDuce.Utils, DDuce.Factories.VirtualTrees,
 
   LogViewer.Resources;

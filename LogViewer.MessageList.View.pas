@@ -372,6 +372,8 @@ uses
   System.StrUtils, System.UITypes, System.DateUtils, System.Math,
   Vcl.GraphUtil,
 
+  VirtualTrees.Types, VirtualTrees.Header,
+
   Spring.Helpers,
 
   DDuce.Factories.VirtualTrees, DDuce.Editor.Factories, DDuce.Utils,
