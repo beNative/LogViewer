@@ -255,7 +255,8 @@ uses
 
   LogViewer.Factories, LogViewer.Resources,
   LogViewer.Subscribers.ZeroMQ, LogViewer.Subscribers.FileSystem,
-  LogViewer.Receivers.Base;
+  LogViewer.Receivers.Base,
+  DateUtils;
 
 {$REGION 'construction and destruction'}
 constructor TfrmDashboard.Create(AOwner: TComponent;
@@ -590,6 +591,16 @@ procedure TfrmDashboard.FTreeViewGetText(Sender: TBaseVirtualTree;
 var
   DN          : TDashboardNode;
   LSubscriber : ISubscriber;
+
+  function DateTimeToText(ADateTime: TDateTime): string;
+  begin
+    if Double(ADateTime).SpecialType = fsZero then
+      Result := ''
+    else
+      Result := DateTimeToStr(ADateTime);
+  end;
+
+
 begin
   CellText := '';
   if not Assigned(Node) then
@@ -621,9 +632,9 @@ begin
         else if Column = COLUMN_BYTES_RECEIVED then
           CellText :=  FormatBytes(LSubscriber.BytesReceived)
         else if Column = COLUMN_TIMESTAMP_FIRST then
-          CellText := DateTimeToStr(LSubscriber.TimeStampFirst)
+          CellText := DateTimeToText(LSubscriber.TimeStampFirst)
         else if Column = COLUMN_TIMESTAMP_LAST then
-          CellText := DateTimeToStr(LSubscriber.TimeStampLast);
+          CellText := DateTimeToText(LSubscriber.TimeStampLast);
       end
     end;
   end;

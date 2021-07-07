@@ -62,6 +62,7 @@ type
     property PollingInterval: Integer // in ms
       read GetPollingInterval write SetPollingInterval
       default DEFAULT_POLLING_INTERVAL;
+
   end;
 
 implementation

@@ -81,6 +81,7 @@ type
 
     property Settings: TWinipcSettings
       read GetSettings;
+
   end;
 
 implementation

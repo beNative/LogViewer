@@ -207,9 +207,6 @@ object frmMessageList: TfrmMessageList
             TabPanelOptions.Options = []
             object tsValueList: TKTabSheet
               Caption = 'Value list'
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
             end
             object tsTextViewer: TKTabSheet
               Caption = 'Text viewer'

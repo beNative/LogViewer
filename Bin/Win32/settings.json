@@ -2,12 +2,12 @@
 	"DebugMode": false,
 	"EmitLogMessages": true,
 	"FormSettings": {
-		"Left": -8,
-		"Top": -8,
-		"Width": 2576,
-		"Height": 1424,
+		"Left": 1240,
+		"Top": 157,
+		"Width": 1221,
+		"Height": 657,
 		"FormStyle": 0,
-		"WindowState": 2
+		"WindowState": 0
 	},
 	"MessageListSettings": {
 		"AutoScrollMessages": true,
@@ -18,11 +18,11 @@
 		"SmartTimeStamps": true,
 		"HorizontalPanelPositions": [
 			0.25678496868476,
-			0.684511063526053,
+			0.649908031882281,
 			1
 		],
 		"LeftVerticalPanelPositions": [
-			0.363896848137536,
+			0.270877944325482,
 			1
 		]
 	},
@@ -30,11 +30,11 @@
 		"Enabled": false
 	},
 	"WinipcSettings": {
-		"Enabled": false,
+		"Enabled": true,
 		"PollingInterval": 100
 	},
 	"ZeroMQSettings": {
-		"Enabled": true,
+		"Enabled": false,
 		"PollingInterval": 100,
 		"PollingTimeout": 10,
 		"Endpoints": "default localhost=tcp://localhost:5555\r\nLogViewer=tcp://localhost:42134\r\nBaltaPC=tcp://SBVCTITPO47:5555\r\n"
@@ -188,7 +188,7 @@
 	"WatchSettings": {
 		"ColumnHeadersVisible": false,
 		"OnlyTrackChanges": true,
-		"WatchHistoryVisible": false,
+		"WatchHistoryVisible": true,
 		"SyncWithSelection": false
 	},
 	"CallStackSettings": {

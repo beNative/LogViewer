@@ -261,6 +261,7 @@ begin
     Inc(FMessageCount);
     Inc(FBytesReceived, AStream.Size);
     FOnReceiveMessage.Invoke(Self, AStream);
+    DoChange;
   end;
 end;
 {$ENDREGION}

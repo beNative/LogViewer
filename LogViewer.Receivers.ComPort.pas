@@ -67,6 +67,7 @@ type
       AThreadId         : UInt32;
       const ASourceName : string
     ): ISubscriber;
+
   end;
 
 implementation

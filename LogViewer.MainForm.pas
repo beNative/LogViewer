@@ -171,8 +171,6 @@ uses
 { Extracts the ZMQ library form resources if it does not exist. }
 
 procedure EnsureZMQLibExists;
-const
-  LIBZMQ = 'libzmq';
 var
   LResStream  : TResourceStream;
   LFileStream : TFileStream;

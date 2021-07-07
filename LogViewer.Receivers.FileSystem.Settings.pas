@@ -55,6 +55,7 @@ type
 
     property PathNames: TStrings
       read GetPathNames;
+
   end;
 
 implementation
