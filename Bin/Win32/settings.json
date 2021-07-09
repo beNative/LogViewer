@@ -2,10 +2,10 @@
 	"DebugMode": false,
 	"EmitLogMessages": false,
 	"FormSettings": {
-		"Left": 2552,
+		"Left": -8,
 		"Top": -8,
 		"Width": 2576,
-		"Height": 1426,
+		"Height": 1424,
 		"FormStyle": 0,
 		"WindowState": 2
 	},
@@ -34,7 +34,7 @@
 		"PollingInterval": 100
 	},
 	"ZeroMQSettings": {
-		"Enabled": false,
+		"Enabled": true,
 		"PollingInterval": 100,
 		"PollingTimeout": 10,
 		"Endpoints": "default localhost=tcp://localhost:5555\r\nLogViewer=tcp://localhost:42134\r\nBaltaPC=tcp://SBVCTITPO47:5555\r\nBaltaPC_1=tcp://SBVCTITPOA8:5555\r\n"
