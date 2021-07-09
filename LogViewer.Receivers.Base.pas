@@ -78,8 +78,8 @@ type
       read GetProcesses;
 
     constructor Create(
-      AManager    : ILogViewerManager;
-      const AName : string
+      const AManager : ILogViewerManager;
+      const AName    : string
     ); reintroduce; virtual;
     procedure AfterConstruction; override;
     destructor Destroy; override;
@@ -133,7 +133,7 @@ end;
 {$ENDREGION}
 
 {$REGION 'construction and destruction'}
-constructor TChannelReceiver.Create(AManager: ILogViewerManager;
+constructor TChannelReceiver.Create(const AManager: ILogViewerManager;
   const AName: string);
 begin
   Guard.CheckNotNull(AManager, 'AManager');

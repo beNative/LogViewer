@@ -21,16 +21,17 @@ interface
 uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
 
-  LogViewer.Receivers.Winipc.Settings, Vcl.ExtCtrls;
+  LogViewer.Receivers.Winipc.Settings;
 
 type
   TfrmWinipcSettings = class(TForm)
-    lblWindowHandleName : TLabel;
-    edtWindowHandleName : TEdit;
-    edtPollingInterval: TLabeledEdit;
-    lblPollingIntervalMs: TLabel;
+    lblWindowHandleName  : TLabel;
+    edtWindowHandleName  : TEdit;
+    edtPollingInterval   : TLabeledEdit;
+    lblPollingIntervalMs : TLabel;
+
     procedure edtPollingIntervalChange(Sender: TObject);
 
   private
@@ -45,6 +46,7 @@ type
       ASettings : TWinipcSettings
     ); reintroduce;
     destructor Destroy; override;
+
   end;
 
 implementation

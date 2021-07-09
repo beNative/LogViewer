@@ -114,10 +114,11 @@ implementation
 uses
   System.StrUtils,
 
+  VirtualTrees.Types, VirtualTrees.Header,
+
   Spring,
 
   DDuce.Factories.VirtualTrees,
-
   DDuce.Logger,
 
   LogViewer.Resources;

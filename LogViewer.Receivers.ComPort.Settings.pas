@@ -86,6 +86,7 @@ type
 
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
+
   end;
 
 implementation

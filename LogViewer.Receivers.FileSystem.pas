@@ -50,6 +50,7 @@ type
 
     property Settings: TFileSystemSettings
       read GetSettings;
+
   end;
 
 implementation

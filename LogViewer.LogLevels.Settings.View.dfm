@@ -15,22 +15,22 @@ object frmLogLevelSettings: TfrmLogLevelSettings
   object splVertical: TSplitter
     Left = 281
     Top = 0
-    Width = 2
+    Width = 4
     Height = 411
     Color = clScrollBar
     ParentColor = False
     ResizeStyle = rsLine
-    ExplicitLeft = 145
-    ExplicitHeight = 339
   end
   object pnlRight: TPanel
-    Left = 283
+    Left = 285
     Top = 0
-    Width = 233
+    Width = 231
     Height = 411
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitLeft = 283
+    ExplicitWidth = 233
   end
   object pnlLeft: TPanel
     Left = 0

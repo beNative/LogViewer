@@ -154,6 +154,8 @@ implementation
 uses
   System.UITypes,
 
+  VirtualTrees.Types, VirtualTrees.Header,
+
   DSharp.Windows.ControlTemplates,
 
   DDuce.Factories.TreeViewPresenter, DDuce.Factories.VirtualTrees,

@@ -150,6 +150,8 @@ resourcestring
   SSubscriberSource = '<x=4>Source:</x> <b>%s</b> (%d)';
 
 const
+  LIBZMQ = 'libzmq';
+
   // message viewer
   COLUMN_LEVEL     = 0;
   COLUMN_MAIN      = 1; // make variable

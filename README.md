@@ -100,7 +100,7 @@ The Object Pascal (Delphi) sources depend on the following open source libraries
   * [DDuce](http://github.com/beNative/dduce)
   * [ZeroMQ](http://github.com/beNative/Delphi-ZeroMQ)
   * [zcontrols](http://github.com/beNative/zcontrols)
-  * [TBCEditor](http://github.com/beNative/TBCEditor)
+  * [TTextEditor](https://github.com/TextEditorPro/TTextEditor)  
   * [TChromeTabs](http://github.com/norgepaul/TChromeTabs)
   * [Ararat Synapse](http://github.com/beNative/synapse)
   * [OMultiPanel](http://github.com/beNative/omultipanel)
