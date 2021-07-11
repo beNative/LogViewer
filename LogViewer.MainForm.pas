@@ -39,23 +39,23 @@ uses
 type
   TfrmMain = class(TForm)
     {$REGION 'designer controls'}
-    aclMain            : TActionList;
-    actCenterToScreen  : TAction;
-    actShowVersion     : TAction;
-    ctMain             : TChromeTabs;
-    imlMain            : TImageList;
-    pbrCPU             : TKPercentProgressBar;
-    pnlDelta           : TPanel;
-    pnlMainClient      : TPanel;
-    pnlMemory          : TPanel;
-    pnlMessageCount    : TPanel;
-    pnlSourceName      : TPanel;
-    pnlStatusBar       : TPanel;
-    pnlTop             : TPanel;
-    shpLine            : TShape;
-    tmrPoll            : TTimer;
-    tskbrMain          : TTaskbar;
-    imlTabStates       : TImageList;
+    aclMain           : TActionList;
+    actCenterToScreen : TAction;
+    actShowVersion    : TAction;
+    ctMain            : TChromeTabs;
+    imlMain           : TImageList;
+    pbrCPU            : TKPercentProgressBar;
+    pnlDelta          : TPanel;
+    pnlMainClient     : TPanel;
+    pnlMemory         : TPanel;
+    pnlMessageCount   : TPanel;
+    pnlSourceName     : TPanel;
+    pnlStatusBar      : TPanel;
+    pnlTop            : TPanel;
+    shpLine           : TShape;
+    tmrPoll           : TTimer;
+    tskbrMain         : TTaskbar;
+    imlTabStates      : TImageList;
     {$ENDREGION}
 
     {$REGION 'action handlers'}

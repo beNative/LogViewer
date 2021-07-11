@@ -1,4 +1,4 @@
-object frmZeroMQSettings: TfrmZeroMQSettings
+object frmZmqSettings: TfrmZmqSettings
   Left = 0
   Top = 0
   ClientHeight = 202

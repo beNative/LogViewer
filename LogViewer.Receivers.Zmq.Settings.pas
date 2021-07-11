@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.Receivers.ZeroMQ.Settings;
+unit LogViewer.Receivers.Zmq.Settings;
 
 { Persistable settings for ZeroMQ receiver. }
 
@@ -28,7 +28,7 @@ uses
   DDuce.Logger.Interfaces;
 
 type
-  TZeroMQSettings = class(TPersistent)
+  TZmqSettings = class(TPersistent)
   const
     DEFAULT_POLLING_INTERVAL = 100;
     DEFAULT_POLLING_TIMEOUT  = 10;
@@ -94,7 +94,7 @@ type
 implementation
 
 {$REGION 'construction and destruction'}
-procedure TZeroMQSettings.AfterConstruction;
+procedure TZmqSettings.AfterConstruction;
 begin
   inherited AfterConstruction;
   FEndpoints        := TStringList.Create;
@@ -104,7 +104,7 @@ begin
   FLogMessageLevels := AllLevels;
 end;
 
-destructor TZeroMQSettings.Destroy;
+destructor TZmqSettings.Destroy;
 begin
   FEndpoints.Free;
   inherited Destroy;
@@ -112,22 +112,22 @@ end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
-function TZeroMQSettings.GetOnChanged: IEvent<TNotifyEvent>;
+function TZmqSettings.GetOnChanged: IEvent<TNotifyEvent>;
 begin
   Result := FOnChanged;
 end;
 
-function TZeroMQSettings.GetEndpoints: TStrings;
+function TZmqSettings.GetEndpoints: TStrings;
 begin
   Result := FEndpoints;
 end;
 
-function TZeroMQSettings.GetLogMessageLevels: TLogMessageLevels;
+function TZmqSettings.GetLogMessageLevels: TLogMessageLevels;
 begin
   Result := FLogMessageLevels;
 end;
 
-procedure TZeroMQSettings.SetLogMessageLevels(const Value: TLogMessageLevels);
+procedure TZmqSettings.SetLogMessageLevels(const Value: TLogMessageLevels);
 begin
   if Value <> LogMessageLevels then
   begin
@@ -136,12 +136,12 @@ begin
   end;
 end;
 
-function TZeroMQSettings.GetLogMessageTypes: TLogMessageTypes;
+function TZmqSettings.GetLogMessageTypes: TLogMessageTypes;
 begin
   Result := FLogMessageTypes;
 end;
 
-procedure TZeroMQSettings.SetLogMessageTypes(const Value: TLogMessageTypes);
+procedure TZmqSettings.SetLogMessageTypes(const Value: TLogMessageTypes);
 begin
   if Value <> LogMessageTypes then
   begin
@@ -150,12 +150,12 @@ begin
   end;
 end;
 
-function TZeroMQSettings.GetPollingInterval: Integer;
+function TZmqSettings.GetPollingInterval: Integer;
 begin
   Result := FPollingInterval;
 end;
 
-procedure TZeroMQSettings.SetPollingInterval(const Value: Integer);
+procedure TZmqSettings.SetPollingInterval(const Value: Integer);
 begin
   if Value <> PollingInterval then
   begin
@@ -164,12 +164,12 @@ begin
   end;
 end;
 
-function TZeroMQSettings.GetPollingTimeout: Integer;
+function TZmqSettings.GetPollingTimeout: Integer;
 begin
   Result := FPollingTimeout;
 end;
 
-procedure TZeroMQSettings.SetPollingTimeout(const Value: Integer);
+procedure TZmqSettings.SetPollingTimeout(const Value: Integer);
 begin
   if Value <> PollingTimeout then
   begin
@@ -178,12 +178,12 @@ begin
   end;
 end;
 
-function TZeroMQSettings.GetEnabled: Boolean;
+function TZmqSettings.GetEnabled: Boolean;
 begin
   Result := FEnabled;
 end;
 
-procedure TZeroMQSettings.SetEnabled(const Value: Boolean);
+procedure TZmqSettings.SetEnabled(const Value: Boolean);
 begin
   if Value <> Enabled then
   begin
@@ -194,20 +194,20 @@ end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
-procedure TZeroMQSettings.Changed;
+procedure TZmqSettings.Changed;
 begin
   FOnChanged.Invoke(Self);
 end;
 {$ENDREGION}
 
 {$REGION 'public methods'}
-procedure TZeroMQSettings.Assign(Source: TPersistent);
+procedure TZmqSettings.Assign(Source: TPersistent);
 var
-  LSettings: TZeroMQSettings;
+  LSettings: TZmqSettings;
 begin
-  if Source is TZeroMQSettings then
+  if Source is TZmqSettings then
   begin
-    LSettings        := TZeroMQSettings(Source);
+    LSettings        := TZmqSettings(Source);
     Enabled          := LSettings.Enabled;
     PollingInterval  := LSettings.PollingInterval;
     PollingTimeout   := LSettings.PollingTimeout;

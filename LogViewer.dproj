@@ -7,7 +7,7 @@
         <TargetedPlatforms>1</TargetedPlatforms>
         <AppType>Application</AppType>
         <FrameworkType>VCL</FrameworkType>
-        <ProjectVersion>18.8</ProjectVersion>
+        <ProjectVersion>19.2</ProjectVersion>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
@@ -180,10 +180,10 @@
         <DCCReference Include="LogViewer.Receivers.Winods.Settings.View.pas">
             <Form>frmWinodsSettings</Form>
         </DCCReference>
-        <DCCReference Include="LogViewer.Receivers.ZeroMQ.pas"/>
-        <DCCReference Include="LogViewer.Receivers.ZeroMQ.Settings.pas"/>
-        <DCCReference Include="LogViewer.Receivers.ZeroMQ.Settings.View.pas">
-            <Form>frmZeroMQSettings</Form>
+        <DCCReference Include="LogViewer.Receivers.Zmq.pas"/>
+        <DCCReference Include="LogViewer.Receivers.Zmq.Settings.pas"/>
+        <DCCReference Include="LogViewer.Receivers.Zmq.Settings.View.pas">
+            <Form>frmZmqSettings</Form>
         </DCCReference>
         <DCCReference Include="LogViewer.Resources.pas"/>
         <DCCReference Include="LogViewer.Settings.Dialog.Data.pas"/>
@@ -196,7 +196,7 @@
         <DCCReference Include="LogViewer.Subscribers.FileSystem.pas"/>
         <DCCReference Include="LogViewer.Subscribers.Winipc.pas"/>
         <DCCReference Include="LogViewer.Subscribers.Winods.pas"/>
-        <DCCReference Include="LogViewer.Subscribers.ZeroMQ.pas"/>
+        <DCCReference Include="LogViewer.Subscribers.Zmq.pas"/>
         <DCCReference Include="LogViewer.ValueList.View.pas">
             <Form>frmValueListView</Form>
         </DCCReference>

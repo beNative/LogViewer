@@ -37,7 +37,7 @@ uses
   LogViewer.Receivers.ComPort.Settings.View,
   LogViewer.Receivers.Winods.Settings.View,
   LogViewer.Receivers.Winipc.Settings.View, LogViewer.Watches.Settings.View,
-  LogViewer.CallStack.Settings.View, LogViewer.Receivers.ZeroMQ.Settings.View,
+  LogViewer.CallStack.Settings.View, LogViewer.Receivers.Zmq.Settings.View,
   LogViewer.DisplayValues.Settings.View, LogViewer.LogLevels.Settings.View;
 
 type
@@ -91,9 +91,9 @@ type
     FComportSettingsForm       : TfrmComPortSettings;
     FWatchSettingsForm         : TfrmWatchSettings;
     FCallStackSettingsForm     : TfrmCallStackSettings;
-    FWinIPCSettingsForm        : TfrmWinIPCSettings;
-    FWinODSSettingsForm        : TfrmWinODSSettings;
-    FZeroMQSettingsForm        : TfrmZeroMQSettings;
+    FWinIPCSettingsForm        : TfrmWinipcSettings;
+    FWinODSSettingsForm        : TfrmWinodsSettings;
+    FZmqSettingsForm           : TfrmZmqSettings;
     FDisplayValuesSettingsForm : TfrmDisplayValuesSettings;
     FViewSettingsForm          : TfrmViewSettings;
     FLogLevelSettingsForm      : TfrmLogLevelSettings;
@@ -295,16 +295,16 @@ begin
   AssignFormParent(FCallStackSettingsForm, tsCallStack);
 
   FWinIPCSettingsForm :=
-    TfrmWinIPCSettings.Create(Self, FSettings.WinipcSettings);
+    TfrmWinipcSettings.Create(Self, FSettings.WinipcSettings);
   AssignFormParent(FWinIPCSettingsForm, tsWinIPC);
 
   FWinODSSettingsForm :=
-    TfrmWinODSSettings.Create(Self, FSettings.WinodsSettings);
+    TfrmWinodsSettings.Create(Self, FSettings.WinodsSettings);
   AssignFormParent(FWinODSSettingsForm, tsWinODS);
 
-  FZeroMQSettingsForm :=
-    TfrmZeroMQSettings.Create(Self, FSettings.ZeroMQSettings);
-  AssignFormParent(FZeroMQSettingsForm, tsZeroMQ);
+  FZmqSettingsForm :=
+    TfrmZmqSettings.Create(Self, FSettings.ZmqSettings);
+  AssignFormParent(FZmqSettingsForm, tsZeroMQ);
 
   FDisplayValuesSettingsForm :=
     TfrmDisplayValuesSettings.Create(Self, FSettings.DisplayValuesSettings);

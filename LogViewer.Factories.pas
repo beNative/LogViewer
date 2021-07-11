@@ -122,7 +122,7 @@ uses
 
   LogViewer.Resources, LogViewer.Factories.Toolbars,
   LogViewer.Receivers.Winipc, LogViewer.Receivers.Winods,
-  LogViewer.Receivers.ZeroMQ, LogViewer.Receivers.ComPort,
+  LogViewer.Receivers.Zmq, LogViewer.Receivers.ComPort,
   LogViewer.Receivers.FileSystem;
 
 {$REGION 'private class methods'}
@@ -210,19 +210,19 @@ end;
 class function TLogViewerFactories.CreateWinIpcReceiver(
   AManager: ILogViewerManager): IChannelReceiver;
 begin
-  Result := TWinIpcChannelReceiver.Create(AManager, RECEIVERNAME_WINIPC);
+  Result := TWinipcChannelReceiver.Create(AManager, RECEIVERNAME_WINIPC);
 end;
 
 class function TLogViewerFactories.CreateWinOdsReceiver(
   AManager: ILogViewerManager): IChannelReceiver;
 begin
-  Result := TWinOdsChannelReceiver.Create(AManager, RECEIVERNAME_WINODS);
+  Result := TWinodsChannelReceiver.Create(AManager, RECEIVERNAME_WINODS);
 end;
 
 class function TLogViewerFactories.CreateZeroMQReceiver(
   AManager: ILogViewerManager; AZMQ: IZeroMQ): IChannelReceiver;
 begin
-  Result := TZeroMQChannelReceiver.Create(AManager, AZMQ, RECEIVERNAME_ZEROMQ);
+  Result := TZmqChannelReceiver.Create(AManager, AZMQ, RECEIVERNAME_ZEROMQ);
 end;
 
 class function TLogViewerFactories.CreateComPortReceiver(

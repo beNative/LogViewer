@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.Receivers.ZeroMQ;
+unit LogViewer.Receivers.Zmq;
 
 { ZeroMQ channel receiver. }
 
@@ -29,7 +29,7 @@ uses
   ZeroMQ,
 
   LogViewer.Interfaces,  LogViewer.Receivers.Base,
-  LogViewer.Receivers.ZeroMQ.Settings;
+  LogViewer.Receivers.Zmq.Settings;
 
 {$REGION 'documentation'}
 { Receives logmessages from one or more ZMQ publisher through a subscriber
@@ -55,13 +55,13 @@ uses
 {$ENDREGION}
 
 type
-  TZeroMQChannelReceiver = class(TChannelReceiver, IChannelReceiver, IZmq)
+  TZmqChannelReceiver = class(TChannelReceiver, IChannelReceiver, IZmq)
   private
     FZmq : IZeroMQ;
 
   protected
     {$REGION 'property access methods'}
-    function GetSettings: TZeroMQSettings;
+    function GetSettings: TZmqSettings;
     procedure SetEnabled(const Value: Boolean); override;
     {$ENDREGION}
 
@@ -77,7 +77,7 @@ type
     ); reintroduce;
     destructor Destroy; override;
 
-    property Settings: TZeroMQSettings
+    property Settings: TZmqSettings
       read GetSettings;
   end;
 
@@ -88,7 +88,7 @@ uses
   Vcl.Forms;
 
 {$REGION 'construction and destruction'}
-procedure TZeroMQChannelReceiver.AfterConstruction;
+procedure TZmqChannelReceiver.AfterConstruction;
 begin
   inherited AfterConstruction;
   PollTimer.OnTimer  := PollTimerTimer;
@@ -96,14 +96,14 @@ begin
   Settings.OnChanged.Add(SettingsChanged);
 end;
 
-constructor TZeroMQChannelReceiver.Create(AManager: ILogViewerManager; AZmq:
+constructor TZmqChannelReceiver.Create(AManager: ILogViewerManager; AZmq:
   IZeroMQ; const AName: string);
 begin
   inherited Create(AManager, AName);
   FZmq := AZmq;
 end;
 
-destructor TZeroMQChannelReceiver.Destroy;
+destructor TZmqChannelReceiver.Destroy;
 begin
   PollTimer.Enabled := False;
   Settings.OnChanged.RemoveAll(Self);
@@ -113,20 +113,20 @@ end;
 {$ENDREGION}
 
 {$REGION 'property access methods'}
-procedure TZeroMQChannelReceiver.SetEnabled(const Value: Boolean);
+procedure TZmqChannelReceiver.SetEnabled(const Value: Boolean);
 begin
   inherited SetEnabled(Value);
   PollTimer.Enabled := Value;
 end;
 
-function TZeroMQChannelReceiver.GetSettings: TZeroMQSettings;
+function TZmqChannelReceiver.GetSettings: TZmqSettings;
 begin
-  Result := Manager.Settings.ZeroMQSettings;
+  Result := Manager.Settings.ZmqSettings;
 end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
-procedure TZeroMQChannelReceiver.SettingsChanged(Sender: TObject);
+procedure TZmqChannelReceiver.SettingsChanged(Sender: TObject);
 var
   LSubscriber : ISubscriber;
 begin

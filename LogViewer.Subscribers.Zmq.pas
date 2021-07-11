@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.Subscribers.ZeroMQ;
+unit LogViewer.Subscribers.Zmq;
 
 interface
 

@@ -14,7 +14,7 @@
   limitations under the License.
 }
 
-unit LogViewer.Receivers.ZeroMQ.Settings.View;
+unit LogViewer.Receivers.Zmq.Settings.View;
 
 interface
 
@@ -23,10 +23,10 @@ uses
   System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
 
-  LogViewer.Receivers.ZeroMQ.Settings;
+  LogViewer.Receivers.Zmq.Settings;
 
 type
-  TfrmZeroMQSettings = class(TForm)
+  TfrmZmqSettings = class(TForm)
     edtPollingTimeout    : TLabeledEdit;
     edtPollingInterval   : TLabeledEdit;
     lblPollingTimeoutMs  : TLabel;
@@ -36,12 +36,12 @@ type
     procedure edtPollingIntervalChange(Sender: TObject);
 
   private
-    FSettings : TZeroMQSettings;
+    FSettings : TZmqSettings;
 
   public
     constructor Create(
       AOwner    : TComponent;
-      ASettings : TZeroMQSettings
+      ASettings : TZmqSettings
     ); reintroduce; virtual;
   end;
 
@@ -53,8 +53,8 @@ uses
   Spring;
 
 {$REGION 'construction and destruction'}
-constructor TfrmZeroMQSettings.Create(AOwner: TComponent;
-  ASettings: TZeroMQSettings);
+constructor TfrmZmqSettings.Create(AOwner: TComponent;
+  ASettings: TZmqSettings);
 begin
   inherited Create(AOwner);
   Guard.CheckNotNull(ASettings, 'ASettings');
@@ -65,12 +65,12 @@ end;
 {$ENDREGION}
 
 {$REGION 'event handlers'}
-procedure TfrmZeroMQSettings.edtPollingIntervalChange(Sender: TObject);
+procedure TfrmZmqSettings.edtPollingIntervalChange(Sender: TObject);
 begin
   FSettings.PollingInterval := StrToIntDef(edtPollingInterval.Text, 100);
 end;
 
-procedure TfrmZeroMQSettings.edtPollingTimeoutChange(Sender: TObject);
+procedure TfrmZmqSettings.edtPollingTimeoutChange(Sender: TObject);
 begin
   FSettings.PollingTimeout := StrToIntDef(edtPollingTimeout.Text, 10);
 end;

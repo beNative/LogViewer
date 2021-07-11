@@ -245,6 +245,8 @@ implementation
 {$R *.dfm}
 
 uses
+  System.DateUtils,
+
   VirtualTrees.Types, VirtualTrees.Header,
 
   Spring,
@@ -254,9 +256,8 @@ uses
   DDuce.ObjectInspector.zObjectInspector,
 
   LogViewer.Factories, LogViewer.Resources,
-  LogViewer.Subscribers.ZeroMQ, LogViewer.Subscribers.FileSystem,
-  LogViewer.Receivers.Base,
-  DateUtils;
+  LogViewer.Subscribers.Zmq, LogViewer.Subscribers.FileSystem,
+  LogViewer.Receivers.Base;
 
 {$REGION 'construction and destruction'}
 constructor TfrmDashboard.Create(AOwner: TComponent;
@@ -447,7 +448,7 @@ begin
       end
       else if Supports(DN.Data.Receiver, IZmq) then
       begin
-        FManager.Settings.ZeroMQSettings.Enabled := B;
+        FManager.Settings.ZmqSettings.Enabled := B;
       end
       else if Supports(DN.Data.Receiver, IWinods) then
       begin
@@ -925,7 +926,7 @@ begin
   FZeroMQReceiver.OnChange.UseFreeNotification := True;
   FZeroMQReceiver.OnChange.Add(FReceiverChange);
   FZeroMQReceiver.SubscriberList.OnKeyChanged.Add(FZeroMQReceiverSubscriberListChanged);
-  FZeroMQReceiver.Enabled := FManager.Settings.ZeroMQSettings.Enabled;
+  FZeroMQReceiver.Enabled := FManager.Settings.ZmqSettings.Enabled;
   FZeroMQNode := AddNode(nil, FZeroMQReceiver, nil);
   FZeroMQNode.CheckType := ctCheckBox;
   if FZeroMQReceiver.Enabled then
@@ -979,7 +980,7 @@ begin
 //  );
 //  AssignFormParent(FComPortSettingsForm, tsCOMPort);
   pgcMain.ActivePage := tsWinIPC;
-  FZmqEndpoints.Data.FromStrings(FManager.Settings.ZeroMQSettings.Endpoints);
+  FZmqEndpoints.Data.FromStrings(FManager.Settings.ZmqSettings.Endpoints);
   FFSLocations.Data.FromStrings(FManager.Settings.FileSystemSettings.PathNames);
 end;
 
@@ -1096,7 +1097,7 @@ begin
   Logger.Track(Self, 'SaveSettings');
   LStrings := TStringList.Create;
   FZmqEndpoints.Data.ToStrings(LStrings);
-  FManager.Settings.ZeroMQSettings.Endpoints.Assign(LStrings.Value);
+  FManager.Settings.ZmqSettings.Endpoints.Assign(LStrings.Value);
   FFSLocations.Data.ToStrings(LStrings);
   FManager.Settings.FileSystemSettings.PathNames.Assign(LStrings.Value);
 end;
