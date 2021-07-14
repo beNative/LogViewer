@@ -220,8 +220,7 @@ begin
   begin
     // setup logchannel for using a log LogViewer instance to debug itself.
     Logger.Channels.Add(
-//      TZeroMQChannel.Create(Format('tcp://*:%d', [LOGVIEWER_ZMQ_PORT]))
-      TZmqChannel.Create(Format('tcp://*:%d', [5555]))
+      TZmqChannel.Create(Format('tcp://*:%d', [LOGVIEWER_ZMQ_PORT]))
     );
   end;
   Logger.Clear;
@@ -515,7 +514,8 @@ end;
 
 procedure TfrmMain.OptimizeStatusBarPanelWidths;
 begin
-  //OptimizeWidth(pnlSourceName);
+//  OptimizeWidth(pnlSourceName);
+//  OptimizeWidth(pnlMessageCount);
 end;
 
 procedure TfrmMain.OptimizeWidth(APanel: TPanel);
@@ -538,18 +538,18 @@ end;
 procedure TfrmMain.UpdateStatusBar;
 var
   N : Integer;
-//S : string;
+  S : string;
 begin
   if Assigned(ctMain.ActiveTab) and Assigned(Manager)
     and Assigned(Manager.ActiveView)
     and Assigned(Manager.ActiveView.Subscriber)
     and (ctMain.ActiveTab <> FDashboardTab) then
   begin
-//    S := Format(SSubscriberSource, [
-//      Manager.ActiveView.Subscriber.SourceName,
-//      Manager.ActiveView.Subscriber.SourceId
-//    ]);
-//    DrawPanelText(pnlSourceName, S);
+    S := Format(SSubscriberSource, [
+      Manager.ActiveView.Subscriber.SourceName,
+      Manager.ActiveView.Subscriber.SourceId
+    ]);
+    DrawPanelText(pnlSourceName, S);
     N := Manager.ActiveView.MilliSecondsBetweenSelection;
     if N <> -1 then
     begin
@@ -561,16 +561,16 @@ begin
       pnlDelta.Caption := '';
       pnlDelta.Color := clBtnFace;
     end;
-//    S := Format(SReceivedCount, [Manager.ActiveView.Subscriber.MessageCount]);
-//    DrawPanelText(pnlMessageCount, S);
+    S := Format(SReceivedCount, [Manager.ActiveView.Subscriber.MessageCount]);
+    DrawPanelText(pnlMessageCount, S);
   end
   else
   begin
     pnlSourceName.Caption   := '';
     pnlMessageCount.Caption := '';
     pnlDelta.Caption        := '';
-    OptimizeStatusBarPanelWidths;
   end;
+  OptimizeStatusBarPanelWidths;
 end;
 
 procedure TfrmMain.UpdateTabStates;
