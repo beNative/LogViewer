@@ -111,8 +111,8 @@ type
       Column : TColumnIndex
     );
     procedure FConfigTreeFreeNode(
-      Sender: TBaseVirtualTree;
-      Node: PVirtualNode
+      Sender : TBaseVirtualTree;
+      Node   : PVirtualNode
     );
 
   protected

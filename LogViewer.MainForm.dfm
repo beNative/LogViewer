@@ -486,8 +486,6 @@ object frmMain: TfrmMain
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 2
-    ExplicitLeft = -1
-    ExplicitTop = -6
   end
   object aclMain: TActionList
     Images = imlMain

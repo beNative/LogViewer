@@ -21,7 +21,7 @@ unit LogViewer.Receivers.Winipc;
 interface
 
 {$REGION 'documentation'}
-{ Receives logmessages through WinIPC (WM_COPYDATA) messages.
+{ Receives logmessages through Winipc (WM_COPYDATA) messages.
 
   The communication with the message source is synchronous, so when the source
   application sends a message, it blocks until it is received by the receiver.
@@ -33,8 +33,8 @@ interface
   is created which polls for incoming messages.
 
   REMARK:
-   - the sending application and the logviewer need to be started with the same
-     windows user credentials. This is required to be able to exchange
+   - The sending application and the logviewer need to be started with the same
+     Windows user credentials. This is required to be able to exchange
      WM_COPYDATA messages between applications.
 }
 {$ENDREGION}

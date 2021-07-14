@@ -57,11 +57,11 @@ type
 
     procedure FormSettingsChanged(Sender: TObject);
     procedure DisplayValuesSettingsChanged(Sender: TObject);
-    function GetEmitLogMessages: Boolean;
-    procedure SetEmitLogMessages(const Value: Boolean);
 
   protected
     {$REGION 'property access methods'}
+    function GetEmitLogMessages: Boolean;
+    procedure SetEmitLogMessages(const Value: Boolean);
     function GetDebugMode: Boolean;
     procedure SetDebugMode(const Value: Boolean);
     function GetOnChanged: IEvent<TNotifyEvent>;

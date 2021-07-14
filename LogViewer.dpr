@@ -11,7 +11,7 @@ uses
   DDuce.CustomImageDrawHook,
   DDuce.Logger,
   DDuce.Logger.Interfaces,
-  DDuce.Logger.Channels.ZeroMQ,
+  DDuce.Logger.Channels.Zmq,
   LogViewer.CallStack.Data in 'LogViewer.CallStack.Data.pas',
   LogViewer.CallStack.Settings in 'LogViewer.CallStack.Settings.pas',
   LogViewer.CallStack.View in 'LogViewer.CallStack.View.pas' {frmCallStackView},

@@ -1183,7 +1183,7 @@ begin
   LN.VTNode      := Node;
   LN.LogLevel    := FCurrentMsg.LogLevel;
   LN.Id          := MessageCount;
-  LN.TextSize    := Length(FCurrentMsg.Text); // correct as it is a UTF8String
+  LN.TextSize    := Length(FCurrentMsg.Text); // correct as it is an UTF8String
   LText          := string(FCurrentMsg.Text);
   case LN.MessageType of
     lmtValue, lmtComponent, lmtStrings, lmtPersistent, lmtObject, lmtInterface,

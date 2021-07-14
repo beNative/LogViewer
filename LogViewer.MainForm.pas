@@ -18,6 +18,8 @@ unit LogViewer.MainForm;
 
 { Application main form. }
 
+{ Check Windows Defender firewall rules if no messages can be captured. }
+
 interface
 
 uses
@@ -163,14 +165,14 @@ uses
   Spring.Utils,
 
   DDuce.Factories.VirtualTrees,
-  DDuce.Logger, DDuce.Logger.Channels.ZeroMQ, DDuce.Utils.Winapi,
+  DDuce.Logger, DDuce.Logger.Channels.Zmq, DDuce.Utils.Winapi,
 
   LogViewer.Resources;
 
 {$REGION 'non-interfaced routines'}
 { Extracts the ZMQ library form resources if it does not exist. }
 
-procedure EnsureZMQLibExists;
+procedure EnsureZmqLibExists;
 var
   LResStream  : TResourceStream;
   LFileStream : TFileStream;
@@ -218,7 +220,8 @@ begin
   begin
     // setup logchannel for using a log LogViewer instance to debug itself.
     Logger.Channels.Add(
-      TZeroMQChannel.Create(Format('tcp://*:%d', [LOGVIEWER_ZMQ_PORT]))
+//      TZeroMQChannel.Create(Format('tcp://*:%d', [LOGVIEWER_ZMQ_PORT]))
+      TZmqChannel.Create(Format('tcp://*:%d', [5555]))
     );
   end;
   Logger.Clear;
@@ -613,6 +616,6 @@ end;
 {$ENDREGION}
 
 initialization
-  EnsureZMQLibExists;
+  EnsureZmqLibExists;
 
 end.

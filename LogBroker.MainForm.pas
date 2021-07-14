@@ -26,7 +26,7 @@ uses
 
   ZeroMQ.API, ZeroMQ,
 
-  DDuce.Logger.Channels.ZeroMQ, DDuce.Logger.Interfaces, DDuce.WinIPC.Server;
+  DDuce.Logger.Channels.Zmq, DDuce.Logger.Interfaces, DDuce.Winipc.Server;
 
 type
   TfrmMain = class(TForm)
@@ -40,8 +40,8 @@ type
     procedure tsIPCClick(Sender: TObject);
 
   private
-    FIPCServer : TWinIPCServer;
-    FZMQ       : IZeroMQ;
+    FIpcServer : TWinipcServer;
+    FZmq       : IZeroMQ;
     FPublisher : IZMQPair;
     FEndPoint  : string;
     FBuffer    : TStringStream;
@@ -79,7 +79,7 @@ uses
 {$R *.dfm}
 
 {$REGION 'non-interfaced routines'}
-procedure EnsureZMQLibExists;
+procedure EnsureZmqLibExists;
 const
   LIBZMQ = 'libzmq';
 var
@@ -110,10 +110,10 @@ procedure TfrmMain.AfterConstruction;
 begin
   inherited AfterConstruction;
   FEndPoint := 'tcp://*:5555';
-  FIPCServer := TWinIPCServer.Create;
-  FIPCServer.OnMessage := FIPCServerMessage;
-  FIPCServer.Active    := True;
-  FZMQ := TZeroMQ.Create;
+  FIpcServer := TWinipcServer.Create;
+  FIpcServer.OnMessage := FIPCServerMessage;
+  FIpcServer.Active    := True;
+  FZmq := TZeroMQ.Create;
   FBuffer := TStringStream.Create('', TEncoding.ANSI);
   LoadSettings;
 end;
@@ -121,13 +121,13 @@ end;
 destructor TfrmMain.Destroy;
 begin
   SaveSettings;
-  FIPCServer.Free;
+  FIpcServer.Free;
   if Assigned(FPublisher) then
   begin
     FPublisher.Close;
     FPublisher := nil;
   end;
-  FZMQ := nil;
+  FZmq := nil;
   FBuffer.Free;
   inherited Destroy;
 end;
@@ -179,7 +179,7 @@ begin
   if Assigned(FPublisher) then
     FPublisher.Close;
 
-  FPublisher := FZMQ.Start(ZMQSocket.Publisher);
+  FPublisher := FZmq.Start(ZMQSocket.Publisher);
   if chkIPCAutoPort.Checked then
   begin
     Result := FPublisher.Bind(Format(ENDPOINT, ['*'])) = 0;
@@ -243,6 +243,6 @@ end;
 {$ENDREGION}
 
 initialization
-  EnsureZMQLibExists;
+  EnsureZmqLibExists;
 
 end.
