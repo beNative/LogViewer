@@ -102,7 +102,7 @@ type
       AManager : ILogViewerManager
     ): IChannelReceiver;
 
-    class function CreateZeroMQReceiver(
+    class function CreateZmqReceiver(
       AManager : ILogViewerManager;
       AZMQ     : IZeroMQ
     ): IChannelReceiver;
@@ -219,7 +219,7 @@ begin
   Result := TWinodsChannelReceiver.Create(AManager, RECEIVERNAME_WINODS);
 end;
 
-class function TLogViewerFactories.CreateZeroMQReceiver(
+class function TLogViewerFactories.CreateZmqReceiver(
   AManager: ILogViewerManager; AZMQ: IZeroMQ): IChannelReceiver;
 begin
   Result := TZmqChannelReceiver.Create(AManager, AZMQ, RECEIVERNAME_ZEROMQ);

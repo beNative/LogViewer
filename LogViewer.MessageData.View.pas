@@ -67,6 +67,13 @@ type
       CellRect        : TRect;
       var ContentRect : TRect
     );
+    procedure FLogNodeDataViewGetHint(
+      Sender             : TBaseVirtualTree;
+      Node               : PVirtualNode;
+      Column             : TColumnIndex;
+      var LineBreakStyle : TVTTooltipLineBreakStyle;
+      var HintText       : string
+    );
     function GetData: IDynamicRecord;
 
   public
@@ -116,6 +123,7 @@ begin
   //FLogNodeDataView.ShowGutter        := False;
   FLogNodeDataView.OnPaintText       := FLogNodeDataViewPaintText;
   FLogNodeDataView.OnBeforeCellPaint := FLogNodeDataViewBeforeCellPaint;
+  FLogNodeDataView.OnGetHint         := FLogNodeDataViewGetHint;
 end;
 {$ENDREGION}
 
@@ -163,6 +171,17 @@ begin
     ApplyDisplaySettings(N.Data.Name, TargetCanvas);
   end;
   TargetCanvas.FillRect(CellRect);
+end;
+
+procedure TfrmMessageDataView.FLogNodeDataViewGetHint(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; Column: TColumnIndex;
+  var LineBreakStyle: TVTTooltipLineBreakStyle; var HintText: string);
+var
+  N  : TValueListNode;
+begin
+  N := Sender.GetNodeData<TValueListNode>(Node);
+  LineBreakStyle := hlbForceMultiLine;
+  HintText := N.Data.Value.ToString;
 end;
 
 procedure TfrmMessageDataView.FLogNodeDataViewPaintText(

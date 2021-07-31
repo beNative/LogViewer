@@ -2,10 +2,10 @@
 	"DebugMode": false,
 	"EmitLogMessages": true,
 	"FormSettings": {
-		"Left": 126,
-		"Top": 78,
-		"Width": 1856,
-		"Height": 744,
+		"Left": 305,
+		"Top": 52,
+		"Width": 2232,
+		"Height": 1266,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -18,7 +18,7 @@
 		"SmartTimeStamps": true,
 		"HorizontalPanelPositions": [
 			0.270848182466144,
-			0.666429080541696,
+			0.692702980472765,
 			1
 		],
 		"LeftVerticalPanelPositions": [
@@ -30,14 +30,14 @@
 		"Enabled": false
 	},
 	"WinipcSettings": {
-		"Enabled": true,
+		"Enabled": false,
 		"PollingInterval": 100
 	},
 	"ZmqSettings": {
 		"Enabled": false,
 		"PollingInterval": 100,
 		"PollingTimeout": 10,
-		"Endpoints": "New=tcp://localhost:42134\r\n"
+		"Endpoints": "New=tcp://localhost:42134\r\nNew_1=tcp://SBVCTITPOA8:5555\r\n"
 	},
 	"FileSystemSettings": {
 		"Enabled": false,
@@ -197,12 +197,12 @@
 	"LogLevelSettings": {
 		"LogLevels": [
 			{
-				"Alias": "",
+				"Alias": "Base",
 				"Color": 15793151,
 				"Level": 0
 			},
 			{
-				"Alias": "",
+				"Alias": "Green",
 				"Color": 32768,
 				"Level": 1
 			},
@@ -212,12 +212,12 @@
 				"Level": 2
 			},
 			{
-				"Alias": "",
+				"Alias": "Three",
 				"Color": 8454143,
 				"Level": 3
 			},
 			{
-				"Alias": "",
+				"Alias": "Four",
 				"Color": 8453888,
 				"Level": 4
 			},
@@ -252,7 +252,7 @@
 				"Level": 10
 			},
 			{
-				"Alias": "",
+				"Alias": "SQL",
 				"Color": 8421376,
 				"Level": 11
 			},

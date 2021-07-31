@@ -26,6 +26,7 @@ uses
 
 type
   TfrmImageView = class(TForm)
+    {$REGION 'designer controls'}
     aclMain        : TActionList;
     actCopy        : TAction;
     edtHandleType  : TLabeledEdit;
@@ -36,6 +37,7 @@ type
     mniCopy        : TMenuItem;
     ppmMain        : TPopupMenu;
     sbxMain        : TScrollBox;
+    {$ENDREGION}
 
     procedure actCopyExecute(Sender: TObject);
 

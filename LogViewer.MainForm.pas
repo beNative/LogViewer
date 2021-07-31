@@ -36,28 +36,29 @@ uses
   DDuce.Utils,
 
   LogViewer.Interfaces, LogViewer.Factories, LogViewer.Settings,
-  LogViewer.Dashboard.View;
+  LogViewer.Dashboard.View, Vcl.StdCtrls, Vcl.TitleBarCtrls;
 
 type
   TfrmMain = class(TForm)
-    {$REGION 'designer controls'}
-    aclMain           : TActionList;
-    actCenterToScreen : TAction;
-    actShowVersion    : TAction;
-    ctMain            : TChromeTabs;
-    imlMain           : TImageList;
-    pbrCPU            : TKPercentProgressBar;
-    pnlDelta          : TPanel;
-    pnlMainClient     : TPanel;
-    pnlMemory         : TPanel;
-    pnlMessageCount   : TPanel;
-    pnlSourceName     : TPanel;
-    pnlStatusBar      : TPanel;
-    pnlTop            : TPanel;
-    shpLine           : TShape;
-    tmrPoll           : TTimer;
-    tskbrMain         : TTaskbar;
-    imlTabStates      : TImageList;
+    pnlMain: TPanel;
+    pnlMainClient: TPanel;
+    ctMain: TChromeTabs;
+    pnlStatusBar: TPanel;
+    shpLine: TShape;
+    pnlSourceName: TPanel;
+    pnlDelta: TPanel;
+    pbrCPU: TKPercentProgressBar;
+    pnlMessageCount: TPanel;
+    pnlMemory: TPanel;
+    aclMain: TActionList;
+    actCenterToScreen: TAction;
+    actShowVersion: TAction;
+    imlMain: TImageList;
+    tbrMain: TTaskbar;
+    tmrPoll: TTimer;
+    imlTabStates: TImageList;
+    pnlTitleBar: TTitleBarPanel;
+    pnlTop: TPanel;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -90,6 +91,7 @@ type
     );
     procedure FormShortCut(var Msg: TWMKey; var Handled: Boolean);
     procedure tmrPollTimer(Sender: TObject);
+    procedure pnlTitleBarCustomButtons0Click(Sender: TObject);
     {$ENDREGION}
 
   private
@@ -533,6 +535,11 @@ begin
     APanel.Width := 0;
     APanel.AlignWithMargins := False;
   end;
+end;
+
+procedure TfrmMain.pnlTitleBarCustomButtons0Click(Sender: TObject);
+begin
+  ShowMessage('You pressed a hidden button!');
 end;
 
 procedure TfrmMain.UpdateStatusBar;

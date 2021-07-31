@@ -240,6 +240,32 @@ type
       Node        : PVirtualNode;
       var Allowed : Boolean
     );
+    procedure FLogTreeViewGetHint(
+      Sender             : TBaseVirtualTree;
+      Node               : PVirtualNode;
+      Column             : TColumnIndex;
+      var LineBreakStyle : TVTTooltipLineBreakStyle;
+      var HintText       : string
+    );
+    procedure FLogTreeViewGetHintKind(
+      Sender   : TBaseVirtualTree;
+      Node     : PVirtualNode;
+      Column   : TColumnIndex;
+      var Kind : TVTHintKind
+    );
+    procedure FLogTreeViewGetHintSize(
+      Sender : TBaseVirtualTree;
+      Node   : PVirtualNode;
+      Column : TColumnIndex;
+      var R  : TRect
+    );
+    procedure FLogTreeViewDrawHint(
+      Sender     : TBaseVirtualTree;
+      HintCanvas : TCanvas;
+      Node       : PVirtualNode;
+      R          : TRect;
+      Column     : TColumnIndex
+    );
     {$ENDREGION}
 
     procedure FSettingsChanged(Sender: TObject);
@@ -484,7 +510,7 @@ begin
     pnlTextViewer,
     Manager.EditorManager
   );
-  EditorView.Settings.EditorOptions.WordWrapEnabled := True;
+  EditorView.Settings.EditorOptions.WordWrapEnabled := False; // WordWrap can cause AV's
 end;
 
 procedure TfrmMessageList.CreateImageView;
@@ -531,6 +557,10 @@ begin
   FLogTreeView.OnCollapsed       := FLogTreeViewCollapsed;
   FLogTreeView.OnExpanded        := FLogTreeViewExpanded;
   FLogTreeView.OnExpanding       := FLogTreeViewExpanding;
+  FLogTreeView.OnGetHint         := FLogTreeViewGetHint;
+  FLogTreeView.OnGetHintKind     := FLogTreeViewGetHintKind;
+  FLogTreeView.OnGetHintSize     := FLogTreeViewGetHintSize;
+  FLogTreeView.OnDrawHint        := FLogTreeViewDrawHint;
 
   B := Supports(Subscriber, IWinIpc) or Supports(Subscriber, IZmq);
 
@@ -843,6 +873,12 @@ begin
   AutoFitColumns;
 end;
 
+procedure TfrmMessageList.FLogTreeViewDrawHint(Sender: TBaseVirtualTree;
+  HintCanvas: TCanvas; Node: PVirtualNode; R: TRect; Column: TColumnIndex);
+begin
+//
+end;
+
 { Show both Enter and Leave nodes when expanded. }
 
 procedure TfrmMessageList.FLogTreeViewExpanded(Sender: TBaseVirtualTree;
@@ -1022,6 +1058,29 @@ begin
     end;
     Sender.IsVisible[Node] := B;
   end;
+end;
+
+procedure TfrmMessageList.FLogTreeViewGetHint(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; Column: TColumnIndex;
+  var LineBreakStyle: TVTTooltipLineBreakStyle; var HintText: string);
+var
+  LN      : TLogNode;
+begin
+  LN := Sender.GetNodeData<TLogNode>(Node);
+  HintText := LN.Value;
+  LineBreakStyle := hlbForceMultiLine;
+end;
+
+procedure TfrmMessageList.FLogTreeViewGetHintKind(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; Column: TColumnIndex; var Kind: TVTHintKind);
+begin
+//
+end;
+
+procedure TfrmMessageList.FLogTreeViewGetHintSize(Sender: TBaseVirtualTree;
+  Node: PVirtualNode; Column: TColumnIndex; var R: TRect);
+begin
+//
 end;
 
 procedure TfrmMessageList.FLogTreeViewGetImageIndex(Sender: TBaseVirtualTree;

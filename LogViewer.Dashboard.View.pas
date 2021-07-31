@@ -40,12 +40,10 @@ uses
 
   Spring.Collections,
 
-  VirtualTrees, ZeroMQ,
+  VirtualTrees, ZeroMQ, OMultiPanel, kcontrols, kpagecontrol,
 
   DDuce.Components.VirtualTrees.Node, DDuce.Components.ValueList,
   DDuce.DynamicRecord, DDuce.EditList,
-
-  OMultiPanel, kcontrols, kpagecontrol,
 
   LogViewer.Interfaces, LogViewer.Dashboard.Data;
 
@@ -101,12 +99,12 @@ type
     FManager            : ILogViewerManager;
     FTreeView           : TVirtualStringTree;
     FZeroMQ             : IZeroMQ;
-    FZeroMQReceiver     : IChannelReceiver;
+    FZmqReceiver        : IChannelReceiver;
     FWinipcReceiver     : IChannelReceiver;
     FComPortReceiver    : IChannelReceiver;
     FWinodsReceiver     : IChannelReceiver;
     FFileSystemReceiver : IChannelReceiver;
-    FZeroMQNode         : TDashboardNode;
+    FZmqNode            : TDashboardNode;
     FWinipcNode         : TDashboardNode;
     FComPortNode        : TDashboardNode;
     FWinodsNode         : TDashboardNode;
@@ -159,12 +157,12 @@ type
       var Ghosted    : Boolean;
       var ImageIndex : TImageIndex
     );
-    procedure FZMQEndpointsAdd(
+    procedure FZmqEndpointsAdd(
       ASender    : TObject;
       var AName  : string;
       var AValue : TValue
     );
-    procedure FZMQEndpointsItemExecute(
+    procedure FZmqEndpointsItemExecute(
       ASender    : TObject;
       var AName  : string;
       var AValue : TValue
@@ -184,7 +182,7 @@ type
       const AKey : UInt32;
       Action     : TCollectionChangedAction
     );
-    procedure FZeroMQReceiverSubscriberListChanged(
+    procedure FZmqReceiverSubscriberListChanged(
       Sender     : TObject;
       const AKey : UInt32;
       Action     : TCollectionChangedAction
@@ -211,7 +209,7 @@ type
   protected
     procedure CreateWinipcReceiver;
     procedure CreateWinodsReceiver;
-    procedure CreateZeroMQReceiver;
+    procedure CreateZmqReceiver;
     procedure CreateComPortReceiver;
     procedure CreateFileSystemReceiver;
 
@@ -273,9 +271,9 @@ begin
   inherited AfterConstruction;
   FTreeView := TVirtualStringTreeFactory.CreateTreeList(Self, pnlRight);
   FZmqEndpoints := TEditList.Create(Self, pnlZMQEndpoints);
-  FZmqEndpoints.OnAdd.Add(FZMQEndpointsAdd);
-  FZmqEndpoints.OnItemExecute.Add(FZMQEndpointsItemExecute);
-  FZmqEndpoints.OnExecute.Add(FZMQEndpointsItemExecute);
+  FZmqEndpoints.OnAdd.Add(FZmqEndpointsAdd);
+  FZmqEndpoints.OnItemExecute.Add(FZmqEndpointsItemExecute);
+  FZmqEndpoints.OnExecute.Add(FZmqEndpointsItemExecute);
   FZmqEndpoints.ValueList.BorderStyle := bsNone;
   // TODO: implement a better way to save changes.
   //FZMQEndpoints.ValueList.OnExit := FValueListExit;
@@ -313,12 +311,12 @@ begin
   FFSLocations.OnDelete.RemoveAll(Self);
 
   FZmqEndpoints.ValueList.OnExit := nil;
-  FZeroMQReceiver.OnChange.RemoveAll(Self);
+  FZmqReceiver.OnChange.RemoveAll(Self);
   FWinipcReceiver.OnChange.RemoveAll(Self);
 //  FComPortReceiver.OnChange.RemoveAll(Self);
 
   SaveSettings;
-  FZeroMQReceiver     := nil;
+  FZmqReceiver     := nil;
   FWinipcReceiver     := nil;
   FWinodsReceiver     := nil;
 //  FComPortReceiver    := nil;
@@ -350,16 +348,16 @@ begin
       LEndPoint := Format('tcp://%s:%s', [SL[0], IntToStr(LOGVIEWER_ZMQ_PORT)]);
       LName     := Application.ExeName;
       LSubscriber := TZMQSubscriber.Create(
-        FZeroMQReceiver,
+        FZmqReceiver,
         FZeroMQ,
         LEndPoint,
         GetCurrentProcessId,
         LEndPoint,
         LName,
-        FZeroMQReceiver.Enabled
+        FZmqReceiver.Enabled
       );
       Logger.Channels.Clear;
-      FZeroMQReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
+      FZmqReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
       Modified;
     end;
   finally
@@ -382,15 +380,15 @@ begin
       LEndPoint   := Format('tcp://%s:%s', [SL[0], '5555']);
       LName       := 'localhost';
       LSubscriber := TZMQSubscriber.Create(
-        FZeroMQReceiver,
+        FZmqReceiver,
         FZeroMQ,
         LEndPoint,
         0,
         LEndPoint,
         LName,
-        FZeroMQReceiver.Enabled
+        FZmqReceiver.Enabled
       );
-      FZeroMQReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
+      FZmqReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
       Modified;
     end;
   finally
@@ -560,7 +558,7 @@ begin
   LReceiver := DN.Data.Receiver;
   if (Sender.GetNodeLevel(Node) = 0) and (Kind in [ikNormal, ikSelected]) then
   begin
-    if LReceiver = FZeroMQReceiver then
+    if LReceiver = FZmqReceiver then
     begin
       ImageIndex := 1;
     end
@@ -697,7 +695,7 @@ begin
   end;
 end;
 
-procedure TfrmDashboard.FZeroMQReceiverSubscriberListChanged(Sender: TObject;
+procedure TfrmDashboard.FZmqReceiverSubscriberListChanged(Sender: TObject;
   const AKey: UInt32; Action: TCollectionChangedAction);
 var
   LDelete     : TDashboardNode;
@@ -706,7 +704,7 @@ begin
   LDelete := nil;
   if Action = caRemoved then
   begin
-    for LDelete in FZeroMQNode do
+    for LDelete in FZmqNode do
     begin
       if LDelete.Data.Subscriber.SourceId = AKey then
         Break;
@@ -718,21 +716,21 @@ begin
   end
   else if Action = caAdded then
   begin
-    LSubscriber := FZeroMQReceiver.SubscriberList[AKey];
-    AddNode(FZeroMQNode, nil, LSubscriber);
+    LSubscriber := FZmqReceiver.SubscriberList[AKey];
+    AddNode(FZmqNode, nil, LSubscriber);
     LSubscriber.OnChange.Add(FSubscriberChange);
   end;
 end;
 {$ENDREGION}
 
 {$REGION 'FZMQEndpoints'}
-procedure TfrmDashboard.FZMQEndpointsAdd(ASender: TObject; var AName: string;
+procedure TfrmDashboard.FZmqEndpointsAdd(ASender: TObject; var AName: string;
   var AValue: TValue);
 begin
   AValue := 'tcp://';
 end;
 
-procedure TfrmDashboard.FZMQEndpointsItemExecute(ASender: TObject;
+procedure TfrmDashboard.FZmqEndpointsItemExecute(ASender: TObject;
   var AName: string; var AValue: TValue);
 var
   LSubscriber : ISubscriber;
@@ -742,15 +740,15 @@ begin
   LEndPoint   := AValue.ToString;
   LName       := AName;
   LSubscriber := TZMQSubscriber.Create(
-    FZeroMQReceiver,
+    FZmqReceiver,
     FZeroMQ,
     LEndPoint,
     0,         // ASourceId
     LEndPoint, // AKey
     LName,     // ASourceName
-    FZeroMQReceiver.Enabled
+    FZmqReceiver.Enabled
   );
-  FZeroMQReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
+  FZmqReceiver.SubscriberList.Add(LSubscriber.SourceId, LSubscriber);
   Modified;
 end;
 
@@ -874,7 +872,7 @@ procedure TfrmDashboard.CreateChannelReceivers;
 begin
   Logger.Track(Self, 'CreateChannelReceivers');
   CreateWinipcReceiver;
-  CreateZeroMQReceiver;
+  CreateZmqReceiver;
   //CreateWinodsReceiver;
 //  CreateComPortReceiver;
 //  CreateFileSystemReceiver;
@@ -918,21 +916,21 @@ begin
   FComPortReceiver.Enabled := False;
 end;
 
-procedure TfrmDashboard.CreateZeroMQReceiver;
+procedure TfrmDashboard.CreateZmqReceiver;
 begin
   FZeroMQ := TZeroMQ.Create;
-  FZeroMQReceiver := TLogViewerFactories.CreateZeroMQReceiver(FManager, FZeroMQ);
-  FManager.AddReceiver(FZeroMQReceiver);
-  FZeroMQReceiver.OnChange.UseFreeNotification := True;
-  FZeroMQReceiver.OnChange.Add(FReceiverChange);
-  FZeroMQReceiver.SubscriberList.OnKeyChanged.Add(FZeroMQReceiverSubscriberListChanged);
-  FZeroMQReceiver.Enabled := FManager.Settings.ZmqSettings.Enabled;
-  FZeroMQNode := AddNode(nil, FZeroMQReceiver, nil);
-  FZeroMQNode.CheckType := ctCheckBox;
-  if FZeroMQReceiver.Enabled then
-    FZeroMQNode.CheckState := csCheckedNormal
+  FZmqReceiver := TLogViewerFactories.CreateZmqReceiver(FManager, FZeroMQ);
+  FManager.AddReceiver(FZmqReceiver);
+  FZmqReceiver.OnChange.UseFreeNotification := True;
+  FZmqReceiver.OnChange.Add(FReceiverChange);
+  FZmqReceiver.SubscriberList.OnKeyChanged.Add(FZmqReceiverSubscriberListChanged);
+  FZmqReceiver.Enabled := FManager.Settings.ZmqSettings.Enabled;
+  FZmqNode := AddNode(nil, FZmqReceiver, nil);
+  FZmqNode.CheckType := ctCheckBox;
+  if FZmqReceiver.Enabled then
+    FZmqNode.CheckState := csCheckedNormal
   else
-    FZeroMQNode.CheckState := csUncheckedNormal;
+    FZmqNode.CheckState := csUncheckedNormal;
 end;
 
 procedure TfrmDashboard.CreateWinodsReceiver;

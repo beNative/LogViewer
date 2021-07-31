@@ -47,6 +47,7 @@ type
     property Title: string
       read FTitle write FTitle;
 
+    { Duration in ms. }
     property Duration: Integer
       read FDuration write FDuration;
 

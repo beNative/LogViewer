@@ -31,9 +31,11 @@ uses
 
 type
   TfrmValueListView = class(TForm)
+    {$REGION 'designer controls'}
     pnlMain   : TOMultiPanel;
     pnlBottom : TPanel;
     pnlTop    : TPanel;
+    {$ENDREGION}
 
   private
     FFieldView             : TValueList;
