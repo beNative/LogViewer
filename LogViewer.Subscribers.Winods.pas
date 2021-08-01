@@ -25,8 +25,23 @@ uses
 
 type
   TWinodsSubscriber = class(TSubscriber, ISubscriber, IWinods)
+  protected
+    function GetIsSourceActive: Boolean; override;
+
+  public
+
   end;
 
 implementation
+
+uses
+  DDuce.Utils.Winapi;
+
+{$REGION 'property access methods'}
+function TWinodsSubscriber.GetIsSourceActive: Boolean;
+begin
+  Result := CheckProcessExists(SourceId);
+end;
+{$ENDREGION}
 
 end.

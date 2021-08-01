@@ -157,6 +157,13 @@ type
       var Ghosted    : Boolean;
       var ImageIndex : TImageIndex
     );
+    procedure FTreeViewPaintText(
+      Sender             : TBaseVirtualTree;
+      const TargetCanvas : TCanvas;
+      Node               : PVirtualNode;
+      Column             : TColumnIndex;
+      TextType           : TVSTTextType
+    );
     procedure FZmqEndpointsAdd(
       ASender    : TObject;
       var AName  : string;
@@ -316,7 +323,7 @@ begin
 //  FComPortReceiver.OnChange.RemoveAll(Self);
 
   SaveSettings;
-  FZmqReceiver     := nil;
+  FZmqReceiver        := nil;
   FWinipcReceiver     := nil;
   FWinodsReceiver     := nil;
 //  FComPortReceiver    := nil;
@@ -411,14 +418,15 @@ var
   DN : TDashboardNode;
 begin
   DN := Sender.GetNodeData<TDashboardNode>(Node);
-  if Sender.GetNodeLevel(Node) = 0 then
+  if DN.Level = 0 then
   begin
     if DN.Data.Receiver.Enabled then
       Node.CheckState := csCheckedNormal
     else
       Node.CheckState := csUncheckedNormal;
+    TargetCanvas.Font.Style := [fsBold];
   end
-  else if Sender.GetNodeLevel(Node) = 1 then
+  else if DN.Level = 1 then
   begin
     if DN.Data.Subscriber.Enabled then
       Node.CheckState := csCheckedNormal
@@ -436,7 +444,7 @@ begin
   DN := Sender.GetNodeData<TDashboardNode>(Node);
   if Assigned(DN) then
   begin
-    if Sender.GetNodeLevel(Node) = 0 then
+    if DN.Level = 0 then
     begin
       B := Node.CheckState = csCheckedNormal;
       DN.Data.Receiver.Enabled := B;
@@ -556,7 +564,7 @@ var
 begin
   DN := Sender.GetNodeData<TDashboardNode>(Node);
   LReceiver := DN.Data.Receiver;
-  if (Sender.GetNodeLevel(Node) = 0) and (Kind in [ikNormal, ikSelected]) then
+  if (DN.Level = 0) and (Kind in [ikNormal, ikSelected]) then
   begin
     if LReceiver = FZmqReceiver then
     begin
@@ -578,7 +586,7 @@ var
   DN : TDashboardNode;
 begin
   DN := Sender.GetNodeData<TDashboardNode>(Node);
-  if Assigned(DN) and (Sender.GetNodeLevel(Node) = 1) then
+  if Assigned(DN) and (DN.Level = 1) then
   begin
     PopupMenu := FManager.Menus.SubscriberPopupMenu;
   end;
@@ -599,7 +607,6 @@ var
       Result := DateTimeToStr(ADateTime);
   end;
 
-
 begin
   CellText := '';
   if not Assigned(Node) then
@@ -608,7 +615,7 @@ begin
   DN := Sender.GetNodeData<TDashboardNode>(Node);
   if Assigned(DN) then
   begin
-    if Sender.GetNodeLevel(Node) = 0 then
+    if DN.Level = 0 then
     begin
       if Column = COLUMN_SOURCENAME then
         CellText := DN.Data.Caption
@@ -635,6 +642,40 @@ begin
         else if Column = COLUMN_TIMESTAMP_LAST then
           CellText := DateTimeToText(LSubscriber.TimeStampLast);
       end
+    end;
+  end;
+end;
+
+procedure TfrmDashboard.FTreeViewPaintText(Sender: TBaseVirtualTree;
+  const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
+  TextType: TVSTTextType);
+var
+  DN : TDashboardNode;
+begin
+  DN := Sender.GetNodeData<TDashboardNode>(Node);
+  if Assigned(DN) then
+  begin
+    if DN.Level = 0 then
+      TargetCanvas.Font.Style := [fsBold]
+    else if DN.Level = 1 then
+    begin
+      if Column < 2 then
+      begin
+        TargetCanvas.Font.Style := [fsBold];
+      end
+      else
+      begin
+        TargetCanvas.Font.Style := [];
+      end;
+      if DN.Data.Subscriber.IsSourceActive then
+      begin
+        if DN.Data.Subscriber.Enabled then
+          TargetCanvas.Font.Color := clGreen
+        else
+          TargetCanvas.Font.Color := clRed;
+      end
+      else
+        TargetCanvas.Font.Color := clGray;
     end;
   end;
 end;
@@ -995,6 +1036,7 @@ begin
   FTreeView.OnDblClick        := FTreeViewDblClick;
   FTreeView.OnGetImageIndex   := FTreeViewGetImageIndex;
   FTreeView.OnGetPopupMenu    := FTreeViewGetPopupMenu;
+  FTreeView.OnPaintText       := FTreeViewPaintText;
   with FTreeView do
   begin
     with Header.Columns.Add do

@@ -36,6 +36,8 @@ type
     FZmqStream  : TStringStream;
 
   protected
+    function GetIsSourceActive: Boolean; override;
+
     procedure CreateSubscriberSocket(const AEndPoint: string);
     procedure Close; override;
     procedure Poll; override;
@@ -58,6 +60,7 @@ implementation
 uses
   System.SysUtils,
 
+  DDuce.Utils.Winapi,
   DDuce.Logger;
 
 {$REGION 'construction and destruction'}
@@ -102,6 +105,13 @@ begin
       FZmqStream.Clear;
     end
   );
+end;
+{$ENDREGION}
+
+{$REGION 'property access methods'}
+function TWinipcSubscriber.GetIsSourceActive: Boolean;
+begin
+  Result := CheckProcessExists(SourceId);
 end;
 {$ENDREGION}
 

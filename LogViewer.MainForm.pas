@@ -40,25 +40,25 @@ uses
 
 type
   TfrmMain = class(TForm)
-    pnlMain: TPanel;
-    pnlMainClient: TPanel;
-    ctMain: TChromeTabs;
-    pnlStatusBar: TPanel;
-    shpLine: TShape;
-    pnlSourceName: TPanel;
-    pnlDelta: TPanel;
-    pbrCPU: TKPercentProgressBar;
-    pnlMessageCount: TPanel;
-    pnlMemory: TPanel;
-    aclMain: TActionList;
-    actCenterToScreen: TAction;
-    actShowVersion: TAction;
-    imlMain: TImageList;
-    tbrMain: TTaskbar;
-    tmrPoll: TTimer;
-    imlTabStates: TImageList;
-    pnlTitleBar: TTitleBarPanel;
-    pnlTop: TPanel;
+    aclMain           : TActionList;
+    actCenterToScreen : TAction;
+    actShowVersion    : TAction;
+    ctMain            : TChromeTabs;
+    imlMain           : TImageList;
+    imlTabStates      : TImageList;
+    pbrCPU            : TKPercentProgressBar;
+    pnlDelta          : TPanel;
+    pnlMain           : TPanel;
+    pnlMainClient     : TPanel;
+    pnlMemory         : TPanel;
+    pnlMessageCount   : TPanel;
+    pnlSourceName     : TPanel;
+    pnlStatusBar      : TPanel;
+    pnlTitleBar       : TTitleBarPanel;
+    pnlTop            : TPanel;
+    shpLine           : TShape;
+    tbrMain           : TTaskbar;
+    tmrPoll           : TTimer;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -592,23 +592,7 @@ begin
     begin
       LV := ILogViewer(ctMain.Tabs[I].Data);
       S  := LV.Subscriber;
-      if Supports(S, IWinipc) or Supports(S, IWinods) then
-      begin
-        if CheckProcessExists(S.SourceId) then
-        begin
-          if S.Enabled then
-            ctMain.Tabs[I].ImageIndex := 0 // Green
-          else
-          begin
-            ctMain.Tabs[I].ImageIndex := 2 // Red
-          end;
-        end
-        else
-        begin
-          ctMain.Tabs[I].ImageIndex := 1; // Off
-        end;
-      end
-      else
+      if S.IsSourceActive then
       begin
         if S.Enabled then
           ctMain.Tabs[I].ImageIndex := 0 // Green
@@ -616,6 +600,10 @@ begin
         begin
           ctMain.Tabs[I].ImageIndex := 2 // Red
         end;
+      end
+      else
+      begin
+        ctMain.Tabs[I].ImageIndex := 1; // Off
       end;
     end;
   end;

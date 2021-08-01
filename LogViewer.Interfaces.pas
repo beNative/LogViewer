@@ -73,7 +73,9 @@ type
     function GetTimeStampFirst: TDateTime;
     function GetTimeStampLast: TDateTime;
     function GetBytesReceived: Int64;
+    function GetIsSourceActive: Boolean;
     {$ENDREGION}
+
     procedure Poll;
     procedure Reset;
     procedure Close;
@@ -96,6 +98,9 @@ type
 
     property SourceId: UInt32
       read GetSourceId;
+
+    property IsSourceActive: Boolean
+      read GetIsSourceActive;
 
     property SourceName: string
       read GetSourceName;

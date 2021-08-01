@@ -64,6 +64,7 @@ type
     function GetTimeStampFirst: TDateTime;
     function GetTimeStampLast: TDateTime;
     function GetBytesReceived: Int64;
+    function GetIsSourceActive: Boolean; virtual;
     {$ENDREGION}
 
     procedure Poll; virtual;
@@ -84,6 +85,9 @@ type
 
     property MessageCount: Int64
       read GetMessageCount;
+
+   property IsSourceActive: Boolean
+     read GetIsSourceActive;
 
     property SourceId: UInt32
       read GetSourceId;
@@ -168,6 +172,11 @@ begin
     FEnabled := Value;
     DoChange;
   end;
+end;
+
+function TSubscriber.GetIsSourceActive: Boolean;
+begin
+  Result := FEnabled;
 end;
 
 function TSubscriber.GetLogMessageLevels: TLogMessageLevels;

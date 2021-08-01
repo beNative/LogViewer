@@ -2,27 +2,27 @@
 	"DebugMode": false,
 	"EmitLogMessages": false,
 	"FormSettings": {
-		"Left": 0,
-		"Top": 0,
-		"Width": 800,
-		"Height": 600,
+		"Left": 416,
+		"Top": 47,
+		"Width": 1969,
+		"Height": 1074,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
 	"MessageListSettings": {
-		"AutoScrollMessages": false,
-		"AutoFilterMessages": false,
-		"ColumnHeadersVisible": false,
-		"DynamicAutoSizeColumns": false,
-		"MessageDetailsVisible": false,
-		"SmartTimeStamps": false,
+		"AutoScrollMessages": true,
+		"AutoFilterMessages": true,
+		"ColumnHeadersVisible": true,
+		"DynamicAutoSizeColumns": true,
+		"MessageDetailsVisible": true,
+		"SmartTimeStamps": true,
 		"HorizontalPanelPositions": [
-			0.2,
-			0.7,
+			0.264720942140297,
+			0.666666666666667,
 			1
 		],
 		"LeftVerticalPanelPositions": [
-			0.3,
+			0.204301075268817,
 			1
 		]
 	},
@@ -30,10 +30,10 @@
 		"Enabled": false
 	},
 	"WinipcSettings": {
-		"Enabled": false,
-		"PollingInterval": 10
+		"Enabled": true,
+		"PollingInterval": 100
 	},
-	"ZeroMQSettings": {
+	"ZmqSettings": {
 		"Enabled": false,
 		"PollingInterval": 100,
 		"PollingTimeout": 10,
@@ -41,12 +41,12 @@
 	},
 	"FileSystemSettings": {
 		"Enabled": false,
-		"PathNames": ""
+		"PathNames": "test.txt=tcp://localhost:5555\r\nC:\\Tools\\doublecmd\\doublecmd_2019-11-06.log=tcp://localhost:5556\r\n"
 	},
 	"DisplayValuesSettings": {
 		"Id": {
-			"BackgroundColor": 0,
-			"FontName": "Tahoma",
+			"BackgroundColor": 16777215,
+			"FontName": "Segoe UI",
 			"FontColor": 8421504,
 			"FontSize": 8,
 			"FontStyle": "",
@@ -55,9 +55,9 @@
 			"VerticalAlignment": 0
 		},
 		"Info": {
-			"BackgroundColor": 0,
-			"FontName": "Tahoma",
-			"FontColor": 16711680,
+			"BackgroundColor": 16711680,
+			"FontName": "Segoe UI",
+			"FontColor": 16777215,
 			"FontSize": 8,
 			"FontStyle": "fsBold",
 			"WordWrap": false,
@@ -65,9 +65,9 @@
 			"VerticalAlignment": 0
 		},
 		"Warning": {
-			"BackgroundColor": 0,
-			"FontName": "Tahoma",
-			"FontColor": 42495,
+			"BackgroundColor": 42495,
+			"FontName": "Segoe UI",
+			"FontColor": 16777215,
 			"FontSize": 8,
 			"FontStyle": "fsBold",
 			"WordWrap": false,
@@ -75,9 +75,9 @@
 			"VerticalAlignment": 0
 		},
 		"Error": {
-			"BackgroundColor": 0,
-			"FontName": "Tahoma",
-			"FontColor": 255,
+			"BackgroundColor": 255,
+			"FontName": "Segoe UI",
+			"FontColor": 16777215,
 			"FontSize": 8,
 			"FontStyle": "fsBold",
 			"WordWrap": false,
@@ -85,8 +85,8 @@
 			"VerticalAlignment": 0
 		},
 		"TimeStamp": {
-			"BackgroundColor": 0,
-			"FontName": "Tahoma",
+			"BackgroundColor": 14540253,
+			"FontName": "Segoe UI",
 			"FontColor": 16711680,
 			"FontSize": 8,
 			"FontStyle": "",
@@ -95,18 +95,18 @@
 			"VerticalAlignment": 0
 		},
 		"ValueName": {
-			"BackgroundColor": 0,
-			"FontName": "Tahoma",
+			"BackgroundColor": 16777215,
+			"FontName": "Segoe UI",
 			"FontColor": 128,
 			"FontSize": 8,
-			"FontStyle": "fsUnderline",
+			"FontStyle": "",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
 		},
 		"ValueType": {
-			"BackgroundColor": 0,
-			"FontName": "Tahoma",
+			"BackgroundColor": 16777215,
+			"FontName": "Consolas",
 			"FontColor": 8388608,
 			"FontSize": 8,
 			"FontStyle": "",
@@ -115,28 +115,28 @@
 			"VerticalAlignment": 0
 		},
 		"Value": {
-			"BackgroundColor": 0,
-			"FontName": "Tahoma",
+			"BackgroundColor": 16777215,
+			"FontName": "Consolas",
 			"FontColor": 0,
 			"FontSize": 8,
-			"FontStyle": "",
+			"FontStyle": "fsBold",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
 		},
 		"CheckPoint": {
-			"BackgroundColor": 0,
-			"FontName": "Tahoma",
-			"FontColor": 32768,
+			"BackgroundColor": 32768,
+			"FontName": "Segoe UI",
+			"FontColor": 16777215,
 			"FontSize": 8,
-			"FontStyle": "",
+			"FontStyle": "fsBold",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
 		},
 		"Counter": {
-			"BackgroundColor": 0,
-			"FontName": "Tahoma",
+			"BackgroundColor": 16777215,
+			"FontName": "Segoe UI",
 			"FontColor": 8388736,
 			"FontSize": 8,
 			"FontStyle": "",
@@ -145,38 +145,38 @@
 			"VerticalAlignment": 0
 		},
 		"Tracing": {
-			"BackgroundColor": 12632256,
-			"FontName": "Tahoma",
-			"FontColor": -16777208,
+			"BackgroundColor": 14540253,
+			"FontName": "Segoe UI",
+			"FontColor": 32896,
 			"FontSize": 8,
-			"FontStyle": "",
+			"FontStyle": "fsBold,fsUnderline",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
 		},
 		"Enter": {
-			"BackgroundColor": 12632256,
-			"FontName": "Tahoma",
-			"FontColor": 32768,
+			"BackgroundColor": 14540253,
+			"FontName": "Segoe UI",
+			"FontColor": 32896,
 			"FontSize": 8,
-			"FontStyle": "",
+			"FontStyle": "fsBold",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
 		},
 		"Leave": {
-			"BackgroundColor": 12632256,
-			"FontName": "Tahoma",
-			"FontColor": 255,
+			"BackgroundColor": 14540253,
+			"FontName": "Segoe UI",
+			"FontColor": 32896,
 			"FontSize": 8,
-			"FontStyle": "",
+			"FontStyle": "fsBold",
 			"WordWrap": false,
 			"HorizontalAlignment": 0,
 			"VerticalAlignment": 0
 		},
 		"Conditional": {
-			"BackgroundColor": 0,
-			"FontName": "Tahoma",
+			"BackgroundColor": 16777215,
+			"FontName": "Segoe UI",
 			"FontColor": 8421376,
 			"FontSize": 8,
 			"FontStyle": "",
@@ -187,8 +187,8 @@
 	},
 	"WatchSettings": {
 		"ColumnHeadersVisible": false,
-		"OnlyTrackChanges": false,
-		"WatchHistoryVisible": false,
+		"OnlyTrackChanges": true,
+		"WatchHistoryVisible": true,
 		"SyncWithSelection": false
 	},
 	"CallStackSettings": {
@@ -198,37 +198,37 @@
 		"LogLevels": [
 			{
 				"Alias": "",
-				"Color": 536870911,
+				"Color": 15793151,
 				"Level": 0
 			},
 			{
 				"Alias": "",
-				"Color": 536870911,
+				"Color": 32768,
 				"Level": 1
 			},
 			{
-				"Alias": "",
-				"Color": 536870911,
+				"Alias": "Olijf",
+				"Color": 32896,
 				"Level": 2
 			},
 			{
 				"Alias": "",
-				"Color": 536870911,
+				"Color": 8454143,
 				"Level": 3
 			},
 			{
 				"Alias": "",
-				"Color": 536870911,
+				"Color": 8453888,
 				"Level": 4
 			},
 			{
-				"Alias": "",
-				"Color": 536870911,
+				"Alias": "vsvcsvs",
+				"Color": 65535,
 				"Level": 5
 			},
 			{
 				"Alias": "",
-				"Color": 536870911,
+				"Color": 8454143,
 				"Level": 6
 			},
 			{
@@ -238,7 +238,7 @@
 			},
 			{
 				"Alias": "",
-				"Color": 536870911,
+				"Color": 8454143,
 				"Level": 8
 			},
 			{
@@ -248,12 +248,12 @@
 			},
 			{
 				"Alias": "",
-				"Color": 536870911,
+				"Color": 65535,
 				"Level": 10
 			},
 			{
 				"Alias": "",
-				"Color": 536870911,
+				"Color": 8421376,
 				"Level": 11
 			},
 			{
@@ -263,12 +263,12 @@
 			},
 			{
 				"Alias": "",
-				"Color": 536870911,
+				"Color": 65535,
 				"Level": 13
 			},
 			{
-				"Alias": "",
-				"Color": 536870911,
+				"Alias": "halle",
+				"Color": 65535,
 				"Level": 14
 			},
 			{
