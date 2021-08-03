@@ -21,7 +21,11 @@ object frmMain: TfrmMain
   CustomTitleBar.ButtonInactiveForegroundColor = 10066329
   CustomTitleBar.ButtonInactiveBackgroundColor = clWhite
   DoubleBuffered = True
-  ParentFont = True
+  Font.Charset = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Segoe UI'
+  Font.Style = []
   GlassFrame.Enabled = True
   GlassFrame.Top = 31
   KeyPreview = True

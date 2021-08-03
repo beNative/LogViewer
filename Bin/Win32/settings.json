@@ -2,10 +2,10 @@
 	"DebugMode": false,
 	"EmitLogMessages": true,
 	"FormSettings": {
-		"Left": 870,
-		"Top": 220,
-		"Width": 1169,
-		"Height": 802,
+		"Left": 721,
+		"Top": 208,
+		"Width": 1282,
+		"Height": 891,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -85,7 +85,7 @@
 			"VerticalAlignment": 0
 		},
 		"TimeStamp": {
-			"BackgroundColor": 14540253,
+			"BackgroundColor": 15724527,
 			"FontName": "Segoe UI",
 			"FontColor": 16711680,
 			"FontSize": 8,
@@ -145,7 +145,7 @@
 			"VerticalAlignment": 0
 		},
 		"Tracing": {
-			"BackgroundColor": 14540253,
+			"BackgroundColor": 15724527,
 			"FontName": "Segoe UI",
 			"FontColor": 32896,
 			"FontSize": 8,
@@ -155,7 +155,7 @@
 			"VerticalAlignment": 0
 		},
 		"Enter": {
-			"BackgroundColor": 14540253,
+			"BackgroundColor": 15724527,
 			"FontName": "Segoe UI",
 			"FontColor": 32896,
 			"FontSize": 8,
@@ -165,7 +165,7 @@
 			"VerticalAlignment": 0
 		},
 		"Leave": {
-			"BackgroundColor": 14540253,
+			"BackgroundColor": 15724527,
 			"FontName": "Segoe UI",
 			"FontColor": 32896,
 			"FontSize": 8,
@@ -228,8 +228,8 @@
 			},
 			{
 				"Alias": "",
-				"Color": 8454143,
-				"Level": 6
+				"Color": 8388736,
+				"Level": 8
 			},
 			{
 				"Alias": "",

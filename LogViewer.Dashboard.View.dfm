@@ -5,7 +5,12 @@ object frmDashboard: TfrmDashboard
   ClientHeight = 616
   ClientWidth = 1046
   Color = clWhite
-  ParentFont = True
+  DoubleBuffered = True
+  Font.Charset = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Segoe UI'
+  Font.Style = []
   OldCreateOrder = False
   ShowHint = True
   PixelsPerInch = 96
@@ -58,14 +63,12 @@ object frmDashboard: TfrmDashboard
         TabOrder = 0
         object tsWinIpc: TKTabSheet
           Caption = 'WinIPC'
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object lblWinIPC: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
-            Width = 307
-            Height = 221
+            Width = 308
+            Height = 588
             Align = alClient
             Caption = 
               'Messages are exchanged between the source application and LogVie' +
@@ -84,6 +87,8 @@ object frmDashboard: TfrmDashboard
             ParentFont = False
             Transparent = True
             WordWrap = True
+            ExplicitWidth = 307
+            ExplicitHeight = 221
           end
           object pnlWinIPCTitle: TPanel
             Left = 0
@@ -106,14 +111,12 @@ object frmDashboard: TfrmDashboard
         end
         object tsWinOds: TKTabSheet
           Caption = 'WinODS'
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object lblWinods: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
             Width = 308
-            Height = 374
+            Height = 588
             Align = alClient
             Caption = 
               'This receiver captures messages from any local applicatiion that' +
@@ -138,6 +141,7 @@ object frmDashboard: TfrmDashboard
             ParentFont = False
             Transparent = True
             WordWrap = True
+            ExplicitHeight = 374
           end
           object pnlWinodsTitle: TPanel
             Left = 0
@@ -256,8 +260,6 @@ object frmDashboard: TfrmDashboard
         end
         object tsFileSystem: TKTabSheet
           Caption = 'FileSystem'
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object pnlFileSystemTitle: TPanel
             Left = 0
             Top = 0
@@ -288,8 +290,6 @@ object frmDashboard: TfrmDashboard
         end
         object tsComPort: TKTabSheet
           Caption = 'COM port'
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object pnlComPorts: TPanel
             Left = 0
             Top = 25

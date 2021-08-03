@@ -5,7 +5,12 @@ object frmDisplayValuesSettings: TfrmDisplayValuesSettings
   ClientHeight = 378
   ClientWidth = 489
   Color = clBtnFace
-  ParentFont = True
+  DoubleBuffered = True
+  Font.Charset = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Segoe UI'
+  Font.Style = []
   OldCreateOrder = False
   PixelsPerInch = 96
   TextHeight = 13

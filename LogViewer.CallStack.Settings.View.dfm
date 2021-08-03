@@ -4,10 +4,11 @@ object frmCallStackSettings: TfrmCallStackSettings
   ClientHeight = 36
   ClientWidth = 171
   Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
+  DoubleBuffered = True
+  Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
-  Font.Name = 'Tahoma'
+  Font.Name = 'Segoe UI'
   Font.Style = []
   OldCreateOrder = False
   PixelsPerInch = 96

@@ -4,8 +4,14 @@ object frmWinodsSettings: TfrmWinodsSettings
   ClientHeight = 61
   ClientWidth = 213
   Color = clBtnFace
-  ParentFont = True
+  DoubleBuffered = True
+  Font.Charset = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Segoe UI'
+  Font.Style = []
   OldCreateOrder = False
+  ShowHint = True
   PixelsPerInch = 96
   TextHeight = 13
   object lblProcess: TLabel
