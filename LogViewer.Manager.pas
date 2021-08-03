@@ -31,7 +31,6 @@ uses
 
   LogViewer.Interfaces, LogViewer.Settings, LogViewer.Events,
   LogViewer.Commands,
-
   LogViewer.MessageFilter.View;
 
 type
@@ -268,8 +267,6 @@ type
     property Receivers: IList<IChannelReceiver>
       read GetReceivers;
 
-
-
   public
     constructor Create(
       AOwner    : TComponent;
@@ -306,7 +303,7 @@ end;
 procedure TdmManager.AfterConstruction;
 begin
   inherited AfterConstruction;
-  VCLComObject := nil;
+  VCLComObject    := nil;
   FEvents         := TLogViewerEvents.Create(Self);
   FCommands       := TLogViewerCommands.Create(Self);
   FReceivers      := TCollections.CreateInterfaceList<IChannelReceiver>;
@@ -748,7 +745,7 @@ end;
 
 procedure TdmManager.FSettingsChanged(Sender: TObject);
 begin
-//  UpdateActions;
+  UpdateActions;
 end;
 {$ENDREGION}
 
@@ -949,8 +946,8 @@ begin
     FReceivers.Add(ALogViewer.Subscriber.Receiver);
   end;
   Events.DoAddLogViewer(ALogViewer);
-  ActiveView := ALogViewer;
-  ActiveView.UpdateView;
+//  ActiveView := ALogViewer;
+//  ActiveView.UpdateView;
   UpdateActions;
 end;
 

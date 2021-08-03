@@ -74,6 +74,7 @@ type
     tsValueList                : TKTabSheet;
     {$ENDREGION}
 
+    {$REGION 'event handlers'}
     procedure chkShowWatchHistoryClick(Sender: TObject);
     procedure edtMessageFilterChange(Sender: TObject);
     procedure edtMessageFilterKeyDown(
@@ -98,6 +99,7 @@ type
       NewHeight: Integer; var Resize: Boolean);
     procedure edtMessageFilterExit(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    {$ENDREGION}
 
   private class var
     FCounter : Integer;
@@ -701,6 +703,7 @@ begin
   if Value <> LeftPanelVisible then
   begin
     pnlMain.PanelCollection[0].Visible := Value;
+    UpdateTreeColumns;
   end;
 end;
 
@@ -1442,7 +1445,6 @@ begin
 //  ApplySettings;
 //  RightPanelVisible := False;
 //    RightPanelVisible := True;
-
 end;
 
 procedure TfrmMessageList.FSubscriberReceiveMessage(Sender: TObject;
@@ -1503,6 +1505,7 @@ begin
   if Value <> RightPanelVisible then
   begin
     pnlMain.PanelCollection[2].Visible := Value;
+    UpdateTreeColumns;
   end;
 end;
 
@@ -1794,6 +1797,7 @@ begin
     end;
   end; // case
 end;
+
 {$REGION 'Commands'}
 { Clear all received messages. }
 
@@ -2123,8 +2127,9 @@ end;
 
 procedure TfrmMessageList.UpdateTreeColumns;
 var
-  LTotalWidth : Integer;
-  LColumn     : TVirtualTreeColumn;
+  LTotalWidth        : Integer;
+  LColumn            : TVirtualTreeColumn;
+  LValueColumnFactor : Integer;
 begin
   // This can cause focus to be set on the grid if ComponentState is does not
   // include csLoading. Otherwise it can cause an exception ('cannot focus a
@@ -2132,6 +2137,19 @@ begin
   // not assigned right after creation of the treeview.
   FLogTreeView.Header.MainColumn := COLUMN_MAIN;
 
+  // dynamically change column properties based on visiblility of L/R panels
+  if LeftPanelVisible and RightPanelVisible then
+  begin
+    LValueColumnFactor := 6;
+  end
+  else if LeftPanelVisible or RightPanelVisible then
+  begin
+    LValueColumnFactor := 3;
+  end
+  else
+  begin
+    LValueColumnFactor := 2;
+  end;
   LTotalWidth := FLogTreeView.ClientWidth;
   LColumn := FLogTreeView.Header.Columns[COLUMN_MAIN];
   LColumn.MinWidth := LTotalWidth div 6;
@@ -2140,7 +2158,7 @@ begin
   LColumn.MinWidth := LTotalWidth div 10;
   LColumn := FLogTreeView.Header.Columns[COLUMN_VALUE];
   LColumn.MaxWidth := LTotalWidth div 2;
-  LColumn.MinWidth := LTotalWidth div 6;
+  LColumn.MinWidth := LTotalWidth div LValueColumnFactor;
   LColumn := FLogTreeView.Header.Columns[COLUMN_VALUETYPE];
   LColumn.MaxWidth := LTotalWidth div 6;
   LColumn.MinWidth := LTotalWidth div 10;
@@ -2188,7 +2206,7 @@ procedure TfrmMessageList.UpdateActions;
 begin
   if FUpdate and not IsActiveView then
     EnsureCurrentViewIsActiveViewWhenFocused;
-  if IsActiveView and FUpdate then
+  if {IsActiveView and} FUpdate then
   begin
     Logger.IncCounter(Name);
     UpdateLogTreeView;
@@ -2196,6 +2214,7 @@ begin
     begin
       Actions.UpdateActions;
     end;
+    Logger.IncCounter('UPDA');
     FUpdate := False;
   end;
   inherited UpdateActions;

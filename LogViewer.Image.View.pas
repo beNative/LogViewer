@@ -96,8 +96,8 @@ begin
   begin
     edtWidth.Text       := imgBitmap.Width.ToString;
     edtHeight.Text      := imgBitmap.Height.ToString;
-    //edtPixelFormat.Text := Reflect.EnumName(Bitmap.PixelFormat);
-    //edtHandleType.Text  := Reflect.EnumName(Bitmap.HandleType);
+    //edtPixelFormat.Text := Bitmap.PixelFormat.ToString;
+    //edtHandleType.Text  := Bitmap.HandleType.ToString;
   end;
 end;
 {$ENDREGION}

@@ -120,7 +120,7 @@ procedure TWinipcSubscriber.Poll;
 begin
   if Enabled then
   begin
-    while FPoll.PollOnce(10) > 0 do
+    while FPoll.PollOnce(1) > 0 do
     begin
       FPoll.FireEvents;
     end;

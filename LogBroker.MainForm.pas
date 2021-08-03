@@ -19,14 +19,14 @@ unit LogBroker.MainForm;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages,
-  System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.WinXCtrls,
+  Winapi.Windows,
+  System.SysUtils, System.Classes,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.WinXCtrls,
   Vcl.StdCtrls, Vcl.ExtCtrls,
 
-  ZeroMQ.API, ZeroMQ,
+  ZeroMQ,
 
-  DDuce.Logger.Channels.Zmq, DDuce.Logger.Interfaces, DDuce.Winipc.Server;
+  DDuce.Winipc.Server;
 
 type
   TfrmMain = class(TForm)
@@ -220,7 +220,7 @@ procedure TfrmMain.SaveSettings;
 begin
   Settings.WriteBool('', 'IPCAutoPort', chkIPCAutoPort.Checked);
   Settings.WriteString('', 'IPCPort', edtIPCPort.Text);
-  Settings.WriteBool('', 'IPCEnabled', tsIPC.State = tssOn);
+  //Settings.WriteBool('', 'IPCEnabled', tsIPC.State = tssOn);
 end;
 {$ENDREGION}
 

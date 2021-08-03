@@ -20,14 +20,21 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages,
-  System.SysUtils, System.Variants, System.Classes,
-  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
+  System.SysUtils, System.Variants, System.Classes, System.Actions,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Clipbrd, Vcl.Menus,
+  Vcl.ActnList,
 
   kcontrols, khexeditor;
 
 type
   TfrmRawDataView = class(TForm)
-    heMain : TKHexEditor;
+    heMain  : TKHexEditor;
+    ppmMain : TPopupMenu;
+    mniCopy : TMenuItem;
+    aclMain : TActionList;
+    actCopy : TAction;
+
+    procedure actCopyExecute(Sender: TObject);
 
   public
     procedure Clear;
@@ -40,6 +47,21 @@ implementation
 
 uses
   Spring;
+
+{$REGION 'action handlers'}
+procedure TfrmRawDataView.actCopyExecute(Sender: TObject);
+var
+  SS : TStringStream;
+begin
+  SS := TStringStream.Create;
+  try
+    heMain.SaveToStream(SS);
+    Clipboard.AsText := SS.DataString;
+  finally
+    SS.Free;
+  end;
+end;
+{$ENDREGION}
 
 {$REGION 'public methods'}
 procedure TfrmRawDataView.Clear;

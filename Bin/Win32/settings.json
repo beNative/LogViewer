@@ -1,11 +1,11 @@
 {
 	"DebugMode": false,
-	"EmitLogMessages": false,
+	"EmitLogMessages": true,
 	"FormSettings": {
-		"Left": 416,
-		"Top": 47,
-		"Width": 1969,
-		"Height": 1074,
+		"Left": 870,
+		"Top": 220,
+		"Width": 1169,
+		"Height": 802,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -18,11 +18,11 @@
 		"SmartTimeStamps": true,
 		"HorizontalPanelPositions": [
 			0.264720942140297,
-			0.666666666666667,
+			0.697309417040359,
 			1
 		],
 		"LeftVerticalPanelPositions": [
-			0.204301075268817,
+			0.204040404040404,
 			1
 		]
 	},
@@ -34,10 +34,10 @@
 		"PollingInterval": 100
 	},
 	"ZmqSettings": {
-		"Enabled": false,
+		"Enabled": true,
 		"PollingInterval": 100,
 		"PollingTimeout": 10,
-		"Endpoints": ""
+		"Endpoints": "New=tcp://SBVCTITPOA8:5555\r\n"
 	},
 	"FileSystemSettings": {
 		"Enabled": false,
@@ -207,7 +207,7 @@
 				"Level": 1
 			},
 			{
-				"Alias": "Olijf",
+				"Alias": "",
 				"Color": 32896,
 				"Level": 2
 			},
@@ -222,7 +222,7 @@
 				"Level": 4
 			},
 			{
-				"Alias": "vsvcsvs",
+				"Alias": "",
 				"Color": 65535,
 				"Level": 5
 			},
@@ -267,7 +267,7 @@
 				"Level": 13
 			},
 			{
-				"Alias": "halle",
+				"Alias": "",
 				"Color": 65535,
 				"Level": 14
 			},

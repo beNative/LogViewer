@@ -382,20 +382,27 @@ end;
 procedure TfrmMain.EventsAddLogViewer(Sender: TObject;
   ALogViewer: ILogViewer);
 var
-  S : string;
+  S  : string;
+  CT : TChromeTab;
 begin
   ALogViewer.Subscriber.Enabled := True;
   ALogViewer.Form.Parent := pnlMainClient;
   S := ExtractFileName(ALogViewer.Subscriber.SourceName);
-  ctMain.Tabs.Add;
-  ctMain.ActiveTab.Data := Pointer(ALogViewer);
-  ctMain.ActiveTab.Caption :=
-    Format('%s (%d, %s)', [
-      S,
-      ALogViewer.Subscriber.SourceId,
-      ALogViewer.Subscriber.Receiver.ToString
-    ]);
-  ALogViewer.Form.Show;
+  ctMain.BeginUpdate;
+  try
+    CT := ctMain.Tabs.Add;
+    CT.Data := Pointer(ALogViewer);
+    CT.Caption :=
+      Format('%s (%d, %s)', [
+        S,
+        ALogViewer.Subscriber.SourceId,
+        ALogViewer.Subscriber.Receiver.ToString
+      ]);
+    //ALogViewer.Form.Show;
+    ctMain.ActiveTabIndex := 0;
+  finally
+    ctMain.EndUpdate;
+  end;
   UpdateStatusBar;
   OptimizeStatusBarPanelWidths;
 end;
