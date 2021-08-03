@@ -512,6 +512,7 @@ begin
     pnlTextViewer,
     Manager.EditorManager
   );
+  EditorView.Editor.Highlighter.Colors.LoadFromFile('settings.texteditor.json');
   EditorView.Settings.EditorOptions.WordWrapEnabled := False; // WordWrap can cause AV's
 end;
 
@@ -2214,7 +2215,6 @@ begin
     begin
       Actions.UpdateActions;
     end;
-    Logger.IncCounter('UPDA');
     FUpdate := False;
   end;
   inherited UpdateActions;

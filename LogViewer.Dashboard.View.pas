@@ -695,26 +695,27 @@ end;
 procedure TfrmDashboard.FWinipcReceiverSubscriberListChanged(Sender: TObject;
   const AKey: UInt32; Action: TCollectionChangedAction);
 var
-  LDelete     : TDashboardNode;
+  LNode       : TDashboardNode;
   LSubscriber : ISubscriber;
 begin
-  LDelete := nil;
+  LNode := nil;
   if Action = caRemoved then
   begin
-    for LDelete in FWinipcNode do
+    for LNode in FWinipcNode do
     begin
-      if LDelete.Data.Subscriber.SourceId = AKey then
+      if LNode.Data.Subscriber.SourceId = AKey then
         Break;
     end;
-    if Assigned(LDelete) then
+    if Assigned(LNode) then
     begin
-      FTreeView.DeleteNode(LDelete.VNode);
+      FTreeView.DeleteNode(LNode.VNode);
     end;
   end
   else if Action = caAdded then
   begin
     LSubscriber := FWinipcReceiver.SubscriberList[AKey];
-    AddNode(FWinipcNode, nil, LSubscriber);
+    LNode := AddNode(FWinipcNode, nil, LSubscriber);
+    LNode.Selected := True;
     LSubscriber.OnChange.Add(FSubscriberChange);
   end;
 end;
@@ -722,26 +723,27 @@ end;
 procedure TfrmDashboard.FWinodsReceiverSubscriberListChanged(Sender: TObject;
   const AKey: UInt32; Action: TCollectionChangedAction);
 var
-  LDelete     : TDashboardNode;
+  LNode       : TDashboardNode;
   LSubscriber : ISubscriber;
 begin
-  LDelete := nil;
+  LNode := nil;
   if Action = caRemoved then
   begin
-    for LDelete in FWinodsNode do
+    for LNode in FWinodsNode do
     begin
-      if LDelete.Data.Subscriber.SourceId = AKey then
+      if LNode.Data.Subscriber.SourceId = AKey then
         Break;
     end;
-    if Assigned(LDelete) then
+    if Assigned(LNode) then
     begin
-      FTreeView.DeleteNode(LDelete.VNode);
+      FTreeView.DeleteNode(LNode.VNode);
     end;
   end
   else if Action = caAdded then
   begin
     LSubscriber := FWinodsReceiver.SubscriberList[AKey];
-    AddNode(FWinodsNode, nil, LSubscriber);
+    LNode := AddNode(FWinodsNode, nil, LSubscriber);
+    LNode.Selected := True;
     LSubscriber.OnChange.Add(FSubscriberChange);
   end;
 end;
@@ -749,26 +751,27 @@ end;
 procedure TfrmDashboard.FZmqReceiverSubscriberListChanged(Sender: TObject;
   const AKey: UInt32; Action: TCollectionChangedAction);
 var
-  LDelete     : TDashboardNode;
+  LNode       : TDashboardNode;
   LSubscriber : ISubscriber;
 begin
-  LDelete := nil;
+  LNode := nil;
   if Action = caRemoved then
   begin
-    for LDelete in FZmqNode do
+    for LNode in FZmqNode do
     begin
-      if LDelete.Data.Subscriber.SourceId = AKey then
+      if LNode.Data.Subscriber.SourceId = AKey then
         Break;
     end;
-    if Assigned(LDelete) then
+    if Assigned(LNode) then
     begin
-      FTreeView.DeleteNode(LDelete.VNode);
+      FTreeView.DeleteNode(LNode.VNode);
     end;
   end
   else if Action = caAdded then
   begin
     LSubscriber := FZmqReceiver.SubscriberList[AKey];
-    AddNode(FZmqNode, nil, LSubscriber);
+    LNode := AddNode(FZmqNode, nil, LSubscriber);
+    LNode.Selected := True;
     LSubscriber.OnChange.Add(FSubscriberChange);
   end;
 end;
