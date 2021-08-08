@@ -2,10 +2,10 @@
 	"DebugMode": false,
 	"EmitLogMessages": true,
 	"FormSettings": {
-		"Left": 544,
-		"Top": 195,
-		"Width": 1760,
-		"Height": 1014,
+		"Left": 645,
+		"Top": 138,
+		"Width": 1524,
+		"Height": 952,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -17,8 +17,8 @@
 		"MessageDetailsVisible": true,
 		"SmartTimeStamps": true,
 		"HorizontalPanelPositions": [
-			0.264720942140297,
-			0.697309417040359,
+			0.232743867655448,
+			0.748434237995825,
 			1
 		],
 		"LeftVerticalPanelPositions": [
@@ -27,7 +27,7 @@
 		]
 	},
 	"WinodsSettings": {
-		"Enabled": false
+		"Enabled": true
 	},
 	"WinipcSettings": {
 		"Enabled": true,

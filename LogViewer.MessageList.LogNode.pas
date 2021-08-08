@@ -81,9 +81,8 @@ type
     {$ENDREGION}
 
   public
-
-    procedure BeforeDestruction; override;
     procedure AfterConstruction; override;
+    destructor Destroy; override;
 
     property VTNode: PVirtualNode
       read GetVTNode write SetVTNode;
@@ -135,12 +134,13 @@ begin
   FMessageData := TMemoryStream.Create;
 end;
 
-procedure TLogNode.BeforeDestruction;
+destructor TLogNode.Destroy;
 begin
   if Assigned(FMessageData) then
     FreeAndNil(FMessageData);
-  inherited BeforeDestruction;
+  inherited Destroy;
 end;
+
 {$ENDREGION}
 
 {$REGION 'property access methods'}

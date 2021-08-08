@@ -960,13 +960,17 @@ begin
   if Assigned(AView) then
   begin
     Events.DoDeleteLogViewer(AView);
-    I := FViewList.IndexOf(AView);
     if ActiveView = AView then
       FActiveView := nil;
     S := AView.Subscriber;
-    S.Receiver.SubscriberList.Remove(S.SourceId);
-    FViewList[I].Form.Close; // instance still exists after closing
-    FViewList.Delete(I); // automatically frees the instance
+    if Assigned(S) then
+      S.Receiver.SubscriberList.Remove(S.SourceId);
+    I := FViewList.IndexOf(AView);
+    if I >= 0 then
+    begin
+      FViewList[I].Form.Close; // instance still exists after closing
+      FViewList.Delete(I); // automatically frees the instance
+    end;
     Result := True;
   end
   else

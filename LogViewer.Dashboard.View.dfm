@@ -63,12 +63,14 @@ object frmDashboard: TfrmDashboard
         TabOrder = 0
         object tsWinIpc: TKTabSheet
           Caption = 'WinIPC'
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object lblWinIPC: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
-            Width = 308
-            Height = 588
+            Width = 307
+            Height = 221
             Align = alClient
             Caption = 
               'Messages are exchanged between the source application and LogVie' +
@@ -87,8 +89,6 @@ object frmDashboard: TfrmDashboard
             ParentFont = False
             Transparent = True
             WordWrap = True
-            ExplicitWidth = 307
-            ExplicitHeight = 221
           end
           object pnlWinIPCTitle: TPanel
             Left = 0
@@ -111,12 +111,14 @@ object frmDashboard: TfrmDashboard
         end
         object tsWinOds: TKTabSheet
           Caption = 'WinODS'
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object lblWinods: TLabel
             AlignWithMargins = True
             Left = 3
             Top = 28
             Width = 308
-            Height = 588
+            Height = 374
             Align = alClient
             Caption = 
               'This receiver captures messages from any local applicatiion that' +
@@ -141,7 +143,6 @@ object frmDashboard: TfrmDashboard
             ParentFont = False
             Transparent = True
             WordWrap = True
-            ExplicitHeight = 374
           end
           object pnlWinodsTitle: TPanel
             Left = 0
@@ -260,6 +261,8 @@ object frmDashboard: TfrmDashboard
         end
         object tsFileSystem: TKTabSheet
           Caption = 'FileSystem'
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object pnlFileSystemTitle: TPanel
             Left = 0
             Top = 0
@@ -290,6 +293,8 @@ object frmDashboard: TfrmDashboard
         end
         object tsComPort: TKTabSheet
           Caption = 'COM port'
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object pnlComPorts: TPanel
             Left = 0
             Top = 25

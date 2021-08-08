@@ -62,7 +62,6 @@ object frmMain: TfrmMain
         OnActiveTabChanged = ctMainActiveTabChanged
         OnButtonCloseTabClick = ctMainButtonCloseTabClick
         OnNeedDragImageControl = ctMainNeedDragImageControl
-        OnBeforeDrawItem = ctMainBeforeDrawItem
         ActiveTabIndex = -1
         Images = imlTabStates
         Options.Display.CloseButton.Offsets.Vertical = 6
@@ -524,17 +523,7 @@ object frmMain: TfrmMain
     Top = 0
     Width = 1025
     Height = 30
-    CustomButtons = <
-      item
-        ButtonType = sbSpacer
-        Enabled = True
-        Width = 32
-        Visible = True
-        OnClick = pnlTitleBarCustomButtons0Click
-      end>
-    DesignSize = (
-      1025
-      30)
+    CustomButtons = <>
   end
   object aclMain: TActionList
     Images = imlMain

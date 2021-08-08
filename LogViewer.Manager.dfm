@@ -280,6 +280,7 @@ object dmManager: TdmManager
       AutoCheck = True
       Caption = 'Dashboard'
       ImageIndex = 33
+      ShortCut = 16452
       OnExecute = actDashboardExecute
     end
     object actCloseTerminatedProcesses: TAction

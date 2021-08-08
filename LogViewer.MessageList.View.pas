@@ -152,6 +152,10 @@ type
     procedure SetSelectedLogNode(const Value: TLogNode);
     function GetMessageCount: Int64;
     function GetMilliSecondsBetweenSelection: Integer;
+    function GetLeftPanelVisible: Boolean;
+    procedure SetLeftPanelVisible(const Value: Boolean);
+    function GetRightPanelVisible: Boolean;
+    procedure SetRightPanelVisible(const Value: Boolean);
     {$ENDREGION}
 
     {$REGION 'event handlers'}
@@ -216,7 +220,8 @@ type
       Sender       : TBaseVirtualTree;
       TargetCanvas : TCanvas;
       Node         : PVirtualNode;
-      ItemRect     : TRect);
+      ItemRect     : TRect
+    );
     procedure FLogTreeViewPaintText(
       Sender             : TBaseVirtualTree;
       const TargetCanvas : TCanvas;
@@ -287,11 +292,6 @@ type
     function ParseValue(const AString: string): Tuple<string, string, string>;
 
   protected
-    function GetLeftPanelVisible: Boolean;
-    procedure SetLeftPanelVisible(const Value: Boolean);
-    function GetRightPanelVisible: Boolean;
-    procedure SetRightPanelVisible(const Value: Boolean);
-
     procedure Clear;
     procedure AutoFitColumns;
     procedure ApplySettings;
@@ -514,6 +514,7 @@ begin
   );
   EditorView.Editor.Highlighter.Colors.LoadFromFile('settings.texteditor.json');
   EditorView.Settings.EditorOptions.WordWrapEnabled := False; // WordWrap can cause AV's
+  EditorView.Settings.EditorOptions.ShowRuler       := True;
 end;
 
 procedure TfrmMessageList.CreateImageView;
@@ -1442,8 +1443,8 @@ end;
 
 procedure TfrmMessageList.FormShow(Sender: TObject);
 begin
-//  FLogTreeView.SetFocus;
-//  ApplySettings;
+  FLogTreeView.SetFocus;
+  ApplySettings;
 //  RightPanelVisible := False;
 //    RightPanelVisible := True;
 end;
@@ -1451,7 +1452,7 @@ end;
 procedure TfrmMessageList.FSubscriberReceiveMessage(Sender: TObject;
   AStream: TStream);
 begin
-  if Supports(Sender, IZmq) or Supports(Sender, IWinipc)
+  if Supports(Sender, IZmq) or Supports(Sender, IWinipc) or Supports(Sender, IWinods)
     or Supports(Sender, IComPort) then
   begin
     ProcessMessage(AStream);

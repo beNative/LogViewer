@@ -143,7 +143,10 @@ type
       var ContentRect : TRect
     );
     procedure FTreeViewDblClick(Sender: TObject);
-    procedure FTreeViewChecked(Sender: TBaseVirtualTree; Node: PVirtualNode);
+    procedure FTreeViewChecked(
+      Sender : TBaseVirtualTree;
+      Node   : PVirtualNode
+    );
     procedure FTreeViewFocusChanged(
       Sender : TBaseVirtualTree;
       Node   : PVirtualNode;
@@ -927,7 +930,7 @@ begin
   Logger.Track(Self, 'CreateChannelReceivers');
   CreateWinipcReceiver;
   CreateZmqReceiver;
-  //CreateWinodsReceiver;
+//  CreateWinodsReceiver;
 //  CreateComPortReceiver;
 //  CreateFileSystemReceiver;
   FTreeView.FullExpand;

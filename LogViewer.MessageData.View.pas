@@ -49,6 +49,7 @@ type
     {$REGION 'property access methods'}
     function GetLogNode: TLogNode;
     procedure SetLogNode(const Value: TLogNode);
+    function GetData: IDynamicRecord;
     {$ENDREGION}
 
     procedure FLogNodeDataViewPaintText(
@@ -74,7 +75,6 @@ type
       var LineBreakStyle : TVTTooltipLineBreakStyle;
       var HintText       : string
     );
-    function GetData: IDynamicRecord;
 
   public
     constructor Create(
