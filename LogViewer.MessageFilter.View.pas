@@ -48,11 +48,6 @@ type
     FSettings  : TMessageListSettings;
 
   protected
-    procedure BuildTree(
-      ATree         : TVirtualStringTree;
-      AIsSourceSide : Boolean = False
-    );
-
     {$REGION 'event handlers'}
     procedure FTreeGetText(
       Sender       : TBaseVirtualTree;
@@ -85,12 +80,30 @@ type
     procedure FSettingsChanged(Sender: TObject);
     {$ENDREGION}
 
+    procedure BuildTree(
+      ATree         : TVirtualStringTree;
+      AIsSourceSide : Boolean = False
+    );
+    function AddMessageTypeNode(
+      ATree         : TVirtualStringTree;
+      ACaption      : string;
+      AImageIndex   : Integer = -1;
+      AMessageTypes : TLogMessageTypes = [];
+      AParentNode   : TFilterNode = nil
+    ): TFilterNode;
+    function AddMessageLevelNode(
+      ATree         : TVirtualStringTree;
+      ACaption       : string;
+      AColor         : TColor;
+      AMessageLevels : TLogMessageLevels = [];
+      AParentNode    : TFilterNode = nil
+    ): TFilterNode;
+
     function UpdateChildren(
       ATree       : TBaseVirtualTree;
       ANode       : TFilterNode;
       ACheckState : TCheckState
     ): Boolean;
-
     function UpdateParent(
       ATree       : TBaseVirtualTree;
       ANode       : TFilterNode;
@@ -105,6 +118,7 @@ type
     ); reintroduce; virtual;
     procedure AfterConstruction; override;
     destructor Destroy; override;
+
   end;
 
 implementation
@@ -207,7 +221,7 @@ begin
   begin
     if FN.Data.IsMessageTypeFilter then
     begin
-      if MatchText(FN.Data.Caption, ['SQL', 'XML', 'INI', 'JSON']) then
+      if MatchText(FN.Data.Caption, [SSql, SXml, SIni, SJson]) then
       begin
         I := FSettings.VisibleValueTypes.IndexOf(FN.Data.Caption);
         if I <> -1 then
@@ -248,7 +262,7 @@ begin
   FN := Sender.GetNodeData<TFilterNode>(Node);
   if FN.VNode.CheckState.IsChecked then
   begin
-    if MatchText(FN.Data.Caption, ['SQL', 'XML', 'INI', 'JSON']) then
+    if MatchText(FN.Data.Caption, [SSql, SXml, SIni, SJson]) then
     begin
       FSettings.VisibleValueTypes.Add(FN.Data.Caption);
     end
@@ -262,7 +276,7 @@ begin
   end
   else
   begin
-    if MatchText(FN.Data.Caption, ['SQL', 'XML', 'INI', 'JSON']) then
+    if MatchText(FN.Data.Caption, [SSql, SXml, SIni, SJson]) then
     begin
       I := FSettings.VisibleValueTypes.IndexOf(FN.Data.Caption);
       if I <> -1 then
@@ -323,131 +337,145 @@ end;
 {$ENDREGION}
 
 {$REGION 'protected methods'}
+function TfrmMessageFilter.AddMessageLevelNode(ATree: TVirtualStringTree;
+  ACaption: string; AColor: TColor; AMessageLevels: TLogMessageLevels;
+  AParentNode: TFilterNode): TFilterNode;
+begin
+  if Assigned(AParentNode) then
+  begin
+    Result := AParentNode.Add(TFilterData.Create(ACaption, AMessageLevels));
+  end
+  else
+  begin
+    Result := TFilterNode.Create(
+      ATree, TFilterData.Create(ACaption, AMessageLevels)
+    );
+  end;
+  Result.Data.Color := AColor;
+  Result.CheckType  := ctCheckBox;
+  if AColor = clNone then // root node
+    Result.ImageIndex := 29
+  else
+    Result.ImageIndex := -1;
+  if AMessageLevels * FSettings.VisibleMessageLevels = AMessageLevels then
+    Result.CheckState := csCheckedNormal
+  else
+    Result.CheckState := csUncheckedNormal;
+
+  if Result.Level = 1 then
+  begin
+    UpdateParent(ATree, Result, Result.CheckState);
+  end;
+end;
+
+function TfrmMessageFilter.AddMessageTypeNode(ATree: TVirtualStringTree;
+  ACaption: string; AImageIndex: Integer; AMessageTypes: TLogMessageTypes;
+  AParentNode: TFilterNode): TFilterNode;
+begin
+  if Assigned(AParentNode) then
+  begin
+    Result := AParentNode.Add(TFilterData.Create(ACaption, AMessageTypes));
+  end
+  else
+  begin
+    Result := TFilterNode.Create(
+      ATree, TFilterData.Create(ACaption, AMessageTypes)
+    );
+  end;
+  Result.ImageIndex := AImageIndex;
+  Result.CheckType  := ctCheckBox;
+  if AMessageTypes * FSettings.VisibleMessageTypes = AMessageTypes then
+    Result.CheckState := csCheckedNormal
+  else
+    Result.CheckState := csUncheckedNormal;
+
+  if Result.Level = 1 then
+  begin
+    UpdateParent(ATree, Result, Result.CheckState);
+  end;
+end;
+
 procedure TfrmMessageFilter.BuildTree(ATree: TVirtualStringTree;
   AIsSourceSide: Boolean);
 var
   LNode            : TFilterNode;
   LLogMessageLevel : TLogMessageLevel;
-
-  function AddMessageTypeNode(
-    ACaption      : string;
-    AImageIndex   : Integer = -1;
-    AMessageTypes : TLogMessageTypes = []
-  ): TFilterNode;
-  begin
-    if Assigned(LNode) then
-    begin
-      Result := LNode.Add(TFilterData.Create(ACaption, AMessageTypes));
-    end
-    else
-    begin
-      Result := TFilterNode.Create(
-        ATree, TFilterData.Create(ACaption, AMessageTypes)
-      );
-    end;
-    Result.ImageIndex := AImageIndex;
-    Result.CheckType  := ctCheckBox;
-    if AMessageTypes * FSettings.VisibleMessageTypes = AMessageTypes then
-      Result.CheckState := csCheckedNormal
-    else
-      Result.CheckState := csUncheckedNormal;
-
-    if Result.Level = 1 then
-    begin
-      UpdateParent(ATree, Result, Result.CheckState);
-    end;
-  end;
-
-  function AddMessageLevelNode(
-    ACaption       : string;
-    AColor         : TColor;
-    AMessageLevels : TLogMessageLevels = []
-  ): TFilterNode;
-  begin
-    if Assigned(LNode) then
-    begin
-      Result := LNode.Add(TFilterData.Create(ACaption, AMessageLevels));
-    end
-    else
-    begin
-      Result := TFilterNode.Create(
-        ATree, TFilterData.Create(ACaption, AMessageLevels)
-      );
-    end;
-    Result.Data.Color := AColor;
-    Result.CheckType  := ctCheckBox;
-    if AColor = clNone then // root node
-      Result.ImageIndex := 29
-    else
-      Result.ImageIndex := -1;
-    if AMessageLevels * FSettings.VisibleMessageLevels = AMessageLevels then
-      Result.CheckState := csCheckedNormal
-    else
-      Result.CheckState := csUncheckedNormal;
-
-    if Result.Level = 1 then
-    begin
-      UpdateParent(ATree, Result, Result.CheckState);
-    end;
-  end;
-
 begin
-  LNode := nil;
   LNode := AddMessageTypeNode(
+    ATree,
     SNotificationMessages, -1, [lmtInfo, lmtWarning, lmtError]
   );
-  AddMessageTypeNode(SInfo, 0, [lmtInfo]);
-  AddMessageTypeNode(SWarning, 2, [lmtWarning]);
-  AddMessageTypeNode(SError, 1, [lmtError]);
+  AddMessageTypeNode(ATree, SInfo, IMGIDX_INFO, [lmtInfo], LNode);
+  AddMessageTypeNode(ATree, SWarning, IMGIDX_WARNING, [lmtWarning], LNode);
+  AddMessageTypeNode(ATree, SError, IMGIDX_ERROR, [lmtError], LNode);
 
-  LNode := nil;
-  LNode := AddMessageTypeNode(SValueMessages, - 1, [lmtValue, lmtStrings,
-    lmtComponent, lmtColor, lmtAlphaColor, lmtPersistent, lmtInterface,
-    lmtObject, lmtDataSet, lmtAction, lmtBitmap, lmtScreenshot, lmtException]);
-  AddMessageTypeNode(SValue, 19, [lmtValue]);
-  AddMessageTypeNode(SStrings, 8, [lmtStrings]);
-  AddMessageTypeNode(SComponent, 10, [lmtComponent]);
-  AddMessageTypeNode(SColor, 22, [lmtColor, lmtAlphaColor]);
-  AddMessageTypeNode(SPersistent, 16, [lmtPersistent]);
-  AddMessageTypeNode(SInterface, 17, [lmtInterface]);
-  AddMessageTypeNode(SObject, 18, [lmtObject]);
-  AddMessageTypeNode(SDataSet, 20, [lmtDataSet]);
-  AddMessageTypeNode(SAction, 21, [lmtAction]);
-  AddMessageTypeNode(SBitmap, 12, [lmtBitmap]);
-  AddMessageTypeNode(SScreenshot, 12, [lmtScreenshot]);
-  AddMessageTypeNode(SException, 11, [lmtException]);
+  LNode := AddMessageTypeNode(
+    ATree,
+    SValueMessages,
+    - 1,
+    [lmtValue, lmtStrings, lmtComponent, lmtColor, lmtAlphaColor, lmtPersistent,
+     lmtInterface, lmtObject, lmtDataSet, lmtAction, lmtBitmap, lmtScreenshot,
+     lmtException]
+  );
+  AddMessageTypeNode(ATree, SValue, IMGIDX_VALUE, [lmtValue], LNode);
+  AddMessageTypeNode(ATree, SStrings, IMGIDX_STRINGS, [lmtStrings], LNode);
+  AddMessageTypeNode(
+    ATree, SComponent, IMGIDX_COMPONENT, [lmtComponent], LNode
+  );
+  AddMessageTypeNode(
+    ATree, SColor, IMGIDX_COLOR, [lmtColor, lmtAlphaColor], LNode
+  );
+  AddMessageTypeNode(
+    ATree, SPersistent, IMGIDX_PERSISTENT, [lmtPersistent], LNode
+  );
+  AddMessageTypeNode(
+    ATree, SInterface, IMGIDX_INTERFACE, [lmtInterface], LNode
+  );
+  AddMessageTypeNode(ATree, SObject, IMGIDX_OBJECT, [lmtObject], LNode);
+  AddMessageTypeNode(ATree, SDataSet, IMGIDX_DATASET, [lmtDataSet], LNode);
+  AddMessageTypeNode(ATree, SAction, IMGIDX_ACTION, [lmtAction], LNode);
+  AddMessageTypeNode(ATree, SBitmap, IMGIDX_BITMAP, [lmtBitmap], LNode);
+  AddMessageTypeNode(
+    ATree, SScreenshot, IMGIDX_SCREENSHOT, [lmtScreenshot], LNode
+  );
+  AddMessageTypeNode(
+    ATree, SException, IMGIDX_EXCEPTION, [lmtException], LNode
+  );
 
-  LNode := nil;
-  LNode := AddMessageTypeNode(STextMessages, 24, [lmtText]);
+  LNode := AddMessageTypeNode(ATree, STextMessages, 24, [lmtText]);
   if not AIsSourceSide then
   begin
-    AddMessageTypeNode('SQL', 27, [lmtText]);
-    AddMessageTypeNode('XML', 28, [lmtText]);
-    AddMessageTypeNode('INI', 30, [lmtText]);
-    AddMessageTypeNode('JSON', 26, [lmtText]);
-    FSettings.VisibleValueTypes.Add('SQL');
-    FSettings.VisibleValueTypes.Add('XML');
-    FSettings.VisibleValueTypes.Add('INI');
-    FSettings.VisibleValueTypes.Add('JSON');
+    AddMessageTypeNode(ATree, SSql, IMGIDX_SQL, [lmtText], LNode);
+    AddMessageTypeNode(ATree, SXml, IMGIDX_XML, [lmtText], LNode);
+    AddMessageTypeNode(ATree, SIni, IMGIDX_INI, [lmtText], LNode);
+    AddMessageTypeNode(ATree, SJson, IMGIDX_JSON, [lmtText], LNode);
+    FSettings.VisibleValueTypes.Add(SSql);
+    FSettings.VisibleValueTypes.Add(SXml);
+    FSettings.VisibleValueTypes.Add(SIni);
+    FSettings.VisibleValueTypes.Add(SJson);
   end;
 
-  LNode := nil;
   LNode := AddMessageTypeNode(
+    ATree,
     STraceMessages,
-    25,
+    IMGIDX_TRACE,
     [lmtCheckpoint, lmtCounter, lmtEnterMethod, lmtLeaveMethod]
   );
-  AddMessageTypeNode(SCheckpoint, 7, [lmtCheckpoint]);
-  LNode := AddMessageTypeNode(STrackMethod, 9, [lmtEnterMethod, lmtLeaveMethod]);
-  AddMessageTypeNode(SEnter, 4, [lmtEnterMethod]);
-  AddMessageTypeNode(SLeave, 5, [lmtLeaveMethod]);
+  AddMessageTypeNode(
+    ATree, SCheckpoint, IMGIDX_CHECKPOINT, [lmtCheckpoint], LNode
+  );
 
-  LNode := nil;
-  LNode := AddMessageLevelNode(SLogLevels, clNone, AllLevels);
+  LNode := AddMessageTypeNode(
+    ATree, STrackMethod, IMGIDX_TRACKMETHOD, [lmtEnterMethod, lmtLeaveMethod]
+  );
+  AddMessageTypeNode(ATree, SEnter, IMGIDX_ENTER, [lmtEnterMethod], LNode);
+  AddMessageTypeNode(ATree, SLeave, IMGIDX_LEAVE, [lmtLeaveMethod], LNode);
+
+  LNode := AddMessageLevelNode(ATree, SLogLevels, clNone, AllLevels);
   for LLogMessageLevel := Low(TLogMessageLevel) to High(TLogMessageLevel) do
   begin
     AddMessageLevelNode(
-      Integer(LLogMessageLevel).ToString, clRed, [LLogMessageLevel]
+      ATree, Integer(LLogMessageLevel).ToString, clRed, [LLogMessageLevel], LNode
     );
   end;
 
@@ -488,7 +516,8 @@ var
   N           : PVirtualNode;
   B           : Boolean;
 begin
-  if Assigned(ANode) and Assigned(ANode.VNode) and Assigned(ANode.VNode.Parent) then
+  if Assigned(ANode) and Assigned(ANode.VNode)
+    and Assigned(ANode.VNode.Parent) then
   begin
     LFirstChild := ANode.VNode.Parent.FirstChild;
     LLastChild  := ANode.VNode.Parent.LastChild;

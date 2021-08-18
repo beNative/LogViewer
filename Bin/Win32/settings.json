@@ -2,10 +2,10 @@
 	"DebugMode": false,
 	"EmitLogMessages": true,
 	"FormSettings": {
-		"Left": 645,
-		"Top": 138,
-		"Width": 1524,
-		"Height": 952,
+		"Left": 2881,
+		"Top": 104,
+		"Width": 1435,
+		"Height": 972,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -34,7 +34,7 @@
 		"PollingInterval": 100
 	},
 	"ZmqSettings": {
-		"Enabled": true,
+		"Enabled": false,
 		"PollingInterval": 100,
 		"PollingTimeout": 10,
 		"Endpoints": "New=tcp://SBVCTITPOA8:5555\r\n"
@@ -189,7 +189,7 @@
 		"ColumnHeadersVisible": false,
 		"OnlyTrackChanges": true,
 		"WatchHistoryVisible": true,
-		"SyncWithSelection": false
+		"SyncWithSelection": true
 	},
 	"CallStackSettings": {
 		"ColumnHeadersVisible": false

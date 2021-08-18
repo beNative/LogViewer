@@ -248,12 +248,20 @@ end;
 
 function TWatch.GetTimeStamp: TDateTime;
 begin
-  Result := FList[FCurrentIndex].TimeStamp;
+  if (FCurrentIndex >= 0) and (FCurrentIndex < FList.Count) then
+  begin
+    Result := FList[FCurrentIndex].TimeStamp;
+  end
+  else
+    Result := Default(TDateTime);
 end;
 
 function TWatch.GetValues(AIndex: Integer): string;
 begin
-  Result := FList[AIndex].Value;
+  if (AIndex >= 0) and (AIndex < FList.Count) then
+    Result := FList[AIndex].Value
+  else
+    Result := '';
 end;
 
 function TWatch.GetValueType: string;
