@@ -23,7 +23,7 @@ uses
   System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls,
 
-  VirtualTrees, OMultiPanel,
+  VirtualTrees, VirtualTrees.BaseTree, OMultiPanel,
 
   DDuce.DynamicRecord, DDuce.Components.ValueList,
 

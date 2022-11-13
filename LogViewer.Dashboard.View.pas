@@ -40,7 +40,8 @@ uses
 
   Spring.Collections,
 
-  VirtualTrees, ZeroMQ, OMultiPanel, kcontrols, kpagecontrol,
+  VirtualTrees, VirtualTrees.BaseTree, ZeroMQ, OMultiPanel,
+  kcontrols, kpagecontrol,
 
   DDuce.Components.VirtualTrees.Node, DDuce.Components.ValueList,
   DDuce.DynamicRecord, DDuce.EditList,

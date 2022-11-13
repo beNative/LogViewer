@@ -11,7 +11,6 @@ object frmLogViewerSettings: TfrmLogViewerSettings
   Font.Height = -11
   Font.Name = 'Segoe UI'
   Font.Style = []
-  OldCreateOrder = False
   PopupMode = pmAuto
   Position = poMainFormCenter
   ShowHint = True
@@ -100,27 +99,43 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     TabOrder = 2
     object tsWatches: TKTabSheet
       Caption = 'Watches'
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object tsCallStack: TKTabSheet
       Caption = 'Callstack'
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object tsComPort: TKTabSheet
       Caption = 'ComPort'
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object tsZeroMQ: TKTabSheet
       Caption = 'ZeroMQ'
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object tsWinODS: TKTabSheet
       Caption = 'WinODS'
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object tsWinIPC: TKTabSheet
       Caption = 'WinIPC'
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object tsDisplayValueSettings: TKTabSheet
       Caption = 'DisplayValueSettings'
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object tsAdvanced: TKTabSheet
       Caption = 'Advanced'
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object seSettings: TSynEdit
         Left = 0
         Top = 0
@@ -169,12 +184,18 @@ object frmLogViewerSettings: TfrmLogViewerSettings
     end
     object tsViewSettings: TKTabSheet
       Caption = 'ViewSettings'
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object tsLogLevels: TKTabSheet
       Caption = 'KTabSheet1'
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object tsGeneralSettings: TKTabSheet
       Caption = 'KTabSheet1'
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object chkEmitLogMessages: TCheckBox
         Left = 17
         Top = 16

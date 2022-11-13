@@ -17,7 +17,7 @@ object frmMessageFilter: TfrmMessageFilter
   PopupMode = pmAuto
   ScreenSnap = True
   PixelsPerInch = 96
-  TextHeight = 15
+  TextHeight = 13
   object pnlMessageFilter: TPanel
     Left = 0
     Top = 0
@@ -39,6 +39,9 @@ object frmMessageFilter: TfrmMessageFilter
       TabOrder = 0
       object tsClientSide: TKTabSheet
         Caption = 'Client side'
+        ExplicitTop = 0
+        ExplicitWidth = 0
+        ExplicitHeight = 0
       end
       object tsSourceSide: TKTabSheet
         Caption = 'Source side'

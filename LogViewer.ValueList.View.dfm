@@ -6,9 +6,8 @@ object frmValueListView: TfrmValueListView
   Color = clWhite
   DoubleBuffered = True
   ParentFont = True
-  OldCreateOrder = False
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object pnlMain: TOMultiPanel
     Left = 0
     Top = 0

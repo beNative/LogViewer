@@ -10,7 +10,6 @@ object frmMessageList: TfrmMessageList
   Font.Height = -11
   Font.Name = 'Segoe UI'
   Font.Style = []
-  OldCreateOrder = False
   ShowHint = True
   OnClose = FormClose
   OnShow = FormShow
@@ -207,6 +206,9 @@ object frmMessageList: TfrmMessageList
             TabPanelOptions.Options = []
             object tsValueList: TKTabSheet
               Caption = 'Value list'
+              ExplicitTop = 0
+              ExplicitWidth = 0
+              ExplicitHeight = 0
             end
             object tsTextViewer: TKTabSheet
               Caption = 'Text viewer'

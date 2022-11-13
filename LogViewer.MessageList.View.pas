@@ -31,7 +31,7 @@ uses
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
   Vcl.ExtCtrls, Vcl.Buttons, Vcl.ComCtrls, Vcl.ImgList,
 
-  VirtualTrees, kcontrols, kpagecontrol, OMultiPanel,
+  VirtualTrees, VirtualTrees.BaseTree, kcontrols, kpagecontrol, OMultiPanel,
 
   Spring, Spring.Collections,
 

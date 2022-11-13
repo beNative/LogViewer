@@ -23,7 +23,7 @@ interface
 uses
   System.Classes,
 
-  VirtualTrees,
+  VirtualTrees, VirtualTrees.BaseTree,
 
   DDuce.Logger.Interfaces;
 

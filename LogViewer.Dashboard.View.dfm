@@ -11,7 +11,6 @@ object frmDashboard: TfrmDashboard
   Font.Height = -11
   Font.Name = 'Segoe UI'
   Font.Style = []
-  OldCreateOrder = False
   ShowHint = True
   PixelsPerInch = 96
   TextHeight = 13
@@ -165,6 +164,8 @@ object frmDashboard: TfrmDashboard
         end
         object tsZeroMQ: TKTabSheet
           Caption = 'ZeroMQ'
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object pnlZmqEndpoints: TPanel
             Left = 0
             Top = 25

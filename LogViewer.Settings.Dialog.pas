@@ -26,7 +26,7 @@ uses
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls,
   Vcl.ComCtrls, Vcl.ActnList, Vcl.StdCtrls, Vcl.ImgList,
 
-  VirtualTrees, kpagecontrol, kcontrols,
+  VirtualTrees, VirtualTrees.BaseTree, kpagecontrol, kcontrols,
 
   SynEditHighlighter, SynHighlighterJScript, SynEdit, SynEditCodeFolding,
 
