@@ -9,7 +9,7 @@
                 "Name": "Tim Sinaeve",
                 "Mail": "",
                 "Email": "tim.sinaeve@gmail.com"
-            }     
+            }
         },
         "Editor": {
             "Colors": {
@@ -135,7 +135,7 @@
             {
                 "Name": "AssemblerComment",
                 "Foreground": "clGray",
-                "Background": "clWindow"                
+                "Background": "clWindow"
             },
             {
                 "Name": "AssemblerReservedWord",

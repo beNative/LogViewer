@@ -41,7 +41,7 @@
 	},
 	"FileSystemSettings": {
 		"Enabled": false,
-		"PathNames": "test.txt=tcp://localhost:5555\r\nC:\\Tools\\doublecmd\\doublecmd_2019-11-06.log=tcp://localhost:5556\r\n"
+		"PathNames": ""
 	},
 	"DisplayValuesSettings": {
 		"Id": {
@@ -207,7 +207,7 @@
 				"Level": 1
 			},
 			{
-				"Alias": "Olijf",
+				"Alias": "",
 				"Color": 32896,
 				"Level": 2
 			},
@@ -222,7 +222,7 @@
 				"Level": 4
 			},
 			{
-				"Alias": "vsvcsvs",
+				"Alias": "",
 				"Color": 65535,
 				"Level": 5
 			},
@@ -267,7 +267,7 @@
 				"Level": 13
 			},
 			{
-				"Alias": "halle",
+				"Alias": "",
 				"Color": 65535,
 				"Level": 14
 			},

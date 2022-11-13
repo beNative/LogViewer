@@ -74,6 +74,7 @@ type
     tsValueList                : TKTabSheet;
     {$ENDREGION}
 
+    {$REGION 'event handlers'}
     procedure chkShowWatchHistoryClick(Sender: TObject);
     procedure edtMessageFilterChange(Sender: TObject);
     procedure edtMessageFilterKeyDown(
@@ -98,6 +99,7 @@ type
       NewHeight: Integer; var Resize: Boolean);
     procedure edtMessageFilterExit(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    {$ENDREGION}
 
   private class var
     FCounter : Integer;
@@ -150,6 +152,10 @@ type
     procedure SetSelectedLogNode(const Value: TLogNode);
     function GetMessageCount: Int64;
     function GetMilliSecondsBetweenSelection: Integer;
+    function GetLeftPanelVisible: Boolean;
+    procedure SetLeftPanelVisible(const Value: Boolean);
+    function GetRightPanelVisible: Boolean;
+    procedure SetRightPanelVisible(const Value: Boolean);
     {$ENDREGION}
 
     {$REGION 'event handlers'}
@@ -214,7 +220,8 @@ type
       Sender       : TBaseVirtualTree;
       TargetCanvas : TCanvas;
       Node         : PVirtualNode;
-      ItemRect     : TRect);
+      ItemRect     : TRect
+    );
     procedure FLogTreeViewPaintText(
       Sender             : TBaseVirtualTree;
       const TargetCanvas : TCanvas;
@@ -285,11 +292,6 @@ type
     function ParseValue(const AString: string): Tuple<string, string, string>;
 
   protected
-    function GetLeftPanelVisible: Boolean;
-    procedure SetLeftPanelVisible(const Value: Boolean);
-    function GetRightPanelVisible: Boolean;
-    procedure SetRightPanelVisible(const Value: Boolean);
-
     procedure Clear;
     procedure AutoFitColumns;
     procedure ApplySettings;
@@ -510,7 +512,9 @@ begin
     pnlTextViewer,
     Manager.EditorManager
   );
+  EditorView.Editor.Highlighter.Colors.LoadFromFile('settings.texteditor.json');
   EditorView.Settings.EditorOptions.WordWrapEnabled := False; // WordWrap can cause AV's
+  EditorView.Settings.EditorOptions.ShowRuler       := True;
 end;
 
 procedure TfrmMessageList.CreateImageView;
@@ -701,6 +705,7 @@ begin
   if Value <> LeftPanelVisible then
   begin
     pnlMain.PanelCollection[0].Visible := Value;
+    UpdateTreeColumns;
   end;
 end;
 
@@ -1438,17 +1443,16 @@ end;
 
 procedure TfrmMessageList.FormShow(Sender: TObject);
 begin
-//  FLogTreeView.SetFocus;
-//  ApplySettings;
+  FLogTreeView.SetFocus;
+  ApplySettings;
 //  RightPanelVisible := False;
 //    RightPanelVisible := True;
-
 end;
 
 procedure TfrmMessageList.FSubscriberReceiveMessage(Sender: TObject;
   AStream: TStream);
 begin
-  if Supports(Sender, IZmq) or Supports(Sender, IWinipc)
+  if Supports(Sender, IZmq) or Supports(Sender, IWinipc) or Supports(Sender, IWinods)
     or Supports(Sender, IComPort) then
   begin
     ProcessMessage(AStream);
@@ -1503,6 +1507,7 @@ begin
   if Value <> RightPanelVisible then
   begin
     pnlMain.PanelCollection[2].Visible := Value;
+    UpdateTreeColumns;
   end;
 end;
 
@@ -1794,6 +1799,7 @@ begin
     end;
   end; // case
 end;
+
 {$REGION 'Commands'}
 { Clear all received messages. }
 
@@ -2123,8 +2129,9 @@ end;
 
 procedure TfrmMessageList.UpdateTreeColumns;
 var
-  LTotalWidth : Integer;
-  LColumn     : TVirtualTreeColumn;
+  LTotalWidth        : Integer;
+  LColumn            : TVirtualTreeColumn;
+  LValueColumnFactor : Integer;
 begin
   // This can cause focus to be set on the grid if ComponentState is does not
   // include csLoading. Otherwise it can cause an exception ('cannot focus a
@@ -2132,6 +2139,19 @@ begin
   // not assigned right after creation of the treeview.
   FLogTreeView.Header.MainColumn := COLUMN_MAIN;
 
+  // dynamically change column properties based on visiblility of L/R panels
+  if LeftPanelVisible and RightPanelVisible then
+  begin
+    LValueColumnFactor := 6;
+  end
+  else if LeftPanelVisible or RightPanelVisible then
+  begin
+    LValueColumnFactor := 3;
+  end
+  else
+  begin
+    LValueColumnFactor := 2;
+  end;
   LTotalWidth := FLogTreeView.ClientWidth;
   LColumn := FLogTreeView.Header.Columns[COLUMN_MAIN];
   LColumn.MinWidth := LTotalWidth div 6;
@@ -2140,7 +2160,7 @@ begin
   LColumn.MinWidth := LTotalWidth div 10;
   LColumn := FLogTreeView.Header.Columns[COLUMN_VALUE];
   LColumn.MaxWidth := LTotalWidth div 2;
-  LColumn.MinWidth := LTotalWidth div 6;
+  LColumn.MinWidth := LTotalWidth div LValueColumnFactor;
   LColumn := FLogTreeView.Header.Columns[COLUMN_VALUETYPE];
   LColumn.MaxWidth := LTotalWidth div 6;
   LColumn.MinWidth := LTotalWidth div 10;
@@ -2188,7 +2208,7 @@ procedure TfrmMessageList.UpdateActions;
 begin
   if FUpdate and not IsActiveView then
     EnsureCurrentViewIsActiveViewWhenFocused;
-  if IsActiveView and FUpdate then
+  if {IsActiveView and} FUpdate then
   begin
     Logger.IncCounter(Name);
     UpdateLogTreeView;

@@ -4,7 +4,12 @@ object frmWatchesView: TfrmWatchesView
   ClientHeight = 739
   ClientWidth = 444
   Color = clWhite
-  ParentFont = True
+  DoubleBuffered = True
+  Font.Charset = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Segoe UI'
+  Font.Style = []
   OldCreateOrder = False
   ShowHint = True
   PixelsPerInch = 96

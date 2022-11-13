@@ -18,6 +18,8 @@ unit LogViewer.WinipcBroker;
 
 interface
 
+{ Uses a inproc ZMQ publisher. }
+
 uses
   Winapi.Windows, Winapi.Messages,
   System.Classes,
@@ -37,7 +39,7 @@ type
   ) of object;
 
 type
- TWinipcBroker = class(TThread)
+  TWinipcBroker = class(TThread)
   private
     // Contains the window class attributes that are registered by the
     // RegisterClass function.

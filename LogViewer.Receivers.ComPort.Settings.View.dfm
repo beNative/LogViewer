@@ -4,7 +4,12 @@ object frmComPortSettings: TfrmComPortSettings
   ClientHeight = 69
   ClientWidth = 258
   Color = clBtnFace
-  ParentFont = True
+  DoubleBuffered = True
+  Font.Charset = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Segoe UI'
+  Font.Style = []
   OldCreateOrder = False
   PixelsPerInch = 96
   TextHeight = 13
@@ -19,7 +24,7 @@ object frmComPortSettings: TfrmComPortSettings
   object lblBaudRate: TLabel
     Left = 16
     Top = 38
-    Width = 48
+    Width = 49
     Height = 13
     Caption = 'Baudrate:'
     FocusControl = cbxBaudRate

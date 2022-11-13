@@ -288,7 +288,10 @@ end;
 
 procedure TSubscriber.Reset;
 begin
-  FMessageCount := 0;
+  FMessageCount   := 0;
+  FBytesReceived  := 0;
+  FTimeStampFirst := 0;
+  FTimeStampLast  := 0;
   DoChange;
 end;
 {$ENDREGION}

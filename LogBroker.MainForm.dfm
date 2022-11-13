@@ -52,16 +52,6 @@ object frmMain: TfrmMain
     TabOrder = 0
     Text = '5555'
   end
-  object tsIPC: TToggleSwitch
-    Left = 32
-    Top = 4
-    Width = 50
-    Height = 20
-    ShowStateCaption = False
-    TabOrder = 1
-    TabStop = False
-    OnClick = tsIPCClick
-  end
   object chkIPCAutoPort: TCheckBox
     Left = 194
     Top = 7
@@ -69,7 +59,14 @@ object frmMain: TfrmMain
     Height = 17
     Hint = 'Auto assign TCP port for IPC messages'
     Caption = 'Auto'
-    TabOrder = 2
+    TabOrder = 1
     OnClick = chkIPCAutoPortClick
+  end
+  object tsIPC: TToggleSwitch
+    Left = 27
+    Top = 4
+    Width = 54
+    Height = 20
+    TabOrder = 2
   end
 end

@@ -4,14 +4,20 @@ object frmWinipcSettings: TfrmWinipcSettings
   ClientHeight = 84
   ClientWidth = 324
   Color = clBtnFace
-  ParentFont = True
+  DoubleBuffered = True
+  Font.Charset = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Segoe UI'
+  Font.Style = []
   OldCreateOrder = False
+  ShowHint = True
   PixelsPerInch = 96
   TextHeight = 13
   object lblWindowHandleName: TLabel
     Left = 8
     Top = 8
-    Width = 106
+    Width = 117
     Height = 13
     Caption = 'Window handle name:'
     FocusControl = edtWindowHandleName
@@ -19,24 +25,24 @@ object frmWinipcSettings: TfrmWinipcSettings
   object lblPollingIntervalMs: TLabel
     Left = 183
     Top = 36
-    Width = 13
+    Width = 14
     Height = 13
     Caption = 'ms'
   end
   object edtWindowHandleName: TEdit
-    Left = 120
+    Left = 131
     Top = 6
-    Width = 193
+    Width = 182
     Height = 21
     TabOrder = 0
   end
   object edtPollingInterval: TLabeledEdit
-    Left = 120
+    Left = 131
     Top = 33
     Width = 57
     Height = 21
     Alignment = taRightJustify
-    EditLabel.Width = 73
+    EditLabel.Width = 80
     EditLabel.Height = 13
     EditLabel.Caption = 'Polling &interval:'
     LabelPosition = lpLeft

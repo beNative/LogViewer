@@ -154,17 +154,33 @@ begin
   FSubscriber := FZmq.Start(ZMQSocket.Subscriber);
   FSubscriber.Connect(AEndPoint);
   FPoll := FZmq.Poller;
-  FZmqStream.Clear;
   FPoll.RegisterPair(
     FSubscriber,
     [PollEvent.PollIn],
     procedure(Event: PollEvents)
     begin
-      FZmqStream.WriteString(FSubscriber.ReceiveString);
+      FZmqStream.Clear;
+      FZmqStream.Position := 0;
+      var S := FSubscriber.ReceiveString;
+
+      FZmqStream.WriteString(S);
       DoReceiveMessage(FZmqStream);
       FZmqStream.Clear;
     end
   );
+end;
+{$ENDREGION}
+
+{$REGION 'protected methods'}
+procedure TZmqSubscriber.Poll;
+begin
+  if Enabled then
+  begin
+    while FPoll.PollOnce(1) > 0 do
+    begin
+      FPoll.FireEvents;
+    end;
+  end;
 end;
 
 procedure TZmqSubscriber.Subscribe;
@@ -200,19 +216,6 @@ begin
   // See answer of Pieter Hintjens on this discussion:
   // https://grokbase.com/t/zeromq/zeromq-dev/165zwq8dxx/unsubscribe-from-all-topics
   CreateSubscriberSocket(FEndPoint);
-end;
-{$ENDREGION}
-
-{$REGION 'protected methods'}
-procedure TZmqSubscriber.Poll;
-begin
-  if Enabled then
-  begin
-    while FPoll.PollOnce(10) > 0 do
-    begin
-      FPoll.FireEvents;
-    end;
-  end;
 end;
 {$ENDREGION}
 

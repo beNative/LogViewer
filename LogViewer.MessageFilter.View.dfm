@@ -8,7 +8,11 @@ object frmMessageFilter: TfrmMessageFilter
   ClientWidth = 215
   Color = clBtnFace
   DoubleBuffered = True
-  ParentFont = True
+  Font.Charset = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Segoe UI'
+  Font.Style = []
   FormStyle = fsStayOnTop
   PopupMode = pmAuto
   ScreenSnap = True
@@ -35,9 +39,6 @@ object frmMessageFilter: TfrmMessageFilter
       TabOrder = 0
       object tsClientSide: TKTabSheet
         Caption = 'Client side'
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
       end
       object tsSourceSide: TKTabSheet
         Caption = 'Source side'

@@ -81,14 +81,6 @@ type
       Sender : TObject;
       ATab   : TChromeTab
     );
-    procedure ctMainBeforeDrawItem(
-      Sender       : TObject;
-      TargetCanvas : TGPGraphics;
-      ItemRect     : TRect;
-      ItemType     : TChromeTabItemType;
-      TabIndex     : Integer;
-      var Handled  : Boolean
-    );
     procedure FormShortCut(var Msg: TWMKey; var Handled: Boolean);
     procedure tmrPollTimer(Sender: TObject);
     procedure pnlTitleBarCustomButtons0Click(Sender: TObject);
@@ -99,7 +91,6 @@ type
     FSettings     : TLogViewerSettings;
     FMainToolbar  : TToolBar;
     FDashboard    : TfrmDashboard;
-    FDashboardTab : TChromeTab;
 
     procedure SettingsChanged(Sender: TObject);
 
@@ -116,6 +107,9 @@ type
       ALogViewer : ILogViewer
     );
     procedure EventsShowDashboard(Sender: TObject);
+
+    procedure WMEnterSizeMove(var AMessage: TWMMove); message WM_ENTERSIZEMOVE;
+    procedure WMExitSizeMove(var AMessage: TMessage); message WM_EXITSIZEMOVE;
 
   protected
     {$REGION 'property access methods'}
@@ -296,16 +290,7 @@ var
   MV : ILogViewer;
 begin
   Logger.Track(Self, 'ctMainActiveTabChanged');
-  if ATab = FDashboardTab then
-  begin
-    FDashboard.Show;
-    FDashboard.SetFocus;
-    pnlSourceName.Caption   := '';
-    pnlMessageCount.Caption := '';
-    pnlDelta.Caption        := '';
-    OptimizeStatusBarPanelWidths;
-  end
-  else if Assigned(ATab.Data) then
+  if Assigned(ATab.Data) then
   begin
     MV := ILogViewer(ATab.Data);
     MV.Form.Show;
@@ -316,26 +301,6 @@ begin
   end;
 end;
 
-procedure TfrmMain.ctMainBeforeDrawItem(Sender: TObject;
-  TargetCanvas: TGPGraphics; ItemRect: TRect; ItemType: TChromeTabItemType;
-  TabIndex: Integer; var Handled: Boolean);
-//var
-//  V : ILogViewer;
-begin
-//  if ItemType = itTabText then
-//  begin
-//    V := ILogViewer(ctMain.Tabs[TabIndex].Data);
-//    TargetCanvas.DrawString()
-//    Handled := True;
-//  end;
-//  if ItemType = itBackground then
-//  begin
-//    V := ILogViewer(ctMain.Tabs[TabIndex].Data);
-//    TargetCanvas.DrawString()
-//    Handled := True;
-//  end;
-end;
-
 procedure TfrmMain.ctMainButtonCloseTabClick(Sender: TObject; ATab: TChromeTab;
   var Close: Boolean);
 var
@@ -343,11 +308,8 @@ var
 begin
   Logger.Track(Self, 'ctMainButtonCloseTabClick');
   Close := False; // cleanup happens in EventsDeleteLogViewer
-  if ATab <> FDashboardTab then
-  begin
-    V := ILogViewer(ATab.Data);
-    Manager.DeleteView(V);
-  end;
+  V := ILogViewer(ATab.Data);
+  Manager.DeleteView(V);
 end;
 
 procedure TfrmMain.ctMainNeedDragImageControl(Sender: TObject; ATab: TChromeTab;
@@ -382,20 +344,26 @@ end;
 procedure TfrmMain.EventsAddLogViewer(Sender: TObject;
   ALogViewer: ILogViewer);
 var
-  S : string;
+  S  : string;
+  CT : TChromeTab;
 begin
   ALogViewer.Subscriber.Enabled := True;
   ALogViewer.Form.Parent := pnlMainClient;
   S := ExtractFileName(ALogViewer.Subscriber.SourceName);
-  ctMain.Tabs.Add;
-  ctMain.ActiveTab.Data := Pointer(ALogViewer);
-  ctMain.ActiveTab.Caption :=
-    Format('%s (%d, %s)', [
-      S,
-      ALogViewer.Subscriber.SourceId,
-      ALogViewer.Subscriber.Receiver.ToString
-    ]);
-  ALogViewer.Form.Show;
+  ctMain.BeginUpdate;
+  try
+    CT := ctMain.Tabs.Add;
+    CT.Data := Pointer(ALogViewer);
+    CT.Caption :=
+      Format('%s (%d, %s)', [
+        S,
+        ALogViewer.Subscriber.SourceId,
+        ALogViewer.Subscriber.Receiver.ToString
+      ]);
+    ctMain.ActiveTabIndex := 0;
+  finally
+    ctMain.EndUpdate;
+  end;
   UpdateStatusBar;
   OptimizeStatusBarPanelWidths;
 end;
@@ -425,7 +393,6 @@ end;
 
 procedure TfrmMain.EventsShowDashboard(Sender: TObject);
 begin
-  FDashboardTab.Active := True;
   FDashboard.Show;
 end;
 
@@ -445,6 +412,21 @@ end;
 procedure TfrmMain.FormShortCut(var Msg: TWMKey; var Handled: Boolean);
 begin
   Handled := Manager.Actions.ActionList.IsShortCut(Msg);
+end;
+{$ENDREGION}
+
+{$REGION 'message handlers'}
+{ These handlers make resizing the main form more smoothly if many child
+  forms are present. }
+
+procedure TfrmMain.WMEnterSizeMove(var AMessage: TWMMove);
+begin
+  DisableAlign;
+end;
+
+procedure TfrmMain.WMExitSizeMove(var AMessage: TMessage);
+begin
+  EnableAlign;
 end;
 {$ENDREGION}
 
@@ -477,12 +459,6 @@ begin
   FDashboard.Parent      := pnlMainClient;
   FDashboard.Align       := alClient;
   FDashboard.BorderStyle := bsNone;
-  ctMain.Tabs.Add;
-  ctMain.ActiveTab.Data        := Pointer(FDashboard);
-  ctMain.ActiveTab.Caption     := 'Dashboard';
-  ctMain.ActiveTab.DisplayName := 'Dashboard';
-  ctMain.ActiveTab.Pinned      := True;
-  FDashboardTab := ctMain.ActiveTab;
   FDashboard.Show;
 end;
 
@@ -549,8 +525,7 @@ var
 begin
   if Assigned(ctMain.ActiveTab) and Assigned(Manager)
     and Assigned(Manager.ActiveView)
-    and Assigned(Manager.ActiveView.Subscriber)
-    and (ctMain.ActiveTab <> FDashboardTab) then
+    and Assigned(Manager.ActiveView.Subscriber) then
   begin
     S := Format(SSubscriberSource, [
       Manager.ActiveView.Subscriber.SourceName,
@@ -586,13 +561,13 @@ var
   S  : ISubscriber;
   LV : ILogViewer;
 begin
-  for I := 0 to ctMain.Tabs.Count - 1 do
+  if ctMain.Tabs.Count > 0 then
   begin
-    if ctMain.Tabs[I] <> FDashboardTab then
+    for I := 0 to ctMain.Tabs.Count - 1 do
     begin
       LV := ILogViewer(ctMain.Tabs[I].Data);
       S  := LV.Subscriber;
-      if S.IsSourceActive then
+      if Assigned(S) and S.IsSourceActive then
       begin
         if S.Enabled then
           ctMain.Tabs[I].ImageIndex := 0 // Green

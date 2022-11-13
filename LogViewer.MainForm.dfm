@@ -8,30 +8,35 @@ object frmMain: TfrmMain
   CustomTitleBar.Control = pnlTitleBar
   CustomTitleBar.Enabled = True
   CustomTitleBar.Height = 31
-  CustomTitleBar.BackgroundColor = clWhite
-  CustomTitleBar.ForegroundColor = 65793
+  CustomTitleBar.BackgroundColor = 14120960
+  CustomTitleBar.ForegroundColor = clWhite
   CustomTitleBar.InactiveBackgroundColor = clWhite
   CustomTitleBar.InactiveForegroundColor = 10066329
-  CustomTitleBar.ButtonForegroundColor = 65793
-  CustomTitleBar.ButtonBackgroundColor = clWhite
-  CustomTitleBar.ButtonHoverForegroundColor = 65793
-  CustomTitleBar.ButtonHoverBackgroundColor = 16053492
-  CustomTitleBar.ButtonPressedForegroundColor = 65793
-  CustomTitleBar.ButtonPressedBackgroundColor = 15395562
+  CustomTitleBar.ButtonForegroundColor = clWhite
+  CustomTitleBar.ButtonBackgroundColor = 14120960
+  CustomTitleBar.ButtonHoverForegroundColor = clWhite
+  CustomTitleBar.ButtonHoverBackgroundColor = 11362304
+  CustomTitleBar.ButtonPressedForegroundColor = clWhite
+  CustomTitleBar.ButtonPressedBackgroundColor = 7159040
   CustomTitleBar.ButtonInactiveForegroundColor = 10066329
   CustomTitleBar.ButtonInactiveBackgroundColor = clWhite
   DoubleBuffered = True
-  ParentFont = True
+  Font.Charset = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Segoe UI'
+  Font.Style = []
   GlassFrame.Enabled = True
   GlassFrame.Top = 31
   KeyPreview = True
+  OldCreateOrder = False
   Position = poDesigned
   ScreenSnap = True
   ShowHint = True
   StyleElements = [seFont, seClient]
   OnShortCut = FormShortCut
   PixelsPerInch = 96
-  TextHeight = 15
+  TextHeight = 13
   object pnlMain: TPanel
     Left = 0
     Top = 30
@@ -57,7 +62,6 @@ object frmMain: TfrmMain
         OnActiveTabChanged = ctMainActiveTabChanged
         OnButtonCloseTabClick = ctMainButtonCloseTabClick
         OnNeedDragImageControl = ctMainNeedDragImageControl
-        OnBeforeDrawItem = ctMainBeforeDrawItem
         ActiveTabIndex = -1
         Images = imlTabStates
         Options.Display.CloseButton.Offsets.Vertical = 6
@@ -519,17 +523,7 @@ object frmMain: TfrmMain
     Top = 0
     Width = 1025
     Height = 30
-    CustomButtons = <
-      item
-        ButtonType = sbSpacer
-        Enabled = True
-        Width = 46
-        Visible = True
-        OnClick = pnlTitleBarCustomButtons0Click
-      end>
-    DesignSize = (
-      1025
-      30)
+    CustomButtons = <>
   end
   object aclMain: TActionList
     Images = imlMain

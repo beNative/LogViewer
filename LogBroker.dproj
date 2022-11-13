@@ -83,12 +83,16 @@
         <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-        <DCC_RemoteDebug>false</DCC_RemoteDebug>
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
         <Icon_MainIcon>LogBroker_Icon.ico</Icon_MainIcon>
         <AppDPIAwarenessMode>PerMonitor</AppDPIAwarenessMode>
         <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <DCC_ExeOutput>.\Bin\$(Platform)</DCC_ExeOutput>
+        <DCC_Optimize>true</DCC_Optimize>
+        <DCC_IntegerOverflowCheck>true</DCC_IntegerOverflowCheck>
+        <DCC_DebugInfoInTds>true</DCC_DebugInfoInTds>
+        <DCC_RangeChecking>true</DCC_RangeChecking>
+        <DCC_MapFile>3</DCC_MapFile>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>

@@ -1,6 +1,6 @@
+{$SetPEFlags 1} // strip relocation info
+
 program LogBroker;
-
-
 
 {$R *.dres}
 

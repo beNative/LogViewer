@@ -143,7 +143,10 @@ type
       var ContentRect : TRect
     );
     procedure FTreeViewDblClick(Sender: TObject);
-    procedure FTreeViewChecked(Sender: TBaseVirtualTree; Node: PVirtualNode);
+    procedure FTreeViewChecked(
+      Sender : TBaseVirtualTree;
+      Node   : PVirtualNode
+    );
     procedure FTreeViewFocusChanged(
       Sender : TBaseVirtualTree;
       Node   : PVirtualNode;
@@ -564,7 +567,7 @@ var
 begin
   DN := Sender.GetNodeData<TDashboardNode>(Node);
   LReceiver := DN.Data.Receiver;
-  if (DN.Level = 0) and (Kind in [ikNormal, ikSelected]) then
+  if (DN.Level = 0) and (Column = 0) and (Kind in [ikNormal, ikSelected]) then
   begin
     if LReceiver = FZmqReceiver then
     begin
@@ -602,7 +605,7 @@ var
   function DateTimeToText(ADateTime: TDateTime): string;
   begin
     if Double(ADateTime).SpecialType = fsZero then
-      Result := ''
+      Result := ' '
     else
       Result := DateTimeToStr(ADateTime);
   end;
@@ -634,9 +637,19 @@ begin
         else if Column = COLUMN_SOURCEID then
           CellText := LSubscriber.SourceId.ToString
         else if Column = COLUMN_MESSAGECOUNT then
-          CellText := LSubscriber.MessageCount.ToString
+        begin
+          if LSubscriber.MessageCount > 0 then
+            CellText := LSubscriber.MessageCount.ToString
+          else
+            CellText := ' ';
+        end
         else if Column = COLUMN_BYTES_RECEIVED then
-          CellText :=  FormatBytes(LSubscriber.BytesReceived)
+        begin
+          if LSubscriber.BytesReceived > 0 then
+            CellText :=  FormatBytes(LSubscriber.BytesReceived)
+          else
+            CellText := ' ';
+        end
         else if Column = COLUMN_TIMESTAMP_FIRST then
           CellText := DateTimeToText(LSubscriber.TimeStampFirst)
         else if Column = COLUMN_TIMESTAMP_LAST then
@@ -685,26 +698,27 @@ end;
 procedure TfrmDashboard.FWinipcReceiverSubscriberListChanged(Sender: TObject;
   const AKey: UInt32; Action: TCollectionChangedAction);
 var
-  LDelete     : TDashboardNode;
+  LNode       : TDashboardNode;
   LSubscriber : ISubscriber;
 begin
-  LDelete := nil;
+  LNode := nil;
   if Action = caRemoved then
   begin
-    for LDelete in FWinipcNode do
+    for LNode in FWinipcNode do
     begin
-      if LDelete.Data.Subscriber.SourceId = AKey then
+      if LNode.Data.Subscriber.SourceId = AKey then
         Break;
     end;
-    if Assigned(LDelete) then
+    if Assigned(LNode) then
     begin
-      FTreeView.DeleteNode(LDelete.VNode);
+      FTreeView.DeleteNode(LNode.VNode);
     end;
   end
   else if Action = caAdded then
   begin
     LSubscriber := FWinipcReceiver.SubscriberList[AKey];
-    AddNode(FWinipcNode, nil, LSubscriber);
+    LNode := AddNode(FWinipcNode, nil, LSubscriber);
+    LNode.Selected := True;
     LSubscriber.OnChange.Add(FSubscriberChange);
   end;
 end;
@@ -712,26 +726,27 @@ end;
 procedure TfrmDashboard.FWinodsReceiverSubscriberListChanged(Sender: TObject;
   const AKey: UInt32; Action: TCollectionChangedAction);
 var
-  LDelete     : TDashboardNode;
+  LNode       : TDashboardNode;
   LSubscriber : ISubscriber;
 begin
-  LDelete := nil;
+  LNode := nil;
   if Action = caRemoved then
   begin
-    for LDelete in FWinodsNode do
+    for LNode in FWinodsNode do
     begin
-      if LDelete.Data.Subscriber.SourceId = AKey then
+      if LNode.Data.Subscriber.SourceId = AKey then
         Break;
     end;
-    if Assigned(LDelete) then
+    if Assigned(LNode) then
     begin
-      FTreeView.DeleteNode(LDelete.VNode);
+      FTreeView.DeleteNode(LNode.VNode);
     end;
   end
   else if Action = caAdded then
   begin
     LSubscriber := FWinodsReceiver.SubscriberList[AKey];
-    AddNode(FWinodsNode, nil, LSubscriber);
+    LNode := AddNode(FWinodsNode, nil, LSubscriber);
+    LNode.Selected := True;
     LSubscriber.OnChange.Add(FSubscriberChange);
   end;
 end;
@@ -739,26 +754,27 @@ end;
 procedure TfrmDashboard.FZmqReceiverSubscriberListChanged(Sender: TObject;
   const AKey: UInt32; Action: TCollectionChangedAction);
 var
-  LDelete     : TDashboardNode;
+  LNode       : TDashboardNode;
   LSubscriber : ISubscriber;
 begin
-  LDelete := nil;
+  LNode := nil;
   if Action = caRemoved then
   begin
-    for LDelete in FZmqNode do
+    for LNode in FZmqNode do
     begin
-      if LDelete.Data.Subscriber.SourceId = AKey then
+      if LNode.Data.Subscriber.SourceId = AKey then
         Break;
     end;
-    if Assigned(LDelete) then
+    if Assigned(LNode) then
     begin
-      FTreeView.DeleteNode(LDelete.VNode);
+      FTreeView.DeleteNode(LNode.VNode);
     end;
   end
   else if Action = caAdded then
   begin
     LSubscriber := FZmqReceiver.SubscriberList[AKey];
-    AddNode(FZmqNode, nil, LSubscriber);
+    LNode := AddNode(FZmqNode, nil, LSubscriber);
+    LNode.Selected := True;
     LSubscriber.OnChange.Add(FSubscriberChange);
   end;
 end;
@@ -914,7 +930,7 @@ begin
   Logger.Track(Self, 'CreateChannelReceivers');
   CreateWinipcReceiver;
   CreateZmqReceiver;
-  //CreateWinodsReceiver;
+//  CreateWinodsReceiver;
 //  CreateComPortReceiver;
 //  CreateFileSystemReceiver;
   FTreeView.FullExpand;
@@ -1076,7 +1092,7 @@ begin
     begin
       MaxWidth  := 90;
       MinWidth  := 90;
-      Options   := [coAllowClick, coEnabled, coParentBidiMode, coShowDropMark,
+      Options   := [coAllowClick, coEnabled, coParentBidiMode,
         coVisible, coAllowFocus];
       Position  := COLUMN_MESSAGECOUNT;
       Width     := 90;
@@ -1087,7 +1103,7 @@ begin
     begin
       MaxWidth  := 80;
       MinWidth  := 80;
-      Options   := [coAllowClick, coEnabled, coParentBidiMode, coShowDropMark,
+      Options   := [coAllowClick, coEnabled, coParentBidiMode,
         coVisible, coAllowFocus];
       Position  := COLUMN_BYTES_RECEIVED;
       Width     := 80;
@@ -1098,8 +1114,8 @@ begin
     begin
       MaxWidth := 120;
       MinWidth := 120;
-      Options  := [coAllowClick, coEnabled, coParentBidiMode, coShowDropMark,
-        coVisible, coAllowFocus];
+      Options  := [coAllowClick, coEnabled, coParentBidiMode, coVisible,
+        coAllowFocus];
       Position := COLUMN_TIMESTAMP_FIRST;
       Width    := 120;
       Text     := STimeStampFirst;
@@ -1108,14 +1124,14 @@ begin
     begin
       MaxWidth := 120;
       MinWidth := 120;
-      Options  := [coAllowClick, coEnabled, coParentBidiMode, coShowDropMark,
+      Options  := [coAllowClick, coEnabled, coParentBidiMode,
         coVisible, coAllowFocus];
       Position := COLUMN_TIMESTAMP_LAST;
       Width    := 120;
       Text     := STimeStampLast;
     end;
     Header.MainColumn := 0;
-    TreeOptions.AutoOptions := TreeOptions.AutoOptions + [toAutoSpanColumns];
+    TreeOptions.AutoOptions  := TreeOptions.AutoOptions + [toAutoSpanColumns];
     TreeOptions.PaintOptions := TreeOptions.PaintOptions + [toShowTreeLines];
   end;
   FTreeView.Header.AutoSizeIndex := 0;

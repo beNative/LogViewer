@@ -5,7 +5,11 @@ object frmMessageList: TfrmMessageList
   ClientWidth = 1261
   Color = clWhite
   DoubleBuffered = True
-  ParentFont = True
+  Font.Charset = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Segoe UI'
+  Font.Style = []
   OldCreateOrder = False
   ShowHint = True
   OnClose = FormClose

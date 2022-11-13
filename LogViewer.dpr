@@ -10,7 +10,6 @@ uses
   Vcl.Styles,
   Vcl.Forms,
   VirtualTrees,
-  DDuce.CustomImageDrawHook,
   DDuce.Logger,
   DDuce.Logger.Interfaces,
   DDuce.Logger.Channels.Zmq,
@@ -82,6 +81,7 @@ begin
   ReportMemoryLeaksOnShutdown := DebugHook > 0;
   {$WARNINGS ON}
   Application.Initialize;
+  Application.ActionUpdateDelay := 50;
   Application.Title := 'Log viewer';
   Application.CreateForm(TfrmMain, frmMain);
   Logger.Info('LogViewer Started.');

@@ -4,21 +4,27 @@ object frmZmqSettings: TfrmZmqSettings
   ClientHeight = 202
   ClientWidth = 278
   Color = clBtnFace
-  ParentFont = True
+  DoubleBuffered = True
+  Font.Charset = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Segoe UI'
+  Font.Style = []
   OldCreateOrder = False
+  ShowHint = True
   PixelsPerInch = 96
   TextHeight = 13
   object lblPollingTimeoutMs: TLabel
     Left = 151
     Top = 11
-    Width = 13
+    Width = 14
     Height = 13
     Caption = 'ms'
   end
   object lblPollingIntervalMs: TLabel
     Left = 151
     Top = 38
-    Width = 13
+    Width = 14
     Height = 13
     Caption = 'ms'
   end
@@ -28,7 +34,7 @@ object frmZmqSettings: TfrmZmqSettings
     Width = 57
     Height = 21
     Alignment = taRightJustify
-    EditLabel.Width = 73
+    EditLabel.Width = 82
     EditLabel.Height = 13
     EditLabel.Caption = 'Polling &timeout:'
     LabelPosition = lpLeft
@@ -42,7 +48,7 @@ object frmZmqSettings: TfrmZmqSettings
     Width = 57
     Height = 21
     Alignment = taRightJustify
-    EditLabel.Width = 73
+    EditLabel.Width = 80
     EditLabel.Height = 13
     EditLabel.Caption = 'Polling &interval:'
     LabelPosition = lpLeft

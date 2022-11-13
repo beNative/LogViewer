@@ -6,7 +6,11 @@ object frmLogViewerSettings: TfrmLogViewerSettings
   ClientWidth = 668
   Color = clWhite
   DoubleBuffered = True
-  ParentFont = True
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Segoe UI'
+  Font.Style = []
   OldCreateOrder = False
   PopupMode = pmAuto
   Position = poMainFormCenter
@@ -188,7 +192,7 @@ object frmLogViewerSettings: TfrmLogViewerSettings
       object chkDebugMode: TCheckBox
         Left = 17
         Top = 39
-        Width = 80
+        Width = 128
         Height = 17
         Hint = 
           'In Debug mode, the application is able to capture log messages f' +
