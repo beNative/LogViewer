@@ -8,16 +8,16 @@ object frmMain: TfrmMain
   CustomTitleBar.Control = pnlTitleBar
   CustomTitleBar.Enabled = True
   CustomTitleBar.Height = 31
-  CustomTitleBar.BackgroundColor = 14120960
-  CustomTitleBar.ForegroundColor = clWhite
+  CustomTitleBar.BackgroundColor = clWhite
+  CustomTitleBar.ForegroundColor = 65793
   CustomTitleBar.InactiveBackgroundColor = clWhite
   CustomTitleBar.InactiveForegroundColor = 10066329
-  CustomTitleBar.ButtonForegroundColor = clWhite
-  CustomTitleBar.ButtonBackgroundColor = 14120960
-  CustomTitleBar.ButtonHoverForegroundColor = clWhite
-  CustomTitleBar.ButtonHoverBackgroundColor = 11362304
-  CustomTitleBar.ButtonPressedForegroundColor = clWhite
-  CustomTitleBar.ButtonPressedBackgroundColor = 7159040
+  CustomTitleBar.ButtonForegroundColor = 65793
+  CustomTitleBar.ButtonBackgroundColor = clWhite
+  CustomTitleBar.ButtonHoverForegroundColor = 65793
+  CustomTitleBar.ButtonHoverBackgroundColor = 16053492
+  CustomTitleBar.ButtonPressedForegroundColor = 65793
+  CustomTitleBar.ButtonPressedBackgroundColor = 15395562
   CustomTitleBar.ButtonInactiveForegroundColor = 10066329
   CustomTitleBar.ButtonInactiveBackgroundColor = clWhite
   DoubleBuffered = True
@@ -25,14 +25,13 @@ object frmMain: TfrmMain
   GlassFrame.Enabled = True
   GlassFrame.Top = 31
   KeyPreview = True
-  OldCreateOrder = False
   Position = poDesigned
   ScreenSnap = True
   ShowHint = True
   StyleElements = [seFont, seClient]
   OnShortCut = FormShortCut
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object pnlMain: TPanel
     Left = 0
     Top = 30
@@ -524,7 +523,7 @@ object frmMain: TfrmMain
       item
         ButtonType = sbSpacer
         Enabled = True
-        Width = 32
+        Width = 46
         Visible = True
         OnClick = pnlTitleBarCustomButtons0Click
       end>

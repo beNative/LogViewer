@@ -2,10 +2,10 @@
 	"DebugMode": false,
 	"EmitLogMessages": false,
 	"FormSettings": {
-		"Left": 416,
-		"Top": 47,
-		"Width": 1969,
-		"Height": 1074,
+		"Left": 1107,
+		"Top": 93,
+		"Width": 1395,
+		"Height": 915,
 		"FormStyle": 0,
 		"WindowState": 0
 	},
@@ -17,12 +17,12 @@
 		"MessageDetailsVisible": true,
 		"SmartTimeStamps": true,
 		"HorizontalPanelPositions": [
-			0.264720942140297,
-			0.666666666666667,
+			0.115625,
+			0.255078125,
 			1
 		],
 		"LeftVerticalPanelPositions": [
-			0.204301075268817,
+			0.25,
 			1
 		]
 	},
@@ -30,14 +30,14 @@
 		"Enabled": false
 	},
 	"WinipcSettings": {
-		"Enabled": true,
+		"Enabled": false,
 		"PollingInterval": 100
 	},
 	"ZmqSettings": {
 		"Enabled": false,
 		"PollingInterval": 100,
 		"PollingTimeout": 10,
-		"Endpoints": ""
+		"Endpoints": "New=tcp://\r\nNew_1=tcp://\r\nNew_2=tcp://\r\nNew_3=tcp://\r\nNew_4=tcp://\r\n"
 	},
 	"FileSystemSettings": {
 		"Enabled": false,

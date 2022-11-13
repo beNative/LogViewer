@@ -10,11 +10,10 @@ object frmMessageFilter: TfrmMessageFilter
   DoubleBuffered = True
   ParentFont = True
   FormStyle = fsStayOnTop
-  OldCreateOrder = False
   PopupMode = pmAuto
   ScreenSnap = True
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 15
   object pnlMessageFilter: TPanel
     Left = 0
     Top = 0

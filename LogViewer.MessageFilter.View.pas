@@ -32,6 +32,7 @@ uses
   LogViewer.MessageList.Settings, LogViewer.MessageFilter.Data;
 
 type
+  TFilterData = LogViewer.MessageFilter.Data.TFilterData;
   TFilterNode = TVTNode<TFilterData>;
 
 type
@@ -466,7 +467,7 @@ begin
   begin
     for I := 0 to ANode.ChildCount - 1 do
     begin
-      N := ANode.Items[I];
+      N := TFilterNode(ANode.Items[I]);
       N.CheckState := ACheckState;
       ATree.InvalidateNode(N.VNode);
       UpdateChildren(ATree, N, ACheckState);
