@@ -1,23 +1,23 @@
 object frmMain: TfrmMain
-  Left = 0
-  Top = 0
+  Left = 4068
+  Top = 228
   Caption = 'Logviewer'
   ClientHeight = 665
   ClientWidth = 1025
   Color = clBtnFace
   CustomTitleBar.Control = pnlTitleBar
   CustomTitleBar.Enabled = True
-  CustomTitleBar.Height = 31
-  CustomTitleBar.BackgroundColor = 14120960
-  CustomTitleBar.ForegroundColor = clWhite
+  CustomTitleBar.Height = 45
+  CustomTitleBar.BackgroundColor = clWhite
+  CustomTitleBar.ForegroundColor = 65793
   CustomTitleBar.InactiveBackgroundColor = clWhite
   CustomTitleBar.InactiveForegroundColor = 10066329
-  CustomTitleBar.ButtonForegroundColor = clWhite
-  CustomTitleBar.ButtonBackgroundColor = 14120960
-  CustomTitleBar.ButtonHoverForegroundColor = clWhite
-  CustomTitleBar.ButtonHoverBackgroundColor = 11362304
-  CustomTitleBar.ButtonPressedForegroundColor = clWhite
-  CustomTitleBar.ButtonPressedBackgroundColor = 7159040
+  CustomTitleBar.ButtonForegroundColor = 65793
+  CustomTitleBar.ButtonBackgroundColor = clWhite
+  CustomTitleBar.ButtonHoverForegroundColor = 65793
+  CustomTitleBar.ButtonHoverBackgroundColor = 16053492
+  CustomTitleBar.ButtonPressedForegroundColor = 65793
+  CustomTitleBar.ButtonPressedBackgroundColor = 15395562
   CustomTitleBar.ButtonInactiveForegroundColor = 10066329
   CustomTitleBar.ButtonInactiveBackgroundColor = clWhite
   DoubleBuffered = True
@@ -27,21 +27,20 @@ object frmMain: TfrmMain
   Font.Name = 'Segoe UI'
   Font.Style = []
   GlassFrame.Enabled = True
-  GlassFrame.Top = 31
+  GlassFrame.Top = 45
   KeyPreview = True
-  OldCreateOrder = False
-  Position = poDesigned
+  Position = poScreenCenter
   ScreenSnap = True
   ShowHint = True
   StyleElements = [seFont, seClient]
+  ShowInTaskBar = True
   OnShortCut = FormShortCut
-  PixelsPerInch = 96
   TextHeight = 13
   object pnlMain: TPanel
     Left = 0
-    Top = 30
+    Top = 44
     Width = 1025
-    Height = 635
+    Height = 621
     Align = alClient
     BevelOuter = bvNone
     Caption = 'pnlMain'
@@ -50,7 +49,7 @@ object frmMain: TfrmMain
       Left = 0
       Top = 26
       Width = 1025
-      Height = 589
+      Height = 575
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0
@@ -176,6 +175,7 @@ object frmMain: TfrmMain
         Options.Behaviour.TabRightClickSelect = True
         Options.Behaviour.ActivateNewTab = True
         Options.Behaviour.DebugMode = False
+        Options.Behaviour.CloseOnWheel = True
         Options.Behaviour.IgnoreDoubleClicksWhileAnimatingMovement = True
         Options.Scrolling.Enabled = True
         Options.Scrolling.ScrollButtons = csbRight
@@ -199,9 +199,9 @@ object frmMain: TfrmMain
         LookAndFeel.Tabs.Modified.OutsideColor = clBlue
         LookAndFeel.Tabs.Modified.CentreAlpha = 130
         LookAndFeel.Tabs.Modified.OutsideAlpha = 0
-        LookAndFeel.Tabs.DefaultFont.Name = 'Segoe UI Semibold'
+        LookAndFeel.Tabs.DefaultFont.Name = 'Segoe UI'
         LookAndFeel.Tabs.DefaultFont.Color = clBlack
-        LookAndFeel.Tabs.DefaultFont.Size = 8
+        LookAndFeel.Tabs.DefaultFont.Size = 7
         LookAndFeel.Tabs.DefaultFont.Alpha = 255
         LookAndFeel.Tabs.DefaultFont.TextRenderingMode = TextRenderingHintClearTypeGridFit
         LookAndFeel.Tabs.MouseGlow.CentreColor = clWhite
@@ -214,9 +214,9 @@ object frmMain: TfrmMain
         LookAndFeel.Tabs.Spinners.Download.Color = 14388040
         LookAndFeel.Tabs.Spinners.Download.Thickness = 2.500000000000000000
         LookAndFeel.Tabs.Spinners.Download.Alpha = 255
-        LookAndFeel.Tabs.Active.Font.Name = 'Segoe UI Semibold'
+        LookAndFeel.Tabs.Active.Font.Name = 'Segoe UI'
         LookAndFeel.Tabs.Active.Font.Color = clWhite
-        LookAndFeel.Tabs.Active.Font.Size = 8
+        LookAndFeel.Tabs.Active.Font.Size = 7
         LookAndFeel.Tabs.Active.Font.Alpha = 255
         LookAndFeel.Tabs.Active.Font.TextRenderingMode = TextRenderingHintClearTypeGridFit
         LookAndFeel.Tabs.Active.Font.UseDefaultFont = False
@@ -227,7 +227,7 @@ object frmMain: TfrmMain
         LookAndFeel.Tabs.Active.Style.OutlineColor = clGray
         LookAndFeel.Tabs.Active.Style.OutlineSize = 1.000000000000000000
         LookAndFeel.Tabs.Active.Style.OutlineAlpha = 255
-        LookAndFeel.Tabs.NotActive.Font.Name = 'Segoe UI Semibold'
+        LookAndFeel.Tabs.NotActive.Font.Name = 'Segoe UI'
         LookAndFeel.Tabs.NotActive.Font.Color = clBlack
         LookAndFeel.Tabs.NotActive.Font.Size = 8
         LookAndFeel.Tabs.NotActive.Font.Alpha = 255
@@ -240,7 +240,7 @@ object frmMain: TfrmMain
         LookAndFeel.Tabs.NotActive.Style.OutlineColor = clGray
         LookAndFeel.Tabs.NotActive.Style.OutlineSize = 1.000000000000000000
         LookAndFeel.Tabs.NotActive.Style.OutlineAlpha = 255
-        LookAndFeel.Tabs.Hot.Font.Name = 'Segoe UI Semibold'
+        LookAndFeel.Tabs.Hot.Font.Name = 'Segoe UI'
         LookAndFeel.Tabs.Hot.Font.Color = clBlack
         LookAndFeel.Tabs.Hot.Font.Size = 8
         LookAndFeel.Tabs.Hot.Font.Alpha = 255
@@ -384,15 +384,15 @@ object frmMain: TfrmMain
         Align = alTop
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Segoe UI Semibold'
-        Font.Style = [fsBold]
+        Font.Height = -9
+        Font.Name = 'Segoe UI'
+        Font.Style = []
         TabOrder = 0
       end
     end
     object pnlStatusBar: TPanel
       Left = 0
-      Top = 615
+      Top = 601
       Width = 1025
       Height = 20
       Align = alBottom
@@ -407,7 +407,6 @@ object frmMain: TfrmMain
         Height = 1
         Align = alTop
         Pen.Color = clScrollBar
-        ExplicitWidth = 997
       end
       object pnlSourceName: TPanel
         AlignWithMargins = True
@@ -515,6 +514,12 @@ object frmMain: TfrmMain
       Height = 26
       Align = alTop
       BevelOuter = bvNone
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+      ParentFont = False
       TabOrder = 2
     end
   end
@@ -522,7 +527,7 @@ object frmMain: TfrmMain
     Left = 0
     Top = 0
     Width = 1025
-    Height = 30
+    Height = 44
     CustomButtons = <>
   end
   object aclMain: TActionList
@@ -1306,13 +1311,13 @@ object frmMain: TfrmMain
   object tmrPoll: TTimer
     Enabled = False
     OnTimer = tmrPollTimer
-    Left = 32
-    Top = 112
+    Left = 104
+    Top = 160
   end
   object imlTabStates: TImageList
     ColorDepth = cd32Bit
-    Left = 120
-    Top = 110
+    Left = 216
+    Top = 158
     Bitmap = {
       494C010103000800040010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010

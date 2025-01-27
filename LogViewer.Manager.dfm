@@ -1,7 +1,6 @@
 object dmManager: TdmManager
-  OldCreateOrder = False
-  Height = 251
-  Width = 213
+  Height = 419
+  Width = 271
   object aclMain: TActionList
     Images = imlMain
     OnExecute = aclMainExecute

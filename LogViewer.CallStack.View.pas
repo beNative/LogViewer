@@ -1,5 +1,5 @@
 {
-  Copyright (C) 2013-2021 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2024 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -100,7 +100,7 @@ uses
   DSharp.Windows.ControlTemplates,
 
   DDuce.Factories.TreeViewPresenter, DDuce.Factories.VirtualTrees,
-  DDuce.Logger,
+  DDuce.Logger, DDuce.Utils,
 
   LogViewer.CallStack.Data, LogViewer.Interfaces;
 
@@ -138,8 +138,8 @@ begin
   CD.ValuePropertyName := 'Duration';
   CD.HintPropertyName  := CD.ValuePropertyName;
   CD.OnCustomDraw      := FCDDurationCustomDraw;
-  CD.Width             := 60;
-  CD.MinWidth          := 60;
+  CD.MinWidth          := ScaleSize(15 * FDisplayValuesSettings.TimeStamp.Font.Size);
+  CD.Width             := CD.MinWidth;
   CD.Alignment         := taRightJustify;
   CD.AutoSize          := False;
   FVSTCallStack.Header.AutoSizeIndex := 1;

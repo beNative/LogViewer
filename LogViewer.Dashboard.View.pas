@@ -1,5 +1,5 @@
 {
-  Copyright (C) 2013-2021 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2024 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -40,7 +40,8 @@ uses
 
   Spring.Collections,
 
-  VirtualTrees, ZeroMQ, OMultiPanel, kcontrols, kpagecontrol,
+  VirtualTrees, VirtualTrees.BaseTree, ZeroMQ, OMultiPanel,
+  kcontrols, kpagecontrol,
 
   DDuce.Components.VirtualTrees.Node, DDuce.Components.ValueList,
   DDuce.DynamicRecord, DDuce.EditList,

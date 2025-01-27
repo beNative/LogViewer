@@ -1,8 +1,8 @@
 object frmMessageList: TfrmMessageList
-  Left = 0
-  Top = 0
+  Left = 4334
+  Top = 494
   ClientHeight = 746
-  ClientWidth = 1261
+  ClientWidth = 1279
   Color = clWhite
   DoubleBuffered = True
   Font.Charset = ANSI_CHARSET
@@ -10,16 +10,14 @@ object frmMessageList: TfrmMessageList
   Font.Height = -11
   Font.Name = 'Segoe UI'
   Font.Style = []
-  OldCreateOrder = False
   ShowHint = True
   OnClose = FormClose
   OnShow = FormShow
-  PixelsPerInch = 96
   TextHeight = 13
   object pnlMain: TOMultiPanel
     Left = 0
     Top = 0
-    Width = 1261
+    Width = 1279
     Height = 746
     PanelCollection = <
       item
@@ -49,9 +47,9 @@ object frmMessageList: TfrmMessageList
     OnCanResize = pnlMainCanResize
     TabOrder = 0
     object pnlMessages: TPanel
-      Left = 419
+      Left = 425
       Top = 0
-      Width = 422
+      Width = 428
       Height = 746
       Align = alClient
       BevelOuter = bvNone
@@ -62,7 +60,7 @@ object frmMessageList: TfrmMessageList
       object pnlFilter: TPanel
         Left = 0
         Top = 0
-        Width = 422
+        Width = 428
         Height = 18
         Align = alTop
         BevelOuter = bvNone
@@ -72,7 +70,7 @@ object frmMessageList: TfrmMessageList
         object edtMessageFilter: TButtonedEdit
           Left = 0
           Top = 0
-          Width = 422
+          Width = 428
           Height = 18
           Margins.Left = 0
           Margins.Top = 0
@@ -107,9 +105,9 @@ object frmMessageList: TfrmMessageList
       end
     end
     object pnlRight: TPanel
-      Left = 844
+      Left = 856
       Top = 0
-      Width = 417
+      Width = 423
       Height = 746
       Align = alClient
       BevelOuter = bvNone
@@ -121,17 +119,18 @@ object frmMessageList: TfrmMessageList
       object splRightHorizontal: TSplitter
         Left = 0
         Top = 186
-        Width = 417
+        Width = 423
         Height = 3
         Cursor = crVSplit
         Align = alTop
         Color = clScrollBar
         ParentColor = False
+        ExplicitWidth = 425
       end
       object pnlMessageContent: TPanel
         Left = 0
         Top = 0
-        Width = 417
+        Width = 423
         Height = 20
         Align = alTop
         Alignment = taLeftJustify
@@ -147,10 +146,10 @@ object frmMessageList: TfrmMessageList
         ParentFont = False
         TabOrder = 0
         DesignSize = (
-          417
+          423
           20)
         object chkShowDetails: TCheckBox
-          Left = 324
+          Left = 323
           Top = 2
           Width = 92
           Height = 17
@@ -170,12 +169,13 @@ object frmMessageList: TfrmMessageList
       object pgcMessageData: TKPageControl
         Left = 0
         Top = 189
-        Width = 417
+        Width = 423
         Height = 557
         ActivateNewDocked = False
         ActivePageIndex = 0
         Align = alClient
         HotTrack = False
+        ParentBackground = False
         TabHeight = 0
         TabOrder = 1
         TabPanelOptions.Colors.HotTop = clBtnHighlight
@@ -190,12 +190,13 @@ object frmMessageList: TfrmMessageList
           object pgcMessageDetails: TKPageControl
             Left = 0
             Top = 0
-            Width = 417
+            Width = 423
             Height = 557
             ActivateNewDocked = False
             ActivePageIndex = 0
             Align = alClient
             HotTrack = False
+            ParentBackground = False
             TabOrder = 0
             TabPanelOptions.Colors.HotTop = clBtnHighlight
             TabPanelOptions.Colors.HotBottom = clBtnHighlight
@@ -210,14 +211,14 @@ object frmMessageList: TfrmMessageList
             end
             object tsTextViewer: TKTabSheet
               Caption = 'Text viewer'
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
+              ExplicitTop = 16
+              ExplicitWidth = 425
+              ExplicitHeight = 541
               object pnlTextViewer: TPanel
                 Left = 0
                 Top = 0
-                Width = 417
-                Height = 533
+                Width = 421
+                Height = 541
                 Align = alClient
                 BevelEdges = []
                 BevelOuter = bvNone
@@ -227,22 +228,22 @@ object frmMessageList: TfrmMessageList
             end
             object tsImageViewer: TKTabSheet
               Caption = 'Image viewer'
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
+              ExplicitTop = 16
+              ExplicitWidth = 425
+              ExplicitHeight = 541
             end
             object tsDataSet: TKTabSheet
               Caption = 'Dataset viewer'
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
+              ExplicitTop = 16
+              ExplicitWidth = 425
+              ExplicitHeight = 541
             end
             object tsRawData: TKTabSheet
               Caption = 'Raw data viewer'
               OnShow = tsRawDataShow
-              ExplicitTop = 0
-              ExplicitWidth = 0
-              ExplicitHeight = 0
+              ExplicitTop = 16
+              ExplicitWidth = 425
+              ExplicitHeight = 541
             end
           end
         end
@@ -250,7 +251,7 @@ object frmMessageList: TfrmMessageList
       object pnlMessageData: TPanel
         Left = 0
         Top = 20
-        Width = 417
+        Width = 423
         Height = 166
         Align = alTop
         BevelOuter = bvNone
@@ -260,7 +261,7 @@ object frmMessageList: TfrmMessageList
     object pnlLeft: TOMultiPanel
       Left = 0
       Top = 0
-      Width = 416
+      Width = 422
       Height = 746
       PanelType = ptVertical
       PanelCollection = <
@@ -284,7 +285,7 @@ object frmMessageList: TfrmMessageList
       object pnlCallStack: TPanel
         Left = 0
         Top = 0
-        Width = 416
+        Width = 422
         Height = 186
         Align = alTop
         BevelOuter = bvNone
@@ -292,7 +293,7 @@ object frmMessageList: TfrmMessageList
         object pnlCallStackTitle: TPanel
           Left = 0
           Top = 0
-          Width = 416
+          Width = 422
           Height = 20
           Align = alTop
           Alignment = taLeftJustify
@@ -312,7 +313,7 @@ object frmMessageList: TfrmMessageList
       object pnlWatches: TPanel
         Left = 0
         Top = 189
-        Width = 416
+        Width = 422
         Height = 557
         Align = alClient
         BevelOuter = bvNone
@@ -323,7 +324,7 @@ object frmMessageList: TfrmMessageList
         object pnlWatchTitle: TPanel
           Left = 0
           Top = 0
-          Width = 416
+          Width = 422
           Height = 20
           Align = alTop
           Alignment = taLeftJustify
@@ -339,10 +340,10 @@ object frmMessageList: TfrmMessageList
           ParentFont = False
           TabOrder = 0
           DesignSize = (
-            416
+            422
             20)
           object chkSyncWithSelectedMessage: TCheckBox
-            Left = 320
+            Left = 330
             Top = 2
             Width = 92
             Height = 17
@@ -361,7 +362,7 @@ object frmMessageList: TfrmMessageList
             OnClick = chkSyncWithSelectedMessageClick
           end
           object chkShowWatchHistory: TCheckBox
-            Left = 222
+            Left = 232
             Top = 2
             Width = 92
             Height = 17

@@ -1,5 +1,5 @@
 {
-  Copyright (C) 2013-2021 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2024 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@ uses
   System.SysUtils, System.Variants, System.Classes, System.Actions,
   System.Win.TaskbarCore, System.ImageList,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ComCtrls, Vcl.Taskbar,
-  Vcl.ExtCtrls, Vcl.ActnList, Vcl.ImgList, Vcl.Menus,
+  Vcl.ExtCtrls, Vcl.ActnList, Vcl.ImgList, Vcl.Menus, Vcl.StdCtrls,
+  Vcl.TitleBarCtrls,
 
   ChromeTabs, ChromeTabsClasses, ChromeTabsTypes,
   kcontrols, kprogress,
@@ -36,7 +37,7 @@ uses
   DDuce.Utils,
 
   LogViewer.Interfaces, LogViewer.Factories, LogViewer.Settings,
-  LogViewer.Dashboard.View, Vcl.StdCtrls, Vcl.TitleBarCtrls;
+  LogViewer.Dashboard.View;
 
 type
   TfrmMain = class(TForm)
@@ -212,13 +213,13 @@ begin
     // ignore it and continue with defaults
   end;
   Logger.Enabled := FSettings.EmitLogMessages;
-  if Logger.Enabled then
-  begin
-    // setup logchannel for using a log LogViewer instance to debug itself.
-    Logger.Channels.Add(
-      TZmqChannel.Create(Format('tcp://*:%d', [LOGVIEWER_ZMQ_PORT]))
-    );
-  end;
+//  if Logger.Enabled then
+//  begin
+//    // setup logchannel for using a log LogViewer instance to debug itself.
+//    Logger.Channels.Add(
+//      TZmqChannel.Create(Format('tcp://*:%d', [LOGVIEWER_ZMQ_PORT]))
+//    );
+//  end;
   Logger.Clear;
 
   FManager := TLogViewerFactories.CreateManager(Self, FSettings);

@@ -1,11 +1,11 @@
 object frmMessageFilter: TfrmMessageFilter
-  Left = 0
-  Top = 0
+  Left = 76
+  Top = 76
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSizeToolWin
   Caption = 'Message filter'
   ClientHeight = 627
-  ClientWidth = 215
+  ClientWidth = 233
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = ANSI_CHARSET
@@ -14,15 +14,13 @@ object frmMessageFilter: TfrmMessageFilter
   Font.Name = 'Segoe UI'
   Font.Style = []
   FormStyle = fsStayOnTop
-  OldCreateOrder = False
   PopupMode = pmAuto
   ScreenSnap = True
-  PixelsPerInch = 96
   TextHeight = 13
   object pnlMessageFilter: TPanel
     Left = 0
     Top = 0
-    Width = 215
+    Width = 233
     Height = 627
     Align = alClient
     BevelOuter = bvNone
@@ -32,7 +30,7 @@ object frmMessageFilter: TfrmMessageFilter
     object pgcMain: TKPageControl
       Left = 0
       Top = 0
-      Width = 215
+      Width = 233
       Height = 627
       ActivePageIndex = 0
       Align = alClient
@@ -40,12 +38,13 @@ object frmMessageFilter: TfrmMessageFilter
       TabOrder = 0
       object tsClientSide: TKTabSheet
         Caption = 'Client side'
+        ExplicitTop = 16
+        ExplicitHeight = 611
       end
       object tsSourceSide: TKTabSheet
         Caption = 'Source side'
-        ExplicitTop = 0
-        ExplicitWidth = 0
-        ExplicitHeight = 0
+        ExplicitTop = 16
+        ExplicitHeight = 611
       end
     end
   end

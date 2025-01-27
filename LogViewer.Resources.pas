@@ -1,5 +1,5 @@
 {
-  Copyright (C) 2013-2021 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2024 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -96,11 +96,6 @@ resourcestring
   SEnter       = 'Enter';
   SLeave       = 'Leave';
 
-  SSql         = 'SQL';
-  SXml         = 'XML';
-  SIni         = 'INI';
-  SJson        = 'JSON';
-
   // dashboard columns
   SId           = 'Id';
   SMessageCount = 'Messagecount';
@@ -142,35 +137,6 @@ const
   RECEIVERNAME_ZEROMQ     = 'ZeroMQ';
   RECEIVERNAME_COMPORT    = 'ComPort';
   RECEIVERNAME_FILESYSTEM = 'FileSystem';
-
-  // message type image indexes
-  IMGIDX_INFO        = 0;
-  IMGIDX_ERROR       = 1;
-  IMGIDX_WARNING     = 2;
-
-  IMGIDX_VALUE       = 19;
-  IMGIDX_STRINGS     = 8;
-  IMGIDX_COMPONENT   = 10;
-  IMGIDX_COLOR       = 22;
-  IMGIDX_PERSISTENT  = 16;
-  IMGIDX_INTERFACE   = 17;
-  IMGIDX_OBJECT      = 18;
-  IMGIDX_DATASET     = 20;
-  IMGIDX_ACTION      = 21;
-  IMGIDX_BITMAP      = 12;
-  IMGIDX_SCREENSHOT  = 12;
-  IMGIDX_EXCEPTION   = 11;
-
-  IMGIDX_SQL         = 27;
-  IMGIDX_XML         = 28;
-  IMGIDX_INI         = 30;
-  IMGIDX_JSON        = 26;
-
-  IMGIDX_TRACE       = 25;
-  IMGIDX_CHECKPOINT  = 7;
-  IMGIDX_TRACKMETHOD = 9;
-  IMGIDX_ENTER       = 4;
-  IMGIDX_LEAVE       = 5;
 
 resourcestring
   SReceiverCaptionWinIPC     = 'Windows IPC receiver';

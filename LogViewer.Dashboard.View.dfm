@@ -3,7 +3,7 @@ object frmDashboard: TfrmDashboard
   Top = 0
   Caption = 'Dashboard'
   ClientHeight = 616
-  ClientWidth = 1046
+  ClientWidth = 1048
   Color = clWhite
   DoubleBuffered = True
   Font.Charset = ANSI_CHARSET
@@ -11,14 +11,13 @@ object frmDashboard: TfrmDashboard
   Font.Height = -11
   Font.Name = 'Segoe UI'
   Font.Style = []
-  OldCreateOrder = False
+  Position = poDesigned
   ShowHint = True
-  PixelsPerInch = 96
   TextHeight = 13
   object pnlMain: TOMultiPanel
     Left = 0
     Top = 0
-    Width = 1046
+    Width = 1048
     Height = 616
     PanelCollection = <
       item
@@ -38,6 +37,8 @@ object frmDashboard: TfrmDashboard
     SplitterHoverColor = clScrollBar
     Align = alClient
     TabOrder = 0
+    ExplicitWidth = 1042
+    ExplicitHeight = 599
     object pnlLeft: TPanel
       Left = 0
       Top = 0
@@ -59,18 +60,20 @@ object frmDashboard: TfrmDashboard
         Height = 616
         ActivePageIndex = 2
         Align = alClient
+        ParentBackground = False
         TabHeight = 0
         TabOrder = 0
+        ExplicitWidth = 313
+        ExplicitHeight = 599
         object tsWinIpc: TKTabSheet
           Caption = 'WinIPC'
-          ExplicitWidth = 0
-          ExplicitHeight = 0
+          ExplicitWidth = 315
           object lblWinIPC: TLabel
             AlignWithMargins = True
             Left = 3
-            Top = 28
-            Width = 307
-            Height = 221
+            Top = 29
+            Width = 304
+            Height = 255
             Align = alClient
             Caption = 
               'Messages are exchanged between the source application and LogVie' +
@@ -93,7 +96,7 @@ object frmDashboard: TfrmDashboard
           object pnlWinIPCTitle: TPanel
             Left = 0
             Top = 0
-            Width = 314
+            Width = 315
             Height = 25
             Align = alTop
             Alignment = taLeftJustify
@@ -111,12 +114,11 @@ object frmDashboard: TfrmDashboard
         end
         object tsWinOds: TKTabSheet
           Caption = 'WinODS'
-          ExplicitWidth = 0
-          ExplicitHeight = 0
+          ExplicitWidth = 315
           object lblWinods: TLabel
             AlignWithMargins = True
             Left = 3
-            Top = 28
+            Top = 29
             Width = 308
             Height = 374
             Align = alClient
@@ -147,7 +149,7 @@ object frmDashboard: TfrmDashboard
           object pnlWinodsTitle: TPanel
             Left = 0
             Top = 0
-            Width = 314
+            Width = 315
             Height = 25
             Align = alTop
             Alignment = taLeftJustify
@@ -165,6 +167,8 @@ object frmDashboard: TfrmDashboard
         end
         object tsZeroMQ: TKTabSheet
           Caption = 'ZeroMQ'
+          ExplicitWidth = 313
+          ExplicitHeight = 599
           object pnlZmqEndpoints: TPanel
             Left = 0
             Top = 25
@@ -175,6 +179,8 @@ object frmDashboard: TfrmDashboard
             BevelOuter = bvNone
             ParentColor = True
             TabOrder = 0
+            ExplicitWidth = 313
+            ExplicitHeight = 857
           end
           object pnlZeroMQTitle: TPanel
             Left = 0
@@ -193,6 +199,7 @@ object frmDashboard: TfrmDashboard
             ParentColor = True
             ParentFont = False
             TabOrder = 1
+            ExplicitWidth = 313
           end
           object pnlButtons: TGridPanel
             Left = 0
@@ -235,6 +242,8 @@ object frmDashboard: TfrmDashboard
                 SizeStyle = ssAuto
               end>
             TabOrder = 2
+            ExplicitTop = 551
+            ExplicitWidth = 313
             object btnSubscribeToLocalHost: TButton
               AlignWithMargins = True
               Left = 3
@@ -261,12 +270,11 @@ object frmDashboard: TfrmDashboard
         end
         object tsFileSystem: TKTabSheet
           Caption = 'FileSystem'
-          ExplicitWidth = 0
-          ExplicitHeight = 0
+          ExplicitWidth = 315
           object pnlFileSystemTitle: TPanel
             Left = 0
             Top = 0
-            Width = 314
+            Width = 315
             Height = 25
             Align = alTop
             Alignment = taLeftJustify
@@ -284,7 +292,7 @@ object frmDashboard: TfrmDashboard
           object pnlFSLocations: TPanel
             Left = 0
             Top = 25
-            Width = 314
+            Width = 315
             Height = 591
             Align = alClient
             BevelOuter = bvNone
@@ -293,12 +301,11 @@ object frmDashboard: TfrmDashboard
         end
         object tsComPort: TKTabSheet
           Caption = 'COM port'
-          ExplicitWidth = 0
-          ExplicitHeight = 0
+          ExplicitWidth = 315
           object pnlComPorts: TPanel
             Left = 0
             Top = 25
-            Width = 314
+            Width = 315
             Height = 591
             Align = alClient
             BevelOuter = bvNone
@@ -307,7 +314,7 @@ object frmDashboard: TfrmDashboard
           object pnlComPortTitle: TPanel
             Left = 0
             Top = 0
-            Width = 314
+            Width = 315
             Height = 25
             Align = alTop
             Alignment = taLeftJustify
@@ -329,7 +336,7 @@ object frmDashboard: TfrmDashboard
       AlignWithMargins = True
       Left = 317
       Top = 0
-      Width = 729
+      Width = 731
       Height = 616
       Margins.Left = 0
       Margins.Bottom = 0
@@ -340,7 +347,7 @@ object frmDashboard: TfrmDashboard
   end
   object aclMain: TActionList
     Images = imlMain
-    Left = 464
+    Left = 500
     Top = 8
     object actSubscribeToLocalHost: TAction
       Caption = 'Subscribe to default local publisher (tcp://localhost:5555)'
@@ -794,7 +801,7 @@ object frmDashboard: TfrmDashboard
       000000000000}
   end
   object ppmSubscriber: TPopupMenu
-    Left = 520
-    Top = 8
+    Left = 816
+    Top = 12
   end
 end

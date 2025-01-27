@@ -1,5 +1,5 @@
 ﻿{
-  Copyright (C) 2013-2021 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2024 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -248,20 +248,12 @@ end;
 
 function TWatch.GetTimeStamp: TDateTime;
 begin
-  if (FCurrentIndex >= 0) and (FCurrentIndex < FList.Count) then
-  begin
-    Result := FList[FCurrentIndex].TimeStamp;
-  end
-  else
-    Result := Default(TDateTime);
+  Result := FList[FCurrentIndex].TimeStamp;
 end;
 
 function TWatch.GetValues(AIndex: Integer): string;
 begin
-  if (AIndex >= 0) and (AIndex < FList.Count) then
-    Result := FList[AIndex].Value
-  else
-    Result := '';
+  Result := FList[AIndex].Value;
 end;
 
 function TWatch.GetValueType: string;

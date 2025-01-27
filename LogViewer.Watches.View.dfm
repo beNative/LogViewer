@@ -1,8 +1,8 @@
 object frmWatchesView: TfrmWatchesView
-  Left = 0
-  Top = 0
+  Left = 4068
+  Top = 228
   ClientHeight = 739
-  ClientWidth = 444
+  ClientWidth = 450
   Color = clWhite
   DoubleBuffered = True
   Font.Charset = ANSI_CHARSET
@@ -10,14 +10,12 @@ object frmWatchesView: TfrmWatchesView
   Font.Height = -11
   Font.Name = 'Segoe UI'
   Font.Style = []
-  OldCreateOrder = False
   ShowHint = True
-  PixelsPerInch = 96
   TextHeight = 13
   object pnlMain: TOMultiPanel
     Left = 0
     Top = 0
-    Width = 444
+    Width = 450
     Height = 739
     PanelType = ptVertical
     PanelCollection = <
@@ -42,7 +40,7 @@ object frmWatchesView: TfrmWatchesView
     object pnlWatches: TPanel
       Left = 0
       Top = 0
-      Width = 444
+      Width = 450
       Height = 370
       Align = alTop
       BevelOuter = bvNone
@@ -51,7 +49,7 @@ object frmWatchesView: TfrmWatchesView
     object pnlWatchHistory: TPanel
       Left = 0
       Top = 373
-      Width = 444
+      Width = 450
       Height = 366
       Align = alBottom
       BevelOuter = bvNone

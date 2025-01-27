@@ -1,8 +1,8 @@
 object frmWatchSettings: TfrmWatchSettings
-  Left = 0
-  Top = 0
+  Left = 190
+  Top = 190
   ClientHeight = 209
-  ClientWidth = 354
+  ClientWidth = 366
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -10,8 +10,6 @@ object frmWatchSettings: TfrmWatchSettings
   Font.Height = -11
   Font.Name = 'Segoe UI'
   Font.Style = []
-  OldCreateOrder = False
-  PixelsPerInch = 96
   TextHeight = 13
   object chkOnlyTrackChanges: TCheckBox
     Left = 16

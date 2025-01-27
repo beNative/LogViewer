@@ -1,5 +1,5 @@
 {
-  Copyright (C) 2013-2021 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2024 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ uses
 
   LogViewer.Interfaces, LogViewer.Settings, LogViewer.Events,
   LogViewer.Commands,
-  LogViewer.MessageFilter.View;
+  LogViewer.MessageFilter.View, Vcl.BaseImageCollection, SVGIconImageCollection;
 
 type
   TdmManager = class(TDataModule, ILogViewerActions,

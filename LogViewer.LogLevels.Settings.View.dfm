@@ -1,8 +1,8 @@
 object frmLogLevelSettings: TfrmLogLevelSettings
-  Left = 0
-  Top = 0
+  Left = 304
+  Top = 304
   ClientHeight = 411
-  ClientWidth = 516
+  ClientWidth = 522
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = ANSI_CHARSET
@@ -10,8 +10,6 @@ object frmLogLevelSettings: TfrmLogLevelSettings
   Font.Height = -11
   Font.Name = 'Segoe UI'
   Font.Style = []
-  OldCreateOrder = False
-  PixelsPerInch = 96
   TextHeight = 13
   object splVertical: TSplitter
     Left = 281
@@ -25,7 +23,7 @@ object frmLogLevelSettings: TfrmLogLevelSettings
   object pnlRight: TPanel
     Left = 285
     Top = 0
-    Width = 231
+    Width = 237
     Height = 411
     Align = alClient
     BevelOuter = bvNone

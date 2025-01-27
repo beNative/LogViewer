@@ -1,5 +1,5 @@
 {
-  Copyright (C) 2013-2021 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2024 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ uses
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
   Vcl.ExtCtrls, Vcl.Buttons, Vcl.ComCtrls, Vcl.ImgList,
 
-  VirtualTrees, kcontrols, kpagecontrol, OMultiPanel,
+  VirtualTrees, VirtualTrees.BaseTree, kcontrols, kpagecontrol, OMultiPanel,
 
   Spring, Spring.Collections,
 
@@ -574,24 +574,24 @@ begin
   C.Text     := '';
   C.Margin   := 0;
   C.Spacing  := 0;
-  C.Width    := 10;
-  C.MinWidth := 10;
-  C.MaxWidth := 10;
+  C.Width    := ScaleSize(10);
+  C.MinWidth := ScaleSize(10);
+  C.MaxWidth := ScaleSize(10);
 
   C := FLogTreeView.Header.Columns.Add; // message type
   C.Text     := '';
   C.Options  := C.Options - [coSmartResize, coAutoSpring];
   if B then
   begin
-    C.Width    := 100;
-    C.MinWidth := 100;
+    C.Width    := ScaleSize(100);
+    C.MinWidth := ScaleSize(100);
     C.MaxWidth := 2000;
   end
   else
   begin
-    C.Width    := 20;
-    C.MinWidth := 20;
-    C.MaxWidth := 40;
+    C.Width    := ScaleSize(20);
+    C.MinWidth := ScaleSize(20);
+    C.MaxWidth := ScaleSize(40);
   end;
 
   C := FLogTreeView.Header.Columns.Add; // name
@@ -601,15 +601,15 @@ begin
   else
     C.Options  := C.Options + [coSmartResize, coAutoSpring];
 
-  C.Width    := 100;
-  C.MinWidth := 100;
+  C.Width    := ScaleSize(100);
+  C.MinWidth := ScaleSize(100);
   C.MaxWidth := 2000;
 
   C := FLogTreeView.Header.Columns.Add; // value
   C.Text     := SValue;
   C.Options  := C.Options + [coSmartResize, coAutoSpring];
-  C.Width    := 100;
-  C.MinWidth := 100;
+  C.Width    := ScaleSize(100);
+  C.MinWidth := ScaleSize(100);
   C.MaxWidth := 2000;
 
   C := FLogTreeView.Header.Columns.Add;
@@ -619,16 +619,17 @@ begin
     C.Options  := C.Options - [coVisible, coSmartResize, coAutoSpring]
   else
     C.Options := C.Options + [coSmartResize, coAutoSpring];
-  C.Width     := 70;
-  C.MinWidth  := 75;
+  C.Width     := ScaleSize(75);
+  C.MinWidth  := ScaleSize(75);
   C.MaxWidth  := 2000;
 
   C := FLogTreeView.Header.Columns.Add; // timestamp
   C.Text     := STimestamp;
-  C.MinWidth := 10 * DisplayValuesSettings.TimeStamp.Font.Size;
+  C.MinWidth := ScaleSize(12 * DisplayValuesSettings.TimeStamp.Font.Size);
   C.Width    := C.MinWidth;
   C.MaxWidth := C.MinWidth;
   C.Alignment := taRightJustify;
+
   FLogTreeView.Header.AutoSizeIndex := COLUMN_MAIN;
   FLogTreeView.Header.Options       :=
     FLogTreeView.Header.Options + [hoFullRepaintOnResize];
@@ -2165,7 +2166,7 @@ begin
   LColumn.MaxWidth := LTotalWidth div 6;
   LColumn.MinWidth := LTotalWidth div 10;
   LColumn := FLogTreeView.Header.Columns[COLUMN_TIMESTAMP];
-  LColumn.MinWidth := 10 * DisplayValuesSettings.TimeStamp.Font.Size;
+  LColumn.MinWidth := 15 * DisplayValuesSettings.TimeStamp.Font.Size;
   LColumn.Width    := LColumn.MinWidth;
   LColumn.MaxWidth := LColumn.MinWidth;
 

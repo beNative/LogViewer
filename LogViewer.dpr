@@ -87,5 +87,3 @@ begin
   Logger.Info('LogViewer Started.');
   Application.Run;
 end.
-
-

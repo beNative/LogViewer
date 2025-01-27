@@ -1,5 +1,5 @@
 {
-  Copyright (C) 2013-2021 Tim Sinaeve tim.sinaeve@gmail.com
+  Copyright (C) 2013-2024 Tim Sinaeve tim.sinaeve@gmail.com
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -159,7 +159,7 @@ uses
   DSharp.Windows.ControlTemplates,
 
   DDuce.Factories.TreeViewPresenter, DDuce.Factories.VirtualTrees,
-  DDuce.Logger, DDuce.Logger.Interfaces,
+  DDuce.Logger, DDuce.Logger.Interfaces, DDuce.Utils,
 
   LogViewer.Resources;
 
@@ -362,8 +362,8 @@ begin
 
   CD                   := CDS.Add(COLUMNNAME_TIMESTAMP);
   CD.ValuePropertyName := COLUMNNAME_TIMESTAMP;
-  CD.MinWidth          := 80;
-  CD.Width             := 80;
+  CD.MinWidth          := ScaleSize(12 * FDisplayValuesSettings.TimeStamp.Font.Size);
+  CD.Width             := CD.MinWidth;
   CD.HintPropertyName  := CD.ValuePropertyName;
   CD.Alignment         := taCenter;
   CD.OnGetText         := FCDTimeStampGetText;
@@ -384,8 +384,8 @@ begin
   CD.ColumnOptions     := CD.ColumnOptions - [coSortable];
 
   CD                   := FWatchHistoryColumnDefinitions.Add(COLUMNNAME_TIMESTAMP);
-  CD.MinWidth          := 80;
-  CD.Width             := 80;
+  CD.MinWidth          := ScaleSize(12 * FDisplayValuesSettings.TimeStamp.Font.Size);
+  CD.Width             := CD.MinWidth;
   CD.ValuePropertyName := COLUMNNAME_TIMESTAMP;
   CD.HintPropertyName  := CD.ValuePropertyName;
   CD.Alignment         := taCenter;

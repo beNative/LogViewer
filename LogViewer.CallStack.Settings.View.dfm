@@ -1,8 +1,8 @@
 object frmCallStackSettings: TfrmCallStackSettings
-  Left = 0
-  Top = 0
+  Left = 342
+  Top = 342
   ClientHeight = 36
-  ClientWidth = 171
+  ClientWidth = 188
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = ANSI_CHARSET
@@ -10,8 +10,6 @@ object frmCallStackSettings: TfrmCallStackSettings
   Font.Height = -11
   Font.Name = 'Segoe UI'
   Font.Style = []
-  OldCreateOrder = False
-  PixelsPerInch = 96
   TextHeight = 13
   object chkHideColumnHeaders: TCheckBox
     Left = 16
