@@ -4,19 +4,17 @@ object frmMain: TfrmMain
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   ClientHeight = 30
-  ClientWidth = 272
-  Color = clBtnFace
+  ClientWidth = 306
+  Color = clWindow
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'Segoe UI'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
   ScreenSnap = True
   Visible = True
-  PixelsPerInch = 96
   TextHeight = 13
   object lblIPC: TLabel
     Left = 4
@@ -26,20 +24,20 @@ object frmMain: TfrmMain
     Caption = 'IPC:'
   end
   object shpStat: TShape
-    Left = 243
-    Top = 7
+    Left = 276
+    Top = 6
     Width = 21
-    Height = 16
+    Height = 19
     Brush.Color = clBackground
   end
   object edtIPCPort: TLabeledEdit
-    Left = 115
-    Top = 4
-    Width = 73
+    Left = 140
+    Top = 5
+    Width = 68
     Height = 21
     Alignment = taCenter
     EditLabel.Width = 24
-    EditLabel.Height = 13
+    EditLabel.Height = 21
     EditLabel.Caption = 'Port:'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -53,9 +51,9 @@ object frmMain: TfrmMain
     Text = '5555'
   end
   object chkIPCAutoPort: TCheckBox
-    Left = 194
+    Left = 213
     Top = 7
-    Width = 41
+    Width = 58
     Height = 17
     Hint = 'Auto assign TCP port for IPC messages'
     Caption = 'Auto'
@@ -64,8 +62,8 @@ object frmMain: TfrmMain
   end
   object tsIPC: TToggleSwitch
     Left = 27
-    Top = 4
-    Width = 54
+    Top = 5
+    Width = 81
     Height = 20
     TabOrder = 2
   end
