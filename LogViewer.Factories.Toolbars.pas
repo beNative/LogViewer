@@ -192,7 +192,7 @@ begin
   TB := TToolBar.Create(AOwner);
   ApplyDefaultProperties(TB);
   TB.Parent           := AParent;
-  TB.Images           := FActions.ActionList.Images;
+  //TB.Images           := FActions.ActionList.Images;
   TB.ButtonWidth      := 10;
   TB.AllowTextButtons := True;
   CreateToolButton(TB, 'actDashboard', tbsTextButton);
@@ -225,7 +225,7 @@ begin
   TB := TToolBar.Create(AOwner);
   ApplyDefaultProperties(TB);
   TB.Parent           := AParent;
-  TB.Images           := FActions.ActionList.Images;
+//  TB.Images           := FActions.ActionList.Images;
   TB.ButtonWidth      := 10;
   TB.AllowTextButtons := True;
   CreateToolButton(TB, 'actAbout');

@@ -37,7 +37,7 @@ uses
   DDuce.Utils,
 
   LogViewer.Interfaces, LogViewer.Factories, LogViewer.Settings,
-  LogViewer.Dashboard.View;
+  LogViewer.Dashboard.View, Vcl.VirtualImageList;
 
 type
   TfrmMain = class(TForm)
@@ -45,7 +45,6 @@ type
     actCenterToScreen : TAction;
     actShowVersion    : TAction;
     ctMain            : TChromeTabs;
-    imlMain           : TImageList;
     imlTabStates      : TImageList;
     pbrCPU            : TKPercentProgressBar;
     pnlDelta          : TPanel;
@@ -60,6 +59,7 @@ type
     shpLine           : TShape;
     tbrMain           : TTaskbar;
     tmrPoll           : TTimer;
+    imlMain           : TVirtualImageList;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -223,10 +223,13 @@ begin
   Logger.Clear;
 
   FManager := TLogViewerFactories.CreateManager(Self, FSettings);
+  imlMain.ImageCollection := FManager.ImageCollection;
   Events.OnAddLogViewer.Add(EventsAddLogViewer);
   Events.OnDeleteLogViewer.Add(EventsDeleteLogViewer);
   Events.OnActiveViewChange.Add(EventsActiveViewChange);
   Events.OnShowDashboard.Add(EventsShowDashboard);
+  Actions.ActionList.Images := imlMain;
+  Menus.LogTreeViewerPopupMenu.Images := imlMain;
   FSettings.FormSettings.AssignTo(Self);
   FSettings.OnChanged.Add(SettingsChanged);
   FMainToolbar := TLogViewerFactories.CreateMainToolbar(
@@ -235,6 +238,7 @@ begin
     Actions,
     Menus
   );
+  FMainToolbar.Images := imlMain;
   CreateDashboardView;
   ctMain.LookAndFeel.Tabs.NotActive.Style.StartColor := ColorToRGB(clBtnFace);
   ctMain.LookAndFeel.Tabs.NotActive.Style.StopColor  := ColorToRGB(clBtnFace);

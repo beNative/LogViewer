@@ -46,6 +46,8 @@ object frmMessageList: TfrmMessageList
     BevelEdges = []
     OnCanResize = pnlMainCanResize
     TabOrder = 0
+    ExplicitWidth = 1273
+    ExplicitHeight = 729
     object pnlMessages: TPanel
       Left = 425
       Top = 0
@@ -67,6 +69,7 @@ object frmMessageList: TfrmMessageList
         ParentColor = True
         TabOrder = 0
         StyleElements = [seFont, seBorder]
+        ExplicitWidth = 426
         object edtMessageFilter: TButtonedEdit
           Left = 0
           Top = 0
@@ -89,7 +92,6 @@ object frmMessageList: TfrmMessageList
           Font.Height = -11
           Font.Name = 'Tahoma'
           Font.Style = []
-          Images = dmManager.imlMain
           ParentFont = False
           RightButton.ImageIndex = 15
           RightButton.Visible = True
@@ -101,6 +103,7 @@ object frmMessageList: TfrmMessageList
           OnKeyUp = edtMessageFilterKeyUp
           OnMouseEnter = edtMessageFilterMouseEnter
           OnMouseLeave = edtMessageFilterMouseLeave
+          ExplicitWidth = 426
         end
       end
     end
@@ -118,14 +121,13 @@ object frmMessageList: TfrmMessageList
       TabOrder = 2
       object splRightHorizontal: TSplitter
         Left = 0
-        Top = 186
+        Top = 204
         Width = 423
-        Height = 3
+        Height = 2
         Cursor = crVSplit
         Align = alTop
         Color = clScrollBar
         ParentColor = False
-        ExplicitWidth = 425
       end
       object pnlMessageContent: TPanel
         Left = 0
@@ -145,6 +147,7 @@ object frmMessageList: TfrmMessageList
         ParentBackground = False
         ParentFont = False
         TabOrder = 0
+        ExplicitWidth = 421
         DesignSize = (
           423
           20)
@@ -164,13 +167,14 @@ object frmMessageList: TfrmMessageList
           ParentFont = False
           TabOrder = 0
           OnClick = chkShowDetailsClick
+          ExplicitLeft = 321
         end
       end
       object pgcMessageData: TKPageControl
         Left = 0
-        Top = 189
+        Top = 206
         Width = 423
-        Height = 557
+        Height = 540
         ActivateNewDocked = False
         ActivePageIndex = 0
         Align = alClient
@@ -185,13 +189,16 @@ object frmMessageList: TfrmMessageList
         TabPanelOptions.Colors.SelectedBottom = clBtnHighlight
         TabPanelOptions.Colors.TabBorder = cl3DLight
         TabPanelOptions.Options = [toDrag, toBrightTopColors]
+        ExplicitTop = 189
+        ExplicitWidth = 421
         object tsMessageView: TKTabSheet
           Caption = 'MessageView'
+          ExplicitWidth = 421
           object pgcMessageDetails: TKPageControl
             Left = 0
             Top = 0
             Width = 423
-            Height = 557
+            Height = 540
             ActivateNewDocked = False
             ActivePageIndex = 0
             Align = alClient
@@ -206,44 +213,39 @@ object frmMessageList: TfrmMessageList
             TabPanelOptions.Colors.SelectedBottom = clBtnHighlight
             TabPanelOptions.Colors.TabBorder = clBtnHighlight
             TabPanelOptions.Options = []
+            ExplicitWidth = 421
             object tsValueList: TKTabSheet
               Caption = 'Value list'
+              ExplicitWidth = 421
             end
             object tsTextViewer: TKTabSheet
               Caption = 'Text viewer'
-              ExplicitTop = 16
-              ExplicitWidth = 425
-              ExplicitHeight = 541
+              ExplicitHeight = 533
               object pnlTextViewer: TPanel
                 Left = 0
                 Top = 0
-                Width = 421
-                Height = 541
+                Width = 423
+                Height = 516
                 Align = alClient
                 BevelEdges = []
                 BevelOuter = bvNone
                 Color = clWhite
                 TabOrder = 0
+                ExplicitHeight = 533
               end
             end
             object tsImageViewer: TKTabSheet
               Caption = 'Image viewer'
-              ExplicitTop = 16
-              ExplicitWidth = 425
-              ExplicitHeight = 541
+              ExplicitHeight = 533
             end
             object tsDataSet: TKTabSheet
               Caption = 'Dataset viewer'
-              ExplicitTop = 16
-              ExplicitWidth = 425
-              ExplicitHeight = 541
+              ExplicitHeight = 533
             end
             object tsRawData: TKTabSheet
               Caption = 'Raw data viewer'
               OnShow = tsRawDataShow
-              ExplicitTop = 16
-              ExplicitWidth = 425
-              ExplicitHeight = 541
+              ExplicitHeight = 533
             end
           end
         end
@@ -252,7 +254,7 @@ object frmMessageList: TfrmMessageList
         Left = 0
         Top = 20
         Width = 423
-        Height = 166
+        Height = 184
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 2
@@ -308,6 +310,7 @@ object frmMessageList: TfrmMessageList
           ParentBackground = False
           ParentFont = False
           TabOrder = 0
+          ExplicitWidth = 420
         end
       end
       object pnlWatches: TPanel
@@ -339,6 +342,7 @@ object frmMessageList: TfrmMessageList
           ParentBackground = False
           ParentFont = False
           TabOrder = 0
+          ExplicitWidth = 420
           DesignSize = (
             422
             20)
@@ -360,6 +364,7 @@ object frmMessageList: TfrmMessageList
             State = cbChecked
             TabOrder = 0
             OnClick = chkSyncWithSelectedMessageClick
+            ExplicitLeft = 328
           end
           object chkShowWatchHistory: TCheckBox
             Left = 232
@@ -377,12 +382,13 @@ object frmMessageList: TfrmMessageList
             ParentFont = False
             TabOrder = 1
             OnClick = chkShowWatchHistoryClick
+            ExplicitLeft = 230
           end
         end
       end
     end
   end
-  object imlMessageTypes: TImageList
+  object imlMessageTypes_: TImageList
     ColorDepth = cd32Bit
     Left = 55
     Top = 22
@@ -1317,5 +1323,12 @@ object frmMessageList: TfrmMessageList
       000000008000000000008001800180010000C003C001E0070000C003C003FFFF
       0000F00FE00FFFFF0000F81FF83FFFFF00000000000000000000000000000000
       000000000000}
+  end
+  object imlMain: TVirtualImageList
+    AutoFill = True
+    Images = <>
+    ImageNameAvailable = False
+    Left = 208
+    Top = 40
   end
 end

@@ -24,12 +24,14 @@ uses
   Winapi.Windows, Winapi.Messages,
   System.SysUtils, System.Variants, System.Classes,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls,
+  Vcl.ImageCollection,
 
   VirtualTrees, VirtualTrees.BaseTree, kpagecontrol, kcontrols,
 
   DDuce.Logger.Interfaces, DDuce.Components.VirtualTrees.Node,
 
-  LogViewer.MessageList.Settings, LogViewer.MessageFilter.Data;
+  LogViewer.MessageList.Settings, LogViewer.MessageFilter.Data,
+  System.ImageList, Vcl.ImgList, Vcl.VirtualImageList;
 
 type
   TFilterData = LogViewer.MessageFilter.Data.TFilterData;
@@ -41,11 +43,12 @@ type
     pgcMain          : TKPageControl;
     tsClientSide     : TKTabSheet;
     tsSourceSide     : TKTabSheet;
+    imlMain: TVirtualImageList;
 
   private
     FCSTree    : TVirtualStringTree;
     FSSTree    : TVirtualStringTree;
-    FImageList : TImageList;
+    FImageList : TVirtualImageList;
     FSettings  : TMessageListSettings;
 
   protected
@@ -100,9 +103,9 @@ type
 
   public
     constructor Create(
-      AOwner     : TComponent;
-      ASettings  : TMessageListSettings;
-      AImageList : TImageList
+      AOwner           : TComponent;
+      ASettings        : TMessageListSettings;
+      AImageCollection : TImageCollection
     ); reintroduce; virtual;
     procedure AfterConstruction; override;
     destructor Destroy; override;
@@ -164,14 +167,15 @@ begin
 end;
 
 constructor TfrmMessageFilter.Create(AOwner: TComponent;
-  ASettings: TMessageListSettings; AImageList: TImageList);
+  ASettings: TMessageListSettings; AImageCollection: TImageCollection);
 begin
   inherited Create(AOwner);
   Guard.CheckNotNull(ASettings, 'ASettings');
-  Guard.CheckNotNull(AImageList, 'AImageList');
+  Guard.CheckNotNull(AImageCollection, 'AImageList');
   FSettings  := ASettings;
   FSettings.OnChanged.Add(FSettingsChanged);
-  FImageList := AImageList;
+  FImageList := imlMain;
+  FImageList.ImageCollection := AImageCollection;
 end;
 
 destructor TfrmMessageFilter.Destroy;

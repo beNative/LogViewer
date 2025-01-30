@@ -1059,76 +1059,76 @@ begin
     with Header.Columns.Add do
     begin
       Color    := clWhite;
-      MaxWidth := 800;
-      MinWidth := 100;
+      MaxWidth := ScaleSize(800);
+      MinWidth := ScaleSize(100);
       Options  := [coAllowClick, coEnabled, coParentBidiMode, coResizable,
         coVisible, coSmartResize, coAllowFocus];
       Position := COLUMN_SOURCENAME;
-      Indent   := 8;
-      Width    := 100;
+      Indent   := ScaleSize(8);
+      Width    := ScaleSize(100);
       Text     := SName;
     end;
     with Header.Columns.Add do
     begin
-      MaxWidth := 400;
-      MinWidth := 150;
+      MaxWidth := ScaleSize(400);
+      MinWidth := ScaleSize(150);
       Options  := [coAllowClick, coEnabled, coParentBidiMode, coResizable,
         coVisible, coSmartResize, coAllowFocus];
       Position := COLUMN_KEY;
-      Width    := 200;
+      Width    := ScaleSize(200);
       Text     := SValue;
     end;
     with Header.Columns.Add do
     begin
-      MaxWidth  := 80;
-      MinWidth  := 80;
+      MaxWidth  := ScaleSize(80);
+      MinWidth  := ScaleSize(80);
       Options   := [coAllowClick, coEnabled, coParentBidiMode, coVisible,
         coAutoSpring, coAllowFocus];
       Position  := COLUMN_SOURCEID;
-      Width     := 80;
+      Width     := ScaleSize(80);
       Alignment := taCenter;
       Text      := SId;
     end;
     with Header.Columns.Add do
     begin
-      MaxWidth  := 90;
-      MinWidth  := 90;
+      MaxWidth  := ScaleSize(90);
+      MinWidth  := ScaleSize(90);
       Options   := [coAllowClick, coEnabled, coParentBidiMode,
         coVisible, coAllowFocus];
       Position  := COLUMN_MESSAGECOUNT;
-      Width     := 90;
+      Width     := ScaleSize(90);
       Alignment := taCenter;
       Text      := SMessageCount;
     end;
     with Header.Columns.Add do
     begin
-      MaxWidth  := 80;
-      MinWidth  := 80;
+      MaxWidth  := ScaleSize(80);
+      MinWidth  := ScaleSize(80);
       Options   := [coAllowClick, coEnabled, coParentBidiMode,
         coVisible, coAllowFocus];
       Position  := COLUMN_BYTES_RECEIVED;
-      Width     := 80;
+      Width     := ScaleSize(80);
       Alignment := taCenter;
       Text      := SBytesReceived;
     end;
     with Header.Columns.Add do
     begin
-      MaxWidth := 120;
-      MinWidth := 120;
+      MaxWidth := ScaleSize(120);
+      MinWidth := ScaleSize(120);
       Options  := [coAllowClick, coEnabled, coParentBidiMode, coVisible,
         coAllowFocus];
       Position := COLUMN_TIMESTAMP_FIRST;
-      Width    := 120;
+      Width    := ScaleSize(120);
       Text     := STimeStampFirst;
     end;
     with Header.Columns.Add do
     begin
-      MaxWidth := 120;
-      MinWidth := 120;
+      MaxWidth := ScaleSize(120);
+      MinWidth := ScaleSize(120);
       Options  := [coAllowClick, coEnabled, coParentBidiMode,
         coVisible, coAllowFocus];
       Position := COLUMN_TIMESTAMP_LAST;
-      Width    := 120;
+      Width    := ScaleSize(120);
       Text     := STimeStampLast;
     end;
     Header.MainColumn := 0;
@@ -1136,7 +1136,7 @@ begin
     TreeOptions.PaintOptions := TreeOptions.PaintOptions + [toShowTreeLines];
   end;
   FTreeView.Header.AutoSizeIndex := 0;
-  FTreeView.Indent := 30;
+  FTreeView.Indent := ScaleSize(30);
 end;
 
 { Called when actions in the manager need to be updated. }

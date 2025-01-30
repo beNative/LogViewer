@@ -37,6 +37,8 @@ object frmWatchesView: TfrmWatchesView
     Align = alClient
     BevelEdges = []
     TabOrder = 0
+    ExplicitWidth = 444
+    ExplicitHeight = 722
     object pnlWatches: TPanel
       Left = 0
       Top = 0

@@ -27,6 +27,8 @@ object frmMessageFilter: TfrmMessageFilter
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
+    ExplicitWidth = 227
+    ExplicitHeight = 610
     object pgcMain: TKPageControl
       Left = 0
       Top = 0
@@ -36,16 +38,26 @@ object frmMessageFilter: TfrmMessageFilter
       Align = alClient
       ParentBackground = False
       TabOrder = 0
+      ExplicitWidth = 227
+      ExplicitHeight = 610
       object tsClientSide: TKTabSheet
         Caption = 'Client side'
-        ExplicitTop = 16
-        ExplicitHeight = 611
+        ExplicitWidth = 227
+        ExplicitHeight = 586
       end
       object tsSourceSide: TKTabSheet
         Caption = 'Source side'
         ExplicitTop = 16
+        ExplicitWidth = 0
         ExplicitHeight = 611
       end
     end
+  end
+  object imlMain: TVirtualImageList
+    AutoFill = True
+    Images = <>
+    ImageNameAvailable = False
+    Left = 96
+    Top = 184
   end
 end

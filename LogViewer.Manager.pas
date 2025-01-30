@@ -24,14 +24,17 @@ uses
   System.SysUtils, System.Classes, System.Actions, System.ImageList,
   System.Generics.Collections,
   Vcl.ExtCtrls, Vcl.ImgList, Vcl.Controls, Vcl.ActnList, Vcl.Menus,
+  Vcl.ImageCollection, Vcl.BaseImageCollection,
 
   Spring, Spring.Collections,
+
+  SVGIconImageCollection,
 
   DDuce.Logger.Interfaces, DDuce.Editor.Interfaces,
 
   LogViewer.Interfaces, LogViewer.Settings, LogViewer.Events,
   LogViewer.Commands,
-  LogViewer.MessageFilter.View, Vcl.BaseImageCollection, SVGIconImageCollection;
+  LogViewer.MessageFilter.View;
 
 type
   TdmManager = class(TDataModule, ILogViewerActions,
@@ -88,11 +91,13 @@ type
     actToggleRightPanelVisible  : TAction;
     actValue                    : TAction;
     actWarning                  : TAction;
-    imlMain                     : TImageList;
-    imlMessageTypes             : TImageList;
+    imlMain_: TImageList;
+    imlMessageTypes_: TImageList;
     ppmLogTreeViewer            : TPopupMenu;
     ppmMessageTypes             : TPopupMenu;
     ppmSubscriber               : TPopupMenu;
+    imcMain: TImageCollection;
+    imcMessageTypes: TImageCollection;
     {$ENDREGION}
 
     {$REGION 'action handlers'}
@@ -179,6 +184,7 @@ type
     function GetSettings: TLogViewerSettings;
     function GetViews: IList<ILogViewer>;
     function GetReceivers: IList<IChannelReceiver>;
+    function GetImageCollection: TImageCollection;
     function GetMessageTypesPopupMenu: TPopupMenu;
     function GetLogTreeViewerPopupMenu: TPopupMenu;
     function GetSubscriberPopupMenu: TPopupMenu;
@@ -242,6 +248,9 @@ type
 
     property Actions: ILogViewerActions
       read GetActions;
+
+    property ImageCollection: TImageCollection
+      read GetImageCollection;
     {$ENDREGION}
 
     {$REGION 'ILogViewerCommands'}
@@ -317,7 +326,7 @@ begin
   FFilterView := TfrmMessageFilter.Create(
     Self,
     FSettings.MessageListSettings,
-    imlMessageTypes
+    imcMessageTypes
   );
   UpdateActions;
 end;
@@ -678,6 +687,11 @@ begin
     FActiveView := nil;
     Logger.Warn('FActiveView set to nil');
   end;
+end;
+
+function TdmManager.GetImageCollection: TImageCollection;
+begin
+  Result := imcMain;
 end;
 
 function TdmManager.GetItem(AName: string): TCustomAction;

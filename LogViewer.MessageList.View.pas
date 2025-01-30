@@ -30,6 +30,7 @@ uses
   System.SysUtils, System.Variants, System.Classes, System.ImageList,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
   Vcl.ExtCtrls, Vcl.Buttons, Vcl.ComCtrls, Vcl.ImgList,
+  Vcl.VirtualImageList,
 
   VirtualTrees, VirtualTrees.BaseTree, kcontrols, kpagecontrol, OMultiPanel,
 
@@ -50,7 +51,7 @@ type
     chkShowWatchHistory        : TCheckBox;
     chkSyncWithSelectedMessage : TCheckBox;
     edtMessageFilter           : TButtonedEdit;
-    imlMessageTypes            : TImageList;
+    imlMessageTypes_: TImageList;
     pgcMessageData             : TKPageControl;
     pgcMessageDetails          : TKPageControl;
     pnlCallStack               : TPanel;
@@ -72,6 +73,7 @@ type
     tsRawData                  : TKTabSheet;
     tsTextViewer               : TKTabSheet;
     tsValueList                : TKTabSheet;
+    imlMain: TVirtualImageList;
     {$ENDREGION}
 
     {$REGION 'event handlers'}
@@ -540,7 +542,7 @@ begin
     toUseBlendedSelection, toStaticBackground, toUseExplorerTheme
   ];
   FLogTreeView.NodeDataSize := SizeOf(TLogNode);
-  FLogTreeView.Images       := imlMessageTypes;
+  FLogTreeView.Images       := imlMain;
   FLogTreeView.HintMode     := hmTooltip;
   FLogTreeView.ShowHint     := True;
   FLogTreeView.LineMode     := lmBands;
@@ -1099,7 +1101,7 @@ begin
   Guard.CheckNotNull(ND, 'ND');
   if (Kind in [ikNormal, ikSelected]) and (Column = COLUMN_MAIN) then
   begin
-    if Integer(ND.MessageType) < imlMessageTypes.Count then
+    if Integer(ND.MessageType) < imlMain.Count then
     begin
       ImageIndex := Integer(ND.MessageType);
       if not (vsExpanded in Node.States) and (ND.MessageType = lmtEnterMethod)

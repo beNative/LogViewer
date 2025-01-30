@@ -336,8 +336,8 @@ begin
   CDS                  := TFactories.CreateColumnDefinitions;
   CD                   := CDS.Add(COLUMNNAME_NAME);
   CD.ValuePropertyName := COLUMNNAME_NAME;
-  CD.MinWidth          := 60;
-  CD.Width             := 100;
+  CD.MinWidth          := ScaleSize(120);
+  CD.Width             := ScaleSize(120);
   CD.HintPropertyName  := CD.ValuePropertyName;
   CD.OnCustomDraw      := FCDNameCustomDraw;
 
@@ -356,7 +356,7 @@ begin
   CD.ValuePropertyName := COLUMNNAME_VALUETYPE;
   CD.HintPropertyName  := CD.ValuePropertyName;
   CD.MinWidth          := 0;
-  CD.Width             := 60;
+  CD.Width             := ScaleSize(60);
   CD.Caption           := SType;
   CD.OnCustomDraw      := FCDTypeCustomDraw;
 
@@ -373,7 +373,7 @@ begin
   CD                   := FWatchHistoryColumnDefinitions.Add(COLUMNNAME_ID);
   CD.ValuePropertyName := COLUMNNAME_ID;
   CD.HintPropertyName  := CD.ValuePropertyName;
-  CD.Width             := 100;
+  CD.Width             := ScaleSize(120);
   CD.OnCustomDraw      := FCDIdCustomDraw;
 
   CD                   := FWatchHistoryColumnDefinitions.Add(COLUMNNAME_VALUE);

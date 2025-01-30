@@ -1,207 +1,140 @@
 object frmLogViewerSettings: TfrmLogViewerSettings
   Left = 0
   Top = 0
-  Margins.Left = 5
-  Margins.Top = 5
-  Margins.Right = 5
-  Margins.Bottom = 5
   Caption = 'Settings'
-  ClientHeight = 623
-  ClientWidth = 1011
+  ClientHeight = 415
+  ClientWidth = 670
   Color = clWhite
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -17
+  Font.Height = -11
   Font.Name = 'Segoe UI'
   Font.Style = []
   PopupMode = pmAuto
   Position = poMainFormCenter
   ShowHint = True
-  PixelsPerInch = 144
-  TextHeight = 23
+  TextHeight = 13
   object splVertical: TSplitter
-    Left = 276
+    Left = 184
     Top = 0
-    Height = 576
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
+    Height = 384
     Color = clScrollBar
-    MinSize = 45
     ParentColor = False
     ResizeStyle = rsLine
   end
   object pnlConfigTree: TPanel
     Left = 0
     Top = 0
-    Width = 276
-    Height = 576
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
+    Width = 184
+    Height = 384
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitHeight = 367
   end
   object pnlBottom: TPanel
     Left = 0
-    Top = 576
-    Width = 1011
-    Height = 47
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
+    Top = 384
+    Width = 670
+    Height = 31
     Align = alBottom
     BevelOuter = bvNone
     ParentBackground = False
     TabOrder = 1
+    ExplicitTop = 367
+    ExplicitWidth = 664
     DesignSize = (
-      1011
-      47)
+      670
+      31)
     object shpLine: TShape
       Left = 0
       Top = 0
-      Width = 1011
-      Height = 2
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Width = 670
+      Height = 1
       Align = alTop
       Pen.Color = clScrollBar
-      Pen.Width = 2
-      ExplicitWidth = 1002
+      ExplicitWidth = 674
     end
     object btnClose: TButton
-      Left = 773
-      Top = 6
-      Width = 225
-      Height = 38
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 515
+      Top = 4
+      Width = 150
+      Height = 25
       Action = actClose
       Anchors = [akRight, akBottom]
       Images = imlMain
       TabOrder = 2
+      ExplicitLeft = 509
     end
     object btnClose1: TButton
-      Left = 305
-      Top = 6
-      Width = 225
-      Height = 38
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 203
+      Top = 4
+      Width = 150
+      Height = 25
       Action = actApply
       Anchors = [akRight, akBottom]
       Images = imlMain
       TabOrder = 0
+      ExplicitLeft = 197
     end
     object btnCancel: TButton
-      Left = 539
-      Top = 6
-      Width = 225
-      Height = 38
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Left = 359
+      Top = 4
+      Width = 150
+      Height = 25
       Action = actCancel
       Anchors = [akRight, akBottom]
       Images = imlMain
       TabOrder = 1
+      ExplicitLeft = 353
     end
   end
   object pgcMain: TKPageControl
-    Left = 279
+    Left = 187
     Top = 0
-    Width = 732
-    Height = 576
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
+    Width = 483
+    Height = 384
     ActivePageIndex = 10
     Align = alClient
     ParentBackground = False
     TabHeight = 0
     TabOrder = 2
+    ExplicitWidth = 477
+    ExplicitHeight = 367
     object tsWatches: TKTabSheet
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
       Caption = 'Watches'
     end
     object tsCallStack: TKTabSheet
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
       Caption = 'Callstack'
     end
     object tsComPort: TKTabSheet
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
       Caption = 'ComPort'
     end
     object tsZeroMQ: TKTabSheet
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
       Caption = 'ZeroMQ'
     end
     object tsWinODS: TKTabSheet
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
       Caption = 'WinODS'
     end
     object tsWinIPC: TKTabSheet
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
       Caption = 'WinIPC'
     end
     object tsDisplayValueSettings: TKTabSheet
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
       Caption = 'DisplayValueSettings'
     end
     object tsAdvanced: TKTabSheet
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
       Caption = 'Advanced'
       object seSettings: TSynEdit
         Left = 0
         Top = 0
-        Width = 732
-        Height = 576
-        Margins.Left = 5
-        Margins.Top = 5
-        Margins.Right = 5
-        Margins.Bottom = 5
+        Width = 483
+        Height = 384
         Align = alClient
         ActiveLineColor = clYellow
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
-        Font.Height = -20
+        Font.Height = -13
         Font.Name = 'Consolas'
         Font.Style = []
         TabOrder = 0
@@ -213,19 +146,21 @@ object frmLogViewerSettings: TfrmLogViewerSettings
         CodeFolding.ShowCollapsedLine = False
         CodeFolding.ShowHintMark = True
         UseCodeFolding = False
+        BookMarkOptions.LeftMargin = 0
+        BookMarkOptions.XOffset = 0
         BorderStyle = bsNone
         Gutter.AutoSize = True
         Gutter.Color = cl3DLight
         Gutter.Font.Charset = ANSI_CHARSET
         Gutter.Font.Color = clSilver
-        Gutter.Font.Height = -17
+        Gutter.Font.Height = -11
         Gutter.Font.Name = 'Consolas'
         Gutter.Font.Style = []
         Gutter.LeftOffset = 0
         Gutter.RightOffset = 0
         Gutter.ShowLineNumbers = True
         Gutter.ShowModification = True
-        Gutter.Width = 23
+        Gutter.Width = 15
         Gutter.Gradient = True
         Gutter.GradientStartColor = clWhite
         Gutter.GradientEndColor = clWhite
@@ -239,57 +174,39 @@ object frmLogViewerSettings: TfrmLogViewerSettings
       end
     end
     object tsViewSettings: TKTabSheet
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
       Caption = 'ViewSettings'
     end
     object tsLogLevels: TKTabSheet
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
       Caption = 'KTabSheet1'
     end
     object tsGeneralSettings: TKTabSheet
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
       Caption = 'KTabSheet1'
+      ExplicitWidth = 477
+      ExplicitHeight = 367
       object chkEmitLogMessages: TCheckBox
-        Left = 26
-        Top = 24
-        Width = 192
-        Height = 26
+        Left = 17
+        Top = 16
+        Width = 128
+        Height = 17
         Hint = 
           'Enables a remote logviewer instance to subscribe to '#13#10'log messag' +
           'es sent by the application. '#13#10'When enabled you can connect a log' +
           'viewer by subscribing to this '#13#10'ZeroMQ endpoint: tcp://localhost' +
           ':42134.'#13#10
-        Margins.Left = 5
-        Margins.Top = 5
-        Margins.Right = 5
-        Margins.Bottom = 5
         Caption = 'Emit log messages'
         TabOrder = 0
         OnClick = chkEmitLogMessagesClick
       end
       object chkDebugMode: TCheckBox
-        Left = 26
-        Top = 59
-        Width = 192
-        Height = 25
+        Left = 17
+        Top = 39
+        Width = 128
+        Height = 17
         Hint = 
           'In Debug mode, the application is able to capture log messages f' +
           'rom another LogViewer instance '#13#10'which is configured to emit log' +
           ' messages.'#13#10'In this special mode the option to emit log messages' +
           ' is disabled to avoid crosstalk with other instances.'
-        Margins.Left = 5
-        Margins.Top = 5
-        Margins.Right = 5
-        Margins.Bottom = 5
         Caption = 'Debug mode'
         TabOrder = 1
         OnClick = chkDebugModeClick

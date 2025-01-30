@@ -23,6 +23,7 @@ interface
 uses
   System.Classes, System.Actions,
   Vcl.Controls, Vcl.ActnList, Vcl.ComCtrls, Vcl.Forms, Vcl.Menus,
+  Vcl.ImageCollection,
 
   Spring, Spring.Collections,
 
@@ -307,6 +308,7 @@ type
     function GetCommands: ILogViewerCommands;
     function GetEvents: ILogViewerEvents;
     function GetEditorManager: IEditorManager;
+    function GetImageCollection: TImageCollection;
     {$ENDREGION}
 
     procedure AddView(ALogViewer: ILogViewer);
@@ -341,6 +343,9 @@ type
 
     property EditorManager: IEditorManager
       read GetEditorManager;
+
+    property ImageCollection: TImageCollection
+      read GetImageCollection;
   end;
 
   ILogViewerToolbarsFactory = interface

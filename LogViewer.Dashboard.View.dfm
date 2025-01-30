@@ -68,6 +68,7 @@ object frmDashboard: TfrmDashboard
         object tsWinIpc: TKTabSheet
           Caption = 'WinIPC'
           ExplicitWidth = 315
+          ExplicitHeight = 0
           object lblWinIPC: TLabel
             AlignWithMargins = True
             Left = 3
@@ -115,6 +116,7 @@ object frmDashboard: TfrmDashboard
         object tsWinOds: TKTabSheet
           Caption = 'WinODS'
           ExplicitWidth = 315
+          ExplicitHeight = 0
           object lblWinods: TLabel
             AlignWithMargins = True
             Left = 3
@@ -173,14 +175,14 @@ object frmDashboard: TfrmDashboard
             Left = 0
             Top = 25
             Width = 314
-            Height = 874
+            Height = 891
             Align = alTop
             Anchors = [akLeft, akTop, akRight, akBottom]
             BevelOuter = bvNone
             ParentColor = True
             TabOrder = 0
             ExplicitWidth = 313
-            ExplicitHeight = 857
+            ExplicitHeight = 874
           end
           object pnlZeroMQTitle: TPanel
             Left = 0
@@ -271,6 +273,7 @@ object frmDashboard: TfrmDashboard
         object tsFileSystem: TKTabSheet
           Caption = 'FileSystem'
           ExplicitWidth = 315
+          ExplicitHeight = 0
           object pnlFileSystemTitle: TPanel
             Left = 0
             Top = 0
@@ -302,6 +305,7 @@ object frmDashboard: TfrmDashboard
         object tsComPort: TKTabSheet
           Caption = 'COM port'
           ExplicitWidth = 315
+          ExplicitHeight = 0
           object pnlComPorts: TPanel
             Left = 0
             Top = 25
