@@ -28,7 +28,7 @@ uses
 type
   TLogViewerCommands = class(TInterfaceBase, ILogViewerCommands) // no refcount
   private
-    FManager: ILogViewerManager;
+    FManager : ILogViewerManager;
 
     {$REGION 'property access methods'}
     function GetActiveView: ILogViewer;
@@ -55,6 +55,7 @@ type
 
     property Receiver: IChannelReceiver
       read GetReceiver;
+
   end;
 
 implementation

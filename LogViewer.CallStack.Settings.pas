@@ -49,6 +49,7 @@ type
   published
     property ColumnHeadersVisible: Boolean
       read GetColumnHeadersVisible write SetColumnHeadersVisible;
+
   end;
 
 implementation

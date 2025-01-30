@@ -67,6 +67,7 @@ type
 
     property SyncWithSelection: Boolean
       read GetSyncWithSelection write SetSyncWithSelection;
+
   end;
 
 implementation

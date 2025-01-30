@@ -90,6 +90,7 @@ type
 
     property Properties: IDynamicRecord
       read GetProperties write SetProperties;
+
   end;
 
 implementation

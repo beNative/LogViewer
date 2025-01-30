@@ -284,6 +284,7 @@ type
 
     procedure AfterConstruction; override;
     destructor Destroy; override;
+
   end;
 
 implementation

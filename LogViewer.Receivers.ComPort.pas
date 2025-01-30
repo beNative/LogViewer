@@ -138,7 +138,7 @@ begin
   begin
     S := CreateSubscriber(I, 0, SL.Value[I]);
     if Assigned(S) then
-      SubscriberList.AddOrSetValue(I, S);
+      SubscriberList[I] := S;
   end;
 end;
 {$ENDREGION}

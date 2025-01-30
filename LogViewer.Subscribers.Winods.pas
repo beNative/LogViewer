@@ -28,8 +28,6 @@ type
   protected
     function GetIsSourceActive: Boolean; override;
 
-  public
-
   end;
 
 implementation

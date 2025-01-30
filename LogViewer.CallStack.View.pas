@@ -77,8 +77,8 @@ type
       DrawMode         : TDrawMode;
       Selected         : Boolean
     ): Boolean;
-    procedure SettingsChanged(Sender: TObject);
     procedure FTVPCallStackDoubleClick(Sender: TObject);
+    procedure SettingsChanged(Sender: TObject);
 
   public
     constructor Create(

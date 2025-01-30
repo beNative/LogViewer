@@ -73,6 +73,7 @@ type
 
     property Level: TLogMessageLevel
       read GetLevel write SetLevel;
+
   end;
 
   TLogLevelSettings = class(TPersistent)
@@ -93,6 +94,7 @@ type
 
     property LogLevels: IList<TLogLevelProperties>
       read FLogLevels;
+
   end;
 
 implementation

@@ -28,7 +28,6 @@ uses
 type
   TComPortSettings = class(TPersistent)
   const
-    //DEFAULT_BAUDRATE         = 9600;
     DEFAULT_BAUDRATE         = 115200;
     DEFAULT_POLLING_INTERVAL = 50;
 
@@ -86,6 +85,7 @@ type
 
     property OnChanged: IEvent<TNotifyEvent>
       read GetOnChanged;
+
   end;
 
 implementation

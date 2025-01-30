@@ -194,11 +194,11 @@ begin
     LSubscriber := TWinipcSubscriber.Create(
       Self, FZmq,  AEndPoint, AProcessId, '', AProcessName, True
     );
-    SubscriberList.AddOrSetValue(AProcessId, LSubscriber);
+    SubscriberList[AProcessId] := LSubscriber;
     if not Processes.TryGetValue(AProcessId, LProcessName) then
     begin
       LProcessName := GetExenameForProcess(AProcessId);
-      Processes.AddOrSetValue(AProcessId, LProcessName);
+      Processes[AProcessId] := LProcessName;
     end;
   end;
 end;

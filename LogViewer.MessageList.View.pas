@@ -392,6 +392,7 @@ type
     ); reintroduce; virtual;
     procedure AfterConstruction; override;
     destructor Destroy; override;
+
   end;
 
 implementation
@@ -983,7 +984,7 @@ begin
   if Column = Sender.Header.MainColumn then
   begin
     // draw indentation background
-    LIndent := Sender.GetNodeLevel(Node) * FLogTreeView.Indent;
+    LIndent := Integer(Sender.GetNodeLevel(Node)) * FLogTreeView.Indent;
     LRect   := CellRect;
     Inc(LRect.Left, LIndent);
     LIndent := -Integer(FLogTreeView.Indent);
@@ -1001,7 +1002,7 @@ begin
     until False;
     if LN.MessageType in NotificationMessages then
     begin
-      LIndent := (Sender.GetNodeLevel(Node) + 1) * FLogTreeView.Indent;
+      LIndent := Integer(Sender.GetNodeLevel(Node) + 1) * FLogTreeView.Indent;
       LRect := CellRect;
       Inc(LRect.Left, LIndent);
       case LN.MessageType of

@@ -57,6 +57,7 @@ type
 
     property Settings: TComPortSettings
       read GetSettings;
+
   end;
 
   ISubscriber = interface
@@ -117,6 +118,7 @@ type
 
     property OnReceiveMessage: IEvent<TReceiveMessageEvent>
       read GetOnReceiveMessage;
+
   end;
 
   IChannelReceiver = interface
@@ -143,6 +145,7 @@ type
 
     property OnChange: IEvent<TNotifyEvent>
       read GetOnChange;
+
   end;
 
   IZmq = interface
@@ -181,6 +184,7 @@ type
 
     property ActionList: TActionList
       read GetActionList;
+
   end;
 
   ILogViewerMenus = interface
@@ -199,6 +203,7 @@ type
 
     property SubscriberPopupMenu: TPopupMenu
       read GetSubscriberPopupMenu;
+
   end;
 
   ILogViewer = interface
@@ -246,6 +251,7 @@ type
 
     property RightPanelVisible: Boolean
       read GetRightPanelVisible write SetRightPanelVisible;
+
   end;
 
   ILogViewerEvents = interface
@@ -280,6 +286,7 @@ type
 
     property OnShowDashboard: IEvent<TNotifyEvent>
       read GetOnShowDashboard;
+
   end;
 
   ILogViewerCommands = interface
@@ -293,6 +300,7 @@ type
     procedure GotoFirst;
     procedure GotoLast;
     procedure SetFocusToFilter;
+
   end;
 
   ILogViewerManager = interface
@@ -346,6 +354,7 @@ type
 
     property ImageCollection: TImageCollection
       read GetImageCollection;
+
   end;
 
   ILogViewerToolbarsFactory = interface
@@ -359,6 +368,7 @@ type
       AOwner  : TComponent;
       AParent : TWinControl
     ): TToolbar;
+
   end;
 
   { Interface supported by subscribers that allow custom topics to subscribe to.
@@ -378,6 +388,7 @@ type
 
     property LogMessageLevels: TLogMessageLevels
       read GetLogMessageLevels write SetLogMessageLevels;
+
   end;
 
 implementation

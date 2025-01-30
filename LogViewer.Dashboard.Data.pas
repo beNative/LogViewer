@@ -57,6 +57,7 @@ type
 
     property Subscriber: ISubscriber
       read GetSubscriber write SetSubscriber;
+
   end;
 
 implementation

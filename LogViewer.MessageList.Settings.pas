@@ -124,6 +124,7 @@ type
 
     property SmartTimeStamps: Boolean
       read GetSmartTimeStamps write SetSmartTimeStamps;
+
   end;
 
 implementation

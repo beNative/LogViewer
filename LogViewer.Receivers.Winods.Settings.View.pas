@@ -43,6 +43,7 @@ type
       ASettings : TWinodsSettings
     ); reintroduce;
     destructor Destroy; override;
+
   end;
 
 implementation

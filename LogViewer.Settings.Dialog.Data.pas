@@ -46,6 +46,7 @@ type
 
     property TabSheet: TKTabSheet
       read FTabSheet write FTabSheet;
+
   end;
 
 implementation

@@ -43,6 +43,7 @@ type
       AOwner    : TComponent;
       ASettings : TZmqSettings
     ); reintroduce; virtual;
+
   end;
 
 implementation

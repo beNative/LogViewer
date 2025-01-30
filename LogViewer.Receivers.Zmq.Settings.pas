@@ -89,6 +89,7 @@ type
 
     property Endpoints: TStrings
       read GetEndpoints;
+
   end;
 
 implementation

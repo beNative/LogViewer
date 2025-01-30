@@ -122,6 +122,7 @@ type
       AEnabled          : Boolean
     );
     destructor Destroy; override;
+
   end;
 
 implementation

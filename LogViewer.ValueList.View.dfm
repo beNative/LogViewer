@@ -1,26 +1,17 @@
 object frmValueListView: TfrmValueListView
   Left = 0
   Top = 0
-  Margins.Left = 5
-  Margins.Top = 5
-  Margins.Right = 5
-  Margins.Bottom = 5
-  ClientHeight = 854
-  ClientWidth = 606
+  ClientHeight = 569
+  ClientWidth = 400
   Color = clWhite
   DoubleBuffered = True
   ParentFont = True
-  PixelsPerInch = 144
-  TextHeight = 25
+  TextHeight = 15
   object pnlMain: TOMultiPanel
     Left = 0
     Top = 0
-    Width = 606
-    Height = 854
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
+    Width = 400
+    Height = 569
     PanelType = ptVertical
     PanelCollection = <
       item
@@ -42,15 +33,13 @@ object frmValueListView: TfrmValueListView
     AutoSize = True
     BevelEdges = []
     TabOrder = 0
+    ExplicitWidth = 394
+    ExplicitHeight = 552
     object pnlBottom: TPanel
       Left = 0
-      Top = 430
-      Width = 606
-      Height = 424
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Top = 287
+      Width = 400
+      Height = 282
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 1
@@ -58,12 +47,8 @@ object frmValueListView: TfrmValueListView
     object pnlTop: TPanel
       Left = 0
       Top = 0
-      Width = 606
-      Height = 427
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Width = 400
+      Height = 284
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 0

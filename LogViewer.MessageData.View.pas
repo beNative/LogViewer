@@ -90,6 +90,7 @@ type
 
     property Data: IDynamicRecord
       read GetData;
+
   end;
 
 implementation

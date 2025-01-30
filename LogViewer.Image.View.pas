@@ -50,6 +50,7 @@ type
 
     property Bitmap : TBitmap
       read GetBitmap;
+
   end;
 
 implementation

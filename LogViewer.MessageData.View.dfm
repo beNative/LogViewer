@@ -1,30 +1,21 @@
 object frmMessageDataView: TfrmMessageDataView
   Left = 0
   Top = 0
-  Margins.Left = 5
-  Margins.Top = 5
-  Margins.Right = 5
-  Margins.Bottom = 5
-  ClientHeight = 431
-  ClientWidth = 911
+  ClientHeight = 287
+  ClientWidth = 603
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
-  Font.Height = -17
+  Font.Height = -11
   Font.Name = 'Segoe UI'
   Font.Style = []
-  PixelsPerInch = 144
-  TextHeight = 23
+  TextHeight = 13
   object pnlMain: TOMultiPanel
     Left = 0
     Top = 0
-    Width = 911
-    Height = 431
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
+    Width = 603
+    Height = 287
     PanelCollection = <
       item
         Control = pnlLeft
@@ -35,18 +26,16 @@ object frmMessageDataView: TfrmMessageDataView
     MinPosition = 0.020000000000000000
     Align = alClient
     TabOrder = 0
+    ExplicitWidth = 597
+    ExplicitHeight = 270
     DesignSize = (
-      911
-      431)
+      603
+      287)
     object pnlLeft: TPanel
       Left = 0
       Top = 0
-      Width = 911
-      Height = 431
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Width = 603
+      Height = 287
       Anchors = []
       BevelOuter = bvNone
       TabOrder = 0

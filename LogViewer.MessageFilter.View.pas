@@ -22,16 +22,16 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages,
-  System.SysUtils, System.Variants, System.Classes,
+  System.SysUtils, System.Variants, System.Classes, System.UITypes,
+  System.ImageList,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls,
-  Vcl.ImageCollection,
+  Vcl.ImageCollection, Vcl.ImgList, Vcl.VirtualImageList,
 
   VirtualTrees, VirtualTrees.BaseTree, kpagecontrol, kcontrols,
 
   DDuce.Logger.Interfaces, DDuce.Components.VirtualTrees.Node,
 
-  LogViewer.MessageList.Settings, LogViewer.MessageFilter.Data,
-  System.ImageList, Vcl.ImgList, Vcl.VirtualImageList;
+  LogViewer.MessageList.Settings, LogViewer.MessageFilter.Data;
 
 type
   TFilterData = LogViewer.MessageFilter.Data.TFilterData;
@@ -109,6 +109,7 @@ type
     ); reintroduce; virtual;
     procedure AfterConstruction; override;
     destructor Destroy; override;
+
   end;
 
 implementation

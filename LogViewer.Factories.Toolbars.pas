@@ -89,6 +89,7 @@ type
 
     property Transparant: Boolean
       read FTransparant write FTransparant default DEFAULT_TRANSPARANT;
+
   end;
 
 implementation
@@ -192,8 +193,6 @@ begin
   TB := TToolBar.Create(AOwner);
   ApplyDefaultProperties(TB);
   TB.Parent           := AParent;
-  //TB.Images           := FActions.ActionList.Images;
-  TB.ButtonWidth      := 10;
   TB.AllowTextButtons := True;
   CreateToolButton(TB, 'actDashboard', tbsTextButton);
   CreateToolButton(TB);
@@ -225,8 +224,6 @@ begin
   TB := TToolBar.Create(AOwner);
   ApplyDefaultProperties(TB);
   TB.Parent           := AParent;
-//  TB.Images           := FActions.ActionList.Images;
-  TB.ButtonWidth      := 10;
   TB.AllowTextButtons := True;
   CreateToolButton(TB, 'actAbout');
   CreateToolButton(TB);

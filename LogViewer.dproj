@@ -99,7 +99,7 @@
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
-        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.9.9.404;ProductName=LogViewer;ProductVersion=1.9.9;LegalCopyright=2013 - 2021 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=Tim Sinaeve;FileDescription=LogViewer;FileVersion=1.9.9.405;ProductName=LogViewer;ProductVersion=1.9.9;LegalCopyright=2013 - 2021 (c) Tim Sinaeve;OriginalFilename=LogViewer.exe</VerInfo_Keys>
         <DCC_IntegerOverflowCheck>true</DCC_IntegerOverflowCheck>
         <DCC_RangeChecking>true</DCC_RangeChecking>
         <DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
@@ -110,7 +110,7 @@
         <DCC_RunTimeTypeInfo>true</DCC_RunTimeTypeInfo>
         <DCC_DebugInfoInTds>true</DCC_DebugInfoInTds>
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
-        <VerInfo_Build>404</VerInfo_Build>
+        <VerInfo_Build>405</VerInfo_Build>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">

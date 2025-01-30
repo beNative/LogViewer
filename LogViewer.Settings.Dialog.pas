@@ -26,8 +26,8 @@ uses
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls,
   Vcl.ComCtrls, Vcl.ActnList, Vcl.StdCtrls, Vcl.ImgList,
 
-  VirtualTrees, VirtualTrees.BaseTree, kpagecontrol, kcontrols,
-
+  VirtualTrees, VirtualTrees.BaseTree,
+  kpagecontrol, kcontrols,
   SynEditHighlighter, SynHighlighterJScript, SynEdit, SynEditCodeFolding,
 
   DDuce.Components.VirtualTrees.Node,
@@ -133,6 +133,7 @@ type
       ASettings : TLogViewerSettings
     ); reintroduce;
     destructor Destroy; override;
+
   end;
 
 implementation

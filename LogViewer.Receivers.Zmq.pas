@@ -79,6 +79,7 @@ type
 
     property Settings: TZmqSettings
       read GetSettings;
+
   end;
 
 implementation

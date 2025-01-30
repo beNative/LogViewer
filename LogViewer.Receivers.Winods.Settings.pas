@@ -61,6 +61,7 @@ type
   published
     property Enabled: Boolean
       read GetEnabled write SetEnabled;
+
   end;
 
 implementation

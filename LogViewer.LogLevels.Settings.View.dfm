@@ -28,7 +28,7 @@ object frmLogLevelSettings: TfrmLogLevelSettings
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitWidth = 231
+    ExplicitWidth = 293
     ExplicitHeight = 394
   end
   object pnlLeft: TPanel

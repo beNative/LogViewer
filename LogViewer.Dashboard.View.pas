@@ -247,6 +247,7 @@ type
     destructor Destroy; override;
 
     procedure Update; override;
+
   end;
 
 implementation

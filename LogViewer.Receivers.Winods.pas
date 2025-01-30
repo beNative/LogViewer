@@ -97,6 +97,7 @@ type
 
     property OnMessageReceived : TOdsMessageReceivedEvent
       read FOnMessageReceived write FOnMessageReceived;
+
   end;
 
 type
@@ -120,6 +121,7 @@ type
 
     property Settings: TWinodsSettings
       read GetSettings;
+
   end;
 
 implementation
@@ -415,7 +417,7 @@ begin
       if not Processes.TryGetValue(AProcessId, LProcessName) then
       begin
         LProcessName := GetExenameForProcess(AProcessId);
-        Processes.AddOrSetValue(AProcessId, LProcessName);
+        Processes[AProcessId] := LProcessName;
       end;
 
       if not SubscriberList.TryGetValue(AProcessId, LSubscriber) then
@@ -423,7 +425,7 @@ begin
         LSubscriber := TWinodsSubscriber.Create(
           Self, AProcessId, '', LProcessName, True
         );
-        SubscriberList.AddOrSetValue(AProcessId, LSubscriber);
+        SubscriberList[AProcessId] := LSubscriber;
       end;
       LSubscriber.DoReceiveMessage(FBuffer);
     end;

@@ -11,8 +11,6 @@ object frmRawDataView: TfrmRawDataView
   Font.Height = -11
   Font.Name = 'Segoe UI'
   Font.Style = []
-  OldCreateOrder = False
-  PixelsPerInch = 96
   TextHeight = 13
   object heMain: TKHexEditor
     Left = 0
@@ -26,7 +24,7 @@ object frmRawDataView: TfrmRawDataView
     Colors.VertLines = clScrollBar
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
-    Font.Height = -13
+    Font.Height = -16
     Font.Name = 'Consolas'
     Font.Pitch = fpFixed
     Font.Style = []

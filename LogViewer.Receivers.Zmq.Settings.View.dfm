@@ -1,58 +1,39 @@
 object frmZmqSettings: TfrmZmqSettings
   Left = 0
   Top = 0
-  Margins.Left = 5
-  Margins.Top = 5
-  Margins.Right = 5
-  Margins.Bottom = 5
-  ClientHeight = 303
-  ClientWidth = 426
+  ClientHeight = 202
+  ClientWidth = 280
   Color = clBtnFace
   DoubleBuffered = True
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
-  Font.Height = -17
+  Font.Height = -11
   Font.Name = 'Segoe UI'
   Font.Style = []
   ShowHint = True
-  PixelsPerInch = 144
-  TextHeight = 23
+  TextHeight = 13
   object lblPollingTimeoutMs: TLabel
-    Left = 227
-    Top = 17
-    Width = 22
-    Height = 23
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
+    Left = 151
+    Top = 11
+    Width = 14
+    Height = 13
     Caption = 'ms'
   end
   object lblPollingIntervalMs: TLabel
-    Left = 227
-    Top = 57
-    Width = 22
-    Height = 23
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
+    Left = 151
+    Top = 38
+    Width = 14
+    Height = 13
     Caption = 'ms'
   end
   object edtPollingTimeout: TLabeledEdit
-    Left = 132
-    Top = 12
-    Width = 86
-    Height = 31
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
+    Left = 88
+    Top = 8
+    Width = 57
+    Height = 21
     Alignment = taRightJustify
-    EditLabel.Width = 120
-    EditLabel.Height = 31
-    EditLabel.Margins.Left = 5
-    EditLabel.Margins.Top = 5
-    EditLabel.Margins.Right = 5
-    EditLabel.Margins.Bottom = 5
+    EditLabel.Width = 82
+    EditLabel.Height = 21
     EditLabel.Caption = 'Polling &timeout:'
     LabelPosition = lpLeft
     NumbersOnly = True
@@ -61,21 +42,13 @@ object frmZmqSettings: TfrmZmqSettings
     OnChange = edtPollingTimeoutChange
   end
   object edtPollingInterval: TLabeledEdit
-    Left = 132
-    Top = 53
-    Width = 86
-    Height = 31
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
+    Left = 88
+    Top = 35
+    Width = 57
+    Height = 21
     Alignment = taRightJustify
-    EditLabel.Width = 116
-    EditLabel.Height = 31
-    EditLabel.Margins.Left = 5
-    EditLabel.Margins.Top = 5
-    EditLabel.Margins.Right = 5
-    EditLabel.Margins.Bottom = 5
+    EditLabel.Width = 80
+    EditLabel.Height = 21
     EditLabel.Caption = 'Polling &interval:'
     LabelPosition = lpLeft
     NumbersOnly = True

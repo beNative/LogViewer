@@ -49,6 +49,7 @@ type
       const PItem : PPropItem;
       Items       : TStrings
     ); override;
+
   end;
 
 implementation

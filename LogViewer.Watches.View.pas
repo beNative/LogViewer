@@ -145,6 +145,7 @@ type
     procedure Clear;
 
     function HasFocus: Boolean;
+
   end;
 
 implementation

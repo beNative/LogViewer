@@ -59,6 +59,7 @@ type
 
     property TimeStamp: TDateTime
       read FTimeStamp write FTimeStamp;
+
   end;
 
   TWatch = class
@@ -136,6 +137,7 @@ type
 
     property CurrentWatchValue: TWatchValue
       read GetCurrentWatchValue;
+
   end;
 
   { TWatchList }
@@ -186,6 +188,7 @@ type
 
     property OnNewWatch: TNewWatchEvent
       read FOnNewWatch write FOnNewWatch;
+
   end;
 
 implementation

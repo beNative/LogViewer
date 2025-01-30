@@ -74,6 +74,7 @@ type
 
     property OnAddSubscriber: TAddSubscriberEvent
       read FOnAddSubscriber write FOnAddSubscriber;
+
   end;
 
 const
@@ -176,7 +177,7 @@ begin
     begin
       LPublisher := FZmq.Target.Start(ZMQSocket.Publisher);
       Guard.CheckTrue(LPublisher.Bind(LEndPoint) = 0, 'Bind failed');
-      FPublishers.AddOrSetValue(LEndPoint, LPublisher);
+      FPublishers[LEndPoint] := LPublisher;
       Queue(
         procedure
         begin

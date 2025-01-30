@@ -89,6 +89,7 @@ type
 
     property Color: TColor
       read GetColor write SetColor;
+
   end;
 
 implementation

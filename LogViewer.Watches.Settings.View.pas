@@ -49,6 +49,7 @@ type
     ); reintroduce;
 
     destructor Destroy; override;
+
   end;
 
 implementation

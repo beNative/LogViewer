@@ -18,7 +18,9 @@ unit LogViewer.MainForm;
 
 { Application main form. }
 
-{ Check Windows Defender firewall rules if no messages can be captured. }
+{ REMARKS
+   - Check Windows Defender firewall rules if no messages can be captured.
+}
 
 interface
 

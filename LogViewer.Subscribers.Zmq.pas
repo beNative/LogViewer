@@ -66,6 +66,7 @@ type
       AEnabled          : Boolean
     ); reintroduce; virtual;
     destructor Destroy; override;
+
   end;
 
 implementation

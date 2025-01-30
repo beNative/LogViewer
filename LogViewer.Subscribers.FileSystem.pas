@@ -37,6 +37,7 @@ type
     procedure BeforeDestruction; override;
 
     procedure Poll; override;
+
   end;
 
 implementation

@@ -74,6 +74,7 @@ type
 
     property OnShowDashboard: IEvent<TNotifyEvent>
       read GetOnShowDashboard;
+
   end;
 
 implementation
