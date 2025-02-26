@@ -36,7 +36,7 @@ uses
   DDuce.Utils,
 
   LogViewer.Interfaces, LogViewer.Factories, LogViewer.Settings,
-  LogViewer.Dashboard.View, Vcl.StdCtrls, Vcl.TitleBarCtrls;
+  LogViewer.Dashboard.View;
 
 type
   TfrmMain = class(TForm)
@@ -54,7 +54,6 @@ type
     pnlMessageCount   : TPanel;
     pnlSourceName     : TPanel;
     pnlStatusBar      : TPanel;
-    pnlTitleBar       : TTitleBarPanel;
     pnlTop            : TPanel;
     shpLine           : TShape;
     tbrMain           : TTaskbar;

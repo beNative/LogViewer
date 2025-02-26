@@ -149,6 +149,8 @@ end;
   registers a dedicated poller to handle incomming messages. }
 
 procedure TZmqSubscriber.CreateSubscriberSocket(const AEndPoint: string);
+var
+  S : string;
 begin
   FEndPoint := AEndPoint;
   FSubscriber := FZmq.Start(ZMQSocket.Subscriber);
@@ -161,7 +163,7 @@ begin
     begin
       FZmqStream.Clear;
       FZmqStream.Position := 0;
-      var S := FSubscriber.ReceiveString;
+      S := FSubscriber.ReceiveString;
 
       FZmqStream.WriteString(S);
       DoReceiveMessage(FZmqStream);

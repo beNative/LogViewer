@@ -5,21 +5,6 @@ object frmMain: TfrmMain
   ClientHeight = 665
   ClientWidth = 1025
   Color = clBtnFace
-  CustomTitleBar.Control = pnlTitleBar
-  CustomTitleBar.Enabled = True
-  CustomTitleBar.Height = 31
-  CustomTitleBar.BackgroundColor = 14120960
-  CustomTitleBar.ForegroundColor = clWhite
-  CustomTitleBar.InactiveBackgroundColor = clWhite
-  CustomTitleBar.InactiveForegroundColor = 10066329
-  CustomTitleBar.ButtonForegroundColor = clWhite
-  CustomTitleBar.ButtonBackgroundColor = 14120960
-  CustomTitleBar.ButtonHoverForegroundColor = clWhite
-  CustomTitleBar.ButtonHoverBackgroundColor = 11362304
-  CustomTitleBar.ButtonPressedForegroundColor = clWhite
-  CustomTitleBar.ButtonPressedBackgroundColor = 7159040
-  CustomTitleBar.ButtonInactiveForegroundColor = 10066329
-  CustomTitleBar.ButtonInactiveBackgroundColor = clWhite
   DoubleBuffered = True
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
@@ -39,13 +24,15 @@ object frmMain: TfrmMain
   TextHeight = 13
   object pnlMain: TPanel
     Left = 0
-    Top = 30
+    Top = 0
     Width = 1025
-    Height = 635
+    Height = 665
     Align = alClient
     BevelOuter = bvNone
     Caption = 'pnlMain'
     TabOrder = 0
+    ExplicitTop = 30
+    ExplicitHeight = 635
     object pnlMainClient: TPanel
       Left = 0
       Top = 26
@@ -176,6 +163,7 @@ object frmMain: TfrmMain
         Options.Behaviour.TabRightClickSelect = True
         Options.Behaviour.ActivateNewTab = True
         Options.Behaviour.DebugMode = False
+        Options.Behaviour.CloseOnWheel = True
         Options.Behaviour.IgnoreDoubleClicksWhileAnimatingMovement = True
         Options.Scrolling.Enabled = True
         Options.Scrolling.ScrollButtons = csbRight
@@ -518,13 +506,6 @@ object frmMain: TfrmMain
       TabOrder = 2
     end
   end
-  object pnlTitleBar: TTitleBarPanel
-    Left = 0
-    Top = 0
-    Width = 1025
-    Height = 30
-    CustomButtons = <>
-  end
   object aclMain: TActionList
     Images = imlMain
     Left = 120
@@ -544,7 +525,7 @@ object frmMain: TfrmMain
     Left = 208
     Top = 48
     Bitmap = {
-      494C010101000500040010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010101000500080010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -1314,7 +1295,7 @@ object frmMain: TfrmMain
     Left = 120
     Top = 110
     Bitmap = {
-      494C010103000800040010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
+      494C010103000800080010001000FFFFFFFF2110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
