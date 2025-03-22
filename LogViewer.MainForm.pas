@@ -314,6 +314,7 @@ var
   V : ILogViewer;
 begin
   Logger.Track(Self, 'ctMainButtonCloseTabClick');
+  Guard.CheckNotNull(ATab.Data, 'ATab.Data');
   Close := False; // cleanup happens in EventsDeleteLogViewer
   V := ILogViewer(ATab.Data);
   Manager.DeleteView(V);
@@ -354,6 +355,7 @@ var
   S  : string;
   CT : TChromeTab;
 begin
+  Guard.CheckNotNull(ALogViewer, 'ALogViewer');
   ALogViewer.Subscriber.Enabled := True;
   ALogViewer.Form.Parent := pnlMainClient;
   S := ExtractFileName(ALogViewer.Subscriber.SourceName);
@@ -381,8 +383,9 @@ var
   I        : Integer;
   LDeleted : Boolean;
 begin
+  Guard.CheckNotNull(ALogViewer, 'ALogViewer');
   LDeleted := False;
-  I := 1; // zero is dashboard
+  I := 0;
   while (I < ctMain.Tabs.Count) and not LDeleted do
   begin
     if ILogViewer(ctMain.Tabs[I].Data) = ALogViewer then
