@@ -43,7 +43,7 @@ type
     pgcMain          : TKPageControl;
     tsClientSide     : TKTabSheet;
     tsSourceSide     : TKTabSheet;
-    imlMain: TVirtualImageList;
+    imlMain          : TVirtualImageList;
 
   private
     FCSTree    : TVirtualStringTree;
@@ -473,8 +473,10 @@ begin
     for I := 0 to ANode.ChildCount - 1 do
     begin
       N := TFilterNode(ANode.Items[I]);
+//      Guard.CheckNotNull(N, 'N');
+//      Guard.CheckNotNull(N.VNode, 'N.VNode');
       N.CheckState := ACheckState;
-      ATree.InvalidateNode(N.VNode);
+      //ATree.InvalidateNode(N.VNode);
       UpdateChildren(ATree, N, ACheckState);
     end;
     Result := True;
