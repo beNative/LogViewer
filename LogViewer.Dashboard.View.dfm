@@ -33,6 +33,7 @@ object frmDashboard: TfrmDashboard
         Index = 1
       end>
     MinPosition = 0.020000000000000000
+    SplitterSize = 8
     SplitterColor = clScrollBar
     SplitterHoverColor = clScrollBar
     Align = alClient
@@ -67,14 +68,12 @@ object frmDashboard: TfrmDashboard
         ExplicitHeight = 599
         object tsWinIpc: TKTabSheet
           Caption = 'WinIPC'
-          ExplicitWidth = 315
-          ExplicitHeight = 0
           object lblWinIPC: TLabel
             AlignWithMargins = True
             Left = 3
-            Top = 29
-            Width = 304
-            Height = 255
+            Top = 28
+            Width = 308
+            Height = 588
             Align = alClient
             Caption = 
               'Messages are exchanged between the source application and LogVie' +
@@ -93,11 +92,14 @@ object frmDashboard: TfrmDashboard
             ParentFont = False
             Transparent = True
             WordWrap = True
+            ExplicitTop = 29
+            ExplicitWidth = 304
+            ExplicitHeight = 255
           end
           object pnlWinIPCTitle: TPanel
             Left = 0
             Top = 0
-            Width = 315
+            Width = 314
             Height = 25
             Align = alTop
             Alignment = taLeftJustify
@@ -115,14 +117,12 @@ object frmDashboard: TfrmDashboard
         end
         object tsWinOds: TKTabSheet
           Caption = 'WinODS'
-          ExplicitWidth = 315
-          ExplicitHeight = 0
           object lblWinods: TLabel
             AlignWithMargins = True
             Left = 3
-            Top = 29
+            Top = 28
             Width = 308
-            Height = 374
+            Height = 588
             Align = alClient
             Caption = 
               'This receiver captures messages from any local applicatiion that' +
@@ -147,11 +147,13 @@ object frmDashboard: TfrmDashboard
             ParentFont = False
             Transparent = True
             WordWrap = True
+            ExplicitTop = 29
+            ExplicitHeight = 374
           end
           object pnlWinodsTitle: TPanel
             Left = 0
             Top = 0
-            Width = 315
+            Width = 314
             Height = 25
             Align = alTop
             Alignment = taLeftJustify
@@ -175,14 +177,14 @@ object frmDashboard: TfrmDashboard
             Left = 0
             Top = 25
             Width = 314
-            Height = 891
+            Height = 925
             Align = alTop
             Anchors = [akLeft, akTop, akRight, akBottom]
             BevelOuter = bvNone
             ParentColor = True
             TabOrder = 0
             ExplicitWidth = 313
-            ExplicitHeight = 874
+            ExplicitHeight = 908
           end
           object pnlZeroMQTitle: TPanel
             Left = 0
@@ -272,12 +274,10 @@ object frmDashboard: TfrmDashboard
         end
         object tsFileSystem: TKTabSheet
           Caption = 'FileSystem'
-          ExplicitWidth = 315
-          ExplicitHeight = 0
           object pnlFileSystemTitle: TPanel
             Left = 0
             Top = 0
-            Width = 315
+            Width = 314
             Height = 25
             Align = alTop
             Alignment = taLeftJustify
@@ -295,7 +295,7 @@ object frmDashboard: TfrmDashboard
           object pnlFSLocations: TPanel
             Left = 0
             Top = 25
-            Width = 315
+            Width = 314
             Height = 591
             Align = alClient
             BevelOuter = bvNone
@@ -304,12 +304,10 @@ object frmDashboard: TfrmDashboard
         end
         object tsComPort: TKTabSheet
           Caption = 'COM port'
-          ExplicitWidth = 315
-          ExplicitHeight = 0
           object pnlComPorts: TPanel
             Left = 0
             Top = 25
-            Width = 315
+            Width = 314
             Height = 591
             Align = alClient
             BevelOuter = bvNone
@@ -318,7 +316,7 @@ object frmDashboard: TfrmDashboard
           object pnlComPortTitle: TPanel
             Left = 0
             Top = 0
-            Width = 315
+            Width = 314
             Height = 25
             Align = alTop
             Alignment = taLeftJustify
@@ -338,9 +336,9 @@ object frmDashboard: TfrmDashboard
     end
     object pnlRight: TPanel
       AlignWithMargins = True
-      Left = 317
+      Left = 322
       Top = 0
-      Width = 731
+      Width = 726
       Height = 616
       Margins.Left = 0
       Margins.Bottom = 0

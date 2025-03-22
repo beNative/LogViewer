@@ -24,7 +24,8 @@ uses
   System.SysUtils, System.Variants, System.Classes, System.ImageList,
   System.Actions,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls,
-  Vcl.ComCtrls, Vcl.ActnList, Vcl.StdCtrls, Vcl.ImgList,
+  Vcl.ComCtrls, Vcl.ActnList, Vcl.StdCtrls, Vcl.ImgList, Vcl.VirtualImageList,
+  Vcl.BaseImageCollection, Vcl.ImageCollection,
 
   VirtualTrees, VirtualTrees.BaseTree,
   kpagecontrol, kcontrols,
@@ -54,10 +55,11 @@ type
     btnClose                : TButton;
     btnClose1               : TButton;
     chkEmitLogMessages      : TCheckBox;
-    imlMain                 : TImageList;
+    chkDebugMode            : TCheckBox;
     pgcMain                 : TKPageControl;
     pnlBottom               : TPanel;
     pnlConfigTree           : TPanel;
+    pnlGeneralSettings      : TPanel;
     seSettings              : TSynEdit;
     shpLine                 : TShape;
     splVertical             : TSplitter;
@@ -73,7 +75,8 @@ type
     tsWinIPC                : TKTabSheet;
     tsWinODS                : TKTabSheet;
     tsZeroMQ                : TKTabSheet;
-    chkDebugMode: TCheckBox;
+    imcMain                 : TImageCollection;
+    imlMain                 : TVirtualImageList;
     {$ENDREGION}
 
     {$REGION 'action handlers'}

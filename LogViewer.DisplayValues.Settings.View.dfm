@@ -15,21 +15,22 @@ object frmDisplayValuesSettings: TfrmDisplayValuesSettings
   object splVertical: TSplitter
     Left = 145
     Top = 0
-    Width = 2
+    Width = 4
     Height = 378
     Color = clScrollBar
     ParentColor = False
     ResizeStyle = rsUpdate
-    ExplicitHeight = 339
   end
   object pnlRight: TPanel
-    Left = 147
+    Left = 149
     Top = 0
-    Width = 342
+    Width = 340
     Height = 378
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 0
+    ExplicitLeft = 147
+    ExplicitWidth = 342
   end
   object pnlLeft: TPanel
     Left = 0

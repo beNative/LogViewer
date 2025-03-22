@@ -591,10 +591,12 @@ var
   DN : TDashboardNode;
 begin
   DN := Sender.GetNodeData<TDashboardNode>(Node);
-  if Assigned(DN) and (DN.Level = 1) then
-  begin
-    PopupMenu := FManager.Menus.SubscriberPopupMenu;
-  end;
+
+  // TODO: action should be applied to corresponding view of the node and not the active view
+//  if Assigned(DN) and (DN.Level = 1) then
+//  begin
+//    PopupMenu := FManager.Menus.SubscriberPopupMenu;
+//  end;
 end;
 
 procedure TfrmDashboard.FTreeViewGetText(Sender: TBaseVirtualTree;

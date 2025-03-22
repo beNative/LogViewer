@@ -91,8 +91,6 @@ type
     actToggleRightPanelVisible  : TAction;
     actValue                    : TAction;
     actWarning                  : TAction;
-    imlMain_: TImageList;
-    imlMessageTypes_: TImageList;
     ppmLogTreeViewer            : TPopupMenu;
     ppmMessageTypes             : TPopupMenu;
     ppmSubscriber               : TPopupMenu;

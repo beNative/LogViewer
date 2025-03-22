@@ -27,6 +27,7 @@ object frmValueListView: TfrmValueListView
         Index = 1
       end>
     MinPosition = 0.020000000000000000
+    SplitterSize = 8
     SplitterColor = clScrollBar
     SplitterHoverColor = clScrollBar
     Align = alClient
@@ -37,9 +38,9 @@ object frmValueListView: TfrmValueListView
     ExplicitHeight = 552
     object pnlBottom: TPanel
       Left = 0
-      Top = 287
+      Top = 292
       Width = 400
-      Height = 282
+      Height = 277
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 1
