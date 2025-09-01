@@ -1,0 +1,6 @@
+{
+  "name": "draft of Log Analyser 2.9.5",
+  "description": "An application to view formatted XML log files by dragging and dropping them. It parses the XML and displays the data in a clean, readable table.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}

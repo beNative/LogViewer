@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="./" />
+    <title>Log Analyser</title>
+    <script>
+      // This script will run immediately when the HTML is parsed.
+      // This helps confirm that the HTML file itself is loading.
+      console.log('index.html: <head> script tag executed successfully.');
+    </script>
+    <link rel="stylesheet" href="./dist/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.1.1",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.1/",
+    "react/": "https://esm.sh/react@^19.1.1/"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+    <!-- 
+      The application entrypoint. This points to the JavaScript bundle created by esbuild.
+      The esbuild process resolves all 'import' statements (like React) and bundles
+      them into this single file.
+    -->
+    <script 
+      type="module" 
+      src="./dist/bundle.js"
+    ></script>
+  </body>
+</html>

@@ -1,0 +1,370 @@
+const { app, BrowserWindow, ipcMain, shell, dialog, systemPreferences } = require('electron');
+const path = require('path');
+const fs = require('fs');
+
+let mainWindow;
+
+// --- Path and Log Setup ---
+const appDataPath = app.isPackaged ? path.dirname(app.getPath('exe')) : app.getAppPath();
+const settingsPath = path.join(appDataPath, 'settings.json');
+const sessionsPath = path.join(appDataPath, 'sessions'); // CHANGED: Sessions are now portable with the app
+
+// --- Log file setup ---
+function getLogfileName() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    return `app-log-${year}-${month}-${day}.log`;
+}
+
+const logFilePath = path.join(appDataPath, getLogfileName());
+
+function log(level, message) {
+    const timestamp = new Date().toISOString();
+    const logEntry = `[${timestamp}] [${level.toUpperCase()}] ${message}`;
+    console.log(logEntry);
+    try {
+        fs.appendFileSync(logFilePath, logEntry + '\n');
+    } catch (error) {
+        console.error(`!!! CRITICAL: Failed to write to log file at ${logFilePath}:`, error);
+    }
+}
+
+log('INFO', '--- Application Main Process Starting ---');
+log('INFO', `Is Packaged: ${app.isPackaged}`);
+log('INFO', `User Data Path: ${app.getPath('userData')}`);
+log('INFO', `Sessions Path: ${sessionsPath}`);
+log('INFO', `Settings File Path: ${settingsPath}`);
+
+// --- File System Setup ---
+try {
+    if (!fs.existsSync(sessionsPath)) {
+        fs.mkdirSync(sessionsPath, { recursive: true });
+        log('INFO', `Created sessions directory at ${sessionsPath}`);
+    }
+} catch (error) {
+    log('ERROR', `Could not create sessions directory: ${error.message}`);
+    dialog.showErrorBox('Fatal Error', `Could not create session directory at ${sessionsPath}. The application cannot save data.`);
+}
+
+
+// --- Settings Management ---
+function getSettings() {
+    const defaultColumnStyles = {
+      time: { fontFamily: 'monospace', isBold: false, isItalic: false, fontSize: 13, color: '#6B7280', darkColor: '#9CA3AF' },
+      level: { fontFamily: 'sans-serif', isBold: true, isItalic: false, fontSize: 12, color: '', darkColor: '' },
+      sndrtype: { fontFamily: 'sans-serif', isBold: false, isItalic: false, fontSize: 14, color: '#374151', darkColor: '#D1D5DB' },
+      sndrname: { fontFamily: 'sans-serif', isBold: false, isItalic: false, fontSize: 14, color: '#374151', darkColor: '#D1D5DB' },
+      fileName: { fontFamily: 'sans-serif', isBold: false, isItalic: false, fontSize: 13, color: '#6B7280', darkColor: '#9CA3AF' },
+      msg: { fontFamily: 'monospace', isBold: false, isItalic: false, fontSize: 13, color: '#1F2937', darkColor: '#F3F4F6' },
+    };
+
+    const defaultSettings = {
+        theme: "light",
+        viewMode: "pagination",
+        columnVisibility: {
+            time: true,
+            level: true,
+            sndrtype: true,
+            sndrname: true,
+            fileName: true,
+            msg: true
+        },
+        customFilterPresets: {},
+        columnStyles: defaultColumnStyles,
+        panelWidths: {
+            filters: 320,
+            details: 500,
+        },
+        isTimeRangeSelectorVisible: true,
+    };
+    try {
+        if (fs.existsSync(settingsPath)) {
+            const settingsData = fs.readFileSync(settingsPath, 'utf-8');
+            const loadedSettings = JSON.parse(settingsData);
+            
+            const mergedColumnStyles = { ...defaultColumnStyles };
+            if (loadedSettings.columnStyles) {
+                for (const key in mergedColumnStyles) {
+                    if (loadedSettings.columnStyles[key]) {
+                        mergedColumnStyles[key] = { ...mergedColumnStyles[key], ...loadedSettings.columnStyles[key] };
+                    }
+                }
+            }
+
+            const finalSettings = {
+                ...defaultSettings,
+                ...loadedSettings,
+                columnVisibility: {
+                    ...defaultSettings.columnVisibility,
+                    ...(loadedSettings.columnVisibility || {}),
+                },
+                customFilterPresets: {
+                    ...defaultSettings.customFilterPresets,
+                    ...(loadedSettings.customFilterPresets || {}),
+                },
+                columnStyles: mergedColumnStyles,
+                panelWidths: {
+                    ...defaultSettings.panelWidths,
+                    ...(loadedSettings.panelWidths || {}),
+                },
+                isTimeRangeSelectorVisible: loadedSettings.isTimeRangeSelectorVisible ?? defaultSettings.isTimeRangeSelectorVisible,
+            };
+            
+            // Clean up deprecated keys from old versions
+            delete finalSettings.apiKey;
+            
+            return finalSettings;
+        }
+    } catch (error) {
+        log('ERROR', `Could not read or parse settings.json: ${error.message}. Using defaults.`);
+    }
+    
+    // For any error or if file doesn't exist, write a fresh default file
+    try {
+        fs.writeFileSync(settingsPath, JSON.stringify(defaultSettings, null, 2));
+        return defaultSettings;
+    } catch (writeError) {
+         log('ERROR', `Could not create default settings.json: ${writeError.message}`);
+         return defaultSettings; // Return default in memory if write fails
+    }
+}
+
+
+// --- Main Window Creation ---
+function createWindow() {
+  log('INFO', 'createWindow() called.');
+  
+  const windowOptions = {
+    width: 1280,
+    height: 800,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+    autoHideMenuBar: true,
+  };
+  mainWindow = new BrowserWindow(windowOptions);
+
+  const indexPath = path.join(__dirname, '..', 'index.html');
+  mainWindow.loadFile(indexPath);
+
+  let forceQuit = false;
+  app.on('before-quit', () => forceQuit = true);
+
+  mainWindow.on('close', async (e) => {
+    if (forceQuit) {
+      return;
+    }
+    e.preventDefault();
+
+    try {
+      const dirtyState = await mainWindow.webContents.executeJavaScript('window.isAppDirty && window.isAppDirty()', true);
+      
+      if (!dirtyState || !dirtyState.isDirty) {
+        forceQuit = true;
+        app.quit();
+        return;
+      }
+      
+      const { response } = await dialog.showMessageBox(mainWindow, {
+        type: 'question',
+        buttons: ['Save', 'Don\'t Save', 'Cancel'],
+        defaultId: 0,
+        cancelId: 2,
+        title: 'Unsaved Changes',
+        message: `Do you want to save the changes you made to "${dirtyState.sessionName || 'Unsaved Session'}"?`,
+        detail: 'Your changes will be lost if you don\'t save them.'
+      });
+
+      if (response === 2) { // Cancel
+        return; 
+      }
+      if (response === 1) { // Don't Save
+        forceQuit = true;
+        app.quit();
+        return;
+      }
+      if (response === 0) { // Save
+        mainWindow.webContents.send('save-before-quit');
+      }
+
+    } catch (err) {
+      log('ERROR', `Error during close confirmation: ${err.message}`);
+      // If something went wrong, just quit to avoid an unresponsive app
+      forceQuit = true;
+      app.quit();
+    }
+  });
+
+  if (!app.isPackaged) {
+    mainWindow.webContents.openDevTools();
+  }
+}
+
+// --- IPC Handlers for Session Management ---
+
+ipcMain.handle('list-sessions', () => {
+    try {
+        const files = fs.readdirSync(sessionsPath).filter(file => file.endsWith('.sqlite'));
+        return files.map(file => {
+            const filePath = path.join(sessionsPath, file);
+            const stats = fs.statSync(filePath);
+            return {
+                name: file,
+                path: filePath,
+                size: stats.size,
+                mtime: stats.mtime.getTime(),
+            };
+        }).sort((a, b) => b.mtime - a.mtime); // Sort by most recently modified
+    } catch (error) {
+        log('ERROR', `IPC: Failed to list sessions: ${error.message}`);
+        return [];
+    }
+});
+
+ipcMain.handle('get-session-buffer', (event, fileName) => {
+    try {
+        const filePath = path.join(sessionsPath, fileName);
+        if (!fs.existsSync(filePath)) {
+            throw new Error(`Session file not found: ${fileName}`);
+        }
+        const buffer = fs.readFileSync(filePath);
+        return { success: true, buffer };
+    } catch (error) {
+        log('ERROR', `IPC: Failed to get session buffer for ${fileName}: ${error.message}`);
+        return { success: false, error: error.message };
+    }
+});
+
+ipcMain.handle('save-session', (event, buffer, fileName) => {
+    try {
+        if (!fileName) {
+            const now = new Date();
+            const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-').replace('T', '_');
+            fileName = `session_${timestamp}.sqlite`;
+        }
+        
+        const filePath = path.join(sessionsPath, fileName);
+        fs.writeFileSync(filePath, Buffer.from(buffer));
+        return { success: true };
+    } catch (error) {
+        log('ERROR', `IPC: Failed to save session: ${error.message}`);
+        return { success: false, error: error.message };
+    }
+});
+
+ipcMain.handle('delete-session', (event, fileName) => {
+    try {
+        const filePath = path.join(sessionsPath, fileName);
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+            return { success: true };
+        }
+        throw new Error(`File not found for deletion: ${fileName}`);
+    } catch (error) {
+        log('ERROR', `IPC: Failed to delete session ${fileName}: ${error.message}`);
+        return { success: false, error: error.message };
+    }
+});
+
+ipcMain.handle('rename-session', (event, oldName, newName) => {
+    try {
+        const oldPath = path.join(sessionsPath, oldName);
+        const newPath = path.join(sessionsPath, newName);
+
+        if (!fs.existsSync(oldPath)) throw new Error(`Source file not found: ${oldName}`);
+        if (fs.existsSync(newPath)) throw new Error(`Destination file already exists: ${newName}`);
+
+        fs.renameSync(oldPath, newPath);
+        return { success: true };
+    } catch (error) {
+        log('ERROR', `IPC: Failed to rename session ${oldName} to ${newName}: ${error.message}`);
+        return { success: false, error: error.message };
+    }
+});
+
+ipcMain.handle('get-markdown-content', (event, fileName) => {
+    try {
+        const filePath = path.join(appDataPath, fileName);
+        if (fs.existsSync(filePath)) {
+            const content = fs.readFileSync(filePath, 'utf-8');
+            return { success: true, content };
+        } else {
+            log('WARNING', `IPC: Markdown file not found at ${filePath}`);
+            throw new Error(`File not found: ${fileName}`);
+        }
+    } catch (error) {
+        log('ERROR', `IPC: Failed to get markdown content for ${fileName}: ${error.message}`);
+        return { success: false, error: error.message };
+    }
+});
+
+
+// --- Application Lifecycle Events ---
+app.whenReady().then(() => {
+    log('INFO', "Electron 'ready' event fired. Setting up IPC handlers and creating window.");
+
+    // Standard IPC Handlers
+    ipcMain.handle('get-settings', () => getSettings());
+    ipcMain.handle('set-settings', (event, settings) => {
+        try {
+            fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
+            return { success: true };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    });
+    ipcMain.handle('get-settings-path', () => settingsPath);
+    ipcMain.handle('show-settings-file', () => shell.showItemInFolder(settingsPath));
+    ipcMain.on('log-message', (event, { level, message }) => log(level, `[Renderer] ${message}`));
+    
+    // Custom IPC Handlers
+    ipcMain.handle('get-system-fonts', () => {
+        const fontList = systemPreferences.getFontFamilyList();
+        // On Windows, getFontFamilyList() returns an array of objects { name, path }.
+        // On other platforms, it returns an array of strings.
+        // We normalize it here to always return a string array for the renderer.
+        if (fontList.length > 0 && typeof fontList[0] === 'object' && fontList[0].hasOwnProperty('name')) {
+            // It's an array of objects, so map it to an array of names.
+            return fontList.map(font => font.name);
+        }
+        // Otherwise, assume it's already an array of strings (like on macOS).
+        return fontList;
+    });
+
+    // Quit sequence handler
+    ipcMain.on('saved-and-ready-to-quit', () => {
+      // This is called by the renderer after a successful save-on-quit
+      const allWindows = BrowserWindow.getAllWindows();
+      if (allWindows.length > 0) {
+        const win = allWindows[0];
+        // The 'close' event handler has a flag `forceQuit` which is now true
+        // and will allow the app to exit.
+        win.destroy(); // destroy instead of close to bypass listener again
+      }
+      app.quit();
+    });
+
+    ipcMain.handle('set-title', (event, title) => {
+        if(mainWindow) {
+            mainWindow.setTitle(title);
+        }
+    });
+
+    createWindow();
+
+    app.on('activate', () => {
+        if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    });
+});
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit();
+});
+
+app.on('will-quit', () => {
+    log('INFO', '--- Application will quit ---');
+});

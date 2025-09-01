@@ -1,0 +1,825 @@
+import React from 'react';
+import { LogEntry, FilterState, PageTimestampRange, ColumnVisibilityState, ColumnStyles, ColumnKey, PanelWidths, ViewMode, ConsoleMessage, OverallTimeRange, FileTimeRange, LogDensityPoint } from '../types.ts';
+import { ChevronLeftIcon } from './icons/ChevronLeftIcon.tsx';
+import { ChevronRightIcon } from './icons/ChevronRightIcon.tsx';
+import { FilterBar } from './FilterBar.tsx';
+import { LogDetailPanel } from './LogDetailPanel.tsx';
+import { highlightText } from '../utils.ts';
+import { ColumnSelector } from './ColumnSelector.tsx';
+import { BugAntIcon } from './icons/BugAntIcon.tsx';
+import { TimeRangeSelector } from './TimeRangeSelector.tsx';
+import { ClockIcon } from './icons/ClockIcon.tsx';
+import { getSqlDateTime } from '../db.ts';
+import { SidebarRightIcon } from './icons/SidebarRightIcon.tsx';
+import { ArrowPathIcon } from './icons/ArrowPathIcon.tsx';
+import { FilterIcon } from './icons/FilterIcon.tsx';
+
+type Theme = 'light' | 'dark';
+
+interface LogTableProps {
+  entries: LogEntry[];
+  loadedFileNames: string[];
+  currentPage: number;
+  totalPages: number;
+  filteredEntriesCount: number;
+  totalEntries: number;
+  pageSize: number;
+  pageTimestampRanges: PageTimestampRange[];
+  onGoToPage: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
+  filters: FilterState; // This is formFilters
+  appliedFilters: FilterState; // This is the source of truth for the view
+  onFiltersChange: (filters: FilterState) => void;
+  onApplyFilters: () => void;
+  onResetFilters: () => void;
+  onClearTimeRange: () => void;
+  uniqueValues: {
+    level: string[];
+    sndrtype: string[];
+    sndrname: string[];
+    fileName: string[];
+  };
+  theme: Theme;
+  viewMode: ViewMode;
+  onViewModeChange: (mode: ViewMode) => void;
+  columnVisibility: ColumnVisibilityState;
+  onColumnVisibilityChange: (newState: ColumnVisibilityState) => void;
+  columnStyles: ColumnStyles;
+  panelWidths: PanelWidths;
+  onPanelWidthsChange: (newWidths: PanelWidths) => void;
+  onApplyFilter: (key: 'level' | 'sndrtype' | 'sndrname' | 'fileName', value: string) => void;
+  customFilterPresets: Record<string, FilterState>;
+  onSavePreset: (name: string) => void;
+  onDeletePreset: (name: string) => void;
+  onLoadPreset: (name: string) => void;
+  onLoadMore: () => void;
+  hasMore: boolean;
+  isBusy: boolean;
+  logToConsole: (message: string, type: ConsoleMessage['type']) => void;
+  overallTimeRange: OverallTimeRange | null;
+  onTimeRangeSelectorChange: (startTime: number, endTime: number) => void;
+  isTimeRangeSelectorVisible: boolean;
+  onTimeRangeSelectorVisibilityChange: (isVisible: boolean) => void;
+  fileTimeRanges: FileTimeRange[];
+  logDensity: LogDensityPoint[];
+  datesWithLogs: string[];
+  onCursorChange: (time: number) => void;
+  onFileSelect: (fileName: string) => void;
+  onDateSelect: (date: string) => void;
+  keyboardSelectedId: number | null;
+  setKeyboardSelectedId: (id: number | null) => void;
+  jumpToEntryId: number | null;
+  timelineViewRange: OverallTimeRange | null;
+  onTimelineZoomToSelection: () => void;
+  onTimelineZoomReset: () => void;
+  isInitialLoad: boolean;
+}
+
+export const getLevelColor = (level: string): string => {
+  const lowerLevel = level.toLowerCase();
+  if (lowerLevel.includes('error')) {
+    return 'bg-red-100 text-red-800 dark:bg-red-800/50 dark:text-red-300';
+  }
+  if (lowerLevel.includes('warn')) {
+    return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800/50 dark:text-yellow-300';
+  }
+  if (lowerLevel.includes('info ext')) {
+    return 'bg-sky-100 text-sky-800 dark:bg-sky-800/50 dark:text-sky-300';
+  }
+  if (lowerLevel.includes('info')) {
+    return 'bg-blue-100 text-blue-800 dark:bg-blue-800/50 dark:text-blue-300';
+  }
+  return 'bg-gray-200 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300';
+};
+
+
+// Helper to format just the time part for the dropdown
+const formatTime = (isoString: string | null) => {
+    if (!isoString) return '...';
+    // Extracts time part e.g. "2024-05-25 14:30:01.123" -> "14:30:01"
+    return isoString.substring(11, 19);
+};
+
+
+export const LogTable: React.FC<LogTableProps> = ({ 
+  entries,
+  loadedFileNames,
+  currentPage,
+  totalPages,
+  filteredEntriesCount,
+  totalEntries,
+  pageSize,
+  pageTimestampRanges,
+  onGoToPage,
+  onPageSizeChange,
+  filters,
+  appliedFilters,
+  onFiltersChange,
+  onApplyFilters,
+  onResetFilters,
+  onClearTimeRange,
+  uniqueValues,
+  theme,
+  viewMode,
+  onViewModeChange,
+  columnVisibility,
+  onColumnVisibilityChange,
+  columnStyles,
+  panelWidths,
+  onPanelWidthsChange,
+  onApplyFilter,
+  customFilterPresets,
+  onSavePreset,
+  onDeletePreset,
+  onLoadPreset,
+  onLoadMore,
+  hasMore,
+  isBusy,
+  logToConsole,
+  overallTimeRange,
+  onTimeRangeSelectorChange,
+  isTimeRangeSelectorVisible,
+  onTimeRangeSelectorVisibilityChange,
+  fileTimeRanges,
+  logDensity,
+  datesWithLogs,
+  onCursorChange,
+  onFileSelect,
+  onDateSelect,
+  keyboardSelectedId,
+  setKeyboardSelectedId,
+  jumpToEntryId,
+  timelineViewRange,
+  onTimelineZoomToSelection,
+  onTimelineZoomReset,
+  isInitialLoad,
+}) => {
+  const [selectedEntry, setSelectedEntry] = React.useState<LogEntry | null>(null);
+  const [selectOnLoad, setSelectOnLoad] = React.useState<'first' | 'last' | null>(null);
+
+  const [localPanelWidths, setLocalPanelWidths] = React.useState<PanelWidths>(panelWidths);
+  const [isResizing, setIsResizing] = React.useState<'filters' | 'details' | null>(null);
+  const [isDebugMenuOpen, setIsDebugMenuOpen] = React.useState(false);
+  const [isDetailPanelVisible, setIsDetailPanelVisible] = React.useState(false);
+  
+  // Refs for layout and scrolling
+  const fullContainerRef = React.useRef<HTMLDivElement>(null);
+  const mainContainerRef = React.useRef<HTMLElement>(null);
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+  const tableBodyRef = React.useRef<HTMLTableSectionElement>(null);
+  const debugButtonRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    setLocalPanelWidths(panelWidths);
+  }, [panelWidths]);
+
+  // When switching view modes, reset any selection state
+  React.useEffect(() => {
+    setSelectedEntry(null);
+    setKeyboardSelectedId(null);
+    setSelectOnLoad(null);
+    setIsDetailPanelVisible(false);
+  }, [viewMode, setKeyboardSelectedId]);
+  
+  // Infinite scroll listener
+  React.useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container || viewMode !== 'scroll') return;
+
+    const handleScroll = () => {
+        if (container.scrollTop + container.clientHeight >= container.scrollHeight - 500 && hasMore && !isBusy) {
+            onLoadMore();
+        }
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [viewMode, hasMore, isBusy, onLoadMore]);
+
+  // Close debug menu if clicked outside
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+        if (isDebugMenuOpen && debugButtonRef.current && !debugButtonRef.current.contains(event.target as Node)) {
+            setIsDebugMenuOpen(false);
+        }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isDebugMenuOpen]);
+
+  const handleResizeMouseDown = (e: React.MouseEvent, panel: 'filters' | 'details') => {
+    e.preventDefault();
+    setIsResizing(panel);
+  };
+
+  const handleResizeMouseUp = React.useCallback(() => {
+    if (isResizing) {
+        onPanelWidthsChange(localPanelWidths);
+        setIsResizing(null);
+    }
+  }, [isResizing, localPanelWidths, onPanelWidthsChange]);
+
+  const handleResizeMouseMove = React.useCallback((e: MouseEvent) => {
+    if (!isResizing || !fullContainerRef.current) return;
+    
+    e.preventDefault();
+
+    const containerRect = fullContainerRef.current.getBoundingClientRect();
+    let newWidth: number;
+    
+    if (isResizing === 'details') {
+        newWidth = containerRect.right - e.clientX;
+        const minPanelWidth = 300;
+        const maxPanelWidth = containerRect.width - localPanelWidths.filters - 200; // Keep at least 200px for table
+        newWidth = Math.max(minPanelWidth, Math.min(newWidth, maxPanelWidth));
+        setLocalPanelWidths(prev => ({...prev, details: newWidth}));
+    } else if (isResizing === 'filters') {
+        newWidth = e.clientX - containerRect.left;
+        const minPanelWidth = 250;
+        const detailsWidth = isDetailPanelVisible && selectedEntry ? localPanelWidths.details : 0;
+        const maxPanelWidth = containerRect.width - detailsWidth - 200; // Keep 200px for table
+        newWidth = Math.max(minPanelWidth, Math.min(newWidth, maxPanelWidth));
+        setLocalPanelWidths(prev => ({...prev, filters: newWidth}));
+    }
+
+  }, [isResizing, localPanelWidths.filters, localPanelWidths.details, selectedEntry, isDetailPanelVisible]);
+
+  const handleLogLayout = () => {
+    setIsDebugMenuOpen(false);
+    logToConsole("Layout debugging is not applicable for the current scroll mode.", 'INFO');
+    alert('The layout debugging tool is for the legacy virtualization mode and is not needed for the current table implementation.');
+  };
+
+  React.useEffect(() => {
+    window.addEventListener('mousemove', handleResizeMouseMove);
+    window.addEventListener('mouseup', handleResizeMouseUp);
+
+    return () => {
+      window.removeEventListener('mousemove', handleResizeMouseMove);
+      window.removeEventListener('mouseup', handleResizeMouseUp);
+    };
+  }, [handleResizeMouseMove, handleResizeMouseUp]);
+
+  React.useEffect(() => {
+    if (selectOnLoad && entries.length > 0) {
+      const newId = selectOnLoad === 'first' ? entries[0].id : entries[entries.length - 1].id;
+      setKeyboardSelectedId(newId);
+      setSelectOnLoad(null);
+    }
+  }, [entries, selectOnLoad, setKeyboardSelectedId]);
+
+  React.useEffect(() => {
+    if (keyboardSelectedId === null) return;
+    
+    // In both modes, we can now use a consistent querySelector
+    const body = tableBodyRef.current;
+    if (body) {
+        const rowElement = body.querySelector(`[data-row-id="${keyboardSelectedId}"]`);
+        if (rowElement) {
+            rowElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+  }, [keyboardSelectedId]);
+
+  React.useEffect(() => {
+    if (keyboardSelectedId !== null) {
+        const entryToUpdate = entries.find(entry => entry.id === keyboardSelectedId);
+        if (entryToUpdate) {
+            setSelectedEntry(entryToUpdate);
+        } else {
+            if (!isBusy) {
+                 setSelectedEntry(null);
+            }
+        }
+    } else {
+        setSelectedEntry(null);
+    }
+  }, [keyboardSelectedId, entries, isBusy]);
+  
+  React.useEffect(() => {
+    if (jumpToEntryId !== null && entries.some(e => e.id === jumpToEntryId)) {
+        setKeyboardSelectedId(jumpToEntryId);
+    }
+  }, [jumpToEntryId, entries, setKeyboardSelectedId]);
+
+
+  React.useEffect(() => {
+    const mainEl = mainContainerRef.current;
+    if (!mainEl) return;
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const handledKeys = ['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End'];
+      if (!handledKeys.includes(e.key) || entries.length === 0) {
+        return;
+      }
+      e.preventDefault();
+
+      let currentIndex = -1;
+      if (keyboardSelectedId !== null) {
+        currentIndex = entries.findIndex(entry => entry.id === keyboardSelectedId);
+      }
+      
+      switch (e.key) {
+        case 'ArrowDown': {
+          if (currentIndex < entries.length - 1) {
+            const nextIndex = currentIndex === -1 ? 0 : currentIndex + 1;
+            setKeyboardSelectedId(entries[nextIndex].id);
+          } else if (viewMode === 'scroll' && hasMore && !isBusy) {
+            onLoadMore();
+          } else if (viewMode === 'pagination' && currentPage < totalPages) {
+            setSelectOnLoad('first');
+            onGoToPage(currentPage + 1);
+          }
+          break;
+        }
+        case 'ArrowUp': {
+          if (currentIndex > 0) {
+            setKeyboardSelectedId(entries[currentIndex - 1].id);
+          } else if (currentIndex === -1 && entries.length > 0) {
+            setKeyboardSelectedId(entries[entries.length - 1].id);
+          } else if (viewMode === 'pagination' && currentPage > 1) {
+            setSelectOnLoad('last');
+            onGoToPage(currentPage - 1);
+          }
+          break;
+        }
+        case 'PageDown': {
+            if (viewMode === 'pagination' && e.ctrlKey && currentPage < totalPages) {
+              setSelectOnLoad('first');
+              onGoToPage(currentPage + 1);
+              break;
+            }
+
+            const scrollableView = scrollContainerRef.current;
+            if (!scrollableView) break;
+
+            if (currentIndex === entries.length - 1) break;
+
+            const tableBody = tableBodyRef.current;
+            if (!tableBody) break;
+            const averageRowHeight = tableBody.scrollHeight > 0 ? tableBody.scrollHeight / entries.length : 50;
+            const itemsPerPage = Math.max(1, Math.floor(scrollableView.clientHeight / averageRowHeight));
+            
+            const newIndex = Math.min(entries.length - 1, (currentIndex === -1 ? -1 : currentIndex) + itemsPerPage);
+            setKeyboardSelectedId(entries[newIndex].id);
+            break;
+        }
+        case 'PageUp': {
+            if (viewMode === 'pagination' && e.ctrlKey && currentPage > 1) {
+                setSelectOnLoad('last');
+                onGoToPage(currentPage - 1);
+                break;
+            }
+
+            const scrollableView = scrollContainerRef.current;
+            if (!scrollableView) break;
+
+            if (currentIndex <= 0) break;
+
+            const tableBody = tableBodyRef.current;
+            if (!tableBody) break;
+            const averageRowHeight = tableBody.scrollHeight > 0 ? tableBody.scrollHeight / entries.length : 50;
+            const itemsPerPage = Math.max(1, Math.floor(scrollableView.clientHeight / averageRowHeight));
+
+            const newIndex = Math.max(0, currentIndex - itemsPerPage);
+            setKeyboardSelectedId(entries[newIndex].id);
+            break;
+        }
+        case 'Home': {
+          if (viewMode === 'pagination' && e.ctrlKey && currentPage !== 1) {
+            setSelectOnLoad('first');
+            onGoToPage(1);
+          } else if (entries.length > 0) {
+            setKeyboardSelectedId(entries[0].id);
+             if (scrollContainerRef.current) {
+                scrollContainerRef.current.scrollTop = 0;
+            }
+          }
+          break;
+        }
+        case 'End': {
+          if (viewMode === 'pagination' && e.ctrlKey && currentPage !== totalPages && totalPages > 0) {
+            setSelectOnLoad('last');
+            onGoToPage(totalPages);
+          } else if (viewMode === 'scroll' && hasMore) {
+              onLoadMore(); // This will continue until all loaded
+              // We can't easily jump to the end if not all are loaded, so this is a reasonable behavior.
+          } else if (entries.length > 0) {
+            setKeyboardSelectedId(entries[entries.length - 1].id);
+            if (scrollContainerRef.current) {
+                scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+            }
+          }
+          break;
+        }
+      }
+    };
+    
+    mainEl.addEventListener('keydown', handleKeyDown);
+    return () => mainEl.removeEventListener('keydown', handleKeyDown);
+  }, [entries, onGoToPage, currentPage, totalPages, keyboardSelectedId, viewMode, hasMore, isBusy, onLoadMore, filteredEntriesCount, setKeyboardSelectedId]);
+  
+  const handleEntrySelect = React.useCallback((entry: LogEntry) => {
+      setKeyboardSelectedId(entry.id);
+  }, [setKeyboardSelectedId]);
+
+  const handleToggleDetailsPanel = () => {
+    const turningOn = !isDetailPanelVisible;
+    if (turningOn && keyboardSelectedId === null && entries.length > 0) {
+        setKeyboardSelectedId(entries[0].id);
+    }
+    setIsDetailPanelVisible(turningOn);
+  };
+
+  const startEntry = (currentPage - 1) * pageSize + 1;
+  const endEntry = startEntry + entries.length - 1;
+
+  const filesInfo = `${loadedFileNames.length} file(s) loaded`;
+  
+  const includeTerms = filters.includeMsg.split('\n').filter(Boolean);
+
+  const visibleColumnCount = React.useMemo(() => {
+    return Object.values(columnVisibility).filter(v => v).length;
+  }, [columnVisibility]);
+  
+  const getTdStyle = (key: ColumnKey): React.CSSProperties => {
+    const styleConf = columnStyles[key];
+    if (!styleConf) return {};
+
+    const properties: React.CSSProperties = {
+        fontFamily: styleConf.fontFamily || 'inherit',
+        fontSize: `${styleConf.fontSize}px`,
+        fontWeight: styleConf.isBold ? 'bold' : 'normal',
+        fontStyle: styleConf.isItalic ? 'italic' : 'normal',
+    };
+
+    const color = theme === 'dark' ? styleConf.darkColor : styleConf.color;
+    
+    if (color) {
+        properties.color = color;
+    }
+
+    return properties;
+  };
+  
+  const getSelectedTimestamps = React.useCallback((sourceFilters: FilterState) => {
+    let selectedStartTime: number | null = null;
+    let selectedEndTime: number | null = null;
+
+    if (sourceFilters.dateFrom) {
+        let timePart = sourceFilters.timeFrom || '00:00:00';
+        if (timePart.length === 5) timePart += ':00';
+        const dateString = `${sourceFilters.dateFrom}T${timePart}.000Z`;
+        const date = new Date(dateString);
+        if (!isNaN(date.getTime())) {
+            selectedStartTime = date.getTime();
+        }
+    }
+     if (sourceFilters.dateTo) {
+        let timePart = sourceFilters.timeTo || '23:59:59';
+        if (timePart.length === 5) timePart += ':00';
+        const dateString = `${sourceFilters.dateTo}T${timePart}.999Z`;
+        const date = new Date(dateString);
+         if (!isNaN(date.getTime())) {
+            selectedEndTime = date.getTime();
+        }
+    }
+    return { selectedStartTime, selectedEndTime };
+  }, []);
+
+  const { selectedStartTime, selectedEndTime } = getSelectedTimestamps(filters);
+
+  const zoomToSelectionEnabled = React.useMemo(() => {
+    if (!appliedFilters.dateFrom || !appliedFilters.dateTo) return false;
+    const { selectedStartTime: appliedStart, selectedEndTime: appliedEnd } = getSelectedTimestamps(appliedFilters);
+    return appliedStart !== null && appliedEnd !== null && appliedStart < appliedEnd;
+  }, [appliedFilters, getSelectedTimestamps]);
+  
+  const activeDate = React.useMemo(() => {
+    if (filters.dateFrom && filters.dateTo && filters.dateFrom === filters.dateTo) {
+        return filters.dateFrom;
+    }
+    return null;
+  }, [filters.dateFrom, filters.dateTo]);
+
+  const activeFileName = React.useMemo(() => {
+    if (filters.fileName?.length === 1) {
+        return filters.fileName[0];
+    }
+    return null;
+  }, [filters.fileName]);
+
+  const ViewModeToggle: React.FC = () => {
+    const buttonBase = "px-3 py-1 text-xs font-semibold rounded-md transition-colors";
+    const activeClass = "bg-white dark:bg-gray-600 text-sky-700 dark:text-white shadow-sm";
+    const inactiveClass = "text-gray-500 dark:text-gray-400 hover:bg-white/60 dark:hover:bg-gray-500/50";
+    
+    return (
+      <div className="flex items-center gap-1 p-0.5 bg-gray-200 dark:bg-gray-700/80 rounded-lg">
+        <button onClick={() => onViewModeChange('pagination')} className={`${buttonBase} ${viewMode === 'pagination' ? activeClass : inactiveClass}`}>
+          Paginate
+        </button>
+        <button onClick={() => onViewModeChange('scroll')} className={`${buttonBase} ${viewMode === 'scroll' ? activeClass : inactiveClass}`}>
+          Scroll
+        </button>
+      </div>
+    );
+  };
+  
+  const TableContent = (
+    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+      <thead className="bg-gray-100 dark:bg-gray-800 sticky top-0 z-10">
+        <tr>
+          {columnVisibility.time && <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-300 sm:pl-6">Timestamp</th>}
+          {columnVisibility.level && <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-300">Level</th>}
+          {columnVisibility.sndrtype && <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-300">Sender Type</th>}
+          {columnVisibility.sndrname && <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-300">Sender Name</th>}
+          {columnVisibility.fileName && <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-300">Filename</th>}
+          {columnVisibility.msg && <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-300">Message</th>}
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-gray-200/50 dark:divide-gray-700/50 bg-white dark:bg-gray-900" ref={tableBodyRef}>
+        {entries.map((entry) => (
+          <tr key={entry.id} 
+            data-row-id={entry.id}
+            onClick={() => handleEntrySelect(entry)}
+            className={`relative hover:bg-gray-100 dark:hover:bg-gray-800/70 transition-colors duration-150 cursor-pointer ${
+              keyboardSelectedId === entry.id ? 'bg-sky-50 dark:bg-sky-900/60 ring-2 ring-inset ring-sky-500' : ''
+            }`}
+          >
+            {columnVisibility.time && <td style={getTdStyle('time')} className="whitespace-nowrap py-4 pl-4 pr-3 sm:pl-6">{entry.time}</td>}
+            
+            {columnVisibility.level && <td className="whitespace-nowrap px-3 py-4">
+              <span style={getTdStyle('level')} className={`px-2 py-1 rounded-full font-medium ${getLevelColor(entry.level)}`}>
+                {entry.level}
+              </span>
+            </td>}
+
+            {columnVisibility.sndrtype && <td style={getTdStyle('sndrtype')} className="whitespace-nowrap px-3 py-4">{entry.sndrtype}</td>}
+            
+            {columnVisibility.sndrname && <td style={getTdStyle('sndrname')} className="whitespace-nowrap px-3 py-4">{entry.sndrname}</td>}
+            
+            {columnVisibility.fileName && <td style={getTdStyle('fileName')} className="whitespace-nowrap px-3 py-4 max-w-xs truncate" title={entry.fileName}>{entry.fileName}</td>}
+
+            {columnVisibility.msg && <td style={getTdStyle('msg')} className="px-3 py-4 whitespace-pre-wrap break-words" dangerouslySetInnerHTML={{ __html: highlightText(entry.msg, includeTerms, theme) }} />}
+          </tr>
+        ))}
+        {entries.length === 0 && (
+            <tr>
+              <td colSpan={visibleColumnCount} className="text-center py-12">
+                {isBusy ? (
+                    <div className="flex justify-center items-center gap-2 text-gray-500 dark:text-gray-400">
+                        <ArrowPathIcon className="w-6 h-6 animate-spin" />
+                        <span className="font-semibold text-lg">Processing...</span>
+                    </div>
+                ) : isInitialLoad && filteredEntriesCount > 0 ? (
+                    <div className="text-gray-500 dark:text-gray-400">
+                        <FilterIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                        <h3 className="text-xl font-semibold mb-2 text-gray-700 dark:text-gray-300">Data Ready for Analysis</h3>
+                        <p className="font-bold text-lg">{filteredEntriesCount.toLocaleString()} total entries loaded.</p>
+                        <p className="mt-2">Use the filters on the left and click <strong className="text-amber-600 dark:text-amber-400">Apply</strong> to view logs.</p>
+                    </div>
+                ) : (
+                    <div className="text-gray-500 dark:text-gray-400">
+                        No log items found matching the filters.
+                    </div>
+                )}
+              </td>
+            </tr>
+        )}
+      </tbody>
+    </table>
+  );
+
+  return (
+    <div className="flex flex-col flex-1 bg-white dark:bg-gray-800/50 overflow-hidden">
+      <div className="flex flex-1 min-h-0" ref={fullContainerRef}>
+        <aside
+          style={{ width: `${localPanelWidths.filters}px` }} 
+          className="flex-shrink-0 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+          <FilterBar
+            filters={filters}
+            appliedFilters={appliedFilters}
+            onFiltersChange={onFiltersChange}
+            onApplyFilters={onApplyFilters}
+            onResetFilters={onResetFilters}
+            uniqueValues={uniqueValues}
+            customFilterPresets={customFilterPresets}
+            onSavePreset={onSavePreset}
+            onDeletePreset={onDeletePreset}
+            onLoadPreset={onLoadPreset}
+          />
+        </aside>
+
+        <div
+            onMouseDown={(e) => handleResizeMouseDown(e, 'filters')}
+            className="w-1.5 flex-shrink-0 cursor-col-resize bg-gray-200 dark:bg-gray-700/50 hover:bg-sky-500 transition-colors duration-200"
+        />
+
+        <main className="flex-1 flex flex-col min-h-0" ref={mainContainerRef} tabIndex={-1}>
+            <div className="flex-1 flex min-h-0">
+                <div className="flex-1 min-w-0 min-h-0 flex flex-col">
+                    {isTimeRangeSelectorVisible && overallTimeRange && (
+                        <div className="flex-shrink-0 p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                            <TimeRangeSelector
+                                minTime={overallTimeRange.min}
+                                maxTime={overallTimeRange.max}
+                                selectedStartTime={selectedStartTime}
+                                selectedEndTime={selectedEndTime}
+                                onRangeChange={onTimeRangeSelectorChange}
+                                onClear={onClearTimeRange}
+                                theme={theme}
+                                pageTimestampRanges={pageTimestampRanges}
+                                fileTimeRanges={fileTimeRanges}
+                                logDensity={logDensity}
+                                datesWithLogs={datesWithLogs}
+                                viewMode={viewMode}
+                                onGoToPage={onGoToPage}
+                                cursorTime={selectedEntry ? new Date(selectedEntry.time + 'Z').getTime() : null}
+                                activeFileName={activeFileName}
+                                activeDate={activeDate}
+                                currentPage={currentPage}
+                                onCursorChange={onCursorChange}
+                                onFileSelect={onFileSelect}
+                                onDateSelect={onDateSelect}
+                                viewRange={timelineViewRange}
+                                onZoomToSelection={onTimelineZoomToSelection}
+                                onZoomToExtent={onTimelineZoomReset}
+                                zoomToSelectionEnabled={zoomToSelectionEnabled}
+                            />
+                        </div>
+                    )}
+                    <div className="flex-1 relative">
+                        <div className="absolute inset-0 overflow-auto" ref={scrollContainerRef}>
+                            {TableContent}
+                            {viewMode === 'scroll' && isBusy && (
+                                <div className="text-center p-4 text-gray-500 dark:text-gray-400 font-semibold animate-pulse">Loading more...</div>
+                            )}
+                            {viewMode === 'scroll' && !hasMore && filteredEntriesCount > 0 && (
+                                <div className="text-center p-4 text-gray-500 dark:text-gray-400 font-semibold">End of logs</div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {isDetailPanelVisible && (
+                  <>
+                    <div
+                      onMouseDown={(e) => handleResizeMouseDown(e, 'details')}
+                      className="w-1.5 flex-shrink-0 cursor-col-resize bg-gray-200 dark:bg-gray-700/50 hover:bg-sky-500 transition-colors duration-200"
+                    />
+                    <LogDetailPanel 
+                      entry={selectedEntry} 
+                      onClose={() => setIsDetailPanelVisible(false)}
+                      width={localPanelWidths.details}
+                      highlightTerms={includeTerms}
+                      theme={theme}
+                      onApplyFilter={onApplyFilter}
+                      columnStyles={columnStyles}
+                    />
+                  </>
+                )}
+            </div>
+          
+            <div className="flex-shrink-0 flex items-center justify-between p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex-wrap gap-4">
+              {/* Left-side info */}
+              <div>
+                  {filteredEntriesCount > 0 && viewMode === 'pagination' && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                          Showing rows <span className="font-medium text-gray-800 dark:text-gray-200">{startEntry.toLocaleString()}</span>-<span className="font-medium text-gray-800 dark:text-gray-200">{endEntry.toLocaleString()}</span> of <span className="font-medium text-gray-800 dark:text-gray-200">{filteredEntriesCount.toLocaleString()}</span>
+                      </p>
+                  )}
+                  {filteredEntriesCount > 0 && viewMode === 'scroll' && entries.length > 0 && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                         Showing <span className="font-medium text-gray-800 dark:text-gray-200">{entries.length.toLocaleString()}</span> of <span className="font-medium text-gray-800 dark:text-gray-200">{filteredEntriesCount.toLocaleString()}</span> rows
+                      </p>
+                  )}
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{filesInfo} ({totalEntries.toLocaleString()} total rows)</p>
+              </div>
+
+              {/* Right-side controls */}
+              <div className="flex items-center gap-x-6 gap-y-2 flex-wrap justify-end">
+                  <ViewModeToggle />
+                  <ColumnSelector
+                      visibility={columnVisibility}
+                      onChange={onColumnVisibilityChange}
+                  />
+
+                  {/* Timeline Toggle */}
+                  <button
+                      onClick={() => onTimeRangeSelectorVisibilityChange(!isTimeRangeSelectorVisible)}
+                      className={`inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-md transition-colors
+                          ${isTimeRangeSelectorVisible
+                              ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
+                          }
+                      `}
+                      title="Toggle timeline selector"
+                  >
+                      <ClockIcon className="w-5 h-5"/>
+                      <span>Timeline</span>
+                  </button>
+                  
+                  {/* Details Panel Toggle */}
+                  <button
+                      onClick={handleToggleDetailsPanel}
+                      className={`inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-md transition-colors
+                          ${isDetailPanelVisible
+                              ? 'bg-amber-500 hover:bg-amber-600 text-white'
+                              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
+                          }
+                      `}
+                      title="Toggle details panel"
+                  >
+                      <SidebarRightIcon className="w-5 h-5"/>
+                      <span>Details</span>
+                  </button>
+
+                  {/* Debug Menu */}
+                  <div className="relative" ref={debugButtonRef}>
+                     <button
+                        onClick={() => setIsDebugMenuOpen(!isDebugMenuOpen)}
+                        className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors"
+                        title="Debugging tools"
+                    >
+                        <BugAntIcon className="w-5 h-5"/>
+                        <span>Debug</span>
+                    </button>
+                    {isDebugMenuOpen && (
+                         <div className="absolute bottom-full mb-2 right-0 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-20">
+                            <ul className="p-1">
+                                <li>
+                                    <button
+                                        onClick={handleLogLayout}
+                                        className="w-full text-left flex items-center gap-2 p-2 text-sm rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    >
+                                        Log Layout Dimensions
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    )}
+                  </div>
+
+                  {/* Pagination */}
+                  {viewMode === 'pagination' && totalPages > 1 && (
+                      <div className="flex items-center space-x-2">
+                          <button
+                              onClick={() => onGoToPage(currentPage - 1)}
+                              disabled={currentPage === 1}
+                              className="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          >
+                              <ChevronLeftIcon className="w-5 h-5"/>
+                          </button>
+                          
+                          <select
+                              value={currentPage}
+                              onChange={(e) => onGoToPage(Number(e.target.value))}
+                              className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white sm:text-sm rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition"
+                          >
+                              {pageTimestampRanges.length > 0 ? (
+                                pageTimestampRanges.map(p => (
+                                    <option key={p.page} value={p.page}>
+                                        Page {p.page} of {totalPages} ({formatTime(p.startTime)} - {formatTime(p.endTime)})
+                                    </option>
+                                ))
+                              ) : (
+                                <option value={currentPage}>Page {currentPage} of {totalPages}</option>
+                              )}
+                          </select>
+
+                          <button
+                              onClick={() => onGoToPage(currentPage + 1)}
+                              disabled={currentPage === totalPages}
+                              className="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          >
+                              <ChevronRightIcon className="w-5 h-5"/>
+                          </button>
+                      </div>
+                  )}
+                  
+                  {/* Page size selector */}
+                  {viewMode === 'pagination' && (
+                      <div className="flex items-center space-x-2">
+                          <label htmlFor="pageSize" className="text-sm text-gray-600 dark:text-gray-400">Rows/page:</label>
+                          <select
+                              id="pageSize"
+                              value={pageSize}
+                              onChange={(e) => onPageSizeChange(Number(e.target.value))}
+                              className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white sm:text-sm rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition"
+                          >
+                              <option value="100">100</option>
+                              <option value="500">500</option>
+                              <option value="1000">1000</option>
+                              <option value="5000">5000</option>
+                              <option value="10000">10000</option>
+                          </select>
+                      </div>
+                  )}
+              </div>
+            </div>
+        </main>
+      </div>
+    </div>
+  );
+};
