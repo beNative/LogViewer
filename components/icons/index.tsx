@@ -367,7 +367,7 @@ const XMarkSolid: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 // --- FEATHER ICONS (Feathericons.com) ---
 
 const FeatherIconWrapper: React.FC<{ children: React.ReactNode } & React.SVGProps<SVGSVGElement>> = ({ children, ...props }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" strokeWidth={2} stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" {...props}>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" strokeWidth={1.5} stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" {...props}>
     {children}
   </svg>
 );
@@ -474,6 +474,93 @@ const XCircleFeather: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 const XMarkFeather: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <FeatherIconWrapper {...props}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></FeatherIconWrapper>
 );
+
+// --- TABLER ICONS (tabler-icons.io) ---
+
+const TablerIconWrapper: React.FC<{ children: React.ReactNode } & React.SVGProps<SVGSVGElement>> = ({ children, ...props }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+    {children}
+  </svg>
+);
+
+const ArchiveBoxTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M8 8h8v2a2 2 0 0 1 -2 2h-4a2 2 0 0 1 -2 -2v-2z" /><path d="M4 8v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-10" /><path d="M10 12h4" /></TablerIconWrapper> );
+const ArrowPathTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M19.933 13.041a8 8 0 1 1 -9.925 -8.788c3.899 -1 7.935 1.007 9.425 4.747" /><path d="M20 4v5h-5" /></TablerIconWrapper> );
+const ArrowsPointingInTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M4 10h6v-6" /><path d="M20 14h-6v6" /><path d="M10 4l-6 6" /><path d="M14 20l6 -6" /></TablerIconWrapper> );
+const ArrowsPointingOutTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M4 14h6v-6" /><path d="M20 10h-6v6" /><path d="M14 4l6 6" /><path d="M10 20l-6 -6" /></TablerIconWrapper> );
+const ArrowUpTrayTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /><path d="M7 9l5 -5l5 5" /><path d="M12 4l0 12" /></TablerIconWrapper> );
+const BookOpenTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /><path d="M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0" /><path d="M3 6l0 13" /><path d="M12 6l0 13" /><path d="M21 6l0 13" /></TablerIconWrapper> );
+const BugAntTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M9 9v-1a3 3 0 0 1 6 0v1" /><path d="M8 9h8a6 6 0 0 1 6 6v3h-19v-3a6 6 0 0 1 6 -6" /><path d="M3 13v-1a3 3 0 0 1 3 -3" /><path d="M21 13v-1a3 3 0 0 0 -3 -3" /><path d="M12 20l0 -6" /><path d="M4 18l4 -2" /><path d="M20 18l-4 -2" /><path d="M8 7l1 -4" /><path d="M16 7l-1 -4" /></TablerIconWrapper> );
+const ChartBarTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M3 12m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" /><path d="M9 8m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" /><path d="M15 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" /><path d="M4 20l14 0" /></TablerIconWrapper> );
+const CheckCircleTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M9 12l2 2l4 -4" /></TablerIconWrapper> );
+const ChevronDownTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M6 9l6 6l6 -6" /></TablerIconWrapper> );
+const ChevronLeftTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M15 6l-6 6l6 6" /></TablerIconWrapper> );
+const ChevronRightTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M9 6l6 6l-6 6" /></TablerIconWrapper> );
+const ClockTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 12l0 -3.5" /><path d="M16.5 16.5l-4.5 -4.5" /></TablerIconWrapper> );
+const CodeBracketTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M7 8l-4 4l4 4" /><path d="M17 8l4 4l-4 4" /><path d="M14 4l-4 16" /></TablerIconWrapper> );
+const CodeBracketSquareTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M7 4a2 2 0 0 0 -2 2v3a2 3 0 0 1 -2 3a2 3 0 0 1 2 3v3a2 2 0 0 0 2 2" /><path d="M17 4a2 2 0 0 1 2 2v3a2 3 0 0 0 2 3a2 3 0 0 0 -2 3v3a2 2 0 0 1 -2 2" /></TablerIconWrapper> );
+const CogTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" /><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /></TablerIconWrapper> );
+const DatabaseTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M12 6m-8 0a8 3 0 1 0 16 0a8 3 0 1 0 -16 0" /><path d="M4 6v6a8 3 0 0 0 16 0v-6" /><path d="M4 12v6a8 3 0 0 0 16 0v-6" /></TablerIconWrapper> );
+const DocumentPlusTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M12 11l0 6" /><path d="M9 14l6 0" /></TablerIconWrapper> );
+const DownloadTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" /><path d="M7 11l5 5l5 -5" /><path d="M12 4l0 12" /></TablerIconWrapper> );
+const ExclamationTriangleTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M12 9v4" /><path d="M10.24 3.957l-8.407 14.286a1.914 1.914 0 0 0 1.643 2.857h16.813a1.914 1.914 0 0 0 1.643 -2.857l-8.407 -14.286a1.914 1.914 0 0 0 -3.286 0z" /><path d="M12 17h.01" /></TablerIconWrapper> );
+const FileTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /></TablerIconWrapper> );
+const FilterTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.217z" /></TablerIconWrapper> );
+const FolderTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2" /></TablerIconWrapper> );
+const InformationCircleTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" /></TablerIconWrapper> );
+const PencilSquareTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" /><path d="M16 5l3 3" /></TablerIconWrapper> );
+const PlusCircleTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M9 12l6 0" /><path d="M12 9l0 6" /></TablerIconWrapper> );
+const SaveDiskTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" /><path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M14 4l0 4l-6 0l0 -4" /></TablerIconWrapper> );
+const SidebarRightTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" /><path d="M15 4l0 16" /></TablerIconWrapper> );
+const TableTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z" /><path d="M3 10h18" /><path d="M10 3v18" /></TablerIconWrapper> );
+const TerminalTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M8 9l3 3l-3 3" /><path d="M13 15l0 -6" /><path d="M3 4m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z" /></TablerIconWrapper> );
+const TrashTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></TablerIconWrapper> );
+const ViewColumnsTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" /><path d="M12 4l0 16" /></TablerIconWrapper> );
+const XCircleTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M10 10l4 4m0 -4l-4 4" /></TablerIconWrapper> );
+const XMarkTabler: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <TablerIconWrapper {...props}><path d="M18 6l-12 12" /><path d="M6 6l12 12" /></TablerIconWrapper> );
+
+// --- LUCIDE ICONS (lucide.dev) ---
+
+const LucideIconWrapper: React.FC<{ children: React.ReactNode } & React.SVGProps<SVGSVGElement>> = ({ children, ...props }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" {...props}>
+        {children}
+    </svg>
+);
+
+const ArchiveBoxLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></LucideIconWrapper> );
+const ArrowPathLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></LucideIconWrapper> );
+const ArrowsPointingInLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></LucideIconWrapper> );
+const ArrowsPointingOutLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></LucideIconWrapper> );
+const ArrowUpTrayLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></LucideIconWrapper> );
+const BookOpenLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></LucideIconWrapper> );
+const BugAntLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-4"/><path d="M6 13H2"/><path d="M18 13h4"/><path d="M6 7h2.5"/><path d="M15.5 7H18"/></LucideIconWrapper> );
+const ChartBarLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></LucideIconWrapper> );
+const CheckCircleLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></LucideIconWrapper> );
+const ChevronDownLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><path d="m6 9 6 6 6-6"/></LucideIconWrapper> );
+const ChevronLeftLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><path d="m15 18-6-6 6-6"/></LucideIconWrapper> );
+const ChevronRightLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><path d="m9 18 6-6-6-6"/></LucideIconWrapper> );
+const ClockLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></LucideIconWrapper> );
+const CodeBracketLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></LucideIconWrapper> );
+const CodeBracketSquareLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M10 9.5 8 12l2 2.5"/><path d="m14 9.5 2 2.5-2 2.5"/></LucideIconWrapper> );
+const CogLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l.15-.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></LucideIconWrapper> );
+const DatabaseLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></LucideIconWrapper> );
+const DocumentPlusLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></LucideIconWrapper> );
+const DownloadLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></LucideIconWrapper> );
+const ExclamationTriangleLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></LucideIconWrapper> );
+const FileLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></LucideIconWrapper> );
+const FilterLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></LucideIconWrapper> );
+const FolderLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2a2 2 0 0 0-1.66-.9H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"/></LucideIconWrapper> );
+const InformationCircleLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></LucideIconWrapper> );
+const PencilSquareLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></LucideIconWrapper> );
+const PlusCircleLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></LucideIconWrapper> );
+const SaveDiskLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></LucideIconWrapper> );
+const SidebarRightLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M16 3v18"/></LucideIconWrapper> );
+const TableLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></LucideIconWrapper> );
+const TerminalLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></LucideIconWrapper> );
+const TrashLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></LucideIconWrapper> );
+const ViewColumnsLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 3v18"/></LucideIconWrapper> );
+const XCircleLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></LucideIconWrapper> );
+const XMarkLucide: React.FC<React.SVGProps<SVGSVGElement>> = (props) => ( <LucideIconWrapper {...props}><path d="M18 6 6 18"/><path d="M6 6l12 12"/></LucideIconWrapper> );
 
 const sharpIcons = {
     ArchiveBox: ArchiveBoxSharp,
@@ -589,11 +676,89 @@ const featherIcons = {
     XMark: XMarkFeather,
 };
 
+const tablerIcons = {
+    ArchiveBox: ArchiveBoxTabler,
+    ArrowPath: ArrowPathTabler,
+    ArrowsPointingIn: ArrowsPointingInTabler,
+    ArrowsPointingOut: ArrowsPointingOutTabler,
+    ArrowUpTray: ArrowUpTrayTabler,
+    BookOpen: BookOpenTabler,
+    BugAnt: BugAntTabler,
+    ChartBar: ChartBarTabler,
+    CheckCircle: CheckCircleTabler,
+    ChevronDown: ChevronDownTabler,
+    ChevronLeft: ChevronLeftTabler,
+    ChevronRight: ChevronRightTabler,
+    Clock: ClockTabler,
+    CodeBracket: CodeBracketTabler,
+    CodeBracketSquare: CodeBracketSquareTabler,
+    Cog: CogTabler,
+    Database: DatabaseTabler,
+    DocumentPlus: DocumentPlusTabler,
+    Download: DownloadTabler,
+    ExclamationTriangle: ExclamationTriangleTabler,
+    File: FileTabler,
+    Filter: FilterTabler,
+    Folder: FolderTabler,
+    InformationCircle: InformationCircleTabler,
+    PencilSquare: PencilSquareTabler,
+    PlusCircle: PlusCircleTabler,
+    SaveDisk: SaveDiskTabler,
+    Save: SaveDiskTabler,
+    SidebarRight: SidebarRightTabler,
+    Table: TableTabler,
+    Terminal: TerminalTabler,
+    Trash: TrashTabler,
+    ViewColumns: ViewColumnsTabler,
+    XCircle: XCircleTabler,
+    XMark: XMarkTabler,
+};
+
+const lucideIcons = {
+    ArchiveBox: ArchiveBoxLucide,
+    ArrowPath: ArrowPathLucide,
+    ArrowsPointingIn: ArrowsPointingInLucide,
+    ArrowsPointingOut: ArrowsPointingOutLucide,
+    ArrowUpTray: ArrowUpTrayLucide,
+    BookOpen: BookOpenLucide,
+    BugAnt: BugAntLucide,
+    ChartBar: ChartBarLucide,
+    CheckCircle: CheckCircleLucide,
+    ChevronDown: ChevronDownLucide,
+    ChevronLeft: ChevronLeftLucide,
+    ChevronRight: ChevronRightLucide,
+    Clock: ClockLucide,
+    CodeBracket: CodeBracketLucide,
+    CodeBracketSquare: CodeBracketSquareLucide,
+    Cog: CogLucide,
+    Database: DatabaseLucide,
+    DocumentPlus: DocumentPlusLucide,
+    Download: DownloadLucide,
+    ExclamationTriangle: ExclamationTriangleLucide,
+    File: FileLucide,
+    Filter: FilterLucide,
+    Folder: FolderLucide,
+    InformationCircle: InformationCircleLucide,
+    PencilSquare: PencilSquareLucide,
+    PlusCircle: PlusCircleLucide,
+    SaveDisk: SaveDiskLucide,
+    Save: SaveDiskLucide,
+    SidebarRight: SidebarRightLucide,
+    Table: TableLucide,
+    Terminal: TerminalLucide,
+    Trash: TrashLucide,
+    ViewColumns: ViewColumnsLucide,
+    XCircle: XCircleLucide,
+    XMark: XMarkLucide,
+};
+
 
 const iconSets = {
   sharp: sharpIcons,
   solid: solidIcons,
   feather: featherIcons,
+  tabler: tablerIcons,
+  lucide: lucideIcons,
 };
 
 type IconName = keyof typeof sharpIcons;

@@ -103,7 +103,7 @@ export interface PanelWidths {
 }
 
 export type ViewMode = 'pagination' | 'scroll';
-export type IconSet = 'sharp' | 'solid' | 'feather';
+export type IconSet = 'sharp' | 'solid' | 'feather' | 'tabler' | 'lucide';
 
 export interface Settings {
     theme: 'light' | 'dark';

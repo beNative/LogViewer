@@ -191,6 +191,8 @@ export const Settings: React.FC<SettingsProps> = ({
                                             { label: 'Sharp', value: 'sharp' },
                                             { label: 'Solid', value: 'solid' },
                                             { label: 'Feather', value: 'feather' },
+                                            { label: 'Tabler', value: 'tabler' },
+                                            { label: 'Lucide', value: 'lucide' },
                                         ]}
                                     />
                                 </div>
