@@ -1,6 +1,7 @@
 import React from 'react';
 import { ColumnKey, ColumnStyle, ColumnStyles } from '../types';
 import { COLUMN_DEFINITIONS } from '../utils';
+import { ChevronDownIcon } from './icons/ChevronDownIcon';
 
 const FONT_FAMILIES_WEB = ['sans-serif', 'serif', 'monospace', 'system-ui', 'inherit'];
 
@@ -62,17 +63,18 @@ const ColumnStyleEditor: React.FC<ColumnStyleEditorProps> = ({ columnKey, label,
         <div className="grid grid-cols-1 md:grid-cols-6 gap-x-4 gap-y-2 items-center p-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
             <div className="font-semibold text-gray-800 dark:text-gray-200">{label}</div>
             
-            <div>
+            <div className="relative">
                 <input
                     list={`font-list-${columnKey}`}
                     value={style.font}
                     onChange={e => handleChange('font', e.target.value)}
-                    className={inputBaseClasses}
+                    className={`${inputBaseClasses} pr-8`}
                     aria-label={`${label} font`}
                 />
                 <datalist id={`font-list-${columnKey}`}>
                     {fontList.map(f => <option key={f} value={f} />)}
                 </datalist>
+                <ChevronDownIcon className="absolute top-1/2 right-2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
             </div>
 
              <div className="relative">
