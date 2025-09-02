@@ -5,6 +5,9 @@ import { formatBytes } from '../utils.ts';
 import { Icon } from './icons/index.tsx';
 import { IconSet } from '../types.ts';
 
+// FIX: Infer the Icon's name prop type to ensure type safety.
+type IconName = React.ComponentProps<typeof Icon>['name'];
+
 // The ProgressPhase type is defined in App.tsx and passed down via props.
 // We just need to ensure our `phaseDetails` object can handle the new 'loading' phase.
 type ProgressPhase = 'reading' | 'unzipping' | 'parsing' | 'inserting' | 'indexing' | 'loading';
@@ -22,7 +25,7 @@ interface ProgressIndicatorProps {
   iconSet: IconSet;
 }
 
-const phaseDetails: Record<ProgressPhase, { iconName: string; label: string, isAnimated?: boolean }> = {
+const phaseDetails: Record<ProgressPhase, { iconName: IconName; label: string, isAnimated?: boolean }> = {
     reading: { iconName: 'File', label: 'Reading Files' },
     unzipping: { iconName: 'ArchiveBox', label: 'Unzipping Archives' },
     parsing: { iconName: 'CodeBracket', label: 'Parsing Data' },
