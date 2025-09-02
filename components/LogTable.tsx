@@ -605,6 +605,7 @@ export const LogTable: React.FC<LogTableProps> = ({
             onDeletePreset={onDeletePreset}
             onLoadPreset={onLoadPreset}
             iconSet={iconSet}
+            isInitialLoad={isInitialLoad}
           />
         </aside>
 

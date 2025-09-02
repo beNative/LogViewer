@@ -22,6 +22,7 @@ interface FilterBarProps {
     onDeletePreset: (name: string) => void;
     onLoadPreset: (name: string) => void;
     iconSet: IconSet;
+    isInitialLoad: boolean;
 }
 
 const inputStyles = "w-full bg-white dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white sm:text-sm rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition";
@@ -112,6 +113,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     onDeletePreset,
     onLoadPreset,
     iconSet,
+    isInitialLoad,
 }) => {
     
     const [selectedPreset, setSelectedPreset] = React.useState('');
@@ -247,9 +249,9 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     </button>
                     <button
                         onClick={onApplyFilters}
-                        disabled={!isOverallDirty}
+                        disabled={!isOverallDirty && !isInitialLoad}
                         className={`flex items-center justify-center gap-2 px-3 py-1.5 text-sm text-white font-semibold rounded-md transition-colors duration-200
-                            ${isOverallDirty
+                            ${(isOverallDirty || isInitialLoad)
                                 ? 'bg-amber-500 hover:bg-amber-600 animate-pulse'
                                 : 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
                             }
