@@ -1,15 +1,15 @@
 import React from 'react';
-import { ColumnKey, ColumnVisibilityState } from '../types.ts';
-import { ViewColumnsIcon } from './icons/ViewColumnsIcon.tsx';
-import { ChevronDownIcon } from './icons/ChevronDownIcon.tsx';
+import { ColumnKey, ColumnVisibilityState, IconSet } from '../types.ts';
 import { COLUMN_DEFINITIONS } from '../utils.ts';
+import { Icon } from './icons/index.tsx';
 
 interface ColumnSelectorProps {
     visibility: ColumnVisibilityState;
     onChange: (newState: ColumnVisibilityState) => void;
+    iconSet: IconSet;
 }
 
-export const ColumnSelector: React.FC<ColumnSelectorProps> = ({ visibility, onChange }) => {
+export const ColumnSelector: React.FC<ColumnSelectorProps> = ({ visibility, onChange, iconSet }) => {
     const [isOpen, setIsOpen] = React.useState(false);
     const wrapperRef = React.useRef<HTMLDivElement>(null);
 
@@ -33,9 +33,9 @@ export const ColumnSelector: React.FC<ColumnSelectorProps> = ({ visibility, onCh
                 onClick={() => setIsOpen(!isOpen)}
                 className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
             >
-                <ViewColumnsIcon className="w-5 h-5" />
+                <Icon name="ViewColumns" iconSet={iconSet} className="w-5 h-5" />
                 <span>Columns</span>
-                <ChevronDownIcon className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                <Icon name="ChevronDown" iconSet={iconSet} className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
             </button>
             {isOpen && (
                 <div className="absolute bottom-full mb-2 right-0 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-20">

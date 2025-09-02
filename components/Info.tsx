@@ -1,5 +1,6 @@
 import React from 'react';
-import { BookOpenIcon } from './icons/BookOpenIcon.tsx';
+import { Icon } from './icons/index.tsx';
+import { IconSet } from '../types.ts';
 
 const MARKDOWN_FILES = [
     { name: 'README.md', title: 'README' },
@@ -71,7 +72,11 @@ const parseMarkdown = (markdown: string): string => {
     return html;
 }
 
-export const Info: React.FC = () => {
+interface InfoProps {
+    iconSet: IconSet;
+}
+
+export const Info: React.FC<InfoProps> = ({ iconSet }) => {
     const [activeTabIndex, setActiveTabIndex] = React.useState(0);
     const [markdownContent, setMarkdownContent] = React.useState<Record<string, string>>({});
     const [loading, setLoading] = React.useState(true);
@@ -123,7 +128,7 @@ export const Info: React.FC = () => {
             <aside className="w-64 flex-shrink-0 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
                 <div className="p-4 flex-shrink-0 border-b border-gray-200 dark:border-gray-700">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                        <BookOpenIcon className="w-6 h-6 text-sky-600 dark:text-sky-400" />
+                        <Icon name="BookOpen" iconSet={iconSet} className="w-6 h-6 text-sky-600 dark:text-sky-400" />
                         Info & Manuals
                     </h3>
                 </div>

@@ -1,18 +1,12 @@
 import React from 'react';
-import { LogEntry, FilterState, PageTimestampRange, ColumnVisibilityState, ColumnStyles, ColumnKey, PanelWidths, ViewMode, ConsoleMessage, OverallTimeRange, FileTimeRange, LogDensityPoint } from '../types.ts';
-import { ChevronLeftIcon } from './icons/ChevronLeftIcon.tsx';
-import { ChevronRightIcon } from './icons/ChevronRightIcon.tsx';
+import { LogEntry, FilterState, PageTimestampRange, ColumnVisibilityState, ColumnStyles, ColumnKey, PanelWidths, ViewMode, ConsoleMessage, OverallTimeRange, FileTimeRange, LogDensityPoint, IconSet } from '../types.ts';
+import { Icon } from './icons/index.tsx';
 import { FilterBar } from './FilterBar.tsx';
 import { LogDetailPanel } from './LogDetailPanel.tsx';
 import { highlightText } from '../utils.ts';
 import { ColumnSelector } from './ColumnSelector.tsx';
-import { BugAntIcon } from './icons/BugAntIcon.tsx';
 import { TimeRangeSelector } from './TimeRangeSelector.tsx';
-import { ClockIcon } from './icons/ClockIcon.tsx';
 import { getSqlDateTime } from '../db.ts';
-import { SidebarRightIcon } from './icons/SidebarRightIcon.tsx';
-import { ArrowPathIcon } from './icons/ArrowPathIcon.tsx';
-import { FilterIcon } from './icons/FilterIcon.tsx';
 
 type Theme = 'light' | 'dark';
 
@@ -73,6 +67,7 @@ interface LogTableProps {
   onTimelineZoomToSelection: () => void;
   onTimelineZoomReset: () => void;
   isInitialLoad: boolean;
+  iconSet: IconSet;
 }
 
 export const getLevelColor = (level: string): string => {
@@ -153,6 +148,7 @@ export const LogTable: React.FC<LogTableProps> = ({
   onTimelineZoomToSelection,
   onTimelineZoomReset,
   isInitialLoad,
+  iconSet,
 }) => {
   const [selectedEntry, setSelectedEntry] = React.useState<LogEntry | null>(null);
   const [selectOnLoad, setSelectOnLoad] = React.useState<'first' | 'last' | null>(null);
@@ -569,12 +565,12 @@ export const LogTable: React.FC<LogTableProps> = ({
               <td colSpan={visibleColumnCount} className="text-center py-12">
                 {isBusy ? (
                     <div className="flex justify-center items-center gap-2 text-gray-500 dark:text-gray-400">
-                        <ArrowPathIcon className="w-6 h-6 animate-spin" />
+                        <Icon name="ArrowPath" iconSet={iconSet} className="w-6 h-6 animate-spin" />
                         <span className="font-semibold text-lg">Processing...</span>
                     </div>
                 ) : isInitialLoad && filteredEntriesCount > 0 ? (
                     <div className="text-gray-500 dark:text-gray-400">
-                        <FilterIcon className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                        <Icon name="Filter" iconSet={iconSet} className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
                         <h3 className="text-xl font-semibold mb-2 text-gray-700 dark:text-gray-300">Data Ready for Analysis</h3>
                         <p className="font-bold text-lg">{filteredEntriesCount.toLocaleString()} total entries loaded.</p>
                         <p className="mt-2">Use the filters on the left and click <strong className="text-amber-600 dark:text-amber-400">Apply</strong> to view logs.</p>
@@ -608,6 +604,7 @@ export const LogTable: React.FC<LogTableProps> = ({
             onSavePreset={onSavePreset}
             onDeletePreset={onDeletePreset}
             onLoadPreset={onLoadPreset}
+            iconSet={iconSet}
           />
         </aside>
 
@@ -646,6 +643,7 @@ export const LogTable: React.FC<LogTableProps> = ({
                                 onZoomToSelection={onTimelineZoomToSelection}
                                 onZoomToExtent={onTimelineZoomReset}
                                 zoomToSelectionEnabled={zoomToSelectionEnabled}
+                                iconSet={iconSet}
                             />
                         </div>
                     )}
@@ -676,6 +674,7 @@ export const LogTable: React.FC<LogTableProps> = ({
                       theme={theme}
                       onApplyFilter={onApplyFilter}
                       columnStyles={columnStyles}
+                      iconSet={iconSet}
                     />
                   </>
                 )}
@@ -703,6 +702,7 @@ export const LogTable: React.FC<LogTableProps> = ({
                   <ColumnSelector
                       visibility={columnVisibility}
                       onChange={onColumnVisibilityChange}
+                      iconSet={iconSet}
                   />
 
                   {/* Timeline Toggle */}
@@ -716,7 +716,7 @@ export const LogTable: React.FC<LogTableProps> = ({
                       `}
                       title="Toggle timeline selector"
                   >
-                      <ClockIcon className="w-5 h-5"/>
+                      <Icon name="Clock" iconSet={iconSet} className="w-5 h-5"/>
                       <span>Timeline</span>
                   </button>
                   
@@ -731,7 +731,7 @@ export const LogTable: React.FC<LogTableProps> = ({
                       `}
                       title="Toggle details panel"
                   >
-                      <SidebarRightIcon className="w-5 h-5"/>
+                      <Icon name="SidebarRight" iconSet={iconSet} className="w-5 h-5"/>
                       <span>Details</span>
                   </button>
 
@@ -742,7 +742,7 @@ export const LogTable: React.FC<LogTableProps> = ({
                         className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors"
                         title="Debugging tools"
                     >
-                        <BugAntIcon className="w-5 h-5"/>
+                        <Icon name="BugAnt" iconSet={iconSet} className="w-5 h-5"/>
                         <span>Debug</span>
                     </button>
                     {isDebugMenuOpen && (
@@ -769,7 +769,7 @@ export const LogTable: React.FC<LogTableProps> = ({
                               disabled={currentPage === 1}
                               className="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                           >
-                              <ChevronLeftIcon className="w-5 h-5"/>
+                              <Icon name="ChevronLeft" iconSet={iconSet} className="w-5 h-5"/>
                           </button>
                           
                           <select
@@ -793,7 +793,7 @@ export const LogTable: React.FC<LogTableProps> = ({
                               disabled={currentPage === totalPages}
                               className="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                           >
-                              <ChevronRightIcon className="w-5 h-5"/>
+                              <Icon name="ChevronRight" iconSet={iconSet} className="w-5 h-5"/>
                           </button>
                       </div>
                   )}

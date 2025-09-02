@@ -1,8 +1,8 @@
 import React from 'react';
-import { DashboardData } from '../types.ts';
+import { DashboardData, IconSet } from '../types.ts';
 import { TimelineChart } from './TimelineChart.tsx';
 import { CategoryChart } from './CategoryChart.tsx';
-import { ChartBarIcon } from './icons/ChartBarIcon.tsx';
+import { Icon } from './icons/index.tsx';
 
 type Theme = 'light' | 'dark';
 
@@ -12,6 +12,7 @@ interface DashboardProps {
   onTimeRangeSelect: (startTime: number, endTime: number) => void;
   onCategorySelect: (category: 'level' | 'sndrtype', value: string) => void;
   theme: Theme;
+  iconSet: IconSet;
 }
 
 const ChartCard: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
@@ -21,12 +22,12 @@ const ChartCard: React.FC<{ title: string; children: React.ReactNode }> = ({ tit
     </div>
 );
 
-export const Dashboard: React.FC<DashboardProps> = ({ data, hasData, onTimeRangeSelect, onCategorySelect, theme }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ data, hasData, onTimeRangeSelect, onCategorySelect, theme, iconSet }) => {
   if (!hasData) {
     return (
       <div className="flex-grow flex items-center justify-center p-8 text-center bg-gray-100 dark:bg-transparent">
         <div>
-          <ChartBarIcon className="w-24 h-24 text-gray-300 dark:text-gray-700 mx-auto mb-6" />
+          <Icon name="ChartBar" iconSet={iconSet} className="w-24 h-24 text-gray-300 dark:text-gray-700 mx-auto mb-6" />
           <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-300">Dashboard is Empty</h2>
           <p className="text-gray-500 dark:text-gray-500 mt-2 max-w-md mx-auto">
             Load data in the <strong className="text-gray-800 dark:text-gray-400">Data Hub</strong> tab to see visualizations.

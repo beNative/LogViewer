@@ -1,27 +1,25 @@
 import React from 'react';
-import { ConsoleMessage, ConsoleMessageType } from '../types.ts';
-import { InformationCircleIcon } from './icons/InformationCircleIcon.tsx';
-import { CheckCircleIcon } from './icons/CheckCircleIcon.tsx';
-import { XCircleIcon } from './icons/XCircleIcon.tsx';
-import { ExclamationTriangleIcon } from './icons/ExclamationTriangleIcon.tsx';
+import { ConsoleMessage, ConsoleMessageType, IconSet } from '../types.ts';
+import { Icon } from './icons/index.tsx';
 
 interface ConsoleProps {
   messages: ConsoleMessage[];
   onClear: () => void;
   filters: Record<ConsoleMessageType, boolean>;
   onFiltersChange: (newFilters: Record<ConsoleMessageType, boolean>) => void;
+  iconSet: IconSet;
 }
 
-const getIcon = (type: ConsoleMessageType) => {
+const getIcon = (type: ConsoleMessageType, iconSet: IconSet) => {
   switch (type) {
     case 'INFO':
-      return <InformationCircleIcon className="w-5 h-5 text-blue-500" />;
+      return <Icon name="InformationCircle" iconSet={iconSet} className="w-5 h-5 text-blue-500" />;
     case 'DEBUG':
-      return <CheckCircleIcon className="w-5 h-5 text-green-500" />;
+      return <Icon name="CheckCircle" iconSet={iconSet} className="w-5 h-5 text-green-500" />;
     case 'WARNING':
-        return <ExclamationTriangleIcon className="w-5 h-5 text-orange-400" />;
+        return <Icon name="ExclamationTriangle" iconSet={iconSet} className="w-5 h-5 text-orange-400" />;
     case 'ERROR':
-      return <XCircleIcon className="w-5 h-5 text-red-500" />;
+      return <Icon name="XCircle" iconSet={iconSet} className="w-5 h-5 text-red-500" />;
     default:
       return null;
   }
@@ -52,7 +50,7 @@ const FilterButton: React.FC<{
 };
 
 
-export const Console: React.FC<ConsoleProps> = ({ messages, onClear, filters, onFiltersChange }) => {
+export const Console: React.FC<ConsoleProps> = ({ messages, onClear, filters, onFiltersChange, iconSet }) => {
   const consoleEndRef = React.useRef<HTMLDivElement>(null);
 
   const messageCounts = React.useMemo(() => {
@@ -101,7 +99,7 @@ export const Console: React.FC<ConsoleProps> = ({ messages, onClear, filters, on
         <div className="p-3 overflow-y-auto flex-grow font-mono text-xs">
           {filteredMessages.map((msg, index) => (
             <div key={index} className={`flex items-start space-x-3 mb-1.5`}>
-              <span className="flex-shrink-0 pt-0.5">{getIcon(msg.type)}</span>
+              <span className="flex-shrink-0 pt-0.5">{getIcon(msg.type, iconSet)}</span>
               <span className="flex-shrink-0 text-gray-400 dark:text-gray-500">{msg.timestamp}</span>
               <p className={`flex-grow break-words whitespace-pre-wrap ${
               msg.type === 'ERROR' ? 'text-red-600 dark:text-red-400' : 

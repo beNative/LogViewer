@@ -103,10 +103,12 @@ export interface PanelWidths {
 }
 
 export type ViewMode = 'pagination' | 'scroll';
+export type IconSet = 'sharp' | 'solid' | 'feather';
 
 export interface Settings {
     theme: 'light' | 'dark';
     viewMode: ViewMode;
+    iconSet: IconSet;
     columnVisibility: ColumnVisibilityState;
     columnStyles: ColumnStyles;
     customFilterPresets: Record<string, FilterState>;

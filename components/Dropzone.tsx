@@ -1,12 +1,14 @@
 import React from 'react';
-import { FileIcon } from './icons/FileIcon.tsx';
+import { Icon } from './icons/index.tsx';
+import { IconSet } from '../types.ts';
 
 interface DropzoneProps {
   onFileDrop: (files: FileList) => void;
   error: string | null;
+  iconSet: IconSet;
 }
 
-export const Dropzone: React.FC<DropzoneProps> = ({ onFileDrop, error }) => {
+export const Dropzone: React.FC<DropzoneProps> = ({ onFileDrop, error, iconSet }) => {
   const [isDragging, setIsDragging] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -66,7 +68,7 @@ export const Dropzone: React.FC<DropzoneProps> = ({ onFileDrop, error }) => {
             accept=".xml,.zip"
         />
         <div className="flex flex-col items-center justify-center text-center text-gray-500 dark:text-gray-400 pointer-events-none">
-            <FileIcon className={`w-16 h-16 mb-4 transition-colors duration-200 ${isDragging ? 'text-sky-500 dark:text-sky-400' : 'text-gray-400 dark:text-gray-500'}`} />
+            <Icon name="File" iconSet={iconSet} className={`w-16 h-16 mb-4 transition-colors duration-200 ${isDragging ? 'text-sky-500 dark:text-sky-400' : 'text-gray-400 dark:text-gray-500'}`} />
             <p className="font-semibold text-lg text-gray-700 dark:text-gray-300">
                 <span className="text-sky-600 dark:text-sky-400">Click to upload</span> or drag and drop
             </p>

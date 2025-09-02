@@ -1,14 +1,17 @@
 
 
+
+
+
 import React from 'react';
-import { LogEntry, ConsoleMessage, FilterState, ConsoleMessageType, DashboardData, PageTimestampRange, SessionFile, ColumnVisibilityState, ColumnStyles, PanelWidths, ViewMode, OverallTimeRange, FileTimeRange, LogDensityPoint } from './types.ts';
+import { LogEntry, ConsoleMessage, FilterState, ConsoleMessageType, DashboardData, PageTimestampRange, SessionFile, ColumnVisibilityState, ColumnStyles, PanelWidths, ViewMode, OverallTimeRange, FileTimeRange, LogDensityPoint, IconSet } from './types.ts';
 import { LogTable } from './components/LogTable.tsx';
 import { ProgressIndicator } from './components/ProgressIndicator.tsx';
 import { Database, getSqlDateTime } from './db.ts';
 import { Header } from './components/Header.tsx';
 import { Console } from './components/Console.tsx';
 import { DataHub } from './components/DataHub.tsx';
-import { TableIcon } from './components/icons/TableIcon.tsx';
+import { Icon } from './components/icons/index.tsx';
 import { Dashboard } from './components/Dashboard.tsx';
 import { Settings } from './components/Settings.tsx';
 import { Info } from './components/Info.tsx';
@@ -126,6 +129,7 @@ const App: React.FC = () => {
   const [activeView, setActiveView] = React.useState<'data' | 'viewer' | 'dashboard' | 'console' | 'settings' | 'info'>('data');
   const [theme, setTheme] = React.useState<Theme>('light');
   const [viewMode, setViewMode] = React.useState<ViewMode>('pagination');
+  const [iconSet, setIconSet] = React.useState<IconSet>('sharp');
   const [columnVisibility, setColumnVisibility] = React.useState<ColumnVisibilityState>(initialColumnVisibility);
   const [columnStyles, setColumnStyles] = React.useState<ColumnStyles>(initialColumnStyles);
   const [customFilterPresets, setCustomFilterPresets] = React.useState<Record<string, FilterState>>({});
@@ -296,6 +300,10 @@ const App: React.FC = () => {
                 if (settings.viewMode === 'pagination' || settings.viewMode === 'scroll') {
                     setViewMode(settings.viewMode);
                     logToConsole(`View mode set to '${settings.viewMode}' from settings.`, 'DEBUG');
+                }
+                if (settings.iconSet) {
+                    setIconSet(settings.iconSet);
+                    logToConsole(`Icon set to '${settings.iconSet}' from settings.`, 'DEBUG');
                 }
                 if (settings.columnVisibility) {
                     setColumnVisibility({ ...initialColumnVisibility, ...settings.columnVisibility });
@@ -873,6 +881,20 @@ const App: React.FC = () => {
         }
     }
   };
+  
+  const handleIconSetChange = async (newIconSet: IconSet) => {
+    setIconSet(newIconSet);
+    if (window.electronAPI) {
+        try {
+            const settings = await window.electronAPI.getSettings();
+            await window.electronAPI.setSettings({ ...settings, iconSet: newIconSet });
+            logToConsole(`Icon set changed to '${newIconSet}' and settings saved.`, 'INFO');
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            logToConsole(`Failed to save icon set setting: ${msg}`, 'ERROR');
+        }
+    }
+  };
 
   const handleColumnVisibilityChange = async (newVisibility: ColumnVisibilityState) => {
     setColumnVisibility(newVisibility);
@@ -1225,8 +1247,8 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      {isLoading && <ProgressIndicator progress={progress} message={progressMessage} phase={progressPhase} detailedProgress={detailedProgress} />}
-      <Header activeView={activeView} onViewChange={setActiveView} isBusy={isBusy} />
+      {isLoading && <ProgressIndicator progress={progress} message={progressMessage} phase={progressPhase} detailedProgress={detailedProgress} iconSet={iconSet} />}
+      <Header activeView={activeView} onViewChange={setActiveView} isBusy={isBusy} iconSet={iconSet} />
       <main className="flex-grow flex flex-col min-h-0">
         {activeView === 'data' && (
            <DataHub
@@ -1244,6 +1266,7 @@ const App: React.FC = () => {
             onDeleteSession={handleDeleteSession}
             isDirty={isDirty}
             onSaveSession={handleSaveSession}
+            iconSet={iconSet}
           />
         )}
         {activeView === 'viewer' && (
@@ -1301,11 +1324,12 @@ const App: React.FC = () => {
                 onTimelineZoomToSelection={handleTimelineZoomToSelection}
                 onTimelineZoomReset={handleTimelineZoomReset}
                 isInitialLoad={isInitialLoad}
+                iconSet={iconSet}
               />
             ) : (
                 <div className="flex-grow flex items-center justify-center p-8 text-center bg-white dark:bg-gray-900">
                     <div>
-                        <TableIcon className="w-24 h-24 text-gray-300 dark:text-gray-700 mx-auto mb-6" />
+                        <Icon name="Table" iconSet={iconSet} className="w-24 h-24 text-gray-300 dark:text-gray-700 mx-auto mb-6" />
                         <h2 className="text-2xl font-semibold text-gray-600 dark:text-gray-300">No Data Loaded</h2>
                         <p className="text-gray-500 dark:text-gray-500 mt-2 max-w-md mx-auto">
                             Switch to the <strong className="text-gray-700 dark:text-gray-400">Data Hub</strong> tab to {isElectron ? 'load a session or create a new one' : 'add log files'}.
@@ -1322,6 +1346,7 @@ const App: React.FC = () => {
                 onTimeRangeSelect={handleTimeRangeSelect}
                 onCategorySelect={handleCategorySelect}
                 theme={theme}
+                iconSet={iconSet}
             />
         )}
         {activeView === 'console' && (
@@ -1331,11 +1356,12 @@ const App: React.FC = () => {
                 onClear={handleClearConsole}
                 filters={consoleFilters}
                 onFiltersChange={setConsoleFilters}
+                iconSet={iconSet}
              />
           </div>
         )}
         {activeView === 'info' && (
-            <Info />
+            <Info iconSet={iconSet} />
         )}
         {activeView === 'settings' && (
             <Settings 
@@ -1343,6 +1369,8 @@ const App: React.FC = () => {
               onThemeChange={handleThemeChange}
               viewMode={viewMode}
               onViewModeChange={handleViewModeChange}
+              iconSet={iconSet}
+              onIconSetChange={handleIconSetChange}
               columnStyles={columnStyles}
               onColumnStylesChange={handleColumnStylesChange}
               isTimeRangeSelectorVisible={isTimeRangeSelectorVisible}

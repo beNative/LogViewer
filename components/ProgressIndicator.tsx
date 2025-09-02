@@ -1,11 +1,9 @@
 
+
 import React from 'react';
-import { FileIcon } from './icons/FileIcon.tsx';
-import { ArchiveBoxIcon } from './icons/ArchiveBoxIcon.tsx';
-import { CodeBracketIcon } from './icons/CodeBracketIcon.tsx';
-import { DatabaseIcon } from './icons/DatabaseIcon.tsx';
 import { formatBytes } from '../utils.ts';
-import { ArrowPathIcon } from './icons/ArrowPathIcon.tsx';
+import { Icon } from './icons/index.tsx';
+import { IconSet } from '../types.ts';
 
 // The ProgressPhase type is defined in App.tsx and passed down via props.
 // We just need to ensure our `phaseDetails` object can handle the new 'loading' phase.
@@ -21,19 +19,20 @@ interface ProgressIndicatorProps {
     fileTotalBytes: number;
     fileLogCount: number | null;
   }
+  iconSet: IconSet;
 }
 
-const phaseDetails: Record<ProgressPhase, { icon: React.ReactNode; label: string }> = {
-    reading: { icon: <FileIcon className="w-8 h-8"/>, label: 'Reading Files' },
-    unzipping: { icon: <ArchiveBoxIcon className="w-8 h-8"/>, label: 'Unzipping Archives' },
-    parsing: { icon: <CodeBracketIcon className="w-8 h-8"/>, label: 'Parsing Data' },
-    inserting: { icon: <DatabaseIcon className="w-8 h-8"/>, label: 'Inserting to Database' },
-    indexing: { icon: <DatabaseIcon className="w-8 h-8 animate-pulse"/>, label: 'Creating Indexes' },
-    loading: { icon: <ArrowPathIcon className="w-8 h-8 animate-spin" />, label: 'Loading...' },
+const phaseDetails: Record<ProgressPhase, { iconName: string; label: string, isAnimated?: boolean }> = {
+    reading: { iconName: 'File', label: 'Reading Files' },
+    unzipping: { iconName: 'ArchiveBox', label: 'Unzipping Archives' },
+    parsing: { iconName: 'CodeBracket', label: 'Parsing Data' },
+    inserting: { iconName: 'Database', label: 'Inserting to Database' },
+    indexing: { iconName: 'Database', label: 'Creating Indexes', isAnimated: true },
+    loading: { iconName: 'ArrowPath', label: 'Loading...', isAnimated: true },
 };
 
 
-export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ progress, message, phase, detailedProgress }) => {
+export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ progress, message, phase, detailedProgress, iconSet }) => {
   const currentPhase = phaseDetails[phase];
 
   return (
@@ -42,7 +41,7 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ progress, 
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Processing Files...</h2>
         
         <div className="flex items-center justify-center gap-3 my-4 text-sky-600 dark:text-sky-400">
-            {currentPhase.icon}
+            <Icon name={currentPhase.iconName} iconSet={iconSet} className={`w-8 h-8 ${currentPhase.isAnimated ? 'animate-spin' : ''}`} />
             <span className="text-lg font-medium">{currentPhase.label}</span>
         </div>
 

@@ -1,14 +1,9 @@
 import React from 'react';
-import { FilterState } from '../types.ts';
+import { FilterState, IconSet } from '../types.ts';
 import { MultiSelectDropdown } from './MultiSelectDropdown.tsx';
-import { FilterIcon } from './icons/FilterIcon.tsx';
-import { XMarkIcon } from './icons/XMarkIcon.tsx';
-import { SaveDiskIcon } from './icons/SaveDiskIcon.tsx';
-import { TrashIcon } from './icons/TrashIcon.tsx';
 import { areFiltersEqual, areArraysEqualUnordered } from '../utils.ts';
 import { SqlEditor } from './SqlEditor.tsx';
-import { CodeBracketSquareIcon } from './icons/CodeBracketSquareIcon.tsx';
-import { InformationCircleIcon } from './icons/InformationCircleIcon.tsx';
+import { Icon } from './icons/index.tsx';
 
 interface FilterBarProps {
     filters: FilterState;
@@ -26,6 +21,7 @@ interface FilterBarProps {
     onSavePreset: (name: string) => void;
     onDeletePreset: (name: string) => void;
     onLoadPreset: (name: string) => void;
+    iconSet: IconSet;
 }
 
 const inputStyles = "w-full bg-white dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white sm:text-sm rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition";
@@ -115,6 +111,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     onSavePreset,
     onDeletePreset,
     onLoadPreset,
+    iconSet,
 }) => {
     
     const [selectedPreset, setSelectedPreset] = React.useState('');
@@ -245,7 +242,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Filters</h3>
                 <div className="flex items-center gap-2">
                     <button onClick={onResetFilters} className="flex items-center justify-center gap-2 px-3 py-1.5 text-sm bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md transition-colors duration-200">
-                        <XMarkIcon className="w-4 h-4" />
+                        <Icon name="XMark" iconSet={iconSet} className="w-4 h-4" />
                         Clear
                     </button>
                     <button
@@ -258,7 +255,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                             }
                         `}
                     >
-                        <FilterIcon className="w-4 h-4" />
+                        <Icon name="Filter" iconSet={iconSet} className="w-4 h-4" />
                         Apply
                     </button>
                 </div>
@@ -266,7 +263,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
             {isOverallDirty && (
                 <div className="p-3 bg-amber-100 dark:bg-amber-900/40 border-b border-amber-200 dark:border-amber-800/60 flex-shrink-0">
                     <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 text-sm font-medium">
-                        <InformationCircleIcon className="w-5 h-5 flex-shrink-0" />
+                        <Icon name="InformationCircle" iconSet={iconSet} className="w-5 h-5 flex-shrink-0" />
                         <p>Filter settings have changed. Click Apply to update.</p>
                     </div>
                 </div>
@@ -337,7 +334,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                                     className="flex items-center justify-center gap-2 w-full px-3 py-1.5 text-sm bg-white hover:bg-gray-200 text-gray-800 border border-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white dark:border-gray-500 font-semibold rounded-lg transition-colors duration-200"
                                     title="Save current filters as a new or existing preset"
                                 >
-                                    <SaveDiskIcon className="w-4 h-4" />
+                                    <Icon name="SaveDisk" iconSet={iconSet} className="w-4 h-4" />
                                     Save As...
                                 </button>
                                 <button
@@ -346,7 +343,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                                     className="flex items-center justify-center gap-2 w-full px-3 py-1.5 text-sm bg-white hover:bg-gray-200 text-gray-800 border border-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white dark:border-gray-500 font-semibold rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-700"
                                     title={selectedPreset ? `Delete preset '${selectedPreset}'` : 'Select a preset to delete'}
                                 >
-                                    <TrashIcon className="w-4 h-4" />
+                                    <Icon name="Trash" iconSet={iconSet} className="w-4 h-4" />
                                     Delete Preset
                                 </button>
                             </div>
@@ -473,7 +470,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                                         onClick={() => handleFieldChange('sqlQuery', PREDEFINED_SQL_QUERY)}
                                         className="flex items-center gap-1.5 px-2 py-1 text-xs font-semibold text-sky-700 dark:text-sky-300 bg-sky-100 dark:bg-sky-900/40 hover:bg-sky-200 dark:hover:bg-sky-800/50 rounded-md transition-colors"
                                     >
-                                        <CodeBracketSquareIcon className="w-4 h-4" />
+                                        <Icon name="CodeBracketSquare" iconSet={iconSet} className="w-4 h-4" />
                                         Insert Example
                                     </button>
                                 </div>

@@ -1,8 +1,8 @@
 import React from 'react';
-import { CogIcon } from './icons/CogIcon.tsx';
 import { ColumnStyleSettings } from './ColumnStyleSettings.tsx';
-import { ColumnStyles, ViewMode } from '../types.ts';
+import { ColumnStyles, ViewMode, IconSet } from '../types.ts';
 import { JsonSyntaxHighlighter } from './JsonSyntaxHighlighter.tsx';
+import { Icon } from './icons/index.tsx';
 
 type Theme = 'light' | 'dark';
 
@@ -11,6 +11,8 @@ interface SettingsProps {
   onThemeChange: (newTheme: Theme) => void;
   viewMode: ViewMode;
   onViewModeChange: (newMode: ViewMode) => void;
+  iconSet: IconSet;
+  onIconSetChange: (newIconSet: IconSet) => void;
   columnStyles: ColumnStyles;
   onColumnStylesChange: (newStyles: ColumnStyles) => void;
   isTimeRangeSelectorVisible: boolean;
@@ -94,6 +96,7 @@ const TabButton: React.FC<{ label: string; isActive: boolean; onClick: () => voi
 export const Settings: React.FC<SettingsProps> = ({ 
     theme, onThemeChange, 
     viewMode, onViewModeChange, 
+    iconSet, onIconSetChange,
     columnStyles, onColumnStylesChange,
     isTimeRangeSelectorVisible, onTimeRangeSelectorVisibilityChange 
 }) => {
@@ -132,7 +135,7 @@ export const Settings: React.FC<SettingsProps> = ({
         <div className="flex-grow flex flex-col items-center p-4 sm:p-6 lg:p-8 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-300 overflow-y-auto">
             <div className="w-full max-w-5xl space-y-6">
                 <div className="text-center">
-                    <CogIcon className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-500 mb-4" />
+                    <Icon name="Cog" iconSet={iconSet} className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-500 mb-4" />
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Application Settings</h1>
                     <p className="mt-2 text-lg text-gray-600 dark:text-gray-400">
                         Configure the application's appearance and behavior.
@@ -179,6 +182,16 @@ export const Settings: React.FC<SettingsProps> = ({
                                         label="Show Timeline by Default"
                                         enabled={isTimeRangeSelectorVisible}
                                         onChange={onTimeRangeSelectorVisibilityChange}
+                                    />
+                                    <SegmentedControl
+                                        label="Icon Set"
+                                        value={iconSet}
+                                        onChange={onIconSetChange}
+                                        options={[
+                                            { label: 'Sharp', value: 'sharp' },
+                                            { label: 'Solid', value: 'solid' },
+                                            { label: 'Feather', value: 'feather' },
+                                        ]}
                                     />
                                 </div>
                             </div>

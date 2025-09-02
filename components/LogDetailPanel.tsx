@@ -1,15 +1,13 @@
 import React from 'react';
-import { LogEntry, ColumnStyles, ColumnKey, GridData } from '../types.ts';
-import { XMarkIcon } from './icons/XMarkIcon.tsx';
+import { LogEntry, ColumnStyles, ColumnKey, GridData, IconSet } from '../types.ts';
 import { getLevelColor } from './LogTable.tsx';
 import { highlightText } from '../utils.ts';
 import { XmlTreeView } from './XmlTreeView.tsx';
 import { KeyValueTableView } from './KeyValueTableView.tsx';
 import { SqlSyntaxHighlighter } from './SqlSyntaxHighlighter.tsx';
 import { parseLogMessage } from '../parsers.ts';
-import { PlusCircleIcon } from './icons/PlusCircleIcon.tsx';
 import { GridView } from './GridView.tsx';
-import { InformationCircleIcon } from './icons/InformationCircleIcon.tsx';
+import { Icon } from './icons/index.tsx';
 
 type Theme = 'light' | 'dark';
 
@@ -21,6 +19,7 @@ interface LogDetailPanelProps {
     theme: Theme;
     onApplyFilter: (key: 'level' | 'sndrtype' | 'sndrname' | 'fileName', value: string) => void;
     columnStyles: ColumnStyles;
+    iconSet: IconSet;
 }
 
 const DetailRow: React.FC<{
@@ -31,7 +30,8 @@ const DetailRow: React.FC<{
     filterKey?: 'level' | 'sndrtype' | 'sndrname' | 'fileName';
     filterValue?: string;
     onApplyFilter?: (key: 'level' | 'sndrtype' | 'sndrname' | 'fileName', value: string) => void;
-}> = ({ label, value, valueClassName = 'text-gray-800 dark:text-gray-200', valueStyle, filterKey, filterValue, onApplyFilter }) => (
+    iconSet: IconSet;
+}> = ({ label, value, valueClassName = 'text-gray-800 dark:text-gray-200', valueStyle, filterKey, filterValue, onApplyFilter, iconSet }) => (
     <div className="group flex flex-col sm:flex-row sm:items-start py-2.5 border-b border-gray-200/80 dark:border-gray-700/50 relative">
         <dt className="w-28 text-sm font-medium text-gray-500 dark:text-gray-400 flex-shrink-0">{label}</dt>
         <dd style={valueStyle} className={`mt-1 text-sm sm:mt-0 break-words w-full ${valueClassName}`}>{value}</dd>
@@ -42,13 +42,13 @@ const DetailRow: React.FC<{
                 aria-label={`Add filter for ${label}: ${filterValue}`}
                 title={`Add filter for ${label}: ${filterValue}`}
             >
-                <PlusCircleIcon className="w-5 h-5" />
+                <Icon name="PlusCircle" iconSet={iconSet} className="w-5 h-5" />
             </button>
         )}
     </div>
 );
 
-export const LogDetailPanel: React.FC<LogDetailPanelProps> = ({ entry, onClose, width, highlightTerms = [], theme, onApplyFilter, columnStyles }) => {
+export const LogDetailPanel: React.FC<LogDetailPanelProps> = ({ entry, onClose, width, highlightTerms = [], theme, onApplyFilter, columnStyles, iconSet }) => {
     
     const parsedContent = React.useMemo(() => {
         if (!entry) return null;
@@ -87,15 +87,16 @@ export const LogDetailPanel: React.FC<LogDetailPanelProps> = ({ entry, onClose, 
                     className="p-1 text-gray-500 dark:text-gray-400 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-white transition-colors"
                     aria-label="Close details"
                 >
-                    <XMarkIcon className="w-6 h-6" />
+                    <Icon name="XMark" iconSet={iconSet} className="w-6 h-6" />
                 </button>
             </div>
             <div className="flex-grow p-4 overflow-y-auto">
                 {entry && parsedContent ? (
                     <>
                         <dl>
-                            <DetailRow label="Timestamp" value={entry.time} valueStyle={getStyle('time')} valueClassName="text-gray-600 dark:text-gray-300" />
+                            <DetailRow iconSet={iconSet} label="Timestamp" value={entry.time} valueStyle={getStyle('time')} valueClassName="text-gray-600 dark:text-gray-300" />
                             <DetailRow
+                                iconSet={iconSet}
                                 label="Level"
                                 value={<span style={getStyle('level')} className={`px-2 py-1 rounded-full text-xs font-medium ${getLevelColor(entry.level)}`}>{entry.level}</span>}
                                 filterKey="level"
@@ -103,6 +104,7 @@ export const LogDetailPanel: React.FC<LogDetailPanelProps> = ({ entry, onClose, 
                                 onApplyFilter={onApplyFilter}
                             />
                             <DetailRow
+                                iconSet={iconSet}
                                 label="Sender Type"
                                 value={entry.sndrtype}
                                 valueStyle={getStyle('sndrtype')}
@@ -111,6 +113,7 @@ export const LogDetailPanel: React.FC<LogDetailPanelProps> = ({ entry, onClose, 
                                 onApplyFilter={onApplyFilter}
                             />
                             <DetailRow
+                                iconSet={iconSet}
                                 label="Sender Name"
                                 value={entry.sndrname}
                                 valueStyle={getStyle('sndrname')}
@@ -119,6 +122,7 @@ export const LogDetailPanel: React.FC<LogDetailPanelProps> = ({ entry, onClose, 
                                 onApplyFilter={onApplyFilter}
                             />
                             <DetailRow
+                                iconSet={iconSet}
                                 label="Filename"
                                 value={entry.fileName}
                                 valueStyle={getStyle('fileName')}
@@ -177,7 +181,7 @@ export const LogDetailPanel: React.FC<LogDetailPanelProps> = ({ entry, onClose, 
                     </>
                 ) : (
                      <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 dark:text-gray-400">
-                        <InformationCircleIcon className="w-12 h-12 text-gray-400 dark:text-gray-500 mb-4" />
+                        <Icon name="InformationCircle" iconSet={iconSet} className="w-12 h-12 text-gray-400 dark:text-gray-500 mb-4" />
                         <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300">No Selection</h4>
                         <p className="mt-1 text-sm">Click on a log entry in the table to see its details here.</p>
                     </div>

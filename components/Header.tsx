@@ -1,16 +1,12 @@
 import React from 'react';
-import { TableIcon } from './icons/TableIcon.tsx';
-import { TerminalIcon } from './icons/TerminalIcon.tsx';
-import { ArchiveBoxIcon } from './icons/ArchiveBoxIcon.tsx';
-import { ChartBarIcon } from './icons/ChartBarIcon.tsx';
-import { CogIcon } from './icons/CogIcon.tsx';
-import { BookOpenIcon } from './icons/BookOpenIcon.tsx';
-import { ArrowPathIcon } from './icons/ArrowPathIcon.tsx';
+import { Icon } from './icons/index.tsx';
+import { IconSet } from '../types.ts';
 
 interface HeaderProps {
     activeView: 'data' | 'viewer' | 'dashboard' | 'console' | 'settings' | 'info';
     onViewChange: (view: 'data' | 'viewer' | 'dashboard' | 'console' | 'settings' | 'info') => void;
     isBusy: boolean;
+    iconSet: IconSet;
 }
 
 const NavItem: React.FC<{
@@ -31,31 +27,31 @@ const NavItem: React.FC<{
     )
 }
 
-export const Header: React.FC<HeaderProps> = ({ activeView, onViewChange, isBusy }) => {
+export const Header: React.FC<HeaderProps> = ({ activeView, onViewChange, isBusy, iconSet }) => {
     return (
         <header className="flex-shrink-0 bg-gray-100 dark:bg-gray-900 px-4 pt-3">
             <nav className="flex items-end border-b border-gray-200 dark:border-gray-700">
                 <div className="flex items-end space-x-2">
                     <NavItem
-                        icon={<ArchiveBoxIcon className="w-5 h-5" />}
+                        icon={<Icon name="ArchiveBox" iconSet={iconSet} className="w-5 h-5" />}
                         label="Data Hub"
                         isActive={activeView === 'data'}
                         onClick={() => onViewChange('data')}
                     />
                     <NavItem
-                        icon={<TableIcon className="w-5 h-5" />}
+                        icon={<Icon name="Table" iconSet={iconSet} className="w-5 h-5" />}
                         label="Log Viewer"
                         isActive={activeView === 'viewer'}
                         onClick={() => onViewChange('viewer')}
                     />
                     <NavItem
-                        icon={<ChartBarIcon className="w-5 h-5" />}
+                        icon={<Icon name="ChartBar" iconSet={iconSet} className="w-5 h-5" />}
                         label="Dashboard"
                         isActive={activeView === 'dashboard'}
                         onClick={() => onViewChange('dashboard')}
                     />
                     <NavItem
-                        icon={<TerminalIcon className="w-5 h-5" />}
+                        icon={<Icon name="Terminal" iconSet={iconSet} className="w-5 h-5" />}
                         label="Application Log"
                         isActive={activeView === 'console'}
                         onClick={() => onViewChange('console')}
@@ -65,20 +61,20 @@ export const Header: React.FC<HeaderProps> = ({ activeView, onViewChange, isBusy
                 
                 {isBusy && (
                     <div className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-sky-600 dark:text-sky-400 animate-pulse">
-                        <ArrowPathIcon className="w-5 h-5 animate-spin" />
+                        <Icon name="ArrowPath" iconSet={iconSet} className="w-5 h-5 animate-spin" />
                         <span>Processing...</span>
                     </div>
                 )}
                 
                 <div className="flex items-end space-x-2">
                      <NavItem
-                        icon={<BookOpenIcon className="w-5 h-5" />}
+                        icon={<Icon name="BookOpen" iconSet={iconSet} className="w-5 h-5" />}
                         label="Info"
                         isActive={activeView === 'info'}
                         onClick={() => onViewChange('info')}
                     />
                      <NavItem
-                        icon={<CogIcon className="w-5 h-5" />}
+                        icon={<Icon name="Cog" iconSet={iconSet} className="w-5 h-5" />}
                         label="Settings"
                         isActive={activeView === 'settings'}
                         onClick={() => onViewChange('settings')}

@@ -1,8 +1,6 @@
 import React from 'react';
-import { XMarkIcon } from './icons/XMarkIcon';
-import { PageTimestampRange, FileTimeRange, LogDensityPoint, ViewMode, OverallTimeRange } from '../types';
-import { ArrowsPointingInIcon } from './icons/ArrowsPointingInIcon';
-import { ArrowsPointingOutIcon } from './icons/ArrowsPointingOutIcon';
+import { PageTimestampRange, FileTimeRange, LogDensityPoint, ViewMode, OverallTimeRange, IconSet } from '../types';
+import { Icon } from './icons/index.tsx';
 
 type Theme = 'light' | 'dark';
 type ValueToPositionFn = (value: number) => number;
@@ -32,6 +30,7 @@ interface TimeRangeSelectorProps {
     onZoomToSelection: () => void;
     onZoomToExtent: () => void;
     zoomToSelectionEnabled: boolean;
+    iconSet: IconSet;
 }
 
 type DragState =
@@ -352,7 +351,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     pageTimestampRanges, fileTimeRanges, logDensity, datesWithLogs, viewMode, onGoToPage,
     onCursorChange, onFileSelect, onDateSelect,
     cursorTime = null, activeFileName = null, activeDate = null, currentPage = null,
-    viewRange, onZoomToSelection, onZoomToExtent, zoomToSelectionEnabled
+    viewRange, onZoomToSelection, onZoomToExtent, zoomToSelectionEnabled, iconSet
 }) => {
     const contentContainerRef = React.useRef<HTMLDivElement>(null);
     const [containerWidth, setContainerWidth] = React.useState(0);
@@ -653,7 +652,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                     className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     title="Zoom to Selection"
                 >
-                    <ArrowsPointingInIcon className="w-5 h-5"/>
+                    <Icon name="ArrowsPointingIn" iconSet={iconSet} className="w-5 h-5"/>
                 </button>
                  <button
                     onClick={onZoomToExtent}
@@ -661,14 +660,14 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                     className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     title="Zoom to Extent"
                 >
-                    <ArrowsPointingOutIcon className="w-5 h-5"/>
+                    <Icon name="ArrowsPointingOut" iconSet={iconSet} className="w-5 h-5"/>
                 </button>
                  <button
                     onClick={onClear}
                     className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                     title="Clear time selection"
                 >
-                    <XMarkIcon className="w-6 h-6"/>
+                    <Icon name="XMark" iconSet={iconSet} className="w-6 h-6"/>
                 </button>
             </div>
         </div>
