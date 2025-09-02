@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, shell, dialog, systemPreferences } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { exec } = require('child_process');
 
 let mainWindow;
 
@@ -329,16 +330,48 @@ app.whenReady().then(() => {
     
     // Custom IPC Handlers
     ipcMain.handle('get-system-fonts', () => {
-        const fontList = systemPreferences.getFontFamilyList();
-        // On Windows, getFontFamilyList() returns an array of objects { name, path }.
-        // On other platforms, it returns an array of strings.
-        // We normalize it here to always return a string array for the renderer.
-        if (fontList.length > 0 && typeof fontList[0] === 'object' && fontList[0].hasOwnProperty('name')) {
-            // It's an array of objects, so map it to an array of names.
-            return fontList.map(font => font.name);
-        }
-        // Otherwise, assume it's already an array of strings (like on macOS).
-        return fontList;
+        return new Promise((resolve, reject) => {
+            if (process.platform === 'win32') {
+                const command = 'powershell -command "[System.Drawing.Text.InstalledFontCollection, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a]::new().Families.Name"';
+                
+                exec(command, (error, stdout, stderr) => {
+                    if (error) {
+                        log('ERROR', `Failed to get system fonts via PowerShell: ${stderr}. Falling back to Electron API.`);
+                        // Fallback to the original method
+                        try {
+                            const fontList = systemPreferences.getFontFamilyList();
+                            if (fontList.length > 0 && typeof fontList[0] === 'object' && fontList[0].hasOwnProperty('name')) {
+                                resolve(fontList.map(font => font.name));
+                            } else {
+                                resolve(fontList);
+                            }
+                        } catch(e) {
+                             log('ERROR', `Electron API for fonts also failed: ${e.message}`);
+                             reject(e);
+                        }
+                        return;
+                    }
+                    
+                    const fonts = stdout.split('\r\n').filter(f => f.trim() !== '');
+                    log('INFO', `Successfully fetched ${fonts.length} fonts via PowerShell.`);
+                    resolve(fonts);
+                });
+            } else {
+                // For macOS, Linux, etc., the original method is generally fine.
+                try {
+                    log('INFO', 'Fetching fonts using Electron built-in API for non-Windows OS.');
+                    const fontList = systemPreferences.getFontFamilyList();
+                    if (fontList.length > 0 && typeof fontList[0] === 'object' && fontList[0].hasOwnProperty('name')) {
+                        resolve(fontList.map(font => font.name));
+                    } else {
+                        resolve(fontList);
+                    }
+                } catch (e) {
+                     log('ERROR', `Failed to get system fonts via Electron API: ${e.message}`);
+                     reject(e);
+                }
+            }
+        });
     });
 
     // Quit sequence handler
