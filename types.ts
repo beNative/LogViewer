@@ -87,7 +87,7 @@ export interface ColumnVisibilityState {
 }
 
 export interface ColumnStyle {
-  fontFamily: string;
+  font: string;
   fontSize: number;
   isBold: boolean;
   isItalic: boolean;

@@ -63,14 +63,16 @@ const ColumnStyleEditor: React.FC<ColumnStyleEditorProps> = ({ columnKey, label,
             <div className="font-semibold text-gray-800 dark:text-gray-200">{label}</div>
             
             <div>
-                <select 
-                    value={style.fontFamily}
-                    onChange={e => handleChange('fontFamily', e.target.value)}
+                <input
+                    list={`font-list-${columnKey}`}
+                    value={style.font}
+                    onChange={e => handleChange('font', e.target.value)}
                     className={inputBaseClasses}
-                    aria-label={`${label} font family`}
-                >
-                    {fontList.map(f => <option key={f} value={f}>{f}</option>)}
-                </select>
+                    aria-label={`${label} font`}
+                />
+                <datalist id={`font-list-${columnKey}`}>
+                    {fontList.map(f => <option key={f} value={f} />)}
+                </datalist>
             </div>
 
              <div className="relative">
@@ -175,7 +177,7 @@ export const ColumnStyleSettings: React.FC<ColumnStyleSettingsProps> = ({ styles
         <div className="space-y-2">
              <div className="grid grid-cols-1 md:grid-cols-6 gap-x-4 gap-y-2 items-center px-3 pb-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
                 <span>Column</span>
-                <span>Font Family</span>
+                <span>Font</span>
                 <span>Font Size</span>
                 <span>Style</span>
                 <span>Light Color</span>

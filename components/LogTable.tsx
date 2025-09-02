@@ -447,7 +447,7 @@ export const LogTable: React.FC<LogTableProps> = ({
     if (!styleConf) return {};
 
     const properties: React.CSSProperties = {
-        fontFamily: styleConf.fontFamily || 'inherit',
+        fontFamily: styleConf.font || 'inherit',
         fontSize: `${styleConf.fontSize}px`,
         fontWeight: styleConf.isBold ? 'bold' : 'normal',
         fontStyle: styleConf.isItalic ? 'italic' : 'normal',

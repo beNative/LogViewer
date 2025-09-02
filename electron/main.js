@@ -51,13 +51,14 @@ try {
 
 // --- Settings Management ---
 function getSettings() {
+    const MONO_FONT_STACK = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
     const defaultColumnStyles = {
-      time: { fontFamily: 'monospace', isBold: false, isItalic: false, fontSize: 13, color: '#6B7280', darkColor: '#9CA3AF' },
-      level: { fontFamily: 'sans-serif', isBold: true, isItalic: false, fontSize: 12, color: '', darkColor: '' },
-      sndrtype: { fontFamily: 'sans-serif', isBold: false, isItalic: false, fontSize: 14, color: '#374151', darkColor: '#D1D5DB' },
-      sndrname: { fontFamily: 'sans-serif', isBold: false, isItalic: false, fontSize: 14, color: '#374151', darkColor: '#D1D5DB' },
-      fileName: { fontFamily: 'sans-serif', isBold: false, isItalic: false, fontSize: 13, color: '#6B7280', darkColor: '#9CA3AF' },
-      msg: { fontFamily: 'monospace', isBold: false, isItalic: false, fontSize: 13, color: '#1F2937', darkColor: '#F3F4F6' },
+      time: { font: MONO_FONT_STACK, isBold: false, isItalic: false, fontSize: 13, color: '#6B7280', darkColor: '#9CA3AF' },
+      level: { font: 'sans-serif', isBold: true, isItalic: false, fontSize: 12, color: '', darkColor: '' },
+      sndrtype: { font: 'sans-serif', isBold: false, isItalic: false, fontSize: 14, color: '#374151', darkColor: '#D1D5DB' },
+      sndrname: { font: 'sans-serif', isBold: false, isItalic: false, fontSize: 14, color: '#374151', darkColor: '#D1D5DB' },
+      fileName: { font: 'sans-serif', isBold: false, isItalic: false, fontSize: 13, color: '#6B7280', darkColor: '#9CA3AF' },
+      msg: { font: MONO_FONT_STACK, isBold: false, isItalic: false, fontSize: 13, color: '#1F2937', darkColor: '#F3F4F6' },
     };
 
     const defaultSettings = {
@@ -88,6 +89,11 @@ function getSettings() {
             if (loadedSettings.columnStyles) {
                 for (const key in mergedColumnStyles) {
                     if (loadedSettings.columnStyles[key]) {
+                        // Migration from fontFamily to font for backward compatibility
+                        if (loadedSettings.columnStyles[key].fontFamily && !loadedSettings.columnStyles[key].font) {
+                            loadedSettings.columnStyles[key].font = loadedSettings.columnStyles[key].fontFamily;
+                            delete loadedSettings.columnStyles[key].fontFamily;
+                        }
                         mergedColumnStyles[key] = { ...mergedColumnStyles[key], ...loadedSettings.columnStyles[key] };
                     }
                 }

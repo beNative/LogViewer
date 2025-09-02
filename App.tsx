@@ -59,12 +59,12 @@ const initialColumnVisibility: ColumnVisibilityState = {
 const MONO_FONT_STACK = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
 
 const initialColumnStyles: ColumnStyles = {
-  time: { fontFamily: MONO_FONT_STACK, fontSize: 13, isBold: false, isItalic: false, color: '#6B7280', darkColor: '#9CA3AF' },
-  level: { fontFamily: 'sans-serif', fontSize: 12, isBold: true, isItalic: false, color: '', darkColor: '' },
-  sndrtype: { fontFamily: 'sans-serif', fontSize: 14, isBold: false, isItalic: false, color: '#374151', darkColor: '#D1D5DB' },
-  sndrname: { fontFamily: 'sans-serif', fontSize: 14, isBold: false, isItalic: false, color: '#374151', darkColor: '#D1D5DB' },
-  fileName: { fontFamily: 'sans-serif', fontSize: 13, isBold: false, isItalic: false, color: '#6B7280', darkColor: '#9CA3AF' },
-  msg: { fontFamily: MONO_FONT_STACK, fontSize: 13, isBold: false, isItalic: false, color: '#1F2937', darkColor: '#F3F4F6' },
+  time: { font: MONO_FONT_STACK, fontSize: 13, isBold: false, isItalic: false, color: '#6B7280', darkColor: '#9CA3AF' },
+  level: { font: 'sans-serif', fontSize: 12, isBold: true, isItalic: false, color: '', darkColor: '' },
+  sndrtype: { font: 'sans-serif', fontSize: 14, isBold: false, isItalic: false, color: '#374151', darkColor: '#D1D5DB' },
+  sndrname: { font: 'sans-serif', fontSize: 14, isBold: false, isItalic: false, color: '#374151', darkColor: '#D1D5DB' },
+  fileName: { font: 'sans-serif', fontSize: 13, isBold: false, isItalic: false, color: '#6B7280', darkColor: '#9CA3AF' },
+  msg: { font: MONO_FONT_STACK, fontSize: 13, isBold: false, isItalic: false, color: '#1F2937', darkColor: '#F3F4F6' },
 };
 
 const initialPanelWidths: PanelWidths = {
