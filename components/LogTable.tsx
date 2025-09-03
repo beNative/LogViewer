@@ -7,6 +7,7 @@ import { highlightText } from '../utils.ts';
 import { ColumnSelector } from './ColumnSelector.tsx';
 import { TimeRangeSelector } from './TimeRangeSelector.tsx';
 import { getSqlDateTime } from '../db.ts';
+import { ActiveFilters } from './ActiveFilters.tsx';
 
 type Theme = 'light' | 'dark';
 
@@ -68,6 +69,7 @@ interface LogTableProps {
   onTimelineZoomReset: () => void;
   isInitialLoad: boolean;
   iconSet: IconSet;
+  onRemoveAppliedFilter: (key: keyof FilterState, value?: string) => void;
 }
 
 export const getLevelColor = (level: string): string => {
@@ -149,6 +151,7 @@ export const LogTable: React.FC<LogTableProps> = ({
   onTimelineZoomReset,
   isInitialLoad,
   iconSet,
+  onRemoveAppliedFilter,
 }) => {
   const [selectedEntry, setSelectedEntry] = React.useState<LogEntry | null>(null);
   const [selectOnLoad, setSelectOnLoad] = React.useState<'first' | 'last' | null>(null);
@@ -521,6 +524,22 @@ export const LogTable: React.FC<LogTableProps> = ({
       </div>
     );
   };
+
+  const SkeletonRow: React.FC<{ visibility: ColumnVisibilityState }> = React.memo(({ visibility }) => {
+    const shimmerBg = 'linear-gradient(to right, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)';
+    const lightShimmerBg = 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.05) 50%, transparent 100%)';
+
+    return (
+        <tr className="bg-white dark:bg-gray-900">
+            {visibility.time && <td className="whitespace-nowrap py-4 pl-4 pr-3 sm:pl-6"><div className="h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-3/4 animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
+            {visibility.level && <td className="whitespace-nowrap px-3 py-4"><div className="h-6 w-20 rounded-full bg-gray-200 dark:bg-gray-700/80 animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
+            {visibility.sndrtype && <td className="whitespace-nowrap px-3 py-4"><div className="h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-2/3 animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
+            {visibility.sndrname && <td className="whitespace-nowrap px-3 py-4"><div className="h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-3/4 animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
+            {visibility.fileName && <td className="whitespace-nowrap px-3 py-4"><div className="h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-5/6 animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
+            {visibility.msg && <td className="px-3 py-4"><div className="h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-full animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
+        </tr>
+    );
+});
   
   const TableContent = (
     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -535,53 +554,56 @@ export const LogTable: React.FC<LogTableProps> = ({
         </tr>
       </thead>
       <tbody className="divide-y divide-gray-200/50 dark:divide-gray-700/50 bg-white dark:bg-gray-900" ref={tableBodyRef}>
-        {entries.map((entry) => (
-          <tr key={entry.id} 
-            data-row-id={entry.id}
-            onClick={() => handleEntrySelect(entry)}
-            className={`relative hover:bg-gray-100 dark:hover:bg-gray-800/70 transition-colors duration-150 cursor-pointer ${
-              keyboardSelectedId === entry.id ? 'bg-sky-50 dark:bg-sky-900/60 ring-2 ring-inset ring-sky-500' : ''
-            }`}
-          >
-            {columnVisibility.time && <td style={getTdStyle('time')} className="whitespace-nowrap py-4 pl-4 pr-3 sm:pl-6">{entry.time}</td>}
-            
-            {columnVisibility.level && <td className="whitespace-nowrap px-3 py-4">
-              <span style={getTdStyle('level')} className={`px-2 py-1 rounded-full font-medium ${getLevelColor(entry.level)}`}>
-                {entry.level}
-              </span>
-            </td>}
+        {isBusy && entries.length === 0 ? (
+            <>
+                {Array.from({ length: 15 }).map((_, i) => <SkeletonRow key={i} visibility={columnVisibility} />)}
+            </>
+        ) : (
+            <>
+                {entries.map((entry) => (
+                  <tr key={entry.id} 
+                    data-row-id={entry.id}
+                    onClick={() => handleEntrySelect(entry)}
+                    className={`relative hover:bg-gray-100 dark:hover:bg-gray-800/70 transition-colors duration-150 cursor-pointer ${
+                      keyboardSelectedId === entry.id ? 'bg-sky-50 dark:bg-sky-900/60 ring-2 ring-inset ring-sky-500' : ''
+                    }`}
+                  >
+                    {columnVisibility.time && <td style={getTdStyle('time')} className="whitespace-nowrap py-4 pl-4 pr-3 sm:pl-6">{entry.time}</td>}
+                    
+                    {columnVisibility.level && <td className="whitespace-nowrap px-3 py-4">
+                      <span style={getTdStyle('level')} className={`px-2 py-1 rounded-full font-medium ${getLevelColor(entry.level)}`}>
+                        {entry.level}
+                      </span>
+                    </td>}
 
-            {columnVisibility.sndrtype && <td style={getTdStyle('sndrtype')} className="whitespace-nowrap px-3 py-4">{entry.sndrtype}</td>}
-            
-            {columnVisibility.sndrname && <td style={getTdStyle('sndrname')} className="whitespace-nowrap px-3 py-4">{entry.sndrname}</td>}
-            
-            {columnVisibility.fileName && <td style={getTdStyle('fileName')} className="whitespace-nowrap px-3 py-4 max-w-xs truncate" title={entry.fileName}>{entry.fileName}</td>}
+                    {columnVisibility.sndrtype && <td style={getTdStyle('sndrtype')} className="whitespace-nowrap px-3 py-4">{entry.sndrtype}</td>}
+                    
+                    {columnVisibility.sndrname && <td style={getTdStyle('sndrname')} className="whitespace-nowrap px-3 py-4">{entry.sndrname}</td>}
+                    
+                    {columnVisibility.fileName && <td style={getTdStyle('fileName')} className="whitespace-nowrap px-3 py-4 max-w-xs truncate" title={entry.fileName}>{entry.fileName}</td>}
 
-            {columnVisibility.msg && <td style={getTdStyle('msg')} className="px-3 py-4 whitespace-pre-wrap break-words" dangerouslySetInnerHTML={{ __html: highlightText(entry.msg, includeTerms, theme) }} />}
-          </tr>
-        ))}
-        {entries.length === 0 && (
-            <tr>
-              <td colSpan={visibleColumnCount} className="text-center py-12">
-                {isBusy ? (
-                    <div className="flex justify-center items-center gap-2 text-gray-500 dark:text-gray-400">
-                        <Icon name="ArrowPath" iconSet={iconSet} className="w-6 h-6 animate-spin" />
-                        <span className="font-semibold text-lg">Processing...</span>
-                    </div>
-                ) : isInitialLoad && filteredEntriesCount > 0 ? (
-                    <div className="text-gray-500 dark:text-gray-400">
-                        <Icon name="Filter" iconSet={iconSet} className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-                        <h3 className="text-xl font-semibold mb-2 text-gray-700 dark:text-gray-300">Data Ready for Analysis</h3>
-                        <p className="font-bold text-lg">{filteredEntriesCount.toLocaleString()} total entries loaded.</p>
-                        <p className="mt-2">Use the filters on the left and click <strong className="text-amber-600 dark:text-amber-400">Apply</strong> to view logs.</p>
-                    </div>
-                ) : (
-                    <div className="text-gray-500 dark:text-gray-400">
-                        No log items found matching the filters.
-                    </div>
+                    {columnVisibility.msg && <td style={getTdStyle('msg')} className="px-3 py-4 whitespace-pre-wrap break-words" dangerouslySetInnerHTML={{ __html: highlightText(entry.msg, includeTerms, theme) }} />}
+                  </tr>
+                ))}
+                {entries.length === 0 && (
+                    <tr>
+                      <td colSpan={visibleColumnCount} className="text-center py-12">
+                        {isInitialLoad && filteredEntriesCount > 0 ? (
+                            <div className="text-gray-500 dark:text-gray-400">
+                                <Icon name="Filter" iconSet={iconSet} className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                                <h3 className="text-xl font-semibold mb-2 text-gray-700 dark:text-gray-300">Data Ready for Analysis</h3>
+                                <p className="font-bold text-lg">{filteredEntriesCount.toLocaleString()} total entries loaded.</p>
+                                <p className="mt-2">Use the filters on the left and click <strong className="text-amber-600 dark:text-amber-400">Apply</strong> to view logs.</p>
+                            </div>
+                        ) : (
+                            <div className="text-gray-500 dark:text-gray-400">
+                                No log items found matching the filters.
+                            </div>
+                        )}
+                      </td>
+                    </tr>
                 )}
-              </td>
-            </tr>
+            </>
         )}
       </tbody>
     </table>
@@ -648,10 +670,19 @@ export const LogTable: React.FC<LogTableProps> = ({
                             />
                         </div>
                     )}
+
+                    <div className="flex-shrink-0">
+                      <ActiveFilters 
+                        appliedFilters={appliedFilters} 
+                        onRemoveFilter={onRemoveAppliedFilter}
+                        iconSet={iconSet}
+                      />
+                    </div>
+                    
                     <div className="flex-1 relative">
                         <div className="absolute inset-0 overflow-auto" ref={scrollContainerRef}>
                             {TableContent}
-                            {viewMode === 'scroll' && isBusy && (
+                            {viewMode === 'scroll' && isBusy && entries.length > 0 && (
                                 <div className="text-center p-4 text-gray-500 dark:text-gray-400 font-semibold animate-pulse">Loading more...</div>
                             )}
                             {viewMode === 'scroll' && !hasMore && filteredEntriesCount > 0 && (

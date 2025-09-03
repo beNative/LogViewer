@@ -3,6 +3,7 @@
 
 
 
+
 import React from 'react';
 import { LogEntry, ConsoleMessage, FilterState, ConsoleMessageType, DashboardData, PageTimestampRange, SessionFile, ColumnVisibilityState, ColumnStyles, PanelWidths, ViewMode, OverallTimeRange, FileTimeRange, LogDensityPoint, IconSet } from './types.ts';
 import { LogTable } from './components/LogTable.tsx';
@@ -1242,6 +1243,27 @@ const App: React.FC = () => {
     logToConsole('Timeline zoom reset to full extent.', 'DEBUG');
   }, [logToConsole]);
 
+  const handleRemoveAppliedFilter = React.useCallback((key: keyof FilterState, valueToRemove?: string) => {
+      logToConsole(`Removing filter: ${key} = ${valueToRemove || '(cleared)'}`, 'DEBUG');
+      const updater = (currentFilters: FilterState): FilterState => {
+          const newFilters = { ...currentFilters };
+          const currentValue = newFilters[key];
+
+          if (Array.isArray(currentValue) && valueToRemove) {
+              (newFilters[key] as string[]) = currentValue.filter(v => v !== valueToRemove);
+          } else {
+              // For non-array filters (like includeMsg), just clear them.
+              (newFilters as any)[key] = Array.isArray(initialFilters[key as keyof FilterState]) ? [] : '';
+          }
+          return newFilters;
+      };
+      setFormFilters(updater);
+      setAppliedFilters(updater);
+      setIsInitialLoad(false);
+      setCurrentPage(1);
+      setEntriesOffset(0);
+  }, [logToConsole]);
+
 
   const totalPages = Math.ceil(totalFilteredCount / pageSize);
 
@@ -1325,6 +1347,7 @@ const App: React.FC = () => {
                 onTimelineZoomReset={handleTimelineZoomReset}
                 isInitialLoad={isInitialLoad}
                 iconSet={iconSet}
+                onRemoveAppliedFilter={handleRemoveAppliedFilter}
               />
             ) : (
                 <div className="flex-grow flex items-center justify-center p-8 text-center bg-white dark:bg-gray-900">
