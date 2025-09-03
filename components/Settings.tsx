@@ -132,25 +132,25 @@ export const Settings: React.FC<SettingsProps> = ({
     }
 
     return (
-        <div className="flex-grow flex flex-col p-4 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-300 overflow-y-auto">
-            <div className="w-full max-w-7xl mx-auto space-y-4">
-                {error && (
-                    <div className="bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 rounded-lg p-4 text-center">
-                        <p className="font-bold">Error</p>
-                        <p>{error}</p>
-                    </div>
-                )}
-                
-                <div className="border-b border-gray-200 dark:border-gray-700">
-                    <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-                        <TabButton label="Controls" isActive={activeTab === 'controls'} onClick={() => setActiveTab('controls')} />
-                        {window.electronAPI && (
-                            <TabButton label="JSON Source" isActive={activeTab === 'json'} onClick={() => setActiveTab('json')} />
-                        )}
-                    </nav>
-                </div>
+        <div className="flex-grow flex flex-col bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-300">
+            <div className="border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                <nav className="-mb-px flex space-x-8 px-4 sm:px-6 lg:px-8" aria-label="Tabs">
+                    <TabButton label="Controls" isActive={activeTab === 'controls'} onClick={() => setActiveTab('controls')} />
+                    {window.electronAPI && (
+                        <TabButton label="JSON Source" isActive={activeTab === 'json'} onClick={() => setActiveTab('json')} />
+                    )}
+                </nav>
+            </div>
 
-                <div className="pt-2">
+            <div className="flex-grow overflow-y-auto">
+                <div className="p-4 sm:p-6 lg:p-8">
+                    {error && (
+                        <div className="bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 rounded-lg p-4 text-center mb-6">
+                            <p className="font-bold">Error</p>
+                            <p>{error}</p>
+                        </div>
+                    )}
+                    
                     {activeTab === 'controls' && (
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                              <div className="lg:col-span-1">
