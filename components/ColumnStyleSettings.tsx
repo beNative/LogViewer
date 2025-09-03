@@ -60,7 +60,7 @@ const ColumnStyleEditor: React.FC<ColumnStyleEditorProps> = ({ columnKey, label,
     };
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-x-4 gap-y-2 items-center p-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-x-4 gap-y-2 items-center p-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
             <div className="font-semibold text-gray-800 dark:text-gray-200">{label}</div>
             
             <div className="relative">
@@ -77,23 +77,22 @@ const ColumnStyleEditor: React.FC<ColumnStyleEditorProps> = ({ columnKey, label,
                 <ChevronDownIcon className="absolute top-1/2 right-2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
             </div>
 
-             <div className="relative">
-                <input
-                    type="number"
-                    value={style.fontSize}
-                    onChange={handleFontSizeChange}
-                    className={`${inputBaseClasses} pr-7`}
-                    min="8"
-                    max="48"
-                    aria-label={`${label} font size`}
-                />
-                <span className="absolute inset-y-0 right-2 flex items-center text-gray-500 text-sm">px</span>
-            </div>
-            
             <div className="flex items-center gap-2">
+                <div className="relative w-20">
+                    <input
+                        type="number"
+                        value={style.fontSize}
+                        onChange={handleFontSizeChange}
+                        className={`${inputBaseClasses} pr-7`}
+                        min="8"
+                        max="48"
+                        aria-label={`${label} font size`}
+                    />
+                    <span className="absolute inset-y-0 right-2 flex items-center text-gray-500 text-xs">px</span>
+                </div>
                 <button
                     onClick={() => handleChange('isBold', !style.isBold)}
-                    className={`px-3 py-1 text-sm font-bold rounded-md transition-colors w-10 ${style.isBold ? 'bg-sky-600 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'}`}
+                    className={`px-3 py-1 text-sm font-bold rounded-md transition-colors w-9 h-9 flex items-center justify-center ${style.isBold ? 'bg-sky-600 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'}`}
                     aria-pressed={style.isBold}
                     title={`${label} bold`}
                 >
@@ -101,7 +100,7 @@ const ColumnStyleEditor: React.FC<ColumnStyleEditorProps> = ({ columnKey, label,
                 </button>
                 <button
                     onClick={() => handleChange('isItalic', !style.isItalic)}
-                    className={`px-3 py-1 text-sm italic rounded-md transition-colors w-10 ${style.isItalic ? 'bg-sky-600 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'}`}
+                    className={`px-3 py-1 text-sm italic rounded-md transition-colors w-9 h-9 flex items-center justify-center ${style.isItalic ? 'bg-sky-600 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'}`}
                     aria-pressed={style.isItalic}
                     title={`${label} italic`}
                 >
@@ -177,11 +176,10 @@ export const ColumnStyleSettings: React.FC<ColumnStyleSettingsProps> = ({ styles
 
     return (
         <div className="space-y-2">
-             <div className="grid grid-cols-1 md:grid-cols-6 gap-x-4 gap-y-2 items-center px-3 pb-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+             <div className="grid grid-cols-1 md:grid-cols-5 gap-x-4 gap-y-2 items-center px-3 pb-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
                 <span>Column</span>
                 <span>Font</span>
-                <span>Font Size</span>
-                <span>Style</span>
+                <span>Size &amp; Style</span>
                 <span>Light Color</span>
                 <span>Dark Color</span>
             </div>
