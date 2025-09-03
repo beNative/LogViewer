@@ -132,16 +132,8 @@ export const Settings: React.FC<SettingsProps> = ({
     }
 
     return (
-        <div className="flex-grow flex flex-col p-6 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-300 overflow-y-auto">
-            <div className="w-full max-w-7xl mx-auto space-y-6">
-                <div className="text-center">
-                    <Icon name="Cog" iconSet={iconSet} className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-500 mb-4" />
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Application Settings</h1>
-                    <p className="mt-2 text-lg text-gray-600 dark:text-gray-400">
-                        Configure the application's appearance and behavior.
-                    </p>
-                </div>
-                
+        <div className="flex-grow flex flex-col p-4 bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-300 overflow-y-auto">
+            <div className="w-full max-w-7xl mx-auto space-y-4">
                 {error && (
                     <div className="bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 rounded-lg p-4 text-center">
                         <p className="font-bold">Error</p>
@@ -247,10 +239,6 @@ export const Settings: React.FC<SettingsProps> = ({
                              </div>
                          </div>
                     )}
-                </div>
-
-                <div className="text-center text-gray-500 dark:text-gray-500 text-sm pt-4">
-                    <p>Note: Some changes may require an application restart to take full effect.</p>
                 </div>
             </div>
         </div>
