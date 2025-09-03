@@ -9,7 +9,7 @@
       // This helps confirm that the HTML file itself is loading.
       console.log('index.html: <head> script tag executed successfully.');
     </script>
-    <link rel="stylesheet" href="./dist/styles.css">
+    <link rel="stylesheet" href="/dist/styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
@@ -27,14 +27,9 @@
 </head>
   <body>
     <div id="root"></div>
-    <!-- 
-      The application entrypoint. This points to the JavaScript bundle created by esbuild.
-      The esbuild process resolves all 'import' statements (like React) and bundles
-      them into this single file.
-    -->
     <script 
       type="module" 
-      src="./dist/bundle.js"
+      src="/dist/bundle.js"
     ></script>
   </body>
 </html>
