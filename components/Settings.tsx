@@ -132,8 +132,8 @@ export const Settings: React.FC<SettingsProps> = ({
     }
 
     return (
-        <div className="flex-grow flex flex-col bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-300">
-            <div className="border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+        <div className="flex-grow overflow-y-auto bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-300">
+            <div className="sticky top-0 z-10 bg-gray-100 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
                 <nav className="-mb-px flex space-x-8 px-4 sm:px-6 lg:px-8" aria-label="Tabs">
                     <TabButton label="Controls" isActive={activeTab === 'controls'} onClick={() => setActiveTab('controls')} />
                     {window.electronAPI && (
@@ -142,104 +142,102 @@ export const Settings: React.FC<SettingsProps> = ({
                 </nav>
             </div>
 
-            <div className="flex-grow overflow-y-auto">
-                <div className="p-4 sm:p-6 lg:p-8">
-                    {error && (
-                        <div className="bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 rounded-lg p-4 text-center mb-6">
-                            <p className="font-bold">Error</p>
-                            <p>{error}</p>
-                        </div>
-                    )}
-                    
-                    {activeTab === 'controls' && (
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                             <div className="lg:col-span-1">
-                                <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10">
-                                    <h2 className="text-xl font-semibold text-gray-800 dark:text-sky-400 mb-4">Appearance</h2>
-                                    <div className="space-y-4">
-                                        <ToggleSwitch 
-                                            label="Dark Mode"
-                                            enabled={theme === 'dark'}
-                                            onChange={(enabled) => onThemeChange(enabled ? 'dark' : 'light')}
-                                        />
-                                        <SegmentedControl
-                                            label="Log Viewer Mode"
-                                            value={viewMode}
-                                            onChange={onViewModeChange}
-                                            options={[
-                                                { label: 'Paginate', value: 'pagination' },
-                                                { label: 'Scroll', value: 'scroll' },
-                                            ]}
-                                        />
-                                        <ToggleSwitch
-                                            label="Show Timeline by Default"
-                                            enabled={isTimeRangeSelectorVisible}
-                                            onChange={onTimeRangeSelectorVisibilityChange}
-                                        />
-                                        <SegmentedControl
-                                            label="Icon Set"
-                                            value={iconSet}
-                                            onChange={onIconSetChange}
-                                            options={[
-                                                { label: 'Sharp', value: 'sharp' },
-                                                { label: 'Solid', value: 'solid' },
-                                                { label: 'Feather', value: 'feather' },
-                                                { label: 'Tabler', value: 'tabler' },
-                                                { label: 'Lucide', value: 'lucide' },
-                                            ]}
-                                        />
-                                    </div>
+            <div className="p-4 sm:p-6 lg:p-8">
+                {error && (
+                    <div className="bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 rounded-lg p-4 text-center mb-6">
+                        <p className="font-bold">Error</p>
+                        <p>{error}</p>
+                    </div>
+                )}
+                
+                {activeTab === 'controls' && (
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                         <div className="lg:col-span-1">
+                            <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10">
+                                <h2 className="text-xl font-semibold text-gray-800 dark:text-sky-400 mb-4">Appearance</h2>
+                                <div className="space-y-4">
+                                    <ToggleSwitch 
+                                        label="Dark Mode"
+                                        enabled={theme === 'dark'}
+                                        onChange={(enabled) => onThemeChange(enabled ? 'dark' : 'light')}
+                                    />
+                                    <SegmentedControl
+                                        label="Log Viewer Mode"
+                                        value={viewMode}
+                                        onChange={onViewModeChange}
+                                        options={[
+                                            { label: 'Paginate', value: 'pagination' },
+                                            { label: 'Scroll', value: 'scroll' },
+                                        ]}
+                                    />
+                                    <ToggleSwitch
+                                        label="Show Timeline by Default"
+                                        enabled={isTimeRangeSelectorVisible}
+                                        onChange={onTimeRangeSelectorVisibilityChange}
+                                    />
+                                    <SegmentedControl
+                                        label="Icon Set"
+                                        value={iconSet}
+                                        onChange={onIconSetChange}
+                                        options={[
+                                            { label: 'Sharp', value: 'sharp' },
+                                            { label: 'Solid', value: 'solid' },
+                                            { label: 'Feather', value: 'feather' },
+                                            { label: 'Tabler', value: 'tabler' },
+                                            { label: 'Lucide', value: 'lucide' },
+                                        ]}
+                                    />
                                 </div>
-                             </div>
-
-                             <div className="lg:col-span-2">
-                                <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10">
-                                    <h2 className="text-xl font-semibold text-gray-800 dark:text-sky-400 mb-4">Log Table Styles</h2>
-                                    <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                                        Customize the font, style, and color for each column in the Log Viewer. Changes are saved automatically.
-                                    </p>
-                                    <ColumnStyleSettings styles={columnStyles} onChange={onColumnStylesChange} />
-                                </div>
-                             </div>
-                        </div>
-                    )}
-                    
-                    {activeTab === 'json' && window.electronAPI && (
-                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                             <div className="lg:col-span-1">
-                                 <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10">
-                                    <h2 className="text-xl font-semibold text-gray-800 dark:text-sky-400 mb-4">Settings File</h2>
-                                    <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                                        For advanced configuration, you can edit the settings file directly. Click the button below to show the file in its folder.
-                                    </p>
-                                    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                                        <button
-                                            onClick={handleOpenFile}
-                                            disabled={!window.electronAPI}
-                                            className="bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-lg px-4 py-2 transition-colors duration-200 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            Show Settings File
-                                        </button>
-                                        <code className="bg-gray-100 dark:bg-gray-900/70 p-2 rounded-md text-sm text-gray-500 dark:text-gray-400 break-all w-full">
-                                            {settingsPath || 'Loading path...'}
-                                        </code>
-                                    </div>
-                                </div>
-                             </div>
-
-                             <div className="lg:col-span-2">
-                                <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 h-full">
-                                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-300 mb-4">File Content</h2>
-                                    {settings ? (
-                                        <JsonSyntaxHighlighter jsonString={JSON.stringify(settings, null, 2)} />
-                                    ) : (
-                                        <p className="text-gray-500 dark:text-gray-400">Loading settings...</p>
-                                    )}
-                                </div>
-                             </div>
+                            </div>
                          </div>
-                    )}
-                </div>
+
+                         <div className="lg:col-span-2">
+                            <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10">
+                                <h2 className="text-xl font-semibold text-gray-800 dark:text-sky-400 mb-4">Log Table Styles</h2>
+                                <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+                                    Customize the font, style, and color for each column in the Log Viewer. Changes are saved automatically.
+                                </p>
+                                <ColumnStyleSettings styles={columnStyles} onChange={onColumnStylesChange} />
+                            </div>
+                         </div>
+                    </div>
+                )}
+                
+                {activeTab === 'json' && window.electronAPI && (
+                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                         <div className="lg:col-span-1">
+                             <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10">
+                                <h2 className="text-xl font-semibold text-gray-800 dark:text-sky-400 mb-4">Settings File</h2>
+                                <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+                                    For advanced configuration, you can edit the settings file directly. Click the button below to show the file in its folder.
+                                </p>
+                                <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                                    <button
+                                        onClick={handleOpenFile}
+                                        disabled={!window.electronAPI}
+                                        className="bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-lg px-4 py-2 transition-colors duration-200 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Show Settings File
+                                    </button>
+                                    <code className="bg-gray-100 dark:bg-gray-900/70 p-2 rounded-md text-sm text-gray-500 dark:text-gray-400 break-all w-full">
+                                        {settingsPath || 'Loading path...'}
+                                    </code>
+                                </div>
+                            </div>
+                         </div>
+
+                         <div className="lg:col-span-2">
+                            <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 h-full">
+                                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-300 mb-4">File Content</h2>
+                                {settings ? (
+                                    <JsonSyntaxHighlighter jsonString={JSON.stringify(settings, null, 2)} />
+                                ) : (
+                                    <p className="text-gray-500 dark:text-gray-400">Loading settings...</p>
+                                )}
+                            </div>
+                         </div>
+                     </div>
+                )}
             </div>
         </div>
     );
