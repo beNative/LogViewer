@@ -25,6 +25,10 @@ export interface FilterState {
   sndrtype: string[];
   sndrname: string[];
   fileName: string[];
+  levelExclude: string[];
+  sndrtypeExclude: string[];
+  sndrnameExclude: string[];
+  fileNameExclude: string[];
   includeMsg: string;
   excludeMsg: string;
   includeMsgMode: 'AND' | 'OR';
@@ -104,6 +108,7 @@ export interface PanelWidths {
 
 export type ViewMode = 'pagination' | 'scroll';
 export type IconSet = 'sharp' | 'solid' | 'feather' | 'tabler' | 'lucide';
+export type LogTableDensity = 'compact' | 'normal' | 'comfortable';
 
 export interface Settings {
     theme: 'light' | 'dark';
@@ -114,6 +119,7 @@ export interface Settings {
     customFilterPresets: Record<string, FilterState>;
     panelWidths: PanelWidths;
     isTimeRangeSelectorVisible: boolean;
+    logTableDensity: LogTableDensity;
 }
 
 export interface OverallTimeRange {

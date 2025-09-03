@@ -1,11 +1,5 @@
-
-
-
-
-
-
 import React from 'react';
-import { LogEntry, ConsoleMessage, FilterState, ConsoleMessageType, DashboardData, PageTimestampRange, SessionFile, ColumnVisibilityState, ColumnStyles, PanelWidths, ViewMode, OverallTimeRange, FileTimeRange, LogDensityPoint, IconSet } from './types.ts';
+import { LogEntry, ConsoleMessage, FilterState, ConsoleMessageType, DashboardData, PageTimestampRange, SessionFile, ColumnVisibilityState, ColumnStyles, PanelWidths, ViewMode, OverallTimeRange, FileTimeRange, LogDensityPoint, IconSet, LogTableDensity } from './types.ts';
 import { LogTable } from './components/LogTable.tsx';
 import { ProgressIndicator } from './components/ProgressIndicator.tsx';
 import { Database, getSqlDateTime } from './db.ts';
@@ -30,6 +24,10 @@ const initialFilters: FilterState = {
   sndrtype: [],
   sndrname: [],
   fileName: [],
+  levelExclude: [],
+  sndrtypeExclude: [],
+  sndrnameExclude: [],
+  fileNameExclude: [],
   includeMsg: '',
   excludeMsg: '',
   includeMsgMode: 'OR',
@@ -125,6 +123,7 @@ const App: React.FC = () => {
   const [dashboardData, setDashboardData] = React.useState<DashboardData>(initialDashboardData);
   const [fileTimeRanges, setFileTimeRanges] = React.useState<FileTimeRange[]>([]);
   const [logDensity, setLogDensity] = React.useState<LogDensityPoint[]>([]);
+  const [overallLogDensity, setOverallLogDensity] = React.useState<LogDensityPoint[]>([]);
   const [datesWithLogs, setDatesWithLogs] = React.useState<string[]>([]);
 
   const [activeView, setActiveView] = React.useState<'data' | 'viewer' | 'dashboard' | 'console' | 'settings' | 'info'>('data');
@@ -136,6 +135,7 @@ const App: React.FC = () => {
   const [customFilterPresets, setCustomFilterPresets] = React.useState<Record<string, FilterState>>({});
   const [panelWidths, setPanelWidths] = React.useState<PanelWidths>(initialPanelWidths);
   const [isTimeRangeSelectorVisible, setIsTimeRangeSelectorVisible] = React.useState(true);
+  const [logTableDensity, setLogTableDensity] = React.useState<LogTableDensity>('normal');
   
   const [hasMoreLogs, setHasMoreLogs] = React.useState(true);
   const [keyboardSelectedId, setKeyboardSelectedId] = React.useState<number | null>(null);
@@ -228,10 +228,12 @@ const App: React.FC = () => {
 
         const { minTime, maxTime } = newDb.getMinMaxTime();
         if (minTime && maxTime) {
-            setOverallTimeRange({
+            const overallRange = {
                 min: new Date(minTime + 'Z').getTime(), // Add Z to treat as UTC
                 max: new Date(maxTime + 'Z').getTime()
-            });
+            };
+            setOverallTimeRange(overallRange);
+            setOverallLogDensity(newDb.getLogDensity(initialFilters, 300));
         }
 
         if (fromSessionLoad) {
@@ -305,6 +307,10 @@ const App: React.FC = () => {
                 if (settings.iconSet) {
                     setIconSet(settings.iconSet);
                     logToConsole(`Icon set to '${settings.iconSet}' from settings.`, 'DEBUG');
+                }
+                if (settings.logTableDensity) {
+                    setLogTableDensity(settings.logTableDensity);
+                    logToConsole(`Log table density set to '${settings.logTableDensity}' from settings.`, 'DEBUG');
                 }
                 if (settings.columnVisibility) {
                     setColumnVisibility({ ...initialColumnVisibility, ...settings.columnVisibility });
@@ -896,6 +902,20 @@ const App: React.FC = () => {
         }
     }
   };
+  
+  const handleLogTableDensityChange = async (newDensity: LogTableDensity) => {
+    setLogTableDensity(newDensity);
+    if (window.electronAPI) {
+        try {
+            const settings = await window.electronAPI.getSettings();
+            await window.electronAPI.setSettings({ ...settings, logTableDensity: newDensity });
+            logToConsole(`Log table density changed to '${newDensity}' and settings saved.`, 'INFO');
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            logToConsole(`Failed to save log table density setting: ${msg}`, 'ERROR');
+        }
+    }
+  };
 
   const handleColumnVisibilityChange = async (newVisibility: ColumnVisibilityState) => {
     setColumnVisibility(newVisibility);
@@ -1263,6 +1283,37 @@ const App: React.FC = () => {
       setCurrentPage(1);
       setEntriesOffset(0);
   }, [logToConsole]);
+  
+  const handleContextMenuFilter = React.useCallback((key: 'level' | 'sndrtype' | 'sndrname' | 'fileName', value: string, exclude: boolean) => {
+    logToConsole(`Applying context filter: ${key} ${exclude ? '!=' : '='} ${value}`, 'DEBUG');
+    
+    const includeKey = key;
+    const excludeKey = `${key}Exclude` as const;
+
+    const updater = (currentFilters: FilterState) => {
+        const newFilters = { ...currentFilters };
+
+        if (exclude) {
+            const existingExcludes = newFilters[excludeKey] || [];
+            if (!existingExcludes.includes(value)) {
+                newFilters[excludeKey] = [...existingExcludes, value];
+            }
+        } else {
+            const existingIncludes = newFilters[includeKey] || [];
+            if (!existingIncludes.includes(value)) {
+                newFilters[includeKey] = [...existingIncludes, value];
+            }
+        }
+        return newFilters;
+    };
+
+    setFormFilters(updater);
+    setAppliedFilters(updater);
+    setIsInitialLoad(false);
+    setCurrentPage(1);
+    setEntriesOffset(0);
+    setActiveView('viewer');
+  }, [logToConsole]);
 
 
   const totalPages = Math.ceil(totalFilteredCount / pageSize);
@@ -1321,6 +1372,7 @@ const App: React.FC = () => {
                 panelWidths={panelWidths}
                 onPanelWidthsChange={handlePanelWidthsChange}
                 onApplyFilter={handleApplyDetailFilter}
+                onContextMenuFilter={handleContextMenuFilter}
                 customFilterPresets={customFilterPresets}
                 onSavePreset={handleSaveFilterPreset}
                 onDeletePreset={handleDeleteFilterPreset}
@@ -1335,6 +1387,7 @@ const App: React.FC = () => {
                 onTimeRangeSelectorVisibilityChange={handleTimeRangeSelectorVisibilityChange}
                 fileTimeRanges={fileTimeRanges}
                 logDensity={logDensity}
+                overallLogDensity={overallLogDensity}
                 datesWithLogs={datesWithLogs}
                 onCursorChange={handleCursorChange}
                 onFileSelect={handleFileSelect}
@@ -1343,11 +1396,14 @@ const App: React.FC = () => {
                 setKeyboardSelectedId={setKeyboardSelectedId}
                 jumpToEntryId={jumpToEntryId}
                 timelineViewRange={timelineViewRange}
+                onTimelineViewRangeChange={setTimelineViewRange}
                 onTimelineZoomToSelection={handleTimelineZoomToSelection}
                 onTimelineZoomReset={handleTimelineZoomReset}
                 isInitialLoad={isInitialLoad}
                 iconSet={iconSet}
                 onRemoveAppliedFilter={handleRemoveAppliedFilter}
+                logTableDensity={logTableDensity}
+                onLogTableDensityChange={handleLogTableDensityChange}
               />
             ) : (
                 <div className="flex-grow flex items-center justify-center p-8 text-center bg-white dark:bg-gray-900">
@@ -1398,6 +1454,8 @@ const App: React.FC = () => {
               onColumnStylesChange={handleColumnStylesChange}
               isTimeRangeSelectorVisible={isTimeRangeSelectorVisible}
               onTimeRangeSelectorVisibilityChange={handleTimeRangeSelectorVisibilityChange}
+              logTableDensity={logTableDensity}
+              onLogTableDensityChange={handleLogTableDensityChange}
             />
         )}
       </main>

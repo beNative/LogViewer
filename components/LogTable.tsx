@@ -1,5 +1,5 @@
 import React from 'react';
-import { LogEntry, FilterState, PageTimestampRange, ColumnVisibilityState, ColumnStyles, ColumnKey, PanelWidths, ViewMode, ConsoleMessage, OverallTimeRange, FileTimeRange, LogDensityPoint, IconSet } from '../types.ts';
+import { LogEntry, FilterState, PageTimestampRange, ColumnVisibilityState, ColumnStyles, ColumnKey, PanelWidths, ViewMode, ConsoleMessage, OverallTimeRange, FileTimeRange, LogDensityPoint, IconSet, LogTableDensity } from '../types.ts';
 import { Icon } from './icons/index.tsx';
 import { FilterBar } from './FilterBar.tsx';
 import { LogDetailPanel } from './LogDetailPanel.tsx';
@@ -8,8 +8,11 @@ import { ColumnSelector } from './ColumnSelector.tsx';
 import { TimeRangeSelector } from './TimeRangeSelector.tsx';
 import { getSqlDateTime } from '../db.ts';
 import { ActiveFilters } from './ActiveFilters.tsx';
+import { ContextMenu } from './ContextMenu.tsx';
+import { DensityControl } from './DensityControl.tsx';
 
 type Theme = 'light' | 'dark';
+type ContextMenuState = { x: number; y: number; entry: LogEntry; value: string; key: ColumnKey; };
 
 interface LogTableProps {
   entries: LogEntry[];
@@ -43,6 +46,7 @@ interface LogTableProps {
   panelWidths: PanelWidths;
   onPanelWidthsChange: (newWidths: PanelWidths) => void;
   onApplyFilter: (key: 'level' | 'sndrtype' | 'sndrname' | 'fileName', value: string) => void;
+  onContextMenuFilter: (key: 'level' | 'sndrtype' | 'sndrname' | 'fileName', value: string, exclude: boolean) => void;
   customFilterPresets: Record<string, FilterState>;
   onSavePreset: (name: string) => void;
   onDeletePreset: (name: string) => void;
@@ -57,6 +61,7 @@ interface LogTableProps {
   onTimeRangeSelectorVisibilityChange: (isVisible: boolean) => void;
   fileTimeRanges: FileTimeRange[];
   logDensity: LogDensityPoint[];
+  overallLogDensity: LogDensityPoint[];
   datesWithLogs: string[];
   onCursorChange: (time: number) => void;
   onFileSelect: (fileName: string) => void;
@@ -65,11 +70,14 @@ interface LogTableProps {
   setKeyboardSelectedId: (id: number | null) => void;
   jumpToEntryId: number | null;
   timelineViewRange: OverallTimeRange | null;
+  onTimelineViewRangeChange: (range: OverallTimeRange | null) => void;
   onTimelineZoomToSelection: () => void;
   onTimelineZoomReset: () => void;
   isInitialLoad: boolean;
   iconSet: IconSet;
   onRemoveAppliedFilter: (key: keyof FilterState, value?: string) => void;
+  logTableDensity: LogTableDensity;
+  onLogTableDensityChange: (density: LogTableDensity) => void;
 }
 
 export const getLevelColor = (level: string): string => {
@@ -125,6 +133,7 @@ export const LogTable: React.FC<LogTableProps> = ({
   panelWidths,
   onPanelWidthsChange,
   onApplyFilter,
+  onContextMenuFilter,
   customFilterPresets,
   onSavePreset,
   onDeletePreset,
@@ -139,6 +148,7 @@ export const LogTable: React.FC<LogTableProps> = ({
   onTimeRangeSelectorVisibilityChange,
   fileTimeRanges,
   logDensity,
+  overallLogDensity,
   datesWithLogs,
   onCursorChange,
   onFileSelect,
@@ -147,11 +157,14 @@ export const LogTable: React.FC<LogTableProps> = ({
   setKeyboardSelectedId,
   jumpToEntryId,
   timelineViewRange,
+  onTimelineViewRangeChange,
   onTimelineZoomToSelection,
   onTimelineZoomReset,
   isInitialLoad,
   iconSet,
   onRemoveAppliedFilter,
+  logTableDensity,
+  onLogTableDensityChange
 }) => {
   const [selectedEntry, setSelectedEntry] = React.useState<LogEntry | null>(null);
   const [selectOnLoad, setSelectOnLoad] = React.useState<'first' | 'last' | null>(null);
@@ -160,6 +173,7 @@ export const LogTable: React.FC<LogTableProps> = ({
   const [isResizing, setIsResizing] = React.useState<'filters' | 'details' | null>(null);
   const [isDebugMenuOpen, setIsDebugMenuOpen] = React.useState(false);
   const [isDetailPanelVisible, setIsDetailPanelVisible] = React.useState(false);
+  const [contextMenu, setContextMenu] = React.useState<ContextMenuState | null>(null);
   
   // Refs for layout and scrolling
   const fullContainerRef = React.useRef<HTMLDivElement>(null);
@@ -195,16 +209,19 @@ export const LogTable: React.FC<LogTableProps> = ({
     return () => container.removeEventListener('scroll', handleScroll);
   }, [viewMode, hasMore, isBusy, onLoadMore]);
 
-  // Close debug menu if clicked outside
+  // Close debug menu and context menu if clicked outside
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
         if (isDebugMenuOpen && debugButtonRef.current && !debugButtonRef.current.contains(event.target as Node)) {
             setIsDebugMenuOpen(false);
         }
+        if (contextMenu) {
+            setContextMenu(null);
+        }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isDebugMenuOpen]);
+  }, [isDebugMenuOpen, contextMenu]);
 
   const handleResizeMouseDown = (e: React.MouseEvent, panel: 'filters' | 'details') => {
     e.preventDefault();
@@ -422,6 +439,28 @@ export const LogTable: React.FC<LogTableProps> = ({
       setKeyboardSelectedId(entry.id);
   }, [setKeyboardSelectedId]);
 
+  const handleContextMenu = (e: React.MouseEvent, entry: LogEntry) => {
+    e.preventDefault();
+    setContextMenu(null); // Close any existing menu
+
+    const target = e.target as HTMLElement;
+    const cell = target.closest('td');
+    if (!cell) return;
+
+    const key = cell.dataset.key as ColumnKey;
+    const value = cell.dataset.value;
+
+    if (key && value) {
+        setContextMenu({
+            x: e.clientX,
+            y: e.clientY,
+            entry,
+            key,
+            value,
+        });
+    }
+  };
+
   const handleToggleDetailsPanel = () => {
     const turningOn = !isDetailPanelVisible;
     if (turningOn && keyboardSelectedId === null && entries.length > 0) {
@@ -460,6 +499,15 @@ export const LogTable: React.FC<LogTableProps> = ({
 
     return properties;
   };
+
+  const getRowPaddingClass = React.useCallback(() => {
+    switch (logTableDensity) {
+      case 'compact': return 'py-1';
+      case 'normal': return 'py-2';
+      case 'comfortable': return 'py-4';
+      default: return 'py-2';
+    }
+  }, [logTableDensity]);
   
   const getSelectedTimestamps = React.useCallback((sourceFilters: FilterState) => {
     let selectedStartTime: number | null = null;
@@ -528,15 +576,16 @@ export const LogTable: React.FC<LogTableProps> = ({
   const SkeletonRow: React.FC<{ visibility: ColumnVisibilityState }> = React.memo(({ visibility }) => {
     const shimmerBg = 'linear-gradient(to right, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)';
     const lightShimmerBg = 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.05) 50%, transparent 100%)';
+    const paddingClass = getRowPaddingClass();
 
     return (
         <tr className="bg-white dark:bg-gray-900">
-            {visibility.time && <td className="whitespace-nowrap py-4 pl-4 pr-3 sm:pl-6"><div className="h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-3/4 animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
-            {visibility.level && <td className="whitespace-nowrap px-3 py-4"><div className="h-6 w-20 rounded-full bg-gray-200 dark:bg-gray-700/80 animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
-            {visibility.sndrtype && <td className="whitespace-nowrap px-3 py-4"><div className="h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-2/3 animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
-            {visibility.sndrname && <td className="whitespace-nowrap px-3 py-4"><div className="h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-3/4 animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
-            {visibility.fileName && <td className="whitespace-nowrap px-3 py-4"><div className="h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-5/6 animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
-            {visibility.msg && <td className="px-3 py-4"><div className="h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-full animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
+            {visibility.time && <td className={`whitespace-nowrap pl-4 pr-3 sm:pl-6 ${paddingClass}`}><div className="h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-3/4 animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
+            {visibility.level && <td className={`whitespace-nowrap px-3 ${paddingClass}`}><div className="h-6 w-20 rounded-full bg-gray-200 dark:bg-gray-700/80 animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
+            {visibility.sndrtype && <td className={`whitespace-nowrap px-3 ${paddingClass}`}><div className="h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-2/3 animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
+            {visibility.sndrname && <td className={`whitespace-nowrap px-3 ${paddingClass}`}><div className="h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-3/4 animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
+            {visibility.fileName && <td className={`whitespace-nowrap px-3 ${paddingClass}`}><div className="h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-5/6 animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
+            {visibility.msg && <td className={`px-3 ${paddingClass}`}><div className="h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-full animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
         </tr>
     );
 });
@@ -564,25 +613,26 @@ export const LogTable: React.FC<LogTableProps> = ({
                   <tr key={entry.id} 
                     data-row-id={entry.id}
                     onClick={() => handleEntrySelect(entry)}
+                    onContextMenu={(e) => handleContextMenu(e, entry)}
                     className={`relative hover:bg-gray-100 dark:hover:bg-gray-800/70 transition-colors duration-150 cursor-pointer ${
                       keyboardSelectedId === entry.id ? 'bg-sky-50 dark:bg-sky-900/60 ring-2 ring-inset ring-sky-500' : ''
                     }`}
                   >
-                    {columnVisibility.time && <td style={getTdStyle('time')} className="whitespace-nowrap py-4 pl-4 pr-3 sm:pl-6">{entry.time}</td>}
+                    {columnVisibility.time && <td data-key="time" data-value={entry.time} style={getTdStyle('time')} className={`whitespace-nowrap pl-4 pr-3 sm:pl-6 ${getRowPaddingClass()}`}>{entry.time}</td>}
                     
-                    {columnVisibility.level && <td className="whitespace-nowrap px-3 py-4">
+                    {columnVisibility.level && <td data-key="level" data-value={entry.level} className={`whitespace-nowrap px-3 ${getRowPaddingClass()}`}>
                       <span style={getTdStyle('level')} className={`px-2 py-1 rounded-full font-medium ${getLevelColor(entry.level)}`}>
                         {entry.level}
                       </span>
                     </td>}
 
-                    {columnVisibility.sndrtype && <td style={getTdStyle('sndrtype')} className="whitespace-nowrap px-3 py-4">{entry.sndrtype}</td>}
+                    {columnVisibility.sndrtype && <td data-key="sndrtype" data-value={entry.sndrtype} style={getTdStyle('sndrtype')} className={`whitespace-nowrap px-3 ${getRowPaddingClass()}`}>{entry.sndrtype}</td>}
                     
-                    {columnVisibility.sndrname && <td style={getTdStyle('sndrname')} className="whitespace-nowrap px-3 py-4">{entry.sndrname}</td>}
+                    {columnVisibility.sndrname && <td data-key="sndrname" data-value={entry.sndrname} style={getTdStyle('sndrname')} className={`whitespace-nowrap px-3 ${getRowPaddingClass()}`}>{entry.sndrname}</td>}
                     
-                    {columnVisibility.fileName && <td style={getTdStyle('fileName')} className="whitespace-nowrap px-3 py-4 max-w-xs truncate" title={entry.fileName}>{entry.fileName}</td>}
+                    {columnVisibility.fileName && <td data-key="fileName" data-value={entry.fileName} style={getTdStyle('fileName')} className={`whitespace-nowrap max-w-xs truncate px-3 ${getRowPaddingClass()}`} title={entry.fileName}>{entry.fileName}</td>}
 
-                    {columnVisibility.msg && <td style={getTdStyle('msg')} className="px-3 py-4 whitespace-pre-wrap break-words" dangerouslySetInnerHTML={{ __html: highlightText(entry.msg, includeTerms, theme) }} />}
+                    {columnVisibility.msg && <td data-key="msg" data-value={entry.msg} style={getTdStyle('msg')} className={`whitespace-pre-wrap break-words px-3 ${getRowPaddingClass()}`} dangerouslySetInnerHTML={{ __html: highlightText(entry.msg, includeTerms, theme) }} />}
                   </tr>
                 ))}
                 {entries.length === 0 && (
@@ -611,6 +661,18 @@ export const LogTable: React.FC<LogTableProps> = ({
 
   return (
     <div className="flex flex-col flex-1 bg-white dark:bg-gray-800/50 overflow-hidden">
+        {contextMenu && (
+            <ContextMenu
+                x={contextMenu.x}
+                y={contextMenu.y}
+                entry={contextMenu.entry}
+                contextKey={contextMenu.key}
+                contextValue={contextMenu.value}
+                onClose={() => setContextMenu(null)}
+                onFilter={onContextMenuFilter}
+                iconSet={iconSet}
+            />
+        )}
       <div className="flex flex-1 min-h-0" ref={fullContainerRef}>
         <aside
           style={{ width: `${localPanelWidths.filters}px` }} 
@@ -652,6 +714,7 @@ export const LogTable: React.FC<LogTableProps> = ({
                                 pageTimestampRanges={pageTimestampRanges}
                                 fileTimeRanges={fileTimeRanges}
                                 logDensity={logDensity}
+                                overallLogDensity={overallLogDensity}
                                 datesWithLogs={datesWithLogs}
                                 viewMode={viewMode}
                                 onGoToPage={onGoToPage}
@@ -663,6 +726,7 @@ export const LogTable: React.FC<LogTableProps> = ({
                                 onFileSelect={onFileSelect}
                                 onDateSelect={onDateSelect}
                                 viewRange={timelineViewRange}
+                                onViewRangeChange={onTimelineViewRangeChange}
                                 onZoomToSelection={onTimelineZoomToSelection}
                                 onZoomToExtent={onTimelineZoomReset}
                                 zoomToSelectionEnabled={zoomToSelectionEnabled}
@@ -730,6 +794,7 @@ export const LogTable: React.FC<LogTableProps> = ({
 
               {/* Right-side controls */}
               <div className="flex items-center gap-x-6 gap-y-2 flex-wrap justify-end">
+                  <DensityControl value={logTableDensity} onChange={onLogTableDensityChange} />
                   <ViewModeToggle />
                   <ColumnSelector
                       visibility={columnVisibility}

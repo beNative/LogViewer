@@ -176,6 +176,23 @@ export class Database {
                 whereClauses.push(`fileName IN (${'?,'.repeat(filters.fileName.length).slice(0, -1)})`);
                 params.push(...filters.fileName);
             }
+
+            if (filters.levelExclude?.length > 0) {
+                whereClauses.push(`level NOT IN (${'?,'.repeat(filters.levelExclude.length).slice(0, -1)})`);
+                params.push(...filters.levelExclude);
+            }
+            if (filters.sndrtypeExclude?.length > 0) {
+                whereClauses.push(`sndrtype NOT IN (${'?,'.repeat(filters.sndrtypeExclude.length).slice(0, -1)})`);
+                params.push(...filters.sndrtypeExclude);
+            }
+            if (filters.sndrnameExclude?.length > 0) {
+                whereClauses.push(`sndrname NOT IN (${'?,'.repeat(filters.sndrnameExclude.length).slice(0, -1)})`);
+                params.push(...filters.sndrnameExclude);
+            }
+            if (filters.fileNameExclude?.length > 0) {
+                whereClauses.push(`fileName NOT IN (${'?,'.repeat(filters.fileNameExclude.length).slice(0, -1)})`);
+                params.push(...filters.fileNameExclude);
+            }
             
             const includeTerms = filters.includeMsg?.split('\n').map(t => t.trim().toLowerCase()).filter(Boolean) || [];
             if (includeTerms.length > 0) {

@@ -1,8 +1,9 @@
 import React from 'react';
 import { ColumnStyleSettings } from './ColumnStyleSettings.tsx';
-import { ColumnStyles, ViewMode, IconSet } from '../types.ts';
+import { ColumnStyles, ViewMode, IconSet, LogTableDensity } from '../types.ts';
 import { JsonSyntaxHighlighter } from './JsonSyntaxHighlighter.tsx';
 import { Icon } from './icons/index.tsx';
+import { DensityControl } from './DensityControl.tsx';
 
 type Theme = 'light' | 'dark';
 
@@ -17,6 +18,8 @@ interface SettingsProps {
   onColumnStylesChange: (newStyles: ColumnStyles) => void;
   isTimeRangeSelectorVisible: boolean;
   onTimeRangeSelectorVisibilityChange: (newVisibility: boolean) => void;
+  logTableDensity: LogTableDensity;
+  onLogTableDensityChange: (newDensity: LogTableDensity) => void;
 }
 
 const ToggleSwitch: React.FC<{
@@ -98,7 +101,8 @@ export const Settings: React.FC<SettingsProps> = ({
     viewMode, onViewModeChange, 
     iconSet, onIconSetChange,
     columnStyles, onColumnStylesChange,
-    isTimeRangeSelectorVisible, onTimeRangeSelectorVisibilityChange 
+    isTimeRangeSelectorVisible, onTimeRangeSelectorVisibilityChange,
+    logTableDensity, onLogTableDensityChange,
 }) => {
     const [settings, setSettings] = React.useState<any>(null);
     const [settingsPath, setSettingsPath] = React.useState<string>('');
@@ -170,6 +174,10 @@ export const Settings: React.FC<SettingsProps> = ({
                                             { label: 'Scroll', value: 'scroll' },
                                         ]}
                                     />
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-medium text-gray-800 dark:text-gray-200">Log Row Density</span>
+                                        <DensityControl value={logTableDensity} onChange={onLogTableDensityChange} />
+                                    </div>
                                     <ToggleSwitch
                                         label="Show Timeline by Default"
                                         enabled={isTimeRangeSelectorVisible}
