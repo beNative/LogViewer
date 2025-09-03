@@ -15,9 +15,9 @@ const NavItem: React.FC<{
     isActive: boolean;
     onClick: () => void;
 }> = ({ icon, label, isActive, onClick }) => {
-    const baseClasses = "flex items-center space-x-3 px-4 py-3 font-medium transition-colors duration-200 rounded-t-lg border-b-2";
-    const activeClasses = "border-sky-500 text-sky-600 bg-white dark:border-sky-400 dark:text-sky-400 dark:bg-gray-800/80";
-    const inactiveClasses = "border-transparent text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700/50 dark:hover:text-white";
+    const baseClasses = "flex items-center space-x-2 px-3 py-2 text-sm font-semibold transition-all duration-200 rounded-md shadow-sm";
+    const activeClasses = "bg-white dark:bg-gray-700 text-sky-600 dark:text-sky-400 scale-105 shadow-lg";
+    const inactiveClasses = "bg-sky-600 text-white hover:bg-sky-700 dark:bg-sky-700 dark:hover:bg-sky-600";
 
     return (
         <button onClick={onClick} className={`${baseClasses} ${isActive ? activeClasses : inactiveClasses}`}>
@@ -29,9 +29,9 @@ const NavItem: React.FC<{
 
 export const Header: React.FC<HeaderProps> = ({ activeView, onViewChange, isBusy, iconSet }) => {
     return (
-        <header className="flex-shrink-0 bg-gray-100 dark:bg-gray-900 px-4 pt-3">
-            <nav className="flex items-end border-b border-gray-200 dark:border-gray-700">
-                <div className="flex items-end space-x-2">
+        <header className="flex-shrink-0 bg-gray-100 dark:bg-gray-900 p-3">
+            <nav className="flex items-center">
+                <div className="flex items-center space-x-2">
                     <NavItem
                         icon={<Icon name="ArchiveBox" iconSet={iconSet} className="w-5 h-5" />}
                         label="Data Hub"
@@ -66,7 +66,7 @@ export const Header: React.FC<HeaderProps> = ({ activeView, onViewChange, isBusy
                     </div>
                 )}
                 
-                <div className="flex items-end space-x-2">
+                <div className="flex items-center space-x-2">
                      <NavItem
                         icon={<Icon name="BookOpen" iconSet={iconSet} className="w-5 h-5" />}
                         label="Info"
