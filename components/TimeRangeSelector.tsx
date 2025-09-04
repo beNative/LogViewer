@@ -40,9 +40,7 @@ type DragState =
   | { type: 'select_left'; startX: number; initialStart: number; initialEnd: number }
   | { type: 'select_right'; startX: number; initialStart: number; initialEnd: number }
   | { type: 'cursor'; startX: number; initialCursor: number }
-  | { type: 'new_selection'; startX: number; startTime: number }
-  | { type: 'brush'; startX: number; initialMin: number; initialMax: number }
-  | { type: 'brush_left' | 'brush_right'; startX: number; initialMin: number; initialMax: number };
+  | { type: 'new_selection'; startX: number; startTime: number };
 
 const PALETTE = [
   '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', 
@@ -177,28 +175,61 @@ const OverviewBrush: React.FC<{
     maxTime: number;
     viewMin: number;
     viewMax: number;
+    selectedMin: number | null;
+    selectedMax: number | null;
     density: LogDensityPoint[];
     theme: Theme;
     valueToPosition: ValueToPositionFn;
     positionToValue: PositionToValueFn;
     onViewRangeChange: (range: OverallTimeRange | null) => void;
-}> = ({ minTime, maxTime, viewMin, viewMax, density, theme, valueToPosition, positionToValue, onViewRangeChange }) => {
-    const [dragState, setDragState] = React.useState<Extract<DragState, {type: 'brush' | 'brush_left' | 'brush_right'}> | null>(null);
+    onRangeChange: (startTime: number, endTime: number) => void;
+}> = ({ minTime, maxTime, viewMin, viewMax, selectedMin, selectedMax, density, theme, valueToPosition, positionToValue, onViewRangeChange, onRangeChange }) => {
+    const containerRef = React.useRef<HTMLDivElement>(null);
 
-    const handleMouseDown = (e: React.MouseEvent, type: 'brush' | 'brush_left' | 'brush_right') => {
+    type OverviewDragState =
+      | { type: 'brush'; startX: number; initialMin: number; initialMax: number }
+      | { type: 'brush_left' | 'brush_right'; startX: number; initialMin: number; initialMax: number }
+      | { type: 'new_overview_selection'; startX: number; startTime: number };
+
+    const [dragState, setDragState] = React.useState<OverviewDragState | null>(null);
+    const [tempSelection, setTempSelection] = React.useState<{ start: number, end: number } | null>(null);
+
+    const handleBrushMouseDown = (e: React.MouseEvent, type: 'brush' | 'brush_left' | 'brush_right') => {
         e.stopPropagation();
         setDragState({ type, startX: e.clientX, initialMin: viewMin, initialMax: viewMax });
     };
 
+    const handleContainerMouseDown = (e: React.MouseEvent) => {
+        if (e.target !== e.currentTarget) return;
+        e.stopPropagation();
+
+        const rect = containerRef.current!.getBoundingClientRect();
+        const clickPos = e.clientX - rect.left;
+        const clickTime = positionToValue(clickPos);
+        setDragState({ type: 'new_overview_selection', startX: e.clientX, startTime: clickTime });
+    };
+
     const handleMouseMove = React.useCallback((e: MouseEvent) => {
-        if (!dragState) return;
+        if (!dragState || !containerRef.current) return;
         e.preventDefault();
+
+        const rect = containerRef.current.getBoundingClientRect();
+        const currentPos = e.clientX - rect.left;
+        const currentTime = positionToValue(currentPos);
+
         const deltaX = e.clientX - dragState.startX;
         const deltaTime = positionToValue(deltaX) - positionToValue(0);
 
+        if (dragState.type === 'new_overview_selection') {
+            const start = Math.min(dragState.startTime, currentTime);
+            const end = Math.max(dragState.startTime, currentTime);
+            setTempSelection({ start, end });
+            return;
+        }
+
         let newMin = dragState.initialMin;
         let newMax = dragState.initialMax;
-        
+
         if (dragState.type === 'brush') {
             newMin += deltaTime;
             newMax += deltaTime;
@@ -215,25 +246,34 @@ const OverviewBrush: React.FC<{
         } else if (dragState.type === 'brush_left') {
             newMin += deltaTime;
             if (newMin < minTime) newMin = minTime;
-            if (newMin >= newMax) newMin = newMax -1; // Prevent crossing
+            if (newMin >= newMax) newMin = newMax - 1;
         } else { // brush_right
             newMax += deltaTime;
             if (newMax > maxTime) newMax = maxTime;
-            if (newMax <= newMin) newMax = newMin + 1; // Prevent crossing
+            if (newMax <= newMin) newMax = newMin + 1;
         }
-        
+
         if (newMin < newMax) {
-          onViewRangeChange({ min: newMin, max: newMax });
+            onViewRangeChange({ min: newMin, max: newMax });
         }
     }, [dragState, minTime, maxTime, positionToValue, onViewRangeChange]);
 
-    const handleMouseUp = React.useCallback(() => {
+    const handleMouseUp = React.useCallback((e: MouseEvent) => {
+        if (dragState?.type === 'new_overview_selection') {
+            if (Math.abs(e.clientX - dragState.startX) >= 5 && tempSelection) {
+                onRangeChange(tempSelection.start, tempSelection.end);
+            }
+        }
         setDragState(null);
-    }, []);
+        setTempSelection(null);
+    }, [dragState, onRangeChange, tempSelection]);
 
     React.useEffect(() => {
+        const cursor = dragState?.type.startsWith('brush') ? 'col-resize' :
+            dragState?.type === 'new_overview_selection' ? 'crosshair' : 'default';
+
         if (dragState) {
-            document.body.style.cursor = 'col-resize';
+            document.body.style.cursor = cursor;
             document.addEventListener('mousemove', handleMouseMove);
             document.addEventListener('mouseup', handleMouseUp);
         }
@@ -244,12 +284,21 @@ const OverviewBrush: React.FC<{
         };
     }, [dragState, handleMouseMove, handleMouseUp]);
 
-    const left = valueToPosition(viewMin);
-    const width = valueToPosition(viewMax) - left;
+    const viewLeft = valueToPosition(viewMin);
+    const viewWidth = valueToPosition(viewMax) - viewLeft;
+
+    const currentSelection = tempSelection || (selectedMin !== null && selectedMax !== null ? { start: selectedMin, end: selectedMax } : null);
+    
+    const selectionLeft = currentSelection ? valueToPosition(currentSelection.start) : -1;
+    const selectionWidth = currentSelection ? valueToPosition(currentSelection.end) - selectionLeft : 0;
 
     return (
-        <div className="relative w-full h-10 bg-gray-200 dark:bg-gray-700/50 rounded p-0.5">
-            <div className="w-full h-full flex">
+        <div
+            ref={containerRef}
+            onMouseDown={handleContainerMouseDown}
+            className="relative w-full h-10 bg-gray-200 dark:bg-gray-700/50 rounded p-0.5 cursor-crosshair"
+        >
+            <div className="w-full h-full flex pointer-events-none">
                 {density.map((bucket, i) => (
                     <div
                         key={`density-${i}`}
@@ -260,13 +309,21 @@ const OverviewBrush: React.FC<{
                     />
                 ))}
             </div>
+            
+            {selectionLeft >= 0 && selectionWidth > 0 && (
+                <div
+                    className="absolute top-0 h-full bg-sky-500/20 dark:bg-sky-400/20 pointer-events-none"
+                    style={{ left: `${selectionLeft}px`, width: `${selectionWidth}px` }}
+                />
+            )}
+
             <div
-                onMouseDown={(e) => handleMouseDown(e, 'brush')}
-                className="absolute top-0 h-full bg-black/20 dark:bg-white/20 cursor-move"
-                style={{ left: `${left}px`, width: `${width}px` }}
+                onMouseDown={(e) => handleBrushMouseDown(e, 'brush')}
+                className="absolute top-0 h-full bg-black/20 dark:bg-white/20 cursor-move border-x-2 border-sky-600 dark:border-sky-400"
+                style={{ left: `${viewLeft}px`, width: `${viewWidth}px` }}
             >
-                <div onMouseDown={(e) => handleMouseDown(e, 'brush_left')} className="absolute left-0 top-0 w-2 h-full cursor-col-resize bg-sky-600/50 hover:bg-sky-600" />
-                <div onMouseDown={(e) => handleMouseDown(e, 'brush_right')} className="absolute right-0 top-0 w-2 h-full cursor-col-resize bg-sky-600/50 hover:bg-sky-600" />
+                <div onMouseDown={(e) => handleBrushMouseDown(e, 'brush_left')} className="absolute left-0 top-0 w-2 h-full cursor-col-resize bg-sky-600/50 hover:bg-sky-600" />
+                <div onMouseDown={(e) => handleBrushMouseDown(e, 'brush_right')} className="absolute right-0 top-0 w-2 h-full cursor-col-resize bg-sky-600/50 hover:bg-sky-600" />
             </div>
         </div>
     );
@@ -415,8 +472,12 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
 
     const currentStart = tempSelection?.start ?? selectedStartTime;
     const currentEnd = tempSelection?.end ?? selectedEndTime;
-    const startPos = currentStart !== null ? mainValueToPos(currentStart) : -1;
-    const endPos = currentEnd !== null ? mainValueToPos(currentEnd) : -1;
+
+    const visibleSelectionStart = currentStart !== null ? Math.max(currentStart, displayMinTime) : null;
+    const visibleSelectionEnd = currentEnd !== null ? Math.min(currentEnd, displayMaxTime) : null;
+
+    const startPos = visibleSelectionStart !== null ? mainValueToPos(visibleSelectionStart) : -1;
+    const endPos = visibleSelectionEnd !== null ? mainValueToPos(visibleSelectionEnd) : -1;
 
     return (
         <div className="w-full">
@@ -434,7 +495,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                 <div className="flex-grow flex flex-col relative pt-6">
                     <div 
                         onMouseDown={(e) => handleMouseDown(e, 'new_selection')}
-                        className="w-full cursor-crosshair bg-gray-200 dark:bg-gray-700/50 rounded p-1"
+                        className="w-full cursor-crosshair bg-gray-200 dark:bg-gray-700/50 rounded p-1 overflow-hidden"
                     >
                         <div ref={mainContainerRef} className="relative">
                             <div className="space-y-3">
@@ -442,12 +503,11 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                                     <bar.Comp key={bar.key} valueToPosition={mainValueToPos} {...bar.props} />
                                 ))}
                             </div>
-                             {startPos >= 0 && endPos >= 0 && (
+                             {startPos >= 0 && endPos >= 0 && (endPos > startPos) && (
                                 <div
                                     className="absolute top-0 bottom-0 bg-sky-500/20 dark:bg-sky-400/20 z-10 border-x border-sky-600 dark:border-sky-400"
                                     style={{ left: `${startPos}px`, width: `${Math.max(0, endPos - startPos)}px` }}
                                 >
-                                    {/* Left Handle */}
                                     <div
                                         data-handle="left"
                                         onMouseDown={(e) => handleMouseDown(e, 'select_left')}
@@ -455,8 +515,6 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                                     >
                                         <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-8 w-1.5 bg-sky-600 dark:bg-sky-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
                                     </div>
-                                    
-                                    {/* Right Handle */}
                                     <div
                                         data-handle="right"
                                         onMouseDown={(e) => handleMouseDown(e, 'select_right')}
@@ -466,7 +524,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                                     </div>
                                 </div>
                             )}
-                            {cursorTime !== null && mainContainerWidth > 0 && (
+                            {cursorTime !== null && mainContainerWidth > 0 && cursorTime >= displayMinTime && cursorTime <= displayMaxTime && (
                                 <div 
                                     data-handle="cursor"
                                     onMouseDown={(e) => handleMouseDown(e, 'cursor')}
@@ -478,7 +536,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                     </div>
                     {startPos >= 0 && <div className="absolute top-0 text-xs font-mono text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-1.5 py-0.5 rounded shadow z-40" style={{ left: `${startPos}px`, transform: 'translateX(-50%)' }}>{formatTooltip(currentStart)}</div>}
                     {endPos >= 0 && (endPos - startPos > 60) && <div className="absolute top-0 text-xs font-mono text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-1.5 py-0.5 rounded shadow z-40" style={{ left: `${endPos}px`, transform: 'translateX(-50%)' }}>{formatTooltip(currentEnd)}</div>}
-                    {cursorTime !== null && <div className="absolute top-0 text-xs font-mono bg-red-500/90 backdrop-blur-sm text-white rounded px-1.5 py-0.5 z-40" style={{ left: `${mainValueToPos(cursorTime)}px`, transform: 'translateX(-50%)' }}>{formatTooltip(cursorTime)}</div>}
+                    {cursorTime !== null && cursorTime >= displayMinTime && cursorTime <= displayMaxTime && <div className="absolute top-0 text-xs font-mono bg-red-500/90 backdrop-blur-sm text-white rounded px-1.5 py-0.5 z-40" style={{ left: `${mainValueToPos(cursorTime)}px`, transform: 'translateX(-50%)' }}>{formatTooltip(cursorTime)}</div>}
                 </div>
                 
                 <div className="w-auto flex-shrink-0 self-start pt-6 flex flex-col items-center gap-1">
@@ -487,16 +545,19 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                      <button onClick={onClear} className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" title="Clear time selection"><Icon name="XMark" iconSet={iconSet} className="w-6 h-6"/></button>
                 </div>
             </div>
-            <div className="flex items-start gap-3 w-full mt-0">
+            <div className="flex items-start gap-3 w-full mt-2">
                 <div className="w-16 flex-shrink-0"></div>
                 <div className="flex-grow" ref={overviewContainerRef}>
                     {overviewContainerWidth > 0 && (
                         <OverviewBrush
                             minTime={minTime} maxTime={maxTime}
                             viewMin={displayMinTime} viewMax={displayMaxTime}
+                            selectedMin={selectedStartTime}
+                            selectedMax={selectedEndTime}
                             density={overallLogDensity} theme={theme}
                             valueToPosition={overviewValueToPos} positionToValue={overviewPosToValue}
                             onViewRangeChange={onViewRangeChange}
+                            onRangeChange={onRangeChange}
                         />
                     )}
                 </div>
