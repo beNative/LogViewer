@@ -443,20 +443,27 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                                 ))}
                             </div>
                              {startPos >= 0 && endPos >= 0 && (
-                                <div 
-                                    className="absolute top-0 bottom-0 bg-sky-500/20 dark:bg-sky-400/20 z-10"
-                                    style={{ left: `${startPos}px`, width: `${endPos - startPos}px` }}
+                                <div
+                                    className="absolute top-0 bottom-0 bg-sky-500/20 dark:bg-sky-400/20 z-10 border-x border-sky-600 dark:border-sky-400"
+                                    style={{ left: `${startPos}px`, width: `${Math.max(0, endPos - startPos)}px` }}
                                 >
+                                    {/* Left Handle */}
                                     <div
                                         data-handle="left"
                                         onMouseDown={(e) => handleMouseDown(e, 'select_left')}
-                                        className="absolute top-0 -left-1 w-2 h-full cursor-col-resize bg-sky-600/50 hover:bg-sky-600"
-                                    />
+                                        className="absolute top-0 -left-2 w-4 h-full cursor-col-resize group"
+                                    >
+                                        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-8 w-1.5 bg-sky-600 dark:bg-sky-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
+                                    </div>
+                                    
+                                    {/* Right Handle */}
                                     <div
                                         data-handle="right"
                                         onMouseDown={(e) => handleMouseDown(e, 'select_right')}
-                                        className="absolute top-0 -right-1 w-2 h-full cursor-col-resize bg-sky-600/50 hover:bg-sky-600"
-                                    />
+                                        className="absolute top-0 -right-2 w-4 h-full cursor-col-resize group"
+                                    >
+                                         <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-8 w-1.5 bg-sky-600 dark:bg-sky-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
+                                    </div>
                                 </div>
                             )}
                             {cursorTime !== null && mainContainerWidth > 0 && (
@@ -480,7 +487,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                      <button onClick={onClear} className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" title="Clear time selection"><Icon name="XMark" iconSet={iconSet} className="w-6 h-6"/></button>
                 </div>
             </div>
-            <div className="flex items-start gap-3 w-full mt-1">
+            <div className="flex items-start gap-3 w-full mt-0">
                 <div className="w-16 flex-shrink-0"></div>
                 <div className="flex-grow" ref={overviewContainerRef}>
                     {overviewContainerWidth > 0 && (
