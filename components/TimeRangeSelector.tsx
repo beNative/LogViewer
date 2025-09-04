@@ -88,11 +88,16 @@ const Bar: React.FC<{
     getStart: (item: any) => number;
     getEnd: (item: any) => number;
     getColor: (index: number) => string;
-}> = ({ items, valueToPosition, isActive, onSelect, getLabel, getTitle, getStart, getEnd, getColor }) => (
+    displayMinTime: number;
+    displayMaxTime: number;
+}> = ({ items, valueToPosition, isActive, onSelect, getLabel, getTitle, getStart, getEnd, getColor, displayMinTime, displayMaxTime }) => (
     <div className="relative w-full" style={{ height: `20px`}}>
         {items.map((item, i) => {
             const start = getStart(item);
             const end = getEnd(item);
+            if (end < displayMinTime || start > displayMaxTime) {
+                return null;
+            }
             const leftPx = valueToPosition(start);
             const rightPx = valueToPosition(end);
             let widthPx = Math.max(1, rightPx - leftPx);
@@ -395,9 +400,10 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     }, [dragState, mainPosToValue, displayMinTime, displayMaxTime, onRangeChange, onCursorChange, tempSelection]);
 
     const barComponents = [];
-    if (viewMode === 'pagination' && pageTimestampRanges.length > 0 && onGoToPage) barComponents.push({key: 'page', label: 'Pages', Comp: Bar, props: { items: pageTimestampRanges, isActive: (item: any) => item.page === currentPage, onSelect: (item: any) => onGoToPage(item.page), getLabel: (item: any) => item.page, getTitle: (item: any) => `Page ${item.page}`, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
-    if (fileTimeRanges.length > 0) barComponents.push({key: 'file', label: 'Files', Comp: Bar, props: { items: fileTimeRanges, isActive: (item: any) => item.name === activeFileName, onSelect: (item: any) => onFileSelect(item.name), getLabel: (item: any) => item.name.split('/').pop(), getTitle: (item: any) => item.name, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
-    if (datesWithLogs.length > 0) barComponents.push({key: 'date', label: 'Date', Comp: Bar, props: { items: datesWithLogs, isActive: (item: any) => item === activeDate, onSelect: (item: any) => onDateSelect(item), getLabel: (item: any) => item, getTitle: (item: any) => item, getStart: (item: any) => new Date(`${item}T00:00:00.000Z`).getTime(), getEnd: (item: any) => new Date(`${item}T23:59:59.999Z`).getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
+    const barProps = { displayMinTime: displayMinTime, displayMaxTime: displayMaxTime };
+    if (viewMode === 'pagination' && pageTimestampRanges.length > 0 && onGoToPage) barComponents.push({key: 'page', label: 'Pages', Comp: Bar, props: { ...barProps, items: pageTimestampRanges, isActive: (item: any) => item.page === currentPage, onSelect: (item: any) => onGoToPage(item.page), getLabel: (item: any) => item.page, getTitle: (item: any) => `Page ${item.page}`, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
+    if (fileTimeRanges.length > 0) barComponents.push({key: 'file', label: 'Files', Comp: Bar, props: { ...barProps, items: fileTimeRanges, isActive: (item: any) => item.name === activeFileName, onSelect: (item: any) => onFileSelect(item.name), getLabel: (item: any) => item.name.split('/').pop(), getTitle: (item: any) => item.name, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
+    if (datesWithLogs.length > 0) barComponents.push({key: 'date', label: 'Date', Comp: Bar, props: { ...barProps, items: datesWithLogs, isActive: (item: any) => item === activeDate, onSelect: (item: any) => onDateSelect(item), getLabel: (item: any) => item, getTitle: (item: any) => item, getStart: (item: any) => new Date(`${item}T00:00:00.000Z`).getTime(), getEnd: (item: any) => new Date(`${item}T23:59:59.999Z`).getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
     if (logDensity.length > 0) barComponents.push({key: 'density', label: 'Density', Comp: DensityBar, props: { items: logDensity, theme: theme, displayMinTime: displayMinTime, displayMaxTime: displayMaxTime }});
 
     const currentStart = tempSelection?.start ?? selectedStartTime;
@@ -450,8 +456,8 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                                 <div 
                                     data-handle="cursor"
                                     onMouseDown={(e) => handleMouseDown(e, 'cursor')}
-                                    className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-30 cursor-col-resize" 
-                                    style={{ left: `${mainValueToPos(cursorTime)}px` }} 
+                                    className="absolute top-0 bottom-0 bg-red-500 z-30 cursor-col-resize" 
+                                    style={{ left: `${mainValueToPos(cursorTime)}px`, width: '2px' }} 
                                 />
                             )}
                         </div>
@@ -468,7 +474,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                 </div>
             </div>
             <div className="flex items-start gap-3 w-full mt-2">
-                <div className="w-16 flex-shrink-0 text-right"><span className="text-xs font-semibold text-gray-600 dark:text-gray-400"></span></div>
+                <div className="w-16 flex-shrink-0"></div>
                 <div className="flex-grow" ref={overviewContainerRef}>
                     {overviewContainerWidth > 0 && (
                         <OverviewBrush
