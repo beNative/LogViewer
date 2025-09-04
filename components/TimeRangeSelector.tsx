@@ -98,8 +98,12 @@ const Bar: React.FC<{
             if (end < displayMinTime || start > displayMaxTime) {
                 return null;
             }
-            const leftPx = valueToPosition(start);
-            const rightPx = valueToPosition(end);
+
+            const visibleStart = Math.max(start, displayMinTime);
+            const visibleEnd = Math.min(end, displayMaxTime);
+
+            const leftPx = valueToPosition(visibleStart);
+            const rightPx = valueToPosition(visibleEnd);
             let widthPx = Math.max(1, rightPx - leftPx);
             
             return (
@@ -143,8 +147,11 @@ const DensityBar: React.FC<{
                     return null;
                 }
 
-                const leftPx = valueToPosition(start);
-                const rightPx = valueToPosition(end);
+                const visibleStart = Math.max(start, displayMinTime);
+                const visibleEnd = Math.min(end, displayMaxTime);
+
+                const leftPx = valueToPosition(visibleStart);
+                const rightPx = valueToPosition(visibleEnd);
                 const widthPx = Math.max(0, rightPx - leftPx);
 
                 if (widthPx === 0) return null;
