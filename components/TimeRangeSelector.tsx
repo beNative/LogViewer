@@ -480,7 +480,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                      <button onClick={onClear} className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" title="Clear time selection"><Icon name="XMark" iconSet={iconSet} className="w-6 h-6"/></button>
                 </div>
             </div>
-            <div className="flex items-start gap-3 w-full mt-2">
+            <div className="flex items-start gap-3 w-full mt-1">
                 <div className="w-16 flex-shrink-0"></div>
                 <div className="flex-grow" ref={overviewContainerRef}>
                     {overviewContainerWidth > 0 && (
