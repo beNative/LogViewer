@@ -686,4 +686,70 @@ export const LogTable: React.FC<LogTableProps> = ({
                             <ViewModeToggle />
                             <ColumnSelector
                                 visibility={columnVisibility}
-                                onChange
+                                onChange={onColumnVisibilityChange}
+                                iconSet={iconSet}
+                            />
+                            <button
+                                onClick={handleToggleDetailsPanel}
+                                className={`inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${
+                                    isDetailPanelVisible 
+                                        ? 'bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300'
+                                        : 'text-white bg-blue-600 hover:bg-blue-700'
+                                }`}
+                            >
+                                <Icon name="SidebarRight" iconSet={iconSet} className="w-5 h-5" />
+                                <span>Details</span>
+                            </button>
+                            <div className="relative" ref={debugButtonRef}>
+                                <button
+                                    onClick={() => setIsDebugMenuOpen(!isDebugMenuOpen)}
+                                    className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600"
+                                    title="Debug Menu"
+                                >
+                                    <Icon name="BugAnt" iconSet={iconSet} className="w-5 h-5" />
+                                </button>
+                                {isDebugMenuOpen && (
+                                    <div className="absolute bottom-full mb-2 right-0 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-20">
+                                        <div className="p-1">
+                                            <button
+                                                onClick={handleLogLayout}
+                                                className="w-full text-left flex items-center gap-3 px-3 py-2 text-sm rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                            >
+                                                Log Layout Dimensions
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 min-h-0 relative overflow-auto" ref={scrollContainerRef}>
+                        {TableContent}
+                    </div>
+                </div>
+
+                {isDetailPanelVisible && selectedEntry && (
+                    <>
+                        <div
+                            onMouseDown={(e) => handleResizeMouseDown(e, 'details')}
+                            className="w-1.5 flex-shrink-0 cursor-col-resize bg-gray-200 dark:bg-gray-700/50 hover:bg-sky-500 transition-colors duration-200"
+                        />
+                        <LogDetailPanel
+                            entry={selectedEntry}
+                            onClose={handleToggleDetailsPanel}
+                            width={localPanelWidths.details}
+                            highlightTerms={includeTerms}
+                            theme={theme}
+                            onApplyFilter={onApplyFilter}
+                            columnStyles={columnStyles}
+                            iconSet={iconSet}
+                        />
+                    </>
+                )}
+            </div>
+        </main>
+      </div>
+    </div>
+  );
+};
