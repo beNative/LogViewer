@@ -5,6 +5,8 @@ A sophisticated, client-side log analysis tool that allows users to drag-and-dro
 ## Key Features
 
 - **Standalone Desktop App**: Packaged with Electron for a native desktop experience on Windows.
+- **Automatic Updates**: The application automatically checks for new versions on startup and will prompt you to install an update when it's available.
+- **Prerelease Channel**: Opt-in to receive beta and pre-release versions via a toggle in the Settings tab.
 - **Session Management (Desktop Only)**:
     - **Automatic Saving**: Sessions are automatically saved as `.sqlite` files in a dedicated folder.
     - **Load, Rename, Delete**: The Data Hub provides a full UI to manage previous sessions, allowing you to resume your work effortlessly.
@@ -32,6 +34,7 @@ A sophisticated, client-side log analysis tool that allows users to drag-and-dro
 ## Technology Stack
 
 - **Application Shell**: Electron
+- **Automatic Updates**: electron-updater
 - **Frontend**: React, TypeScript
 - **Bundler**: esbuild
 - **Styling**: Tailwind CSS with a PostCSS build step
@@ -59,12 +62,21 @@ To run the application in a development environment:
       ```
       This will start a development server at `http://localhost:3000` with live reloading.
 
-## Building the Application
+## Building and Releasing
 
-To package the application into a distributable Windows installer (`.exe`):
+To package the application and publish a new release to GitHub:
 
-1.  **Run the Build Script**:
+1.  **Set GitHub Token**: Before you can publish, you must set an environment variable named `GH_TOKEN` with a personal access token for your GitHub account. This token needs the `repo` scope to create releases.
     ```bash
-    npm run dist
+    # On Windows (Command Prompt)
+    set GH_TOKEN=your_token_here
+
+    # On Windows (PowerShell)
+    $env:GH_TOKEN="your_token_here"
     ```
-2.  **Find the Installer**: The installer will be created in the `release-builds/` directory.
+2.  **Run the Publish Script**:
+    ```bash
+    npm run publish
+    ```
+    This script will build, package, and upload the release artifacts (e.g., the `.exe` installer) to a new draft release on your GitHub repository.
+3.  **Finalize Release**: Go to the "Releases" page of your GitHub repository, edit the newly created draft, add release notes, and publish it. `electron-updater` will then automatically detect this new release for users.

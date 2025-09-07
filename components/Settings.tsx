@@ -20,6 +20,8 @@ interface SettingsProps {
   onTimeRangeSelectorVisibilityChange: (newVisibility: boolean) => void;
   logTableDensity: LogTableDensity;
   onLogTableDensityChange: (newDensity: LogTableDensity) => void;
+  allowPrerelease: boolean;
+  onAllowPrereleaseChange: (allow: boolean) => void;
 }
 
 const ToggleSwitch: React.FC<{
@@ -103,6 +105,7 @@ export const Settings: React.FC<SettingsProps> = ({
     columnStyles, onColumnStylesChange,
     isTimeRangeSelectorVisible, onTimeRangeSelectorVisibilityChange,
     logTableDensity, onLogTableDensityChange,
+    allowPrerelease, onAllowPrereleaseChange
 }) => {
     const [settings, setSettings] = React.useState<any>(null);
     const [settingsPath, setSettingsPath] = React.useState<string>('');
@@ -165,6 +168,13 @@ export const Settings: React.FC<SettingsProps> = ({
                                         enabled={theme === 'dark'}
                                         onChange={(enabled) => onThemeChange(enabled ? 'dark' : 'light')}
                                     />
+                                    {window.electronAPI && (
+                                        <ToggleSwitch 
+                                            label="Update to Pre-releases"
+                                            enabled={allowPrerelease}
+                                            onChange={onAllowPrereleaseChange}
+                                        />
+                                    )}
                                     <SegmentedControl
                                         label="Log Viewer Mode"
                                         value={viewMode}

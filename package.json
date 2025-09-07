@@ -13,7 +13,8 @@
     "build": "npm run build:css && npm run build:js",
     "start": "npm run build && electron .",
     "serve": "npm run build:css && concurrently \"npm run build:css -- --watch\" \"esbuild index.tsx --bundle --outfile=dist/bundle.js --jsx=automatic --servedir=. --serve=:3000\"",
-    "dist": "npm run build && electron-builder"
+    "dist": "npm run build && electron-builder",
+    "publish": "npm run build && electron-builder --publish always"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
@@ -22,6 +23,7 @@
     "concurrently": "^8.2.2",
     "electron": "^29.1.5",
     "electron-builder": "^24.13.3",
+    "electron-updater": "^6.2.1",
     "esbuild": "^0.20.2",
     "postcss": "^8.4.38",
     "postcss-cli": "^11.0.0",
@@ -46,6 +48,11 @@
         ]
       }
     ],
+    "publish": {
+      "provider": "github",
+      "owner": "beNative",
+      "repo": "git-automation"
+    },
     "win": {
       "target": [
         {

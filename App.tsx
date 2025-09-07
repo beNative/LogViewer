@@ -136,6 +136,7 @@ const App: React.FC = () => {
   const [panelWidths, setPanelWidths] = React.useState<PanelWidths>(initialPanelWidths);
   const [isTimeRangeSelectorVisible, setIsTimeRangeSelectorVisible] = React.useState(true);
   const [logTableDensity, setLogTableDensity] = React.useState<LogTableDensity>('normal');
+  const [allowPrerelease, setAllowPrerelease] = React.useState<boolean>(false);
   
   const [hasMoreLogs, setHasMoreLogs] = React.useState(true);
   const [keyboardSelectedId, setKeyboardSelectedId] = React.useState<number | null>(null);
@@ -341,6 +342,10 @@ const App: React.FC = () => {
                  if (typeof settings.isTimeRangeSelectorVisible === 'boolean') {
                     setIsTimeRangeSelectorVisible(settings.isTimeRangeSelectorVisible);
                     logToConsole(`Timeline visibility set to '${settings.isTimeRangeSelectorVisible}' from settings.`, 'DEBUG');
+                }
+                if (typeof settings.allowPrerelease === 'boolean') {
+                    setAllowPrerelease(settings.allowPrerelease);
+                    logToConsole(`Pre-release updates set to '${settings.allowPrerelease}' from settings.`, 'DEBUG');
                 }
             })
             .catch(err => {
@@ -973,6 +978,20 @@ const App: React.FC = () => {
     }
 };
 
+const handleAllowPrereleaseChange = async (allow: boolean) => {
+    setAllowPrerelease(allow);
+    if (window.electronAPI) {
+        try {
+            const settings = await window.electronAPI.getSettings();
+            await window.electronAPI.setSettings({ ...settings, allowPrerelease: allow });
+            logToConsole(`Pre-release updates ${allow ? 'enabled' : 'disabled'}. Setting saved. Restart the app for this to take effect.`, 'INFO');
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            logToConsole(`Failed to save pre-release update setting: ${msg}`, 'ERROR');
+        }
+    }
+};
+
   const handleLoadSession = React.useCallback(async (name: string) => {
     if (!window.electronAPI) return;
     setIsLoading(true);
@@ -1456,6 +1475,8 @@ const App: React.FC = () => {
               onTimeRangeSelectorVisibilityChange={handleTimeRangeSelectorVisibilityChange}
               logTableDensity={logTableDensity}
               onLogTableDensityChange={handleLogTableDensityChange}
+              allowPrerelease={allowPrerelease}
+              onAllowPrereleaseChange={handleAllowPrereleaseChange}
             />
         )}
       </main>

@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain, shell, dialog, systemPreferences } = requir
 const path = require('path');
 const fs = require('fs');
 const { exec } = require('child_process');
+const { autoUpdater } = require('electron-updater');
 
 let mainWindow;
 
@@ -65,6 +66,7 @@ function getSettings() {
     const defaultSettings = {
         theme: "light",
         viewMode: "pagination",
+        allowPrerelease: false,
         columnVisibility: {
             time: true,
             level: true,
@@ -103,6 +105,7 @@ function getSettings() {
             const finalSettings = {
                 ...defaultSettings,
                 ...loadedSettings,
+                allowPrerelease: loadedSettings.allowPrerelease ?? defaultSettings.allowPrerelease,
                 columnVisibility: {
                     ...defaultSettings.columnVisibility,
                     ...(loadedSettings.columnVisibility || {}),
@@ -154,6 +157,11 @@ function createWindow() {
     autoHideMenuBar: true,
   };
   mainWindow = new BrowserWindow(windowOptions);
+
+  mainWindow.once('ready-to-show', () => {
+    log('INFO', 'Main window is ready to show. Checking for updates.');
+    autoUpdater.checkForUpdates();
+  });
 
   const indexPath = path.join(__dirname, '..', 'index.html');
   mainWindow.loadFile(indexPath);
@@ -314,11 +322,26 @@ ipcMain.handle('get-markdown-content', (event, fileName) => {
 app.whenReady().then(() => {
     log('INFO', "Electron 'ready' event fired. Setting up IPC handlers and creating window.");
 
+    // Configure auto-updater
+    const settings = getSettings();
+    autoUpdater.allowPrerelease = !!settings.allowPrerelease;
+    autoUpdater.logger = {
+        info: (msg) => log('INFO', `[Updater] ${typeof msg === 'object' ? JSON.stringify(msg) : msg}`),
+        warn: (msg) => log('WARNING', `[Updater] ${typeof msg === 'object' ? JSON.stringify(msg) : msg}`),
+        error: (err) => log('ERROR', `[Updater] ${err}`),
+        debug: (msg) => log('DEBUG', `[Updater] ${typeof msg === 'object' ? JSON.stringify(msg) : msg}`),
+    };
+
     // Standard IPC Handlers
     ipcMain.handle('get-settings', () => getSettings());
     ipcMain.handle('set-settings', (event, settings) => {
         try {
             fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
+            // After saving settings, check if the prerelease flag changed and apply it.
+            if (settings.hasOwnProperty('allowPrerelease')) {
+                autoUpdater.allowPrerelease = !!settings.allowPrerelease;
+                log('INFO', `[Updater] allowPrerelease setting updated to: ${autoUpdater.allowPrerelease}`);
+            }
             return { success: true };
         } catch (error) {
             return { success: false, error: error.message };
@@ -406,4 +429,47 @@ app.on('window-all-closed', () => {
 
 app.on('will-quit', () => {
     log('INFO', '--- Application will quit ---');
+});
+
+
+// --- Auto-Updater Event Handlers ---
+
+autoUpdater.on('checking-for-update', () => {
+    log('INFO', '[Updater] Checking for update...');
+});
+
+autoUpdater.on('update-available', (info) => {
+    log('INFO', `[Updater] Update available: ${info.version}`);
+});
+
+autoUpdater.on('update-not-available', (info) => {
+    log('INFO', `[Updater] Update not available. Current version: ${info.version}`);
+});
+
+autoUpdater.on('error', (err) => {
+    log('ERROR', `[Updater] Error in auto-updater. ${err}`);
+});
+
+autoUpdater.on('download-progress', (progressObj) => {
+    let log_message = "Download speed: " + progressObj.bytesPerSecond;
+    log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
+    log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+    log('INFO', `[Updater] ${log_message}`);
+});
+
+autoUpdater.on('update-downloaded', (info) => {
+    log('INFO', '[Updater] Update downloaded; will prompt user to restart.');
+    dialog.showMessageBox({
+        type: 'info',
+        title: 'Update Ready to Install',
+        message: 'A new version has been downloaded. Restart the application to apply the updates.',
+        detail: `Version ${info.version} is now available.`,
+        buttons: ['Restart Now', 'Later'],
+        defaultId: 0,
+        cancelId: 1
+    }).then(({ response }) => {
+        if (response === 0) {
+            setImmediate(() => autoUpdater.quitAndInstall());
+        }
+    });
 });

@@ -120,6 +120,7 @@ export interface Settings {
     panelWidths: PanelWidths;
     isTimeRangeSelectorVisible: boolean;
     logTableDensity: LogTableDensity;
+    allowPrerelease: boolean;
 }
 
 export interface OverallTimeRange {
