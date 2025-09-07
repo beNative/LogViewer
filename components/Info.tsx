@@ -78,9 +78,10 @@ const parseMarkdown = (markdown: string): string => {
 
 interface InfoProps {
     iconSet: IconSet;
+    onOpenAboutDialog: () => void;
 }
 
-export const Info: React.FC<InfoProps> = ({ iconSet }) => {
+export const Info: React.FC<InfoProps> = ({ iconSet, onOpenAboutDialog }) => {
     const [activeTabIndex, setActiveTabIndex] = React.useState(0);
     const [markdownContent, setMarkdownContent] = React.useState<Record<string, string>>({});
     const [loading, setLoading] = React.useState(true);
@@ -151,6 +152,15 @@ export const Info: React.FC<InfoProps> = ({ iconSet }) => {
                         </button>
                     ))}
                 </nav>
+                <div className="p-2 mt-auto border-t border-gray-200 dark:border-gray-700">
+                    <button
+                        onClick={onOpenAboutDialog}
+                        className="w-full text-left px-3 py-2.5 text-sm font-medium rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200 flex items-center gap-3"
+                    >
+                        <Icon name="InformationCircle" iconSet={iconSet} className="w-5 h-5" />
+                        About Log Analyser
+                    </button>
+                </div>
             </aside>
             <main className="flex-1 overflow-y-auto">
                 <div className="max-w-4xl mx-auto p-6 sm:p-8 lg:p-10">
