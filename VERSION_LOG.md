@@ -1,8 +1,19 @@
-
-
 # Version Log
 
 This document tracks the major changes, new features, and bug fixes for the Log Analyser application.
+
+---
+
+### **Version 0.11.0** - Exclusion Filters & UI Polish
+
+_Date: 2025-08-29_
+
+This release brings a powerful and highly requested feature to the forefront: the ability to manage exclusion filters directly from the main filter panel.
+
+#### ✨ Features & Improvements
+- **Exclusion Filters in UI**: The "Log Attributes" section of the filter panel now includes dedicated multi-select dropdowns for exclusion filters (e.g., "Level is NOT", "Sender Type is NOT"). This powerful feature, previously only accessible via the right-click context menu, is now fully manageable from the main UI for creating more complex queries.
+- **Active Exclusion Pills**: When an exclusion filter is active, it now appears as a distinct red "pill" in the "Active Filters" bar, making it easy to distinguish from standard inclusion filters at a glance.
+- **Improved Filter Logic**: The underlying filter state management and UI components have been updated to cleanly separate inclusion and exclusion criteria, improving maintainability and clarity.
 
 ---
 

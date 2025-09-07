@@ -17,6 +17,10 @@ const filterKeyToLabel: Record<string, string> = {
     sndrtype: 'Sender Type',
     sndrname: 'Sender Name',
     fileName: 'Filename',
+    levelExclude: 'Level NOT',
+    sndrtypeExclude: 'Sender Type NOT',
+    sndrnameExclude: 'Sender Name NOT',
+    fileNameExclude: 'Filename NOT',
     includeMsg: 'Message Contains',
     excludeMsg: 'Message Excludes',
     sqlQuery: 'SQL Query',
@@ -29,6 +33,19 @@ const Pill: React.FC<{ label: string; onRemove: () => void; iconSet: IconSet }> 
         <button 
             onClick={onRemove} 
             className="flex-shrink-0 p-0.5 rounded-full hover:bg-sky-200/70 dark:hover:bg-sky-800/70 text-sky-600 dark:text-sky-300"
+            aria-label={`Remove filter: ${label}`}
+        >
+            <Icon name="XCircle" iconSet={iconSet} className="w-4 h-4" />
+        </button>
+    </div>
+);
+
+const ExcludePill: React.FC<{ label: string; onRemove: () => void; iconSet: IconSet }> = ({ label, onRemove, iconSet }) => (
+    <div className="flex items-center gap-1.5 bg-red-100 dark:bg-red-900/60 text-red-800 dark:text-red-200 text-sm font-medium pl-3 pr-1.5 py-1 rounded-full animate-fadeIn">
+        <span className="truncate" title={label}>{label}</span>
+        <button 
+            onClick={onRemove} 
+            className="flex-shrink-0 p-0.5 rounded-full hover:bg-red-200/70 dark:hover:bg-red-800/70 text-red-600 dark:text-red-300"
             aria-label={`Remove filter: ${label}`}
         >
             <Icon name="XCircle" iconSet={iconSet} className="w-4 h-4" />
@@ -60,7 +77,7 @@ export const ActiveFilters: React.FC<ActiveFiltersProps> = ({ appliedFilters, on
             );
         }
 
-        // Array-based filters
+        // Inclusion Array-based filters
         const arrayFilters: (keyof FilterState)[] = ['level', 'sndrtype', 'sndrname', 'fileName'];
         arrayFilters.forEach(key => {
             const values = appliedFilters[key];
@@ -68,6 +85,24 @@ export const ActiveFilters: React.FC<ActiveFiltersProps> = ({ appliedFilters, on
                 values.forEach(value => {
                     pills.push(
                         <Pill
+                            key={`${key}-${value}`}
+                            label={`${filterKeyToLabel[key]}: ${value}`}
+                            onRemove={() => onRemoveFilter(key, value)}
+                            iconSet={iconSet}
+                        />
+                    );
+                });
+            }
+        });
+
+        // Exclusion Array-based filters
+        const excludeArrayFilters: (keyof FilterState)[] = ['levelExclude', 'sndrtypeExclude', 'sndrnameExclude', 'fileNameExclude'];
+        excludeArrayFilters.forEach(key => {
+            const values = appliedFilters[key];
+            if (Array.isArray(values)) {
+                values.forEach(value => {
+                    pills.push(
+                        <ExcludePill
                             key={`${key}-${value}`}
                             label={`${filterKeyToLabel[key]}: ${value}`}
                             onRemove={() => onRemoveFilter(key, value)}

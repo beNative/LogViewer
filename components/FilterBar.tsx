@@ -128,11 +128,15 @@ export const FilterBar: React.FC<FilterBarProps> = ({
     const isDateRangeActive = !!(appliedFilters.dateFrom || appliedFilters.timeFrom || appliedFilters.dateTo || appliedFilters.timeTo);
     const isDateRangeDirty = filters.dateFrom !== appliedFilters.dateFrom || filters.timeFrom !== appliedFilters.timeFrom || filters.dateTo !== appliedFilters.dateTo || filters.timeTo !== appliedFilters.timeTo;
     
-    const isAttributesActive = appliedFilters.level.length > 0 || appliedFilters.sndrtype.length > 0 || appliedFilters.sndrname.length > 0 || appliedFilters.fileName.length > 0;
+    const isAttributesActive = appliedFilters.level.length > 0 || appliedFilters.sndrtype.length > 0 || appliedFilters.sndrname.length > 0 || appliedFilters.fileName.length > 0 || appliedFilters.levelExclude.length > 0 || appliedFilters.sndrtypeExclude.length > 0 || appliedFilters.sndrnameExclude.length > 0 || appliedFilters.fileNameExclude.length > 0;
     const isAttributesDirty = !areArraysEqualUnordered(filters.level, appliedFilters.level) ||
                               !areArraysEqualUnordered(filters.sndrtype, appliedFilters.sndrtype) ||
                               !areArraysEqualUnordered(filters.sndrname, appliedFilters.sndrname) ||
-                              !areArraysEqualUnordered(filters.fileName, appliedFilters.fileName);
+                              !areArraysEqualUnordered(filters.fileName, appliedFilters.fileName) ||
+                              !areArraysEqualUnordered(filters.levelExclude, appliedFilters.levelExclude) ||
+                              !areArraysEqualUnordered(filters.sndrtypeExclude, appliedFilters.sndrtypeExclude) ||
+                              !areArraysEqualUnordered(filters.sndrnameExclude, appliedFilters.sndrnameExclude) ||
+                              !areArraysEqualUnordered(filters.fileNameExclude, appliedFilters.fileNameExclude);
 
     const isMessageActive = !!(appliedFilters.includeMsg || appliedFilters.excludeMsg);
     const isMessageDirty = filters.includeMsg !== appliedFilters.includeMsg || filters.excludeMsg !== appliedFilters.excludeMsg || filters.includeMsgMode !== appliedFilters.includeMsgMode || filters.excludeMsgMode !== appliedFilters.excludeMsgMode;
@@ -161,7 +165,8 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         onFiltersChange({ ...filters, [fieldName]: value });
     };
 
-    const handleMultiSelectChange = (name: 'level' | 'sndrtype' | 'sndrname' | 'fileName', values: string[]) => {
+    type MultiSelectKeys = 'level' | 'sndrtype' | 'sndrname' | 'fileName' | 'levelExclude' | 'sndrtypeExclude' | 'sndrnameExclude' | 'fileNameExclude';
+    const handleMultiSelectChange = (name: MultiSelectKeys, values: string[]) => {
         onFiltersChange({ ...filters, [name]: values });
     };
 
@@ -371,39 +376,75 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                     
                     <FilterGroup title="Log Attributes" isDisabled={filters.sqlQueryEnabled} isActive={isAttributesActive} isDirty={isAttributesDirty}>
                          <div>
-                            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Level</label>
+                            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Level is</label>
                             <MultiSelectDropdown 
-                                label="Select levels..." 
+                                label="Select levels to include..." 
                                 options={uniqueValues.level} 
                                 selectedOptions={filters.level} 
                                 onSelectionChange={(values) => handleMultiSelectChange('level', values)} 
                             />
                         </div>
-                         <div>
-                            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Sender Type</label>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Level is NOT</label>
                             <MultiSelectDropdown 
-                                label="Select sender types..." 
+                                label="Select levels to exclude..." 
+                                options={uniqueValues.level} 
+                                selectedOptions={filters.levelExclude} 
+                                onSelectionChange={(values) => handleMultiSelectChange('levelExclude', values)} 
+                            />
+                        </div>
+                         <div>
+                            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Sender Type is</label>
+                            <MultiSelectDropdown 
+                                label="Select types to include..." 
                                 options={uniqueValues.sndrtype} 
                                 selectedOptions={filters.sndrtype} 
                                 onSelectionChange={(values) => handleMultiSelectChange('sndrtype', values)} 
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Sender Name</label>
+                            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Sender Type is NOT</label>
                             <MultiSelectDropdown 
-                                label="Select sender names..." 
+                                label="Select types to exclude..." 
+                                options={uniqueValues.sndrtype} 
+                                selectedOptions={filters.sndrtypeExclude} 
+                                onSelectionChange={(values) => handleMultiSelectChange('sndrtypeExclude', values)} 
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Sender Name is</label>
+                            <MultiSelectDropdown 
+                                label="Select names to include..." 
                                 options={uniqueValues.sndrname} 
                                 selectedOptions={filters.sndrname} 
                                 onSelectionChange={(values) => handleMultiSelectChange('sndrname', values)} 
                             />
                         </div>
-                         <div>
-                            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Filename</label>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Sender Name is NOT</label>
                             <MultiSelectDropdown 
-                                label="Select filenames..." 
+                                label="Select names to exclude..." 
+                                options={uniqueValues.sndrname} 
+                                selectedOptions={filters.sndrnameExclude} 
+                                onSelectionChange={(values) => handleMultiSelectChange('sndrnameExclude', values)} 
+                            />
+                        </div>
+                         <div>
+                            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Filename is</label>
+                            <MultiSelectDropdown 
+                                label="Select files to include..." 
                                 options={uniqueValues.fileName} 
                                 selectedOptions={filters.fileName} 
                                 onSelectionChange={(values) => handleMultiSelectChange('fileName', values)} 
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Filename is NOT</label>
+                            <MultiSelectDropdown 
+                                label="Select files to exclude..." 
+                                options={uniqueValues.fileName} 
+                                selectedOptions={filters.fileNameExclude} 
+                                onSelectionChange={(values) => handleMultiSelectChange('fileNameExclude', values)} 
                             />
                         </div>
                     </FilterGroup>

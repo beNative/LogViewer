@@ -25,7 +25,7 @@ A sophisticated, client-side log analysis tool that allows users to drag-and-dro
     - **Category Charts**: Donut charts showing the distribution of logs by `Level` and `Sender Type`. Click a slice to add a filter for that category and apply it.
 - **Advanced Filtering**:
     - Filter by date/time range.
-    - Multi-select dropdowns for log attributes like `level`, `sender type`, `sender name`, and `filename`.
+    - Multi-select dropdowns for log attributes like `level`, `sender type`, `sender name`, and `filename`, with dedicated inputs for both **inclusion** and **exclusion**.
     - Advanced message content filtering with multi-line inputs for "include" and "exclude" terms.
     - **AND/OR Logic**: Toggle between matching all (AND) or any (OR) search terms for precise filtering.
     - **Advanced SQL Queries**: Bypass the UI with a full SQL editor to write custom queries directly against the log database. These complex queries can now be saved as presets.

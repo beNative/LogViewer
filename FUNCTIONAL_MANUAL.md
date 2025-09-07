@@ -73,7 +73,7 @@ This panel on the left side of the screen contains all the controls to filter yo
     - **From/To**: Select start and end dates and times. The query will include logs within this range.
 
 - **Log Attributes**:
-    - Use the multi-select dropdowns to filter by specific values for `Level`, `Sender Type`, `Sender Name`, and `Filename`. You can select multiple values in each dropdown.
+    - Use the multi-select dropdowns to filter by specific values for `Level`, `Sender Type`, `Sender Name`, and `Filename`. For each attribute, there are two dropdowns: one for *inclusion* (e.g., `Level is...`) and one for *exclusion* (e.g., `Level is NOT...`). This allows for highly specific queries, such as showing all 'ERROR' level messages except those from 'SystemA'.
     - **Quick Search**: For dropdowns with many options (like Sender Name), you can click to open the dropdown and then use the search bar at the top to quickly find the item you're looking for.
 
 ### 4.2. Main Content Area
@@ -91,7 +91,7 @@ Located directly above the log table, this toolbar contains all controls for cha
 This table displays the log entries that match your currently applied filters. You can:
 - **Click** a row to select it and view its full contents in the Details Panel.
 - **Use Keyboard Navigation** (Arrow keys, PageUp/Down, Home/End) to move through the entries.
-- **Right-click** on a cell to open a context menu for quick filtering or copying data.
+- **Right-click** on a cell to open a context menu for quick filtering (for both inclusion and exclusion) or copying data.
 
 ### 4.3. The Details Panel
 When toggled on, this panel appears on the right and shows the full, parsed details of the currently selected log entry. It provides a structured view of the data and can render special formats like XML, SQL, and Key-Value pairs.
