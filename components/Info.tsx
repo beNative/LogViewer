@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Icon } from './icons/index.tsx';
 import { IconSet } from '../types.ts';
@@ -56,6 +57,9 @@ const parseMarkdown = (markdown: string): string => {
     html = html.replace(/(?<!\w)\*([\s\S]+?)\*(?!\w)/g, '<em>$1</em>');
     html = html.replace(/(?<!\w)_([\s\S]+?)_(?!\w)/g, '<em>$1</em>');
     
+    // 5. Strikethrough
+    html = html.replace(/~~([\s\S]+?)~~/g, '<del>$1</del>');
+
     // HR
     html = html.replace(/^\s*-{3,}\s*$/gm, '<hr class="my-6 border-gray-200 dark:border-gray-700"/>');
     

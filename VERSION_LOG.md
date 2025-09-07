@@ -6,6 +6,17 @@ This document tracks the major changes, new features, and bug fixes for the Log 
 
 ---
 
+### **Version 0.10.4** - Documentation Engine Polish
+
+_Date: 2025-08-27_
+
+This is a minor release that enhances the in-app documentation viewer.
+
+#### ✨ Features
+- **Strikethrough Support**: The internal markdown parser for the "Info" tab now supports strikethrough formatting (using `~~text~~`). This allows for more expressive and accurate documentation within the application.
+
+---
+
 ### **Version 0.10.3** - Bug Fixes & UX Polish
 
 _Date: 2025-08-26_
