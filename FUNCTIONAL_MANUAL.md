@@ -57,7 +57,7 @@ This section provides tools for moving data between this application and other s
 
 ## 4. Log Viewer
 
-Once you have loaded data, switch to this tab to analyze it. The view is divided into a filter panel (left) and a content area (right).
+Once you have loaded data, this is the primary tab for analysis. The view is divided into three main areas: the **Filter Panel** on the left, the **Main Content Area** in the center, and the **Details Panel** on the right (when visible).
 
 ### 4.1. Filter Panel
 
@@ -75,4 +75,75 @@ This panel on the left side of the screen contains all the controls to filter yo
 - **Log Attributes**:
     - Use the multi-select dropdowns to filter by specific values for `Level`, `Sender Type`, `Sender Name`, and `Filename`. You can select multiple values in each dropdown.
     - **Quick Search**: For dropdowns with many options (like Sender Name), you can click to open the dropdown and then use the search bar at the top to quickly find the item you're looking for.
-    - **Bulk Selection**: After searching, you can use the **"Select All"** and **"Dese
+
+### 4.2. Main Content Area
+
+This is where you view and interact with your log data.
+
+#### The Toolbar
+Located directly above the log table, this toolbar contains all controls for changing the appearance and behavior of the table:
+- **Density**: Adjusts the row spacing between "Compact", "Normal", and "Comfortable".
+- **View Mode**: Toggles the table between "Paginate" (viewing data in discrete pages) and "Scroll" (an infinitely scrolling list).
+- **Columns**: Opens a dropdown to show or hide specific columns in the table.
+- **Details**: Toggles the visibility of the "Details Panel" on the right.
+
+#### The Log Table
+This table displays the log entries that match your currently applied filters. You can:
+- **Click** a row to select it and view its full contents in the Details Panel.
+- **Use Keyboard Navigation** (Arrow keys, PageUp/Down, Home/End) to move through the entries.
+- **Right-click** on a cell to open a context menu for quick filtering or copying data.
+
+### 4.3. The Details Panel
+When toggled on, this panel appears on the right and shows the full, parsed details of the currently selected log entry. It provides a structured view of the data and can render special formats like XML, SQL, and Key-Value pairs.
+
+---
+
+## 5. The Status Bar
+
+A persistent status bar is located at the very bottom of the application window. It provides at-a-glance information and quick controls.
+
+- **Left Side**: Displays key data metrics:
+    - **Total Entries**: The total number of logs in the entire session database.
+    - **Filtered Entries**: The number of logs matching the current filters.
+    - **Session Name**: The name of the active session file. An asterisk (`*`) indicates unsaved changes.
+
+- **Center**: Shows context-aware view information:
+    - In **Paginate Mode**: It displays full pagination controls (current page, total pages, navigation buttons) and a dropdown to change the number of rows per page.
+    - In **Scroll Mode**: It shows the count of currently visible rows.
+
+- **Right Side**: Provides real-time application feedback:
+    - **Status Message**: Shows the most recent message from the "Application Log", giving you live feedback on what the app is doing (e.g., "Applying filters...").
+    - **Theme Toggle**: A sun/moon icon to quickly switch between light and dark themes.
+
+---
+
+## 6. Dashboard
+
+This tab provides a high-level visual overview of your **currently filtered** log data.
+
+### 6.1. Timeline Chart
+This bar chart shows the volume of log entries over time. You can **click and drag** horizontally across the chart to select a specific time range. Doing so will immediately apply that range as a filter and switch you back to the Log Viewer to see the results.
+
+### 6.2. Category Charts
+These donut charts show the distribution of logs by **Level** and **Sender Type**. You can **click on a slice** of a chart to instantly add a filter for that category and see the results in the Log Viewer.
+
+---
+
+## 7. Application Log
+
+This tab displays a real-time feed of messages from the application itself. It's useful for:
+- Seeing the progress of file processing.
+- Diagnosing errors if something goes wrong.
+- Understanding what the application is doing in the background.
+
+You can filter the messages by type (DEBUG, INFO, WARNING, ERROR) using the toggle buttons at the top.
+
+---
+
+## 8. Settings
+
+This tab allows you to configure various aspects of the application.
+- **Appearance**: Toggle between Light and Dark themes, change the active icon set, and adjust the density of rows in the log table.
+- **Log Table Styles**: Customize the font, font size, style (bold/italic), and color for each column in the Log Viewer.
+- **Updates**: Opt-in to receive pre-release (beta) versions of the application.
+- **JSON Source**: For advanced users, this tab shows the raw `settings.json` file and provides a button to open its location on your computer.

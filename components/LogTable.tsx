@@ -637,117 +637,115 @@ export const LogTable: React.FC<LogTableProps> = ({
             className="w-1.5 flex-shrink-0 cursor-col-resize bg-gray-200 dark:bg-gray-700/50 hover:bg-sky-500 transition-colors duration-200"
         />
 
-        <main className="flex-1 flex flex-col min-h-0" ref={mainContainerRef} tabIndex={-1}>
-            <div className="flex-1 flex min-h-0">
-                <div className="flex-1 min-w-0 min-h-0 flex flex-col">
-                    {isTimeRangeSelectorVisible && overallTimeRange && (
-                        <div className="flex-shrink-0 p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-                            <TimeRangeSelector
-                                minTime={overallTimeRange.min}
-                                maxTime={overallTimeRange.max}
-                                selectedStartTime={selectedStartTime}
-                                selectedEndTime={selectedEndTime}
-                                onRangeChange={onTimeRangeSelectorChange}
-                                onClear={onClearTimeRange}
-                                theme={theme}
-                                pageTimestampRanges={pageTimestampRanges}
-                                fileTimeRanges={fileTimeRanges}
-                                logDensity={logDensity}
-                                overallLogDensity={overallLogDensity}
-                                datesWithLogs={datesWithLogs}
-                                viewMode={viewMode}
-                                cursorTime={selectedEntry ? new Date(selectedEntry.time + 'Z').getTime() : null}
-                                activeFileName={activeFileName}
-                                activeDate={activeDate}
-                                onCursorChange={onCursorChange}
-                                onFileSelect={onFileSelect}
-                                onDateSelect={onDateSelect}
-                                viewRange={timelineViewRange}
-                                onViewRangeChange={onTimelineViewRangeChange}
-                                onZoomToSelection={onTimelineZoomToSelection}
-                                onZoomToExtent={onTimelineZoomReset}
-                                zoomToSelectionEnabled={zoomToSelectionEnabled}
-                                iconSet={iconSet}
-                            />
-                        </div>
-                    )}
-
-                    <div className="flex-shrink-0">
-                      <ActiveFilters 
-                        appliedFilters={appliedFilters} 
-                        onRemoveFilter={onRemoveAppliedFilter}
-                        iconSet={iconSet}
-                      />
+        <main className="flex-1 flex min-w-0" ref={mainContainerRef} tabIndex={-1}>
+            <div className="flex-1 min-w-0 min-h-0 flex flex-col">
+                {isTimeRangeSelectorVisible && overallTimeRange && (
+                    <div className="flex-shrink-0 p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                        <TimeRangeSelector
+                            minTime={overallTimeRange.min}
+                            maxTime={overallTimeRange.max}
+                            selectedStartTime={selectedStartTime}
+                            selectedEndTime={selectedEndTime}
+                            onRangeChange={onTimeRangeSelectorChange}
+                            onClear={onClearTimeRange}
+                            theme={theme}
+                            pageTimestampRanges={pageTimestampRanges}
+                            fileTimeRanges={fileTimeRanges}
+                            logDensity={logDensity}
+                            overallLogDensity={overallLogDensity}
+                            datesWithLogs={datesWithLogs}
+                            viewMode={viewMode}
+                            cursorTime={selectedEntry ? new Date(selectedEntry.time + 'Z').getTime() : null}
+                            activeFileName={activeFileName}
+                            activeDate={activeDate}
+                            onCursorChange={onCursorChange}
+                            onFileSelect={onFileSelect}
+                            onDateSelect={onDateSelect}
+                            viewRange={timelineViewRange}
+                            onViewRangeChange={onTimelineViewRangeChange}
+                            onZoomToSelection={onTimelineZoomToSelection}
+                            onZoomToExtent={onTimelineZoomReset}
+                            zoomToSelectionEnabled={zoomToSelectionEnabled}
+                            iconSet={iconSet}
+                        />
                     </div>
+                )}
 
-                    <div className="flex-shrink-0 flex items-center justify-end p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex-wrap gap-4">
-                        <div className="flex items-center gap-x-6 gap-y-2 flex-wrap justify-end">
-                            <DensityControl value={logTableDensity} onChange={onLogTableDensityChange} />
-                            <ViewModeToggle />
-                            <ColumnSelector
-                                visibility={columnVisibility}
-                                onChange={onColumnVisibilityChange}
-                                iconSet={iconSet}
-                            />
+                <div className="flex-shrink-0">
+                  <ActiveFilters 
+                    appliedFilters={appliedFilters} 
+                    onRemoveFilter={onRemoveAppliedFilter}
+                    iconSet={iconSet}
+                  />
+                </div>
+
+                <div className="flex-shrink-0 flex items-center justify-end p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex-wrap gap-4">
+                    <div className="flex items-center gap-x-6 gap-y-2 flex-wrap justify-end">
+                        <DensityControl value={logTableDensity} onChange={onLogTableDensityChange} />
+                        <ViewModeToggle />
+                        <ColumnSelector
+                            visibility={columnVisibility}
+                            onChange={onColumnVisibilityChange}
+                            iconSet={iconSet}
+                        />
+                        <button
+                            onClick={handleToggleDetailsPanel}
+                            className={`inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${
+                                isDetailPanelVisible 
+                                    ? 'bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300'
+                                    : 'text-white bg-blue-600 hover:bg-blue-700'
+                            }`}
+                        >
+                            <Icon name="SidebarRight" iconSet={iconSet} className="w-5 h-5" />
+                            <span>Details</span>
+                        </button>
+                        <div className="relative" ref={debugButtonRef}>
                             <button
-                                onClick={handleToggleDetailsPanel}
-                                className={`inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${
-                                    isDetailPanelVisible 
-                                        ? 'bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300'
-                                        : 'text-white bg-blue-600 hover:bg-blue-700'
-                                }`}
+                                onClick={() => setIsDebugMenuOpen(!isDebugMenuOpen)}
+                                className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600"
+                                title="Debug Menu"
                             >
-                                <Icon name="SidebarRight" iconSet={iconSet} className="w-5 h-5" />
-                                <span>Details</span>
+                                <Icon name="BugAnt" iconSet={iconSet} className="w-5 h-5" />
                             </button>
-                            <div className="relative" ref={debugButtonRef}>
-                                <button
-                                    onClick={() => setIsDebugMenuOpen(!isDebugMenuOpen)}
-                                    className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600"
-                                    title="Debug Menu"
-                                >
-                                    <Icon name="BugAnt" iconSet={iconSet} className="w-5 h-5" />
-                                </button>
-                                {isDebugMenuOpen && (
-                                    <div className="absolute bottom-full mb-2 right-0 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-20">
-                                        <div className="p-1">
-                                            <button
-                                                onClick={handleLogLayout}
-                                                className="w-full text-left flex items-center gap-3 px-3 py-2 text-sm rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                            >
-                                                Log Layout Dimensions
-                                            </button>
-                                        </div>
+                            {isDebugMenuOpen && (
+                                <div className="absolute bottom-full mb-2 right-0 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-20">
+                                    <div className="p-1">
+                                        <button
+                                            onClick={handleLogLayout}
+                                            className="w-full text-left flex items-center gap-3 px-3 py-2 text-sm rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                        >
+                                            Log Layout Dimensions
+                                        </button>
                                     </div>
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </div>
-                    </div>
-
-                    <div className="flex-1 min-h-0 relative overflow-auto" ref={scrollContainerRef}>
-                        {TableContent}
                     </div>
                 </div>
 
-                {isDetailPanelVisible && selectedEntry && (
-                    <>
-                        <div
-                            onMouseDown={(e) => handleResizeMouseDown(e, 'details')}
-                            className="w-1.5 flex-shrink-0 cursor-col-resize bg-gray-200 dark:bg-gray-700/50 hover:bg-sky-500 transition-colors duration-200"
-                        />
-                        <LogDetailPanel
-                            entry={selectedEntry}
-                            onClose={handleToggleDetailsPanel}
-                            width={localPanelWidths.details}
-                            highlightTerms={includeTerms}
-                            theme={theme}
-                            onApplyFilter={onApplyFilter}
-                            columnStyles={columnStyles}
-                            iconSet={iconSet}
-                        />
-                    </>
-                )}
+                <div className="flex-1 min-h-0 relative overflow-auto" ref={scrollContainerRef}>
+                    {TableContent}
+                </div>
             </div>
+
+            {isDetailPanelVisible && selectedEntry && (
+                <>
+                    <div
+                        onMouseDown={(e) => handleResizeMouseDown(e, 'details')}
+                        className="w-1.js-2 flex-shrink-0 cursor-col-resize bg-gray-200 dark:bg-gray-700/50 hover:bg-sky-500 transition-colors duration-200"
+                    />
+                    <LogDetailPanel
+                        entry={selectedEntry}
+                        onClose={handleToggleDetailsPanel}
+                        width={localPanelWidths.details}
+                        highlightTerms={includeTerms}
+                        theme={theme}
+                        onApplyFilter={onApplyFilter}
+                        columnStyles={columnStyles}
+                        iconSet={iconSet}
+                    />
+                </>
+            )}
         </main>
       </div>
     </div>

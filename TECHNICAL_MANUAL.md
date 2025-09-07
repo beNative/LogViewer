@@ -94,5 +94,7 @@ A core feature of the desktop application is persistent session management. This
 ## 4. State Management and Data Flow
 The state management and data flow within the React application remain largely unchanged from the web version, with the primary addition being the initial fetching of application settings from the main process via the preload script. The separation between `formFilters` and `appliedFilters` continues to be the core pattern for ensuring synchronized data fetching between the Log Viewer and the Dashboard.
 
+Recent UI enhancements introduced a global **`StatusBar.tsx`** component, which is managed at the root `App.tsx` level to provide persistent application-wide feedback. The **`LogTable.tsx`** component was refactored to delegate its display controls (e.g., density, column visibility) to a new dedicated toolbar, cleaning up its internal structure. The layout logic was also stabilized by correcting the use of flexbox properties to prevent overflow with large datasets.
+
 ### Column Visibility
 The visibility of columns in the Log Viewer is managed by a new state object, `columnVisibility`, within `App.tsx`. This state is initialized from and persisted to the `settings.json` file via IPC handlers in the main process. The state is passed as props to `LogTable.tsx`, which conditionally renders table headers (`<th>`) and cells (`<td>`) based on the current visibility settings. A new component, `ColumnSelector.tsx`, provides the UI for modifying this state.

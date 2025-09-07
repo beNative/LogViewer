@@ -6,6 +6,19 @@ This document tracks the major changes, new features, and bug fixes for the Log 
 
 ---
 
+### **Version 0.10.5** - UI Overhaul: Status Bar & Toolbar
+
+_Date: 2025-08-28_
+
+This release introduces a major user interface enhancement by adding a persistent global status bar and reorganizing the Log Viewer controls for a more intuitive and informative experience.
+
+#### ✨ Features & Improvements
+- **New Global Status Bar**: A new status bar has been added to the bottom of the application. It provides at-a-glance metrics (total vs. filtered entry count), session status, context-aware view controls (like pagination), a live feed of the latest application log message, and a quick-access theme toggle.
+- **Dedicated Log Viewer Toolbar**: To de-clutter the interface, the controls for managing the table's appearance (View Mode, Density, Columns, Details toggle) have been moved into a clean new toolbar that sits directly above the log table.
+- **Layout Stability Fix**: Resolved a critical CSS layout bug that caused the resizable side panels (Filters and Details) to become misaligned and unresponsive.
+
+---
+
 ### **Version 0.10.4** - Documentation Engine Polish
 
 _Date: 2025-08-27_
