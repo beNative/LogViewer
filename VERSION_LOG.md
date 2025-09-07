@@ -6,7 +6,7 @@ This document tracks the major changes, new features, and bug fixes for the Log 
 
 ---
 
-### **Version 2.9.3** - Bug Fixes & UX Polish
+### **Version 0.10.3** - Bug Fixes & UX Polish
 
 _Date: 2025-08-26_
 
@@ -19,7 +19,7 @@ This release addresses several bugs related to UI feedback and timeline interact
 
 ---
 
-### **Version 2.9.2** - Timeline Interaction & Zoom
+### **Version 0.10.2** - Timeline Interaction & Zoom
 
 _Date: 2025-08-25_
 
@@ -32,7 +32,7 @@ This release fixes a critical bug in the timeline selector and introduces an int
 
 ---
 
-### **Version 2.9.1** - Time Selector Polish & Interactivity
+### **Version 0.10.1** - Time Selector Polish & Interactivity
 
 _Date: 2025-08-24_
 
@@ -45,7 +45,7 @@ This release adds several usability improvements to the Time Range Selector, mak
 
 ---
 
-### **Version 2.9.0** - Multi-Bar Time Range Selector
+### **Version 0.10.0** - Multi-Bar Time Range Selector
 
 _Date: 2025-08-23_
 
@@ -65,7 +65,7 @@ This release completely redesigns the time range selector into a powerful, multi
 
 ---
 
-### **Version 2.8.8** - Definitive Layout Fix (CSS Grid)
+### **Version 0.9.10** - Definitive Layout Fix (CSS Grid)
 
 _Date: 2025-08-22_
 
@@ -75,7 +75,7 @@ _Date: 2025-08-22_
 
 ---
 
-### **Version 2.8.7** - Final Layout Fix & Enhanced Debugging
+### **Version 0.9.9** - Final Layout Fix & Enhanced Debugging
 
 _Date: 2025-08-21_
 
@@ -87,45 +87,35 @@ _Date: 2025-08-21_
 
 ---
 
-### **Version 2.8.6** - Comparative Layout Debugging
-
-_Date: 2025-08-20_
+### **Version 0.9.8** - Comparative Layout Debugging
 
 #### ✨ Features
 - **Enhanced Layout Debugging**: Overhauled the layout debugging tool. It now calculates the *expected* height of each critical container and compares it against the *actual* rendered height. The report clearly indicates which container is overflowing and by how much, providing crucial data to finally diagnose the persistent layout bug with very large tables.
 
 ---
 
-### **Version 2.8.5** - Layout Stability Fix (Flexbox Re-implementation)
-
-_Date: 2025-08-19_
+### **Version 0.9.7** - Layout Stability Fix (Flexbox Re-implementation)
 
 #### 🐛 Bug Fixes
 - **Definitive Layout Fix**: Reverted the main layout from CSS Grid back to a more robust and standard Flexbox implementation to definitively fix the overflow bug with large tables. This uses a canonical 'sticky footer' pattern which is more stable for this type of complex layout problem.
 
 ---
 
-### **Version 2.8.4** - Layout Debugging Tool
-
-_Date: 2025-08-14_
+### **Version 0.9.6** - Layout Debugging Tool
 
 #### ✨ Features
 - **Layout Debugging Tool**: Added a new "Debug" button and menu to the Log Viewer footer. This provides a "Log Layout Dimensions" action which prints a detailed report of the key layout containers' sizes and positions to the **Application Log**. This is intended to help diagnose the persistent and difficult-to-reproduce layout bug where the scroll view expands past the viewport on very large datasets.
 
 ---
 
-### **Version 2.8.3** - Flexbox Layout Stability Fix
-
-_Date: 2025-08-13_
+### **Version 0.9.5** - Flexbox Layout Stability Fix
 
 #### 🐛 Bug Fixes
 - **Layout Stability with Large Tables**: Fixed a critical and persistent flexbox layout bug where the "Scroll" mode view would incorrectly expand and push the footer off-screen when dealing with very large datasets (100,000+ records). This was caused by the browser struggling to calculate the layout with an extremely large virtualized spacer element. Adding `min-h-0` to the correct container forces it to be constrained by its parent, ensuring the layout remains stable regardless of the data size.
 
 ---
 
-### **Version 2.8.0** - Stability & UX Polish
-
-_Date: 2025-08-12_
+### **Version 0.9.4** - Stability & UX Polish
 
 This release focuses on fixing critical stability bugs related to view switching and improving the user experience during data loading operations.
 
@@ -140,9 +130,7 @@ This release focuses on fixing critical stability bugs related to view switching
 
 ---
 
-### **Version 2.7.0** - Keyboard Navigation Overhaul
-
-_Date: 2025-08-11_
+### **Version 0.9.3** - Keyboard Navigation Overhaul
 
 This release significantly enhances keyboard navigation in the Log Viewer, making it faster and more intuitive, especially in pagination mode.
 
@@ -159,9 +147,7 @@ This release significantly enhances keyboard navigation in the Log Viewer, makin
 
 ---
 
-### **Version 2.6.0** - UI Enhancements & Persistence
-
-_Date: 2025-08-10_
+### **Version 0.9.2** - UI Enhancements & Persistence
 
 This release introduces major UI layout flexibility and bug fixes for a smoother user experience.
 
@@ -174,9 +160,7 @@ This release introduces major UI layout flexibility and bug fixes for a smoother
 
 ---
 
-### **Version 2.5.0** - Advanced Filter Presets
-
-_Date: 2025-08-09_
+### **Version 0.9.1** - Advanced Filter Presets
 
 This release enhances the power of filter presets by allowing advanced SQL queries to be saved and reused.
 
@@ -185,9 +169,7 @@ This release enhances the power of filter presets by allowing advanced SQL queri
 
 ---
 
-### **Version 2.4.0** - Filter Preset UI Overhaul
-
-_Date: 2025-08-08_
+### **Version 0.9.0** - Filter Preset UI Overhaul
 
 This release fixes a critical bug preventing users from saving custom filter presets and replaces the problematic UI with a modern, reliable inline form.
 
@@ -199,9 +181,7 @@ This release fixes a critical bug preventing users from saving custom filter pre
 
 ---
 
-### **Version 2.3.0** - Reliability and UX Improvements
-
-_Date: 2025-08-07_
+### **Version 0.8.2** - Reliability and UX Improvements
 
 This release focuses on improving the reliability of settings management and providing a more detailed and accurate user experience during file processing.
 
@@ -213,9 +193,7 @@ This release focuses on improving the reliability of settings management and pro
 
 ---
 
-### **Version 2.2.1** - Build & Initialization Fixes
-
-_Date: 2025-08-06_
+### **Version 0.8.1** - Build & Initialization Fixes
 
 This is a maintenance release that addresses several bugs related to the build process and application startup.
 
@@ -226,9 +204,7 @@ This is a maintenance release that addresses several bugs related to the build p
 
 ---
 
-### **Version 2.2.0** - Desktop Session Management
-
-_Date: 2025-08-06_
+### **Version 0.8.0** - Desktop Session Management
 
 This version introduces robust session management for the desktop application, allowing users to save, load, and manage their analysis sessions effortlessly.
 
@@ -250,9 +226,7 @@ This version introduces robust session management for the desktop application, a
 
 ---
 
-### **Version 2.1.0** - Light Theme & UI Polish
-
-_Date: 2025-08-05_
+### **Version 0.7.0** - Light Theme & UI Polish
 
 This is a major visual overhaul of the application.
 
@@ -271,45 +245,35 @@ This is a major visual overhaul of the application.
 
 ---
 
-### **Version 1.5.4** - UI Text Improvement
-
-_Date: 2025-08-05_
+### **Version 0.6.4** - UI Text Improvement
 
 #### 🎨 Improvements
 - Renamed "Select Visible" and "Deselect Visible" buttons in the filter dropdowns to the more conventional "Select All" and "Deselect All". The functionality remains scoped to the visible (searched) items for better usability.
 
 ---
 
-### **Version 1.5.3** - Filter Usability Improvement
-
-_Date: 2025-08-05_
+### **Version 0.6.3** - Filter Usability Improvement
 
 #### ✨ Features
 - **Bulk Select/Deselect in Filters**: Added "Select Visible" and "Deselect Visible" buttons to the multi-select dropdowns in the filter panel. This allows users to quickly select or deselect all items that match the current search term within the dropdown, significantly speeding up the filter configuration process for long lists.
 
 ---
 
-### **Version 1.5.2** - Dashboard Interaction Fix
-
-_Date: 2025-08-05_
+### **Version 0.6.2** - Dashboard Interaction Fix
 
 #### 🐛 Bug Fixes
 - **Dashboard Filter Sync**: Fixed a critical bug where selecting a time range on the dashboard's timeline chart would not correctly update the date/time filters in the Log Viewer UI. This was due to a stale state closure and has been resolved by refactoring the state update logic to be more robust.
 
 ---
 
-### **Version 1.5.1** - Timeline Chart Display Fix
-
-_Date: 2025-08-05_
+### **Version 0.6.1** - Timeline Chart Display Fix
 
 #### 🐛 Bug Fixes
 - **Timeline Chart Axis Labels**: Fixed an issue where the timeline chart's horizontal axis would only display the time and not the date, which was confusing for data spanning multiple days. The chart is now configured to show both date and time on its labels when appropriate.
 
 ---
 
-### **Version 1.5.0** - Dashboard & Viewer Synchronization
-
-_Date: 2025-08-05_
+### **Version 0.6.0** - Dashboard & Viewer Synchronization
 
 This version introduces a major architectural change to properly synchronize the Log Viewer and the Dashboard, making the application's behavior more intuitive and robust.
 
@@ -326,9 +290,7 @@ This version introduces a major architectural change to properly synchronize the
 
 ---
 
-### **Version 1.4.0** - Data Visualization Dashboard [DEPRECATED]
-
-_Date: 2025-08-05_
+### **Version 0.5.1** - Data Visualization Dashboard [DEPRECATED]
 
 _This version's approach was found to be insufficient and has been superseded by the architecture in v1.5.0. It attempted to sync the views but lacked the robust state separation needed._
 
@@ -338,9 +300,7 @@ _This version's approach was found to be insufficient and has been superseded by
 
 ---
 
-### **Version 1.3.0** - Data Visualization Dashboard
-
-_Date: 2025-08-05_
+### **Version 0.5.0** - Data Visualization Dashboard
 
 This is a major feature release that introduces a new Dashboard tab for high-level data analysis through interactive charts.
 
@@ -355,9 +315,7 @@ This is a major feature release that introduces a new Dashboard tab for high-lev
 
 ---
 
-### **Version 1.2.0** - UX and Filter Improvements
-
-_Date: 2025-08-05_
+### **Version 0.4.0** - UX and Filter Improvements
 
 This version introduces significant usability improvements to the filtering and data analysis workflow.
 
@@ -370,18 +328,14 @@ This version introduces significant usability improvements to the filtering and 
 
 ---
 
-### **Version 1.1.1** - UI Text Improvement
-
-_Date: 2025-08-05_
+### **Version 0.3.0** - UI Text Improvement
 
 #### 🎨 Improvements
 - Renamed "Diagnostic Console" to "Application Log" across the UI and in all documentation for better clarity and a more intuitive user experience.
 
 ---
 
-### **Version 1.1.0** - Console Filtering
-
-_Date: 2025-08-05_
+### **Version 0.2.0** - Console Filtering
 
 This version introduces powerful filtering capabilities to the Diagnostic Console.
 
@@ -395,8 +349,6 @@ This version introduces powerful filtering capabilities to the Diagnostic Consol
 
 ---
 
-### **Version 1.0.0** - Initial Release
-
-_Date: 2025-08-05_
+### **Version 0.1.0** - Initial Release
 
 This is the initial version of the Log Analyser, establishing the core feature set and architecture.

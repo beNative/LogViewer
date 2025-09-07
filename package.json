@@ -1,7 +1,7 @@
 
 {
   "name": "log-analyser",
-  "version": "2.9.3",
+  "version": "0.10.3",
   "description": "An application to view formatted XML log files by dragging and dropping them. It parses the XML and displays the data in a clean, readable table.",
   "main": "electron/main.js",
   "homepage": "./",
@@ -23,7 +23,6 @@
     "concurrently": "^8.2.2",
     "electron": "^29.1.5",
     "electron-builder": "^24.13.3",
-    "electron-updater": "^6.2.1",
     "esbuild": "^0.20.2",
     "postcss": "^8.4.38",
     "postcss-cli": "^11.0.0",
@@ -31,8 +30,11 @@
     "react-dom": "^18.3.1",
     "tailwindcss": "^3.4.3"
   },
+  "dependencies": {
+    "electron-updater": "^6.2.1"
+  },
   "build": {
-    "appId": "com.example.loganalyser",
+    "appId": "com.meditech.loganalyser",
     "productName": "Log Analyser",
     "files": [
       "index.html",
