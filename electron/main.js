@@ -9,9 +9,6 @@ let mainWindow;
 // --- Path and Log Setup ---
 // User-specific writable data path (e.g., AppData on Windows)
 const appDataPath = app.getPath('userData');
-// Path for bundled, read-only application resources. In dev, this is the project root.
-// In production, this is the 'resources' folder which is the standard place for extraFiles.
-const resourcesPath = app.isPackaged ? process.resourcesPath : app.getAppPath();
 
 const settingsPath = path.join(appDataPath, 'settings.json');
 const sessionsPath = path.join(appDataPath, 'sessions');
@@ -308,8 +305,14 @@ ipcMain.handle('rename-session', (event, oldName, newName) => {
 
 ipcMain.handle('get-markdown-content', (event, fileName) => {
     try {
-        // MD files are bundled with the app, not in user data.
-        const filePath = path.join(resourcesPath, fileName);
+        const appPath = app.getAppPath();
+        // In development, appPath is the project root.
+        // In production, appPath is `resources/app.asar`, and extraFiles are in `resources`.
+        // So we need to go up one level from the asar archive to find the MD files.
+        const filePath = app.isPackaged
+            ? path.join(appPath, '..', fileName)
+            : path.join(appPath, fileName);
+
         if (fs.existsSync(filePath)) {
             const content = fs.readFileSync(filePath, 'utf-8');
             return { success: true, content };

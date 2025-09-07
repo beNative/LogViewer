@@ -732,7 +732,7 @@ export const LogTable: React.FC<LogTableProps> = ({
                 <>
                     <div
                         onMouseDown={(e) => handleResizeMouseDown(e, 'details')}
-                        className="w-1.js-2 flex-shrink-0 cursor-col-resize bg-gray-200 dark:bg-gray-700/50 hover:bg-sky-500 transition-colors duration-200"
+                        className="w-1.5 flex-shrink-0 cursor-col-resize bg-gray-200 dark:bg-gray-700/50 hover:bg-sky-500 transition-colors duration-200"
                     />
                     <LogDetailPanel
                         entry={selectedEntry}
