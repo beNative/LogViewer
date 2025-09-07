@@ -1,10 +1,10 @@
 # Log Analyser (Desktop Edition)
 
-A sophisticated, client-side log analysis tool that allows users to drag-and-drop XML or ZIP log files, parses them, and displays them in a powerful, filterable, and searchable interface. It runs as a standalone desktop application using Electron, installed via a standard setup wizard.
+A sophisticated, client-side log analysis tool that allows users to drag-and-drop XML or ZIP log files, parses them, and displays them in a powerful, filterable, and searchable interface. It runs as a standalone desktop application using Electron, installed via a standard setup wizard that allows for customizing the installation directory.
 
 ## Key Features
 
-- **Standalone Desktop App**: Packaged with Electron for a native desktop experience on Windows, complete with an installer.
+- **Standalone Desktop App**: Packaged with Electron for a native desktop experience on Windows, complete with a standard setup wizard that allows for customizing the installation directory.
 - **Automatic Updates**: The application automatically checks for new versions on startup and will prompt you to install an update when it's available.
 - **Prerelease Channel**: Opt-in to receive beta and pre-release versions via a toggle in the Settings tab.
 - **Session Management (Desktop Only)**:
