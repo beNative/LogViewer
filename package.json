@@ -53,7 +53,7 @@
     "publish": {
       "provider": "github",
       "owner": "beNative",
-      "repo": "git-automation"
+      "repo": "Log-Analyser"
     },
     "win": {
       "target": [
