@@ -1,14 +1,14 @@
 # Log Analyser (Desktop Edition)
 
-A sophisticated, client-side log analysis tool that allows users to drag-and-drop XML or ZIP log files, parses them, and displays them in a powerful, filterable, and searchable interface. It runs as a standalone desktop application using Electron, requiring no backend or installation beyond the executable.
+A sophisticated, client-side log analysis tool that allows users to drag-and-drop XML or ZIP log files, parses them, and displays them in a powerful, filterable, and searchable interface. It runs as a standalone desktop application using Electron, installed via a standard setup wizard.
 
 ## Key Features
 
-- **Standalone Desktop App**: Packaged with Electron for a native desktop experience on Windows.
+- **Standalone Desktop App**: Packaged with Electron for a native desktop experience on Windows, complete with an installer.
 - **Automatic Updates**: The application automatically checks for new versions on startup and will prompt you to install an update when it's available.
 - **Prerelease Channel**: Opt-in to receive beta and pre-release versions via a toggle in the Settings tab.
 - **Session Management (Desktop Only)**:
-    - **Automatic Saving**: Sessions are automatically saved as `.sqlite` files in a dedicated folder.
+    - **Automatic Saving**: Sessions are automatically saved as `.sqlite` files in a dedicated folder within your user profile's AppData directory.
     - **Load, Rename, Delete**: The Data Hub provides a full UI to manage previous sessions, allowing you to resume your work effortlessly.
 - **Light and Dark Themes**: A polished UI with a theme toggle in the Settings tab.
 - **Drag-and-Drop Interface**: Easily create new sessions by dropping log files (`.xml` or `.zip` archives).
@@ -29,7 +29,7 @@ A sophisticated, client-side log analysis tool that allows users to drag-and-dro
     - Advanced message content filtering with multi-line inputs for "include" and "exclude" terms.
     - **AND/OR Logic**: Toggle between matching all (AND) or any (OR) search terms for precise filtering.
     - **Advanced SQL Queries**: Bypass the UI with a full SQL editor to write custom queries directly against the log database. These complex queries can now be saved as presets.
-- **Configuration File**: Application settings are stored in a `settings.json` file, created alongside the application executable.
+- **Configuration File**: Application settings are stored in a `settings.json` file within the application's user data directory (e.g., `%APPDATA%\log-analyser\settings.json` on Windows).
 
 ## Technology Stack
 

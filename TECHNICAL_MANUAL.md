@@ -25,7 +25,7 @@ This is the central configuration file for the Node.js project. It defines:
     - `npm run build`: Compiles the application's CSS and JavaScript assets into the `dist/` directory.
     - `npm start`: Builds the assets and then runs the application in development mode using the local Electron dependency.
     - `npm run dist`: Packages the application into a distributable Windows installer using `electron-builder`.
-- **Build Configuration**: The `build` section contains settings for `electron-builder`, specifying the application ID, target platform (`win`, `portable`), and files to include in the final package (`index.html`, `dist/`, `electron/`).
+- **Build Configuration**: The `build` section contains settings for `electron-builder`, specifying the application ID, target platform (`win`, `nsis`), and files to include in the final package (`index.html`, `dist/`, `electron/`).
 
 ### 2.2. Main Process (`electron/main.js`)
 This is the backbone of the Electron application. It's a Node.js script that runs in the background and has full access to the operating system. Its primary responsibilities include:
@@ -44,22 +44,22 @@ The main process acts as a secure backend for the UI, handling tasks that requir
 
 #### Settings Management
 A key feature of the desktop app is the `settings.json` file.
-- **Location**: The main process determines the location of `settings.json`. When the app is packaged, this is the same directory as the executable. In development, it's the project's root directory.
+- **Location**: The settings file (`settings.json`) is stored in the standard user data directory for the application, managed by Electron via `app.getPath('userData')`. This separates user configuration from the application's installation files.
 - **IPC Handlers (`main.js`)**: The main process defines handlers for IPC channels:
-    - `get-settings`: Reads `settings.json` (or creates it with defaults if it doesn't exist) and returns its content. The defaults include `theme` and `columnVisibility`.
+    - `get-settings`: Reads `settings.json` from the user data directory (or creates it with defaults if it doesn't exist) and returns its content.
     - `set-settings`: Receives a settings object from the renderer and writes it to `settings.json`. This is how user preferences are persisted.
 - **Renderer Communication (`App.tsx`, `Settings.tsx`)**: The React components call the functions exposed on `window.electronAPI` (e.g., `window.electronAPI.getSettings()`) to interact with the settings file without ever having direct access to the file system.
 
 #### Automatic File Logging
 The application maintains a persistent log file for diagnostic purposes.
-- **Log Rotation**: A new log file named `app-log-YYYY-MM-DD.log` is created daily in the same directory as the application executable.
+- **Log Rotation**: A new log file named `app-log-YYYY-MM-DD.log` is created daily in the application's user data directory.
 - **IPC Handler (`main.js`)**: The main process listens on a one-way `log-message` IPC channel. When it receives a message, it formats it with a timestamp and level, and appends it to the current day's log file.
 - **Renderer Communication (`App.tsx`)**: The central `logToConsole` function in the React app has been augmented. In addition to updating the in-app console's state, it also calls `window.electronAPI.logMessage()`. This sends the log event to the main process to be written to disk.
 
 #### Session Management
 A core feature of the desktop application is persistent session management. This allows the user's work to be saved automatically and resumed later.
 
-- **Storage Location**: Session files (which are standard `.sqlite` database files) are stored in a dedicated `sessions` directory located in the same folder as the application executable. This makes the application and its data fully portable. The main process ensures this directory exists on startup.
+- **Storage Location**: Session files (which are standard `.sqlite` database files) are stored in a dedicated `sessions` directory within the application's user data directory (`app.getPath('userData')`). This follows standard application design and separates user data from the application's installation files.
 - **IPC Handlers (`main.js`)**: The main process exposes a suite of handlers for session management:
     - `list-sessions`: Reads the contents of the `sessions` directory, gets file stats for each `.sqlite` file, and returns a sorted list of `SessionFile` objects.
     - `get-session-buffer`: Reads a specified session file from disk and returns its contents as a `Buffer`.

@@ -7,9 +7,14 @@ const { autoUpdater } = require('electron-updater');
 let mainWindow;
 
 // --- Path and Log Setup ---
-const appDataPath = app.isPackaged ? path.dirname(app.getPath('exe')) : app.getAppPath();
+// User-specific writable data path (e.g., AppData on Windows)
+const appDataPath = app.getPath('userData');
+// Path for bundled, read-only application resources. In dev, this is the project root.
+// In production, this is the 'resources' folder which is the standard place for extraFiles.
+const resourcesPath = app.isPackaged ? process.resourcesPath : app.getAppPath();
+
 const settingsPath = path.join(appDataPath, 'settings.json');
-const sessionsPath = path.join(appDataPath, 'sessions'); // CHANGED: Sessions are now portable with the app
+const sessionsPath = path.join(appDataPath, 'sessions');
 
 // --- Log file setup ---
 function getLogfileName() {
@@ -303,7 +308,8 @@ ipcMain.handle('rename-session', (event, oldName, newName) => {
 
 ipcMain.handle('get-markdown-content', (event, fileName) => {
     try {
-        const filePath = path.join(appDataPath, fileName);
+        // MD files are bundled with the app, not in user data.
+        const filePath = path.join(resourcesPath, fileName);
         if (fs.existsSync(filePath)) {
             const content = fs.readFileSync(filePath, 'utf-8');
             return { success: true, content };
