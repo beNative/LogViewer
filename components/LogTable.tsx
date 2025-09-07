@@ -1,5 +1,6 @@
 import React from 'react';
-import { LogEntry, FilterState, PageTimestampRange, ColumnVisibilityState, ColumnStyles, ColumnKey, PanelWidths, ViewMode, ConsoleMessage, OverallTimeRange, FileTimeRange, LogDensityPoint, IconSet, LogTableDensity } from '../types.ts';
+// FIX: Import the centralized Theme type from types.ts.
+import { LogEntry, FilterState, PageTimestampRange, ColumnVisibilityState, ColumnStyles, ColumnKey, PanelWidths, ViewMode, ConsoleMessage, OverallTimeRange, FileTimeRange, LogDensityPoint, IconSet, LogTableDensity, Theme } from '../types.ts';
 import { Icon } from './icons/index.tsx';
 import { FilterBar } from './FilterBar.tsx';
 import { LogDetailPanel } from './LogDetailPanel.tsx';
@@ -11,20 +12,14 @@ import { ActiveFilters } from './ActiveFilters.tsx';
 import { ContextMenu } from './ContextMenu.tsx';
 import { DensityControl } from './DensityControl.tsx';
 
-type Theme = 'light' | 'dark';
+// FIX: Removed local Theme type definition. It is now imported from types.ts.
 type ContextMenuState = { x: number; y: number; entry: LogEntry; value: string; key: ColumnKey; };
 
 interface LogTableProps {
   entries: LogEntry[];
   loadedFileNames: string[];
-  currentPage: number;
-  totalPages: number;
-  filteredEntriesCount: number;
-  totalEntries: number;
-  pageSize: number;
   pageTimestampRanges: PageTimestampRange[];
-  onGoToPage: (page: number) => void;
-  onPageSizeChange: (size: number) => void;
+  onViewModeChange: (mode: ViewMode) => void;
   filters: FilterState; // This is formFilters
   appliedFilters: FilterState; // This is the source of truth for the view
   onFiltersChange: (filters: FilterState) => void;
@@ -39,7 +34,6 @@ interface LogTableProps {
   };
   theme: Theme;
   viewMode: ViewMode;
-  onViewModeChange: (mode: ViewMode) => void;
   columnVisibility: ColumnVisibilityState;
   onColumnVisibilityChange: (newState: ColumnVisibilityState) => void;
   columnStyles: ColumnStyles;
@@ -98,25 +92,10 @@ export const getLevelColor = (level: string): string => {
 };
 
 
-// Helper to format just the time part for the dropdown
-const formatTime = (isoString: string | null) => {
-    if (!isoString) return '...';
-    // Extracts time part e.g. "2024-05-25 14:30:01.123" -> "14:30:01"
-    return isoString.substring(11, 19);
-};
-
-
 export const LogTable: React.FC<LogTableProps> = ({ 
   entries,
   loadedFileNames,
-  currentPage,
-  totalPages,
-  filteredEntriesCount,
-  totalEntries,
-  pageSize,
   pageTimestampRanges,
-  onGoToPage,
-  onPageSizeChange,
   filters,
   appliedFilters,
   onFiltersChange,
@@ -167,8 +146,7 @@ export const LogTable: React.FC<LogTableProps> = ({
   onLogTableDensityChange
 }) => {
   const [selectedEntry, setSelectedEntry] = React.useState<LogEntry | null>(null);
-  const [selectOnLoad, setSelectOnLoad] = React.useState<'first' | 'last' | null>(null);
-
+  
   const [localPanelWidths, setLocalPanelWidths] = React.useState<PanelWidths>(panelWidths);
   const [isResizing, setIsResizing] = React.useState<'filters' | 'details' | null>(null);
   const [isDebugMenuOpen, setIsDebugMenuOpen] = React.useState(false);
@@ -190,7 +168,6 @@ export const LogTable: React.FC<LogTableProps> = ({
   React.useEffect(() => {
     setSelectedEntry(null);
     setKeyboardSelectedId(null);
-    setSelectOnLoad(null);
     setIsDetailPanelVisible(false);
   }, [viewMode, setKeyboardSelectedId]);
   
@@ -277,14 +254,6 @@ export const LogTable: React.FC<LogTableProps> = ({
   }, [handleResizeMouseMove, handleResizeMouseUp]);
 
   React.useEffect(() => {
-    if (selectOnLoad && entries.length > 0) {
-      const newId = selectOnLoad === 'first' ? entries[0].id : entries[entries.length - 1].id;
-      setKeyboardSelectedId(newId);
-      setSelectOnLoad(null);
-    }
-  }, [entries, selectOnLoad, setKeyboardSelectedId]);
-
-  React.useEffect(() => {
     if (keyboardSelectedId === null) return;
     
     // In both modes, we can now use a consistent querySelector
@@ -342,9 +311,6 @@ export const LogTable: React.FC<LogTableProps> = ({
             setKeyboardSelectedId(entries[nextIndex].id);
           } else if (viewMode === 'scroll' && hasMore && !isBusy) {
             onLoadMore();
-          } else if (viewMode === 'pagination' && currentPage < totalPages) {
-            setSelectOnLoad('first');
-            onGoToPage(currentPage + 1);
           }
           break;
         }
@@ -353,19 +319,10 @@ export const LogTable: React.FC<LogTableProps> = ({
             setKeyboardSelectedId(entries[currentIndex - 1].id);
           } else if (currentIndex === -1 && entries.length > 0) {
             setKeyboardSelectedId(entries[entries.length - 1].id);
-          } else if (viewMode === 'pagination' && currentPage > 1) {
-            setSelectOnLoad('last');
-            onGoToPage(currentPage - 1);
           }
           break;
         }
         case 'PageDown': {
-            if (viewMode === 'pagination' && e.ctrlKey && currentPage < totalPages) {
-              setSelectOnLoad('first');
-              onGoToPage(currentPage + 1);
-              break;
-            }
-
             const scrollableView = scrollContainerRef.current;
             if (!scrollableView) break;
 
@@ -381,12 +338,6 @@ export const LogTable: React.FC<LogTableProps> = ({
             break;
         }
         case 'PageUp': {
-            if (viewMode === 'pagination' && e.ctrlKey && currentPage > 1) {
-                setSelectOnLoad('last');
-                onGoToPage(currentPage - 1);
-                break;
-            }
-
             const scrollableView = scrollContainerRef.current;
             if (!scrollableView) break;
 
@@ -402,10 +353,7 @@ export const LogTable: React.FC<LogTableProps> = ({
             break;
         }
         case 'Home': {
-          if (viewMode === 'pagination' && e.ctrlKey && currentPage !== 1) {
-            setSelectOnLoad('first');
-            onGoToPage(1);
-          } else if (entries.length > 0) {
+          if (entries.length > 0) {
             setKeyboardSelectedId(entries[0].id);
              if (scrollContainerRef.current) {
                 scrollContainerRef.current.scrollTop = 0;
@@ -414,10 +362,7 @@ export const LogTable: React.FC<LogTableProps> = ({
           break;
         }
         case 'End': {
-          if (viewMode === 'pagination' && e.ctrlKey && currentPage !== totalPages && totalPages > 0) {
-            setSelectOnLoad('last');
-            onGoToPage(totalPages);
-          } else if (viewMode === 'scroll' && hasMore) {
+          if (viewMode === 'scroll' && hasMore) {
               onLoadMore(); // This will continue until all loaded
               // We can't easily jump to the end if not all are loaded, so this is a reasonable behavior.
           } else if (entries.length > 0) {
@@ -433,7 +378,7 @@ export const LogTable: React.FC<LogTableProps> = ({
     
     mainEl.addEventListener('keydown', handleKeyDown);
     return () => mainEl.removeEventListener('keydown', handleKeyDown);
-  }, [entries, onGoToPage, currentPage, totalPages, keyboardSelectedId, viewMode, hasMore, isBusy, onLoadMore, filteredEntriesCount, setKeyboardSelectedId]);
+  }, [entries, keyboardSelectedId, viewMode, hasMore, isBusy, onLoadMore, setKeyboardSelectedId]);
   
   const handleEntrySelect = React.useCallback((entry: LogEntry) => {
       setKeyboardSelectedId(entry.id);
@@ -469,11 +414,6 @@ export const LogTable: React.FC<LogTableProps> = ({
     setIsDetailPanelVisible(turningOn);
   };
 
-  const startEntry = (currentPage - 1) * pageSize + 1;
-  const endEntry = startEntry + entries.length - 1;
-
-  const filesInfo = `${loadedFileNames.length} file(s) loaded`;
-  
   const includeTerms = filters.includeMsg.split('\n').filter(Boolean);
 
   const visibleColumnCount = React.useMemo(() => {
@@ -638,12 +578,11 @@ export const LogTable: React.FC<LogTableProps> = ({
                 {entries.length === 0 && (
                     <tr>
                       <td colSpan={visibleColumnCount} className="text-center py-12">
-                        {isInitialLoad && filteredEntriesCount > 0 ? (
+                        {isInitialLoad && entries.length === 0 ? (
                             <div className="text-gray-500 dark:text-gray-400">
                                 <Icon name="Filter" iconSet={iconSet} className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
                                 <h3 className="text-xl font-semibold mb-2 text-gray-700 dark:text-gray-300">Data Ready for Analysis</h3>
-                                <p className="font-bold text-lg">{filteredEntriesCount.toLocaleString()} total entries loaded.</p>
-                                <p className="mt-2">Use the filters on the left and click <strong className="text-amber-600 dark:text-amber-400">Apply</strong> to view logs.</p>
+                                <p>Use the filters on the left and click <strong className="text-amber-600 dark:text-amber-400">Apply</strong> to view logs.</p>
                             </div>
                         ) : (
                             <div className="text-gray-500 dark:text-gray-400">
@@ -717,11 +656,9 @@ export const LogTable: React.FC<LogTableProps> = ({
                                 overallLogDensity={overallLogDensity}
                                 datesWithLogs={datesWithLogs}
                                 viewMode={viewMode}
-                                onGoToPage={onGoToPage}
                                 cursorTime={selectedEntry ? new Date(selectedEntry.time + 'Z').getTime() : null}
                                 activeFileName={activeFileName}
                                 activeDate={activeDate}
-                                currentPage={currentPage}
                                 onCursorChange={onCursorChange}
                                 onFileSelect={onFileSelect}
                                 onDateSelect={onDateSelect}
@@ -742,181 +679,11 @@ export const LogTable: React.FC<LogTableProps> = ({
                         iconSet={iconSet}
                       />
                     </div>
-                    
-                    <div className="flex-1 relative">
-                        <div className="absolute inset-0 overflow-auto" ref={scrollContainerRef}>
-                            {TableContent}
-                            {viewMode === 'scroll' && isBusy && entries.length > 0 && (
-                                <div className="text-center p-4 text-gray-500 dark:text-gray-400 font-semibold animate-pulse">Loading more...</div>
-                            )}
-                            {viewMode === 'scroll' && !hasMore && filteredEntriesCount > 0 && (
-                                <div className="text-center p-4 text-gray-500 dark:text-gray-400 font-semibold">End of logs</div>
-                            )}
-                        </div>
-                    </div>
-                </div>
 
-                {isDetailPanelVisible && (
-                  <>
-                    <div
-                      onMouseDown={(e) => handleResizeMouseDown(e, 'details')}
-                      className="w-1.5 flex-shrink-0 cursor-col-resize bg-gray-200 dark:bg-gray-700/50 hover:bg-sky-500 transition-colors duration-200"
-                    />
-                    <LogDetailPanel 
-                      entry={selectedEntry} 
-                      onClose={() => setIsDetailPanelVisible(false)}
-                      width={localPanelWidths.details}
-                      highlightTerms={includeTerms}
-                      theme={theme}
-                      onApplyFilter={onApplyFilter}
-                      columnStyles={columnStyles}
-                      iconSet={iconSet}
-                    />
-                  </>
-                )}
-            </div>
-          
-            <div className="flex-shrink-0 flex items-center justify-between p-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex-wrap gap-4">
-              {/* Left-side info */}
-              <div>
-                  {filteredEntriesCount > 0 && viewMode === 'pagination' && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                          Showing rows <span className="font-medium text-gray-800 dark:text-gray-200">{startEntry.toLocaleString()}</span>-<span className="font-medium text-gray-800 dark:text-gray-200">{endEntry.toLocaleString()}</span> of <span className="font-medium text-gray-800 dark:text-gray-200">{filteredEntriesCount.toLocaleString()}</span>
-                      </p>
-                  )}
-                  {filteredEntriesCount > 0 && viewMode === 'scroll' && entries.length > 0 && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                         Showing <span className="font-medium text-gray-800 dark:text-gray-200">{entries.length.toLocaleString()}</span> of <span className="font-medium text-gray-800 dark:text-gray-200">{filteredEntriesCount.toLocaleString()}</span> rows
-                      </p>
-                  )}
-                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{filesInfo} ({totalEntries.toLocaleString()} total rows)</p>
-              </div>
-
-              {/* Right-side controls */}
-              <div className="flex items-center gap-x-6 gap-y-2 flex-wrap justify-end">
-                  <DensityControl value={logTableDensity} onChange={onLogTableDensityChange} />
-                  <ViewModeToggle />
-                  <ColumnSelector
-                      visibility={columnVisibility}
-                      onChange={onColumnVisibilityChange}
-                      iconSet={iconSet}
-                  />
-
-                  {/* Timeline Toggle */}
-                  <button
-                      onClick={() => onTimeRangeSelectorVisibilityChange(!isTimeRangeSelectorVisible)}
-                      className={`inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-md transition-colors
-                          ${isTimeRangeSelectorVisible
-                              ? 'bg-purple-600 hover:bg-purple-700 text-white'
-                              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
-                          }
-                      `}
-                      title="Toggle timeline selector"
-                  >
-                      <Icon name="Clock" iconSet={iconSet} className="w-5 h-5"/>
-                      <span>Timeline</span>
-                  </button>
-                  
-                  {/* Details Panel Toggle */}
-                  <button
-                      onClick={handleToggleDetailsPanel}
-                      className={`inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-md transition-colors
-                          ${isDetailPanelVisible
-                              ? 'bg-amber-500 hover:bg-amber-600 text-white'
-                              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
-                          }
-                      `}
-                      title="Toggle details panel"
-                  >
-                      <Icon name="SidebarRight" iconSet={iconSet} className="w-5 h-5"/>
-                      <span>Details</span>
-                  </button>
-
-                  {/* Debug Menu */}
-                  <div className="relative" ref={debugButtonRef}>
-                     <button
-                        onClick={() => setIsDebugMenuOpen(!isDebugMenuOpen)}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors"
-                        title="Debugging tools"
-                    >
-                        <Icon name="BugAnt" iconSet={iconSet} className="w-5 h-5"/>
-                        <span>Debug</span>
-                    </button>
-                    {isDebugMenuOpen && (
-                         <div className="absolute bottom-full mb-2 right-0 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-20">
-                            <ul className="p-1">
-                                <li>
-                                    <button
-                                        onClick={handleLogLayout}
-                                        className="w-full text-left flex items-center gap-2 p-2 text-sm rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                    >
-                                        Log Layout Dimensions
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
-                    )}
-                  </div>
-
-                  {/* Pagination */}
-                  {viewMode === 'pagination' && totalPages > 1 && (
-                      <div className="flex items-center space-x-2">
-                          <button
-                              onClick={() => onGoToPage(currentPage - 1)}
-                              disabled={currentPage === 1}
-                              className="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                          >
-                              <Icon name="ChevronLeft" iconSet={iconSet} className="w-5 h-5"/>
-                          </button>
-                          
-                          <select
-                              value={currentPage}
-                              onChange={(e) => onGoToPage(Number(e.target.value))}
-                              className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white sm:text-sm rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition"
-                          >
-                              {pageTimestampRanges.length > 0 ? (
-                                pageTimestampRanges.map(p => (
-                                    <option key={p.page} value={p.page}>
-                                        Page {p.page} of {totalPages} ({formatTime(p.startTime)} - {formatTime(p.endTime)})
-                                    </option>
-                                ))
-                              ) : (
-                                <option value={currentPage}>Page {currentPage} of {totalPages}</option>
-                              )}
-                          </select>
-
-                          <button
-                              onClick={() => onGoToPage(currentPage + 1)}
-                              disabled={currentPage === totalPages}
-                              className="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                          >
-                              <Icon name="ChevronRight" iconSet={iconSet} className="w-5 h-5"/>
-                          </button>
-                      </div>
-                  )}
-                  
-                  {/* Page size selector */}
-                  {viewMode === 'pagination' && (
-                      <div className="flex items-center space-x-2">
-                          <label htmlFor="pageSize" className="text-sm text-gray-600 dark:text-gray-400">Rows/page:</label>
-                          <select
-                              id="pageSize"
-                              value={pageSize}
-                              onChange={(e) => onPageSizeChange(Number(e.target.value))}
-                              className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white sm:text-sm rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition"
-                          >
-                              <option value="100">100</option>
-                              <option value="500">500</option>
-                              <option value="1000">1000</option>
-                              <option value="5000">5000</option>
-                              <option value="10000">10000</option>
-                          </select>
-                      </div>
-                  )}
-              </div>
-            </div>
-        </main>
-      </div>
-    </div>
-  );
-};
+                    <div className="flex-shrink-0 flex items-center justify-end p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex-wrap gap-4">
+                        <div className="flex items-center gap-x-6 gap-y-2 flex-wrap justify-end">
+                            <DensityControl value={logTableDensity} onChange={onLogTableDensityChange} />
+                            <ViewModeToggle />
+                            <ColumnSelector
+                                visibility={columnVisibility}
+                                onChange

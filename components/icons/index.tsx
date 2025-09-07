@@ -1,5 +1,7 @@
 import React from 'react';
 import { IconSet } from '../types.ts';
+import { MoonIcon } from './MoonIcon.tsx';
+import { SunIcon } from './SunIcon.tsx';
 
 // --- SHARP ICONS (Heroicons Outline) ---
 
@@ -259,6 +261,25 @@ const ClockSolid: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z" clipRule="evenodd" />
   </svg>
 );
+const MoonSolid: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
+        <path fillRule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.7-10.5-10.5 0-3.51 1.713-6.636 4.362-8.467a.75.75 0 01.819.162z" clipRule="evenodd" />
+    </svg>
+);
+const SunSolid: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
+        <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.106a.75.75 0 010 1.06l-1.591 1.591a.75.75 0 11-1.06-1.06l1.591-1.591a.75.75 0 011.06 0zm-11.483 0a.75.75 0 011.06 0l1.591 1.591a.75.75 0 11-1.06 1.06L6.106 7.166a.75.75 0 010-1.06zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75zM3.75 12a.75.75 0 01.75-.75h2.25a.75.75 0 010 1.5H4.5a.75.75 0 01-.75-.75zM17.303 17.303a.75.75 0 01-1.06 0l-1.591-1.591a.75.75 0 111.06-1.06l1.591 1.591a.75.75 0 010 1.06zM7.166 18.894a.75.75 0 010-1.06l1.591-1.591a.75.75 0 111.06 1.06l-1.591 1.591a.75.75 0 01-1.06 0zM12 18a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18z" />
+    </svg>
+);
+const SaveSolid: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" {...props}>
+        <path d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v14.25C1.5 20.16 2.339 21 3.375 21h17.25c1.035 0 1.875-.84 1.875-1.875V4.875C22.5 3.839 21.66 3 20.625 3H3.375z" />
+        <path fillRule="evenodd" d="M9 16.5a.75.75 0 00.75-.75V12a.75.75 0 00-1.5 0v3.75a.75.75 0 00.75.75z" clipRule="evenodd" />
+        <path fillRule="evenodd" d="M12.75 16.5a.75.75 0 00.75-.75V12a.75.75 0 00-1.5 0v3.75a.75.75 0 00.75.75z" clipRule="evenodd" />
+        <path fillRule="evenodd" d="M16.5 16.5a.75.75 0 00.75-.75V12a.75.75 0 00-1.5 0v3.75a.75.75 0 00.75.75z" clipRule="evenodd" />
+    </svg>
+);
+
 
 // --- FEATHER ICONS (from feathericons.com) ---
 // Not implemented
@@ -309,6 +330,8 @@ const sharpIcons = {
     ViewColumns: ViewColumnsSharp,
     XCircle: XCircleSharp,
     XMark: XMarkSharp,
+    Sun: SunIcon,
+    Moon: MoonIcon,
 };
 
 const solidIcons = {
@@ -326,6 +349,10 @@ const solidIcons = {
     ChevronRight: ChevronRightSolid,
     Clipboard: ClipboardSolid,
     Clock: ClockSolid,
+    Sun: SunSolid,
+    Moon: MoonSolid,
+    Save: SaveSolid,
+    SaveDisk: SaveSolid,
     // Other solid icons would go here... we fallback to sharp.
 };
 

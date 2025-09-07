@@ -65,6 +65,7 @@
       ]
     },
     "nsis": {
+      "oneClick": false,
       "allowToChangeInstallationDirectory": true
     },
     "directories": {

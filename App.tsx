@@ -1,5 +1,6 @@
 import React from 'react';
-import { LogEntry, ConsoleMessage, FilterState, ConsoleMessageType, DashboardData, PageTimestampRange, SessionFile, ColumnVisibilityState, ColumnStyles, PanelWidths, ViewMode, OverallTimeRange, FileTimeRange, LogDensityPoint, IconSet, LogTableDensity } from './types.ts';
+// FIX: Import the centralized Theme type from types.ts.
+import { LogEntry, ConsoleMessage, FilterState, ConsoleMessageType, DashboardData, PageTimestampRange, SessionFile, ColumnVisibilityState, ColumnStyles, PanelWidths, ViewMode, OverallTimeRange, FileTimeRange, LogDensityPoint, IconSet, LogTableDensity, Theme } from './types.ts';
 import { LogTable } from './components/LogTable.tsx';
 import { ProgressIndicator } from './components/ProgressIndicator.tsx';
 import { Database, getSqlDateTime } from './db.ts';
@@ -10,6 +11,7 @@ import { Icon } from './components/icons/index.tsx';
 import { Dashboard } from './components/Dashboard.tsx';
 import { Settings } from './components/Settings.tsx';
 import { Info } from './components/Info.tsx';
+import { StatusBar } from './components/StatusBar.tsx';
 
 // JSZip is loaded from script tag
 declare const JSZip: any;
@@ -75,7 +77,7 @@ const initialPanelWidths: PanelWidths = {
 };
 
 
-type Theme = 'light' | 'dark';
+// FIX: Removed local Theme type definition. It is now imported from types.ts.
 type ProgressPhase = 'reading' | 'unzipping' | 'parsing' | 'inserting' | 'indexing' | 'loading';
 
 const App: React.FC = () => {
@@ -105,6 +107,7 @@ const App: React.FC = () => {
   });
   
   const [consoleMessages, setConsoleMessages] = React.useState<ConsoleMessage[]>([]);
+  const [lastConsoleMessage, setLastConsoleMessage] = React.useState<ConsoleMessage | null>(null);
   const [consoleFilters, setConsoleFilters] = React.useState(initialConsoleFilters);
 
   const [currentPage, setCurrentPage] = React.useState<number>(1);
@@ -157,8 +160,13 @@ const App: React.FC = () => {
     if (window.electronAPI?.logMessage) {
         window.electronAPI.logMessage(type, message);
     }
-    const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
-    setConsoleMessages(prev => [...prev, { message, type, timestamp }]);
+    const newMessage: ConsoleMessage = { 
+        message, 
+        type, 
+        timestamp: new Date().toLocaleTimeString('en-US', { hour12: false }) 
+    };
+    setConsoleMessages(prev => [...prev, newMessage]);
+    setLastConsoleMessage(newMessage);
   }, []);
   
   const handleClearConsole = React.useCallback(() => {
@@ -1367,14 +1375,8 @@ const handleAllowPrereleaseChange = async (allow: boolean) => {
               <LogTable 
                 entries={filteredEntries}
                 loadedFileNames={loadedFileNames}
-                currentPage={currentPage}
-                totalPages={totalPages}
-                filteredEntriesCount={totalFilteredCount}
-                totalEntries={totalEntryCount}
-                pageSize={pageSize}
                 pageTimestampRanges={pageTimestampRanges}
-                onGoToPage={goToPage}
-                onPageSizeChange={handlePageSizeChange}
+                onViewModeChange={handleViewModeChange}
                 filters={formFilters}
                 appliedFilters={appliedFilters}
                 onFiltersChange={setFormFilters}
@@ -1384,7 +1386,6 @@ const handleAllowPrereleaseChange = async (allow: boolean) => {
                 uniqueValues={uniqueValues}
                 theme={theme}
                 viewMode={viewMode}
-                onViewModeChange={handleViewModeChange}
                 columnVisibility={columnVisibility}
                 onColumnVisibilityChange={handleColumnVisibilityChange}
                 columnStyles={columnStyles}
@@ -1480,6 +1481,24 @@ const handleAllowPrereleaseChange = async (allow: boolean) => {
             />
         )}
       </main>
+      <StatusBar
+        totalEntries={totalEntryCount}
+        filteredCount={totalFilteredCount}
+        activeSessionName={activeSessionName}
+        isDirty={isDirty}
+        viewMode={viewMode}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        visibleRowCount={filteredEntries.length}
+        pageSize={pageSize}
+        onPageSizeChange={handlePageSizeChange}
+        onGoToPage={goToPage}
+        isBusy={isBusy}
+        lastConsoleMessage={lastConsoleMessage}
+        theme={theme}
+        onThemeChange={() => handleThemeChange(theme === 'light' ? 'dark' : 'light')}
+        iconSet={iconSet}
+      />
     </div>
   );
 };
