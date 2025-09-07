@@ -72,7 +72,6 @@ A core feature of the desktop application is persistent session management. This
     - When the user adds new files via the `Dropzone`, `App.tsx` orchestrates the processing and then calls `window.electronAPI.saveSession()` to persist the new database.
     - All actions (load, rename, delete) are initiated from the UI, call the relevant `window.electronAPI` function, and then trigger a refresh of the session list to update the UI.
 
-
 ## 3. File Structure
 
 - `package.json`: Project manifest and build configuration.
