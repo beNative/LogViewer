@@ -4,6 +4,30 @@ This document tracks the major changes, new features, and bug fixes for the Log 
 
 ---
 
+### **Version 0.13.0** - UI/UX & System Polish
+
+_Date: 2025-08-31_
+
+This release focuses on a wide range of user interface enhancements, bug fixes, and under-the-hood improvements to make the application more robust, visually appealing, and intuitive to use.
+
+#### ✨ Features & Improvements
+- **Colored Header Navigation**: The main navigation buttons in the header now feature a distinct color scheme, making it easier to identify the active tab and improving the overall visual appeal.
+- **Improved UI Scaling**: The UI Scale slider in the Settings now has a dedicated "Apply" button, giving users more deliberate control over when the interface is rescaled.
+- **Icon System Overhaul**: The entire icon system has been re-engineered. All icons have been replaced with high-quality, verified versions, fixing rendering glitches. The "solid" icon set is now complete, ensuring a consistent look when switching themes.
+
+#### 🐛 Bug Fixes
+- **Status Bar Layout**: Fixed a critical bug where the status bar would detach from the bottom of the screen when the UI scale was adjusted.
+- **Icon Set Switching**: Corrected an issue where switching between icon sets in the settings did not visually update the icons in the UI.
+- **Build Process Reliability**: Improved the build scripts to prevent "Access is denied" errors on Windows, making the packaging process more reliable.
+- **Packaged Documentation**: Fixed a bug that caused the markdown manual files to be missing from the final packaged Electron application.
+- **Settings Layout**: The configuration cards on the Settings page are now stacked vertically for better readability and responsiveness.
+
+#### 🛠️ Under the Hood
+- **Code Cleanup**: Performed a significant code cleanup, removing obsolete components (`VirtualizedLogView`), unused files, and refactoring shared code for better organization.
+- **Styling Consolidation**: Refactored the application's styling to consistently use Tailwind CSS utility classes, improving maintainability and readability.
+
+---
+
 ### **Version 0.12.0** - Advanced Settings Management
 
 _Date: 2025-08-30_

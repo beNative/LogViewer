@@ -8,12 +8,13 @@ The Log Analyser is a desktop tool designed to help you analyze structured XML l
 
 ## 2. Main Interface
 
-The application is organized into five main tabs, which you can switch between using the header navigation. The recommended workflow is now session-centric:
+The application is organized into several main tabs, which you can switch between using the header navigation. The recommended workflow is now session-centric:
 
 - **Data Hub**: Your starting point. Here you will load an existing session or create a new one.
 - **Log Viewer**: For analyzing and filtering your log entries within the active session.
 - **Dashboard**: For a high-level visual overview of your filtered data within the active session.
 - **Application Log**: For viewing application status messages and errors.
+- **Info**: For viewing in-app documentation, manuals, and version logs.
 - **Settings**: For managing application configuration and appearance.
 
 ---

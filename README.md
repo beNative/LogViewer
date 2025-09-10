@@ -11,6 +11,7 @@ A sophisticated, client-side log analysis tool that allows users to drag-and-dro
     - **Automatic Saving**: Sessions are automatically saved as `.sqlite` files in a dedicated folder within your user profile's AppData directory.
     - **Load, Rename, Delete**: The Data Hub provides a full UI to manage previous sessions, allowing you to resume your work effortlessly.
 - **Light and Dark Themes**: A polished UI with a theme toggle in the Settings tab.
+- **Polished User Experience**: Features a color-coded header for intuitive navigation, a global status bar for at-a-glance information, and multiple icon sets for customization.
 - **Drag-and-Drop Interface**: Easily create new sessions by dropping log files (`.xml` or `.zip` archives).
 - **In-Memory Database**: Utilizes `sql.js` to store log data in an in-memory SQLite database, enabling fast and complex queries without a server.
 - **Tabbed Navigation**:
@@ -18,6 +19,7 @@ A sophisticated, client-side log analysis tool that allows users to drag-and-dro
     - **Log Viewer**: The main analysis view featuring a filter panel, a dedicated toolbar for display options, the main log table, and a resizable detail panel. A new global status bar provides persistent data and view controls.
     - **Dashboard**: A visualization hub with interactive charts that provide a high-level overview of the *currently filtered* data.
     - **Application Log**: See real-time feedback, processing status, and errors from the application.
+    - **Info**: View in-app documentation, manuals, and version logs.
     - **Settings**: Manage application settings, including the UI theme.
 - **Dynamic Data Visualization Dashboard**:
     - The dashboard is **fully synchronized** with the filters set in the Log Viewer and updates when filters are applied.

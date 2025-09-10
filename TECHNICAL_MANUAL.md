@@ -11,7 +11,7 @@ The Log Analyser is a **desktop application** built using **Electron**. This arc
 - **Bundler**: **esbuild** is used for fast and efficient bundling of the TypeScript and React code.
 - **Data Storage**: Log data is stored in an in-memory **SQLite database** powered by **sql.js**, a library that compiles SQLite to WebAssembly. This allows for powerful and efficient SQL-based querying directly in the browser context of the Electron window.
 - **Data Visualization**: Charts are rendered using **Chart.js**, a powerful and flexible open-source charting library. The application also uses `chartjs-adapter-date-fns` for time-series axes and `chartjs-plugin-zoom` for interactive drag-to-select functionality.
-- **Styling**: **Tailwind CSS** is used for utility-first styling. A **PostCSS** build step processes the CSS to include vendor prefixes and apply Tailwind transformations, enabling advanced features like theme-aware styling (`dark:` variants).
+- **Styling**: **Tailwind CSS** is used for utility-first styling. A **PostCSS** build step processes the CSS to include vendor prefixes and apply Tailwind transformations. The application has been refactored to consolidate all styling into utility classes and a central stylesheet, removing inline styles for improved maintainability.
 
 ## 2. Desktop Application Architecture (Electron)
 
@@ -93,7 +93,7 @@ A core feature of the desktop application is persistent session management. This
 ## 4. State Management and Data Flow
 The state management and data flow within the React application remain largely unchanged from the web version, with the primary addition being the initial fetching of application settings from the main process via the preload script. The separation between `formFilters` and `appliedFilters` continues to be the core pattern for ensuring synchronized data fetching between the Log Viewer and the Dashboard.
 
-Recent UI enhancements introduced a global **`StatusBar.tsx`** component, which is managed at the root `App.tsx` level to provide persistent application-wide feedback. The **`LogTable.tsx`** component was refactored to delegate its display controls (e.g., density, column visibility) to a new dedicated toolbar, cleaning up its internal structure. The layout logic was also stabilized by correcting the use of flexbox properties to prevent overflow with large datasets.
+The UI features a global **`StatusBar.tsx`** component, which is managed at the root `App.tsx` level to provide persistent application-wide feedback. The **`LogTable.tsx`** component has been refactored to delegate its display controls (e.g., density, column visibility) to a new dedicated toolbar, cleaning up its internal structure. The previous complex `VirtualizedLogView` has been removed, with the infinite scroll implementation now handled directly within `LogTable.tsx`, simplifying the rendering logic.
 
 ### Column Visibility
 The visibility of columns in the Log Viewer is managed by a new state object, `columnVisibility`, within `App.tsx`. This state is initialized from and persisted to the `settings.json` file via IPC handlers in the main process. The state is passed as props to `LogTable.tsx`, which conditionally renders table headers (`<th>`) and cells (`<td>`) based on the current visibility settings. A new component, `ColumnSelector.tsx`, provides the UI for modifying this state.
