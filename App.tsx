@@ -491,8 +491,35 @@ const App: React.FC = () => {
   }, [theme]);
   
   React.useEffect(() => {
-    // FIX: Cast style to any to set the non-standard 'zoom' property, which is not in the default CSSStyleDeclaration type.
-    (document.documentElement.style as any).zoom = `${uiScale}`;
+    const docEl = document.documentElement;
+
+    // This effect manages the application's global zoom level.
+    // The `zoom` property is non-standard but widely supported and provides a simpler scaling model than `transform: scale`.
+    // A known issue with `zoom` is that it scales elements sized with viewport units (like `vh`).
+    // To counteract this, when zoom is applied, we adjust the `<html>` element's height by the inverse of the zoom factor.
+    // This ensures that the main app container, which uses `h-screen` (100vh), always fills the full viewport height after scaling.
+    if (uiScale === 1) {
+        // Reset styles when scale is 1 to avoid lingering properties.
+        // FIX: Cast style to 'any' to allow setting the non-standard 'zoom' property.
+        (docEl.style as any).zoom = '';
+        docEl.style.height = '';
+        docEl.style.overflow = '';
+    } else {
+        // FIX: Cast style to 'any' to allow setting the non-standard 'zoom' property.
+        (docEl.style as any).zoom = `${uiScale}`;
+        docEl.style.height = `${100 / uiScale}vh`;
+        // Prevent the html element from showing scrollbars if its new calculated height causes overflow.
+        docEl.style.overflow = 'hidden';
+    }
+
+    // A cleanup function is essential to remove the styles when the component unmounts,
+    // preventing them from affecting other applications if this were part of a larger shell.
+    return () => {
+        // FIX: Cast style to 'any' to allow setting the non-standard 'zoom' property.
+        (docEl.style as any).zoom = '';
+        docEl.style.height = '';
+        docEl.style.overflow = '';
+    };
   }, [uiScale]);
 
   // This single effect handles all data fetching and state updates when filters or pagination change.

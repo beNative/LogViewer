@@ -238,8 +238,8 @@ export const Settings: React.FC<SettingsProps> = ({
                 )}
                 
                 {activeTab === 'controls' && (
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                         <div className="lg:col-span-1">
+                    <div className="max-w-5xl mx-auto space-y-8">
+                         <div>
                             <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10">
                                 <h2 className="text-xl font-semibold text-gray-800 dark:text-sky-400 mb-4">Appearance</h2>
                                 <div className="space-y-4">
@@ -314,7 +314,7 @@ export const Settings: React.FC<SettingsProps> = ({
                             </div>
                          </div>
 
-                         <div className="lg:col-span-2">
+                         <div>
                             <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10">
                                 <h2 className="text-xl font-semibold text-gray-800 dark:text-sky-400 mb-4">Log Table Styles</h2>
                                 <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
@@ -327,8 +327,8 @@ export const Settings: React.FC<SettingsProps> = ({
                 )}
                 
                 {activeTab === 'json' && window.electronAPI && (
-                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-                         <div className="lg:col-span-1">
+                     <div className="max-w-5xl mx-auto space-y-8">
+                         <div>
                              <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10">
                                 <h2 className="text-xl font-semibold text-gray-800 dark:text-sky-400 mb-4">Settings File</h2>
                                 <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
@@ -349,7 +349,7 @@ export const Settings: React.FC<SettingsProps> = ({
                             </div>
                          </div>
 
-                         <div className="lg:col-span-2">
+                         <div>
                             <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 h-full flex flex-col" style={{minHeight: '60vh'}}>
                                 <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
                                     <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-300">File Content</h2>

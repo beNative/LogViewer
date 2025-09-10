@@ -29,7 +29,8 @@ A sophisticated, client-side log analysis tool that allows users to drag-and-dro
     - Advanced message content filtering with multi-line inputs for "include" and "exclude" terms.
     - **AND/OR Logic**: Toggle between matching all (AND) or any (OR) search terms for precise filtering.
     - **Advanced SQL Queries**: Bypass the UI with a full SQL editor to write custom queries directly against the log database. These complex queries can now be saved as presets.
-- **Configuration File**: Application settings are stored in a `settings.json` file within the application's user data directory (e.g., `%APPDATA%\log-analyser\settings.json` on Windows).
+- **Advanced Settings Management**: Directly edit the raw `settings.json` configuration in a syntax-highlighted editor, with options to import and export settings files.
+- **Configuration File**: Application settings are stored in a `settings.json` file within the application's user data directory (e.g., `%APPDATA%\log-analyser\settings.json` on Windows). This file can be viewed and edited directly within the application via the 'JSON Source' tab in Settings, which also provides import/export capabilities.
 
 ## Technology Stack
 

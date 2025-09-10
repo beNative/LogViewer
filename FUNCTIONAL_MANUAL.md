@@ -142,8 +142,19 @@ You can filter the messages by type (DEBUG, INFO, WARNING, ERROR) using the togg
 
 ## 8. Settings
 
-This tab allows you to configure various aspects of the application.
-- **Appearance**: Toggle between Light and Dark themes, change the active icon set, and adjust the density of rows in the log table.
+This tab allows you to configure various aspects of the application and is divided into two main views: **Controls** and **JSON Source**.
+
+### 8.1. Controls View
+This is the default view and provides user-friendly controls for common settings.
+- **Appearance**: Toggle between Light and Dark themes, change the active icon set, adjust the UI Scale, and adjust the density of rows in the log table.
 - **Log Table Styles**: Customize the font, font size, style (bold/italic), and color for each column in the Log Viewer.
 - **Updates**: Opt-in to receive pre-release (beta) versions of the application.
-- **JSON Source**: For advanced users, this tab shows the raw `settings.json` file and provides a button to open its location on your computer.
+
+### 8.2. JSON Source View
+For advanced users, this tab provides direct access to the `settings.json` configuration file.
+- **Editable JSON**: The main part of this view is a syntax-highlighted editor displaying the raw JSON content of your settings file. You can make direct changes here.
+- **Save**: After editing the JSON, click this button to apply and save your changes. The application will validate the JSON before saving.
+- **Discard**: If you've made changes you don't want to keep, click this to revert the editor's content back to the last saved version.
+- **Import**: Click to open a file dialog and select a `.json` settings file to load into the editor. This is useful for restoring a backup or sharing configurations.
+- **Export**: Click to download the current settings in the editor as a `.json` file.
+- **Show Settings File**: This button will open your operating system's file explorer with the `settings.json` file selected, showing you where it's stored on your computer.
