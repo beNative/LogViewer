@@ -1,5 +1,5 @@
 import React from 'react';
-import { PageTimestampRange, FileTimeRange, LogDensityPoint, ViewMode, OverallTimeRange, IconSet } from '../types';
+import { PageTimestampRange, FileTimeRange, LogDensityPoint, ViewMode, OverallTimeRange, IconSet } from '../types.ts';
 import { Icon } from './icons/index.tsx';
 
 type Theme = 'light' | 'dark';
@@ -89,7 +89,7 @@ const Bar: React.FC<{
     displayMinTime: number;
     displayMaxTime: number;
 }> = ({ items, valueToPosition, isActive, onSelect, getLabel, getTitle, getStart, getEnd, getColor, displayMinTime, displayMaxTime }) => (
-    <div className="relative w-full" style={{ height: `20px`}}>
+    <div className="relative w-full h-5">
         {items.map((item, i) => {
             const start = getStart(item);
             const end = getEnd(item);
@@ -108,11 +108,10 @@ const Bar: React.FC<{
                 <div
                     key={getTitle(item)}
                     onClick={(e) => { e.stopPropagation(); onSelect(item); }}
-                    className={`absolute flex items-center justify-center overflow-hidden transition-all duration-150 hover:scale-y-105 origin-bottom ${isActive(item) ? 'outline outline-4 outline-offset-2 outline-black dark:outline-white' : ''}`}
+                    className={`absolute h-5 flex items-center justify-center overflow-hidden transition-all duration-150 hover:scale-y-105 origin-bottom ${isActive(item) ? 'outline outline-4 outline-offset-2 outline-black dark:outline-white' : ''}`}
                     style={{
                         left: `${leftPx}px`,
                         width: `${widthPx}px`,
-                        height: `20px`,
                         backgroundColor: getColor(i) + '99',
                         cursor: 'pointer'
                     }}
@@ -132,11 +131,11 @@ const DensityBar: React.FC<{
     displayMinTime: number;
     displayMaxTime: number;
 }> = ({ items, valueToPosition, theme, displayMinTime, displayMaxTime }) => {
-    if (items.length < 2) return <div className="relative w-full" style={{ height: '20px' }} />;
+    if (items.length < 2) return <div className="relative w-full h-5" />;
     const bucketDuration = items[1].time - items[0].time;
     
     return (
-        <div className="relative w-full" style={{ height: '20px' }}>
+        <div className="relative w-full h-5">
             {items.map((bucket, i) => {
                 const start = bucket.time;
                 const end = bucket.time + bucketDuration;
@@ -485,7 +484,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                 <div className="w-16 flex-shrink-0 text-right pt-6">
                     <div className="space-y-3">
                         {barComponents.map(bar => (
-                            <div key={bar.key} style={{ height: `20px`}} className="text-xs font-semibold text-gray-600 dark:text-gray-400 flex items-center justify-end pr-2">
+                            <div key={bar.key} className="h-5 text-xs font-semibold text-gray-600 dark:text-gray-400 flex items-center justify-end pr-2">
                                 {bar.label}
                             </div>
                         ))}
@@ -528,8 +527,8 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                                 <div 
                                     data-handle="cursor"
                                     onMouseDown={(e) => handleMouseDown(e, 'cursor')}
-                                    className="absolute top-0 bottom-0 bg-red-500 z-30 cursor-col-resize" 
-                                    style={{ left: `${mainValueToPos(cursorTime)}px`, width: '2px' }} 
+                                    className="absolute top-0 bottom-0 bg-red-500 z-30 cursor-col-resize w-0.5" 
+                                    style={{ left: `${mainValueToPos(cursorTime)}px` }} 
                                 />
                             )}
                         </div>
@@ -561,7 +560,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                         />
                     )}
                 </div>
-                <div className="w-auto flex-shrink-0" style={{ width: '60px' }}/>
+                <div className="w-[60px] flex-shrink-0"/>
             </div>
         </div>
     );

@@ -1,3 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html, body, #root {
+    @apply h-full m-0 overflow-hidden;
+  }
+}
+
+@layer utilities {
+  .shimmer-bg-light {
+    background-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.05) 50%, transparent 100%);
+  }
+  .shimmer-bg-dark {
+    background-image: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+  }
+}

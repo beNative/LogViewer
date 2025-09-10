@@ -23,42 +23,30 @@ const parseMarkdown = (markdown: string): string => {
         (match, lang, code) => `<pre class="bg-gray-100 dark:bg-gray-900 rounded-lg p-4 my-4 overflow-x-auto font-mono text-sm"><code class="language-${lang || ''}">${code.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`);
 
     // Headings (order is important)
-    html = html.replace(/^#### (.*$)/gim, '<h4 class="text-lg font-bold mt-5 mb-1">$1</h4>');
-    html = html.replace(/^### (.*$)/gim, '<h3 class="text-xl font-bold mt-6 mb-2 border-b border-gray-200 dark:border-gray-700 pb-1">$1</h3>');
-    html = html.replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold mt-8 mb-3 border-b border-gray-200 dark:border-gray-700 pb-2">$1</h2>');
-    html = html.replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold mt-4 mb-4">$1</h1>');
+    html = html.replace(/^#### (.*$)/gim, '<h4 class="text-lg font-bold mt-5 mb-1 text-gray-800 dark:text-gray-200">$1</h4>');
+    html = html.replace(/^### (.*$)/gim, '<h3 class="text-xl font-bold mt-6 mb-2 border-b border-gray-200 dark:border-gray-700 pb-1 text-gray-800 dark:text-gray-200">$1</h3>');
+    html = html.replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold mt-8 mb-3 border-b border-gray-200 dark:border-gray-700 pb-2 text-gray-900 dark:text-white">$1</h2>');
+    html = html.replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold mt-4 mb-4 text-gray-900 dark:text-white">$1</h1>');
 
     // Blockquotes
-    html = html.replace(/^\> (.*$)/gim, '<blockquote class="border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic my-4">$1</blockquote>');
+    html = html.replace(/^\> (.*$)/gim, '<blockquote class="border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic my-4 text-gray-600 dark:text-gray-400">$1</blockquote>');
 
     // Lists
     html = html.replace(/^(?:\*|-|\d+\.) (.*$)/gim, '<li>$1</li>');
     html = html.replace(/^(<li>.*<\/li>(?:\n|$))+/gim, (match) => {
-        // A bit of a hack to determine list type. This won't work for mixed lists but is fine for the docs.
         return match.includes('1.') ? `<ol class="list-decimal list-inside pl-4 my-4 space-y-1">${match}</ol>` 
                                     : `<ul class="list-disc list-inside pl-4 my-4 space-y-1">${match}</ul>`;
     });
      html = html.replace(/<\/ul>\s*<ul>/g, '').replace(/<\/ol>\s*<ol>/g, '');
 
     // Inline elements - order is important!
-    
-    // 1. Inline code `...` (must be before emphasis)
     html = html.replace(/`([^`]+)`/g, '<code class="bg-gray-200 dark:bg-gray-700 rounded px-1.5 py-1 font-mono text-sm text-sky-600 dark:text-sky-400 mx-0.5">$1</code>');
-
-    // 2. Links [...]()
     html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-sky-600 dark:text-sky-400 hover:underline">$1</a>');
-    
-    // 3. Strong emphasis (bold)
-    // Using lookbehind and lookahead to avoid matching mid-word emphasis like in "file__name"
-    html = html.replace(/(?<!\w)\*\*([\s\S]+?)\*\*(?!\w)/g, '<strong>$1</strong>');
-    html = html.replace(/(?<!\w)__([\s\S]+?)__(?!\w)/g, '<strong>$1</strong>');
-
-    // 4. Emphasis (italic)
-    html = html.replace(/(?<!\w)\*([\s\S]+?)\*(?!\w)/g, '<em>$1</em>');
-    html = html.replace(/(?<!\w)_([\s\S]+?)_(?!\w)/g, '<em>$1</em>');
-    
-    // 5. Strikethrough
-    html = html.replace(/~~([\s\S]+?)~~/g, '<del>$1</del>');
+    html = html.replace(/(?<!\w)\*\*([\s\S]+?)\*\*(?!\w)/g, '<strong class="font-bold text-gray-800 dark:text-gray-200">$1</strong>');
+    html = html.replace(/(?<!\w)__([\s\S]+?)__(?!\w)/g, '<strong class="font-bold text-gray-800 dark:text-gray-200">$1</strong>');
+    html = html.replace(/(?<!\w)\*([\s\S]+?)\*(?!\w)/g, '<em class="italic">$1</em>');
+    html = html.replace(/(?<!\w)_([\s\S]+?)_(?!\w)/g, '<em class="italic">$1</em>');
+    html = html.replace(/~~([\s\S]+?)~~/g, '<del class="line-through">$1</del>');
 
     // HR
     html = html.replace(/^\s*-{3,}\s*$/gm, '<hr class="my-6 border-gray-200 dark:border-gray-700"/>');
@@ -168,16 +156,10 @@ export const Info: React.FC<InfoProps> = ({ iconSet, onOpenAboutDialog }) => {
                     {error && <div className="bg-red-100 text-red-700 p-4 rounded-lg">{error}</div>}
                     {!loading && !error && (
                         <div
-                            className="prose-styles"
                             dangerouslySetInnerHTML={{ __html: parsedHtml }}
                         />
                     )}
                 </div>
-                <style>{`
-                    .prose-styles h1, .prose-styles h2, .prose-styles h3, .prose-styles h4 { color: inherit; }
-                    .prose-styles p, .prose-styles li, .prose-styles blockquote { color: var(--text-color); }
-                    html.dark .prose-styles p, html.dark .prose-styles li, html.dark .prose-styles blockquote { color: var(--dark-text-color); }
-                `}</style>
             </main>
         </div>
     );

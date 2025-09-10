@@ -500,18 +500,17 @@ export const LogTable: React.FC<LogTableProps> = ({
   };
 
   const SkeletonRow: React.FC<{ visibility: ColumnVisibilityState }> = React.memo(({ visibility }) => {
-    const shimmerBg = 'linear-gradient(to right, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)';
-    const lightShimmerBg = 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.05) 50%, transparent 100%)';
     const paddingClass = getRowPaddingClass();
+    const shimmerClasses = `animate-shimmer bg-[length:1000px_100%] ${theme === 'dark' ? 'shimmer-bg-dark' : 'shimmer-bg-light'}`;
 
     return (
         <tr className="bg-white dark:bg-gray-900">
-            {visibility.time && <td className={`whitespace-nowrap pl-4 pr-3 sm:pl-6 ${paddingClass}`}><div className="h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-3/4 animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
-            {visibility.level && <td className={`whitespace-nowrap px-3 ${paddingClass}`}><div className="h-6 w-20 rounded-full bg-gray-200 dark:bg-gray-700/80 animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
-            {visibility.sndrtype && <td className={`whitespace-nowrap px-3 ${paddingClass}`}><div className="h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-2/3 animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
-            {visibility.sndrname && <td className={`whitespace-nowrap px-3 ${paddingClass}`}><div className="h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-3/4 animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
-            {visibility.fileName && <td className={`whitespace-nowrap px-3 ${paddingClass}`}><div className="h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-5/6 animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
-            {visibility.msg && <td className={`px-3 ${paddingClass}`}><div className="h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-full animate-shimmer" style={{ backgroundSize: '1000px 100%', backgroundImage: theme === 'dark' ? shimmerBg : lightShimmerBg }}></div></td>}
+            {visibility.time && <td className={`whitespace-nowrap pl-4 pr-3 sm:pl-6 ${paddingClass}`}><div className={`h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-3/4 ${shimmerClasses}`}></div></td>}
+            {visibility.level && <td className={`whitespace-nowrap px-3 ${paddingClass}`}><div className={`h-6 w-20 rounded-full bg-gray-200 dark:bg-gray-700/80 ${shimmerClasses}`}></div></td>}
+            {visibility.sndrtype && <td className={`whitespace-nowrap px-3 ${paddingClass}`}><div className={`h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-2/3 ${shimmerClasses}`}></div></td>}
+            {visibility.sndrname && <td className={`whitespace-nowrap px-3 ${paddingClass}`}><div className={`h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-3/4 ${shimmerClasses}`}></div></td>}
+            {visibility.fileName && <td className={`whitespace-nowrap px-3 ${paddingClass}`}><div className={`h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-5/6 ${shimmerClasses}`}></div></td>}
+            {visibility.msg && <td className={`px-3 ${paddingClass}`}><div className={`h-4 rounded bg-gray-200 dark:bg-gray-700/80 w-full ${shimmerClasses}`}></div></td>}
         </tr>
     );
 });
