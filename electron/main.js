@@ -308,12 +308,9 @@ ipcMain.handle('rename-session', (event, oldName, newName) => {
 ipcMain.handle('get-markdown-content', (event, fileName) => {
     try {
         const appPath = app.getAppPath();
-        // In development, appPath is the project root.
-        // In production, appPath is `resources/app.asar`, and extraFiles are in `resources`.
-        // So we need to go up one level from the asar archive to find the MD files.
-        const filePath = app.isPackaged
-            ? path.join(appPath, '..', fileName)
-            : path.join(appPath, fileName);
+        // The markdown files are now packed into the application's root (app.asar in production).
+        // This path works for both development (project root) and packaged (asar root) modes.
+        const filePath = path.join(appPath, fileName);
 
         if (fs.existsSync(filePath)) {
             const content = fs.readFileSync(filePath, 'utf-8');

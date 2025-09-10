@@ -38,16 +38,8 @@
     "files": [
       "index.html",
       "dist/",
-      "electron/"
-    ],
-    "extraFiles": [
-      {
-        "from": ".",
-        "to": ".",
-        "filter": [
-          "*.md"
-        ]
-      }
+      "electron/",
+      "*.md"
     ],
     "publish": {
       "provider": "github",
