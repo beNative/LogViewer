@@ -491,34 +491,17 @@ const App: React.FC = () => {
   }, [theme]);
   
   React.useEffect(() => {
-    const docEl = document.documentElement;
-
     // This effect manages the application's global zoom level.
-    // The `zoom` property is non-standard but widely supported and provides a simpler scaling model than `transform: scale`.
-    // A known issue with `zoom` is that it scales elements sized with viewport units (like `vh`).
-    // To counteract this, when zoom is applied, we adjust the `<html>` element's height by the inverse of the zoom factor.
-    // This ensures that the main app container, which uses `h-screen` (100vh), always fills the full viewport height after scaling.
-    if (uiScale === 1) {
-        // Reset styles when scale is 1 to avoid lingering properties.
-        // FIX: Cast style to 'any' to allow setting the non-standard 'zoom' property.
-        (docEl.style as any).zoom = '';
-        docEl.style.height = '';
-        docEl.style.overflow = '';
-    } else {
-        // FIX: Cast style to 'any' to allow setting the non-standard 'zoom' property.
-        (docEl.style as any).zoom = `${uiScale}`;
-        docEl.style.height = `${100 / uiScale}vh`;
-        // Prevent the html element from showing scrollbars if its new calculated height causes overflow.
-        docEl.style.overflow = 'hidden';
-    }
+    // By applying `zoom` to the `<body>` element, the entire UI is scaled.
+    // To avoid issues with `vh` units being scaled incorrectly, the application's root
+    // element uses `h-full` and we ensure `<html>` and `<body>` are also `h-full` via CSS.
+    // This provides a more robust scaling model than `transform: scale` without text blurring.
+    const bodyEl = document.body;
+    (bodyEl.style as any).zoom = uiScale === 1 ? '' : `${uiScale}`;
 
-    // A cleanup function is essential to remove the styles when the component unmounts,
-    // preventing them from affecting other applications if this were part of a larger shell.
+    // A cleanup function is essential to remove the style when the component unmounts.
     return () => {
-        // FIX: Cast style to 'any' to allow setting the non-standard 'zoom' property.
-        (docEl.style as any).zoom = '';
-        docEl.style.height = '';
-        docEl.style.overflow = '';
+        (bodyEl.style as any).zoom = '';
     };
   }, [uiScale]);
 
@@ -1539,7 +1522,7 @@ const handleUiScaleChange = async (newScale: number) => {
   const totalPages = Math.ceil(totalFilteredCount / pageSize);
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       {isAboutDialogOpen && (
           <AboutDialog
               isOpen={isAboutDialogOpen}

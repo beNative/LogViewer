@@ -121,6 +121,15 @@ export const Settings: React.FC<SettingsProps> = ({
     const [isDirty, setIsDirty] = React.useState(false);
     const importInputRef = React.useRef<HTMLInputElement>(null);
 
+    // Local state for UI scale slider
+    const [tempUiScale, setTempUiScale] = React.useState(uiScale);
+    const isScaleDirty = tempUiScale !== uiScale;
+
+    React.useEffect(() => {
+        // Keep temp scale in sync with prop if it changes from outside (e.g., from JSON load)
+        setTempUiScale(uiScale);
+    }, [uiScale]);
+
 
     React.useEffect(() => {
         if (!window.electronAPI) {
@@ -263,20 +272,27 @@ export const Settings: React.FC<SettingsProps> = ({
                                                 min="0.5"
                                                 max="4"
                                                 step="0.05"
-                                                value={uiScale}
-                                                onChange={(e) => onUiScaleChange(parseFloat(e.target.value))}
+                                                value={tempUiScale}
+                                                onChange={(e) => setTempUiScale(parseFloat(e.target.value))}
                                                 className="w-32 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
                                             />
                                             <span className="w-16 text-center font-mono text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700/80 rounded-md px-2 py-1 text-sm">
-                                                {(uiScale * 100).toFixed(0)}%
+                                                {(tempUiScale * 100).toFixed(0)}%
                                             </span>
                                             <button
-                                                onClick={() => onUiScaleChange(1)}
-                                                disabled={uiScale === 1}
+                                                onClick={() => setTempUiScale(1)}
+                                                disabled={tempUiScale === 1}
                                                 className="p-1.5 text-gray-500 dark:text-gray-400 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
                                                 title="Reset to 100%"
                                             >
                                                 <Icon name="ArrowPath" iconSet={iconSet} className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => onUiScaleChange(tempUiScale)}
+                                                disabled={!isScaleDirty}
+                                                className="px-3 py-1.5 text-sm font-semibold rounded-md transition-colors bg-sky-600 text-white hover:bg-sky-700 disabled:bg-gray-400 disabled:dark:bg-gray-600 disabled:cursor-not-allowed"
+                                            >
+                                                Apply
                                             </button>
                                         </div>
                                     </div>
