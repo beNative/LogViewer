@@ -4,6 +4,19 @@ This document tracks the major changes, new features, and bug fixes for the Log 
 
 ---
 
+### **Version 0.12.0** - Advanced Settings Management
+
+_Date: 2025-08-30_
+
+This release introduces powerful new capabilities for managing application settings, giving advanced users direct control over the configuration.
+
+#### ✨ Features & Improvements
+- **Editable Settings JSON**: The "JSON Source" tab within the Settings page now features a full, syntax-highlighted editor, allowing for direct modification of the `settings.json` content.
+- **Import/Export Settings**: Users can now export their current settings to a `.json` file for backup or sharing. A corresponding import function allows for quickly loading a configuration file.
+- **Robust Save/Discard**: When editing the settings JSON, users can save their changes to apply them globally or discard them to revert to the last saved state. The editor provides real-time validation to prevent saving invalid JSON.
+
+---
+
 ### **Version 0.11.0** - Exclusion Filters & UI Polish
 
 _Date: 2025-08-29_

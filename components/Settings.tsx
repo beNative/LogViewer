@@ -1,7 +1,7 @@
 import React from 'react';
 import { ColumnStyleSettings } from './ColumnStyleSettings.tsx';
-import { ColumnStyles, ViewMode, IconSet, LogTableDensity } from '../types.ts';
-import { JsonSyntaxHighlighter } from './JsonSyntaxHighlighter.tsx';
+import { ColumnStyles, ViewMode, IconSet, LogTableDensity, Settings as SettingsType } from '../types.ts';
+import { JsonEditor } from './JsonEditor.tsx';
 import { Icon } from './icons/index.tsx';
 import { DensityControl } from './DensityControl.tsx';
 
@@ -24,6 +24,7 @@ interface SettingsProps {
   onAllowPrereleaseChange: (allow: boolean) => void;
   uiScale: number;
   onUiScaleChange: (newScale: number) => void;
+  onFullSettingsUpdate: (newSettings: SettingsType) => Promise<void>;
 }
 
 const ToggleSwitch: React.FC<{
@@ -108,12 +109,18 @@ export const Settings: React.FC<SettingsProps> = ({
     isTimeRangeSelectorVisible, onTimeRangeSelectorVisibilityChange,
     logTableDensity, onLogTableDensityChange,
     allowPrerelease, onAllowPrereleaseChange,
-    uiScale, onUiScaleChange
+    uiScale, onUiScaleChange,
+    onFullSettingsUpdate
 }) => {
-    const [settings, setSettings] = React.useState<any>(null);
+    const [savedSettings, setSavedSettings] = React.useState<any>(null);
     const [settingsPath, setSettingsPath] = React.useState<string>('');
     const [error, setError] = React.useState<string>('');
     const [activeTab, setActiveTab] = React.useState<'controls' | 'json'>('controls');
+    const [jsonText, setJsonText] = React.useState('');
+    const [isJsonValid, setIsJsonValid] = React.useState(true);
+    const [isDirty, setIsDirty] = React.useState(false);
+    const importInputRef = React.useRef<HTMLInputElement>(null);
+
 
     React.useEffect(() => {
         if (!window.electronAPI) {
@@ -124,8 +131,11 @@ export const Settings: React.FC<SettingsProps> = ({
             try {
                 const fetchedSettings = await window.electronAPI.getSettings();
                 const fetchedPath = await window.electronAPI.getSettingsPath();
-                setSettings(fetchedSettings);
+                setSavedSettings(fetchedSettings);
                 setSettingsPath(fetchedPath);
+                setJsonText(JSON.stringify(fetchedSettings, null, 2));
+                setIsJsonValid(true);
+                setIsDirty(false);
             } catch (e) {
                 const message = e instanceof Error ? e.message : 'An unknown error occurred';
                 setError(`Failed to load settings: ${message}`);
@@ -140,6 +150,73 @@ export const Settings: React.FC<SettingsProps> = ({
             window.electronAPI.showSettingsFile();
         }
     }
+
+    const handleJsonChange = (newText: string) => {
+        setJsonText(newText);
+        try {
+            const parsed = JSON.parse(newText);
+            setIsJsonValid(true);
+            setIsDirty(JSON.stringify(parsed, null, 2) !== JSON.stringify(savedSettings, null, 2));
+        } catch (e) {
+            setIsJsonValid(false);
+            setIsDirty(true);
+        }
+    };
+
+    const handleSaveChanges = async () => {
+        if (!isJsonValid) {
+            alert("Cannot save: The JSON is invalid.");
+            return;
+        }
+        const newSettings = JSON.parse(jsonText);
+        await onFullSettingsUpdate(newSettings);
+        // After successful save, update local state to match
+        setSavedSettings(newSettings);
+        setIsDirty(false);
+    };
+
+    const handleDiscardChanges = () => {
+        setJsonText(JSON.stringify(savedSettings, null, 2));
+        setIsJsonValid(true);
+        setIsDirty(false);
+    };
+
+    const handleExport = () => {
+        const blob = new Blob([jsonText], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'log-analyser-settings.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
+    const handleImportClick = () => {
+        importInputRef.current?.click();
+    };
+
+    const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const content = event.target?.result as string;
+            try {
+                // Validate it's JSON before setting
+                JSON.parse(content);
+                // Prettify the imported JSON
+                handleJsonChange(JSON.stringify(JSON.parse(content), null, 2));
+            } catch (error) {
+                alert('Invalid JSON file. Please select a valid settings file.');
+            }
+        };
+        reader.readAsText(file);
+        e.target.value = ''; // Reset input to allow re-importing the same file
+    };
+
 
     return (
         <div className="flex-grow overflow-y-auto bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-300">
@@ -273,10 +350,34 @@ export const Settings: React.FC<SettingsProps> = ({
                          </div>
 
                          <div className="lg:col-span-2">
-                            <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 h-full">
-                                <h2 className="text-xl font-semibold text-gray-800 dark:text-300 mb-4">File Content</h2>
-                                {settings ? (
-                                    <JsonSyntaxHighlighter jsonString={JSON.stringify(settings, null, 2)} />
+                            <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 h-full flex flex-col" style={{minHeight: '60vh'}}>
+                                <div className="flex justify-between items-center mb-4 flex-wrap gap-2">
+                                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-300">File Content</h2>
+                                    <div className="flex items-center gap-2">
+                                        <input type="file" ref={importInputRef} onChange={handleFileImport} className="hidden" accept=".json,application/json" />
+                                        <button onClick={handleImportClick} className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors duration-200 bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200" title="Import settings from file">
+                                            <Icon name="ArrowUpTray" iconSet={iconSet} className="w-4 h-4" /> Import
+                                        </button>
+                                        <button onClick={handleExport} className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors duration-200 bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200" title="Export current settings to file">
+                                            <Icon name="Download" iconSet={iconSet} className="w-4 h-4" /> Export
+                                        </button>
+                                        <button onClick={handleDiscardChanges} disabled={!isDirty} className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors duration-200 bg-white hover:bg-gray-200 text-gray-800 border border-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white dark:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed" title="Discard unsaved changes">
+                                            <Icon name="ArrowPath" iconSet={iconSet} className="w-4 h-4" /> Discard
+                                        </button>
+                                        <button onClick={handleSaveChanges} disabled={!isDirty || !isJsonValid} className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors duration-200 bg-sky-600 hover:bg-sky-700 text-white disabled:opacity-50 disabled:cursor-not-allowed" title={!isJsonValid ? "Cannot save: Invalid JSON" : "Save changes"}>
+                                            <Icon name="SaveDisk" iconSet={iconSet} className="w-4 h-4" /> Save
+                                        </button>
+                                    </div>
+                                </div>
+                                {!isJsonValid && (
+                                    <div className="mb-2 text-sm text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/50 p-2 rounded-md">
+                                        The content is not valid JSON. Please correct it before saving.
+                                    </div>
+                                )}
+                                {savedSettings ? (
+                                    <div className="flex-grow min-h-0">
+                                        <JsonEditor value={jsonText} onChange={handleJsonChange} />
+                                    </div>
                                 ) : (
                                     <p className="text-gray-500 dark:text-gray-400">Loading settings...</p>
                                 )}

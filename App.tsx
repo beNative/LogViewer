@@ -1,6 +1,6 @@
 import React from 'react';
 // FIX: Import the centralized Theme type from types.ts.
-import { LogEntry, ConsoleMessage, FilterState, ConsoleMessageType, DashboardData, PageTimestampRange, SessionFile, ColumnVisibilityState, ColumnStyles, PanelWidths, ViewMode, OverallTimeRange, FileTimeRange, LogDensityPoint, IconSet, LogTableDensity, Theme } from './types.ts';
+import { LogEntry, ConsoleMessage, FilterState, ConsoleMessageType, DashboardData, PageTimestampRange, SessionFile, ColumnVisibilityState, ColumnStyles, PanelWidths, ViewMode, OverallTimeRange, FileTimeRange, LogDensityPoint, IconSet, LogTableDensity, Theme, Settings as SettingsType } from './types.ts';
 import { LogTable } from './components/LogTable.tsx';
 import { ProgressIndicator } from './components/ProgressIndicator.tsx';
 import { Database, getSqlDateTime } from './db.ts';
@@ -1126,6 +1126,46 @@ const handleUiScaleChange = async (newScale: number) => {
     }
   };
 
+  const handleFullSettingsUpdate = async (newSettings: SettingsType) => {
+    // Save to disk first
+    if (window.electronAPI) {
+        const { success, error: saveError } = await window.electronAPI.setSettings(newSettings);
+        if (!success) {
+            const msg = `Failed to save updated settings: ${saveError || 'Unknown error'}`;
+            logToConsole(msg, 'ERROR');
+            setError(msg); // Show error to user
+            return; // Abort state update if save fails
+        }
+    }
+
+    // Update all relevant state variables in the app
+    if (newSettings.theme === 'light' || newSettings.theme === 'dark') setTheme(newSettings.theme);
+    if (newSettings.viewMode === 'pagination' || newSettings.viewMode === 'scroll') setViewMode(newSettings.viewMode);
+    if (newSettings.iconSet) setIconSet(newSettings.iconSet);
+    if (newSettings.logTableDensity) setLogTableDensity(newSettings.logTableDensity);
+    if (newSettings.columnVisibility) setColumnVisibility({ ...initialColumnVisibility, ...newSettings.columnVisibility });
+    
+    // Deep merge column styles
+    const mergedStyles = { ...initialColumnStyles };
+    for (const key in mergedStyles) {
+        if (newSettings.columnStyles[key as keyof ColumnStyles]) {
+            mergedStyles[key as keyof ColumnStyles] = { 
+                ...mergedStyles[key as keyof ColumnStyles], 
+                ...newSettings.columnStyles[key as keyof ColumnStyles] 
+            };
+        }
+    }
+    setColumnStyles(mergedStyles);
+
+    if (newSettings.customFilterPresets) setCustomFilterPresets(newSettings.customFilterPresets);
+    if (newSettings.panelWidths) setPanelWidths({ ...initialPanelWidths, ...newSettings.panelWidths });
+    if (typeof newSettings.isTimeRangeSelectorVisible === 'boolean') setIsTimeRangeSelectorVisible(newSettings.isTimeRangeSelectorVisible);
+    if (typeof newSettings.allowPrerelease === 'boolean') setAllowPrerelease(newSettings.allowPrerelease);
+    if (typeof newSettings.uiScale === 'number') setUiScale(newSettings.uiScale);
+    
+    logToConsole('Settings updated and applied from JSON editor.', 'INFO');
+};
+
   const handleLoadSession = React.useCallback(async (name: string) => {
     if (!window.electronAPI) return;
     setIsLoading(true);
@@ -1478,7 +1518,7 @@ const handleUiScaleChange = async (newScale: number) => {
               isOpen={isAboutDialogOpen}
               onClose={() => setIsAboutDialogOpen(false)}
               iconSet={iconSet}
-              version="0.11.0"
+              version="0.12.0"
           />
       )}
       {isLoading && <ProgressIndicator progress={progress} message={progressMessage} phase={progressPhase} detailedProgress={detailedProgress} iconSet={iconSet} />}
@@ -1617,6 +1657,7 @@ const handleUiScaleChange = async (newScale: number) => {
               onAllowPrereleaseChange={handleAllowPrereleaseChange}
               uiScale={uiScale}
               onUiScaleChange={handleUiScaleChange}
+              onFullSettingsUpdate={handleFullSettingsUpdate}
             />
         )}
       </main>
