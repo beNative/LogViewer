@@ -106,14 +106,12 @@ export interface PanelWidths {
     details: number;
 }
 
-// FIX: Export a reusable Theme type.
 export type Theme = 'light' | 'dark';
 export type ViewMode = 'pagination' | 'scroll';
 export type IconSet = 'sharp' | 'solid' | 'feather' | 'tabler' | 'lucide';
 export type LogTableDensity = 'compact' | 'normal' | 'comfortable';
 
 export interface Settings {
-    // FIX: Use the exported Theme type.
     theme: Theme;
     viewMode: ViewMode;
     iconSet: IconSet;
@@ -142,3 +140,5 @@ export interface LogDensityPoint {
     time: number; // Start time of the bucket
     count: number;
 }
+
+export type ProgressPhase = 'reading' | 'unzipping' | 'parsing' | 'inserting' | 'indexing' | 'loading';

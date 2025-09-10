@@ -1,5 +1,4 @@
 import React from 'react';
-// FIX: Import the centralized Theme type from types.ts.
 import { LogEntry, FilterState, PageTimestampRange, ColumnVisibilityState, ColumnStyles, ColumnKey, PanelWidths, ViewMode, ConsoleMessage, OverallTimeRange, FileTimeRange, LogDensityPoint, IconSet, LogTableDensity, Theme } from '../types.ts';
 import { Icon } from './icons/index.tsx';
 import { FilterBar } from './FilterBar.tsx';
@@ -7,12 +6,10 @@ import { LogDetailPanel } from './LogDetailPanel.tsx';
 import { highlightText } from '../utils.ts';
 import { ColumnSelector } from './ColumnSelector.tsx';
 import { TimeRangeSelector } from './TimeRangeSelector.tsx';
-import { getSqlDateTime } from '../db.ts';
 import { ActiveFilters } from './ActiveFilters.tsx';
 import { ContextMenu } from './ContextMenu.tsx';
 import { DensityControl } from './DensityControl.tsx';
 
-// FIX: Removed local Theme type definition. It is now imported from types.ts.
 type ContextMenuState = { x: number; y: number; entry: LogEntry; value: string; key: ColumnKey; };
 
 interface LogTableProps {
@@ -149,7 +146,6 @@ export const LogTable: React.FC<LogTableProps> = ({
   
   const [localPanelWidths, setLocalPanelWidths] = React.useState<PanelWidths>(panelWidths);
   const [isResizing, setIsResizing] = React.useState<'filters' | 'details' | null>(null);
-  const [isDebugMenuOpen, setIsDebugMenuOpen] = React.useState(false);
   const [isDetailPanelVisible, setIsDetailPanelVisible] = React.useState(false);
   const [contextMenu, setContextMenu] = React.useState<ContextMenuState | null>(null);
   
@@ -158,7 +154,6 @@ export const LogTable: React.FC<LogTableProps> = ({
   const mainContainerRef = React.useRef<HTMLElement>(null);
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const tableBodyRef = React.useRef<HTMLTableSectionElement>(null);
-  const debugButtonRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     setLocalPanelWidths(panelWidths);
@@ -186,19 +181,16 @@ export const LogTable: React.FC<LogTableProps> = ({
     return () => container.removeEventListener('scroll', handleScroll);
   }, [viewMode, hasMore, isBusy, onLoadMore]);
 
-  // Close debug menu and context menu if clicked outside
+  // Close context menu if clicked outside
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-        if (isDebugMenuOpen && debugButtonRef.current && !debugButtonRef.current.contains(event.target as Node)) {
-            setIsDebugMenuOpen(false);
-        }
         if (contextMenu) {
             setContextMenu(null);
         }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isDebugMenuOpen, contextMenu]);
+  }, [contextMenu]);
 
   const handleResizeMouseDown = (e: React.MouseEvent, panel: 'filters' | 'details') => {
     e.preventDefault();
@@ -236,12 +228,6 @@ export const LogTable: React.FC<LogTableProps> = ({
     }
 
   }, [isResizing, localPanelWidths.filters, localPanelWidths.details, selectedEntry, isDetailPanelVisible]);
-
-  const handleLogLayout = () => {
-    setIsDebugMenuOpen(false);
-    logToConsole("Layout debugging is not applicable for the current scroll mode.", 'INFO');
-    alert('The layout debugging tool is for the legacy virtualization mode and is not needed for the current table implementation.');
-  };
 
   React.useEffect(() => {
     window.addEventListener('mousemove', handleResizeMouseMove);
@@ -699,27 +685,6 @@ export const LogTable: React.FC<LogTableProps> = ({
                             <Icon name="SidebarRight" iconSet={iconSet} className="w-5 h-5" />
                             <span>Details</span>
                         </button>
-                        <div className="relative" ref={debugButtonRef}>
-                            <button
-                                onClick={() => setIsDebugMenuOpen(!isDebugMenuOpen)}
-                                className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600"
-                                title="Debug Menu"
-                            >
-                                <Icon name="BugAnt" iconSet={iconSet} className="w-5 h-5" />
-                            </button>
-                            {isDebugMenuOpen && (
-                                <div className="absolute bottom-full mb-2 right-0 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-20">
-                                    <div className="p-1">
-                                        <button
-                                            onClick={handleLogLayout}
-                                            className="w-full text-left flex items-center gap-3 px-3 py-2 text-sm rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                        >
-                                            Log Layout Dimensions
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
                     </div>
                 </div>
 

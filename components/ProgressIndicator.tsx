@@ -1,16 +1,9 @@
-
-
 import React from 'react';
 import { formatBytes } from '../utils.ts';
 import { Icon } from './icons/index.tsx';
-import { IconSet } from '../types.ts';
+import { IconSet, ProgressPhase } from '../types.ts';
 
-// FIX: Infer the Icon's name prop type to ensure type safety.
 type IconName = React.ComponentProps<typeof Icon>['name'];
-
-// The ProgressPhase type is defined in App.tsx and passed down via props.
-// We just need to ensure our `phaseDetails` object can handle the new 'loading' phase.
-type ProgressPhase = 'reading' | 'unzipping' | 'parsing' | 'inserting' | 'indexing' | 'loading';
 
 interface ProgressIndicatorProps {
   progress: number;
