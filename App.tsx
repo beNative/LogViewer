@@ -242,6 +242,7 @@ const App: React.FC = () => {
   const [isTimeRangeSelectorVisible, setIsTimeRangeSelectorVisible] = React.useState(true);
   const [logTableDensity, setLogTableDensity] = React.useState<LogTableDensity>('normal');
   const [allowPrerelease, setAllowPrerelease] = React.useState<boolean>(false);
+  const [uiScale, setUiScale] = React.useState<number>(1);
   
   const [hasMoreLogs, setHasMoreLogs] = React.useState(true);
   const [keyboardSelectedId, setKeyboardSelectedId] = React.useState<number | null>(null);
@@ -458,6 +459,10 @@ const App: React.FC = () => {
                     setAllowPrerelease(settings.allowPrerelease);
                     logToConsole(`Pre-release updates set to '${settings.allowPrerelease}' from settings.`, 'DEBUG');
                 }
+                if (typeof settings.uiScale === 'number') {
+                    setUiScale(settings.uiScale);
+                    logToConsole(`UI Scale set to '${(settings.uiScale * 100).toFixed(0)}%' from settings.`, 'DEBUG');
+                }
             })
             .catch(err => {
                 const msg = err instanceof Error ? err.message : String(err);
@@ -485,6 +490,10 @@ const App: React.FC = () => {
     }
   }, [theme]);
   
+  React.useEffect(() => {
+    // FIX: Cast style to any to set the non-standard 'zoom' property, which is not in the default CSSStyleDeclaration type.
+    (document.documentElement.style as any).zoom = `${uiScale}`;
+  }, [uiScale]);
 
   // This single effect handles all data fetching and state updates when filters or pagination change.
   // It replaces the two previous, separate effects to prevent race conditions and ensure UI consistency.
@@ -1103,6 +1112,20 @@ const handleAllowPrereleaseChange = async (allow: boolean) => {
     }
 };
 
+const handleUiScaleChange = async (newScale: number) => {
+    setUiScale(newScale);
+    if (window.electronAPI) {
+        try {
+            const settings = await window.electronAPI.getSettings();
+            await window.electronAPI.setSettings({ ...settings, uiScale: newScale });
+            logToConsole(`UI Scale changed to '${(newScale * 100).toFixed(0)}%' and settings saved.`, 'INFO');
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            logToConsole(`Failed to save UI Scale setting: ${msg}`, 'ERROR');
+        }
+    }
+  };
+
   const handleLoadSession = React.useCallback(async (name: string) => {
     if (!window.electronAPI) return;
     setIsLoading(true);
@@ -1592,6 +1615,8 @@ const handleAllowPrereleaseChange = async (allow: boolean) => {
               onLogTableDensityChange={handleLogTableDensityChange}
               allowPrerelease={allowPrerelease}
               onAllowPrereleaseChange={handleAllowPrereleaseChange}
+              uiScale={uiScale}
+              onUiScaleChange={handleUiScaleChange}
             />
         )}
       </main>

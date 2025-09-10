@@ -124,6 +124,7 @@ export interface Settings {
     isTimeRangeSelectorVisible: boolean;
     logTableDensity: LogTableDensity;
     allowPrerelease: boolean;
+    uiScale: number;
 }
 
 export interface OverallTimeRange {

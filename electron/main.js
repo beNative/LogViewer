@@ -84,6 +84,7 @@ function getSettings() {
             details: 500,
         },
         isTimeRangeSelectorVisible: true,
+        uiScale: 1,
     };
     try {
         if (fs.existsSync(settingsPath)) {
@@ -122,6 +123,7 @@ function getSettings() {
                     ...(loadedSettings.panelWidths || {}),
                 },
                 isTimeRangeSelectorVisible: loadedSettings.isTimeRangeSelectorVisible ?? defaultSettings.isTimeRangeSelectorVisible,
+                uiScale: loadedSettings.uiScale ?? defaultSettings.uiScale,
             };
             
             // Clean up deprecated keys from old versions

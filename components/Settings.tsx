@@ -22,6 +22,8 @@ interface SettingsProps {
   onLogTableDensityChange: (newDensity: LogTableDensity) => void;
   allowPrerelease: boolean;
   onAllowPrereleaseChange: (allow: boolean) => void;
+  uiScale: number;
+  onUiScaleChange: (newScale: number) => void;
 }
 
 const ToggleSwitch: React.FC<{
@@ -105,7 +107,8 @@ export const Settings: React.FC<SettingsProps> = ({
     columnStyles, onColumnStylesChange,
     isTimeRangeSelectorVisible, onTimeRangeSelectorVisibilityChange,
     logTableDensity, onLogTableDensityChange,
-    allowPrerelease, onAllowPrereleaseChange
+    allowPrerelease, onAllowPrereleaseChange,
+    uiScale, onUiScaleChange
 }) => {
     const [settings, setSettings] = React.useState<any>(null);
     const [settingsPath, setSettingsPath] = React.useState<string>('');
@@ -175,6 +178,31 @@ export const Settings: React.FC<SettingsProps> = ({
                                             onChange={onAllowPrereleaseChange}
                                         />
                                     )}
+                                     <div className="flex items-center justify-between">
+                                        <span className="font-medium text-gray-800 dark:text-gray-200">UI Scale</span>
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="range"
+                                                min="0.5"
+                                                max="4"
+                                                step="0.05"
+                                                value={uiScale}
+                                                onChange={(e) => onUiScaleChange(parseFloat(e.target.value))}
+                                                className="w-32 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                                            />
+                                            <span className="w-16 text-center font-mono text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700/80 rounded-md px-2 py-1 text-sm">
+                                                {(uiScale * 100).toFixed(0)}%
+                                            </span>
+                                            <button
+                                                onClick={() => onUiScaleChange(1)}
+                                                disabled={uiScale === 1}
+                                                className="p-1.5 text-gray-500 dark:text-gray-400 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                title="Reset to 100%"
+                                            >
+                                                <Icon name="ArrowPath" iconSet={iconSet} className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </div>
                                     <SegmentedControl
                                         label="Log Viewer Mode"
                                         value={viewMode}
@@ -246,7 +274,7 @@ export const Settings: React.FC<SettingsProps> = ({
 
                          <div className="lg:col-span-2">
                             <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 h-full">
-                                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-300 mb-4">File Content</h2>
+                                <h2 className="text-xl font-semibold text-gray-800 dark:text-300 mb-4">File Content</h2>
                                 {settings ? (
                                     <JsonSyntaxHighlighter jsonString={JSON.stringify(settings, null, 2)} />
                                 ) : (
