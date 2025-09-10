@@ -1567,6 +1567,10 @@ const handleUiScaleChange = async (newScale: number) => {
               uiScale={uiScale}
               onUiScaleChange={handleUiScaleChange}
               onFullSettingsUpdate={handleFullSettingsUpdate}
+              // Pass missing props for JSON editor
+              columnVisibility={columnVisibility}
+              customFilterPresets={customFilterPresets}
+              panelWidths={panelWidths}
             />
         )}
       </main>

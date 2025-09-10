@@ -1,6 +1,6 @@
 import React from 'react';
 import { ColumnStyleSettings } from './ColumnStyleSettings.tsx';
-import { ColumnStyles, ViewMode, IconSet, LogTableDensity, Settings as SettingsType } from '../types.ts';
+import { ColumnStyles, ViewMode, IconSet, LogTableDensity, Settings as SettingsType, ColumnVisibilityState, PanelWidths, FilterState } from '../types.ts';
 import { JsonEditor } from './JsonEditor.tsx';
 import { Icon } from './icons/index.tsx';
 import { DensityControl } from './DensityControl.tsx';
@@ -25,6 +25,10 @@ interface SettingsProps {
   uiScale: number;
   onUiScaleChange: (newScale: number) => void;
   onFullSettingsUpdate: (newSettings: SettingsType) => Promise<void>;
+  // Props needed for constructing the full settings object
+  columnVisibility: ColumnVisibilityState;
+  customFilterPresets: Record<string, FilterState>;
+  panelWidths: PanelWidths;
 }
 
 const ToggleSwitch: React.FC<{
@@ -101,18 +105,20 @@ const TabButton: React.FC<{ label: string; isActive: boolean; onClick: () => voi
 };
 
 
-export const Settings: React.FC<SettingsProps> = ({ 
-    theme, onThemeChange, 
-    viewMode, onViewModeChange, 
-    iconSet, onIconSetChange,
-    columnStyles, onColumnStylesChange,
-    isTimeRangeSelectorVisible, onTimeRangeSelectorVisibilityChange,
-    logTableDensity, onLogTableDensityChange,
-    allowPrerelease, onAllowPrereleaseChange,
-    uiScale, onUiScaleChange,
-    onFullSettingsUpdate
-}) => {
-    const [savedSettings, setSavedSettings] = React.useState<any>(null);
+export const Settings: React.FC<SettingsProps> = (props) => {
+    const { 
+        theme, onThemeChange, 
+        viewMode, onViewModeChange, 
+        iconSet, onIconSetChange,
+        columnStyles, onColumnStylesChange,
+        isTimeRangeSelectorVisible, onTimeRangeSelectorVisibilityChange,
+        logTableDensity, onLogTableDensityChange,
+        allowPrerelease, onAllowPrereleaseChange,
+        uiScale, onUiScaleChange,
+        onFullSettingsUpdate
+    } = props;
+    
+    const [savedSettings, setSavedSettings] = React.useState<SettingsType | null>(null);
     const [settingsPath, setSettingsPath] = React.useState<string>('');
     const [error, setError] = React.useState<string>('');
     const [activeTab, setActiveTab] = React.useState<'controls' | 'json'>('controls');
@@ -185,9 +191,11 @@ export const Settings: React.FC<SettingsProps> = ({
     };
 
     const handleDiscardChanges = () => {
-        setJsonText(JSON.stringify(savedSettings, null, 2));
-        setIsJsonValid(true);
-        setIsDirty(false);
+        if (savedSettings) {
+            setJsonText(JSON.stringify(savedSettings, null, 2));
+            setIsJsonValid(true);
+            setIsDirty(false);
+        }
     };
 
     const handleExport = () => {
