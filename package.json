@@ -10,23 +10,25 @@
     "build:css": "postcss styles.css -o dist/styles.css",
     "build:js": "esbuild index.tsx --bundle --outfile=dist/bundle.js --jsx=automatic",
     "build": "npm run build:css && npm run build:js",
+    "clean": "rimraf release-builds",
     "start": "npm run build && electron .",
     "serve": "npm run build:css && concurrently \"npm run build:css -- --watch\" \"esbuild index.tsx --bundle --outfile=dist/bundle.js --jsx=automatic --servedir=. --serve=:3000\"",
-    "dist": "npm run build && electron-builder",
-    "publish": "npm run build && electron-builder --publish always"
+    "dist": "npm run clean && npm run build && electron-builder",
+    "publish": "npm run clean && npm run build && electron-builder --publish always"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.19",
     "concurrently": "^8.2.2",
-    "electron": "^29.1.5",
+    "electron": "^29.4.6",
     "electron-builder": "^24.13.3",
     "esbuild": "^0.20.2",
     "postcss": "^8.4.38",
     "postcss-cli": "^11.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "rimraf": "^5.0.7",
     "tailwindcss": "^3.4.3"
   },
   "dependencies": {
