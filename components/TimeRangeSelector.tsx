@@ -34,6 +34,7 @@ interface TimeRangeSelectorProps {
     onZoomToExtent: () => void;
     zoomToSelectionEnabled: boolean;
     iconSet: IconSet;
+    uiScale: number;
 }
 
 type DragState =
@@ -182,7 +183,8 @@ const OverviewBrush: React.FC<{
     positionToValue: PositionToValueFn;
     onViewRangeChange: (range: OverallTimeRange | null) => void;
     onRangeChange: (startTime: number, endTime: number) => void;
-}> = ({ minTime, maxTime, viewMin, viewMax, selectedMin, selectedMax, density, theme, valueToPosition, positionToValue, onViewRangeChange, onRangeChange }) => {
+    uiScale: number;
+}> = ({ minTime, maxTime, viewMin, viewMax, selectedMin, selectedMax, density, theme, valueToPosition, positionToValue, onViewRangeChange, onRangeChange, uiScale }) => {
     const containerRef = React.useRef<HTMLDivElement>(null);
 
     type OverviewDragState =
@@ -203,7 +205,7 @@ const OverviewBrush: React.FC<{
         e.stopPropagation();
 
         const rect = containerRef.current!.getBoundingClientRect();
-        const clickPos = e.clientX - rect.left;
+        const clickPos = (e.clientX - rect.left) / uiScale;
         const clickTime = positionToValue(clickPos);
         setDragState({ type: 'new_overview_selection', startX: e.clientX, startTime: clickTime });
     };
@@ -213,11 +215,12 @@ const OverviewBrush: React.FC<{
         e.preventDefault();
 
         const rect = containerRef.current.getBoundingClientRect();
-        const currentPos = e.clientX - rect.left;
+        const currentPos = (e.clientX - rect.left) / uiScale;
         const currentTime = positionToValue(currentPos);
 
         const deltaX = e.clientX - dragState.startX;
-        const deltaTime = positionToValue(deltaX) - positionToValue(0);
+        const unscaledDeltaX = deltaX / uiScale;
+        const deltaTime = positionToValue(unscaledDeltaX) - positionToValue(0);
 
         if (dragState.type === 'new_overview_selection') {
             const start = Math.min(dragState.startTime, currentTime);
@@ -255,7 +258,7 @@ const OverviewBrush: React.FC<{
         if (newMin < newMax) {
             onViewRangeChange({ min: newMin, max: newMax });
         }
-    }, [dragState, minTime, maxTime, positionToValue, onViewRangeChange]);
+    }, [dragState, minTime, maxTime, positionToValue, onViewRangeChange, uiScale]);
 
     const handleMouseUp = React.useCallback((e: MouseEvent) => {
         if (dragState?.type === 'new_overview_selection') {
@@ -335,7 +338,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     pageTimestampRanges, fileTimeRanges, logDensity, overallLogDensity, datesWithLogs, viewMode, onGoToPage,
     onCursorChange, onFileSelect, onDateSelect,
     cursorTime = null, activeFileName = null, activeDate = null, currentPage = null,
-    viewRange, onViewRangeChange, onZoomToSelection, onZoomToExtent, zoomToSelectionEnabled, iconSet
+    viewRange, onViewRangeChange, onZoomToSelection, onZoomToExtent, zoomToSelectionEnabled, iconSet, uiScale
 }) => {
     const mainContainerRef = React.useRef<HTMLDivElement>(null);
     const overviewContainerRef = React.useRef<HTMLDivElement>(null);
@@ -385,7 +388,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
         e.preventDefault();
         
         const rect = mainContainerRef.current!.getBoundingClientRect();
-        const clickPos = e.clientX - rect.left;
+        const clickPos = (e.clientX - rect.left) / uiScale;
         const clickTime = mainPosToValue(clickPos);
 
         setDragState({
@@ -402,12 +405,16 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
         const handleMouseMove = (e: MouseEvent) => {
             if (!dragState || !mainContainerRef.current) return;
             e.preventDefault();
+            const rect = mainContainerRef.current.getBoundingClientRect();
+            
             const deltaX = e.clientX - dragState.startX;
-            const deltaTime = mainPosToValue(deltaX) - mainPosToValue(0);
+            const unscaledDeltaX = deltaX / uiScale;
+            const deltaTime = mainPosToValue(unscaledDeltaX) - mainPosToValue(0);
 
             switch (dragState.type) {
                 case 'new_selection': {
-                    const currentTime = mainPosToValue(e.clientX - mainContainerRef.current.getBoundingClientRect().left);
+                    const currentUnscaledPos = (e.clientX - rect.left) / uiScale;
+                    const currentTime = mainPosToValue(currentUnscaledPos);
                     const start = Math.min(dragState.startTime, currentTime);
                     const end = Math.max(dragState.startTime, currentTime);
                     setTempSelection({ start, end });
@@ -460,7 +467,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
             document.removeEventListener('mousemove', handleMouseMove);
             document.removeEventListener('mouseup', handleMouseUp);
         };
-    }, [dragState, mainPosToValue, displayMinTime, displayMaxTime, onRangeChange, onCursorChange, tempSelection]);
+    }, [dragState, mainPosToValue, displayMinTime, displayMaxTime, onRangeChange, onCursorChange, tempSelection, uiScale]);
 
     const barComponents = [];
     const barProps = { displayMinTime: displayMinTime, displayMaxTime: displayMaxTime };
@@ -557,6 +564,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                             valueToPosition={overviewValueToPos} positionToValue={overviewPosToValue}
                             onViewRangeChange={onViewRangeChange}
                             onRangeChange={onRangeChange}
+                            uiScale={uiScale}
                         />
                     )}
                 </div>

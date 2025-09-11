@@ -1588,6 +1588,7 @@ const handleUiScaleChange = async (newScale: number) => {
                 onRemoveAppliedFilter={handleRemoveAppliedFilter}
                 logTableDensity={logTableDensity}
                 onLogTableDensityChange={handleLogTableDensityChange}
+                uiScale={uiScale}
               />
             ) : (
                 <div className="flex-grow flex items-center justify-center p-8 text-center bg-white dark:bg-gray-900">

@@ -69,6 +69,7 @@ interface LogTableProps {
   onRemoveAppliedFilter: (key: keyof FilterState, value?: string) => void;
   logTableDensity: LogTableDensity;
   onLogTableDensityChange: (density: LogTableDensity) => void;
+  uiScale: number;
 }
 
 export const getLevelColor = (level: string): string => {
@@ -140,7 +141,8 @@ export const LogTable: React.FC<LogTableProps> = ({
   iconSet,
   onRemoveAppliedFilter,
   logTableDensity,
-  onLogTableDensityChange
+  onLogTableDensityChange,
+  uiScale
 }) => {
   const [selectedEntry, setSelectedEntry] = React.useState<LogEntry | null>(null);
   
@@ -652,6 +654,7 @@ export const LogTable: React.FC<LogTableProps> = ({
                             onZoomToExtent={onTimelineZoomReset}
                             zoomToSelectionEnabled={zoomToSelectionEnabled}
                             iconSet={iconSet}
+                            uiScale={uiScale}
                         />
                     </div>
                 )}
