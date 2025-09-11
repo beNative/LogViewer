@@ -1643,7 +1643,6 @@ const handleUiScaleChange = async (newScale: number) => {
             onRenameSession={handleRenameSession}
             onDeleteSession={handleDeleteSession}
             isDirty={isDirty}
-            onSaveSession={handleSaveSession}
             iconSet={iconSet}
           />
         )}

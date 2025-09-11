@@ -97,61 +97,33 @@ interface SessionManagerProps {
     onLoad: (name: string) => void;
     onRename: (oldName: string, newName: string) => Promise<boolean>;
     onDelete: (name: string) => void;
-    onNew: () => void;
-    onSave: () => Promise<boolean>;
     iconSet: IconSet;
 }
 
 export const SessionManager: React.FC<SessionManagerProps> = (props) => {
     return (
-        <div className="bg-gray-100 dark:bg-gray-900/50 p-4 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm flex flex-col h-full">
-            <div className="flex justify-between items-center mb-4 flex-shrink-0 flex-wrap gap-2">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                    <Icon name="Folder" iconSet={props.iconSet} className="w-7 h-7 text-sky-600 dark:text-sky-500" />
-                    Local Sessions
-                </h2>
-                <div className="flex items-center gap-2">
-                    <button 
-                        onClick={props.onSave}
-                        disabled={!props.isDirty}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors duration-200 bg-sky-600 hover:bg-sky-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {/* Fix: Changed icon name from "Save" to "SaveDisk" to match available icons. */}
-                        <Icon name="SaveDisk" iconSet={props.iconSet} className="w-5 h-5" />
-                        Save Session
-                    </button>
-                    <button 
-                        onClick={props.onNew}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors duration-200 bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200"
-                    >
-                        <Icon name="DocumentPlus" iconSet={props.iconSet} className="w-5 h-5" />
-                        New Blank
-                    </button>
+        <>
+            {props.sessions.length > 0 ? (
+                <ul className="space-y-2">
+                    {props.sessions.map(session => (
+                        <SessionItem
+                            key={session.path}
+                            session={session}
+                            isActive={session.name === props.activeSessionName}
+                            isDirty={props.isDirty}
+                            onLoad={props.onLoad}
+                            onRename={props.onRename}
+                            onDelete={props.onDelete}
+                            iconSet={props.iconSet}
+                        />
+                    ))}
+                </ul>
+            ) : (
+                <div className="text-center text-gray-500 dark:text-gray-400 py-10">
+                        <p>No saved sessions found.</p>
+                        <p className="text-sm mt-1">Create a new session by dropping files above.</p>
                 </div>
-            </div>
-            <div className="flex-grow overflow-y-auto -mr-2 pr-2">
-                 {props.sessions.length > 0 ? (
-                    <ul className="space-y-2">
-                        {props.sessions.map(session => (
-                            <SessionItem
-                                key={session.path}
-                                session={session}
-                                isActive={session.name === props.activeSessionName}
-                                isDirty={props.isDirty}
-                                onLoad={props.onLoad}
-                                onRename={props.onRename}
-                                onDelete={props.onDelete}
-                                iconSet={props.iconSet}
-                            />
-                        ))}
-                    </ul>
-                 ) : (
-                    <div className="text-center text-gray-500 dark:text-gray-400 py-10">
-                         <p>No saved sessions found.</p>
-                         <p className="text-sm mt-1">Add files to create a new session.</p>
-                    </div>
-                 )}
-            </div>
-        </div>
+            )}
+        </>
     );
 };
