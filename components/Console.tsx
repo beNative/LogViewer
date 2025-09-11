@@ -73,7 +73,7 @@ export const Console: React.FC<ConsoleProps> = ({ messages, onClear, filters, on
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-lg ring-1 ring-black/5 dark:ring-white/10 flex flex-col h-full">
+    <div className="bg-white dark:bg-gray-800 flex flex-col flex-grow">
       <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 flex-shrink-0 flex-wrap gap-2">
         <h3 className="font-mono text-sm font-semibold text-gray-600 dark:text-gray-300 order-1">APPLICATION LOG</h3>
         <div className="flex items-center space-x-2 order-3 sm:order-2 w-full sm:w-auto">
