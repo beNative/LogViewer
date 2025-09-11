@@ -225,6 +225,18 @@ const iconDefs = {
             </svg>
         )
     },
+    Cube: {
+        sharp: (props: React.SVGProps<SVGSVGElement>) => (
+            <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9.75l-9-5.25m9 5.25l9-5.25" />
+            </svg>
+        ),
+        solid: (props: React.SVGProps<SVGSVGElement>) => (
+            <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+                <path fillRule="evenodd" d="M12.516 2.17a.75.75 0 00-1.032 0L2.942 7.785a.75.75 0 00-.429.646v6.138a.75.75 0 00.429.646l8.542 5.615a.75.75 0 001.032 0l8.542-5.615a.75.75 0 00.429-.646V8.43a.75.75 0 00-.429-.646L12.516 2.17z" clipRule="evenodd" />
+            </svg>
+        )
+    },
     Database: {
         sharp: (props: React.SVGProps<SVGSVGElement>) => (
             <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>

@@ -142,3 +142,30 @@ export interface LogDensityPoint {
 }
 
 export type ProgressPhase = 'reading' | 'unzipping' | 'parsing' | 'inserting' | 'indexing' | 'loading';
+
+// --- Stock Tracker Types ---
+
+export interface StockInfoEntry {
+  timestamp: string;
+  message_id: number;
+  source: string;
+  destination: string;
+  article_id: string;
+  article_name: string;
+  dosage_form: string;
+  max_sub_item_quantity: number;
+  quantity: number;
+}
+
+export interface StockInfoFilters {
+    searchTerm: string;
+    dateFrom: string;
+    timeFrom: string;
+    dateTo: string;
+    timeTo: string;
+}
+
+export interface StockChartDataPoint {
+  time: string;
+  quantity: number;
+}

@@ -3,7 +3,8 @@ import {
     LogEntry, ConsoleMessage, FilterState, ConsoleMessageType, DashboardData, 
     PageTimestampRange, SessionFile, ColumnVisibilityState, ColumnStyles, 
     PanelWidths, ViewMode, OverallTimeRange, FileTimeRange, LogDensityPoint, 
-    IconSet, LogTableDensity, Theme, Settings as SettingsType, ProgressPhase 
+    IconSet, LogTableDensity, Theme, Settings as SettingsType, ProgressPhase,
+    StockInfoEntry, StockInfoFilters
 } from './types.ts';
 import { LogTable } from './components/LogTable.tsx';
 import { ProgressIndicator } from './components/ProgressIndicator.tsx';
@@ -17,6 +18,7 @@ import { Settings } from './components/Settings.tsx';
 import { Info } from './components/Info.tsx';
 import { StatusBar } from './components/StatusBar.tsx';
 import { AboutDialog } from './components/AboutDialog.tsx';
+import { StockTracker } from './components/StockTracker.tsx';
 
 // JSZip is loaded from script tag
 declare const JSZip: any;
@@ -130,7 +132,7 @@ const App: React.FC = () => {
   const [overallLogDensity, setOverallLogDensity] = React.useState<LogDensityPoint[]>([]);
   const [datesWithLogs, setDatesWithLogs] = React.useState<string[]>([]);
 
-  const [activeView, setActiveView] = React.useState<'data' | 'viewer' | 'dashboard' | 'console' | 'settings' | 'info'>('data');
+  const [activeView, setActiveView] = React.useState<'data' | 'viewer' | 'dashboard' | 'console' | 'settings' | 'info' | 'stock'>('data');
   const [theme, setTheme] = React.useState<Theme>('light');
   const [viewMode, setViewMode] = React.useState<ViewMode>('pagination');
   const [iconSet, setIconSet] = React.useState<IconSet>('sharp');
@@ -147,6 +149,10 @@ const App: React.FC = () => {
   const [keyboardSelectedId, setKeyboardSelectedId] = React.useState<number | null>(null);
   const [jumpToEntryId, setJumpToEntryId] = React.useState<number | null>(null);
   const [isInitialLoad, setIsInitialLoad] = React.useState(true);
+
+  // Stock Tracker State
+  const [stockHistory, setStockHistory] = React.useState<StockInfoEntry[]>([]);
+  const [isStockBusy, setIsStockBusy] = React.useState<boolean>(false);
 
 
   // Electron-specific state
@@ -224,6 +230,7 @@ const App: React.FC = () => {
     setActiveSessionName(null);
     setUniqueValues({ level: [], sndrtype: [], sndrname: [], fileName: [] });
     setDashboardData(initialDashboardData);
+    setStockHistory([]);
     setIsInitialLoad(true);
     setIsDirty(false);
     if (log) logToConsole('Started new blank session.', 'INFO');
@@ -665,13 +672,50 @@ const App: React.FC = () => {
           
           setProgressPhase('inserting');
           setProgressMessage(`Inserting ${totalEntriesInFile.toLocaleString()} records from: ${file.name}`);
-          const entries: Omit<LogEntry, 'id' | 'fileName'>[] = Array.from(logNodes).map(node => ({
-              level: node.getAttribute('level') || 'N/A',
-              time: node.getAttribute('time') || 'N/A',
-              sndrtype: node.getAttribute('sndrtype') || 'N/A',
-              sndrname: node.getAttribute('sndrname') || 'N/A',
-              msg: node.getAttribute('msg') || 'N/A',
-          }));
+
+          const entries: Omit<LogEntry, 'id' | 'fileName'>[] = [];
+          const stockEntries: Omit<StockInfoEntry, 'id'>[] = [];
+
+          Array.from(logNodes).forEach(node => {
+              const msg = node.getAttribute('msg') || '';
+              const time = node.getAttribute('time') || 'N/A';
+
+              if (msg.includes('<WWKS') && msg.includes('<StockInfoMessage')) {
+                  try {
+                      const wwksParser = new DOMParser();
+                      const wwksDoc = wwksParser.parseFromString(msg, "application/xml");
+                      const wwksNode = wwksDoc.querySelector('WWKS');
+                      const stockNode = wwksDoc.querySelector('StockInfoMessage');
+                      const articleNode = stockNode?.querySelector('Article');
+
+                      if (wwksNode && stockNode && articleNode) {
+                          const stockEntry = {
+                              timestamp: wwksNode.getAttribute('TimeStamp') || new Date(time.replace(' ', 'T') + 'Z').toISOString(),
+                              message_id: parseInt(stockNode.getAttribute('Id') || '0', 10),
+                              source: stockNode.getAttribute('Source') || 'N/A',
+                              destination: stockNode.getAttribute('Destination') || 'N/A',
+                              article_id: articleNode.getAttribute('Id') || 'N/A',
+                              article_name: articleNode.getAttribute('Name') || 'N/A',
+                              dosage_form: articleNode.getAttribute('DosageForm') || 'N/A',
+                              max_sub_item_quantity: parseInt(articleNode.getAttribute('MaxSubItemQuantity') || '0', 10),
+                              quantity: parseInt(articleNode.getAttribute('Quantity') || '0', 10),
+                          };
+                          stockEntries.push(stockEntry);
+                      }
+                  } catch (e) {
+                      logToConsole(`Failed to parse StockInfoMessage from log message in ${file.name}. Error: ${e instanceof Error ? e.message : String(e)}`, 'WARNING');
+                  }
+              }
+
+              entries.push({
+                  level: node.getAttribute('level') || 'N/A',
+                  time: time,
+                  sndrtype: node.getAttribute('sndrtype') || 'N/A',
+                  sndrname: node.getAttribute('sndrname') || 'N/A',
+                  msg: msg,
+              });
+          });
+
 
           const onProgressCallback = (processedInFile: number) => {
               const progressWithinFile = totalEntriesInFile > 0 
@@ -683,6 +727,11 @@ const App: React.FC = () => {
           };
 
           targetDb.insertLogs(entries, file.name, onProgressCallback);
+          if (stockEntries.length > 0) {
+              logToConsole(`Found and inserting ${stockEntries.length} stock info messages from ${file.name}.`, 'DEBUG');
+              targetDb.insertStockInfo(stockEntries);
+          }
+          
           processedXmlSize += file.size;
           // After the file is fully processed, update progress to reflect its completion for this phase.
           setProgress(30 + (processedXmlSize / totalXmlSize) * 70);
@@ -1417,6 +1466,29 @@ const handleUiScaleChange = async (newScale: number) => {
     setActiveView('viewer');
   }, [logToConsole]);
 
+    const handleSearchStock = React.useCallback((filters: StockInfoFilters) => {
+        if (!db) {
+            logToConsole('Database not available for stock search.', 'ERROR');
+            return;
+        }
+        setIsStockBusy(true);
+        logToConsole(`Searching stock for: ${filters.searchTerm}`, 'INFO');
+        // Use a timeout to allow UI to update
+        setTimeout(() => {
+            try {
+                const results = db.queryStockInfo(filters);
+                setStockHistory(results);
+                logToConsole(`Found ${results.length} stock history records.`, 'DEBUG');
+            } catch (e) {
+                const msg = e instanceof Error ? e.message : String(e);
+                setError(msg);
+                logToConsole(`Stock search failed: ${msg}`, 'ERROR');
+            } finally {
+                setIsStockBusy(false);
+            }
+        }, 50);
+    }, [db, logToConsole]);
+
 
   const totalPages = Math.ceil(totalFilteredCount / pageSize);
 
@@ -1431,7 +1503,7 @@ const handleUiScaleChange = async (newScale: number) => {
           />
       )}
       {isLoading && <ProgressIndicator progress={progress} message={progressMessage} phase={progressPhase} detailedProgress={detailedProgress} iconSet={iconSet} />}
-      <Header activeView={activeView} onViewChange={setActiveView} isBusy={isBusy} iconSet={iconSet} />
+      <Header activeView={activeView} onViewChange={setActiveView} isBusy={isBusy || isStockBusy} iconSet={iconSet} />
       <main className="flex-grow flex flex-col min-h-0">
         {activeView === 'data' && (
            <DataHub
@@ -1529,6 +1601,15 @@ const handleUiScaleChange = async (newScale: number) => {
                 onCategorySelect={handleCategorySelect}
                 theme={theme}
                 iconSet={iconSet}
+            />
+        )}
+        {activeView === 'stock' && (
+            <StockTracker
+                onSearch={handleSearchStock}
+                history={stockHistory}
+                isBusy={isStockBusy}
+                iconSet={iconSet}
+                theme={theme}
             />
         )}
         {activeView === 'console' && (

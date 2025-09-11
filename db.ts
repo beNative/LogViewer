@@ -1,4 +1,4 @@
-import { FilterState, LogEntry, TimelineDataPoint, CategoryDataPoint, PageTimestampRange, FileTimeRange, LogDensityPoint } from './types.ts';
+import { FilterState, LogEntry, TimelineDataPoint, CategoryDataPoint, PageTimestampRange, FileTimeRange, LogDensityPoint, StockInfoEntry, StockInfoFilters } from './types.ts';
 
 // sql.js is loaded from a script tag and will be on the window object
 declare const initSqlJs: (config: { locateFile: (file: string) => string; }) => Promise<any>;
@@ -60,6 +60,19 @@ export class Database {
                 value TEXT
             );
         `);
+        this.db.exec(`
+            CREATE TABLE IF NOT EXISTS stock_info (
+                timestamp TEXT,
+                message_id INTEGER,
+                source TEXT,
+                destination TEXT,
+                article_id TEXT,
+                article_name TEXT,
+                dosage_form TEXT,
+                max_sub_item_quantity INTEGER,
+                quantity INTEGER
+            );
+        `);
     }
 
     dropIndexes() {
@@ -69,6 +82,9 @@ export class Database {
         this.db.exec(`DROP INDEX IF EXISTS idx_sndrtype;`);
         this.db.exec(`DROP INDEX IF EXISTS idx_sndrname;`);
         this.db.exec(`DROP INDEX IF EXISTS idx_fileName;`);
+        this.db.exec(`DROP INDEX IF EXISTS idx_stock_timestamp;`);
+        this.db.exec(`DROP INDEX IF EXISTS idx_stock_article_id;`);
+        this.db.exec(`DROP INDEX IF EXISTS idx_stock_article_name;`);
     }
 
     createIndexes() {
@@ -78,6 +94,9 @@ export class Database {
         this.db.exec(`CREATE INDEX IF NOT EXISTS idx_sndrtype ON logs(sndrtype);`);
         this.db.exec(`CREATE INDEX IF NOT EXISTS idx_sndrname ON logs(sndrname);`);
         this.db.exec(`CREATE INDEX IF NOT EXISTS idx_fileName ON logs(fileName);`);
+        this.db.exec(`CREATE INDEX IF NOT EXISTS idx_stock_timestamp ON stock_info(timestamp);`);
+        this.db.exec(`CREATE INDEX IF NOT EXISTS idx_stock_article_id ON stock_info(article_id);`);
+        this.db.exec(`CREATE INDEX IF NOT EXISTS idx_stock_article_name ON stock_info(article_name);`);
     }
 
     setMeta(key: string, value: string) {
@@ -141,6 +160,89 @@ export class Database {
         } finally {
             stmt.free();
         }
+    }
+
+    insertStockInfo(entries: Omit<StockInfoEntry, 'id'>[]) {
+        if (entries.length === 0) return;
+
+        const stmt = this.db.prepare(`
+            INSERT INTO stock_info (timestamp, message_id, source, destination, article_id, article_name, dosage_form, max_sub_item_quantity, quantity)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+
+        this.db.exec("BEGIN TRANSACTION;");
+        try {
+            entries.forEach(entry => {
+                const sqlTime = entry.timestamp.replace('T', ' ').replace('Z', '');
+                stmt.run([
+                    sqlTime,
+                    entry.message_id,
+                    entry.source,
+                    entry.destination,
+                    entry.article_id,
+                    entry.article_name,
+                    entry.dosage_form,
+                    entry.max_sub_item_quantity,
+                    entry.quantity
+                ]);
+            });
+            this.db.exec("COMMIT;");
+        } catch (e) {
+            this.db.exec("ROLLBACK;");
+            throw e;
+        } finally {
+            stmt.free();
+        }
+    }
+
+    queryStockInfo(filters: StockInfoFilters): StockInfoEntry[] {
+        const whereClauses: string[] = [];
+        const params: (string | number)[] = [];
+
+        const fromDate = getSqlDateTime(filters.dateFrom, filters.timeFrom);
+        if (fromDate) {
+            whereClauses.push(`timestamp >= ?`);
+            params.push(fromDate);
+        }
+
+        const toDate = getSqlDateTime(filters.dateTo, filters.timeTo, true);
+        if (toDate) {
+            whereClauses.push(`timestamp <= ?`);
+            params.push(toDate);
+        }
+
+        if (filters.searchTerm) {
+            whereClauses.push(`(article_id LIKE ? OR article_name LIKE ?)`);
+            params.push(`%${filters.searchTerm}%`, `%${filters.searchTerm}%`);
+        }
+        
+        const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+        const sql = `
+            SELECT timestamp, message_id, source, destination, article_id, article_name, dosage_form, max_sub_item_quantity, quantity 
+            FROM stock_info 
+            ${whereSql} 
+            ORDER BY timestamp ASC
+        `;
+        const stmt = this.db.prepare(sql);
+        stmt.bind(params);
+
+        const entries: StockInfoEntry[] = [];
+        while (stmt.step()) {
+            const row = stmt.get();
+            entries.push({
+                timestamp: row[0],
+                message_id: row[1],
+                source: row[2],
+                destination: row[3],
+                article_id: row[4],
+                article_name: row[5],
+                dosage_form: row[6],
+                max_sub_item_quantity: row[7],
+                quantity: row[8]
+            });
+        }
+        stmt.free();
+        return entries;
     }
 
     private _buildWhereClause(filters: FilterState): { whereSql: string, params: (string | number)[] } {

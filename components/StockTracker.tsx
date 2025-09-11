@@ -1,0 +1,130 @@
+import React from 'react';
+import { StockInfoEntry, StockInfoFilters, IconSet, Theme } from '../types.ts';
+import { Icon } from './icons/index.tsx';
+import { StockHistoryChart } from './StockHistoryChart.tsx';
+
+interface StockTrackerProps {
+  onSearch: (filters: StockInfoFilters) => void;
+  history: StockInfoEntry[];
+  isBusy: boolean;
+  iconSet: IconSet;
+  theme: Theme;
+}
+
+const inputStyles = "w-full bg-white dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white sm:text-sm rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition";
+
+
+export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, isBusy, iconSet, theme }) => {
+    const [filters, setFilters] = React.useState<StockInfoFilters>({
+        searchTerm: '',
+        dateFrom: '',
+        timeFrom: '',
+        dateTo: '',
+        timeTo: '',
+    });
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFilters({ ...filters, [e.target.name]: e.target.value });
+    };
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSearch(filters);
+    };
+
+    const chartData = React.useMemo(() => {
+        if (!history || history.length === 0) return [];
+        return history.map(entry => ({
+            time: entry.timestamp.replace(' ', 'T') + 'Z',
+            quantity: entry.quantity,
+        }));
+    }, [history]);
+
+    return (
+        <div className="flex-grow p-4 sm:p-6 lg:p-8 overflow-y-auto space-y-6 bg-gray-100 dark:bg-transparent">
+            <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Search Article Stock</h2>
+                <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                    <div>
+                        <label htmlFor="searchTerm" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Article ID or Name</label>
+                        <input
+                            type="text"
+                            name="searchTerm"
+                            id="searchTerm"
+                            value={filters.searchTerm}
+                            onChange={handleInputChange}
+                            className={inputStyles}
+                            placeholder="e.g., 3400936009011 or CARTEOL"
+                        />
+                    </div>
+                     <div className="grid grid-cols-2 gap-2">
+                        <div>
+                            <label htmlFor="dateFrom" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">From</label>
+                            <div className="flex gap-2">
+                                <input type="date" name="dateFrom" id="dateFrom" value={filters.dateFrom} onChange={handleInputChange} className={inputStyles} />
+                                <input type="time" name="timeFrom" id="timeFrom" value={filters.timeFrom} onChange={handleInputChange} className={inputStyles} step="1" />
+                            </div>
+                        </div>
+                        <div>
+                            <label htmlFor="dateTo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">To</label>
+                            <div className="flex gap-2">
+                                <input type="date" name="dateTo" id="dateTo" value={filters.dateTo} onChange={handleInputChange} className={inputStyles} />
+                                <input type="time" name="timeTo" id="timeTo" value={filters.timeTo} onChange={handleInputChange} className={inputStyles} step="1" />
+                            </div>
+                        </div>
+                    </div>
+                    <button
+                        type="submit"
+                        disabled={isBusy || !filters.searchTerm}
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2 font-semibold rounded-lg transition-colors duration-200 bg-sky-600 hover:bg-sky-700 text-white dark:bg-sky-600 dark:hover:bg-sky-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <Icon name="Filter" iconSet={iconSet} className="w-5 h-5" />
+                        <span>{isBusy ? 'Searching...' : 'Search'}</span>
+                    </button>
+                </form>
+            </div>
+            
+            {history.length > 0 && (
+                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    <div className="bg-white dark:bg-gray-800/50 p-4 sm:p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Stock History</h3>
+                         <div className="overflow-x-auto max-h-96">
+                            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead className="bg-gray-50 dark:bg-gray-800/50 sticky top-0">
+                                    <tr>
+                                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Timestamp</th>
+                                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Article Name</th>
+                                        <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Quantity</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200/50 dark:divide-gray-700/50">
+                                    {history.map((entry, index) => (
+                                        <tr key={`${entry.timestamp}-${index}`}>
+                                            <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-mono">{entry.timestamp}</td>
+                                            <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">{entry.article_name}</td>
+                                            <td className="px-3 py-2 whitespace-nowrap text-sm text-right text-gray-800 dark:text-gray-200 font-semibold">{entry.quantity}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                     <div className="bg-white dark:bg-gray-800/50 p-4 sm:p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Quantity Over Time</h3>
+                        <div className="h-96">
+                            <StockHistoryChart data={chartData} theme={theme} />
+                        </div>
+                    </div>
+                 </div>
+            )}
+
+            {!isBusy && history.length === 0 && (
+                <div className="text-center py-10">
+                    <Icon name="Cube" iconSet={iconSet} className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold mb-2 text-gray-700 dark:text-gray-300">No Stock Data</h3>
+                    <p className="text-gray-500 dark:text-gray-400">Perform a search to view stock history for an article.</p>
+                </div>
+            )}
+        </div>
+    );
+};

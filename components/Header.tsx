@@ -3,13 +3,13 @@ import { Icon, IconName } from './icons/index.tsx';
 import { IconSet } from '../types.ts';
 
 interface HeaderProps {
-    activeView: 'data' | 'viewer' | 'dashboard' | 'console' | 'settings' | 'info';
-    onViewChange: (view: 'data' | 'viewer' | 'dashboard' | 'console' | 'settings' | 'info') => void;
+    activeView: 'data' | 'viewer' | 'dashboard' | 'console' | 'settings' | 'info' | 'stock';
+    onViewChange: (view: 'data' | 'viewer' | 'dashboard' | 'console' | 'settings' | 'info' | 'stock') => void;
     isBusy: boolean;
     iconSet: IconSet;
 }
 
-type NavColor = 'purple' | 'yellow' | 'red' | 'indigo' | 'blue' | 'green';
+type NavColor = 'purple' | 'yellow' | 'red' | 'indigo' | 'blue' | 'green' | 'teal';
 
 const colorStyles: Record<NavColor, {
     active: string;
@@ -52,6 +52,12 @@ const colorStyles: Record<NavColor, {
         inactive: 'text-green-600 dark:text-green-400',
         iconActive: 'text-white',
         iconInactive: 'text-green-500 dark:text-green-400'
+    },
+    teal: {
+        active: 'bg-teal-600 hover:bg-teal-700 text-white',
+        inactive: 'text-teal-600 dark:text-teal-400',
+        iconActive: 'text-white',
+        iconInactive: 'text-teal-500 dark:text-teal-400'
     }
 };
 
@@ -107,6 +113,14 @@ export const Header: React.FC<HeaderProps> = ({ activeView, onViewChange, isBusy
                         isActive={activeView === 'dashboard'}
                         onClick={() => onViewChange('dashboard')}
                         color="red"
+                        iconSet={iconSet}
+                    />
+                     <NavItem
+                        iconName="Cube"
+                        label="Stock Tracker"
+                        isActive={activeView === 'stock'}
+                        onClick={() => onViewChange('stock')}
+                        color="teal"
                         iconSet={iconSet}
                     />
                     <NavItem
