@@ -69,6 +69,7 @@ function getSettings() {
         theme: "light",
         viewMode: "pagination",
         allowPrerelease: false,
+        githubToken: "",
         iconSet: "sharp",
         logTableDensity: "normal",
         columnVisibility: {
@@ -111,6 +112,7 @@ function getSettings() {
                 ...defaultSettings,
                 ...loadedSettings,
                 allowPrerelease: loadedSettings.allowPrerelease ?? defaultSettings.allowPrerelease,
+                githubToken: loadedSettings.githubToken ?? defaultSettings.githubToken,
                 columnVisibility: {
                     ...defaultSettings.columnVisibility,
                     ...(loadedSettings.columnVisibility || {}),
@@ -332,8 +334,15 @@ ipcMain.handle('get-markdown-content', (event, fileName) => {
 app.whenReady().then(() => {
     log('INFO', "Electron 'ready' event fired. Setting up IPC handlers and creating window.");
 
-    // Configure auto-updater
     const settings = getSettings();
+    
+    // Set GitHub token for auto-updater if present
+    if (settings.githubToken) {
+        process.env.GH_TOKEN = settings.githubToken;
+        log('INFO', '[Updater] GitHub token found in settings and applied to process environment.');
+    }
+    
+    // Configure auto-updater
     autoUpdater.allowPrerelease = !!settings.allowPrerelease;
     autoUpdater.logger = {
         info: (msg) => log('INFO', `[Updater] ${typeof msg === 'object' ? JSON.stringify(msg) : msg}`),
@@ -344,13 +353,17 @@ app.whenReady().then(() => {
 
     // Standard IPC Handlers
     ipcMain.handle('get-settings', () => getSettings());
-    ipcMain.handle('set-settings', (event, settings) => {
+    ipcMain.handle('set-settings', (event, newSettings) => {
         try {
-            fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
-            // After saving settings, check if the prerelease flag changed and apply it.
-            if (settings.hasOwnProperty('allowPrerelease')) {
-                autoUpdater.allowPrerelease = !!settings.allowPrerelease;
-                log('INFO', `[Updater] allowPrerelease setting updated to: ${autoUpdater.allowPrerelease}`);
+            fs.writeFileSync(settingsPath, JSON.stringify(newSettings, null, 2));
+            // After saving settings, check if flags affecting the main process have changed.
+            if (newSettings.hasOwnProperty('allowPrerelease') && autoUpdater.allowPrerelease !== !!newSettings.allowPrerelease) {
+                autoUpdater.allowPrerelease = !!newSettings.allowPrerelease;
+                log('INFO', `[Updater] allowPrerelease setting updated to: ${autoUpdater.allowPrerelease}. Restart required to take full effect.`);
+            }
+             if (newSettings.hasOwnProperty('githubToken') && process.env.GH_TOKEN !== newSettings.githubToken) {
+                process.env.GH_TOKEN = newSettings.githubToken;
+                log('INFO', `[Updater] GitHub token updated. Restart required to take full effect.`);
             }
             return { success: true };
         } catch (error) {

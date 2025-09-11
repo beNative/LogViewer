@@ -1,5 +1,6 @@
 import React from 'react';
-import { ColumnKey, ColumnStyle, ColumnStyles } from '../types';
+// Fix: Changed import from "../types" to "../types.ts"
+import { ColumnKey, ColumnStyle, ColumnStyles } from '../types.ts';
 import { COLUMN_DEFINITIONS } from '../utils';
 import { ChevronDownIcon } from './icons/ChevronDownIcon';
 

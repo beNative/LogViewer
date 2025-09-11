@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconSet } from '../../types';
+import { IconSet } from '../../types.ts';
 
 // Each icon has a 'sharp' (outline) and 'solid' variant.
 // The Icon component below will select the correct one based on the iconSet prop.
@@ -88,7 +88,7 @@ const iconDefs = {
         ),
         solid: (props: React.SVGProps<SVGSVGElement>) => (
             <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-                <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 6a.75.75 0 00-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75V6z" clipRule="evenodd" />
+                 <path fillRule="evenodd" d="M2.25 2.25a.75.75 0 000 1.5H3v16.5a1.5 1.5 0 001.5 1.5h15a1.5 1.5 0 001.5-1.5V3.75h.75a.75.75 0 000-1.5h-18zM15.25 18a.75.75 0 000-1.5H8.75a.75.75 0 000 1.5h6.5zM15.25 13.5a.75.75 0 000-1.5H8.75a.75.75 0 000 1.5h6.5zM15.25 9a.75.75 0 000-1.5H8.75a.75.75 0 000 1.5h6.5z" clipRule="evenodd" />
             </svg>
         )
     },
@@ -197,7 +197,7 @@ const iconDefs = {
         ),
         solid: (props: React.SVGProps<SVGSVGElement>) => (
             <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-                <path fillRule="evenodd" d="M10.5 3.75a.75.75 0 01.75.75v15a.75.75 0 01-1.5 0v-15a.75.75 0 01.75-.75zM13.5 3.75a.75.75 0 01.75.75v15a.75.75 0 01-1.5 0v-15a.75.75 0 01.75-.75z" clipRule="evenodd" />
+                 <path fillRule="evenodd" d="M10.276 3.862a.75.75 0 01.293 1.028l-4.148 7.375a.75.75 0 001.314.738l4.148-7.375a.75.75 0 011.028-.293l8.026 4.515a.75.75 0 010 1.328l-8.026 4.515a.75.75 0 01-1.028-.293l-4.148-7.375a.75.75 0 00-1.314.738l4.148 7.375a.75.75 0 01-.293 1.028l-8.026 4.515a.75.75 0 01-1.028-.664V4.526a.75.75 0 011.028-.664l8.026 4.515z" clipRule="evenodd" />
             </svg>
         )
     },
@@ -209,7 +209,7 @@ const iconDefs = {
         ),
         solid: (props: React.SVGProps<SVGSVGElement>) => (
             <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-                <path fillRule="evenodd" d="M3 3.75A.75.75 0 013.75 3h16.5a.75.75 0 01.75.75v16.5a.75.75 0 01-.75.75H3.75a.75.75 0 01-.75-.75V3.75zM9 12a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5A.75.75 0 019 12z" clipRule="evenodd" />
+                <path fillRule="evenodd" d="M3 3.75A.75.75 0 013.75 3h16.5a.75.75 0 01.75.75v16.5a.75.75 0 01-.75.75H3.75a.75.75 0 01-.75-.75V3.75zm6.22 8.28a.75.75 0 01.03-1.06l-3-3a.75.75 0 011.06-1.06l3.5 3.5a.75.75 0 010 1.06l-3.5 3.5a.75.75 0 11-1.06-1.06l3-3a.75.75 0 01.03-.03z" clipRule="evenodd" />
             </svg>
         )
     },
@@ -272,6 +272,33 @@ const iconDefs = {
         solid: (props: React.SVGProps<SVGSVGElement>) => (
             <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
                 <path fillRule="evenodd" d="M12 2.25a.75.75 0 01.75.75v11.69l3.22-3.22a.75.75 0 111.06 1.06l-4.5 4.5a.75.75 0 01-1.06 0l-4.5-4.5a.75.75 0 111.06-1.06l3.22 3.22V3a.75.75 0 01.75-.75zM3 16.5a.75.75 0 01.75.75v2.25a2.25 2.25 0 002.25 2.25h13.5a2.25 2.25 0 002.25-2.25V17.25a.75.75 0 011.5 0v2.25a3.75 3.75 0 01-3.75 3.75H6a3.75 3.75 0 01-3.75-3.75V17.25A.75.75 0 013 16.5z" clipRule="evenodd" />
+            </svg>
+        )
+    },
+    Eye: {
+        sharp: (props: React.SVGProps<SVGSVGElement>) => (
+            <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+        ),
+        solid: (props: React.SVGProps<SVGSVGElement>) => (
+            <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+                <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
+                <path fillRule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 010-1.113zM17.25 12a5.25 5.25 0 11-10.5 0 5.25 5.25 0 0110.5 0z" clipRule="evenodd" />
+            </svg>
+        )
+    },
+     EyeSlash: {
+        sharp: (props: React.SVGProps<SVGSVGElement>) => (
+            <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+            </svg>
+        ),
+        solid: (props: React.SVGProps<SVGSVGElement>) => (
+            <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+                <path d="M3.53 2.47a.75.75 0 00-1.06 1.06l18 18a.75.75 0 101.06-1.06l-18-18zM22.676 12.553a11.249 11.249 0 01-2.631 4.31l-3.099-3.099a5.25 5.25 0 00-6.71-6.71L7.759 4.577a11.217 11.217 0 014.242-.827c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113z" />
+                <path fillRule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c.725 0 1.45.08 2.148.235l-2.44 2.44A5.25 5.25 0 006.75 12c0 1.562.54 3.024 1.464 4.193l-2.44 2.44A11.217 11.217 0 011.323 12.553a1.762 1.762 0 010-1.113z" clipRule="evenodd" />
             </svg>
         )
     },
@@ -426,11 +453,12 @@ const iconDefs = {
         sharp: (props: React.SVGProps<SVGSVGElement>) => (
             <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L12 15.25l5.571-3" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
         ),
         solid: (props: React.SVGProps<SVGSVGElement>) => (
             <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-                <path fillRule="evenodd" d="M3 3.75A.75.75 0 013.75 3h16.5a.75.75 0 01.75.75v16.5a.75.75 0 01-.75.75H3.75a.75.75 0 01-.75-.75V3.75zm6.22 8.28a.75.75 0 01.03-1.06l-3-3a.75.75 0 011.06-1.06l3.5 3.5a.75.75 0 010 1.06l-3.5 3.5a.75.75 0 11-1.06-1.06l3-3a.75.75 0 01.03-.03z" clipRule="evenodd" />
+                 <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm6.02-2.47a.75.75 0 011.06 0L12 12.22l2.67-2.67a.75.75 0 111.06 1.06l-3.22 3.22a.75.75 0 01-1.06 0L8.27 10.58a.75.75 0 010-1.06z" clipRule="evenodd" />
             </svg>
         )
     },
@@ -442,9 +470,7 @@ const iconDefs = {
         ),
         solid: (props: React.SVGProps<SVGSVGElement>) => (
             <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-                <path fillRule="evenodd" d="M16.5 4.5a.75.75 0 01.75.75v.5a.75.75 0 01-1.5 0v-.5a.75.75 0 01.75-.75z" clipRule="evenodd" />
-                <path fillRule="evenodd" d="M7.5 4.5a.75.75 0 01.75.75v.5a.75.75 0 01-1.5 0v-.5A.75.75 0 017.5 4.5z" clipRule="evenodd" />
-                <path d="M10.875 3a.75.75 0 00-1.5 0v.5a.75.75 0 001.5 0V3zM3 5.25A2.25 2.25 0 015.25 3h13.5A2.25 2.25 0 0121 5.25V18A2.25 2.25 0 0118.75 20.25H5.25A2.25 2.25 0 013 18V5.25z" />
+                <path fillRule="evenodd" d="M16.5 4.5a.75.75 0 01.75.75V6h3.75a.75.75 0 010 1.5H3a.75.75 0 010-1.5h3.75V5.25a.75.75 0 01.75-.75h7.5zM10.5 8.25a.75.75 0 00-1.5 0v8.25a.75.75 0 001.5 0V8.25zm3.75 0a.75.75 0 00-1.5 0v8.25a.75.75 0 001.5 0V8.25z" clipRule="evenodd" />
             </svg>
         )
     },
@@ -484,36 +510,26 @@ const iconDefs = {
             </svg>
         )
     },
-}
+};
 
-// Add aliases
-const icons: Record<string, any> = { ...iconDefs, Save: iconDefs.SaveDisk };
+export type IconName = keyof typeof iconDefs;
 
-export type IconName = keyof typeof icons;
-
-interface IconProps extends React.SVGProps<SVGSVGElement> {
-  name: IconName;
-  iconSet: IconSet;
+export interface IconProps extends React.SVGProps<SVGSVGElement> {
+    name: IconName;
+    iconSet: IconSet;
 }
 
 export const Icon: React.FC<IconProps> = ({ name, iconSet, ...props }) => {
-    const iconSetData = icons[name];
+    const iconSetKey = iconSet === 'solid' ? 'solid' : 'sharp';
+    const IconComponent = iconDefs[name]?.[iconSetKey] || iconDefs[name]?.sharp;
 
-    if (!iconSetData) {
-        console.warn(`Icon "${name}" not found.`);
-        return (
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props} aria-label="Missing Icon">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-        ); // Return a fallback XCircle icon
-    }
-    
-    const IconComponent = iconSetData[iconSet] || iconSetData.sharp;
-    
     if (!IconComponent) {
-        console.warn(`Icon component for "${name}" with set "${iconSet}" not found, falling back to sharp.`);
-        const FallbackComponent = iconSetData.sharp;
-        return <FallbackComponent {...props} />;
+        // Fallback for icon sets that are not explicitly defined (feather, tabler, lucide)
+        const SharpIcon = iconDefs[name]?.sharp;
+        if (SharpIcon) {
+            return <SharpIcon {...props} />;
+        }
+        return null; // or a default fallback icon
     }
 
     return <IconComponent {...props} />;

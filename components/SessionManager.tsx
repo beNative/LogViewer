@@ -116,7 +116,8 @@ export const SessionManager: React.FC<SessionManagerProps> = (props) => {
                         disabled={!props.isDirty}
                         className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors duration-200 bg-sky-600 hover:bg-sky-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <Icon name="Save" iconSet={props.iconSet} className="w-5 h-5" />
+                        {/* Fix: Changed icon name from "Save" to "SaveDisk" to match available icons. */}
+                        <Icon name="SaveDisk" iconSet={props.iconSet} className="w-5 h-5" />
                         Save Session
                     </button>
                     <button 

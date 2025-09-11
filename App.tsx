@@ -146,6 +146,7 @@ const App: React.FC = () => {
   const [isTimeRangeSelectorVisible, setIsTimeRangeSelectorVisible] = React.useState(true);
   const [logTableDensity, setLogTableDensity] = React.useState<LogTableDensity>('normal');
   const [allowPrerelease, setAllowPrerelease] = React.useState<boolean>(false);
+  const [githubToken, setGithubToken] = React.useState<string>('');
   const [uiScale, setUiScale] = React.useState<number>(1);
   
   const [hasMoreLogs, setHasMoreLogs] = React.useState(true);
@@ -391,6 +392,10 @@ const App: React.FC = () => {
                     setAllowPrerelease(settings.allowPrerelease);
                     logToConsole(`Pre-release updates set to '${settings.allowPrerelease}' from settings.`, 'DEBUG');
                 }
+                if (typeof settings.githubToken === 'string') {
+                    setGithubToken(settings.githubToken);
+                    logToConsole(`GitHub token loaded from settings.`, 'DEBUG');
+                }
                 if (typeof settings.uiScale === 'number') {
                     setUiScale(settings.uiScale);
                     logToConsole(`UI Scale set to '${(settings.uiScale * 100).toFixed(0)}%' from settings.`, 'DEBUG');
@@ -420,9 +425,11 @@ const App: React.FC = () => {
     const handleUpdate = (status: string, data: any) => {
         switch(status) {
             case 'checking':
+                logToConsole('Checking for application updates...', 'INFO');
                 addToast({ type: 'info', title: 'Updates', message: 'Checking for updates...', duration: 3000 });
                 break;
             case 'available':
+                logToConsole(`New update available: v${data.info.version}. Starting download...`, 'INFO');
                 addToast({
                     id: UPDATE_TOAST_ID,
                     type: 'progress',
@@ -433,9 +440,11 @@ const App: React.FC = () => {
                 });
                 break;
             case 'not-available':
+                logToConsole(`Application is up to date (v${data.info.version}).`, 'INFO');
                 addToast({ type: 'success', title: 'Updates', message: `You're on the latest version (${data.info.version}).`, duration: 4000 });
                 break;
             case 'progress':
+                // Do not log this event to avoid spamming the console. The toast is sufficient for user feedback.
                 setToasts(prev => prev.map(t =>
                     t.id === UPDATE_TOAST_ID
                         ? { ...t, progress: data.progress.percent, message: `Downloaded ${Math.round(data.progress.percent)}%` }
@@ -443,6 +452,7 @@ const App: React.FC = () => {
                 ));
                 break;
             case 'downloaded':
+                logToConsole(`Update v${data.info.version} downloaded successfully. Ready to install on restart.`, 'INFO');
                 setToasts(prev => prev.map(t =>
                     t.id === UPDATE_TOAST_ID
                         ? {
@@ -457,6 +467,7 @@ const App: React.FC = () => {
                 ));
                 break;
             case 'error':
+                 logToConsole(`Update error: ${data.error}`, 'ERROR');
                  addToast({ type: 'error', title: 'Update Error', message: `An error occurred: ${data.error}`, duration: 8000 });
                  removeToast(UPDATE_TOAST_ID);
                  break;
@@ -465,7 +476,7 @@ const App: React.FC = () => {
     
     const removeListener = window.electronAPI.onUpdateStatus(handleUpdate);
     return () => removeListener();
-  }, [isElectron, addToast, removeToast]);
+  }, [isElectron, addToast, removeToast, logToConsole]);
 
   React.useEffect(() => {
     const root = window.document.documentElement;
@@ -1156,6 +1167,26 @@ const handleAllowPrereleaseChange = async (allow: boolean) => {
     }
 };
 
+const handleGithubTokenChange = async (token: string) => {
+    setGithubToken(token);
+    if (window.electronAPI) {
+        try {
+            const settings = await window.electronAPI.getSettings();
+            await window.electronAPI.setSettings({ ...settings, githubToken: token });
+            logToConsole(`GitHub token updated and saved.`, 'INFO');
+            addToast({
+                type: 'info',
+                title: 'Restart Required',
+                message: 'Please restart the application for the new GitHub token to take effect for private repository updates.',
+                duration: 8000
+            });
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            logToConsole(`Failed to save GitHub token: ${msg}`, 'ERROR');
+        }
+    }
+};
+
 const handleUiScaleChange = async (newScale: number) => {
     setUiScale(newScale);
     if (window.electronAPI) {
@@ -1205,6 +1236,7 @@ const handleUiScaleChange = async (newScale: number) => {
     if (newSettings.panelWidths) setPanelWidths({ ...initialPanelWidths, ...newSettings.panelWidths });
     if (typeof newSettings.isTimeRangeSelectorVisible === 'boolean') setIsTimeRangeSelectorVisible(newSettings.isTimeRangeSelectorVisible);
     if (typeof newSettings.allowPrerelease === 'boolean') setAllowPrerelease(newSettings.allowPrerelease);
+    if (typeof newSettings.githubToken === 'string') setGithubToken(newSettings.githubToken);
     if (typeof newSettings.uiScale === 'number') setUiScale(newSettings.uiScale);
     
     logToConsole('Settings updated and applied from JSON editor.', 'INFO');
@@ -1739,6 +1771,8 @@ const handleUiScaleChange = async (newScale: number) => {
               onLogTableDensityChange={handleLogTableDensityChange}
               allowPrerelease={allowPrerelease}
               onAllowPrereleaseChange={handleAllowPrereleaseChange}
+              githubToken={githubToken}
+              onGithubTokenChange={handleGithubTokenChange}
               uiScale={uiScale}
               onUiScaleChange={handleUiScaleChange}
               onFullSettingsUpdate={handleFullSettingsUpdate}
