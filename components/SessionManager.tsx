@@ -31,6 +31,7 @@ const SessionItem: React.FC<{
                 setIsRenaming(false);
             }
         } else {
+            setNewName(session.name);
             setIsRenaming(false);
         }
     };
@@ -50,7 +51,11 @@ const SessionItem: React.FC<{
     }
 
     return (
-        <li className={`p-3 rounded-lg flex items-center gap-4 transition-colors duration-150 ${isActive ? 'bg-sky-100 dark:bg-sky-900/50 ring-1 ring-sky-500/50' : 'bg-white dark:bg-gray-800'}`}>
+        <li className={`relative pl-4 pr-3 py-3 rounded-lg flex items-center gap-4 transition-all duration-150 group ${isActive ? 'bg-sky-50 dark:bg-sky-900/40' : 'hover:bg-gray-100/70 dark:hover:bg-gray-700/40'}`}>
+            <span className={`absolute left-0 top-2 bottom-2 w-1 rounded-r-full transition-colors ${isActive ? 'bg-sky-500' : 'bg-transparent'}`} />
+            <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${isActive ? 'bg-sky-200/80 dark:bg-sky-800/60' : 'bg-gray-200 dark:bg-gray-700/60'}`}>
+                <Icon name="Database" iconSet={iconSet} className={`w-6 h-6 transition-colors ${isActive ? 'text-sky-600 dark:text-sky-300' : 'text-gray-500 dark:text-gray-400'}`} />
+            </div>
             <div className="flex-grow min-w-0">
                 {isRenaming ? (
                      <div className="flex items-center gap-2">
@@ -63,11 +68,11 @@ const SessionItem: React.FC<{
                             onKeyDown={handleKeyDown}
                             className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white sm:text-sm rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition"
                         />
-                         <button onClick={() => setIsRenaming(false)} className="p-1 text-gray-500 hover:text-red-500"><Icon name="XCircle" iconSet={iconSet} className="w-5 h-5"/></button>
-                         <button onClick={handleRename} className="p-1 text-gray-500 hover:text-green-500"><Icon name="CheckCircle" iconSet={iconSet} className="w-5 h-5"/></button>
+                         <button onClick={() => setIsRenaming(false)} className="p-1 text-gray-500 hover:text-red-500" title="Cancel"><Icon name="XCircle" iconSet={iconSet} className="w-5 h-5"/></button>
+                         <button onClick={handleRename} className="p-1 text-gray-500 hover:text-green-500" title="Confirm"><Icon name="CheckCircle" iconSet={iconSet} className="w-5 h-5"/></button>
                      </div>
                 ) : (
-                    <p className="font-semibold text-gray-800 dark:text-gray-200 truncate" title={session.name}>
+                    <p className={`font-semibold truncate ${isActive ? 'text-sky-800 dark:text-sky-200' : 'text-gray-800 dark:text-gray-200'}`} title={session.name}>
                         {session.name}{isActive && isDirty ? '*' : ''}
                     </p>
                 )}
@@ -75,11 +80,11 @@ const SessionItem: React.FC<{
                     {formatBytes(session.size)} &middot; {new Date(session.mtime).toLocaleString()}
                 </p>
             </div>
-            <div className="flex-shrink-0 flex items-center gap-1">
-                 <button onClick={() => setIsRenaming(true)} title="Rename" className="p-2 text-gray-500 hover:text-gray-900 dark:hover:text-white rounded-full hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors">
+            <div className="flex-shrink-0 flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                 <button onClick={() => setIsRenaming(true)} title="Rename" className="p-2 text-gray-500 hover:text-gray-900 dark:hover:text-white rounded-full hover:bg-gray-200 dark:hover:bg-gray-600/60 transition-colors">
                     <Icon name="PencilSquare" iconSet={iconSet} className="w-5 h-5" />
                 </button>
-                <button onClick={handleDelete} title="Delete" className="p-2 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors">
+                <button onClick={handleDelete} title="Delete" className="p-2 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600/60 transition-colors">
                     <Icon name="Trash" iconSet={iconSet} className="w-5 h-5" />
                 </button>
                 <button onClick={() => onLoad(session.name)} title="Load Session" className="p-2 text-sky-600 dark:text-sky-400 hover:text-sky-800 dark:hover:text-sky-300 rounded-full hover:bg-sky-100 dark:hover:bg-sky-900/60 transition-colors">
@@ -119,9 +124,10 @@ export const SessionManager: React.FC<SessionManagerProps> = (props) => {
                     ))}
                 </ul>
             ) : (
-                <div className="text-center text-gray-500 dark:text-gray-400 py-10">
-                        <p>No saved sessions found.</p>
-                        <p className="text-sm mt-1">Create a new session by dropping files above.</p>
+                <div className="text-center text-gray-500 dark:text-gray-400 py-10 h-full flex flex-col items-center justify-center">
+                    <Icon name="Folder" iconSet={props.iconSet} className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-1 text-gray-700 dark:text-gray-300">No Saved Sessions</h3>
+                    <p className="text-sm">Create a new session by dropping files to the left.</p>
                 </div>
             )}
         </>
