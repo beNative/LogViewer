@@ -23,7 +23,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     // Custom App functions
     getSystemFonts: () => ipcRenderer.invoke('get-system-fonts'),
 
-    // Window & Quit lifecycle
+    // Window & Lifecycle
     setTitle: (title) => ipcRenderer.invoke('set-title', title),
     onSaveBeforeQuit: (callback) => {
         const listener = () => callback();
@@ -32,4 +32,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
         return () => ipcRenderer.removeListener('save-before-quit', listener);
     },
     savedAndReadyToQuit: () => ipcRenderer.send('saved-and-ready-to-quit'),
+
+    // Auto-updater
+    onUpdateStatus: (callback) => {
+        const listener = (event, { status, data }) => callback(status, data);
+        ipcRenderer.on('update-status', listener);
+        return () => ipcRenderer.removeListener('update-status', listener);
+    },
+    installUpdate: () => ipcRenderer.send('install-update'),
 });

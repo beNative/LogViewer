@@ -265,13 +265,6 @@ export const Settings: React.FC<SettingsProps> = (props) => {
                                         enabled={theme === 'dark'}
                                         onChange={(enabled) => onThemeChange(enabled ? 'dark' : 'light')}
                                     />
-                                    {window.electronAPI && (
-                                        <ToggleSwitch 
-                                            label="Update to Pre-releases"
-                                            enabled={allowPrerelease}
-                                            onChange={onAllowPrereleaseChange}
-                                        />
-                                    )}
                                      <div className="flex items-center justify-between">
                                         <span className="font-medium text-gray-800 dark:text-gray-200">UI Scale</span>
                                         <div className="flex items-center gap-2">
@@ -345,6 +338,20 @@ export const Settings: React.FC<SettingsProps> = (props) => {
                                     Customize the font, style, and color for each column in the Log Viewer. Changes are saved automatically.
                                 </p>
                                 <ColumnStyleSettings styles={columnStyles} onChange={onColumnStylesChange} />
+                            </div>
+                         </div>
+                         <div>
+                            <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10">
+                                <h2 className="text-xl font-semibold text-gray-800 dark:text-sky-400 mb-4">Updates</h2>
+                                <div className="space-y-4">
+                                    {window.electronAPI && (
+                                        <ToggleSwitch 
+                                            label="Update to Pre-releases"
+                                            enabled={allowPrerelease}
+                                            onChange={onAllowPrereleaseChange}
+                                        />
+                                    )}
+                                </div>
                             </div>
                          </div>
                     </div>

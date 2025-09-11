@@ -6,6 +6,8 @@ This document provides a comprehensive guide on how to use the Log Analyser desk
 
 The Log Analyser is a desktop tool designed to help you analyze structured XML log files. You can load data, perform complex filtering, and inspect individual log entries without needing to install any software beyond the application itself.
 
+The application will automatically check for updates and notify you via non-intrusive toast messages in the corner of the screen when a new version is available, being downloaded, or ready to install.
+
 ## 2. Main Interface
 
 The application is organized into several main tabs, which you can switch between using the header navigation. The recommended workflow is now session-centric:
@@ -137,7 +139,7 @@ This tab displays a real-time feed of messages from the application itself, pres
 - Diagnosing errors if something goes wrong.
 - Understanding what the application is doing in the background.
 
-You can filter the messages by type (DEBUG, INFO, WARNING, ERROR) using the toggle buttons at the top.
+You can filter the messages by type (DEBUG, INFO, WARNING, ERROR) using the toggle buttons at the top, and search for specific text using the filter input.
 
 ---
 
@@ -149,7 +151,7 @@ This tab allows you to configure various aspects of the application and is divid
 This is the default view and provides user-friendly controls for common settings.
 - **Appearance**: Toggle between Light and Dark themes, change the active icon set, adjust the UI Scale, and adjust the density of rows in the log table.
 - **Log Table Styles**: Customize the font, font size, style (bold/italic), and color for each column in the Log Viewer.
-- **Updates**: Opt-in to receive pre-release (beta) versions of the application.
+- **Updates**: Opt-in to receive pre-release (beta) versions of the application. Enabling this requires an application restart to take effect.
 
 ### 8.2. JSON Source View
 For advanced users, this tab provides direct access to the `settings.json` configuration file.

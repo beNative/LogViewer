@@ -5,8 +5,8 @@ A sophisticated, client-side log analysis tool that allows users to drag-and-dro
 ## Key Features
 
 - **Standalone Desktop App**: Packaged with Electron for a native desktop experience on Windows, complete with a standard setup wizard that allows for customizing the installation directory.
-- **Automatic Updates**: The application automatically checks for new versions on startup and will prompt you to install an update when it's available.
-- **Prerelease Channel**: Opt-in to receive beta and pre-release versions via a toggle in the Settings tab.
+- **Professional Automatic Updates**: The app seamlessly checks for updates and notifies you with non-intrusive toast messages for downloading progress and installation readiness.
+- **Prerelease Channel**: Opt-in to receive beta and pre-release versions via a new toggle in the Settings tab.
 - **Session Management (Desktop Only)**:
     - **Automatic Saving**: Sessions are automatically saved as `.sqlite` files in a dedicated folder within your user profile's AppData directory.
     - **Load, Rename, Delete**: The Data Hub provides a full UI to manage previous sessions, allowing you to resume your work effortlessly.
@@ -18,7 +18,7 @@ A sophisticated, client-side log analysis tool that allows users to drag-and-dro
     - **Data Hub**: A central area to manage sessions, create new sessions from files, and import/export external databases.
     - **Log Viewer**: The main analysis view featuring a filter panel, a dedicated toolbar for display options, the main log table, and a resizable detail panel. A new global status bar provides persistent data and view controls.
     - **Dashboard**: A visualization hub with interactive charts that provide a high-level overview of the *currently filtered* data.
-    - **Application Log**: See real-time feedback, processing status, and errors from the application in a clean, full-screen interface.
+    - **Application Log**: See real-time feedback, processing status, and errors from the application in a clean, full-screen interface with search and filtering capabilities.
     - **Info**: View in-app documentation, manuals, and version logs.
     - **Settings**: Manage application settings, including the UI theme.
 - **Dynamic Data Visualization Dashboard**:

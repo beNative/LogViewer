@@ -4,14 +4,29 @@ This document tracks the major changes, new features, and bug fixes for the Log 
 
 ---
 
+### **Version 0.15.0** - Professional Auto-Updates
+
+_Date: 2025-09-02_
+
+This release overhauls the application's update mechanism to be more professional, informative, and user-friendly.
+
+#### ✨ Features & Improvements
+- **Toast-Based Update Notifications**: Replaced the native OS dialogs for updates with a clean, non-intrusive toast notification system. Users are now informed of every stage of the update process (checking, downloading, ready to install) without interrupting their workflow.
+- **Pre-release Update Channel**: Added a new "Update to Pre-releases" toggle in the Settings tab. This allows users to opt-in to receive beta versions of the application, giving them early access to new features. A restart is required for this change to take effect.
+- **Robust Update Logic**: The underlying update logic in the Electron main process has been significantly improved to provide more detailed status events to the UI, ensuring the toast notifications are always accurate.
+
+---
+
 ### **Version 0.14.0** - Full-Screen Application Log & UX Polish
 
 _Date: 2025-09-01_
 
-This release enhances the developer experience by providing an improved, full-screen view for the Application Log.
+This release enhances the developer experience by providing an improved, full-screen view for the Application Log with new filtering capabilities.
 
 #### ✨ Features & Improvements
-- **Full-Screen Application Log**: The Application Log view now utilizes the full client area, removing the inset card-like container for a more expansive and immersive diagnostic experience. This provides more space for viewing long messages and tracking application activity.
+- **Full-Screen Application Log**: The Application Log view now utilizes the full client area, removing the inset card-like container for a more expansive and immersive diagnostic experience.
+- **Log Filtering and Highlighting**: A new search bar has been added to the Application Log header. Users can now type to filter messages in real-time, and any matching text is highlighted, making it much easier to find specific information.
+- **Scrollable Log View**: Fixed a bug where the Application Log view was not scrollable, preventing access to older messages when the content overflowed the screen.
 
 ---
 

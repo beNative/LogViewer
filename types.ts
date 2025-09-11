@@ -169,3 +169,21 @@ export interface StockChartDataPoint {
   time: string;
   quantity: number;
 }
+
+// --- Toast Notification Types ---
+export type ToastType = 'info' | 'success' | 'warning' | 'error' | 'progress';
+
+export interface ToastAction {
+    label: string;
+    onClick: () => void;
+}
+
+export interface ToastMessage {
+    id: string;
+    type: ToastType;
+    title: string;
+    message: string;
+    duration?: number; // in ms, 0 for persistent
+    progress?: number; // 0-100 for progress type
+    actions?: ToastAction[];
+}

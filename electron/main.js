@@ -69,6 +69,8 @@ function getSettings() {
         theme: "light",
         viewMode: "pagination",
         allowPrerelease: false,
+        iconSet: "sharp",
+        logTableDensity: "normal",
         columnVisibility: {
             time: true,
             level: true,
@@ -424,6 +426,12 @@ app.whenReady().then(() => {
         }
     });
 
+    // Update IPC handler
+    ipcMain.on('install-update', () => {
+        log('INFO', 'Renderer requested application quit and install.');
+        autoUpdater.quitAndInstall();
+    });
+
     createWindow();
 
     app.on('activate', () => {
@@ -442,42 +450,18 @@ app.on('will-quit', () => {
 
 // --- Auto-Updater Event Handlers ---
 
-autoUpdater.on('checking-for-update', () => {
-    log('INFO', '[Updater] Checking for update...');
-});
+const sendUpdateStatus = (status, data = {}) => {
+    if (mainWindow) {
+        log('INFO', `[Updater] Sending status to renderer: ${status}`);
+        mainWindow.webContents.send('update-status', { status, data });
+    } else {
+        log('WARNING', '[Updater] Tried to send status, but mainWindow is not available.');
+    }
+};
 
-autoUpdater.on('update-available', (info) => {
-    log('INFO', `[Updater] Update available: ${info.version}`);
-});
-
-autoUpdater.on('update-not-available', (info) => {
-    log('INFO', `[Updater] Update not available. Current version: ${info.version}`);
-});
-
-autoUpdater.on('error', (err) => {
-    log('ERROR', `[Updater] Error in auto-updater. ${err}`);
-});
-
-autoUpdater.on('download-progress', (progressObj) => {
-    let log_message = "Download speed: " + progressObj.bytesPerSecond;
-    log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
-    log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
-    log('INFO', `[Updater] ${log_message}`);
-});
-
-autoUpdater.on('update-downloaded', (info) => {
-    log('INFO', '[Updater] Update downloaded; will prompt user to restart.');
-    dialog.showMessageBox({
-        type: 'info',
-        title: 'Update Ready to Install',
-        message: 'A new version has been downloaded. Restart the application to apply the updates.',
-        detail: `Version ${info.version} is now available.`,
-        buttons: ['Restart Now', 'Later'],
-        defaultId: 0,
-        cancelId: 1
-    }).then(({ response }) => {
-        if (response === 0) {
-            setImmediate(() => autoUpdater.quitAndInstall());
-        }
-    });
-});
+autoUpdater.on('checking-for-update', () => sendUpdateStatus('checking'));
+autoUpdater.on('update-available', (info) => sendUpdateStatus('available', { info }));
+autoUpdater.on('update-not-available', (info) => sendUpdateStatus('not-available', { info }));
+autoUpdater.on('error', (err) => sendUpdateStatus('error', { error: err.message || 'Unknown error' }));
+autoUpdater.on('download-progress', (progress) => sendUpdateStatus('progress', { progress }));
+autoUpdater.on('update-downloaded', (info) => sendUpdateStatus('downloaded', { info }));

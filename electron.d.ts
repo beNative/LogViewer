@@ -22,6 +22,9 @@ export interface IElectronAPI {
     setTitle: (title: string) => void;
     onSaveBeforeQuit: (callback: () => void) => () => void; // Returns a function to unsubscribe
     savedAndReadyToQuit: () => void;
+    // Auto-updater
+    onUpdateStatus: (callback: (status: string, data: any) => void) => () => void;
+    installUpdate: () => void;
 }
 
 declare global {

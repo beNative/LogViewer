@@ -4,7 +4,7 @@ import {
     PageTimestampRange, SessionFile, ColumnVisibilityState, ColumnStyles, 
     PanelWidths, ViewMode, OverallTimeRange, FileTimeRange, LogDensityPoint, 
     IconSet, LogTableDensity, Theme, Settings as SettingsType, ProgressPhase,
-    StockInfoEntry, StockInfoFilters
+    StockInfoEntry, StockInfoFilters, ToastMessage
 } from './types.ts';
 import { LogTable } from './components/LogTable.tsx';
 import { ProgressIndicator } from './components/ProgressIndicator.tsx';
@@ -19,10 +19,12 @@ import { Info } from './components/Info.tsx';
 import { StatusBar } from './components/StatusBar.tsx';
 import { AboutDialog } from './components/AboutDialog.tsx';
 import { StockTracker } from './components/StockTracker.tsx';
+import { Toast } from './components/Toast.tsx';
 
 // JSZip is loaded from script tag
 declare const JSZip: any;
 const INFINITE_SCROLL_CHUNK_SIZE = 200;
+const UPDATE_TOAST_ID = 'app-update-toast';
 
 const initialFilters: FilterState = {
   dateFrom: '',
@@ -150,6 +152,7 @@ const App: React.FC = () => {
   const [keyboardSelectedId, setKeyboardSelectedId] = React.useState<number | null>(null);
   const [jumpToEntryId, setJumpToEntryId] = React.useState<number | null>(null);
   const [isInitialLoad, setIsInitialLoad] = React.useState(true);
+  const [toasts, setToasts] = React.useState<ToastMessage[]>([]);
 
   // Stock Tracker State
   const [stockHistory, setStockHistory] = React.useState<StockInfoEntry[]>([]);
@@ -164,6 +167,19 @@ const App: React.FC = () => {
   const [isDirty, setIsDirty] = React.useState<boolean>(false);
   const busyTaskRef = React.useRef(0);
   const [isAboutDialogOpen, setIsAboutDialogOpen] = React.useState(false);
+
+  const addToast = React.useCallback((toast: Omit<ToastMessage, 'id'> & { id?: string }) => {
+    const id = toast.id || new Date().getTime().toString() + Math.random();
+    setToasts(prev => {
+        // Avoid duplicate toasts if one with the same ID already exists
+        if (prev.some(t => t.id === id)) return prev;
+        return [...prev, { ...toast, id }];
+    });
+  }, []);
+
+  const removeToast = React.useCallback((id: string) => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
 
 
   const logToConsole = React.useCallback((message: string, type: ConsoleMessage['type']) => {
@@ -396,6 +412,60 @@ const App: React.FC = () => {
         setError(`Database initialization failed: ${msg}`);
     });
   }, [logToConsole, fetchSessions]);
+  
+  // Auto-update listener effect
+  React.useEffect(() => {
+    if (!isElectron || !window.electronAPI.onUpdateStatus) return;
+
+    const handleUpdate = (status: string, data: any) => {
+        switch(status) {
+            case 'checking':
+                addToast({ type: 'info', title: 'Updates', message: 'Checking for updates...', duration: 3000 });
+                break;
+            case 'available':
+                addToast({
+                    id: UPDATE_TOAST_ID,
+                    type: 'progress',
+                    title: `Downloading v${data.info.version}`,
+                    message: 'A new update is available and is being downloaded.',
+                    progress: 0,
+                    duration: 0, // Persistent
+                });
+                break;
+            case 'not-available':
+                addToast({ type: 'success', title: 'Updates', message: `You're on the latest version (${data.info.version}).`, duration: 4000 });
+                break;
+            case 'progress':
+                setToasts(prev => prev.map(t =>
+                    t.id === UPDATE_TOAST_ID
+                        ? { ...t, progress: data.progress.percent, message: `Downloaded ${Math.round(data.progress.percent)}%` }
+                        : t
+                ));
+                break;
+            case 'downloaded':
+                setToasts(prev => prev.map(t =>
+                    t.id === UPDATE_TOAST_ID
+                        ? {
+                            ...t,
+                            type: 'success',
+                            title: 'Update Ready!',
+                            message: `Version ${data.info.version} is ready. Restart to install.`,
+                            progress: 100,
+                            actions: [{ label: 'Restart & Install', onClick: () => window.electronAPI.installUpdate() }]
+                        }
+                        : t
+                ));
+                break;
+            case 'error':
+                 addToast({ type: 'error', title: 'Update Error', message: `An error occurred: ${data.error}`, duration: 8000 });
+                 removeToast(UPDATE_TOAST_ID);
+                 break;
+        }
+    };
+    
+    const removeListener = window.electronAPI.onUpdateStatus(handleUpdate);
+    return () => removeListener();
+  }, [isElectron, addToast, removeToast]);
 
   React.useEffect(() => {
     const root = window.document.documentElement;
@@ -1073,6 +1143,12 @@ const handleAllowPrereleaseChange = async (allow: boolean) => {
             const settings = await window.electronAPI.getSettings();
             await window.electronAPI.setSettings({ ...settings, allowPrerelease: allow });
             logToConsole(`Pre-release updates ${allow ? 'enabled' : 'disabled'}. Setting saved. Restart the app for this to take effect.`, 'INFO');
+            addToast({
+                type: 'info',
+                title: 'Restart Required',
+                message: `Pre-release updates have been ${allow ? 'enabled' : 'disabled'}. Please restart the application for the change to take effect.`,
+                duration: 6000
+            });
         } catch (err) {
             const msg = err instanceof Error ? err.message : String(err);
             logToConsole(`Failed to save pre-release update setting: ${msg}`, 'ERROR');
@@ -1504,12 +1580,17 @@ const handleUiScaleChange = async (newScale: number) => {
 
   return (
     <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+       <div className="fixed bottom-4 right-4 z-50 w-full max-w-sm space-y-3">
+          {toasts.map(toast => (
+              <Toast key={toast.id} toast={toast} onDismiss={() => removeToast(toast.id)} iconSet={iconSet} />
+          ))}
+      </div>
       {isAboutDialogOpen && (
           <AboutDialog
               isOpen={isAboutDialogOpen}
               onClose={() => setIsAboutDialogOpen(false)}
               iconSet={iconSet}
-              version="0.14.0"
+              version="0.15.0"
           />
       )}
       {isLoading && <ProgressIndicator progress={progress} message={progressMessage} phase={progressPhase} detailedProgress={detailedProgress} iconSet={iconSet} />}
