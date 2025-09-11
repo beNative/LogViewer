@@ -1508,7 +1508,7 @@ const handleUiScaleChange = async (newScale: number) => {
               isOpen={isAboutDialogOpen}
               onClose={() => setIsAboutDialogOpen(false)}
               iconSet={iconSet}
-              version="0.13.0"
+              version="0.14.0"
           />
       )}
       {isLoading && <ProgressIndicator progress={progress} message={progressMessage} phase={progressPhase} detailedProgress={detailedProgress} iconSet={iconSet} />}

@@ -132,7 +132,7 @@ These donut charts show the distribution of logs by **Level** and **Sender Type*
 
 ## 7. Application Log
 
-This tab displays a real-time feed of messages from the application itself. It's useful for:
+This tab displays a real-time feed of messages from the application itself, presented in a clean, full-screen view for maximum readability. It's useful for:
 - Seeing the progress of file processing.
 - Diagnosing errors if something goes wrong.
 - Understanding what the application is doing in the background.

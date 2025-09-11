@@ -18,7 +18,7 @@ A sophisticated, client-side log analysis tool that allows users to drag-and-dro
     - **Data Hub**: A central area to manage sessions, create new sessions from files, and import/export external databases.
     - **Log Viewer**: The main analysis view featuring a filter panel, a dedicated toolbar for display options, the main log table, and a resizable detail panel. A new global status bar provides persistent data and view controls.
     - **Dashboard**: A visualization hub with interactive charts that provide a high-level overview of the *currently filtered* data.
-    - **Application Log**: See real-time feedback, processing status, and errors from the application.
+    - **Application Log**: See real-time feedback, processing status, and errors from the application in a clean, full-screen interface.
     - **Info**: View in-app documentation, manuals, and version logs.
     - **Settings**: Manage application settings, including the UI theme.
 - **Dynamic Data Visualization Dashboard**:

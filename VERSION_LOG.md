@@ -4,6 +4,17 @@ This document tracks the major changes, new features, and bug fixes for the Log 
 
 ---
 
+### **Version 0.14.0** - Full-Screen Application Log & UX Polish
+
+_Date: 2025-09-01_
+
+This release enhances the developer experience by providing an improved, full-screen view for the Application Log.
+
+#### ✨ Features & Improvements
+- **Full-Screen Application Log**: The Application Log view now utilizes the full client area, removing the inset card-like container for a more expansive and immersive diagnostic experience. This provides more space for viewing long messages and tracking application activity.
+
+---
+
 ### **Version 0.13.0** - UI/UX & System Polish
 
 _Date: 2025-08-31_

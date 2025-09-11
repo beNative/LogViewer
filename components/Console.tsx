@@ -96,7 +96,8 @@ export const Console: React.FC<ConsoleProps> = ({ messages, onClear, filters, on
           </button>
         </div>
       </div>
-        <div className="p-3 overflow-y-auto flex-grow font-mono text-xs">
+      <div className="flex-grow min-h-0 relative">
+        <div className="absolute inset-0 p-3 overflow-y-auto font-mono text-xs">
           {filteredMessages.map((msg, index) => (
             <div key={index} className={`flex items-start space-x-3 mb-1.5`}>
               <span className="flex-shrink-0 pt-0.5">{getIcon(msg.type, iconSet)}</span>
@@ -112,6 +113,7 @@ export const Console: React.FC<ConsoleProps> = ({ messages, onClear, filters, on
           ))}
           <div ref={consoleEndRef} />
         </div>
+      </div>
     </div>
   );
 };
