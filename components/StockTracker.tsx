@@ -9,12 +9,13 @@ interface StockTrackerProps {
   isBusy: boolean;
   iconSet: IconSet;
   theme: Theme;
+  overallTimeRange: { min: string, max: string } | null;
 }
 
 const inputStyles = "w-full bg-white dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white sm:text-sm rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition";
 
 
-export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, isBusy, iconSet, theme }) => {
+export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, isBusy, iconSet, theme, overallTimeRange }) => {
     const [filters, setFilters] = React.useState<StockInfoFilters>({
         searchTerm: '',
         dateFrom: '',
@@ -22,6 +23,21 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
         dateTo: '',
         timeTo: '',
     });
+
+    React.useEffect(() => {
+        if (overallTimeRange && (!filters.dateFrom || !filters.dateTo)) {
+            const [minDate, minTimeStr] = overallTimeRange.min.split(' ');
+            const [maxDate, maxTimeStr] = overallTimeRange.max.split(' ');
+            setFilters(prev => ({
+                ...prev,
+                dateFrom: minDate,
+                timeFrom: minTimeStr?.substring(0, 8) || '00:00:00',
+                dateTo: maxDate,
+                timeTo: maxTimeStr?.substring(0, 8) || '23:59:59',
+            }));
+        }
+    }, [overallTimeRange, filters.dateFrom, filters.dateTo]);
+
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFilters({ ...filters, [e.target.name]: e.target.value });

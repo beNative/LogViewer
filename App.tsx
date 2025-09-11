@@ -153,6 +153,7 @@ const App: React.FC = () => {
   // Stock Tracker State
   const [stockHistory, setStockHistory] = React.useState<StockInfoEntry[]>([]);
   const [isStockBusy, setIsStockBusy] = React.useState<boolean>(false);
+  const [overallStockTimeRange, setOverallStockTimeRange] = React.useState<{ min: string, max: string } | null>(null);
 
 
   // Electron-specific state
@@ -226,6 +227,7 @@ const App: React.FC = () => {
     setTotalEntryCount(0);
     setHasData(false);
     setOverallTimeRange(null);
+    setOverallStockTimeRange(null);
     setTimelineViewRange(null);
     setActiveSessionName(null);
     setUniqueValues({ level: [], sndrtype: [], sndrname: [], fileName: [] });
@@ -253,6 +255,13 @@ const App: React.FC = () => {
             };
             setOverallTimeRange(overallRange);
             setOverallLogDensity(newDb.getLogDensity(initialFilters, 300));
+        }
+
+        const { minTime: minStockTime, maxTime: maxStockTime } = newDb.getMinMaxStockTime();
+        if (minStockTime && maxStockTime) {
+            setOverallStockTimeRange({ min: minStockTime, max: maxStockTime });
+        } else {
+            setOverallStockTimeRange(null);
         }
 
         if (fromSessionLoad) {
@@ -1610,6 +1619,7 @@ const handleUiScaleChange = async (newScale: number) => {
                 isBusy={isStockBusy}
                 iconSet={iconSet}
                 theme={theme}
+                overallTimeRange={overallStockTimeRange}
             />
         )}
         {activeView === 'console' && (

@@ -487,6 +487,23 @@ export class Database {
         return result;
     }
 
+    getMinMaxStockTime(): { minTime: string | null; maxTime: string | null } {
+        let result = { minTime: null, maxTime: null };
+        try {
+            const stmt = this.db.prepare(`SELECT MIN(timestamp), MAX(timestamp) FROM stock_info`);
+            if (stmt.step()) {
+                const [min, max] = stmt.get();
+                if (min !== null && max !== null) {
+                  result = { minTime: min as string, maxTime: max as string };
+                }
+            }
+            stmt.free();
+        } catch(e) {
+            // Table might not exist or be empty
+        }
+        return result;
+    }
+
     getLogVolumeByInterval(filters: FilterState): TimelineDataPoint[] {
         if (filters.sqlQueryEnabled && filters.sqlQuery) {
             return []; // Cannot determine timeline from arbitrary query
