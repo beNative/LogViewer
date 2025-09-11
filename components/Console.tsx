@@ -1,6 +1,7 @@
 import React from 'react';
-import { ConsoleMessage, ConsoleMessageType, IconSet } from '../types.ts';
+import { ConsoleMessage, ConsoleMessageType, IconSet, Theme } from '../types.ts';
 import { Icon } from './icons/index.tsx';
+import { highlightText } from '../utils.ts';
 
 interface ConsoleProps {
   messages: ConsoleMessage[];
@@ -8,6 +9,9 @@ interface ConsoleProps {
   filters: Record<ConsoleMessageType, boolean>;
   onFiltersChange: (newFilters: Record<ConsoleMessageType, boolean>) => void;
   iconSet: IconSet;
+  searchTerm: string;
+  onSearchTermChange: (term: string) => void;
+  theme: Theme;
 }
 
 const getIcon = (type: ConsoleMessageType, iconSet: IconSet) => {
@@ -50,7 +54,7 @@ const FilterButton: React.FC<{
 };
 
 
-export const Console: React.FC<ConsoleProps> = ({ messages, onClear, filters, onFiltersChange, iconSet }) => {
+export const Console: React.FC<ConsoleProps> = ({ messages, onClear, filters, onFiltersChange, iconSet, searchTerm, onSearchTermChange, theme }) => {
   const consoleEndRef = React.useRef<HTMLDivElement>(null);
 
   const messageCounts = React.useMemo(() => {
@@ -61,8 +65,14 @@ export const Console: React.FC<ConsoleProps> = ({ messages, onClear, filters, on
   }, [messages]);
 
   const filteredMessages = React.useMemo(() => {
-    return messages.filter(msg => filters[msg.type]);
-  }, [messages, filters]);
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    return messages
+      .filter(msg => filters[msg.type])
+      .filter(msg => {
+          if (!lowerCaseSearchTerm) return true;
+          return msg.message.toLowerCase().includes(lowerCaseSearchTerm);
+      });
+  }, [messages, filters, searchTerm]);
 
   React.useEffect(() => {
     consoleEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -74,27 +84,50 @@ export const Console: React.FC<ConsoleProps> = ({ messages, onClear, filters, on
 
   return (
     <div className="bg-white dark:bg-gray-800 flex flex-col flex-grow">
-      <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 flex-shrink-0 flex-wrap gap-2">
-        <h3 className="font-mono text-sm font-semibold text-gray-600 dark:text-gray-300 order-1">APPLICATION LOG</h3>
-        <div className="flex items-center space-x-2 order-3 sm:order-2 w-full sm:w-auto">
-            {(['DEBUG', 'INFO', 'WARNING', 'ERROR'] as ConsoleMessageType[]).map(type => (
-                <FilterButton
-                    key={type}
-                    type={type}
-                    count={messageCounts[type] || 0}
-                    isActive={filters[type]}
-                    onClick={() => handleToggleFilter(type)}
-                />
-            ))}
-        </div>
-        <div className="flex items-center space-x-2 order-2 sm:order-3">
-          <button 
-            onClick={onClear} 
-            className="px-3 py-1 text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-md transition-colors"
-          >
-            Clear
-          </button>
-        </div>
+      <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 flex-shrink-0 flex-wrap gap-4">
+          <h3 className="font-mono text-sm font-semibold text-gray-600 dark:text-gray-300">APPLICATION LOG</h3>
+
+          <div className="relative flex-grow min-w-[200px] max-w-lg">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Icon name="Filter" iconSet={iconSet} className="w-5 h-5 text-gray-400" />
+              </div>
+              <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => onSearchTermChange(e.target.value)}
+                  placeholder="Filter messages..."
+                  className="block w-full pl-10 pr-10 py-1.5 bg-gray-100 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 rounded-md focus:ring-sky-500 focus:border-sky-500 transition"
+              />
+              {searchTerm && (
+                  <button
+                      onClick={() => onSearchTermChange('')}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      aria-label="Clear filter"
+                  >
+                      <Icon name="XCircle" iconSet={iconSet} className="w-5 h-5" />
+                  </button>
+              )}
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="flex items-center space-x-2">
+                {(['DEBUG', 'INFO', 'WARNING', 'ERROR'] as ConsoleMessageType[]).map(type => (
+                    <FilterButton
+                        key={type}
+                        type={type}
+                        count={messageCounts[type] || 0}
+                        isActive={filters[type]}
+                        onClick={() => handleToggleFilter(type)}
+                    />
+                ))}
+            </div>
+            <button 
+              onClick={onClear} 
+              className="px-3 py-1 text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-md transition-colors"
+            >
+              Clear
+            </button>
+          </div>
       </div>
       <div className="flex-grow min-h-0 relative">
         <div className="absolute inset-0 p-3 overflow-y-auto font-mono text-xs">
@@ -108,7 +141,10 @@ export const Console: React.FC<ConsoleProps> = ({ messages, onClear, filters, on
               msg.type === 'WARNING' ? 'text-orange-500 dark:text-orange-400' :
               msg.type === 'INFO' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'
             }
-            `}>{msg.message}</p>
+            `}>{searchTerm.trim()
+                ? <span dangerouslySetInnerHTML={{ __html: highlightText(msg.message, [searchTerm], theme) }} />
+                : msg.message
+            }</p>
             </div>
           ))}
           <div ref={consoleEndRef} />

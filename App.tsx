@@ -112,6 +112,7 @@ const App: React.FC = () => {
   const [consoleMessages, setConsoleMessages] = React.useState<ConsoleMessage[]>([]);
   const [lastConsoleMessage, setLastConsoleMessage] = React.useState<ConsoleMessage | null>(null);
   const [consoleFilters, setConsoleFilters] = React.useState(initialConsoleFilters);
+  const [consoleSearchTerm, setConsoleSearchTerm] = React.useState('');
 
   const [currentPage, setCurrentPage] = React.useState<number>(1);
   const [pageSize, setPageSize] = React.useState<number>(1000);
@@ -1630,6 +1631,9 @@ const handleUiScaleChange = async (newScale: number) => {
                 filters={consoleFilters}
                 onFiltersChange={setConsoleFilters}
                 iconSet={iconSet}
+                searchTerm={consoleSearchTerm}
+                onSearchTermChange={setConsoleSearchTerm}
+                theme={theme}
              />
         )}
         {activeView === 'info' && (
