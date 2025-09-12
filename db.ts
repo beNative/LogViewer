@@ -288,15 +288,17 @@ export class Database {
         return { whereSql, params };
     }
 
-    queryStockInfo(filters: StockInfoFilters): StockInfoEntry[] {
+    queryStockInfo(filters: StockInfoFilters): { entries: StockInfoEntry[], sql: string, params: (string | number)[] } {
         const { whereSql, params } = this._buildStockWhereClause(filters);
         
+        // Compact the SQL string for cleaner logging in the console
         const sql = `
             SELECT timestamp, message_id, source, destination, article_id, article_name, dosage_form, max_sub_item_quantity, quantity 
             FROM stock_info 
             ${whereSql} 
             ORDER BY timestamp ASC
-        `;
+        `.trim().replace(/\s\s+/g, ' ');
+
         const stmt = this.db.prepare(sql);
         stmt.bind(params);
 
@@ -316,7 +318,7 @@ export class Database {
             });
         }
         stmt.free();
-        return entries;
+        return { entries, sql, params };
     }
 
     private _buildWhereClause(filters: FilterState): { whereSql: string, params: (string | number)[] } {

@@ -1683,7 +1683,11 @@ const handleUiScaleChange = async (newScale: number) => {
         
         setTimeout(() => {
             try {
-                const results = db.queryStockInfo(filters);
+                const { entries: results, sql, params } = db.queryStockInfo(filters);
+                
+                logToConsole(`Executing stock search SQL: ${sql}`, 'DEBUG');
+                logToConsole(`With parameters: ${JSON.stringify(params)}`, 'DEBUG');
+
                 setStockHistory(results);
                 logToConsole(`Found ${results.length} stock history records.`, 'DEBUG');
 
