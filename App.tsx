@@ -263,6 +263,18 @@ const App: React.FC = () => {
     const totalEntries = newDb.getTotalEntryCount();
     setTotalEntryCount(totalEntries);
 
+    // Handle stock info initialization independently
+    const { minTime: minStockTime, maxTime: maxStockTime } = newDb.getMinMaxStockTime();
+    let hasStockData = false;
+    if (minStockTime && maxStockTime) {
+        hasStockData = true;
+        setOverallStockTimeRange({ min: minStockTime, max: maxStockTime });
+        setOverallStockDensity(newDb.getStockDensity({} as StockInfoFilters, 300));
+    } else {
+        setOverallStockTimeRange(null);
+        setOverallStockDensity([]);
+    }
+
     if (totalEntries > 0) {
         let newFilters = { ...initialFilters };
         let filtersLoadedFromSession = false;
@@ -275,15 +287,6 @@ const App: React.FC = () => {
             };
             setOverallTimeRange(overallRange);
             setOverallLogDensity(newDb.getLogDensity(initialFilters, 300));
-        }
-
-        const { minTime: minStockTime, maxTime: maxStockTime } = newDb.getMinMaxStockTime();
-        if (minStockTime && maxStockTime) {
-            setOverallStockTimeRange({ min: minStockTime, max: maxStockTime });
-            setOverallStockDensity(newDb.getStockDensity({} as StockInfoFilters, 300));
-        } else {
-            setOverallStockTimeRange(null);
-            setOverallStockDensity([]);
         }
 
         if (fromSessionLoad) {
@@ -329,7 +332,7 @@ const App: React.FC = () => {
             fileName: uniqueFileNames,
         });
         logToConsole(`Database loaded. Total entries: ${totalEntries}. Apply filters to view.`, 'INFO');
-    } else {
+    } else if (!hasStockData) { // Only reset if there's no log data AND no stock data
         handleNewSession(false);
         logToConsole('Database is empty.', 'INFO');
     }
