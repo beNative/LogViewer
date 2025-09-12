@@ -153,7 +153,23 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                     </div>
 
                     {overallTimeRange && (
-                        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
+                             <div className="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label htmlFor="dateFrom" className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">From</label>
+                                    <div className="flex gap-2">
+                                        <input type="date" name="dateFrom" id="dateFrom" value={filters.dateFrom} onChange={handleInputChange} className={inputStyles} />
+                                        <input type="time" name="timeFrom" id="timeFrom" value={filters.timeFrom} onChange={handleInputChange} className={inputStyles} step="1" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label htmlFor="dateTo" className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">To</label>
+                                    <div className="flex gap-2">
+                                        <input type="date" name="dateTo" id="dateTo" value={filters.dateTo} onChange={handleInputChange} className={inputStyles} />
+                                        <input type="time" name="timeTo" id="timeTo" value={filters.timeTo} onChange={handleInputChange} className={inputStyles} step="1" />
+                                    </div>
+                                </div>
+                            </div>
                             <TimeRangeSelector
                                 minTime={new Date(overallTimeRange.min + 'Z').getTime()}
                                 maxTime={new Date(overallTimeRange.max + 'Z').getTime()}
@@ -164,7 +180,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                                 theme={theme}
                                 pageTimestampRanges={[]}
                                 fileTimeRanges={[]}
-                                logDensity={[]}
+                                logDensity={overallStockDensity}
                                 overallLogDensity={overallStockDensity}
                                 datesWithLogs={[]}
                                 viewMode="scroll"

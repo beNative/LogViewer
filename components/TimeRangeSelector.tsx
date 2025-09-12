@@ -485,10 +485,51 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     const startPos = visibleSelectionStart !== null ? mainValueToPos(visibleSelectionStart) : -1;
     const endPos = visibleSelectionEnd !== null ? mainValueToPos(visibleSelectionEnd) : -1;
 
+     const formatTickLabel = (time: number, duration: number): string => {
+        const d = new Date(time);
+        if (duration <= 2 * 60 * 1000) { // < 2 minutes
+            return d.toLocaleTimeString('en-US', { hour12: false, minute: '2-digit', second: '2-digit' });
+        }
+        if (duration <= 2 * 60 * 60 * 1000) { // < 2 hours
+            return d.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+        }
+        if (duration <= 2 * 24 * 60 * 60 * 1000) { // < 2 days
+            return `${d.toLocaleDateString('en-CA', { month: '2-digit', day: '2-digit' })} ${d.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })}`;
+        }
+        return d.toLocaleDateString('en-CA'); // YYYY-MM-DD
+    };
+
+    const ticks = React.useMemo(() => {
+        if (!mainContainerWidth || mainContainerWidth < 100) return [];
+
+        const tickCount = Math.max(2, Math.floor(mainContainerWidth / 120));
+        const duration = displayMaxTime - displayMinTime;
+        if (duration <= 0) return [];
+
+        const niceIntervals = [
+            1000, 5000, 15000, 30000, // seconds
+            60 * 1000, 5 * 60 * 1000, 15 * 60 * 1000, 30 * 60 * 1000, // minutes
+            60 * 60 * 1000, 2 * 60 * 60 * 1000, 6 * 60 * 60 * 1000, 12 * 60 * 60 * 1000, // hours
+            24 * 60 * 60 * 1000, 2 * 24 * 60 * 60 * 1000, 7 * 24 * 60 * 60 * 1000 // days
+        ];
+        const targetStep = duration / tickCount;
+        const step = niceIntervals.find(i => i > targetStep) || niceIntervals[niceIntervals.length - 1];
+
+        const tickValues: number[] = [];
+        const startTick = Math.ceil(displayMinTime / step) * step;
+
+        for (let t = startTick; t <= displayMaxTime; t += step) {
+            tickValues.push(t);
+        }
+        return tickValues;
+    }, [displayMinTime, displayMaxTime, mainContainerWidth]);
+
     return (
         <div className="w-full">
             <div className="flex items-start gap-3 w-full">
-                <div className="w-16 flex-shrink-0 text-right pt-6">
+                <div className="w-16 flex-shrink-0 text-right">
+                     {/* This div is a spacer to align with the timeline content */}
+                    <div className="h-6" />
                     <div className="space-y-3">
                         {barComponents.map(bar => (
                             <div key={bar.key} className="h-5 text-xs font-semibold text-gray-600 dark:text-gray-400 flex items-center justify-end pr-2">
@@ -498,10 +539,18 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                     </div>
                 </div>
                 
-                <div className="flex-grow flex flex-col relative pt-6">
+                <div className="flex-grow flex flex-col relative">
+                     {/* Tooltips Container */}
+                    <div className="absolute top-0 w-full h-6 pointer-events-none z-40">
+                         {startPos >= 0 && <div className="absolute top-0 text-xs font-mono text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-1.5 py-0.5 rounded shadow" style={{ left: `${startPos}px`, transform: 'translateX(-50%)' }}>{formatTooltip(currentStart)}</div>}
+                         {endPos >= 0 && (endPos - startPos > 60) && <div className="absolute top-0 text-xs font-mono text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-1.5 py-0.5 rounded shadow" style={{ left: `${endPos}px`, transform: 'translateX(-50%)' }}>{formatTooltip(currentEnd)}</div>}
+                         {cursorTime !== null && cursorTime >= displayMinTime && cursorTime <= displayMaxTime && <div className="absolute top-0 text-xs font-mono bg-red-500/90 backdrop-blur-sm text-white rounded px-1.5 py-0.5" style={{ left: `${mainValueToPos(cursorTime)}px`, transform: 'translateX(-50%)' }}>{formatTooltip(cursorTime)}</div>}
+                    </div>
+                    
+                    {/* Main Timeline Area */}
                     <div 
                         onMouseDown={(e) => handleMouseDown(e, 'new_selection')}
-                        className="w-full cursor-crosshair bg-gray-200 dark:bg-gray-700/50 rounded p-1 overflow-hidden"
+                        className="w-full cursor-crosshair bg-gray-200 dark:bg-gray-700/50 rounded p-1 overflow-hidden mt-6"
                     >
                         <div ref={mainContainerRef} className="relative">
                             <div className="space-y-3">
@@ -540,9 +589,21 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                             )}
                         </div>
                     </div>
-                    {startPos >= 0 && <div className="absolute top-0 text-xs font-mono text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-1.5 py-0.5 rounded shadow z-40" style={{ left: `${startPos}px`, transform: 'translateX(-50%)' }}>{formatTooltip(currentStart)}</div>}
-                    {endPos >= 0 && (endPos - startPos > 60) && <div className="absolute top-0 text-xs font-mono text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-1.5 py-0.5 rounded shadow z-40" style={{ left: `${endPos}px`, transform: 'translateX(-50%)' }}>{formatTooltip(currentEnd)}</div>}
-                    {cursorTime !== null && cursorTime >= displayMinTime && cursorTime <= displayMaxTime && <div className="absolute top-0 text-xs font-mono bg-red-500/90 backdrop-blur-sm text-white rounded px-1.5 py-0.5 z-40" style={{ left: `${mainValueToPos(cursorTime)}px`, transform: 'translateX(-50%)' }}>{formatTooltip(cursorTime)}</div>}
+                    {/* Time Axis Ticks */}
+                    <div className="relative w-full h-6 mt-1 pointer-events-none">
+                        {ticks.map(tick => {
+                            const pos = mainValueToPos(tick);
+                            if (pos < 20 || pos > mainContainerWidth - 20) return null;
+                            return (
+                                <div key={tick} className="absolute top-0 text-center" style={{ left: `${pos}px`, transform: 'translateX(-50%)' }}>
+                                    <div className="w-px h-1.5 bg-gray-400 dark:bg-gray-500 mx-auto" />
+                                    <span className="block mt-0.5 text-xs text-gray-500 dark:text-gray-400 font-mono whitespace-nowrap">
+                                        {formatTickLabel(tick, displayMaxTime - displayMinTime)}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
                 
                 <div className="w-auto flex-shrink-0 self-start pt-6 flex flex-col items-center gap-1">
