@@ -13,12 +13,13 @@ interface StockTrackerProps {
   overallTimeRange: { min: string, max: string } | null;
   overallStockDensity: LogDensityPoint[];
   uiScale: number;
+  onRebuildStockData: () => Promise<void>;
 }
 
 const inputStyles = "w-full bg-white dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white sm:text-sm rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition";
 
 
-export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, isBusy, iconSet, theme, overallTimeRange, overallStockDensity, uiScale }) => {
+export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, isBusy, iconSet, theme, overallTimeRange, overallStockDensity, uiScale, onRebuildStockData }) => {
     const [filters, setFilters] = React.useState<StockInfoFilters>({
         searchTerm: '',
         dateFrom: '',
@@ -51,6 +52,16 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         onSearch(filters);
+    };
+
+    const handleRebuildClick = () => {
+        if (window.confirm(
+            'Are you sure you want to rebuild the stock data?\n\n' +
+            'This will clear all existing stock information and recreate it from the log entries in the current session. ' +
+            'This process can be slow and the session will be saved automatically.'
+        )) {
+            onRebuildStockData();
+        }
     };
 
     const chartData = React.useMemo(() => {
@@ -127,7 +138,20 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
     return (
         <div className="flex-grow p-4 sm:p-6 lg:p-8 overflow-y-auto space-y-6 bg-gray-100 dark:bg-transparent">
             <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Search Article Stock</h2>
+                <div className="flex justify-between items-start mb-4">
+                    <div>
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Search Article Stock</h2>
+                    </div>
+                    <button
+                        onClick={handleRebuildClick}
+                        disabled={isBusy}
+                        className="inline-flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg transition-colors duration-200 bg-amber-500 hover:bg-amber-600 text-white dark:bg-amber-600 dark:hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Clear and rebuild all stock data from the main log entries in this session."
+                    >
+                        <Icon name="ArrowPath" iconSet={iconSet} className="w-5 h-5" />
+                        <span>Rebuild Stock Data</span>
+                    </button>
+                </div>
                 <form onSubmit={handleSearch} className="space-y-4">
                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                         <div className="md:col-span-2">

@@ -1706,6 +1706,44 @@ const handleUiScaleChange = async (newScale: number) => {
             }
         }, 50);
     }, [db, logToConsole, overallStockTimeRange]);
+    
+    const handleRebuildStockData = React.useCallback(async () => {
+        if (!db || !hasData) {
+            logToConsole('Cannot rebuild stock data: No database or data loaded.', 'ERROR');
+            addToast({ type: 'error', title: 'Rebuild Failed', message: 'No data is currently loaded.' });
+            return;
+        }
+        
+        logToConsole('Starting stock data rebuild from log entries...', 'INFO');
+        addToast({ id: 'rebuild-stock', type: 'progress', title: 'Rebuilding Stock Data', message: 'Processing log entries...', progress: 0, duration: 0 });
+
+        setIsStockBusy(true);
+
+        // Use a timeout to allow the UI to update with the busy state and toast
+        setTimeout(async () => {
+            try {
+                const rebuiltCount = db.rebuildStockInfoFromLogs();
+                logToConsole(`Rebuild complete. Found and inserted ${rebuiltCount} stock entries.`, 'INFO');
+                
+                // Refresh all DB-derived state, including stock info
+                updateStateFromDb(db, false);
+                
+                // Clear current search results in the tracker view
+                setStockHistory([]);
+
+                setIsDirty(true);
+                await handleSaveSession(); // Auto-save the change
+
+                addToast({ id: 'rebuild-stock', type: 'success', title: 'Rebuild Complete', message: `Successfully rebuilt ${rebuiltCount.toLocaleString()} stock entries.` });
+            } catch (e) {
+                const msg = e instanceof Error ? e.message : String(e);
+                logToConsole(`Stock data rebuild failed: ${msg}`, 'ERROR');
+                addToast({ id: 'rebuild-stock', type: 'error', title: 'Rebuild Failed', message: msg });
+            } finally {
+                setIsStockBusy(false);
+            }
+        }, 50);
+    }, [db, hasData, logToConsole, addToast, updateStateFromDb, handleSaveSession]);
 
 
   const totalPages = Math.ceil(totalFilteredCount / pageSize);
@@ -1840,6 +1878,7 @@ const handleUiScaleChange = async (newScale: number) => {
                 overallTimeRange={overallStockTimeRange}
                 overallStockDensity={overallStockDensity}
                 uiScale={uiScale}
+                onRebuildStockData={handleRebuildStockData}
             />
         )}
         {activeView === 'console' && (

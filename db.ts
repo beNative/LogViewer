@@ -196,6 +196,73 @@ export class Database {
         }
     }
 
+    rebuildStockInfoFromLogs(): number {
+        // Clear the table first
+        this.db.exec("DELETE FROM stock_info;");
+
+        // Select only logs that are likely to contain stock info
+        const selectStmt = this.db.prepare("SELECT time, msg FROM logs WHERE msg LIKE '%<StockInfoMessage%'");
+        
+        const stockEntriesToInsert: Omit<StockInfoEntry, 'id'>[] = [];
+
+        while (selectStmt.step()) {
+            const [time, msg] = selectStmt.get();
+            if (msg.includes('<WWKS') && msg.includes('<StockInfoMessage')) {
+                try {
+                    const xmlStartIndex = msg.indexOf('<WWKS');
+                    const xmlEndIndex = msg.lastIndexOf('</WWKS>') + 7;
+
+                    if (xmlStartIndex > -1 && xmlEndIndex > xmlStartIndex) {
+                        const xmlFragment = msg.substring(xmlStartIndex, xmlEndIndex);
+                        const wwksParser = new DOMParser();
+                        const wwksDoc = wwksParser.parseFromString(xmlFragment, "application/xml");
+                        
+                        if (wwksDoc.getElementsByTagName("parsererror").length === 0) {
+                            const wwksNode = wwksDoc.querySelector('WWKS');
+                            const stockNode = wwksDoc.querySelector('StockInfoMessage');
+                            const articleNode = stockNode?.querySelector('Article');
+                            
+                            if (wwksNode && stockNode && articleNode) {
+                                let parsedTimestamp: string;
+                                const wwksTimestamp = wwksNode.getAttribute('TimeStamp');
+                                if (wwksTimestamp) {
+                                    parsedTimestamp = new Date(wwksTimestamp).toISOString();
+                                } else {
+                                    // Fallback to the log entry's timestamp
+                                    parsedTimestamp = new Date(time.replace(/ (\d+)$/, '.$1') + 'Z').toISOString();
+                                }
+
+                                const stockEntry = {
+                                    timestamp: parsedTimestamp,
+                                    message_id: parseInt(stockNode.getAttribute('Id') || '0', 10),
+                                    source: stockNode.getAttribute('Source') || 'N/A',
+                                    destination: stockNode.getAttribute('Destination') || 'N/A',
+                                    article_id: articleNode.getAttribute('Id') || 'N/A',
+                                    article_name: articleNode.getAttribute('Name') || 'N/A',
+                                    dosage_form: articleNode.getAttribute('DosageForm') || 'N/A',
+                                    max_sub_item_quantity: parseInt(articleNode.getAttribute('MaxSubItemQuantity') || '0', 10),
+                                    quantity: parseInt(articleNode.getAttribute('Quantity') || '0', 10),
+                                };
+                                stockEntriesToInsert.push(stockEntry);
+                            }
+                        }
+                    }
+                } catch (e) {
+                    // Log or handle parsing errors for individual messages, but don't stop the whole process
+                    console.warn(`Could not parse stock info from a log message: ${e instanceof Error ? e.message : String(e)}`);
+                }
+            }
+        }
+        selectStmt.free();
+
+        if (stockEntriesToInsert.length > 0) {
+            this.insertStockInfo(stockEntriesToInsert);
+        }
+
+        return stockEntriesToInsert.length;
+    }
+
+
     private _buildStockWhereClause(filters: StockInfoFilters): { whereSql: string, params: (string | number)[] } {
         const whereClauses: string[] = [];
         const params: (string | number)[] = [];
