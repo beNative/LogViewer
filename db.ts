@@ -173,6 +173,7 @@ export class Database {
         this.db.exec("BEGIN TRANSACTION;");
         try {
             entries.forEach(entry => {
+                // Ensure the timestamp is in a format SQLite understands for date functions
                 const sqlTime = entry.timestamp.replace('T', ' ').replace('Z', '');
                 stmt.run([
                     sqlTime,

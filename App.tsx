@@ -777,25 +777,42 @@ const App: React.FC = () => {
 
               if (msg.includes('<WWKS') && msg.includes('<StockInfoMessage')) {
                   try {
-                      const wwksParser = new DOMParser();
-                      const wwksDoc = wwksParser.parseFromString(msg, "application/xml");
-                      const wwksNode = wwksDoc.querySelector('WWKS');
-                      const stockNode = wwksDoc.querySelector('StockInfoMessage');
-                      const articleNode = stockNode?.querySelector('Article');
+                      const xmlStartIndex = msg.indexOf('<WWKS');
+                      const xmlEndIndex = msg.lastIndexOf('</WWKS>') + 7;
 
-                      if (wwksNode && stockNode && articleNode) {
-                          const stockEntry = {
-                              timestamp: wwksNode.getAttribute('TimeStamp') || new Date(time.replace(' ', 'T') + 'Z').toISOString(),
-                              message_id: parseInt(stockNode.getAttribute('Id') || '0', 10),
-                              source: stockNode.getAttribute('Source') || 'N/A',
-                              destination: stockNode.getAttribute('Destination') || 'N/A',
-                              article_id: articleNode.getAttribute('Id') || 'N/A',
-                              article_name: articleNode.getAttribute('Name') || 'N/A',
-                              dosage_form: articleNode.getAttribute('DosageForm') || 'N/A',
-                              max_sub_item_quantity: parseInt(articleNode.getAttribute('MaxSubItemQuantity') || '0', 10),
-                              quantity: parseInt(articleNode.getAttribute('Quantity') || '0', 10),
-                          };
-                          stockEntries.push(stockEntry);
+                      if (xmlStartIndex > -1 && xmlEndIndex > xmlStartIndex) {
+                          const xmlFragment = msg.substring(xmlStartIndex, xmlEndIndex);
+                          const wwksParser = new DOMParser();
+                          const wwksDoc = wwksParser.parseFromString(xmlFragment, "application/xml");
+                          
+                          if (wwksDoc.getElementsByTagName("parsererror").length === 0) {
+                              const wwksNode = wwksDoc.querySelector('WWKS');
+                              const stockNode = wwksDoc.querySelector('StockInfoMessage');
+                              const articleNode = stockNode?.querySelector('Article');
+                              
+                              if (wwksNode && stockNode && articleNode) {
+                                  let parsedTimestamp: string;
+                                  const wwksTimestamp = wwksNode.getAttribute('TimeStamp');
+                                  if (wwksTimestamp) {
+                                      parsedTimestamp = new Date(wwksTimestamp).toISOString();
+                                  } else {
+                                      parsedTimestamp = new Date(time.replace(/ (\d+)$/, '.$1') + 'Z').toISOString();
+                                  }
+
+                                  const stockEntry = {
+                                      timestamp: parsedTimestamp,
+                                      message_id: parseInt(stockNode.getAttribute('Id') || '0', 10),
+                                      source: stockNode.getAttribute('Source') || 'N/A',
+                                      destination: stockNode.getAttribute('Destination') || 'N/A',
+                                      article_id: articleNode.getAttribute('Id') || 'N/A',
+                                      article_name: articleNode.getAttribute('Name') || 'N/A',
+                                      dosage_form: articleNode.getAttribute('DosageForm') || 'N/A',
+                                      max_sub_item_quantity: parseInt(articleNode.getAttribute('MaxSubItemQuantity') || '0', 10),
+                                      quantity: parseInt(articleNode.getAttribute('Quantity') || '0', 10),
+                                  };
+                                  stockEntries.push(stockEntry);
+                              }
+                          }
                       }
                   } catch (e) {
                       logToConsole(`Failed to parse StockInfoMessage from log message in ${file.name}. Error: ${e instanceof Error ? e.message : String(e)}`, 'WARNING');
