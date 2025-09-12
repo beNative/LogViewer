@@ -845,24 +845,74 @@ const App: React.FC = () => {
   }, [logToConsole]);
 
 
-  const handleFileDrop = React.useCallback(async (files: FileList) => {
+  const handleCreateNewSessionFromFiles = React.useCallback(async (files: FileList) => {
     if (!db) {
-        logToConsole('Database not ready, cannot process files.', 'ERROR');
+        logToConsole('Database not ready, cannot create session.', 'ERROR');
         return;
     }
+
+    // This effectively creates a new in-memory DB to work with
+    handleNewSession(false);
+    logToConsole(`Creating new session from ${files.length} file(s)...`, 'INFO');
+
     try {
+        // processFilesToDb will now work on the fresh DB instance
         await processFilesToDb(files, db);
         updateStateFromDb(db, false);
-        setIsDirty(true);
+        
+        // handleSaveSession will generate a new name since activeSessionName is null
+        const success = await handleSaveSession(); 
+        if (success) {
+            logToConsole('New session created and saved successfully.', 'INFO');
+            addToast({ type: 'success', title: 'Session Created', message: `New session created successfully.` });
+        } else {
+            throw new Error('Failed to save the new session after processing files.');
+        }
     } catch(err) {
         const msg = err instanceof Error ? err.message : String(err);
         setError(msg);
         logToConsole(msg, 'ERROR');
+        addToast({ type: 'error', title: 'Session Creation Failed', message: msg });
     } finally {
         setProgressMessage('Done!');
         setTimeout(() => setIsLoading(false), 500);
     }
-  }, [db, processFilesToDb, updateStateFromDb, logToConsole]);
+  }, [db, handleNewSession, processFilesToDb, updateStateFromDb, logToConsole, handleSaveSession, addToast]);
+
+  const handleAddFilesToCurrentSession = React.useCallback(async (files: FileList) => {
+    if (!db) {
+        logToConsole('Database not ready, cannot add files.', 'ERROR');
+        return;
+    }
+    if (!activeSessionName) {
+        logToConsole('No active session. Create a new session first.', 'WARNING');
+        addToast({ type: 'warning', title: 'No Active Session', message: 'Please create or load a session before adding more files.' });
+        return;
+    }
+
+    logToConsole(`Adding ${files.length} file(s) to current session '${activeSessionName}'...`, 'INFO');
+
+    try {
+        await processFilesToDb(files, db);
+        updateStateFromDb(db, false);
+        setIsDirty(true); // Mark as dirty
+        const success = await handleSaveSession(); // Save the changes immediately
+        if (success) {
+            logToConsole(`Successfully added files and saved session.`, 'INFO');
+            addToast({ type: 'success', title: 'Files Added', message: `Successfully added files to ${activeSessionName}.` });
+        } else {
+            throw new Error('Failed to save session after adding files.');
+        }
+    } catch(err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        setError(msg);
+        logToConsole(msg, 'ERROR');
+        addToast({ type: 'error', title: 'Error Adding Files', message: msg });
+    } finally {
+        setProgressMessage('Done!');
+        setTimeout(() => setIsLoading(false), 500);
+    }
+  }, [db, processFilesToDb, updateStateFromDb, logToConsole, activeSessionName, handleSaveSession, addToast]);
   
   const handleApplyFilters = React.useCallback(() => {
     logToConsole('Applying filters...', 'INFO');
@@ -1630,12 +1680,16 @@ const handleUiScaleChange = async (newScale: number) => {
       <main className="flex-grow flex flex-col min-h-0">
         {activeView === 'data' && (
            <DataHub
-            onFileDrop={handleFileDrop}
+            onCreateSessionFromFiles={handleCreateNewSessionFromFiles}
+            onAddFilesToSession={handleAddFilesToCurrentSession}
             onImportDb={handleImportDb}
             onDownloadDb={handleDownloadDb}
             onNewSession={handleNewSession}
             error={error}
             hasData={hasData}
+            totalEntryCount={totalEntryCount}
+            overallTimeRange={overallTimeRange}
+            loadedFileNames={loadedFileNames}
             isElectron={isElectron}
             sessions={sessions}
             activeSessionName={activeSessionName}
