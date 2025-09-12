@@ -196,14 +196,27 @@ export class Database {
         }
     }
 
-    rebuildStockInfoFromLogs(): number {
+    rebuildStockInfoFromLogs(onProgress?: (processed: number, total: number, parsed: number) => void): number {
         // Clear the table first
         this.db.exec("DELETE FROM stock_info;");
+
+        // Count total logs to scan for progress calculation
+        const countResult = this.db.exec("SELECT COUNT(*) FROM logs WHERE msg LIKE '%<StockInfoMessage%'");
+        const totalToScan = countResult.length > 0 && countResult[0].values.length > 0 ? countResult[0].values[0][0] : 0;
+        
+        if (totalToScan === 0) {
+            onProgress?.(0, 0, 0);
+            return 0;
+        }
+
+        onProgress?.(0, totalToScan, 0);
 
         // Select only logs that are likely to contain stock info
         const selectStmt = this.db.prepare("SELECT time, msg FROM logs WHERE msg LIKE '%<StockInfoMessage%'");
         
         const stockEntriesToInsert: Omit<StockInfoEntry, 'id'>[] = [];
+        let processedCount = 0;
+        let successfullyParsedCount = 0;
 
         while (selectStmt.step()) {
             const [time, msg] = selectStmt.get();
@@ -244,6 +257,7 @@ export class Database {
                                     quantity: parseInt(articleNode.getAttribute('Quantity') || '0', 10),
                                 };
                                 stockEntriesToInsert.push(stockEntry);
+                                successfullyParsedCount++;
                             }
                         }
                     }
@@ -252,6 +266,12 @@ export class Database {
                     console.warn(`Could not parse stock info from a log message: ${e instanceof Error ? e.message : String(e)}`);
                 }
             }
+            
+            processedCount++;
+            // Report progress periodically to avoid overwhelming the main thread with state updates
+            if (onProgress && (processedCount % 100 === 0 || processedCount === totalToScan)) {
+                onProgress(processedCount, totalToScan, successfullyParsedCount);
+            }
         }
         selectStmt.free();
 
@@ -259,7 +279,10 @@ export class Database {
             this.insertStockInfo(stockEntriesToInsert);
         }
 
-        return stockEntriesToInsert.length;
+        // Final progress update to ensure it hits 100%
+        onProgress?.(totalToScan, totalToScan, successfullyParsedCount);
+
+        return successfullyParsedCount;
     }
 
 

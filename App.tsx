@@ -1719,17 +1719,38 @@ const handleUiScaleChange = async (newScale: number) => {
         }
         
         logToConsole('Starting stock data rebuild from log entries...', 'INFO');
-        addToast({ id: 'rebuild-stock', type: 'progress', title: 'Rebuilding Stock Data', message: 'Processing log entries...', progress: 0, duration: 0 });
+        addToast({ id: 'rebuild-stock', type: 'progress', title: 'Rebuilding Stock Data', message: 'Initializing...', progress: 0, duration: 0 });
 
         setIsStockBusy(true);
 
         // Use a timeout to allow the UI to update with the busy state and toast
         setTimeout(async () => {
             try {
-                const rebuiltCount = db.rebuildStockInfoFromLogs();
-                logToConsole(`Rebuild complete. Found and inserted ${rebuiltCount} stock entries.`, 'INFO');
+                const onProgress = (processed: number, total: number, parsed: number) => {
+                    if (total === 0) {
+                        logToConsole('No potential stock log entries found to process during rebuild.', 'DEBUG');
+                        setToasts(prev => prev.map(t =>
+                            t.id === 'rebuild-stock'
+                                ? { ...t, progress: 100, message: 'No relevant log entries found.' }
+                                : t
+                        ));
+                        return;
+                    }
+                    const progressPercentage = total > 0 ? (processed / total) * 100 : 100;
+                    logToConsole(`Rebuild Progress: Scanned ${processed.toLocaleString()} of ${total.toLocaleString()} potential logs. Parsed ${parsed.toLocaleString()} stock entries so far.`, 'DEBUG');
+                    setToasts(prev => prev.map(t =>
+                        t.id === 'rebuild-stock'
+                            ? { ...t, progress: progressPercentage, message: `Scanning... ${processed.toLocaleString()}/${total.toLocaleString()}` }
+                            : t
+                    ));
+                };
                 
-                // Refresh all DB-derived state, including stock info
+                logToConsole('Counting potential stock messages for rebuild...', 'DEBUG');
+                const rebuiltCount = db.rebuildStockInfoFromLogs(onProgress);
+                
+                logToConsole(`Rebuild scan complete. A total of ${rebuiltCount.toLocaleString()} stock entries were parsed and inserted.`, 'INFO');
+                
+                logToConsole('Refreshing application state after rebuild...', 'DEBUG');
                 updateStateFromDb(db, false);
                 
                 // Clear current search results in the tracker view
