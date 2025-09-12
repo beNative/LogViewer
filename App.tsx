@@ -1645,12 +1645,23 @@ const handleUiScaleChange = async (newScale: number) => {
         }
         setIsStockBusy(true);
         logToConsole(`Searching stock for: ${filters.searchTerm}`, 'INFO');
-        // Use a timeout to allow UI to update
+        
         setTimeout(() => {
             try {
                 const results = db.queryStockInfo(filters);
                 setStockHistory(results);
                 logToConsole(`Found ${results.length} stock history records.`, 'DEBUG');
+
+                // Fail-safe: If search returns results but the overall time range isn't set,
+                // calculate it now. This ensures the timeline appears as expected.
+                if (results.length > 0 && !overallStockTimeRange) {
+                    logToConsole('Stock data found; re-calculating overall time range for timeline.', 'DEBUG');
+                    const { minTime: minStockTime, maxTime: maxStockTime } = db.getMinMaxStockTime();
+                    if (minStockTime && maxStockTime) {
+                        setOverallStockTimeRange({ min: minStockTime, max: maxStockTime });
+                        setOverallStockDensity(db.getStockDensity({} as StockInfoFilters, 300));
+                    }
+                }
             } catch (e) {
                 const msg = e instanceof Error ? e.message : String(e);
                 setError(msg);
@@ -1659,7 +1670,7 @@ const handleUiScaleChange = async (newScale: number) => {
                 setIsStockBusy(false);
             }
         }, 50);
-    }, [db, logToConsole]);
+    }, [db, logToConsole, overallStockTimeRange]);
 
 
   const totalPages = Math.ceil(totalFilteredCount / pageSize);
