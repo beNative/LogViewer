@@ -1,7 +1,8 @@
 import React from 'react';
-import { StockInfoEntry, StockInfoFilters, IconSet, Theme } from '../types.ts';
+import { StockInfoEntry, StockInfoFilters, IconSet, Theme, LogDensityPoint, OverallTimeRange } from '../types.ts';
 import { Icon } from './icons/index.tsx';
 import { StockHistoryChart } from './StockHistoryChart.tsx';
+import { TimeRangeSelector } from './TimeRangeSelector.tsx';
 
 interface StockTrackerProps {
   onSearch: (filters: StockInfoFilters) => void;
@@ -10,12 +11,14 @@ interface StockTrackerProps {
   iconSet: IconSet;
   theme: Theme;
   overallTimeRange: { min: string, max: string } | null;
+  overallStockDensity: LogDensityPoint[];
+  uiScale: number;
 }
 
 const inputStyles = "w-full bg-white dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white sm:text-sm rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition";
 
 
-export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, isBusy, iconSet, theme, overallTimeRange }) => {
+export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, isBusy, iconSet, theme, overallTimeRange, overallStockDensity, uiScale }) => {
     const [filters, setFilters] = React.useState<StockInfoFilters>({
         searchTerm: '',
         dateFrom: '',
@@ -23,6 +26,8 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
         dateTo: '',
         timeTo: '',
     });
+    const [timelineViewRange, setTimelineViewRange] = React.useState<OverallTimeRange | null>(null);
+
 
     React.useEffect(() => {
         if (overallTimeRange && (!filters.dateFrom || !filters.dateTo)) {
@@ -56,47 +61,126 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
         }));
     }, [history]);
 
+    const handleTimeRangeChange = (startTime: number, endTime: number) => {
+        const startDate = new Date(startTime);
+        const endDate = new Date(endTime);
+
+        const dateToYYYYMMDD = (d: Date) => d.toISOString().split('T')[0];
+        const dateToHHMMSS = (d: Date) => d.toISOString().split('T')[1].substring(0, 8);
+        
+        setFilters(currentFilters => ({
+            ...currentFilters,
+            dateFrom: dateToYYYYMMDD(startDate),
+            timeFrom: dateToHHMMSS(startDate),
+            dateTo: dateToYYYYMMDD(endDate),
+            timeTo: dateToHHMMSS(endDate),
+        }));
+    };
+
+    const handleTimeRangeClear = () => {
+        setFilters(currentFilters => ({
+            ...currentFilters,
+            dateFrom: '',
+            timeFrom: '',
+            dateTo: '',
+            timeTo: '',
+        }));
+    };
+
+    const getSelectedTimestamps = React.useCallback(() => {
+        let selectedStartTime: number | null = null;
+        let selectedEndTime: number | null = null;
+    
+        if (filters.dateFrom) {
+            let timePart = filters.timeFrom || '00:00:00';
+            if (timePart.length === 5) timePart += ':00';
+            const dateString = `${filters.dateFrom}T${timePart}.000Z`;
+            const date = new Date(dateString);
+            if (!isNaN(date.getTime())) {
+                selectedStartTime = date.getTime();
+            }
+        }
+         if (filters.dateTo) {
+            let timePart = filters.timeTo || '23:59:59';
+            if (timePart.length === 5) timePart += ':00';
+            const dateString = `${filters.dateTo}T${timePart}.999Z`;
+            const date = new Date(dateString);
+             if (!isNaN(date.getTime())) {
+                selectedEndTime = date.getTime();
+            }
+        }
+        return { selectedStartTime, selectedEndTime };
+    }, [filters.dateFrom, filters.timeFrom, filters.dateTo, filters.timeTo]);
+
+    const { selectedStartTime, selectedEndTime } = getSelectedTimestamps();
+
+    const handleTimelineZoomToSelection = React.useCallback(() => {
+        if (selectedStartTime && selectedEndTime && selectedStartTime < selectedEndTime) {
+            setTimelineViewRange({ min: selectedStartTime, max: selectedEndTime });
+        }
+    }, [selectedStartTime, selectedEndTime]);
+
+    const zoomToSelectionEnabled = React.useMemo(() => {
+        return selectedStartTime !== null && selectedEndTime !== null && selectedStartTime < selectedEndTime;
+    }, [selectedStartTime, selectedEndTime]);
+
     return (
         <div className="flex-grow p-4 sm:p-6 lg:p-8 overflow-y-auto space-y-6 bg-gray-100 dark:bg-transparent">
             <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
                 <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Search Article Stock</h2>
-                <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                    <div>
-                        <label htmlFor="searchTerm" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Article ID or Name</label>
-                        <input
-                            type="text"
-                            name="searchTerm"
-                            id="searchTerm"
-                            value={filters.searchTerm}
-                            onChange={handleInputChange}
-                            className={inputStyles}
-                            placeholder="e.g., 3400936009011 or CARTEOL"
-                        />
-                    </div>
-                     <div className="grid grid-cols-2 gap-2">
-                        <div>
-                            <label htmlFor="dateFrom" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">From</label>
-                            <div className="flex gap-2">
-                                <input type="date" name="dateFrom" id="dateFrom" value={filters.dateFrom} onChange={handleInputChange} className={inputStyles} />
-                                <input type="time" name="timeFrom" id="timeFrom" value={filters.timeFrom} onChange={handleInputChange} className={inputStyles} step="1" />
-                            </div>
+                <form onSubmit={handleSearch} className="space-y-4">
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        <div className="md:col-span-2">
+                            <label htmlFor="searchTerm" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Article ID or Name</label>
+                            <input
+                                type="text"
+                                name="searchTerm"
+                                id="searchTerm"
+                                value={filters.searchTerm}
+                                onChange={handleInputChange}
+                                className={inputStyles}
+                                placeholder="e.g., 3400936009011 or CARTEOL"
+                            />
                         </div>
-                        <div>
-                            <label htmlFor="dateTo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">To</label>
-                            <div className="flex gap-2">
-                                <input type="date" name="dateTo" id="dateTo" value={filters.dateTo} onChange={handleInputChange} className={inputStyles} />
-                                <input type="time" name="timeTo" id="timeTo" value={filters.timeTo} onChange={handleInputChange} className={inputStyles} step="1" />
-                            </div>
-                        </div>
+                        <button
+                            type="submit"
+                            disabled={isBusy || !filters.searchTerm}
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2 font-semibold rounded-lg transition-colors duration-200 bg-sky-600 hover:bg-sky-700 text-white dark:bg-sky-600 dark:hover:bg-sky-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <Icon name="Filter" iconSet={iconSet} className="w-5 h-5" />
+                            <span>{isBusy ? 'Searching...' : 'Search'}</span>
+                        </button>
                     </div>
-                    <button
-                        type="submit"
-                        disabled={isBusy || !filters.searchTerm}
-                        className="inline-flex items-center justify-center gap-2 px-4 py-2 font-semibold rounded-lg transition-colors duration-200 bg-sky-600 hover:bg-sky-700 text-white dark:bg-sky-600 dark:hover:bg-sky-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        <Icon name="Filter" iconSet={iconSet} className="w-5 h-5" />
-                        <span>{isBusy ? 'Searching...' : 'Search'}</span>
-                    </button>
+
+                    {overallTimeRange && (
+                        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <TimeRangeSelector
+                                minTime={new Date(overallTimeRange.min + 'Z').getTime()}
+                                maxTime={new Date(overallTimeRange.max + 'Z').getTime()}
+                                selectedStartTime={selectedStartTime}
+                                selectedEndTime={selectedEndTime}
+                                onRangeChange={handleTimeRangeChange}
+                                onClear={handleTimeRangeClear}
+                                theme={theme}
+                                pageTimestampRanges={[]}
+                                fileTimeRanges={[]}
+                                logDensity={[]}
+                                overallLogDensity={overallStockDensity}
+                                datesWithLogs={[]}
+                                viewMode="scroll"
+                                onCursorChange={() => {}}
+                                onFileSelect={() => {}}
+                                onDateSelect={() => {}}
+                                viewRange={timelineViewRange}
+                                onViewRangeChange={setTimelineViewRange}
+                                onZoomToSelection={handleTimelineZoomToSelection}
+                                onZoomToExtent={() => setTimelineViewRange(null)}
+                                zoomToSelectionEnabled={zoomToSelectionEnabled}
+                                iconSet={iconSet}
+                                uiScale={uiScale}
+                            />
+                        </div>
+                    )}
                 </form>
             </div>
             

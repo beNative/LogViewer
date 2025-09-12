@@ -159,6 +159,7 @@ const App: React.FC = () => {
   const [stockHistory, setStockHistory] = React.useState<StockInfoEntry[]>([]);
   const [isStockBusy, setIsStockBusy] = React.useState<boolean>(false);
   const [overallStockTimeRange, setOverallStockTimeRange] = React.useState<{ min: string, max: string } | null>(null);
+  const [overallStockDensity, setOverallStockDensity] = React.useState<LogDensityPoint[]>([]);
 
 
   // Electron-specific state
@@ -246,6 +247,7 @@ const App: React.FC = () => {
     setHasData(false);
     setOverallTimeRange(null);
     setOverallStockTimeRange(null);
+    setOverallStockDensity([]);
     setTimelineViewRange(null);
     setActiveSessionName(null);
     setUniqueValues({ level: [], sndrtype: [], sndrname: [], fileName: [] });
@@ -278,8 +280,10 @@ const App: React.FC = () => {
         const { minTime: minStockTime, maxTime: maxStockTime } = newDb.getMinMaxStockTime();
         if (minStockTime && maxStockTime) {
             setOverallStockTimeRange({ min: minStockTime, max: maxStockTime });
+            setOverallStockDensity(newDb.getStockDensity({} as StockInfoFilters, 300));
         } else {
             setOverallStockTimeRange(null);
+            setOverallStockDensity([]);
         }
 
         if (fromSessionLoad) {
@@ -1788,6 +1792,8 @@ const handleUiScaleChange = async (newScale: number) => {
                 iconSet={iconSet}
                 theme={theme}
                 overallTimeRange={overallStockTimeRange}
+                overallStockDensity={overallStockDensity}
+                uiScale={uiScale}
             />
         )}
         {activeView === 'console' && (

@@ -195,28 +195,34 @@ export class Database {
         }
     }
 
-    queryStockInfo(filters: StockInfoFilters): StockInfoEntry[] {
+    private _buildStockWhereClause(filters: StockInfoFilters): { whereSql: string, params: (string | number)[] } {
         const whereClauses: string[] = [];
         const params: (string | number)[] = [];
-
+    
         const fromDate = getSqlDateTime(filters.dateFrom, filters.timeFrom);
         if (fromDate) {
             whereClauses.push(`timestamp >= ?`);
             params.push(fromDate);
         }
-
+    
         const toDate = getSqlDateTime(filters.dateTo, filters.timeTo, true);
         if (toDate) {
             whereClauses.push(`timestamp <= ?`);
             params.push(toDate);
         }
-
+    
         if (filters.searchTerm) {
             whereClauses.push(`(article_id LIKE ? OR article_name LIKE ?)`);
             params.push(`%${filters.searchTerm}%`, `%${filters.searchTerm}%`);
         }
         
         const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+        return { whereSql, params };
+    }
+
+    queryStockInfo(filters: StockInfoFilters): StockInfoEntry[] {
+        const { whereSql, params } = this._buildStockWhereClause(filters);
+        
         const sql = `
             SELECT timestamp, message_id, source, destination, article_id, article_name, dosage_form, max_sub_item_quantity, quantity 
             FROM stock_info 
@@ -487,10 +493,12 @@ export class Database {
         return result;
     }
 
-    getMinMaxStockTime(): { minTime: string | null; maxTime: string | null } {
+    getMinMaxStockTime(filters?: StockInfoFilters): { minTime: string | null; maxTime: string | null } {
         let result = { minTime: null, maxTime: null };
         try {
-            const stmt = this.db.prepare(`SELECT MIN(timestamp), MAX(timestamp) FROM stock_info`);
+            const { whereSql, params } = this._buildStockWhereClause(filters || {} as StockInfoFilters);
+            const stmt = this.db.prepare(`SELECT MIN(timestamp), MAX(timestamp) FROM stock_info ${whereSql}`);
+            stmt.bind(params);
             if (stmt.step()) {
                 const [min, max] = stmt.get();
                 if (min !== null && max !== null) {
@@ -689,6 +697,64 @@ export class Database {
         return densityData;
     }
     
+    getStockDensity(filters: StockInfoFilters, bucketCount: number): LogDensityPoint[] {
+        const { minTime, maxTime } = this.getMinMaxStockTime(filters);
+        if (!minTime || !maxTime) return [];
+    
+        const minTimeMs = new Date(minTime).getTime();
+        const maxTimeMs = new Date(maxTime).getTime();
+        const totalDuration = maxTimeMs - minTimeMs;
+        if (totalDuration <= 0) return [];
+    
+        const bucketDuration = totalDuration / bucketCount;
+    
+        const { whereSql, params } = this._buildStockWhereClause(filters);
+        
+        const sql = `
+            SELECT
+                CAST((julianday(timestamp) - julianday(?)) * 86400000 / ? AS INTEGER) AS bucket,
+                COUNT(*) as count
+            FROM stock_info
+            ${whereSql}
+            GROUP BY bucket
+        `;
+    
+        const dbResults: { bucket: number; count: number }[] = [];
+        try {
+            const stmt = this.db.prepare(sql);
+            stmt.bind([minTime, bucketDuration, ...params]);
+            while (stmt.step()) {
+                const [bucket, count] = stmt.get();
+                dbResults.push({ bucket, count });
+            }
+            stmt.free();
+        } catch (e) {
+            console.error("Failed to get stock density:", e);
+            return [];
+        }
+        
+        const densityData = new Array(bucketCount).fill(0).map((_, i) => ({
+            time: minTimeMs + i * bucketDuration,
+            count: 0
+        }));
+        
+        let maxCount = 0;
+        dbResults.forEach(row => {
+            if (row.bucket >= 0 && row.bucket < bucketCount) {
+                densityData[row.bucket].count = row.count;
+                if (row.count > maxCount) maxCount = row.count;
+            }
+        });
+        
+        if (maxCount > 0) {
+            for (const bucket of densityData) {
+                bucket.count = Math.round((bucket.count / maxCount) * 100);
+            }
+        }
+    
+        return densityData;
+    }
+
     getNearestLogEntry(time: number, filters: FilterState): LogEntry | null {
         if (filters.sqlQueryEnabled) return null;
 

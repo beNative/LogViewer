@@ -74,6 +74,7 @@ export const TimelineChart: React.FC<TimelineChartProps> = ({ data, onTimeRangeS
                 color: tickColor,
                 maxRotation: 0,
                 autoSkip: true,
+                maxTicksLimit: 10,
             }
           },
           y: {
