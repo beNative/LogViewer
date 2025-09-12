@@ -260,29 +260,45 @@ const App: React.FC = () => {
 
   const updateStateFromDb = React.useCallback((newDb: Database, fromSessionLoad: boolean) => {
     logToConsole('Reading metadata from database...', 'DEBUG');
+
     const totalEntries = newDb.getTotalEntryCount();
     setTotalEntryCount(totalEntries);
+    const hasLogData = totalEntries > 0;
 
-    // Handle stock info initialization independently
     const { minTime: minStockTime, maxTime: maxStockTime } = newDb.getMinMaxStockTime();
-    let hasStockData = false;
-    if (minStockTime && maxStockTime) {
-        hasStockData = true;
-        setOverallStockTimeRange({ min: minStockTime, max: maxStockTime });
+    const hasStockData = !!(minStockTime && maxStockTime);
+
+    if (!hasLogData && !hasStockData) {
+        handleNewSession(false);
+        logToConsole('Database is empty.', 'INFO');
+        return;
+    }
+
+    // If we reach here, there's some data to process.
+    setHasData(true);
+    setCurrentPage(1);
+    setEntriesOffset(0);
+    setIsInitialLoad(true);
+
+    // Process stock data if it exists
+    if (hasStockData) {
+        setOverallStockTimeRange({ min: minStockTime!, max: maxStockTime! });
         setOverallStockDensity(newDb.getStockDensity({} as StockInfoFilters, 300));
+        logToConsole('Stock data found and initialized.', 'DEBUG');
     } else {
         setOverallStockTimeRange(null);
         setOverallStockDensity([]);
     }
 
-    if (totalEntries > 0) {
+    // Process log data if it exists
+    if (hasLogData) {
         let newFilters = { ...initialFilters };
         let filtersLoadedFromSession = false;
 
         const { minTime, maxTime } = newDb.getMinMaxTime();
         if (minTime && maxTime) {
             const overallRange = {
-                min: new Date(minTime + 'Z').getTime(), // Add Z to treat as UTC
+                min: new Date(minTime + 'Z').getTime(),
                 max: new Date(maxTime + 'Z').getTime()
             };
             setOverallTimeRange(overallRange);
@@ -294,7 +310,6 @@ const App: React.FC = () => {
             if (savedFiltersJson) {
                 try {
                     const savedFilters = JSON.parse(savedFiltersJson);
-                    // Deep merge to be safe with older session files
                     newFilters = { ...initialFilters, ...savedFilters };
                     filtersLoadedFromSession = true;
                     logToConsole('Loaded filter settings from session.', 'INFO');
@@ -304,7 +319,6 @@ const App: React.FC = () => {
             }
         }
         
-        // If filters were not loaded from session, calculate from min/max time
         if (!filtersLoadedFromSession && minTime && maxTime) {
               const [minDate, minTimeStr] = minTime.split(' ');
               const [maxDate, maxTimeStr] = maxTime.split(' ');
@@ -321,10 +335,6 @@ const App: React.FC = () => {
         setLoadedFileNames(uniqueFileNames);
         setFormFilters(newFilters);
         setAppliedFilters(newFilters);
-        setCurrentPage(1);
-        setEntriesOffset(0);
-        setHasData(true);
-        setIsInitialLoad(true);
         setUniqueValues({
             level: newDb.getUniqueColumnValues('level'),
             sndrtype: newDb.getUniqueColumnValues('sndrtype'),
@@ -332,9 +342,14 @@ const App: React.FC = () => {
             fileName: uniqueFileNames,
         });
         logToConsole(`Database loaded. Total entries: ${totalEntries}. Apply filters to view.`, 'INFO');
-    } else if (!hasStockData) { // Only reset if there's no log data AND no stock data
-        handleNewSession(false);
-        logToConsole('Database is empty.', 'INFO');
+    } else {
+        // If there is only stock data, we should still set some sensible defaults
+        // for the log viewer part of the state to avoid errors, even if it won't be shown.
+        setFormFilters(initialFilters);
+        setAppliedFilters(initialFilters);
+        setUniqueValues({ level: [], sndrtype: [], sndrname: [], fileName: [] });
+        setLoadedFileNames(newDb.getUniqueColumnValues('fileName')); // Show loaded files
+        logToConsole('Database contains only stock data. Log viewer is empty.', 'INFO');
     }
   }, [logToConsole, handleNewSession]);
 
