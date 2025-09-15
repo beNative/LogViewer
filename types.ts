@@ -1,4 +1,4 @@
-// Fix: Removed incorrect import of ToastMessage. The type is defined in this file, which avoids a circular dependency.
+// FIX: Removed incorrect import of `ToastMessage` from `App.tsx` to resolve a circular dependency error. The `ToastMessage` type is already defined within this file.
 
 export type LogEntry = {
     id: number;
@@ -46,13 +46,13 @@ export type FilterState = {
     dateTo: string;
     timeTo: string;
     level: string[];
+    levelFilterMode: 'include' | 'exclude';
     sndrtype: string[];
+    sndrtypeFilterMode: 'include' | 'exclude';
     sndrname: string[];
+    sndrnameFilterMode: 'include' | 'exclude';
     fileName: string[];
-    levelExclude: string[];
-    sndrtypeExclude: string[];
-    sndrnameExclude: string[];
-    fileNameExclude: string[];
+    fileNameFilterMode: 'include' | 'exclude';
     includeMsg: string;
     excludeMsg: string;
     includeMsgMode: 'OR' | 'AND';

@@ -33,13 +33,13 @@ const initialFilters: FilterState = {
   dateTo: '',
   timeTo: '',
   level: [],
+  levelFilterMode: 'include',
   sndrtype: [],
+  sndrtypeFilterMode: 'include',
   sndrname: [],
+  sndrnameFilterMode: 'include',
   fileName: [],
-  levelExclude: [],
-  sndrtypeExclude: [],
-  sndrnameExclude: [],
-  fileNameExclude: [],
+  fileNameFilterMode: 'include',
   includeMsg: '',
   excludeMsg: '',
   includeMsgMode: 'OR',
@@ -313,7 +313,41 @@ const App: React.FC = () => {
             const savedFiltersJson = newDb.getMeta('appliedFilters');
             if (savedFiltersJson) {
                 try {
-                    const savedFilters = JSON.parse(savedFiltersJson);
+                    let savedFilters = JSON.parse(savedFiltersJson);
+                    
+                    const migrateOldFilters = (oldFilters: any): Partial<FilterState> => {
+                        const migrated: Partial<FilterState> = { ...oldFilters };
+                        const attributes: ['level', 'sndrtype', 'sndrname', 'fileName'] = ['level', 'sndrtype', 'sndrname', 'fileName'];
+                        let wasMigrated = false;
+                        
+                        attributes.forEach(attr => {
+                            const excludeKey = `${attr}Exclude` as const;
+                            const modeKey = `${attr}FilterMode` as const;
+
+                            if (migrated.hasOwnProperty(excludeKey)) {
+                                wasMigrated = true;
+                                const includeList = migrated[attr] || [];
+                                const excludeList = migrated[excludeKey] || [];
+                                
+                                if (includeList.length > 0) {
+                                    // Prioritize include list if both exist
+                                    migrated[modeKey] = 'include';
+                                } else if (excludeList.length > 0) {
+                                    // Otherwise, use exclude list
+                                    migrated[attr] = excludeList;
+                                    migrated[modeKey] = 'exclude';
+                                }
+                                delete (migrated as any)[excludeKey];
+                            }
+                        });
+                        if (wasMigrated) {
+                             logToConsole('Migrating filter settings from older session format.', 'INFO');
+                        }
+                        return migrated;
+                    };
+
+                    savedFilters = migrateOldFilters(savedFilters);
+                    
                     newFilters = { ...initialFilters, ...savedFilters };
                     filtersLoadedFromSession = true;
                     logToConsole('Loaded filter settings from session.', 'INFO');
@@ -1120,10 +1154,15 @@ const App: React.FC = () => {
 
   const handleCategorySelect = React.useCallback((category: 'level' | 'sndrtype', value: string) => {
     setTimelineViewRange(null); // Reset zoom
-    const updater = (currentFilters: FilterState) => ({
-        ...currentFilters,
-        [category]: [...(currentFilters[category] || []), value]
-    });
+    const modeKey = `${category}FilterMode` as const;
+
+    const updater = (currentFilters: FilterState) => {
+        const newFilters = { ...currentFilters };
+        newFilters[modeKey] = 'include';
+        newFilters[category] = [...(currentFilters[category] || []), value];
+        return newFilters;
+    };
+    
     setFormFilters(updater);
     setAppliedFilters(updater);
     setIsInitialLoad(false);
@@ -1502,24 +1541,32 @@ const handleUiScaleChange = async (newScale: number) => {
   }, [isElectron, activeSessionName, isDirty]);
 
   const handleApplyDetailFilter = React.useCallback((key: 'level' | 'sndrtype' | 'sndrname' | 'fileName', value: string) => {
-    logToConsole(`Applying quick filter: ${key} = ${value}`, 'DEBUG');
-    const updater = (currentFilters: FilterState) => {
-      const existingValues = currentFilters[key] || [];
-      if (existingValues.includes(value)) {
-        return currentFilters; // Avoid adding duplicates
-      }
-      return {
-        ...currentFilters,
-        [key]: [...existingValues, value],
-      };
-    };
+      logToConsole(`Applying quick filter: ${key} = ${value}`, 'DEBUG');
+      const modeKey = `${key}FilterMode` as const;
 
-    setFormFilters(updater);
-    setAppliedFilters(updater); // Apply immediately
-    setIsInitialLoad(false);
-    setCurrentPage(1);
-    setEntriesOffset(0);
-    setActiveView('viewer'); // Switch to viewer to see results
+      const updater = (currentFilters: FilterState) => {
+          const newFilters = { ...currentFilters };
+          const currentMode = newFilters[modeKey];
+          const existingValues = newFilters[key] || [];
+
+          if (currentMode === 'include') {
+              if (!existingValues.includes(value)) {
+                  newFilters[key] = [...existingValues, value];
+              }
+          } else {
+              // If mode was 'exclude', switch to 'include' and set this as the only value.
+              newFilters[modeKey] = 'include';
+              newFilters[key] = [value];
+          }
+          return newFilters;
+      };
+
+      setFormFilters(updater);
+      setAppliedFilters(updater);
+      setIsInitialLoad(false);
+      setCurrentPage(1);
+      setEntriesOffset(0);
+      setActiveView('viewer');
   }, [logToConsole]);
 
   const handleSaveFilterPreset = async (name: string) => {
@@ -1620,7 +1667,7 @@ const handleUiScaleChange = async (newScale: number) => {
   const handleFileSelect = React.useCallback((fileName: string) => {
       if (db) {
           // Find the time range for this specific file to zoom in
-          const range = db.getTimeRangePerFile({ ...initialFilters, fileName: [fileName] });
+          const range = db.getTimeRangePerFile({ ...initialFilters, fileName: [fileName], fileNameFilterMode: 'include' });
           if (range.length > 0 && range[0].startTime && range[0].endTime) {
               const min = new Date(range[0].startTime + 'Z').getTime();
               const max = new Date(range[0].endTime + 'Z').getTime();
@@ -1638,6 +1685,7 @@ const handleUiScaleChange = async (newScale: number) => {
           dateTo: '',
           timeTo: '',
           fileName: [fileName],
+          fileNameFilterMode: 'include' as 'include' | 'exclude',
       });
       setFormFilters(updater);
       setAppliedFilters(updater);
@@ -1695,10 +1743,22 @@ const handleUiScaleChange = async (newScale: number) => {
           const currentValue = newFilters[key];
 
           if (Array.isArray(currentValue) && valueToRemove) {
-              (newFilters[key] as string[]) = currentValue.filter(v => v !== valueToRemove);
+              const newArray = currentValue.filter(v => v !== valueToRemove);
+              (newFilters[key] as string[]) = newArray;
+              // If the array is now empty, reset the mode for that attribute
+              if (newArray.length === 0) {
+                  const modeKey = `${key}FilterMode` as keyof FilterState;
+                  if (modeKey in newFilters) {
+                      (newFilters as any)[modeKey] = 'include';
+                  }
+              }
           } else {
               // For non-array filters (like includeMsg), just clear them.
               (newFilters as any)[key] = Array.isArray(initialFilters[key as keyof FilterState]) ? [] : '';
+              const modeKey = `${key}FilterMode` as keyof FilterState;
+              if (modeKey in newFilters) {
+                  (newFilters as any)[modeKey] = 'include';
+              }
           }
           return newFilters;
       };
@@ -1712,22 +1772,23 @@ const handleUiScaleChange = async (newScale: number) => {
   const handleContextMenuFilter = React.useCallback((key: 'level' | 'sndrtype' | 'sndrname' | 'fileName', value: string, exclude: boolean) => {
     logToConsole(`Applying context filter: ${key} ${exclude ? '!=' : '='} ${value}`, 'DEBUG');
     
-    const includeKey = key;
-    const excludeKey = `${key}Exclude` as const;
+    const modeKey = `${key}FilterMode` as const;
 
     const updater = (currentFilters: FilterState) => {
         const newFilters = { ...currentFilters };
+        const newMode = exclude ? 'exclude' : 'include';
+        const currentMode = newFilters[modeKey];
+        const existingValues = newFilters[key] || [];
 
-        if (exclude) {
-            const existingExcludes = newFilters[excludeKey] || [];
-            if (!existingExcludes.includes(value)) {
-                newFilters[excludeKey] = [...existingExcludes, value];
+        if (currentMode === newMode) {
+            // Same mode, add value if it's not there.
+            if (!existingValues.includes(value)) {
+                newFilters[key] = [...existingValues, value];
             }
         } else {
-            const existingIncludes = newFilters[includeKey] || [];
-            if (!existingIncludes.includes(value)) {
-                newFilters[includeKey] = [...existingIncludes, value];
-            }
+            // Different mode, so switch mode and set this as the only value.
+            newFilters[modeKey] = newMode;
+            newFilters[key] = [value];
         }
         return newFilters;
     };
@@ -1762,7 +1823,7 @@ const handleUiScaleChange = async (newScale: number) => {
                 // calculate it now. This ensures the timeline appears as expected.
                 if (results.length > 0 && !overallStockTimeRange) {
                     logToConsole('Stock data found; re-calculating overall time range for timeline.', 'DEBUG');
-                    const { minTime: minStockTime, maxTime: maxStockTime } = db.getMinMaxStockTime();
+                    const { minTime: minStockTime, maxTime: maxStockTime } = db.getMinMaxTime();
                     if (minStockTime && maxStockTime) {
                         setOverallStockTimeRange({ min: minStockTime, max: maxStockTime });
                         setOverallStockDensity(db.getStockDensity({} as StockInfoFilters, 300));

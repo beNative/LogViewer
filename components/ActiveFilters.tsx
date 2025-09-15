@@ -17,10 +17,6 @@ const filterKeyToLabel: Record<string, string> = {
     sndrtype: 'Sender Type',
     sndrname: 'Sender Name',
     fileName: 'Filename',
-    levelExclude: 'Level NOT',
-    sndrtypeExclude: 'Sender Type NOT',
-    sndrnameExclude: 'Sender Name NOT',
-    fileNameExclude: 'Filename NOT',
     includeMsg: 'Message Contains',
     excludeMsg: 'Message Excludes',
     sqlQuery: 'SQL Query',
@@ -77,16 +73,20 @@ export const ActiveFilters: React.FC<ActiveFiltersProps> = ({ appliedFilters, on
             );
         }
 
-        // Inclusion Array-based filters
-        const arrayFilters: (keyof FilterState)[] = ['level', 'sndrtype', 'sndrname', 'fileName'];
-        arrayFilters.forEach(key => {
+        // Attribute-based filters (both include and exclude)
+        const attributeFilters: (keyof FilterState)[] = ['level', 'sndrtype', 'sndrname', 'fileName'];
+        attributeFilters.forEach(key => {
             const values = appliedFilters[key];
+            const mode = appliedFilters[`${key}FilterMode` as keyof FilterState];
+            
             if (Array.isArray(values)) {
                 values.forEach(value => {
+                    const label = `${filterKeyToLabel[key]}${mode === 'exclude' ? ' NOT' : ''}: ${value}`;
+                    const PillComponent = mode === 'exclude' ? ExcludePill : Pill;
                     pills.push(
-                        <Pill
+                        <PillComponent
                             key={`${key}-${value}`}
-                            label={`${filterKeyToLabel[key]}: ${value}`}
+                            label={label}
                             onRemove={() => onRemoveFilter(key, value)}
                             iconSet={iconSet}
                         />
@@ -95,23 +95,6 @@ export const ActiveFilters: React.FC<ActiveFiltersProps> = ({ appliedFilters, on
             }
         });
 
-        // Exclusion Array-based filters
-        const excludeArrayFilters: (keyof FilterState)[] = ['levelExclude', 'sndrtypeExclude', 'sndrnameExclude', 'fileNameExclude'];
-        excludeArrayFilters.forEach(key => {
-            const values = appliedFilters[key];
-            if (Array.isArray(values)) {
-                values.forEach(value => {
-                    pills.push(
-                        <ExcludePill
-                            key={`${key}-${value}`}
-                            label={`${filterKeyToLabel[key]}: ${value}`}
-                            onRemove={() => onRemoveFilter(key, value)}
-                            iconSet={iconSet}
-                        />
-                    );
-                });
-            }
-        });
 
         // String-based filters
         const stringFilters: (keyof FilterState)[] = ['includeMsg', 'excludeMsg'];

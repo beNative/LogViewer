@@ -404,40 +404,18 @@ export class Database {
                 whereClauses.push(`time <= ?`);
                 params.push(toDate);
             }
+            
+            const attributes: (keyof FilterState)[] = ['level', 'sndrtype', 'sndrname', 'fileName'];
+            attributes.forEach(attr => {
+                const values = filters[attr] as string[] | undefined;
+                const mode = filters[`${attr}FilterMode` as keyof FilterState] as 'include' | 'exclude' | undefined;
 
-            if (filters.level?.length > 0) {
-                whereClauses.push(`level IN (${'?,'.repeat(filters.level.length).slice(0, -1)})`);
-                params.push(...filters.level);
-            }
-            if (filters.sndrtype?.length > 0) {
-                whereClauses.push(`sndrtype IN (${'?,'.repeat(filters.sndrtype.length).slice(0, -1)})`);
-                params.push(...filters.sndrtype);
-            }
-            if (filters.sndrname?.length > 0) {
-                whereClauses.push(`sndrname IN (${'?,'.repeat(filters.sndrname.length).slice(0, -1)})`);
-                params.push(...filters.sndrname);
-            }
-            if (filters.fileName?.length > 0) {
-                whereClauses.push(`fileName IN (${'?,'.repeat(filters.fileName.length).slice(0, -1)})`);
-                params.push(...filters.fileName);
-            }
-
-            if (filters.levelExclude?.length > 0) {
-                whereClauses.push(`level NOT IN (${'?,'.repeat(filters.levelExclude.length).slice(0, -1)})`);
-                params.push(...filters.levelExclude);
-            }
-            if (filters.sndrtypeExclude?.length > 0) {
-                whereClauses.push(`sndrtype NOT IN (${'?,'.repeat(filters.sndrtypeExclude.length).slice(0, -1)})`);
-                params.push(...filters.sndrtypeExclude);
-            }
-            if (filters.sndrnameExclude?.length > 0) {
-                whereClauses.push(`sndrname NOT IN (${'?,'.repeat(filters.sndrnameExclude.length).slice(0, -1)})`);
-                params.push(...filters.sndrnameExclude);
-            }
-            if (filters.fileNameExclude?.length > 0) {
-                whereClauses.push(`fileName NOT IN (${'?,'.repeat(filters.fileNameExclude.length).slice(0, -1)})`);
-                params.push(...filters.fileNameExclude);
-            }
+                if (values && values.length > 0) {
+                    const operator = mode === 'include' ? 'IN' : 'NOT IN';
+                    whereClauses.push(`${attr} ${operator} (${'?,'.repeat(values.length).slice(0, -1)})`);
+                    params.push(...values);
+                }
+            });
             
             const includeTerms = filters.includeMsg?.split('\n').map(t => t.trim().toLowerCase()).filter(Boolean) || [];
             if (includeTerms.length > 0) {
