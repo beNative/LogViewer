@@ -150,6 +150,7 @@ export type Settings = {
     panelWidths: PanelWidths;
     isTimeRangeSelectorVisible: boolean;
     isDetailPanelVisible: boolean;
+    isFocusDebuggerVisible: boolean;
     uiScale: number;
 };
 

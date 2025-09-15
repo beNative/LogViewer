@@ -6,7 +6,7 @@ import { Icon, IconName } from './icons/index.tsx';
 import { DensityControl } from './DensityControl.tsx';
 
 type Theme = 'light' | 'dark';
-type SettingsCategory = 'appearance' | 'behavior' | 'updates' | 'integrations' | 'styles';
+type SettingsCategory = 'appearance' | 'behavior' | 'updates' | 'integrations' | 'styles' | 'debugging';
 
 interface SettingsProps {
   theme: Theme;
@@ -21,6 +21,8 @@ interface SettingsProps {
   onTimeRangeSelectorVisibilityChange: (newVisibility: boolean) => void;
   isDetailPanelVisible: boolean;
   onDetailPanelVisibilityChange: (newVisibility: boolean) => void;
+  isFocusDebuggerVisible: boolean;
+  onFocusDebuggerVisibilityChange: (isVisible: boolean) => void;
   logTableDensity: LogTableDensity;
   onLogTableDensityChange: (newDensity: LogTableDensity) => void;
   allowPrerelease: boolean;
@@ -128,6 +130,7 @@ export const Settings: React.FC<SettingsProps> = (props) => {
         columnStyles, onColumnStylesChange,
         isTimeRangeSelectorVisible, onTimeRangeSelectorVisibilityChange,
         isDetailPanelVisible, onDetailPanelVisibilityChange,
+        isFocusDebuggerVisible, onFocusDebuggerVisibilityChange,
         logTableDensity, onLogTableDensityChange,
         allowPrerelease, onAllowPrereleaseChange,
         githubToken, onGithubTokenChange,
@@ -265,6 +268,7 @@ export const Settings: React.FC<SettingsProps> = (props) => {
                     <CategoryButton label="Updates" icon="ArrowPath" isActive={activeCategory === 'updates'} onClick={() => setActiveCategory('updates')} />
                     <CategoryButton label="Integrations" icon="CodeBracketSquare" isActive={activeCategory === 'integrations'} onClick={() => setActiveCategory('integrations')} />
                     <CategoryButton label="Table Styles" icon="Table" isActive={activeCategory === 'styles'} onClick={() => setActiveCategory('styles')} />
+                    <CategoryButton label="Debugging" icon="BugAnt" isActive={activeCategory === 'debugging'} onClick={() => setActiveCategory('debugging')} />
                 </nav>
             </aside>
             <main className="flex-1 p-6 sm:p-8 overflow-y-auto">
@@ -335,6 +339,13 @@ export const Settings: React.FC<SettingsProps> = (props) => {
                             <h2 className="text-xl font-bold text-gray-800 dark:text-sky-400 mb-4">Log Table Styles</h2>
                             <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">Customize the font, style, and color for each column in the Log Viewer. Changes are saved automatically.</p>
                             <ColumnStyleSettings styles={columnStyles} onChange={onColumnStylesChange} />
+                        </div>
+                    )}
+                    {activeCategory === 'debugging' && (
+                        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                             <h2 className="text-xl font-bold text-gray-800 dark:text-sky-400 pb-4">Debugging</h2>
+                             <ToggleSwitch label="Show Focus & Hover Inspector" enabled={isFocusDebuggerVisible} onChange={onFocusDebuggerVisibilityChange} />
+                             <p className="pt-3 text-sm text-gray-500 dark:text-gray-400">When enabled, a small overlay will appear at the bottom-left of the screen showing information about the currently focused and hovered UI elements. This is useful for development and debugging.</p>
                         </div>
                     )}
                 </div>

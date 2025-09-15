@@ -20,6 +20,7 @@ import { StatusBar } from './components/StatusBar.tsx';
 import { AboutDialog } from './components/AboutDialog.tsx';
 import { StockTracker } from './components/StockTracker.tsx';
 import { Toast } from './components/Toast.tsx';
+import { FocusDebugger } from './components/FocusDebugger.tsx';
 
 // JSZip is loaded from script tag
 declare const JSZip: any;
@@ -145,6 +146,7 @@ const App: React.FC = () => {
   const [panelWidths, setPanelWidths] = React.useState<PanelWidths>(initialPanelWidths);
   const [isTimeRangeSelectorVisible, setIsTimeRangeSelectorVisible] = React.useState(true);
   const [isDetailPanelVisible, setIsDetailPanelVisible] = React.useState(false);
+  const [isFocusDebuggerVisible, setIsFocusDebuggerVisible] = React.useState<boolean>(false);
   const [logTableDensity, setLogTableDensity] = React.useState<LogTableDensity>('normal');
   const [allowPrerelease, setAllowPrerelease] = React.useState<boolean>(false);
   const [githubToken, setGithubToken] = React.useState<string>('');
@@ -414,6 +416,10 @@ const App: React.FC = () => {
                 if (typeof settings.isDetailPanelVisible === 'boolean') {
                     setIsDetailPanelVisible(settings.isDetailPanelVisible);
                     logToConsole(`Details panel visibility set to '${settings.isDetailPanelVisible}' from settings.`, 'DEBUG');
+                }
+                if (typeof settings.isFocusDebuggerVisible === 'boolean') {
+                    setIsFocusDebuggerVisible(settings.isFocusDebuggerVisible);
+                    logToConsole(`Focus debugger visibility set to '${settings.isFocusDebuggerVisible}' from settings.`, 'DEBUG');
                 }
                 if (typeof settings.allowPrerelease === 'boolean') {
                     setAllowPrerelease(settings.allowPrerelease);
@@ -1255,6 +1261,20 @@ const handleDetailPanelVisibilityChange = async (isVisible: boolean) => {
     }
 };
 
+const handleFocusDebuggerVisibilityChange = async (isVisible: boolean) => {
+    setIsFocusDebuggerVisible(isVisible);
+    if (window.electronAPI) {
+        try {
+            const settings = await window.electronAPI.getSettings();
+            await window.electronAPI.setSettings({ ...settings, isFocusDebuggerVisible: isVisible });
+            logToConsole(`Focus Debugger visibility setting saved: ${isVisible}.`, 'INFO');
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            logToConsole(`Failed to save focus debugger visibility setting: ${msg}`, 'ERROR');
+        }
+    }
+};
+
 const handleAllowPrereleaseChange = async (allow: boolean) => {
     setAllowPrerelease(allow);
     if (window.electronAPI) {
@@ -1344,6 +1364,7 @@ const handleUiScaleChange = async (newScale: number) => {
     if (newSettings.panelWidths) setPanelWidths({ ...initialPanelWidths, ...newSettings.panelWidths });
     if (typeof newSettings.isTimeRangeSelectorVisible === 'boolean') setIsTimeRangeSelectorVisible(newSettings.isTimeRangeSelectorVisible);
     if (typeof newSettings.isDetailPanelVisible === 'boolean') setIsDetailPanelVisible(newSettings.isDetailPanelVisible);
+    if (typeof newSettings.isFocusDebuggerVisible === 'boolean') setIsFocusDebuggerVisible(newSettings.isFocusDebuggerVisible);
     if (typeof newSettings.allowPrerelease === 'boolean') setAllowPrerelease(newSettings.allowPrerelease);
     if (typeof newSettings.githubToken === 'string') setGithubToken(newSettings.githubToken);
     if (typeof newSettings.uiScale === 'number') setUiScale(newSettings.uiScale);
@@ -1960,6 +1981,8 @@ const handleUiScaleChange = async (newScale: number) => {
               onTimeRangeSelectorVisibilityChange={handleTimeRangeSelectorVisibilityChange}
               isDetailPanelVisible={isDetailPanelVisible}
               onDetailPanelVisibilityChange={handleDetailPanelVisibilityChange}
+              isFocusDebuggerVisible={isFocusDebuggerVisible}
+              onFocusDebuggerVisibilityChange={handleFocusDebuggerVisibilityChange}
               logTableDensity={logTableDensity}
               onLogTableDensityChange={handleLogTableDensityChange}
               allowPrerelease={allowPrerelease}
@@ -1993,6 +2016,7 @@ const handleUiScaleChange = async (newScale: number) => {
         onThemeChange={() => handleThemeChange(theme === 'light' ? 'dark' : 'light')}
         iconSet={iconSet}
       />
+      <FocusDebugger isVisible={isFocusDebuggerVisible} iconSet={iconSet} />
     </div>
   );
 };

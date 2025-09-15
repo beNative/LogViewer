@@ -87,6 +87,7 @@ function getSettings() {
             details: 500,
         },
         isTimeRangeSelectorVisible: true,
+        isFocusDebuggerVisible: false,
         uiScale: 1,
     };
     try {
@@ -127,6 +128,7 @@ function getSettings() {
                     ...(loadedSettings.panelWidths || {}),
                 },
                 isTimeRangeSelectorVisible: loadedSettings.isTimeRangeSelectorVisible ?? defaultSettings.isTimeRangeSelectorVisible,
+                isFocusDebuggerVisible: loadedSettings.isFocusDebuggerVisible ?? defaultSettings.isFocusDebuggerVisible,
                 uiScale: loadedSettings.uiScale ?? defaultSettings.uiScale,
             };
             

@@ -220,7 +220,8 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                              <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                                 {entries.map(entry => (
                                     <tr key={entry.id}
-                                        ref={el => rowRefs.current.set(entry.id, el)}
+                                        // FIX: The ref callback must return void. Encapsulating in braces ensures an implicit undefined return.
+                                        ref={el => { rowRefs.current.set(entry.id, el); }}
                                         onClick={() => handleRowClick(entry)}
                                         className={`transition-colors duration-100 cursor-pointer ${keyboardSelectedId === entry.id ? 'bg-sky-100 dark:bg-sky-900/50' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
                                     >
@@ -250,7 +251,8 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                     />
                 )}
             </div>
-             {contextMenuState && <ContextMenu {...contextMenuState} onClose={() => setContextMenuState(null)} onFilter={props.onContextMenuFilter} iconSet={props.iconSet} contextKey={contextMenuState.key} />}
+             {/* FIX: The ContextMenu component expects a 'contextValue' prop, but the state object uses 'value'. This adds the missing prop mapping. */}
+             {contextMenuState && <ContextMenu {...contextMenuState} onClose={() => setContextMenuState(null)} onFilter={props.onContextMenuFilter} iconSet={props.iconSet} contextKey={contextMenuState.key} contextValue={contextMenuState.value} />}
         </div>
     );
 };

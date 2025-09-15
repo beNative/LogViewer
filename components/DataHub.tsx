@@ -137,7 +137,7 @@ export const DataHub: React.FC<DataHubProps> = ({
   };
 
   return (
-    <div className="flex-grow grid grid-cols-1 xl:grid-cols-5 gap-8 p-4 sm:p-6 lg:p-8 bg-gray-100 dark:bg-gray-900/50 overflow-hidden">
+    <div className="flex-grow grid grid-cols-1 xl:grid-cols-5 gap-8 p-4 sm:p-6 lg:p-8 bg-gray-100 dark:bg-gray-900/50 overflow-y-auto">
         {/* Left Column: Session Management */}
         {isElectron && (
             <div className="xl:col-span-3 flex flex-col h-full min-h-0 gap-6">
