@@ -1,5 +1,5 @@
 import React from 'react';
-import { PageTimestampRange, FileTimeRange, LogDensityPoint, ViewMode, OverallTimeRange, IconSet } from '../types.ts';
+import { PageTimestampRange, FileTimeRange, LogDensityPoint, ViewMode, OverallTimeRange, IconSet, TimelineBarVisibility } from '../types.ts';
 import { Icon } from './icons/index.tsx';
 
 type Theme = 'light' | 'dark';
@@ -35,6 +35,8 @@ interface TimeRangeSelectorProps {
     zoomToSelectionEnabled: boolean;
     iconSet: IconSet;
     uiScale: number;
+    barVisibility: TimelineBarVisibility;
+    onBarVisibilityChange: (visibility: TimelineBarVisibility) => void;
 }
 
 type DragState =
@@ -338,7 +340,8 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     pageTimestampRanges, fileTimeRanges, logDensity, overallLogDensity, datesWithLogs, viewMode, onGoToPage,
     onCursorChange, onFileSelect, onDateSelect,
     cursorTime = null, activeFileName = null, activeDate = null, currentPage = null,
-    viewRange, onViewRangeChange, onZoomToSelection, onZoomToExtent, zoomToSelectionEnabled, iconSet, uiScale
+    viewRange, onViewRangeChange, onZoomToSelection, onZoomToExtent, zoomToSelectionEnabled, iconSet, uiScale,
+    barVisibility, onBarVisibilityChange
 }) => {
     const mainContainerRef = React.useRef<HTMLDivElement>(null);
     const overviewContainerRef = React.useRef<HTMLDivElement>(null);
@@ -471,10 +474,10 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
 
     const barComponents = [];
     const barProps = { displayMinTime: displayMinTime, displayMaxTime: displayMaxTime };
-    if (viewMode === 'pagination' && pageTimestampRanges.length > 0 && onGoToPage) barComponents.push({key: 'page', label: 'Pages', Comp: Bar, props: { ...barProps, items: pageTimestampRanges, isActive: (item: any) => item.page === currentPage, onSelect: (item: any) => onGoToPage(item.page), getLabel: (item: any) => item.page, getTitle: (item: any) => `Page ${item.page}`, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
-    if (fileTimeRanges.length > 0) barComponents.push({key: 'file', label: 'Files', Comp: Bar, props: { ...barProps, items: fileTimeRanges, isActive: (item: any) => item.name === activeFileName, onSelect: (item: any) => onFileSelect(item.name), getLabel: (item: any) => item.name.split('/').pop(), getTitle: (item: any) => item.name, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
-    if (datesWithLogs.length > 0) barComponents.push({key: 'date', label: 'Date', Comp: Bar, props: { ...barProps, items: datesWithLogs, isActive: (item: any) => item === activeDate, onSelect: (item: any) => onDateSelect(item), getLabel: (item: any) => item, getTitle: (item: any) => item, getStart: (item: any) => new Date(`${item}T00:00:00.000Z`).getTime(), getEnd: (item: any) => new Date(`${item}T23:59:59.999Z`).getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
-    if (logDensity.length > 0) barComponents.push({key: 'density', label: 'Density', Comp: DensityBar, props: { items: logDensity, theme: theme, displayMinTime: displayMinTime, displayMaxTime: displayMaxTime }});
+    if (barVisibility.pages && viewMode === 'pagination' && pageTimestampRanges.length > 0 && onGoToPage) barComponents.push({key: 'page', label: 'Pages', Comp: Bar, props: { ...barProps, items: pageTimestampRanges, isActive: (item: any) => item.page === currentPage, onSelect: (item: any) => onGoToPage(item.page), getLabel: (item: any) => item.page, getTitle: (item: any) => `Page ${item.page}`, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
+    if (barVisibility.files && fileTimeRanges.length > 0) barComponents.push({key: 'file', label: 'Files', Comp: Bar, props: { ...barProps, items: fileTimeRanges, isActive: (item: any) => item.name === activeFileName, onSelect: (item: any) => onFileSelect(item.name), getLabel: (item: any) => item.name.split('/').pop(), getTitle: (item: any) => item.name, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
+    if (barVisibility.dates && datesWithLogs.length > 0) barComponents.push({key: 'date', label: 'Date', Comp: Bar, props: { ...barProps, items: datesWithLogs, isActive: (item: any) => item === activeDate, onSelect: (item: any) => onDateSelect(item), getLabel: (item: any) => item, getTitle: (item: any) => item, getStart: (item: any) => new Date(`${item}T00:00:00.000Z`).getTime(), getEnd: (item: any) => new Date(`${item}T23:59:59.999Z`).getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
+    if (barVisibility.density && logDensity.length > 0) barComponents.push({key: 'density', label: 'Density', Comp: DensityBar, props: { items: logDensity, theme: theme, displayMinTime: displayMinTime, displayMaxTime: displayMaxTime }});
 
     const currentStart = tempSelection?.start ?? selectedStartTime;
     const currentEnd = tempSelection?.end ?? selectedEndTime;
@@ -612,25 +615,27 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                      <button onClick={onClear} className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" title="Clear time selection"><Icon name="XMark" iconSet={iconSet} className="w-6 h-6"/></button>
                 </div>
             </div>
-            <div className="flex items-start gap-3 w-full mt-2">
-                <div className="w-16 flex-shrink-0"></div>
-                <div className="flex-grow" ref={overviewContainerRef}>
-                    {overviewContainerWidth > 0 && (
-                        <OverviewBrush
-                            minTime={minTime} maxTime={maxTime}
-                            viewMin={displayMinTime} viewMax={displayMaxTime}
-                            selectedMin={selectedStartTime}
-                            selectedMax={selectedEndTime}
-                            density={overallLogDensity} theme={theme}
-                            valueToPosition={overviewValueToPos} positionToValue={overviewPosToValue}
-                            onViewRangeChange={onViewRangeChange}
-                            onRangeChange={onRangeChange}
-                            uiScale={uiScale}
-                        />
-                    )}
+            {barVisibility.overview && (
+                <div className="flex items-start gap-3 w-full mt-2">
+                    <div className="w-16 flex-shrink-0"></div>
+                    <div className="flex-grow" ref={overviewContainerRef}>
+                        {overviewContainerWidth > 0 && (
+                            <OverviewBrush
+                                minTime={minTime} maxTime={maxTime}
+                                viewMin={displayMinTime} viewMax={displayMaxTime}
+                                selectedMin={selectedStartTime}
+                                selectedMax={selectedEndTime}
+                                density={overallLogDensity} theme={theme}
+                                valueToPosition={overviewValueToPos} positionToValue={overviewPosToValue}
+                                onViewRangeChange={onViewRangeChange}
+                                onRangeChange={onRangeChange}
+                                uiScale={uiScale}
+                            />
+                        )}
+                    </div>
+                    <div className="w-[60px] flex-shrink-0"/>
                 </div>
-                <div className="w-[60px] flex-shrink-0"/>
-            </div>
+            )}
         </div>
     );
 };

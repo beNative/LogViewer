@@ -4,7 +4,8 @@ import {
     PageTimestampRange, SessionFile, ColumnVisibilityState, ColumnStyles, 
     PanelWidths, ViewMode, OverallTimeRange, FileTimeRange, LogDensityPoint, 
     IconSet, LogTableDensity, Theme, Settings as SettingsType, ProgressPhase,
-    StockInfoEntry, StockInfoFilters, ToastMessage, StockArticleSuggestion
+    StockInfoEntry, StockInfoFilters, ToastMessage, StockArticleSuggestion,
+    TimelineBarVisibility
 } from './types.ts';
 import { LogTable } from './components/LogTable.tsx';
 import { ProgressIndicator } from './components/ProgressIndicator.tsx';
@@ -86,6 +87,14 @@ const initialPanelWidths: PanelWidths = {
     details: 500
 };
 
+const initialTimelineBarVisibility: TimelineBarVisibility = {
+    pages: true,
+    files: true,
+    dates: true,
+    density: true,
+    overview: true,
+};
+
 const App: React.FC = () => {
   const [db, setDb] = React.useState<Database | null>(null);
   const [hasData, setHasData] = React.useState<boolean>(false);
@@ -147,6 +156,7 @@ const App: React.FC = () => {
   const [isTimeRangeSelectorVisible, setIsTimeRangeSelectorVisible] = React.useState(true);
   const [isDetailPanelVisible, setIsDetailPanelVisible] = React.useState(false);
   const [isFocusDebuggerVisible, setIsFocusDebuggerVisible] = React.useState<boolean>(false);
+  const [timelineBarVisibility, setTimelineBarVisibility] = React.useState<TimelineBarVisibility>(initialTimelineBarVisibility);
   const [logTableDensity, setLogTableDensity] = React.useState<LogTableDensity>('normal');
   const [allowPrerelease, setAllowPrerelease] = React.useState<boolean>(false);
   const [isAutoUpdateEnabled, setIsAutoUpdateEnabled] = React.useState<boolean>(true);
@@ -455,6 +465,10 @@ const App: React.FC = () => {
                 if (typeof settings.isFocusDebuggerVisible === 'boolean') {
                     setIsFocusDebuggerVisible(settings.isFocusDebuggerVisible);
                     logToConsole(`Focus debugger visibility set to '${settings.isFocusDebuggerVisible}' from settings.`, 'DEBUG');
+                }
+                if (settings.timelineBarVisibility) {
+                    setTimelineBarVisibility({ ...initialTimelineBarVisibility, ...settings.timelineBarVisibility });
+                    logToConsole('Timeline bar visibility settings loaded.', 'DEBUG');
                 }
                 if (typeof settings.allowPrerelease === 'boolean') {
                     setAllowPrerelease(settings.allowPrerelease);
@@ -1319,6 +1333,20 @@ const handleFocusDebuggerVisibilityChange = async (isVisible: boolean) => {
     }
 };
 
+const handleTimelineBarVisibilityChange = async (newVisibility: TimelineBarVisibility) => {
+    setTimelineBarVisibility(newVisibility);
+    if (window.electronAPI) {
+        try {
+            const settings = await window.electronAPI.getSettings();
+            await window.electronAPI.setSettings({ ...settings, timelineBarVisibility: newVisibility });
+            logToConsole('Timeline bar visibility settings saved.', 'DEBUG');
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            logToConsole(`Failed to save timeline bar visibility settings: ${msg}`, 'ERROR');
+        }
+    }
+};
+
 const handleAllowPrereleaseChange = async (allow: boolean) => {
     setAllowPrerelease(allow);
     if (window.electronAPI) {
@@ -1429,6 +1457,7 @@ const handleUiScaleChange = async (newScale: number) => {
     if (typeof newSettings.isTimeRangeSelectorVisible === 'boolean') setIsTimeRangeSelectorVisible(newSettings.isTimeRangeSelectorVisible);
     if (typeof newSettings.isDetailPanelVisible === 'boolean') setIsDetailPanelVisible(newSettings.isDetailPanelVisible);
     if (typeof newSettings.isFocusDebuggerVisible === 'boolean') setIsFocusDebuggerVisible(newSettings.isFocusDebuggerVisible);
+    if (newSettings.timelineBarVisibility) setTimelineBarVisibility({ ...initialTimelineBarVisibility, ...newSettings.timelineBarVisibility });
     if (typeof newSettings.allowPrerelease === 'boolean') setAllowPrerelease(newSettings.allowPrerelease);
     if (typeof newSettings.isAutoUpdateEnabled === 'boolean') setIsAutoUpdateEnabled(newSettings.isAutoUpdateEnabled);
     if (typeof newSettings.githubToken === 'string') setGithubToken(newSettings.githubToken);
@@ -1991,6 +2020,8 @@ const handleUiScaleChange = async (newScale: number) => {
                 onTimeRangeSelectorChange={handleTimeRangeSelect}
                 isTimeRangeSelectorVisible={isTimeRangeSelectorVisible}
                 onTimeRangeSelectorVisibilityChange={handleTimeRangeSelectorVisibilityChange}
+                timelineBarVisibility={timelineBarVisibility}
+                onTimelineBarVisibilityChange={handleTimelineBarVisibilityChange}
                 fileTimeRanges={fileTimeRanges}
                 logDensity={logDensity}
                 overallLogDensity={overallLogDensity}
@@ -2079,6 +2110,8 @@ const handleUiScaleChange = async (newScale: number) => {
               onColumnStylesChange={handleColumnStylesChange}
               isTimeRangeSelectorVisible={isTimeRangeSelectorVisible}
               onTimeRangeSelectorVisibilityChange={handleTimeRangeSelectorVisibilityChange}
+              timelineBarVisibility={timelineBarVisibility}
+              onTimelineBarVisibilityChange={handleTimelineBarVisibilityChange}
               isDetailPanelVisible={isDetailPanelVisible}
               onDetailPanelVisibilityChange={handleDetailPanelVisibilityChange}
               isFocusDebuggerVisible={isFocusDebuggerVisible}

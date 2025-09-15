@@ -1,12 +1,12 @@
 import React from 'react';
 import { ColumnStyleSettings } from './ColumnStyleSettings.tsx';
-import { ColumnStyles, ViewMode, IconSet, LogTableDensity, Settings as SettingsType, ColumnVisibilityState, PanelWidths, FilterState } from '../types.ts';
+import { ColumnStyles, ViewMode, IconSet, LogTableDensity, Settings as SettingsType, ColumnVisibilityState, PanelWidths, FilterState, TimelineBarVisibility } from '../types.ts';
 import { JsonEditor } from './JsonEditor.tsx';
 import { Icon, IconName } from './icons/index.tsx';
 import { DensityControl } from './DensityControl.tsx';
 
 type Theme = 'light' | 'dark';
-type SettingsCategory = 'appearance' | 'behavior' | 'updates' | 'integrations' | 'styles' | 'debugging';
+type SettingsCategory = 'appearance' | 'behavior' | 'timeline' | 'updates' | 'integrations' | 'styles' | 'debugging';
 
 interface SettingsProps {
   theme: Theme;
@@ -23,6 +23,8 @@ interface SettingsProps {
   onDetailPanelVisibilityChange: (newVisibility: boolean) => void;
   isFocusDebuggerVisible: boolean;
   onFocusDebuggerVisibilityChange: (isVisible: boolean) => void;
+  timelineBarVisibility: TimelineBarVisibility;
+  onTimelineBarVisibilityChange: (newVisibility: TimelineBarVisibility) => void;
   logTableDensity: LogTableDensity;
   onLogTableDensityChange: (newDensity: LogTableDensity) => void;
   allowPrerelease: boolean;
@@ -133,6 +135,7 @@ export const Settings: React.FC<SettingsProps> = (props) => {
         isTimeRangeSelectorVisible, onTimeRangeSelectorVisibilityChange,
         isDetailPanelVisible, onDetailPanelVisibilityChange,
         isFocusDebuggerVisible, onFocusDebuggerVisibilityChange,
+        timelineBarVisibility, onTimelineBarVisibilityChange,
         logTableDensity, onLogTableDensityChange,
         allowPrerelease, onAllowPrereleaseChange,
         isAutoUpdateEnabled, onAutoUpdateEnabledChange,
@@ -261,6 +264,9 @@ export const Settings: React.FC<SettingsProps> = (props) => {
         onGithubTokenChange(localGithubToken);
     };
 
+    const handleTimelineVisibilityChange = (key: keyof TimelineBarVisibility, value: boolean) => {
+        onTimelineBarVisibilityChange({ ...timelineBarVisibility, [key]: value });
+    };
 
     const ControlsView = (
         <div className="flex flex-grow min-h-0">
@@ -268,6 +274,7 @@ export const Settings: React.FC<SettingsProps> = (props) => {
                 <nav className="space-y-1">
                     <CategoryButton label="Appearance" icon="Sun" isActive={activeCategory === 'appearance'} onClick={() => setActiveCategory('appearance')} />
                     <CategoryButton label="Behavior" icon="Cog" isActive={activeCategory === 'behavior'} onClick={() => setActiveCategory('behavior')} />
+                    <CategoryButton label="Timeline" icon="Clock" isActive={activeCategory === 'timeline'} onClick={() => setActiveCategory('timeline')} />
                     <CategoryButton label="Updates" icon="ArrowPath" isActive={activeCategory === 'updates'} onClick={() => setActiveCategory('updates')} />
                     <CategoryButton label="Integrations" icon="CodeBracketSquare" isActive={activeCategory === 'integrations'} onClick={() => setActiveCategory('integrations')} />
                     <CategoryButton label="Table Styles" icon="Table" isActive={activeCategory === 'styles'} onClick={() => setActiveCategory('styles')} />
@@ -304,6 +311,17 @@ export const Settings: React.FC<SettingsProps> = (props) => {
                              <SegmentedControl label="Log Viewer Mode" value={viewMode} onChange={onViewModeChange} options={[{ label: 'Paginate', value: 'pagination' }, { label: 'Scroll', value: 'scroll' }]} />
                              <ToggleSwitch label="Show Timeline by Default" enabled={isTimeRangeSelectorVisible} onChange={onTimeRangeSelectorVisibilityChange} />
                              <ToggleSwitch label="Show Details Panel by Default" enabled={isDetailPanelVisible} onChange={onDetailPanelVisibilityChange} />
+                        </div>
+                    )}
+                     {activeCategory === 'timeline' && (
+                        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                             <h2 className="text-xl font-bold text-gray-800 dark:text-sky-400 pb-4">Timeline Appearance</h2>
+                             <p className="-mt-3 pb-4 text-sm text-gray-600 dark:text-gray-400">Control which contextual bars are visible in the time range selector. Changes are saved automatically.</p>
+                             <ToggleSwitch label="Show Pages Bar" enabled={timelineBarVisibility.pages} onChange={(val) => handleTimelineVisibilityChange('pages', val)} />
+                             <ToggleSwitch label="Show Files Bar" enabled={timelineBarVisibility.files} onChange={(val) => handleTimelineVisibilityChange('files', val)} />
+                             <ToggleSwitch label="Show Dates Bar" enabled={timelineBarVisibility.dates} onChange={(val) => handleTimelineVisibilityChange('dates', val)} />
+                             <ToggleSwitch label="Show Density Heatmap" enabled={timelineBarVisibility.density} onChange={(val) => handleTimelineVisibilityChange('density', val)} />
+                             <ToggleSwitch label="Show Overview & Zoom Bar" enabled={timelineBarVisibility.overview} onChange={(val) => handleTimelineVisibilityChange('overview', val)} />
                         </div>
                     )}
                     {activeCategory === 'updates' && (

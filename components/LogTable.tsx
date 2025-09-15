@@ -1,5 +1,5 @@
 import React from 'react';
-import { LogEntry, FilterState, PageTimestampRange, ColumnVisibilityState, ColumnStyles, ColumnKey, PanelWidths, ViewMode, ConsoleMessage, OverallTimeRange, FileTimeRange, LogDensityPoint, IconSet, LogTableDensity, Theme } from '../types.ts';
+import { LogEntry, FilterState, PageTimestampRange, ColumnVisibilityState, ColumnStyles, ColumnKey, PanelWidths, ViewMode, ConsoleMessage, OverallTimeRange, FileTimeRange, LogDensityPoint, IconSet, LogTableDensity, Theme, TimelineBarVisibility } from '../types.ts';
 import { Icon } from './icons/index.tsx';
 import { FilterBar } from './FilterBar.tsx';
 import { LogDetailPanel } from './LogDetailPanel.tsx';
@@ -71,6 +71,8 @@ interface LogTableProps {
     onTimeRangeSelectorChange: (startTime: number, endTime: number) => void;
     isTimeRangeSelectorVisible: boolean;
     onTimeRangeSelectorVisibilityChange: (isVisible: boolean) => void;
+    timelineBarVisibility: TimelineBarVisibility;
+    onTimelineBarVisibilityChange: (newVisibility: TimelineBarVisibility) => void;
     fileTimeRanges: FileTimeRange[];
     logDensity: LogDensityPoint[];
     overallLogDensity: LogDensityPoint[];
@@ -199,6 +201,8 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                     zoomToSelectionEnabled={!!(props.appliedFilters.dateFrom && props.appliedFilters.dateTo)}
                     iconSet={props.iconSet}
                     uiScale={props.uiScale}
+                    barVisibility={props.timelineBarVisibility}
+                    onBarVisibilityChange={props.onTimelineBarVisibilityChange}
                    />
                 </div>
             )}
