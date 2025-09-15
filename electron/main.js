@@ -88,15 +88,7 @@ function getSettings() {
             details: 500,
         },
         isTimeRangeSelectorVisible: true,
-        isDetailPanelVisible: false,
         isFocusDebuggerVisible: false,
-        timelineBarVisibility: {
-            pages: true,
-            files: true,
-            dates: true,
-            density: true,
-            overview: true,
-        },
         uiScale: 1,
     };
     try {
@@ -138,12 +130,7 @@ function getSettings() {
                     ...(loadedSettings.panelWidths || {}),
                 },
                 isTimeRangeSelectorVisible: loadedSettings.isTimeRangeSelectorVisible ?? defaultSettings.isTimeRangeSelectorVisible,
-                isDetailPanelVisible: loadedSettings.isDetailPanelVisible ?? defaultSettings.isDetailPanelVisible,
                 isFocusDebuggerVisible: loadedSettings.isFocusDebuggerVisible ?? defaultSettings.isFocusDebuggerVisible,
-                timelineBarVisibility: {
-                    ...defaultSettings.timelineBarVisibility,
-                    ...(loadedSettings.timelineBarVisibility || {}),
-                },
                 uiScale: loadedSettings.uiScale ?? defaultSettings.uiScale,
             };
             

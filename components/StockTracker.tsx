@@ -298,13 +298,6 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                                 zoomToSelectionEnabled={zoomToSelectionEnabled}
                                 iconSet={iconSet}
                                 uiScale={uiScale}
-                                timelineBarVisibility={{
-                                    pages: false,
-                                    files: false,
-                                    dates: false,
-                                    density: true,
-                                    overview: true,
-                                }}
                             />
                         ) : (
                             <div className="h-40 flex items-center justify-center bg-gray-200 dark:bg-gray-700/50 rounded-lg text-sm text-gray-500 dark:text-gray-400 text-center p-4">
