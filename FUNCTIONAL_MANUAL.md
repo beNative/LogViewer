@@ -60,7 +60,7 @@ This section provides tools for moving data between this application and other s
 
 ## 4. Log Viewer
 
-Once you have loaded data, this is the primary tab for analysis. The view is divided into three main areas: the **Filter Panel** on the left, the **Main Content Area** in the center, and the **Details Panel** on the right (when visible).
+Once you have loaded data, this is the primary tab for analysis. The view is divided into three main areas: the **Filter Panel** on the left, the **Main Content Area** in the center, and the **Details Panel** on the right (when visible). The gray bars separating the panels are draggable splitters, allowing you to resize the layout to your preference.
 
 ### 4.1. Filter Panel
 
@@ -76,7 +76,7 @@ This panel on the left side of the screen contains all the controls to filter yo
     - **From/To**: Select start and end dates and times. The query will include logs within this range.
 
 - **Log Attributes**:
-    - Use the multi-select dropdowns to filter by specific values for `Level`, `Sender Type`, `Sender Name`, and `Filename`. For each attribute, there are two dropdowns: one for *inclusion* (e.g., `Level is...`) and one for *exclusion* (e.g., `Level is NOT...`). This allows for highly specific queries, such as showing all 'ERROR' level messages except those from 'SystemA'.
+    - Use the multi-select dropdowns to filter by specific values for `Level`, `Sender Type`, `Sender Name`, and `Filename`. For each attribute, you can use the **Include/Exclude** toggle switch next to the dropdown to control whether the selected items should be part of the result set or removed from it.
     - **Quick Search**: For dropdowns with many options (like Sender Name), you can click to open the dropdown and then use the search bar at the top to quickly find the item you're looking for.
 
 ### 4.2. Main Content Area

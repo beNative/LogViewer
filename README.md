@@ -16,7 +16,7 @@ A sophisticated, client-side log analysis tool that allows users to drag-and-dro
 - **In-Memory Database**: Utilizes `sql.js` to store log data in an in-memory SQLite database, enabling fast and complex queries without a server.
 - **Tabbed Navigation**:
     - **Data Hub**: A central area to manage sessions, create new sessions from files, and import/export external databases.
-    - **Log Viewer**: The main analysis view featuring a filter panel, a dedicated toolbar for display options, the main log table, and a resizable detail panel. A new global status bar provides persistent data and view controls.
+    - **Log Viewer**: The main analysis view featuring a filter panel, a dedicated toolbar for display options, the main log table, and a resizable detail panel. A global status bar provides persistent data and view controls, and the side panels are resizable.
     - **Dashboard**: A visualization hub with interactive charts that provide a high-level overview of the *currently filtered* data.
     - **Application Log**: See real-time feedback, processing status, and errors from the application in a clean, full-screen interface with search and filtering capabilities.
     - **Info**: View in-app documentation, manuals, and version logs.
@@ -27,7 +27,7 @@ A sophisticated, client-side log analysis tool that allows users to drag-and-dro
     - **Category Charts**: Donut charts showing the distribution of logs by `Level` and `Sender Type`. Click a slice to add a filter for that category and apply it.
 - **Advanced Filtering**:
     - Filter by date/time range.
-    - Multi-select dropdowns for log attributes like `level`, `sender type`, `sender name`, and `filename`, with dedicated inputs for both **inclusion** and **exclusion**.
+    - Multi-select dropdowns for log attributes like `level`, `sender type`, `sender name`, and `filename`, with a toggle to switch between **inclusion** and **exclusion** mode for each attribute.
     - Advanced message content filtering with multi-line inputs for "include" and "exclude" terms.
     - **AND/OR Logic**: Toggle between matching all (AND) or any (OR) search terms for precise filtering.
     - **Advanced SQL Queries**: Bypass the UI with a full SQL editor to write custom queries directly against the log database. These complex queries can now be saved as presets.

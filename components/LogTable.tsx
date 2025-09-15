@@ -9,6 +9,7 @@ import { TimeRangeSelector } from './TimeRangeSelector.tsx';
 import { ActiveFilters } from './ActiveFilters.tsx';
 import { ContextMenu } from './ContextMenu.tsx';
 import { DensityControl } from './DensityControl.tsx';
+import { Splitter } from './Splitter.tsx';
 
 type ContextMenuState = { x: number; y: number; entry: LogEntry; value: string; key: ColumnKey } | null;
 
@@ -158,7 +159,16 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         return properties;
     };
     
-    // ... Effects and other logic would go here ...
+    const handleFilterResize = (deltaX: number) => {
+        const newWidth = Math.max(240, Math.min(800, props.panelWidths.filters + deltaX));
+        props.onPanelWidthsChange({ ...props.panelWidths, filters: newWidth });
+    };
+
+    const handleDetailsResize = (deltaX: number) => {
+        // Delta is positive when moving right, which should decrease the details panel width
+        const newWidth = Math.max(300, Math.min(1200, props.panelWidths.details - deltaX));
+        props.onPanelWidthsChange({ ...props.panelWidths, details: newWidth });
+    };
 
     return (
         <div className="flex flex-col flex-grow min-h-0 bg-gray-100 dark:bg-gray-900">
@@ -197,6 +207,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                 <aside style={{ width: `${props.panelWidths.filters}px` }} className="flex-shrink-0 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
                     <FilterBar {...props} />
                 </aside>
+                <Splitter onDrag={handleFilterResize} />
                 <main className="flex-grow grid grid-rows-[auto_1fr] min-h-0">
                     <div className="flex-shrink-0 flex items-center justify-end gap-4 p-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                         <ColumnSelector visibility={props.columnVisibility} onChange={props.onColumnVisibilityChange} iconSet={props.iconSet} />
@@ -220,7 +231,6 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                              <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                                 {entries.map(entry => (
                                     <tr key={entry.id}
-                                        // FIX: The ref callback must return void. Encapsulating in braces ensures an implicit undefined return.
                                         ref={el => { rowRefs.current.set(entry.id, el); }}
                                         onClick={() => handleRowClick(entry)}
                                         className={`transition-colors duration-100 cursor-pointer ${keyboardSelectedId === entry.id ? 'bg-sky-100 dark:bg-sky-900/50' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
@@ -239,19 +249,21 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                     </div>
                 </main>
                 {props.isDetailPanelVisible && (
-                    <LogDetailPanel
-                        entry={selectedEntry}
-                        onClose={() => props.onDetailPanelVisibilityChange(false)}
-                        width={props.panelWidths.details}
-                        highlightTerms={[appliedFilters.includeMsg]}
-                        theme={props.theme}
-                        onApplyFilter={props.onApplyFilter}
-                        columnStyles={props.columnStyles}
-                        iconSet={props.iconSet}
-                    />
+                    <>
+                        <Splitter onDrag={handleDetailsResize} />
+                        <LogDetailPanel
+                            entry={selectedEntry}
+                            onClose={() => props.onDetailPanelVisibilityChange(false)}
+                            width={props.panelWidths.details}
+                            highlightTerms={[appliedFilters.includeMsg]}
+                            theme={props.theme}
+                            onApplyFilter={props.onApplyFilter}
+                            columnStyles={props.columnStyles}
+                            iconSet={props.iconSet}
+                        />
+                    </>
                 )}
             </div>
-             {/* FIX: The ContextMenu component expects a 'contextValue' prop, but the state object uses 'value'. This adds the missing prop mapping. */}
              {contextMenuState && <ContextMenu {...contextMenuState} onClose={() => setContextMenuState(null)} onFilter={props.onContextMenuFilter} iconSet={props.iconSet} contextKey={contextMenuState.key} contextValue={contextMenuState.value} />}
         </div>
     );

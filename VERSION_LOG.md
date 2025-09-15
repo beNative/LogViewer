@@ -4,6 +4,18 @@ This document tracks the major changes, new features, and bug fixes for the Log 
 
 ---
 
+### **Version 0.16.0** - UI Enhancements & Filter Simplification
+
+_Date: 2025-09-03_
+
+This release introduces resizable UI panels for a more flexible layout and documents the recently-implemented simplification of the attribute filtering controls.
+
+#### ✨ Features & Improvements
+- **Resizable Side Panels**: The Filters panel (left) and the Log Details panel (right) are now resizable. Users can drag the vertical splitters to customize their workspace layout. Panel widths are saved and restored across sessions.
+- **Simplified Attribute Filters**: The filter panel UI has been streamlined. Instead of separate dropdowns for inclusion and exclusion, each attribute (`Level`, `Sender Type`, etc.) now has a single dropdown accompanied by an "Include/Exclude" toggle switch. This makes building complex queries more intuitive.
+
+---
+
 ### **Version 0.15.0** - Professional Auto-Updates
 
 _Date: 2025-09-02_
