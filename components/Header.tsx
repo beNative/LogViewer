@@ -107,20 +107,20 @@ export const Header: React.FC<HeaderProps> = ({ activeView, onViewChange, isBusy
                         color="yellow"
                         iconSet={iconSet}
                     />
-                    <NavItem
-                        iconName="ChartBar"
-                        label="Dashboard"
-                        isActive={activeView === 'dashboard'}
-                        onClick={() => onViewChange('dashboard')}
-                        color="red"
-                        iconSet={iconSet}
-                    />
                      <NavItem
                         iconName="Cube"
                         label="Stock Tracker"
                         isActive={activeView === 'stock'}
                         onClick={() => onViewChange('stock')}
                         color="teal"
+                        iconSet={iconSet}
+                    />
+                    <NavItem
+                        iconName="ChartBar"
+                        label="Dashboard"
+                        isActive={activeView === 'dashboard'}
+                        onClick={() => onViewChange('dashboard')}
+                        color="red"
                         iconSet={iconSet}
                     />
                     <NavItem

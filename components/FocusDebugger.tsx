@@ -184,6 +184,23 @@ export const FocusDebugger: React.FC<FocusDebuggerProps> = ({ isVisible, iconSet
     React.useEffect(() => {
         if (!isVisible) return;
 
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'F4') {
+                e.preventDefault();
+                setIsFrozen(prev => !prev);
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isVisible]);
+
+    React.useEffect(() => {
+        if (!isVisible) return;
+
         const handleFocusIn = (e: FocusEvent) => !isFrozen && setFocusedInfo(getElementInfo(e.target as Element));
         const handleFocusOut = () => !isFrozen && setFocusedInfo(null);
         const handleMouseOver = (e: MouseEvent) => {
@@ -224,7 +241,7 @@ export const FocusDebugger: React.FC<FocusDebuggerProps> = ({ isVisible, iconSet
                 <button
                     onClick={() => setIsFrozen(!isFrozen)}
                     className="flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors bg-sky-600 hover:bg-sky-700 text-white pointer-events-auto"
-                    title={isFrozen ? 'Resume Inspector' : 'Freeze Inspector'}
+                    title={isFrozen ? 'Resume Inspector (F4)' : 'Freeze Inspector (F4)'}
                 >
                     <Icon name={isFrozen ? 'Play' : 'Snowflake'} iconSet={iconSet} className="w-5 h-5" />
                     <span>{isFrozen ? 'Resume' : 'Freeze'}</span>
