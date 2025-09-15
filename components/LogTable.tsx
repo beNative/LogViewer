@@ -197,7 +197,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                 <aside style={{ width: `${props.panelWidths.filters}px` }} className="flex-shrink-0 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
                     <FilterBar {...props} />
                 </aside>
-                <main className="flex-grow flex flex-col min-h-0">
+                <main className="flex-grow grid grid-rows-[auto_1fr] min-h-0">
                     <div className="flex-shrink-0 flex items-center justify-end gap-4 p-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                         <ColumnSelector visibility={props.columnVisibility} onChange={props.onColumnVisibilityChange} iconSet={props.iconSet} />
                         <DensityControl value={props.logTableDensity} onChange={props.onLogTableDensityChange} />
@@ -205,7 +205,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                             <Icon name="SidebarRight" iconSet={props.iconSet} className="w-5 h-5"/>
                         </button>
                     </div>
-                    <div className="flex-grow overflow-auto" ref={tableContainerRef}>
+                    <div className="overflow-auto" ref={tableContainerRef}>
                         <table className="min-w-full table-fixed font-sans">
                             <thead className="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 shadow-sm">
                                 <tr>
