@@ -1,39 +1,38 @@
 import React from 'react';
 
 interface SplitterProps {
-    onDrag: (deltaX: number) => void;
+    onResize: (delta: number) => void;
+    direction?: 'horizontal' | 'vertical';
+    className?: string;
 }
 
-export const Splitter: React.FC<SplitterProps> = ({ onDrag }) => {
-    
-    const handleMouseDown = (downEvent: React.MouseEvent) => {
-        downEvent.preventDefault();
-        
-        const startX = downEvent.clientX;
-        let lastX = startX;
+export const Splitter: React.FC<SplitterProps> = ({ onResize, direction = 'vertical', className }) => {
+    const handleMouseDown = React.useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+        e.preventDefault();
 
         const handleMouseMove = (moveEvent: MouseEvent) => {
-            const deltaX = moveEvent.clientX - lastX;
-            onDrag(deltaX);
-            lastX = moveEvent.clientX;
+            const delta = direction === 'vertical' ? moveEvent.movementX : moveEvent.movementY;
+            onResize(delta);
         };
 
         const handleMouseUp = () => {
             document.removeEventListener('mousemove', handleMouseMove);
             document.removeEventListener('mouseup', handleMouseUp);
-            document.body.style.cursor = '';
         };
-        
-        document.body.style.cursor = 'col-resize';
+
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseup', handleMouseUp);
-    };
+    }, [onResize, direction]);
+
+    const baseClasses = "flex-shrink-0 bg-gray-200 dark:bg-gray-700 hover:bg-sky-500 dark:hover:bg-sky-500 transition-colors duration-200";
+    const directionClasses = direction === 'vertical'
+        ? "w-1.5 cursor-col-resize"
+        : "h-1.5 cursor-row-resize";
 
     return (
         <div
             onMouseDown={handleMouseDown}
-            className="flex-shrink-0 w-1.5 cursor-col-resize bg-gray-300 dark:bg-gray-600 hover:bg-sky-500 active:bg-sky-600 transition-colors duration-150 z-10"
-            style={{ touchAction: 'none' }}
+            className={`${baseClasses} ${directionClasses} ${className}`}
         />
     );
 };

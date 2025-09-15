@@ -1,274 +1,147 @@
 import React from 'react';
-import { LogEntry, FilterState, PageTimestampRange, ColumnVisibilityState, ColumnStyles, ColumnKey, PanelWidths, ViewMode, ConsoleMessage, OverallTimeRange, FileTimeRange, LogDensityPoint, IconSet, LogTableDensity, Theme, TimelineBarVisibility } from '../types.ts';
-import { Icon } from './icons/index.tsx';
-import { FilterBar } from './FilterBar.tsx';
-import { LogDetailPanel } from './LogDetailPanel.tsx';
-import { highlightText } from '../utils.ts';
-import { ColumnSelector } from './ColumnSelector.tsx';
-import { TimeRangeSelector } from './TimeRangeSelector.tsx';
-import { ActiveFilters } from './ActiveFilters.tsx';
+import { LogEntry, ColumnVisibilityState, ColumnStyles, ColumnKey, Theme, IconSet, LogTableDensity } from '../types.ts';
+import { COLUMN_DEFINITIONS, highlightText } from '../utils.ts';
 import { ContextMenu } from './ContextMenu.tsx';
-import { DensityControl } from './DensityControl.tsx';
-import { Splitter } from './Splitter.tsx';
-
-type ContextMenuState = { x: number; y: number; entry: LogEntry; value: string; key: ColumnKey } | null;
+import { Icon } from './icons/index.tsx';
 
 export const getLevelColor = (level: string) => {
     switch (level?.toUpperCase()) {
-        case 'ERROR':
-        case 'FATAL':
-            return 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300';
-        case 'WARNING':
-        case 'WARN':
-            return 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300';
-        case 'INFO':
-            return 'bg-sky-100 text-sky-800 dark:bg-sky-900/50 dark:text-sky-300';
-        case 'DEBUG':
-        case 'TRACE':
-            return 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
-        default:
-            return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400';
+        case 'ERROR': return 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300';
+        case 'WARNING': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300';
+        case 'INFO': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300';
+        case 'DEBUG': return 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300';
+        default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
     }
 };
 
 interface LogTableProps {
-    entries: LogEntry[];
-    loadedFileNames: string[];
-    pageTimestampRanges: PageTimestampRange[];
-    onViewModeChange: (newMode: ViewMode) => void;
-    filters: FilterState;
-    appliedFilters: FilterState;
-    onFiltersChange: (newFilters: FilterState) => void;
-    onApplyFilters: () => void;
-    onResetFilters: () => void;
-    onClearTimeRange: () => void;
-    uniqueValues: {
-        level: string[];
-        sndrtype: string[];
-        sndrname: string[];
-        fileName: string[];
-    };
-    theme: Theme;
-    viewMode: ViewMode;
+    logEntries: LogEntry[];
     columnVisibility: ColumnVisibilityState;
-    onColumnVisibilityChange: (newState: ColumnVisibilityState) => void;
     columnStyles: ColumnStyles;
-    panelWidths: PanelWidths;
-    onPanelWidthsChange: (newWidths: PanelWidths) => void;
-    isDetailPanelVisible: boolean;
-    onDetailPanelVisibilityChange: (isVisible: boolean) => void;
-    onApplyFilter: (key: 'level' | 'sndrtype' | 'sndrname' | 'fileName', value: string) => void;
-    onContextMenuFilter: (key: 'level' | 'sndrtype' | 'sndrname' | 'fileName', value: string, exclude: boolean) => void;
-    customFilterPresets: Record<string, FilterState>;
-    onSavePreset: (name: string) => void;
-    onDeletePreset: (name: string) => void;
-    onLoadPreset: (name: string) => void;
-    onLoadMore: () => void;
-    hasMore: boolean;
-    isBusy: boolean;
-    logToConsole: (message: string, type: ConsoleMessage['type']) => void;
-    overallTimeRange: OverallTimeRange | null;
-    onTimeRangeSelectorChange: (startTime: number, endTime: number) => void;
-    isTimeRangeSelectorVisible: boolean;
-    onTimeRangeSelectorVisibilityChange: (isVisible: boolean) => void;
-    timelineBarVisibility: TimelineBarVisibility;
-    onTimelineBarVisibilityChange: (newVisibility: TimelineBarVisibility) => void;
-    fileTimeRanges: FileTimeRange[];
-    logDensity: LogDensityPoint[];
-    overallLogDensity: LogDensityPoint[];
-    datesWithLogs: string[];
-    onCursorChange: (time: number) => void;
-    onFileSelect: (fileName: string) => void;
-    onDateSelect: (date: string) => void;
-    keyboardSelectedId: number | null;
-    setKeyboardSelectedId: (id: number | null) => void;
-    jumpToEntryId: number | null;
-    timelineViewRange: OverallTimeRange | null;
-    onTimelineViewRangeChange: (range: OverallTimeRange | null) => void;
-    onTimelineZoomToSelection: () => void;
-    onTimelineZoomReset: () => void;
-    isInitialLoad: boolean;
+    highlightTerms: string[];
+    theme: Theme;
+    onRowClick: (entry: LogEntry) => void;
+    selectedEntryId: number | null;
+    density: LogTableDensity;
+    onFilter: (key: 'level' | 'sndrtype' | 'sndrname' | 'fileName', value: string, exclude: boolean) => void;
     iconSet: IconSet;
-    onRemoveAppliedFilter: (key: keyof FilterState, value?: string) => void;
-    logTableDensity: LogTableDensity;
-    onLogTableDensityChange: (density: LogTableDensity) => void;
-    uiScale: number;
 }
 
-export const LogTable: React.FC<LogTableProps> = (props) => {
-    const [selectedEntry, setSelectedEntry] = React.useState<LogEntry | null>(null);
-    const [contextMenuState, setContextMenuState] = React.useState<ContextMenuState>(null);
-    const tableContainerRef = React.useRef<HTMLDivElement>(null);
-    const rowRefs = React.useRef<Map<number, HTMLTableRowElement | null>>(new Map());
+interface ContextMenuState {
+    x: number;
+    y: number;
+    entry: LogEntry;
+    contextKey: ColumnKey;
+    contextValue: string;
+}
 
-    const {
-        entries,
-        viewMode,
-        onLoadMore,
-        hasMore,
-        isBusy,
-        columnVisibility,
-        columnStyles,
-        logTableDensity,
-        keyboardSelectedId,
-        setKeyboardSelectedId,
-        appliedFilters,
-        theme,
-        jumpToEntryId
-    } = props;
+export const LogTable: React.FC<LogTableProps> = ({ logEntries, columnVisibility, columnStyles, highlightTerms, theme, onRowClick, selectedEntryId, density, onFilter, iconSet }) => {
+    const [contextMenu, setContextMenu] = React.useState<ContextMenuState | null>(null);
+    const tableContainerRef = React.useRef<HTMLDivElement>(null);
+
+    React.useEffect(() => {
+        if (selectedEntryId) {
+            const row = document.getElementById(`log-row-${selectedEntryId}`);
+            row?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }, [selectedEntryId]);
+
+    const handleContextMenu = (e: React.MouseEvent, entry: LogEntry, key: ColumnKey) => {
+        e.preventDefault();
+        const value = String(entry[key]);
+        setContextMenu({ x: e.clientX, y: e.clientY, entry, contextKey: key, contextValue: value });
+    };
 
     const getRowClass = (density: LogTableDensity) => {
         switch (density) {
-            case 'compact': return 'py-0.5';
-            case 'normal': return 'py-1';
-            case 'comfortable': return 'py-2';
-        }
-    };
-    const getCellClass = (density: LogTableDensity) => {
-        switch (density) {
-            case 'compact': return 'px-2';
-            case 'normal': return 'px-3';
-            case 'comfortable': return 'px-4';
+            case 'compact': return 'py-0.5 px-2';
+            case 'normal': return 'py-1.5 px-2';
+            case 'comfortable': return 'py-2.5 px-2';
+            default: return 'py-1.5 px-2';
         }
     }
 
-    const handleRowClick = (entry: LogEntry) => {
-        setSelectedEntry(entry);
-        setKeyboardSelectedId(entry.id);
-        if (!props.isDetailPanelVisible) {
-            props.onDetailPanelVisibilityChange(true);
-        }
-    };
-
-    const handleContextMenu = (e: React.MouseEvent, entry: LogEntry, key: ColumnKey, value: string) => {
-        e.preventDefault();
-        setContextMenuState({ x: e.clientX, y: e.clientY, entry, key, value });
-    };
-
     const getStyle = (key: ColumnKey): React.CSSProperties => {
         const styleConf = columnStyles[key];
-        if (!styleConf) return {};
         const properties: React.CSSProperties = {
             fontFamily: styleConf.font || 'inherit',
             fontSize: `${styleConf.fontSize}px`,
             fontWeight: styleConf.isBold ? 'bold' : 'normal',
             fontStyle: styleConf.isItalic ? 'italic' : 'normal',
         };
+
         const color = theme === 'dark' ? styleConf.darkColor : styleConf.color;
         if (color) {
             properties.color = color;
         }
+
         return properties;
     };
-    
-    const handleFilterResize = (deltaX: number) => {
-        const newWidth = Math.max(240, Math.min(800, props.panelWidths.filters + deltaX));
-        props.onPanelWidthsChange({ ...props.panelWidths, filters: newWidth });
-    };
 
-    const handleDetailsResize = (deltaX: number) => {
-        // Delta is positive when moving right, which should decrease the details panel width
-        const newWidth = Math.max(300, Math.min(1200, props.panelWidths.details - deltaX));
-        props.onPanelWidthsChange({ ...props.panelWidths, details: newWidth });
-    };
-
-    return (
-        <div className="flex flex-col flex-grow min-h-0 bg-gray-100 dark:bg-gray-900">
-            {props.isTimeRangeSelectorVisible && props.overallTimeRange && (
-                <div className="flex-shrink-0 p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50">
-                   <TimeRangeSelector 
-                    minTime={props.overallTimeRange.min}
-                    maxTime={props.overallTimeRange.max}
-                    selectedStartTime={new Date(props.appliedFilters.dateFrom + 'T' + props.appliedFilters.timeFrom + 'Z').getTime()}
-                    selectedEndTime={new Date(props.appliedFilters.dateTo + 'T' + props.appliedFilters.timeTo + 'Z').getTime()}
-                    onRangeChange={props.onTimeRangeSelectorChange}
-                    onClear={props.onClearTimeRange}
-                    theme={props.theme}
-                    pageTimestampRanges={props.pageTimestampRanges}
-                    fileTimeRanges={props.fileTimeRanges}
-                    logDensity={props.logDensity}
-                    overallLogDensity={props.overallLogDensity}
-                    datesWithLogs={props.datesWithLogs}
-                    viewMode={props.viewMode}
-                    onGoToPage={() => {}}
-                    onCursorChange={props.onCursorChange}
-                    onFileSelect={props.onFileSelect}
-                    onDateSelect={props.onDateSelect}
-                    viewRange={props.timelineViewRange}
-                    onViewRangeChange={props.onTimelineViewRangeChange}
-                    onZoomToSelection={props.onTimelineZoomToSelection}
-                    onZoomToExtent={props.onTimelineZoomReset}
-                    zoomToSelectionEnabled={!!(props.appliedFilters.dateFrom && props.appliedFilters.dateTo)}
-                    iconSet={props.iconSet}
-                    uiScale={props.uiScale}
-                    barVisibility={props.timelineBarVisibility}
-                    onBarVisibilityChange={props.onTimelineBarVisibilityChange}
-                   />
+    if (!logEntries || logEntries.length === 0) {
+        return (
+            <div className="flex-grow flex items-center justify-center text-center text-gray-500 dark:text-gray-400">
+                <div>
+                    <Icon name="Table" iconSet={iconSet} className="w-24 h-24 text-gray-300 dark:text-gray-700 mx-auto mb-6" />
+                    <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-300">No Log Entries Found</h2>
+                    <p className="text-gray-500 dark:text-gray-500 mt-2">Try adjusting your filters or loading a data file.</p>
                 </div>
-            )}
-            <ActiveFilters appliedFilters={props.appliedFilters} onRemoveFilter={props.onRemoveAppliedFilter} iconSet={props.iconSet} />
-            <div className="flex flex-grow min-h-0">
-                <aside style={{ width: `${props.panelWidths.filters}px` }} className="flex-shrink-0 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
-                    <FilterBar {...props} />
-                </aside>
-                <Splitter onDrag={handleFilterResize} />
-                <main className="flex-grow grid grid-rows-[auto_1fr] min-h-0">
-                    <div className="flex-shrink-0 flex items-center justify-end gap-4 p-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                        <ColumnSelector visibility={props.columnVisibility} onChange={props.onColumnVisibilityChange} iconSet={props.iconSet} />
-                        <DensityControl value={props.logTableDensity} onChange={props.onLogTableDensityChange} />
-                         <button onClick={() => props.onDetailPanelVisibilityChange(!props.isDetailPanelVisible)} className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" title={props.isDetailPanelVisible ? "Hide Details" : "Show Details"}>
-                            <Icon name="SidebarRight" iconSet={props.iconSet} className="w-5 h-5"/>
-                        </button>
-                    </div>
-                    <div className="overflow-auto" ref={tableContainerRef}>
-                        <table className="min-w-full table-fixed font-sans">
-                            <thead className="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 shadow-sm">
-                                <tr>
-                                    {columnVisibility.time && <th style={{width: '180px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Time</th>}
-                                    {columnVisibility.level && <th style={{width: '100px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Level</th>}
-                                    {columnVisibility.sndrtype && <th style={{width: '150px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Sender Type</th>}
-                                    {columnVisibility.sndrname && <th style={{width: '150px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Sender Name</th>}
-                                    {columnVisibility.fileName && <th style={{width: '200px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Filename</th>}
-                                    {columnVisibility.msg && <th className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Message</th>}
-                                </tr>
-                            </thead>
-                             <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                                {entries.map(entry => (
-                                    <tr key={entry.id}
-                                        ref={el => { rowRefs.current.set(entry.id, el); }}
-                                        onClick={() => handleRowClick(entry)}
-                                        className={`transition-colors duration-100 cursor-pointer ${keyboardSelectedId === entry.id ? 'bg-sky-100 dark:bg-sky-900/50' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
-                                    >
-                                        {columnVisibility.time && <td onContextMenu={(e) => handleContextMenu(e, entry, 'time', entry.time)} style={getStyle('time')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap`}>{entry.time}</td>}
-                                        {columnVisibility.level && <td onContextMenu={(e) => handleContextMenu(e, entry, 'level', entry.level)} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap`}><span style={getStyle('level')} className={`px-2 py-0.5 rounded-full text-xs font-medium ${getLevelColor(entry.level)}`}>{entry.level}</span></td>}
-                                        {columnVisibility.sndrtype && <td onContextMenu={(e) => handleContextMenu(e, entry, 'sndrtype', entry.sndrtype)} style={getStyle('sndrtype')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.sndrtype}</td>}
-                                        {columnVisibility.sndrname && <td onContextMenu={(e) => handleContextMenu(e, entry, 'sndrname', entry.sndrname)} style={getStyle('sndrname')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.sndrname}</td>}
-                                        {columnVisibility.fileName && <td onContextMenu={(e) => handleContextMenu(e, entry, 'fileName', entry.fileName)} style={getStyle('fileName')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.fileName}</td>}
-                                        {columnVisibility.msg && <td onContextMenu={(e) => handleContextMenu(e, entry, 'msg', entry.msg)} style={getStyle('msg')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`} dangerouslySetInnerHTML={{ __html: highlightText(entry.msg, [appliedFilters.includeMsg], theme) }}></td>}
-                                    </tr>
-                                ))}
-                             </tbody>
-                        </table>
-                        {isBusy && <div className="p-4 text-center">Loading...</div>}
-                    </div>
-                </main>
-                {props.isDetailPanelVisible && (
-                    <>
-                        <Splitter onDrag={handleDetailsResize} />
-                        <LogDetailPanel
-                            entry={selectedEntry}
-                            onClose={() => props.onDetailPanelVisibilityChange(false)}
-                            width={props.panelWidths.details}
-                            highlightTerms={[appliedFilters.includeMsg]}
-                            theme={props.theme}
-                            onApplyFilter={props.onApplyFilter}
-                            columnStyles={props.columnStyles}
-                            iconSet={props.iconSet}
-                        />
-                    </>
-                )}
             </div>
-             {contextMenuState && <ContextMenu {...contextMenuState} onClose={() => setContextMenuState(null)} onFilter={props.onContextMenuFilter} iconSet={props.iconSet} contextKey={contextMenuState.key} contextValue={contextMenuState.value} />}
+        );
+    }
+    
+    return (
+        <div ref={tableContainerRef} className="flex-grow min-h-0 overflow-auto bg-white dark:bg-gray-900">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800 border-separate" style={{ borderSpacing: 0 }}>
+                <thead className="bg-gray-50 dark:bg-gray-800/80 sticky top-0 z-10">
+                    <tr>
+                        {COLUMN_DEFINITIONS.filter(c => columnVisibility[c.key]).map(col => (
+                            <th key={col.key} scope="col" className="px-2 py-2 text-left text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700">
+                                {col.label}
+                            </th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200/80 dark:divide-gray-800/50">
+                    {logEntries.map(entry => (
+                        <tr
+                            key={entry.id}
+                            id={`log-row-${entry.id}`}
+                            onClick={() => onRowClick(entry)}
+                            className={`cursor-pointer transition-colors ${selectedEntryId === entry.id ? 'bg-sky-100 dark:bg-sky-900/50' : 'hover:bg-gray-100/70 dark:hover:bg-gray-800/70'}`}
+                        >
+                            {COLUMN_DEFINITIONS.filter(c => columnVisibility[c.key]).map(col => (
+                                <td
+                                    key={col.key}
+                                    style={getStyle(col.key)}
+                                    className={`${getRowClass(density)} text-sm whitespace-nowrap align-top`}
+                                    onContextMenu={(e) => handleContextMenu(e, entry, col.key)}
+                                >
+                                    {col.key === 'level' ? (
+                                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getLevelColor(entry.level)}`}>
+                                            {entry.level}
+                                        </span>
+                                    ) : col.key === 'msg' ? (
+                                        <div className="whitespace-pre-wrap break-all" style={{ ...getStyle('msg'), whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                                            <span dangerouslySetInnerHTML={{ __html: highlightText(entry.msg, highlightTerms, theme) }} />
+                                        </div>
+                                    ) : (
+                                        String(entry[col.key])
+                                    )}
+                                </td>
+                            ))}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+            {contextMenu && (
+                <ContextMenu
+                    {...contextMenu}
+                    onClose={() => setContextMenu(null)}
+                    onFilter={onFilter}
+                    iconSet={iconSet}
+                />
+            )}
         </div>
     );
 };
