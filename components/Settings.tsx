@@ -19,6 +19,8 @@ interface SettingsProps {
   onColumnStylesChange: (newStyles: ColumnStyles) => void;
   isTimeRangeSelectorVisible: boolean;
   onTimeRangeSelectorVisibilityChange: (newVisibility: boolean) => void;
+  isDetailPanelVisible: boolean;
+  onDetailPanelVisibilityChange: (newVisibility: boolean) => void;
   logTableDensity: LogTableDensity;
   onLogTableDensityChange: (newDensity: LogTableDensity) => void;
   allowPrerelease: boolean;
@@ -125,6 +127,7 @@ export const Settings: React.FC<SettingsProps> = (props) => {
         iconSet, onIconSetChange,
         columnStyles, onColumnStylesChange,
         isTimeRangeSelectorVisible, onTimeRangeSelectorVisibilityChange,
+        isDetailPanelVisible, onDetailPanelVisibilityChange,
         logTableDensity, onLogTableDensityChange,
         allowPrerelease, onAllowPrereleaseChange,
         githubToken, onGithubTokenChange,
@@ -293,6 +296,7 @@ export const Settings: React.FC<SettingsProps> = (props) => {
                              <h2 className="text-xl font-bold text-gray-800 dark:text-sky-400 pb-4">Behavior</h2>
                              <SegmentedControl label="Log Viewer Mode" value={viewMode} onChange={onViewModeChange} options={[{ label: 'Paginate', value: 'pagination' }, { label: 'Scroll', value: 'scroll' }]} />
                              <ToggleSwitch label="Show Timeline by Default" enabled={isTimeRangeSelectorVisible} onChange={onTimeRangeSelectorVisibilityChange} />
+                             <ToggleSwitch label="Show Details Panel by Default" enabled={isDetailPanelVisible} onChange={onDetailPanelVisibilityChange} />
                         </div>
                     )}
                     {activeCategory === 'updates' && (

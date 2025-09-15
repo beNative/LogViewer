@@ -149,6 +149,7 @@ export type Settings = {
     columnStyles: ColumnStyles;
     panelWidths: PanelWidths;
     isTimeRangeSelectorVisible: boolean;
+    isDetailPanelVisible: boolean;
     uiScale: number;
 };
 

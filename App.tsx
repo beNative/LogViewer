@@ -144,6 +144,7 @@ const App: React.FC = () => {
   const [customFilterPresets, setCustomFilterPresets] = React.useState<Record<string, FilterState>>({});
   const [panelWidths, setPanelWidths] = React.useState<PanelWidths>(initialPanelWidths);
   const [isTimeRangeSelectorVisible, setIsTimeRangeSelectorVisible] = React.useState(true);
+  const [isDetailPanelVisible, setIsDetailPanelVisible] = React.useState(false);
   const [logTableDensity, setLogTableDensity] = React.useState<LogTableDensity>('normal');
   const [allowPrerelease, setAllowPrerelease] = React.useState<boolean>(false);
   const [githubToken, setGithubToken] = React.useState<string>('');
@@ -409,6 +410,10 @@ const App: React.FC = () => {
                  if (typeof settings.isTimeRangeSelectorVisible === 'boolean') {
                     setIsTimeRangeSelectorVisible(settings.isTimeRangeSelectorVisible);
                     logToConsole(`Timeline visibility set to '${settings.isTimeRangeSelectorVisible}' from settings.`, 'DEBUG');
+                }
+                if (typeof settings.isDetailPanelVisible === 'boolean') {
+                    setIsDetailPanelVisible(settings.isDetailPanelVisible);
+                    logToConsole(`Details panel visibility set to '${settings.isDetailPanelVisible}' from settings.`, 'DEBUG');
                 }
                 if (typeof settings.allowPrerelease === 'boolean') {
                     setAllowPrerelease(settings.allowPrerelease);
@@ -1236,6 +1241,20 @@ const App: React.FC = () => {
     }
 };
 
+const handleDetailPanelVisibilityChange = async (isVisible: boolean) => {
+    setIsDetailPanelVisible(isVisible);
+    if (window.electronAPI) {
+        try {
+            const settings = await window.electronAPI.getSettings();
+            await window.electronAPI.setSettings({ ...settings, isDetailPanelVisible: isVisible });
+            logToConsole(`Details panel visibility setting saved: ${isVisible}.`, 'INFO');
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            logToConsole(`Failed to save details panel visibility setting: ${msg}`, 'ERROR');
+        }
+    }
+};
+
 const handleAllowPrereleaseChange = async (allow: boolean) => {
     setAllowPrerelease(allow);
     if (window.electronAPI) {
@@ -1324,6 +1343,7 @@ const handleUiScaleChange = async (newScale: number) => {
     if (newSettings.customFilterPresets) setCustomFilterPresets(newSettings.customFilterPresets);
     if (newSettings.panelWidths) setPanelWidths({ ...initialPanelWidths, ...newSettings.panelWidths });
     if (typeof newSettings.isTimeRangeSelectorVisible === 'boolean') setIsTimeRangeSelectorVisible(newSettings.isTimeRangeSelectorVisible);
+    if (typeof newSettings.isDetailPanelVisible === 'boolean') setIsDetailPanelVisible(newSettings.isDetailPanelVisible);
     if (typeof newSettings.allowPrerelease === 'boolean') setAllowPrerelease(newSettings.allowPrerelease);
     if (typeof newSettings.githubToken === 'string') setGithubToken(newSettings.githubToken);
     if (typeof newSettings.uiScale === 'number') setUiScale(newSettings.uiScale);
@@ -1835,6 +1855,8 @@ const handleUiScaleChange = async (newScale: number) => {
                 columnStyles={columnStyles}
                 panelWidths={panelWidths}
                 onPanelWidthsChange={handlePanelWidthsChange}
+                isDetailPanelVisible={isDetailPanelVisible}
+                onDetailPanelVisibilityChange={handleDetailPanelVisibilityChange}
                 onApplyFilter={handleApplyDetailFilter}
                 onContextMenuFilter={handleContextMenuFilter}
                 customFilterPresets={customFilterPresets}
@@ -1936,6 +1958,8 @@ const handleUiScaleChange = async (newScale: number) => {
               onColumnStylesChange={handleColumnStylesChange}
               isTimeRangeSelectorVisible={isTimeRangeSelectorVisible}
               onTimeRangeSelectorVisibilityChange={handleTimeRangeSelectorVisibilityChange}
+              isDetailPanelVisible={isDetailPanelVisible}
+              onDetailPanelVisibilityChange={handleDetailPanelVisibilityChange}
               logTableDensity={logTableDensity}
               onLogTableDensityChange={handleLogTableDensityChange}
               allowPrerelease={allowPrerelease}
