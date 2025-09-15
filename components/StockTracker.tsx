@@ -1,5 +1,5 @@
 import React from 'react';
-import { StockInfoEntry, StockInfoFilters, IconSet, Theme, LogDensityPoint, OverallTimeRange } from '../types.ts';
+import { StockInfoEntry, StockInfoFilters, IconSet, Theme, LogDensityPoint, OverallTimeRange, StockArticleSuggestion } from '../types.ts';
 import { Icon } from './icons/index.tsx';
 import { StockHistoryChart } from './StockHistoryChart.tsx';
 import { TimeRangeSelector } from './TimeRangeSelector.tsx';
@@ -14,12 +14,13 @@ interface StockTrackerProps {
   overallStockDensity: LogDensityPoint[];
   uiScale: number;
   onRebuildStockData: () => Promise<void>;
+  onFetchSuggestions: (searchTerm: string, timeFilters: StockInfoFilters) => Promise<StockArticleSuggestion[]>;
 }
 
 const inputStyles = "w-full bg-white dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white sm:text-sm rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition";
 
 
-export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, isBusy, iconSet, theme, overallTimeRange, overallStockDensity, uiScale, onRebuildStockData }) => {
+export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, isBusy, iconSet, theme, overallTimeRange, overallStockDensity, uiScale, onRebuildStockData, onFetchSuggestions }) => {
     const [filters, setFilters] = React.useState<StockInfoFilters>({
         searchTerm: '',
         dateFrom: '',
@@ -28,6 +29,11 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
         timeTo: '',
     });
     const [timelineViewRange, setTimelineViewRange] = React.useState<OverallTimeRange | null>(null);
+    const [suggestions, setSuggestions] = React.useState<StockArticleSuggestion[]>([]);
+    const [isSuggestionsVisible, setIsSuggestionsVisible] = React.useState(false);
+    const [activeSuggestionIndex, setActiveSuggestionIndex] = React.useState(-1);
+    const debounceTimeoutRef = React.useRef<number | null>(null);
+    const suggestionContainerRef = React.useRef<HTMLDivElement>(null);
 
 
     React.useEffect(() => {
@@ -44,14 +50,69 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
         }
     }, [overallTimeRange, filters.dateFrom, filters.dateTo]);
 
+    // Effect to hide suggestions on outside click
+    React.useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (suggestionContainerRef.current && !suggestionContainerRef.current.contains(event.target as Node)) {
+                setIsSuggestionsVisible(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFilters({ ...filters, [e.target.name]: e.target.value });
+        const newSearchTerm = e.target.value;
+        setFilters({ ...filters, searchTerm: newSearchTerm });
+
+        if (debounceTimeoutRef.current) {
+            clearTimeout(debounceTimeoutRef.current);
+        }
+
+        if (newSearchTerm.length < 2) {
+            setSuggestions([]);
+            setIsSuggestionsVisible(false);
+            return;
+        }
+
+        debounceTimeoutRef.current = window.setTimeout(async () => {
+            const fetchedSuggestions = await onFetchSuggestions(newSearchTerm, filters);
+            setSuggestions(fetchedSuggestions);
+            setIsSuggestionsVisible(fetchedSuggestions.length > 0);
+            setActiveSuggestionIndex(-1);
+        }, 300);
     };
+
+    const handleSuggestionClick = (suggestion: StockArticleSuggestion) => {
+        setFilters({ ...filters, searchTerm: suggestion.name });
+        setSuggestions([]);
+        setIsSuggestionsVisible(false);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (!isSuggestionsVisible || suggestions.length === 0) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setActiveSuggestionIndex(prev => (prev + 1) % suggestions.length);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setActiveSuggestionIndex(prev => (prev - 1 + suggestions.length) % suggestions.length);
+        } else if (e.key === 'Enter') {
+            if (activeSuggestionIndex > -1) {
+                e.preventDefault();
+                handleSuggestionClick(suggestions[activeSuggestionIndex]);
+            }
+        } else if (e.key === 'Escape') {
+            setIsSuggestionsVisible(false);
+        }
+    };
+
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         onSearch(filters);
+        setIsSuggestionsVisible(false);
     };
 
     const handleRebuildClick = () => {
@@ -154,17 +215,36 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                 </div>
                 <form onSubmit={handleSearch} className="space-y-4">
                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                        <div className="md:col-span-2">
+                        <div className="md:col-span-2" ref={suggestionContainerRef}>
                             <label htmlFor="searchTerm" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Article ID or Name</label>
-                            <input
-                                type="text"
-                                name="searchTerm"
-                                id="searchTerm"
-                                value={filters.searchTerm}
-                                onChange={handleInputChange}
-                                className={inputStyles}
-                                placeholder="e.g., 3400936009011 or CARTEOL"
-                            />
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    name="searchTerm"
+                                    id="searchTerm"
+                                    value={filters.searchTerm}
+                                    onChange={handleInputChange}
+                                    onKeyDown={handleKeyDown}
+                                    onFocus={() => { if (suggestions.length > 0) setIsSuggestionsVisible(true); }}
+                                    className={inputStyles}
+                                    placeholder="e.g., CARTEOL (min 2 chars)"
+                                    autoComplete="off"
+                                />
+                                {isSuggestionsVisible && suggestions.length > 0 && (
+                                    <ul className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
+                                        {suggestions.map((suggestion, index) => (
+                                            <li
+                                                key={`${suggestion.id}-${suggestion.name}`}
+                                                className={`px-3 py-2 cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900/50 ${index === activeSuggestionIndex ? 'bg-sky-100 dark:bg-sky-900/50' : ''}`}
+                                                onMouseDown={() => handleSuggestionClick(suggestion)}
+                                            >
+                                                <div className="font-semibold text-gray-900 dark:text-gray-100">{suggestion.name}</div>
+                                                <div className="text-sm text-gray-500 dark:text-gray-400 font-mono">{suggestion.id}</div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
                         </div>
                         <button
                             type="submit"

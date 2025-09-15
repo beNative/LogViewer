@@ -27,6 +27,8 @@ interface SettingsProps {
   onLogTableDensityChange: (newDensity: LogTableDensity) => void;
   allowPrerelease: boolean;
   onAllowPrereleaseChange: (allow: boolean) => void;
+  isAutoUpdateEnabled: boolean;
+  onAutoUpdateEnabledChange: (enabled: boolean) => void;
   githubToken: string;
   onGithubTokenChange: (token: string) => void;
   uiScale: number;
@@ -133,6 +135,7 @@ export const Settings: React.FC<SettingsProps> = (props) => {
         isFocusDebuggerVisible, onFocusDebuggerVisibilityChange,
         logTableDensity, onLogTableDensityChange,
         allowPrerelease, onAllowPrereleaseChange,
+        isAutoUpdateEnabled, onAutoUpdateEnabledChange,
         githubToken, onGithubTokenChange,
         uiScale, onUiScaleChange,
         onFullSettingsUpdate
@@ -306,7 +309,12 @@ export const Settings: React.FC<SettingsProps> = (props) => {
                     {activeCategory === 'updates' && (
                         <div className="divide-y divide-gray-200 dark:divide-gray-700">
                              <h2 className="text-xl font-bold text-gray-800 dark:text-sky-400 pb-4">Updates</h2>
-                             {window.electronAPI && <ToggleSwitch label="Update to Pre-releases" enabled={allowPrerelease} onChange={onAllowPrereleaseChange} />}
+                             {window.electronAPI && (
+                                <>
+                                    <ToggleSwitch label="Enable Automatic Update Checks" enabled={isAutoUpdateEnabled} onChange={onAutoUpdateEnabledChange} />
+                                    <ToggleSwitch label="Update to Pre-releases" enabled={allowPrerelease} onChange={onAllowPrereleaseChange} />
+                                </>
+                             )}
                         </div>
                     )}
                     {activeCategory === 'integrations' && (

@@ -1,3 +1,5 @@
+// Fix: Removed incorrect import of ToastMessage. The type is defined in this file, which avoids a circular dependency.
+
 export type LogEntry = {
     id: number;
     time: string;
@@ -26,6 +28,11 @@ export type StockInfoFilters = {
     timeFrom: string;
     dateTo: string;
     timeTo: string;
+};
+
+export type StockArticleSuggestion = {
+    id: string;
+    name: string;
 };
 
 export type StockChartDataPoint = {
@@ -141,6 +148,7 @@ export type Settings = {
     theme: Theme;
     viewMode: ViewMode;
     allowPrerelease: boolean;
+    isAutoUpdateEnabled: boolean;
     githubToken: string;
     iconSet: IconSet;
     logTableDensity: LogTableDensity;

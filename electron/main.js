@@ -69,6 +69,7 @@ function getSettings() {
         theme: "light",
         viewMode: "pagination",
         allowPrerelease: false,
+        isAutoUpdateEnabled: true,
         githubToken: "",
         iconSet: "sharp",
         logTableDensity: "normal",
@@ -113,6 +114,7 @@ function getSettings() {
                 ...defaultSettings,
                 ...loadedSettings,
                 allowPrerelease: loadedSettings.allowPrerelease ?? defaultSettings.allowPrerelease,
+                isAutoUpdateEnabled: loadedSettings.isAutoUpdateEnabled ?? defaultSettings.isAutoUpdateEnabled,
                 githubToken: loadedSettings.githubToken ?? defaultSettings.githubToken,
                 columnVisibility: {
                     ...defaultSettings.columnVisibility,
@@ -167,10 +169,17 @@ function createWindow() {
     autoHideMenuBar: true,
   };
   mainWindow = new BrowserWindow(windowOptions);
+  
+  const settings = getSettings();
 
   mainWindow.once('ready-to-show', () => {
-    log('INFO', 'Main window is ready to show. Checking for updates.');
-    autoUpdater.checkForUpdates();
+    log('INFO', 'Main window is ready to show.');
+    if (settings.isAutoUpdateEnabled) {
+      log('INFO', '[Updater] Auto-updates enabled. Checking for updates...');
+      autoUpdater.checkForUpdates();
+    } else {
+      log('INFO', '[Updater] Auto-updates disabled. Skipping update check.');
+    }
   });
 
   const indexPath = path.join(__dirname, '..', 'index.html');

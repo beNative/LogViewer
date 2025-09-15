@@ -4,7 +4,7 @@ import {
     PageTimestampRange, SessionFile, ColumnVisibilityState, ColumnStyles, 
     PanelWidths, ViewMode, OverallTimeRange, FileTimeRange, LogDensityPoint, 
     IconSet, LogTableDensity, Theme, Settings as SettingsType, ProgressPhase,
-    StockInfoEntry, StockInfoFilters, ToastMessage
+    StockInfoEntry, StockInfoFilters, ToastMessage, StockArticleSuggestion
 } from './types.ts';
 import { LogTable } from './components/LogTable.tsx';
 import { ProgressIndicator } from './components/ProgressIndicator.tsx';
@@ -149,6 +149,7 @@ const App: React.FC = () => {
   const [isFocusDebuggerVisible, setIsFocusDebuggerVisible] = React.useState<boolean>(false);
   const [logTableDensity, setLogTableDensity] = React.useState<LogTableDensity>('normal');
   const [allowPrerelease, setAllowPrerelease] = React.useState<boolean>(false);
+  const [isAutoUpdateEnabled, setIsAutoUpdateEnabled] = React.useState<boolean>(true);
   const [githubToken, setGithubToken] = React.useState<string>('');
   const [uiScale, setUiScale] = React.useState<number>(1);
   
@@ -424,6 +425,10 @@ const App: React.FC = () => {
                 if (typeof settings.allowPrerelease === 'boolean') {
                     setAllowPrerelease(settings.allowPrerelease);
                     logToConsole(`Pre-release updates set to '${settings.allowPrerelease}' from settings.`, 'DEBUG');
+                }
+                if (typeof settings.isAutoUpdateEnabled === 'boolean') {
+                    setIsAutoUpdateEnabled(settings.isAutoUpdateEnabled);
+                    logToConsole(`Auto-updates set to '${settings.isAutoUpdateEnabled}' from settings.`, 'DEBUG');
                 }
                 if (typeof settings.githubToken === 'string') {
                     setGithubToken(settings.githubToken);
@@ -1295,6 +1300,26 @@ const handleAllowPrereleaseChange = async (allow: boolean) => {
     }
 };
 
+const handleAutoUpdateEnabledChange = async (enabled: boolean) => {
+    setIsAutoUpdateEnabled(enabled);
+    if (window.electronAPI) {
+        try {
+            const settings = await window.electronAPI.getSettings();
+            await window.electronAPI.setSettings({ ...settings, isAutoUpdateEnabled: enabled });
+            logToConsole(`Automatic updates ${enabled ? 'enabled' : 'disabled'}. Setting saved. Restart the app for this to take effect.`, 'INFO');
+            addToast({
+                type: 'info',
+                title: 'Restart Required',
+                message: `Automatic updates have been ${enabled ? 'enabled' : 'disabled'}. Please restart the application for the change to take effect.`,
+                duration: 6000
+            });
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            logToConsole(`Failed to save automatic update setting: ${msg}`, 'ERROR');
+        }
+    }
+};
+
 const handleGithubTokenChange = async (token: string) => {
     setGithubToken(token);
     if (window.electronAPI) {
@@ -1366,6 +1391,7 @@ const handleUiScaleChange = async (newScale: number) => {
     if (typeof newSettings.isDetailPanelVisible === 'boolean') setIsDetailPanelVisible(newSettings.isDetailPanelVisible);
     if (typeof newSettings.isFocusDebuggerVisible === 'boolean') setIsFocusDebuggerVisible(newSettings.isFocusDebuggerVisible);
     if (typeof newSettings.allowPrerelease === 'boolean') setAllowPrerelease(newSettings.allowPrerelease);
+    if (typeof newSettings.isAutoUpdateEnabled === 'boolean') setIsAutoUpdateEnabled(newSettings.isAutoUpdateEnabled);
     if (typeof newSettings.githubToken === 'string') setGithubToken(newSettings.githubToken);
     if (typeof newSettings.uiScale === 'number') setUiScale(newSettings.uiScale);
     
@@ -1752,6 +1778,18 @@ const handleUiScaleChange = async (newScale: number) => {
         }, 50);
     }, [db, logToConsole, overallStockTimeRange]);
     
+    const handleFetchStockSuggestions = React.useCallback(async (searchTerm: string, timeFilters: StockInfoFilters): Promise<StockArticleSuggestion[]> => {
+        if (!db || searchTerm.length < 2) {
+            return [];
+        }
+        try {
+            return db.getUniqueArticles(searchTerm, timeFilters);
+        } catch (e) {
+            logToConsole(`Failed to fetch stock suggestions: ${e instanceof Error ? e.message : String(e)}`, 'ERROR');
+            return [];
+        }
+    }, [db, logToConsole]);
+
     const handleRebuildStockData = React.useCallback(async () => {
         if (!db || !hasData) {
             logToConsole('Cannot rebuild stock data: No database or data loaded.', 'ERROR');
@@ -1947,6 +1985,7 @@ const handleUiScaleChange = async (newScale: number) => {
                 overallStockDensity={overallStockDensity}
                 uiScale={uiScale}
                 onRebuildStockData={handleRebuildStockData}
+                onFetchSuggestions={handleFetchStockSuggestions}
             />
         )}
         {activeView === 'console' && (
@@ -1987,6 +2026,8 @@ const handleUiScaleChange = async (newScale: number) => {
               onLogTableDensityChange={handleLogTableDensityChange}
               allowPrerelease={allowPrerelease}
               onAllowPrereleaseChange={handleAllowPrereleaseChange}
+              isAutoUpdateEnabled={isAutoUpdateEnabled}
+              onAutoUpdateEnabledChange={handleAutoUpdateEnabledChange}
               githubToken={githubToken}
               onGithubTokenChange={handleGithubTokenChange}
               uiScale={uiScale}

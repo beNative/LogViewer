@@ -1,4 +1,4 @@
-import { FilterState, LogEntry, TimelineDataPoint, CategoryDataPoint, PageTimestampRange, FileTimeRange, LogDensityPoint, StockInfoEntry, StockInfoFilters } from './types.ts';
+import { FilterState, LogEntry, TimelineDataPoint, CategoryDataPoint, PageTimestampRange, FileTimeRange, LogDensityPoint, StockInfoEntry, StockInfoFilters, StockArticleSuggestion } from './types.ts';
 
 // sql.js is loaded from a script tag and will be on the window object
 declare const initSqlJs: (config: { locateFile: (file: string) => string; }) => Promise<any>;
@@ -342,6 +342,50 @@ export class Database {
         }
         stmt.free();
         return { entries, sql, params };
+    }
+
+    getUniqueArticles(searchTerm: string, timeFilters: { dateFrom: string, timeFrom: string, dateTo: string, timeTo: string }): StockArticleSuggestion[] {
+        const fromDate = getSqlDateTime(timeFilters.dateFrom, timeFilters.timeFrom);
+        const toDate = getSqlDateTime(timeFilters.dateTo, timeFilters.timeTo, true);
+
+        let whereClauses = [];
+        let params: (string | number)[] = [];
+
+        if (searchTerm) {
+            whereClauses.push(`(article_id LIKE ? OR article_name LIKE ?)`);
+            params.push(`%${searchTerm}%`, `%${searchTerm}%`);
+        }
+
+        if (fromDate) {
+            whereClauses.push(`timestamp >= ?`);
+            params.push(fromDate);
+        }
+
+        if (toDate) {
+            whereClauses.push(`timestamp <= ?`);
+            params.push(toDate);
+        }
+        
+        const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+
+        const sql = `
+            SELECT DISTINCT article_id, article_name
+            FROM stock_info
+            ${whereSql}
+            ORDER BY article_name, article_id
+            LIMIT 15
+        `;
+
+        const stmt = this.db.prepare(sql);
+        stmt.bind(params);
+
+        const articles: StockArticleSuggestion[] = [];
+        while (stmt.step()) {
+            const row = stmt.get();
+            articles.push({ id: row[0], name: row[1] });
+        }
+        stmt.free();
+        return articles;
     }
 
     private _buildWhereClause(filters: FilterState): { whereSql: string, params: (string | number)[] } {
