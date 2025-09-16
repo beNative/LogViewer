@@ -561,7 +561,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                             </div>
                              {startPos >= 0 && endPos >= 0 && (endPos > startPos) && (
                                 <div
-                                    className="absolute top-0 bottom-0 bg-sky-500/20 dark:bg-sky-400/20 z-10 border-x-2 border-sky-600 dark:border-sky-400"
+                                    className="absolute top-0 bottom-0 bg-sky-500/20 dark:bg-sky-400/20 z-10 border-x-4 border-sky-600 dark:border-sky-400"
                                     style={{ left: `${startPos}px`, width: `${Math.max(0, endPos - startPos)}px` }}
                                 >
                                     <div
