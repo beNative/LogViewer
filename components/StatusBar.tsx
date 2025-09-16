@@ -1,6 +1,7 @@
 import React from 'react';
 import { ConsoleMessage, IconSet, Theme, ViewMode } from '../types.ts';
 import { Icon } from './icons/index.tsx';
+import { Tooltip } from './Tooltip.tsx';
 
 // Props interface
 interface StatusBarProps {
@@ -23,10 +24,12 @@ interface StatusBarProps {
 }
 
 const StatItem: React.FC<{ icon: React.ReactNode; label: string; value: string | number; title?: string }> = ({ icon, label, value, title }) => (
-    <div className="flex items-center gap-1.5 px-2 border-r border-gray-300 dark:border-gray-600 last:border-r-0" title={title || `${label}: ${value}`}>
-        {icon}
-        <span className="font-semibold text-gray-700 dark:text-gray-200 truncate">{value}</span>
-    </div>
+    <Tooltip content={title || `${label}: ${value}`}>
+        <div className="flex items-center gap-1.5 px-2 border-r border-gray-300 dark:border-gray-600 last:border-r-0">
+            {icon}
+            <span className="font-semibold text-gray-700 dark:text-gray-200 truncate">{value}</span>
+        </div>
+    </Tooltip>
 );
 
 const getMessageColorClass = (type: ConsoleMessage['type']) => {
@@ -120,9 +123,11 @@ export const StatusBar: React.FC<StatusBarProps> = (props) => {
                         </div>
                     )
                 )}
-                 <button onClick={onThemeChange} className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700" title="Toggle Theme">
-                    <Icon name={theme === 'dark' ? 'Sun' : 'Moon'} iconSet={iconSet} className="w-5 h-5" />
-                </button>
+                <Tooltip content="Toggle Theme">
+                     <button onClick={onThemeChange} className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
+                        <Icon name={theme === 'dark' ? 'Sun' : 'Moon'} iconSet={iconSet} className="w-5 h-5" />
+                    </button>
+                </Tooltip>
             </div>
         </footer>
     );

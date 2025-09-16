@@ -10,6 +10,7 @@ import { ActiveFilters } from './ActiveFilters.tsx';
 import { ContextMenu } from './ContextMenu.tsx';
 import { DensityControl } from './DensityControl.tsx';
 import { Splitter } from './Splitter.tsx';
+import { Tooltip } from './Tooltip.tsx';
 
 type ContextMenuState = { x: number; y: number; entry: LogEntry; value: string; key: ColumnKey } | null;
 
@@ -280,9 +281,11 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                     <div className="flex-shrink-0 flex items-center justify-end gap-4 p-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                         <ColumnSelector visibility={props.columnVisibility} onChange={props.onColumnVisibilityChange} iconSet={props.iconSet} />
                         <DensityControl value={props.logTableDensity} onChange={props.onLogTableDensityChange} />
-                         <button onClick={() => props.onDetailPanelVisibilityChange(!props.isDetailPanelVisible)} className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" title={props.isDetailPanelVisible ? "Hide Details" : "Show Details"}>
-                            <Icon name="SidebarRight" iconSet={props.iconSet} className="w-5 h-5"/>
-                        </button>
+                         <Tooltip content={props.isDetailPanelVisible ? "Hide Details" : "Show Details"}>
+                            <button onClick={() => props.onDetailPanelVisibilityChange(!props.isDetailPanelVisible)} className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                <Icon name="SidebarRight" iconSet={props.iconSet} className="w-5 h-5"/>
+                            </button>
+                        </Tooltip>
                     </div>
                     <div className="overflow-auto outline-none" ref={tableContainerRef} tabIndex={-1}>
                         <table className="min-w-full table-fixed font-sans">

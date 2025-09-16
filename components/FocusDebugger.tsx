@@ -1,6 +1,7 @@
 import React from 'react';
 import { Icon, IconName } from './icons/index.tsx';
 import { IconSet } from '../types.ts';
+import { Tooltip } from './Tooltip.tsx';
 
 // Local types for this component
 type ElementDebugInfo = {
@@ -127,9 +128,11 @@ const DebugInfoDisplay: React.FC<{ title: string; info: ElementDebugInfo | null;
                     <h4 className="font-bold text-gray-200">{title}</h4>
                 </div>
                 {isFrozen && info && (
-                    <button onClick={handleCopy} className="p-1 text-gray-400 hover:text-white rounded-md hover:bg-gray-600" title="Copy details">
-                        <Icon name="ClipboardDocument" iconSet={iconSet} className="w-4 h-4" />
-                    </button>
+                    <Tooltip content="Copy details">
+                        <button onClick={handleCopy} className="p-1 text-gray-400 hover:text-white rounded-md hover:bg-gray-600">
+                            <Icon name="ClipboardDocument" iconSet={iconSet} className="w-4 h-4" />
+                        </button>
+                    </Tooltip>
                 )}
             </div>
             {info ? (
@@ -238,14 +241,15 @@ export const FocusDebugger: React.FC<FocusDebuggerProps> = ({ isVisible, iconSet
                     <Icon name="BugAnt" iconSet={iconSet} className="w-5 h-5 text-amber-400" />
                     <h3 className="font-bold text-lg text-amber-400">Debug Inspector</h3>
                 </div>
-                <button
-                    onClick={() => setIsFrozen(!isFrozen)}
-                    className="flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors bg-sky-600 hover:bg-sky-700 text-white pointer-events-auto"
-                    title={isFrozen ? 'Resume Inspector (F4)' : 'Freeze Inspector (F4)'}
-                >
-                    <Icon name={isFrozen ? 'Play' : 'Snowflake'} iconSet={iconSet} className="w-5 h-5" />
-                    <span>{isFrozen ? 'Resume' : 'Freeze'}</span>
-                </button>
+                <Tooltip content={isFrozen ? 'Resume Inspector (F4)' : 'Freeze Inspector (F4)'}>
+                    <button
+                        onClick={() => setIsFrozen(!isFrozen)}
+                        className="flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors bg-sky-600 hover:bg-sky-700 text-white pointer-events-auto"
+                    >
+                        <Icon name={isFrozen ? 'Play' : 'Snowflake'} iconSet={iconSet} className="w-5 h-5" />
+                        <span>{isFrozen ? 'Resume' : 'Freeze'}</span>
+                    </button>
+                </Tooltip>
             </div>
             <div className="flex items-start gap-3">
                 <DebugInfoDisplay title="Focus Target" info={focusedInfo} icon="Eye" isFrozen={isFrozen} iconSet={iconSet} />

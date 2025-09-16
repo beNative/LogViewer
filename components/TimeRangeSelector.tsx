@@ -1,6 +1,7 @@
 import React from 'react';
 import { PageTimestampRange, FileTimeRange, LogDensityPointByLevel, ViewMode, OverallTimeRange, IconSet, LogDensityPoint } from '../types.ts';
 import { Icon } from './icons/index.tsx';
+import { Tooltip } from './Tooltip.tsx';
 
 type Theme = 'light' | 'dark';
 type ValueToPositionFn = (value: number) => number;
@@ -109,20 +110,20 @@ const Bar: React.FC<{
             let widthPx = Math.max(1, rightPx - leftPx);
             
             return (
-                <div
-                    key={getTitle(item)}
-                    onClick={(e) => { e.stopPropagation(); onSelect(item); }}
-                    className={`absolute h-5 flex items-center justify-center overflow-hidden transition-all duration-150 hover:scale-y-105 origin-bottom ${isActive(item) ? 'outline outline-4 outline-offset-2 outline-black dark:outline-white' : ''}`}
-                    style={{
-                        left: `${leftPx}px`,
-                        width: `${widthPx}px`,
-                        backgroundColor: getColor(i) + '99',
-                        cursor: 'pointer'
-                    }}
-                    title={getTitle(item)}
-                >
-                    {widthPx > 30 && <span className="text-xs font-semibold text-white whitespace-nowrap text-center mix-blend-luminosity pointer-events-none">{getLabel(item)}</span>}
-                </div>
+                <Tooltip key={getTitle(item)} content={getTitle(item)}>
+                    <div
+                        onClick={(e) => { e.stopPropagation(); onSelect(item); }}
+                        className={`absolute h-5 flex items-center justify-center overflow-hidden transition-all duration-150 hover:scale-y-105 origin-bottom ${isActive(item) ? 'outline outline-4 outline-offset-2 outline-black dark:outline-white' : ''}`}
+                        style={{
+                            left: `${leftPx}px`,
+                            width: `${widthPx}px`,
+                            backgroundColor: getColor(i) + '99',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        {widthPx > 30 && <span className="text-xs font-semibold text-white whitespace-nowrap text-center mix-blend-luminosity pointer-events-none">{getLabel(item)}</span>}
+                    </div>
+                </Tooltip>
             );
         })}
     </div>
@@ -548,9 +549,15 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                 </div>
                 
                 <div className="w-auto flex-shrink-0 self-start pt-6 flex flex-col items-center gap-1">
-                     <button onClick={onZoomToSelection} disabled={!zoomToSelectionEnabled} className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" title="Zoom to Selection"><Icon name="ArrowsPointingIn" iconSet={iconSet} className="w-5 h-5"/></button>
-                     <button onClick={onZoomToExtent} disabled={!viewRange} className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" title="Zoom to Extent"><Icon name="ArrowsPointingOut" iconSet={iconSet} className="w-5 h-5"/></button>
-                     <button onClick={onClear} className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" title="Clear time selection"><Icon name="XMark" iconSet={iconSet} className="w-6 h-6"/></button>
+                     <Tooltip content="Zoom to Selection">
+                        <button onClick={onZoomToSelection} disabled={!zoomToSelectionEnabled} className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"><Icon name="ArrowsPointingIn" iconSet={iconSet} className="w-5 h-5"/></button>
+                     </Tooltip>
+                     <Tooltip content="Zoom to Extent">
+                        <button onClick={onZoomToExtent} disabled={!viewRange} className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"><Icon name="ArrowsPointingOut" iconSet={iconSet} className="w-5 h-5"/></button>
+                     </Tooltip>
+                     <Tooltip content="Clear time selection">
+                        <button onClick={onClear} className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"><Icon name="XMark" iconSet={iconSet} className="w-6 h-6"/></button>
+                    </Tooltip>
                 </div>
             </div>
             <div className="flex items-start gap-3 w-full mt-2">
@@ -773,7 +780,7 @@ const OverviewBrush: React.FC<{
 
     const maxTotalCount = React.useMemo(() => {
         // FIX: Add explicit types to reduce callback and a type cast to fix type inference errors.
-         return density.reduce((max, bucket) => {
+         return density.reduce((max: number, bucket: LogDensityPointByLevel | LogDensityPoint) => {
             const total = 'counts' in bucket ? Object.values(bucket.counts).reduce((sum: number, count: number) => sum + count, 0) : (bucket as LogDensityPoint).count;
             return Math.max(max, total);
         }, 1);
@@ -787,14 +794,14 @@ const OverviewBrush: React.FC<{
             className="relative w-full h-10 bg-gray-200 dark:bg-gray-700/50 rounded p-0.5 cursor-crosshair"
         >
             <div className="w-full h-full flex pointer-events-none">
-                {density.map((bucket, i) => {
+                {density.map((bucket: LogDensityPointByLevel | LogDensityPoint, i) => {
                     // FIX: Add explicit types to reduce callback and a type cast to fix type inference errors.
-                    const total = 'counts' in bucket ? Object.values(bucket.counts).reduce((s: number, c: number) => s + c, 0) : (bucket as LogDensityPoint).count;
+                    const total: number = 'counts' in bucket ? Object.values(bucket.counts).reduce((s: number, c: number) => s + c, 0) : (bucket as LogDensityPoint).count;
                     const opacity = total > 0 ? 0.3 + (total / maxTotalCount) * 0.7 : 0;
                      if ('counts' in bucket && total > 0) {
                         return (
                              <div key={i} style={{ flex: '1 1 0%'}} className="flex flex-col">
-                                 {Object.entries(bucket.counts).map(([level, count]) => (
+                                 {Object.entries(bucket.counts).map(([level, count]: [string, number]) => (
                                     <div key={level} style={{ height: `${(count/total)*100}%`, backgroundColor: getLevelColor(level, theme) }}/>
                                  ))}
                              </div>

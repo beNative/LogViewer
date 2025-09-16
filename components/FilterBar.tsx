@@ -4,6 +4,7 @@ import { MultiSelectDropdown } from './MultiSelectDropdown.tsx';
 import { areFiltersEqual, areArraysEqualUnordered } from '../utils.ts';
 import { SqlEditor } from './SqlEditor.tsx';
 import { Icon } from './icons/index.tsx';
+import { Tooltip } from './Tooltip.tsx';
 
 interface FilterBarProps {
     filters: FilterState;
@@ -35,19 +36,24 @@ const FilterGroup: React.FC<{
   isActive?: boolean;
   isDirty?: boolean;
 }> = ({ title, children, isDisabled = false, isActive = false, isDirty = false }) => {
-    const dotClasses = `w-2 h-2 rounded-full transition-colors ${
-        isDirty
-            ? 'bg-amber-400'
-            : isActive
-            ? 'bg-sky-500'
-            : 'bg-gray-300 dark:bg-gray-600'
-    }`;
     const dotTitle = isDirty ? 'Filter changed' : isActive ? 'Filter active' : 'Filter inactive';
+    
+    const dot = (
+        <Tooltip content={dotTitle}>
+            <span className={`w-2 h-2 rounded-full transition-colors ${
+                isDirty
+                    ? 'bg-amber-400'
+                    : isActive
+                    ? 'bg-sky-500'
+                    : 'bg-gray-300 dark:bg-gray-600'
+            }`} />
+        </Tooltip>
+    );
 
     return (
         <div className={`transition-opacity duration-300 ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
             <h4 className="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-2 flex items-center gap-2">
-                <span className={dotClasses} title={dotTitle} />
+                {dot}
                 {title}
             </h4>
             <div className="space-y-3">{children}</div>
@@ -359,23 +365,25 @@ export const FilterBar: React.FC<FilterBarProps> = ({
                             </div>
                         ) : (
                             <div className="flex justify-between items-center gap-2 mt-2">
-                                <button
-                                    onClick={handleSaveClick}
-                                    className="flex items-center justify-center gap-2 w-full px-3 py-1.5 text-sm bg-white hover:bg-gray-200 text-gray-800 border border-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white dark:border-gray-500 font-semibold rounded-lg transition-colors duration-200"
-                                    title="Save current filters as a new or existing preset"
-                                >
-                                    <Icon name="SaveDisk" iconSet={iconSet} className="w-4 h-4" />
-                                    Save As...
-                                </button>
-                                <button
-                                    onClick={handleDeleteClick}
-                                    disabled={!selectedPreset}
-                                    className="flex items-center justify-center gap-2 w-full px-3 py-1.5 text-sm bg-white hover:bg-gray-200 text-gray-800 border border-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white dark:border-gray-500 font-semibold rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-700"
-                                    title={selectedPreset ? `Delete preset '${selectedPreset}'` : 'Select a preset to delete'}
-                                >
-                                    <Icon name="Trash" iconSet={iconSet} className="w-4 h-4" />
-                                    Delete Preset
-                                </button>
+                                <Tooltip content="Save current filters as a new or existing preset">
+                                    <button
+                                        onClick={handleSaveClick}
+                                        className="flex items-center justify-center gap-2 w-full px-3 py-1.5 text-sm bg-white hover:bg-gray-200 text-gray-800 border border-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white dark:border-gray-500 font-semibold rounded-lg transition-colors duration-200"
+                                    >
+                                        <Icon name="SaveDisk" iconSet={iconSet} className="w-4 h-4" />
+                                        Save As...
+                                    </button>
+                                </Tooltip>
+                                <Tooltip content={selectedPreset ? `Delete preset '${selectedPreset}'` : 'Select a preset to delete'}>
+                                    <button
+                                        onClick={handleDeleteClick}
+                                        disabled={!selectedPreset}
+                                        className="flex items-center justify-center gap-2 w-full px-3 py-1.5 text-sm bg-white hover:bg-gray-200 text-gray-800 border border-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white dark:border-gray-500 font-semibold rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-700"
+                                    >
+                                        <Icon name="Trash" iconSet={iconSet} className="w-4 h-4" />
+                                        Delete Preset
+                                    </button>
+                                </Tooltip>
                             </div>
                         )}
                     </FilterGroup>

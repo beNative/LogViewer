@@ -1,6 +1,7 @@
 import React from 'react';
 import { FilterState, IconSet } from '../types.ts';
 import { Icon } from './icons/index.tsx';
+import { Tooltip } from './Tooltip.tsx';
 
 interface ActiveFiltersProps {
     appliedFilters: FilterState;
@@ -25,27 +26,35 @@ const filterKeyToLabel: Record<string, string> = {
 
 const Pill: React.FC<{ label: string; onRemove: () => void; iconSet: IconSet }> = ({ label, onRemove, iconSet }) => (
     <div className="flex items-center gap-1.5 bg-sky-100 dark:bg-sky-900/60 text-sky-800 dark:text-sky-200 text-sm font-medium pl-3 pr-1.5 py-1 rounded-full animate-fadeIn">
-        <span className="truncate" title={label}>{label}</span>
-        <button 
-            onClick={onRemove} 
-            className="flex-shrink-0 p-0.5 rounded-full hover:bg-sky-200/70 dark:hover:bg-sky-800/70 text-sky-600 dark:text-sky-300"
-            aria-label={`Remove filter: ${label}`}
-        >
-            <Icon name="XCircle" iconSet={iconSet} className="w-4 h-4" />
-        </button>
+        <Tooltip content={label}>
+            <span className="truncate">{label}</span>
+        </Tooltip>
+        <Tooltip content={`Remove filter: ${label}`}>
+            <button 
+                onClick={onRemove} 
+                className="flex-shrink-0 p-0.5 rounded-full hover:bg-sky-200/70 dark:hover:bg-sky-800/70 text-sky-600 dark:text-sky-300"
+                aria-label={`Remove filter: ${label}`}
+            >
+                <Icon name="XCircle" iconSet={iconSet} className="w-4 h-4" />
+            </button>
+        </Tooltip>
     </div>
 );
 
 const ExcludePill: React.FC<{ label: string; onRemove: () => void; iconSet: IconSet }> = ({ label, onRemove, iconSet }) => (
     <div className="flex items-center gap-1.5 bg-red-100 dark:bg-red-900/60 text-red-800 dark:text-red-200 text-sm font-medium pl-3 pr-1.5 py-1 rounded-full animate-fadeIn">
-        <span className="truncate" title={label}>{label}</span>
-        <button 
-            onClick={onRemove} 
-            className="flex-shrink-0 p-0.5 rounded-full hover:bg-red-200/70 dark:hover:bg-red-800/70 text-red-600 dark:text-red-300"
-            aria-label={`Remove filter: ${label}`}
-        >
-            <Icon name="XCircle" iconSet={iconSet} className="w-4 h-4" />
-        </button>
+        <Tooltip content={label}>
+             <span className="truncate">{label}</span>
+        </Tooltip>
+        <Tooltip content={`Remove filter: ${label}`}>
+            <button 
+                onClick={onRemove} 
+                className="flex-shrink-0 p-0.5 rounded-full hover:bg-red-200/70 dark:hover:bg-red-800/70 text-red-600 dark:text-red-300"
+                aria-label={`Remove filter: ${label}`}
+            >
+                <Icon name="XCircle" iconSet={iconSet} className="w-4 h-4" />
+            </button>
+        </Tooltip>
     </div>
 );
 

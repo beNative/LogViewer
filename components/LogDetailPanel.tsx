@@ -8,6 +8,7 @@ import { SqlSyntaxHighlighter } from './SqlSyntaxHighlighter.tsx';
 import { parseLogMessage } from '../parsers.ts';
 import { GridView } from './GridView.tsx';
 import { Icon } from './icons/index.tsx';
+import { Tooltip } from './Tooltip.tsx';
 
 type Theme = 'light' | 'dark';
 
@@ -36,14 +37,15 @@ const DetailRow: React.FC<{
         <dt className="w-28 text-sm font-medium text-gray-500 dark:text-gray-400 flex-shrink-0">{label}</dt>
         <dd style={valueStyle} className={`mt-1 text-sm sm:mt-0 break-words w-full ${valueClassName}`}>{value}</dd>
         {filterKey && filterValue && onApplyFilter && (
-            <button
-                onClick={() => onApplyFilter(filterKey, filterValue)}
-                className="absolute top-1/2 -translate-y-1/2 right-0 p-1 text-gray-400 dark:text-gray-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-sky-500 dark:hover:text-sky-400 opacity-0 group-hover:opacity-100 focus:outline-none transition-opacity"
-                aria-label={`Add filter for ${label}: ${filterValue}`}
-                title={`Add filter for ${label}: ${filterValue}`}
-            >
-                <Icon name="PlusCircle" iconSet={iconSet} className="w-5 h-5" />
-            </button>
+            <Tooltip content={`Add filter for ${label}: ${filterValue}`}>
+                <button
+                    onClick={() => onApplyFilter(filterKey, filterValue)}
+                    className="absolute top-1/2 -translate-y-1/2 right-0 p-1 text-gray-400 dark:text-gray-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-sky-500 dark:hover:text-sky-400 opacity-0 group-hover:opacity-100 focus:outline-none transition-opacity"
+                    aria-label={`Add filter for ${label}: ${filterValue}`}
+                >
+                    <Icon name="PlusCircle" iconSet={iconSet} className="w-5 h-5" />
+                </button>
+            </Tooltip>
         )}
     </div>
 );

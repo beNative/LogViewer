@@ -2,6 +2,7 @@ import React from 'react';
 import { SessionFile, IconSet } from '../types.ts';
 import { formatBytes } from '../utils.ts';
 import { Icon } from './icons/index.tsx';
+import { Tooltip } from './Tooltip.tsx';
 
 
 const SessionItem: React.FC<{
@@ -86,9 +87,11 @@ const SessionItem: React.FC<{
                             className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white sm:text-sm rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition"
                         />
                     ) : (
-                        <p className={`font-semibold truncate ${isActive ? 'text-sky-800 dark:text-sky-200' : 'text-gray-800 dark:text-gray-200'}`} title={session.name}>
-                            {session.name}{isActive && isDirty ? '*' : ''}
-                        </p>
+                        <Tooltip content={session.name}>
+                            <p className={`font-semibold truncate ${isActive ? 'text-sky-800 dark:text-sky-200' : 'text-gray-800 dark:text-gray-200'}`}>
+                                {session.name}{isActive && isDirty ? '*' : ''}
+                            </p>
+                        </Tooltip>
                     )}
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {formatBytes(session.size)} &middot; {new Date(session.mtime).toLocaleString()}
@@ -97,12 +100,16 @@ const SessionItem: React.FC<{
             </button>
             {!isRenaming && (
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex-shrink-0 flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-                    <button onClick={handleRenameClick} title="Rename" className="p-2 text-gray-500 hover:text-gray-900 dark:hover:text-white rounded-full hover:bg-gray-200 dark:hover:bg-gray-600/60 transition-colors">
-                        <Icon name="PencilSquare" iconSet={iconSet} className="w-5 h-5" />
-                    </button>
-                    <button onClick={handleDeleteClick} title="Delete" className="p-2 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600/60 transition-colors">
-                        <Icon name="Trash" iconSet={iconSet} className="w-5 h-5" />
-                    </button>
+                    <Tooltip content="Rename">
+                        <button onClick={handleRenameClick} className="p-2 text-gray-500 hover:text-gray-900 dark:hover:text-white rounded-full hover:bg-gray-200 dark:hover:bg-gray-600/60 transition-colors">
+                            <Icon name="PencilSquare" iconSet={iconSet} className="w-5 h-5" />
+                        </button>
+                    </Tooltip>
+                    <Tooltip content="Delete">
+                        <button onClick={handleDeleteClick} className="p-2 text-gray-500 hover:text-red-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600/60 transition-colors">
+                            <Icon name="Trash" iconSet={iconSet} className="w-5 h-5" />
+                        </button>
+                    </Tooltip>
                 </div>
             )}
         </li>

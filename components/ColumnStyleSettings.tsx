@@ -3,6 +3,7 @@ import React from 'react';
 import { ColumnKey, ColumnStyle, ColumnStyles } from '../types.ts';
 import { COLUMN_DEFINITIONS } from '../utils';
 import { ChevronDownIcon } from './icons/ChevronDownIcon';
+import { Tooltip } from './Tooltip.tsx';
 
 const FONT_FAMILIES_WEB = ['sans-serif', 'serif', 'monospace', 'system-ui', 'inherit'];
 
@@ -26,14 +27,15 @@ interface ColorSwatchesProps {
 const ColorSwatches: React.FC<ColorSwatchesProps> = ({ colors, onSelect }) => (
     <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
         {colors.map(color => (
-            <button
-                key={color}
-                type="button"
-                className="w-5 h-5 rounded-full ring-1 ring-inset ring-black/20"
-                style={{ backgroundColor: color }}
-                onClick={() => onSelect(color)}
-                aria-label={`Select color ${color}`}
-            />
+            <Tooltip key={color} content={color}>
+                <button
+                    type="button"
+                    className="w-5 h-5 rounded-full ring-1 ring-inset ring-black/20"
+                    style={{ backgroundColor: color }}
+                    onClick={() => onSelect(color)}
+                    aria-label={`Select color ${color}`}
+                />
+            </Tooltip>
         ))}
     </div>
 );
@@ -91,47 +93,51 @@ const ColumnStyleEditor: React.FC<ColumnStyleEditorProps> = ({ columnKey, label,
                     />
                     <span className="absolute inset-y-0 right-2 flex items-center text-gray-500 text-xs">px</span>
                 </div>
-                <button
-                    onClick={() => handleChange('isBold', !style.isBold)}
-                    className={`px-3 py-1 text-sm font-bold rounded-md transition-colors w-9 h-9 flex items-center justify-center ${style.isBold ? 'bg-sky-600 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'}`}
-                    aria-pressed={style.isBold}
-                    title={`${label} bold`}
-                >
-                    B
-                </button>
-                <button
-                    onClick={() => handleChange('isItalic', !style.isItalic)}
-                    className={`px-3 py-1 text-sm italic rounded-md transition-colors w-9 h-9 flex items-center justify-center ${style.isItalic ? 'bg-sky-600 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'}`}
-                    aria-pressed={style.isItalic}
-                    title={`${label} italic`}
-                >
-                    I
-                </button>
+                <Tooltip content="Bold">
+                    <button
+                        onClick={() => handleChange('isBold', !style.isBold)}
+                        className={`px-3 py-1 text-sm font-bold rounded-md transition-colors w-9 h-9 flex items-center justify-center ${style.isBold ? 'bg-sky-600 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'}`}
+                        aria-pressed={style.isBold}
+                    >
+                        B
+                    </button>
+                </Tooltip>
+                 <Tooltip content="Italic">
+                    <button
+                        onClick={() => handleChange('isItalic', !style.isItalic)}
+                        className={`px-3 py-1 text-sm italic rounded-md transition-colors w-9 h-9 flex items-center justify-center ${style.isItalic ? 'bg-sky-600 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'}`}
+                        aria-pressed={style.isItalic}
+                    >
+                        I
+                    </button>
+                </Tooltip>
             </div>
             
             <div>
-                <input 
-                    type="color"
-                    value={style.color}
-                    onChange={e => handleChange('color', e.target.value)}
-                    className={colorInputClasses}
-                    disabled={columnKey === 'level'}
-                    aria-label={`${label} light theme color`}
-                    title={columnKey === 'level' ? "Color for 'Level' is handled automatically by its class." : "Light theme color"}
-                />
+                <Tooltip content={columnKey === 'level' ? "Color for 'Level' is handled automatically." : "Light theme color"}>
+                    <input 
+                        type="color"
+                        value={style.color}
+                        onChange={e => handleChange('color', e.target.value)}
+                        className={colorInputClasses}
+                        disabled={columnKey === 'level'}
+                        aria-label={`${label} light theme color`}
+                    />
+                </Tooltip>
                  {columnKey !== 'level' && <ColorSwatches colors={LIGHT_THEME_SWATCHES} onSelect={color => handleChange('color', color)} />}
             </div>
 
             <div>
-                 <input 
-                    type="color"
-                    value={style.darkColor}
-                    onChange={e => handleChange('darkColor', e.target.value)}
-                    className={colorInputClasses}
-                    disabled={columnKey === 'level'}
-                    aria-label={`${label} dark theme color`}
-                    title={columnKey === 'level' ? "Color for 'Level' is handled automatically by its class." : "Dark theme color"}
-                />
+                 <Tooltip content={columnKey === 'level' ? "Color for 'Level' is handled automatically." : "Dark theme color"}>
+                     <input 
+                        type="color"
+                        value={style.darkColor}
+                        onChange={e => handleChange('darkColor', e.target.value)}
+                        className={colorInputClasses}
+                        disabled={columnKey === 'level'}
+                        aria-label={`${label} dark theme color`}
+                    />
+                </Tooltip>
                 {columnKey !== 'level' && <ColorSwatches colors={DARK_THEME_SWATCHES} onSelect={color => handleChange('darkColor', color)} />}
             </div>
         </div>
