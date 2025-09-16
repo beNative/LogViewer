@@ -344,6 +344,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     const overviewContainerRef = React.useRef<HTMLDivElement>(null);
     const [dragState, setDragState] = React.useState<DragState | null>(null);
     const [tempSelection, setTempSelection] = React.useState<{ start: number, end: number} | null>(null);
+    const [tempCursorTime, setTempCursorTime] = React.useState<number | null>(null);
     
     const displayMinTime = viewRange?.min ?? minTime;
     const displayMaxTime = viewRange?.max ?? maxTime;
@@ -432,7 +433,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                 }
                 case 'cursor': {
                      const newCursorTime = Math.max(displayMinTime, Math.min(displayMaxTime, currentTime));
-                     onCursorChange(newCursorTime);
+                     setTempCursorTime(newCursorTime);
                      break;
                 }
             }
@@ -451,11 +452,13 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                 if (tempSelection) {
                     onRangeChange(tempSelection.start, tempSelection.end);
                 }
+            } else if (dragState.type === 'cursor' && tempCursorTime !== null) {
+                onCursorChange(tempCursorTime);
             }
-            // No action on mouseUp for 'cursor' type, as it's updated live during move.
 
             setDragState(null);
             setTempSelection(null);
+            setTempCursorTime(null);
         };
 
         if (dragState) {
@@ -468,7 +471,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
             document.removeEventListener('mousemove', handleMouseMove);
             document.removeEventListener('mouseup', handleMouseUp);
         };
-    }, [dragState, mainPosToValue, displayMinTime, displayMaxTime, onRangeChange, onCursorChange, tempSelection, uiScale]);
+    }, [dragState, mainPosToValue, displayMinTime, displayMaxTime, onRangeChange, onCursorChange, tempSelection, tempCursorTime, uiScale]);
 
     const barComponents = [];
     const barProps = { displayMinTime: displayMinTime, displayMaxTime: displayMaxTime };
@@ -524,6 +527,8 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
         }
         return tickValues;
     }, [displayMinTime, displayMaxTime, mainContainerWidth]);
+    
+    const finalCursorTime = tempCursorTime ?? cursorTime;
 
     return (
         <div className="w-full">
@@ -545,7 +550,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                     <div className="absolute top-0 w-full h-6 pointer-events-none z-40">
                          {startPos >= 0 && <div className="absolute top-0 text-xs font-mono text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-1.5 py-0.5 rounded shadow" style={{ left: `${startPos}px`, transform: 'translateX(-50%)' }}>{formatTooltip(currentStart)}</div>}
                          {endPos >= 0 && (endPos - startPos > 60) && <div className="absolute top-0 text-xs font-mono text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-1.5 py-0.5 rounded shadow" style={{ left: `${endPos}px`, transform: 'translateX(-50%)' }}>{formatTooltip(currentEnd)}</div>}
-                         {cursorTime !== null && cursorTime >= displayMinTime && cursorTime <= displayMaxTime && <div className="absolute top-0 text-xs font-mono bg-red-500/90 backdrop-blur-sm text-white rounded px-1.5 py-0.5" style={{ left: `${mainValueToPos(cursorTime)}px`, transform: 'translateX(-50%)' }}>{formatTooltip(cursorTime)}</div>}
+                         {finalCursorTime !== null && finalCursorTime >= displayMinTime && finalCursorTime <= displayMaxTime && <div className="absolute top-0 text-xs font-mono bg-red-500/90 backdrop-blur-sm text-white rounded px-1.5 py-0.5" style={{ left: `${mainValueToPos(finalCursorTime)}px`, transform: 'translateX(-50%)' }}>{formatTooltip(finalCursorTime)}</div>}
                     </div>
                     
                     {/* Main Timeline Area */}
@@ -580,12 +585,12 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                                     </div>
                                 </div>
                             )}
-                            {cursorTime !== null && mainContainerWidth > 0 && cursorTime >= displayMinTime && cursorTime <= displayMaxTime && (
+                            {finalCursorTime !== null && mainContainerWidth > 0 && finalCursorTime >= displayMinTime && finalCursorTime <= displayMaxTime && (
                                 <div 
                                     data-handle="cursor"
                                     onMouseDown={(e) => handleMouseDown(e, 'cursor')}
                                     className="absolute top-0 bottom-0 bg-red-500 z-30 cursor-col-resize" 
-                                    style={{ left: `${mainValueToPos(cursorTime)}px`, width: '4pt', transform: 'translateX(-2pt)' }} 
+                                    style={{ left: `${mainValueToPos(finalCursorTime)}px`, width: '4pt', transform: 'translateX(-2pt)' }} 
                                 />
                             )}
                         </div>

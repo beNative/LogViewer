@@ -118,6 +118,18 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         theme,
         jumpToEntryId
     } = props;
+    
+    // This effect ensures the details panel stays in sync with keyboard navigation.
+    React.useEffect(() => {
+        if (keyboardSelectedId === null) {
+            setSelectedEntry(null);
+            return;
+        }
+        const entry = entries.find(e => e.id === keyboardSelectedId);
+        if (entry) {
+            setSelectedEntry(entry);
+        }
+    }, [keyboardSelectedId, entries]);
 
     const getRowClass = (density: LogTableDensity) => {
         switch (density) {
