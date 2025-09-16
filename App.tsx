@@ -237,8 +237,13 @@ const App: React.FC = () => {
     }
   }, [logToConsole]);
   
-  const handleNewSession = React.useCallback((log = true) => {
-    db?.createTable();
+  const handleNewSession = React.useCallback(async (log = true) => {
+    // Create a new in-memory DB.
+    const newDb = await Database.create();
+    // Update the app's state to use this new DB.
+    setDb(newDb);
+
+    // Reset all other relevant state to initial values.
     setFilteredEntries([]);
     setEntriesOffset(0);
     setError(null);
@@ -258,11 +263,11 @@ const App: React.FC = () => {
     setDashboardData(initialDashboardData);
     setStockHistory([]);
     setIsInitialLoad(true);
-    setIsDirty(false);
+    setIsDirty(false); // A new blank session is not dirty
     if (log) logToConsole('Started new blank session.', 'INFO');
-  }, [db, logToConsole]);
+  }, [logToConsole]);
 
-  const updateStateFromDb = React.useCallback((newDb: Database, fromSessionLoad: boolean) => {
+  const updateStateFromDb = React.useCallback(async (newDb: Database, fromSessionLoad: boolean) => {
     logToConsole('Reading metadata from database...', 'DEBUG');
 
     const totalEntries = newDb.getTotalEntryCount();
@@ -273,7 +278,7 @@ const App: React.FC = () => {
     const hasStockData = !!(minStockTime && maxStockTime);
 
     if (!hasLogData && !hasStockData) {
-        handleNewSession(false);
+        await handleNewSession(false);
         logToConsole('Database is empty.', 'INFO');
         return;
     }
@@ -935,21 +940,25 @@ const App: React.FC = () => {
 
 
   const handleCreateNewSessionFromFiles = React.useCallback(async (files: FileList) => {
-    if (!db) {
-        logToConsole('Database not ready, cannot create session.', 'ERROR');
-        return;
-    }
-
-    // This effectively creates a new in-memory DB to work with
-    handleNewSession(false);
+    setIsLoading(true);
+    setProgress(0);
+    setError(null);
+    setDetailedProgress({ currentFile: '', fileBytesRead: 0, fileTotalBytes: 0, fileLogCount: null });
     logToConsole(`Creating new session from ${files.length} file(s)...`, 'INFO');
 
     try {
-        // processFilesToDb will now work on the fresh DB instance
-        await processFilesToDb(files, db);
-        updateStateFromDb(db, false);
+        // 1. Create a brand new database instance in memory.
+        const newSessionDb = await Database.create();
         
-        // handleSaveSession will generate a new name since activeSessionName is null
+        // 2. Process the dropped files into this new, empty database.
+        await processFilesToDb(files, newSessionDb);
+
+        // 3. Now that data is loaded, make this the active DB and update the app state.
+        setDb(newSessionDb);
+        await updateStateFromDb(newSessionDb, false); // `false` because not loading filters from a saved session.
+        
+        // 4. Since this is a new session, activeSessionName will be null.
+        // handleSaveSession will generate a new name automatically.
         const success = await handleSaveSession(); 
         if (success) {
             logToConsole('New session created and saved successfully.', 'INFO');
@@ -962,11 +971,13 @@ const App: React.FC = () => {
         setError(msg);
         logToConsole(msg, 'ERROR');
         addToast({ type: 'error', title: 'Session Creation Failed', message: msg });
+        // On failure, reset to a clean state
+        await handleNewSession(false);
     } finally {
         setProgressMessage('Done!');
         setTimeout(() => setIsLoading(false), 500);
     }
-  }, [db, handleNewSession, processFilesToDb, updateStateFromDb, logToConsole, handleSaveSession, addToast]);
+  }, [processFilesToDb, updateStateFromDb, logToConsole, handleSaveSession, addToast, handleNewSession]);
 
   const handleAddFilesToCurrentSession = React.useCallback(async (files: FileList) => {
     if (!db) {
@@ -983,7 +994,7 @@ const App: React.FC = () => {
 
     try {
         await processFilesToDb(files, db);
-        updateStateFromDb(db, false);
+        await updateStateFromDb(db, false);
         setIsDirty(true); // Mark as dirty
         const success = await handleSaveSession(); // Save the changes immediately
         if (success) {
@@ -1111,7 +1122,7 @@ const App: React.FC = () => {
         const buffer = await file.arrayBuffer();
         const newDb = await Database.createFromBuffer(new Uint8Array(buffer));
         setDb(newDb);
-        updateStateFromDb(newDb, true);
+        await updateStateFromDb(newDb, true);
         setActiveSessionName(file.name.endsWith('.sqlite') ? file.name : `${file.name}.sqlite`);
         setIsDirty(true);
         if (isElectron) {
@@ -1454,7 +1465,7 @@ const handleUiScaleChange = async (newScale: number) => {
         const newDb = await Database.createFromBuffer(new Uint8Array(buffer));
         setDb(newDb);
         setActiveSessionName(name);
-        updateStateFromDb(newDb, true);
+        await updateStateFromDb(newDb, true);
         setIsDirty(false);
     } catch(e) {
         const msg = e instanceof Error ? e.message : String(e);
@@ -1493,7 +1504,7 @@ const handleUiScaleChange = async (newScale: number) => {
     if (success) {
         await fetchSessions();
         if (activeSessionName === name) {
-            handleNewSession(false);
+            await handleNewSession(false);
             logToConsole(`Active session '${name}' was deleted. Resetting to a blank state.`, 'INFO');
         }
     } else {
@@ -1895,7 +1906,7 @@ const handleUiScaleChange = async (newScale: number) => {
                 logToConsole(`Rebuild scan complete. A total of ${rebuiltCount.toLocaleString()} stock entries were parsed and inserted.`, 'INFO');
                 
                 logToConsole('Refreshing application state after rebuild...', 'DEBUG');
-                updateStateFromDb(db, false);
+                await updateStateFromDb(db, false);
                 
                 // Clear current search results in the tracker view
                 setStockHistory([]);
