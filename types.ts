@@ -102,6 +102,11 @@ export type LogDensityPoint = {
     count: number; // density value
 };
 
+export type LogDensityPointByLevel = {
+    time: number; // timestamp ms
+    counts: Record<string, number>; // e.g., { "ERROR": 10, "INFO": 50 }
+};
+
 export type SessionFile = {
     name: string;
     path: string;

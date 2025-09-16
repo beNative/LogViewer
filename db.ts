@@ -1,4 +1,4 @@
-import { FilterState, LogEntry, TimelineDataPoint, CategoryDataPoint, PageTimestampRange, FileTimeRange, LogDensityPoint, StockInfoEntry, StockInfoFilters, StockArticleSuggestion } from './types.ts';
+import { FilterState, LogEntry, TimelineDataPoint, CategoryDataPoint, PageTimestampRange, FileTimeRange, LogDensityPoint, StockInfoEntry, StockInfoFilters, StockArticleSuggestion, LogDensityPointByLevel } from './types.ts';
 
 // sql.js is loaded from a script tag and will be on the window object
 declare const initSqlJs: (config: { locateFile: (file: string) => string; }) => Promise<any>;
@@ -746,7 +746,7 @@ export class Database {
         return dates;
     }
 
-    getLogDensity(filters: FilterState, bucketCount: number): LogDensityPoint[] {
+    getLogDensityByLevel(filters: FilterState, bucketCount: number): LogDensityPointByLevel[] {
         if (filters.sqlQueryEnabled && filters.sqlQuery) {
             return [];
         }
@@ -762,53 +762,45 @@ export class Database {
 
         const { whereSql, params } = this._buildWhereClause(filters);
         
-        // julianday returns days since noon in Greenwich on November 24, 4714 B.C.
-        // We convert to milliseconds to do the bucketing.
+        // Group by both bucket and level to get compositional counts
         const sql = `
             SELECT
                 CAST((julianday(time) - julianday(?)) * 86400000 / ? AS INTEGER) AS bucket,
+                level,
                 COUNT(*) as count
             FROM logs
             ${whereSql}
-            GROUP BY bucket
+            GROUP BY bucket, level
         `;
 
-        const dbResults: { bucket: number; count: number }[] = [];
+        const bucketMap: Map<number, Record<string, number>> = new Map();
         try {
             const stmt = this.db.prepare(sql);
-            // Bind minTime for offset calculation, bucketDuration for sizing, and then filter params.
             stmt.bind([minTime, bucketDuration, ...params]);
             while (stmt.step()) {
-                const [bucket, count] = stmt.get();
-                dbResults.push({ bucket, count });
+                const [bucket, level, count] = stmt.get();
+                if (typeof bucket !== 'number' || typeof level !== 'string' || typeof count !== 'number') continue;
+
+                if (!bucketMap.has(bucket)) {
+                    bucketMap.set(bucket, {});
+                }
+                const levelCounts = bucketMap.get(bucket)!;
+                levelCounts[level] = count;
             }
             stmt.free();
         } catch (e) {
-            console.error("Failed to get log density:", e);
+            console.error("Failed to get log density by level:", e);
             return [];
         }
 
         // Create a full array of empty buckets and fill it with the DB results.
-        const densityData = new Array(bucketCount).fill(0).map((_, i) => ({
-            time: minTimeMs + i * bucketDuration,
-            count: 0
-        }));
-        
-        let maxCount = 0;
-        dbResults.forEach(row => {
-            if (row.bucket >= 0 && row.bucket < bucketCount) {
-                densityData[row.bucket].count = row.count;
-                if (row.count > maxCount) maxCount = row.count;
-            }
-        });
-        
-        // Normalize the counts to a 0-100 scale for easier heatmap coloring
-        if (maxCount > 0) {
-            for (const bucket of densityData) {
-                bucket.count = Math.round((bucket.count / maxCount) * 100);
-            }
+        const densityData: LogDensityPointByLevel[] = [];
+        for (let i = 0; i < bucketCount; i++) {
+            densityData.push({
+                time: minTimeMs + i * bucketDuration,
+                counts: bucketMap.get(i) || {},
+            });
         }
-
         return densityData;
     }
     

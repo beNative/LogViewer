@@ -1,5 +1,5 @@
 import React from 'react';
-import { LogEntry, FilterState, PageTimestampRange, ColumnVisibilityState, ColumnStyles, ColumnKey, PanelWidths, ViewMode, ConsoleMessage, OverallTimeRange, FileTimeRange, LogDensityPoint, IconSet, LogTableDensity, Theme } from '../types.ts';
+import { LogEntry, FilterState, PageTimestampRange, ColumnVisibilityState, ColumnStyles, ColumnKey, PanelWidths, ViewMode, ConsoleMessage, OverallTimeRange, FileTimeRange, LogDensityPointByLevel, IconSet, LogTableDensity, Theme } from '../types.ts';
 import { Icon } from './icons/index.tsx';
 import { FilterBar } from './FilterBar.tsx';
 import { LogDetailPanel } from './LogDetailPanel.tsx';
@@ -72,8 +72,8 @@ interface LogTableProps {
     isTimeRangeSelectorVisible: boolean;
     onTimeRangeSelectorVisibilityChange: (isVisible: boolean) => void;
     fileTimeRanges: FileTimeRange[];
-    logDensity: LogDensityPoint[];
-    overallLogDensity: LogDensityPoint[];
+    logDensity: LogDensityPointByLevel[];
+    overallLogDensity: LogDensityPointByLevel[];
     datesWithLogs: string[];
     onCursorChange: (time: number) => void;
     onFileSelect: (fileName: string) => void;

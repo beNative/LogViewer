@@ -1,5 +1,5 @@
 import React from 'react';
-import { PageTimestampRange, FileTimeRange, LogDensityPoint, ViewMode, OverallTimeRange, IconSet } from '../types.ts';
+import { PageTimestampRange, FileTimeRange, LogDensityPointByLevel, ViewMode, OverallTimeRange, IconSet, LogDensityPoint } from '../types.ts';
 import { Icon } from './icons/index.tsx';
 
 type Theme = 'light' | 'dark';
@@ -16,8 +16,9 @@ interface TimeRangeSelectorProps {
     theme: Theme;
     pageTimestampRanges: PageTimestampRange[];
     fileTimeRanges: FileTimeRange[];
-    logDensity: LogDensityPoint[];
-    overallLogDensity: LogDensityPoint[];
+    // FIX: Allow both types of density data.
+    logDensity: (LogDensityPointByLevel[] | LogDensityPoint[]);
+    overallLogDensity: (LogDensityPointByLevel[] | LogDensityPoint[]);
     datesWithLogs: string[];
     viewMode: ViewMode;
     onGoToPage?: (page: number) => void;
@@ -48,6 +49,22 @@ const PALETTE = [
   '#6366f1', '#06b6d4', '#d946ef', '#f43f5e', '#14b8a6', '#eab308'
 ];
 
+const LOG_LEVEL_COLORS: Record<string, { light: string, dark: string }> = {
+    'ERROR': { light: '#ef4444', dark: '#f87171' },
+    'FATAL': { light: '#b91c1c', dark: '#ef4444' },
+    'WARNING': { light: '#f59e0b', dark: '#facc15' },
+    'WARN': { light: '#f59e0b', dark: '#facc15' },
+    'INFO': { light: '#3b82f6', dark: '#60a5fa' },
+    'DEBUG': { light: '#6b7280', dark: '#9ca3af' },
+    'TRACE': { light: '#a1a1aa', dark: '#71717a' },
+    'DEFAULT': { light: '#d1d5db', dark: '#4b5563' },
+};
+
+const getLevelColor = (level: string, theme: Theme) => {
+    const upperLevel = level?.toUpperCase() || 'DEFAULT';
+    return (LOG_LEVEL_COLORS[upperLevel] || LOG_LEVEL_COLORS.DEFAULT)[theme];
+};
+
 const formatTooltip = (time: number | null): React.ReactNode => {
     if (typeof time !== 'number' || isNaN(time)) return 'N/A';
     const d = new Date(time);
@@ -61,20 +78,6 @@ const formatTooltip = (time: number | null): React.ReactNode => {
             <div>{timePart}</div>
         </div>
     );
-};
-
-const getHeatmapColor = (densityValue: number, theme: Theme): string => {
-    if (densityValue <= 0) return 'transparent';
-    let hue: number;
-    if (densityValue < 50) {
-        hue = 120 - (densityValue / 50) * 60;
-    } else {
-        hue = 60 - ((densityValue - 50) / 50) * 60;
-    }
-    const saturation = theme === 'dark' ? 80 : 90;
-    const lightness = theme === 'dark' ? 50 : 55;
-    const alpha = 0.85;
-    return `hsla(${hue}, ${saturation}%, ${lightness}%, ${alpha})`;
 };
 
 const Bar: React.FC<{
@@ -126,50 +129,524 @@ const Bar: React.FC<{
 );
 
 const DensityBar: React.FC<{
-    items: LogDensityPoint[];
+    items: LogDensityPointByLevel[] | LogDensityPoint[];
     valueToPosition: ValueToPositionFn;
     theme: Theme;
     displayMinTime: number;
     displayMaxTime: number;
 }> = ({ items, valueToPosition, theme, displayMinTime, displayMaxTime }) => {
-    if (items.length < 2) return <div className="relative w-full h-5" />;
-    const bucketDuration = items[1].time - items[0].time;
+    if (items.length === 0) {
+        return <div className="relative w-full h-5" />;
+    }
+
+    const isLevelDensity = 'counts' in items[0];
+
+    if (isLevelDensity) {
+        const levelItems = items as LogDensityPointByLevel[];
+        const maxTotalCount = React.useMemo(() => {
+            return levelItems.reduce((max, bucket) => {
+                const total = Object.values(bucket.counts).reduce((sum, count) => sum + count, 0);
+                return Math.max(max, total);
+            }, 1); // Use 1 to avoid division by zero
+        }, [levelItems]);
+
+        const bucketDuration = levelItems.length > 1 ? levelItems[1].time - levelItems[0].time : 0;
+        if (bucketDuration === 0) return <div className="relative w-full h-5" />;
+
+        return (
+            <div className="relative w-full h-5">
+                {levelItems.map((bucket, i) => {
+                    const start = bucket.time;
+                    const end = bucket.time + bucketDuration;
+                    if (end < displayMinTime || start > displayMaxTime) return null;
+
+                    const bucketTotal = Object.values(bucket.counts).reduce((s, c) => s + c, 0);
+                    if (bucketTotal === 0) return null;
+                    
+                    const barHeightPercent = (bucketTotal / maxTotalCount) * 100;
+                    const leftPx = valueToPosition(Math.max(start, displayMinTime));
+                    const rightPx = valueToPosition(Math.min(end, displayMaxTime));
+                    const widthPx = Math.max(0, rightPx - leftPx);
+
+                    if (widthPx === 0) return null;
+
+                    const sortedLevels = Object.entries(bucket.counts).sort((a,b) => {
+                        const order: Record<string, number> = { ERROR: 0, FATAL: 1, WARNING: 2, WARN: 3, INFO: 4 };
+                        return (order[a[0].toUpperCase()] ?? 99) - (order[b[0].toUpperCase()] ?? 99);
+                    });
+
+                    return (
+                        <div
+                            key={`density-stack-${i}`}
+                            style={{ left: `${leftPx}px`, width: `${widthPx}px`, height: `${barHeightPercent}%` }}
+                            className="absolute bottom-0 flex flex-col"
+                        >
+                            {sortedLevels.map(([level, count]) => (
+                                <div
+                                    key={level}
+                                    style={{
+                                        height: `${(count / bucketTotal) * 100}%`,
+                                        backgroundColor: getLevelColor(level, theme),
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    } else {
+        const simpleItems = items as LogDensityPoint[];
+        const maxCount = React.useMemo(() => {
+            return simpleItems.reduce((max, bucket) => Math.max(max, bucket.count), 1);
+        }, [simpleItems]);
+
+        const bucketDuration = simpleItems.length > 1 ? simpleItems[1].time - simpleItems[0].time : 0;
+        if (bucketDuration === 0) return <div className="relative w-full h-5" />;
+
+        return (
+            <div className="relative w-full h-5">
+                {simpleItems.map((bucket, i) => {
+                    const start = bucket.time;
+                    const end = bucket.time + bucketDuration;
+                    if (end < displayMinTime || start > displayMaxTime) return null;
+                    if (bucket.count === 0) return null;
+
+                    const barHeightPercent = (bucket.count / maxCount) * 100;
+                    const leftPx = valueToPosition(Math.max(start, displayMinTime));
+                    const rightPx = valueToPosition(Math.min(end, displayMaxTime));
+                    const widthPx = Math.max(0, rightPx - leftPx);
+
+                    if (widthPx === 0) return null;
+
+                    return (
+                        <div
+                            key={`density-bar-${i}`}
+                            style={{ left: `${leftPx}px`, width: `${widthPx}px`, height: `${barHeightPercent}%`, backgroundColor: theme === 'dark' ? '#60a5fa' : '#3b82f6' }}
+                            className="absolute bottom-0"
+                        />
+                    );
+                })}
+            </div>
+        );
+    }
+};
+
+// ... existing OverviewBrush component ...
+
+export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
+    minTime, maxTime, selectedStartTime, selectedEndTime,
+    onRangeChange, onClear, theme,
+    pageTimestampRanges, fileTimeRanges, logDensity, overallLogDensity, datesWithLogs, viewMode, onGoToPage,
+    onCursorChange, onFileSelect, onDateSelect,
+    cursorTime = null, activeFileName = null, activeDate = null, currentPage = null,
+    viewRange, onViewRangeChange, onZoomToSelection, onZoomToExtent, zoomToSelectionEnabled, iconSet, uiScale
+}) => {
+    const mainContainerRef = React.useRef<HTMLDivElement>(null);
+    const overviewContainerRef = React.useRef<HTMLDivElement>(null);
+    const [dragState, setDragState] = React.useState<DragState | null>(null);
+    const [tempSelection, setTempSelection] = React.useState<{ start: number, end: number} | null>(null);
+    const [tempCursorTime, setTempCursorTime] = React.useState<number | null>(null);
+    const [densityTooltip, setDensityTooltip] = React.useState<{ x: number, y: number, bucketData: LogDensityPointByLevel } | null>(null);
+
+    const displayMinTime = viewRange?.min ?? minTime;
+    const displayMaxTime = viewRange?.max ?? maxTime;
+
+    const useResizeObserver = (ref: React.RefObject<HTMLElement>) => {
+        const [width, setWidth] = React.useState(0);
+        React.useEffect(() => {
+            const el = ref.current;
+            if (!el) return;
+            const resizeObserver = new ResizeObserver(entries => {
+                if (entries[0]) setWidth(entries[0].contentRect.width);
+            });
+            resizeObserver.observe(el);
+            setWidth(el.clientWidth);
+            return () => resizeObserver.disconnect();
+        }, [ref]);
+        return width;
+    };
     
-    return (
-        <div className="relative w-full h-5">
-            {items.map((bucket, i) => {
-                const start = bucket.time;
-                const end = bucket.time + bucketDuration;
-                
-                if (end < displayMinTime || start > displayMaxTime) {
-                    return null;
+    const mainContainerWidth = useResizeObserver(mainContainerRef);
+    const overviewContainerWidth = useResizeObserver(overviewContainerRef);
+
+    const mainPosToValue = React.useCallback((p: number) => {
+        if (mainContainerWidth === 0 || displayMaxTime === displayMinTime) return displayMinTime;
+        return displayMinTime + (p / mainContainerWidth) * (displayMaxTime - displayMinTime);
+    }, [displayMinTime, displayMaxTime, mainContainerWidth]);
+
+    const mainValueToPos = React.useCallback((v: number) => {
+        if (displayMaxTime === displayMinTime) return 0;
+        return ((v - displayMinTime) / (displayMaxTime - displayMinTime)) * mainContainerWidth;
+    }, [displayMinTime, displayMaxTime, mainContainerWidth]);
+    
+    const overviewValueToPos = React.useCallback((v: number) => ((v - minTime) / (maxTime - minTime)) * overviewContainerWidth, [minTime, maxTime, overviewContainerWidth]);
+    const overviewPosToValue = React.useCallback((p: number) => minTime + (p / overviewContainerWidth) * (maxTime - minTime), [minTime, maxTime, overviewContainerWidth]);
+
+    React.useEffect(() => {
+        if (tempCursorTime !== null && cursorTime !== null && Math.abs(tempCursorTime - cursorTime) < 1000) {
+          setTempCursorTime(null);
+        }
+    }, [cursorTime, tempCursorTime]);
+
+
+    const handleMouseDown = (
+        e: React.MouseEvent,
+        type: 'select_left' | 'select_right' | 'cursor' | 'new_selection'
+    ) => {
+        e.stopPropagation();
+        e.preventDefault();
+        
+        const rect = mainContainerRef.current!.getBoundingClientRect();
+        const clickPos = (e.clientX - rect.left) / uiScale;
+        const clickTime = mainPosToValue(clickPos);
+
+        if (type === 'cursor') {
+            setDragState({ type: 'cursor', startX: e.clientX });
+        } else if (type === 'new_selection') {
+            setDragState({ type: 'new_selection', startX: e.clientX, startTime: clickTime });
+        } else {
+            setDragState({
+                type: type,
+                startX: e.clientX,
+                initialStart: selectedStartTime || displayMinTime,
+                initialEnd: selectedEndTime || displayMaxTime,
+            });
+        }
+    };
+    
+    React.useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!dragState || !mainContainerRef.current) return;
+            e.preventDefault();
+            const rect = mainContainerRef.current.getBoundingClientRect();
+            const currentUnscaledPos = (e.clientX - rect.left) / uiScale;
+            const currentTime = mainPosToValue(currentUnscaledPos);
+
+            switch (dragState.type) {
+                case 'new_selection': {
+                    const start = Math.min(dragState.startTime, currentTime);
+                    const end = Math.max(dragState.startTime, currentTime);
+                    setTempSelection({ start, end });
+                    break;
                 }
+                case 'select_left': {
+                    const newStart = Math.min(dragState.initialEnd, Math.max(displayMinTime, currentTime));
+                    setTempSelection({ start: newStart, end: dragState.initialEnd });
+                    break;
+                }
+                case 'select_right': {
+                    const newEnd = Math.max(dragState.initialStart, Math.min(displayMaxTime, currentTime));
+                    setTempSelection({ start: dragState.initialStart, end: newEnd });
+                    break;
+                }
+                case 'cursor': {
+                     const newCursorTime = Math.max(displayMinTime, Math.min(displayMaxTime, currentTime));
+                     setTempCursorTime(newCursorTime);
+                     break;
+                }
+            }
+        };
 
-                const visibleStart = Math.max(start, displayMinTime);
-                const visibleEnd = Math.min(end, displayMaxTime);
+        const handleMouseUp = (e: MouseEvent) => {
+            if (!dragState) return;
+            
+            if (dragState.type === 'new_selection') {
+                if (Math.abs(e.clientX - dragState.startX) < 5) {
+                    onCursorChange(dragState.startTime);
+                } else if (tempSelection) {
+                    onRangeChange(tempSelection.start, tempSelection.end);
+                }
+            } else if (dragState.type === 'select_left' || dragState.type === 'select_right') {
+                if (tempSelection) {
+                    onRangeChange(tempSelection.start, tempSelection.end);
+                }
+            } else if (dragState.type === 'cursor' && tempCursorTime !== null) {
+                onCursorChange(tempCursorTime);
+            }
 
-                const leftPx = valueToPosition(visibleStart);
-                const rightPx = valueToPosition(visibleEnd);
-                const widthPx = Math.max(0, rightPx - leftPx);
+            setDragState(null);
+            setTempSelection(null);
+        };
 
-                if (widthPx === 0) return null;
+        if (dragState) {
+            document.body.style.cursor = 'col-resize';
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+        }
+        return () => {
+            document.body.style.cursor = 'default';
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [dragState, mainPosToValue, displayMinTime, displayMaxTime, onRangeChange, onCursorChange, tempSelection, tempCursorTime, uiScale]);
+
+    const barComponents = [];
+    const barProps = { displayMinTime: displayMinTime, displayMaxTime: displayMaxTime };
+    if (viewMode === 'pagination' && pageTimestampRanges.length > 0 && onGoToPage) barComponents.push({key: 'page', label: 'Pages', Comp: Bar, props: { ...barProps, items: pageTimestampRanges, isActive: (item: any) => item.page === currentPage, onSelect: (item: any) => onGoToPage(item.page), getLabel: (item: any) => item.page, getTitle: (item: any) => `Page ${item.page}`, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
+    if (fileTimeRanges.length > 0) barComponents.push({key: 'file', label: 'Files', Comp: Bar, props: { ...barProps, items: fileTimeRanges, isActive: (item: any) => item.name === activeFileName, onSelect: (item: any) => onFileSelect(item.name), getLabel: (item: any) => item.name.split('/').pop(), getTitle: (item: any) => item.name, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
+    if (datesWithLogs.length > 0) barComponents.push({key: 'date', label: 'Date', Comp: Bar, props: { ...barProps, items: datesWithLogs, isActive: (item: any) => item === activeDate, onSelect: (item: any) => onDateSelect(item), getLabel: (item: any) => item, getTitle: (item: any) => item, getStart: (item: any) => new Date(`${item}T00:00:00.000Z`).getTime(), getEnd: (item: any) => new Date(`${item}T23:59:59.999Z`).getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
+    if (logDensity.length > 0) barComponents.push({key: 'density', label: 'Density', Comp: DensityBar, props: { items: logDensity, theme: theme, ...barProps }});
+
+    const currentStart = tempSelection?.start ?? selectedStartTime;
+    const currentEnd = tempSelection?.end ?? selectedEndTime;
+
+    const visibleSelectionStart = currentStart !== null ? Math.max(currentStart, displayMinTime) : null;
+    const visibleSelectionEnd = currentEnd !== null ? Math.min(currentEnd, displayMaxTime) : null;
+
+    const startPos = visibleSelectionStart !== null ? mainValueToPos(visibleSelectionStart) : -1;
+    const endPos = visibleSelectionEnd !== null ? mainValueToPos(visibleSelectionEnd) : -1;
+
+     const formatTickLabel = (time: number, duration: number): string => {
+        const d = new Date(time);
+        if (duration <= 2 * 60 * 1000) { // < 2 minutes
+            return d.toLocaleTimeString('en-US', { hour12: false, minute: '2-digit', second: '2-digit' });
+        }
+        if (duration <= 2 * 60 * 60 * 1000) { // < 2 hours
+            return d.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+        }
+        if (duration <= 2 * 24 * 60 * 60 * 1000) { // < 2 days
+            return `${d.toLocaleDateString('en-CA', { month: '2-digit', day: '2-digit' })} ${d.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })}`;
+        }
+        return d.toLocaleDateString('en-CA'); // YYYY-MM-DD
+    };
+
+    const ticks = React.useMemo(() => {
+        if (!mainContainerWidth || mainContainerWidth < 100) return [];
+
+        const tickCount = Math.max(2, Math.floor(mainContainerWidth / 120));
+        const duration = displayMaxTime - displayMinTime;
+        if (duration <= 0) return [];
+
+        const niceIntervals = [
+            1000, 5000, 15000, 30000, // seconds
+            60 * 1000, 5 * 60 * 1000, 15 * 60 * 1000, 30 * 60 * 1000, // minutes
+            60 * 60 * 1000, 2 * 60 * 60 * 1000, 6 * 60 * 60 * 1000, 12 * 60 * 60 * 1000, // hours
+            24 * 60 * 60 * 1000, 2 * 24 * 60 * 60 * 1000, 7 * 24 * 60 * 60 * 1000 // days
+        ];
+        const targetStep = duration / tickCount;
+        const step = niceIntervals.find(i => i > targetStep) || niceIntervals[niceIntervals.length - 1];
+
+        const tickValues: number[] = [];
+        const startTick = Math.ceil(displayMinTime / step) * step;
+
+        for (let t = startTick; t <= displayMaxTime; t += step) {
+            tickValues.push(t);
+        }
+        return tickValues;
+    }, [displayMinTime, displayMaxTime, mainContainerWidth]);
+    
+    const finalCursorTime = tempCursorTime ?? cursorTime;
+
+    const handleDensityHover = (e: React.MouseEvent) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const hoverTime = mainPosToValue(x);
+        
+        if (logDensity.length > 1 && 'counts' in logDensity[0]) {
+            const levelDensity = logDensity as LogDensityPointByLevel[];
+            const bucketDuration = levelDensity[1].time - levelDensity[0].time;
+            const bucketIndex = Math.floor((hoverTime - levelDensity[0].time) / bucketDuration);
+            const bucketData = levelDensity[bucketIndex];
+            
+            if (bucketData && Object.keys(bucketData.counts).length > 0) {
+                setDensityTooltip({
+                    x: e.clientX,
+                    y: rect.top,
+                    bucketData: bucketData
+                });
+            } else {
+                setDensityTooltip(null);
+            }
+        }
+    };
+    const handleDensityLeave = () => setDensityTooltip(null);
+
+
+    return (
+        <div className="w-full">
+            <div className="flex items-start gap-3 w-full">
+                <div className="w-16 flex-shrink-0 text-right">
+                     {/* This div is a spacer to align with the timeline content */}
+                    <div className="h-6" />
+                    <div className="space-y-3">
+                        {barComponents.map(bar => (
+                            <div key={bar.key} className="h-5 text-xs font-semibold text-gray-600 dark:text-gray-400 flex items-center justify-end pr-2">
+                                {bar.label}
+                            </div>
+                        ))}
+                    </div>
+                </div>
                 
-                return (
-                    <div
-                        key={`density-bucket-${i}`}
-                        className="absolute top-0 bottom-0"
-                        style={{
-                            left: `${leftPx}px`,
-                            width: `${widthPx}px`,
-                            backgroundColor: getHeatmapColor(bucket.count, theme),
-                        }}
-                    />
-                );
-            })}
+                <div className="flex-grow flex flex-col relative">
+                     {/* Tooltips Container */}
+                    <div className="absolute top-0 w-full h-6 pointer-events-none z-40">
+                         {startPos >= 0 && <div className="absolute top-0 text-xs font-mono text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-1.5 py-0.5 rounded shadow" style={{ left: `${startPos}px`, transform: 'translateX(-50%)' }}>{formatTooltip(currentStart)}</div>}
+                         {endPos >= 0 && (endPos - startPos > 60) && <div className="absolute top-0 text-xs font-mono text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-1.5 py-0.5 rounded shadow" style={{ left: `${endPos}px`, transform: 'translateX(-50%)' }}>{formatTooltip(currentEnd)}</div>}
+                         {finalCursorTime !== null && finalCursorTime >= displayMinTime && finalCursorTime <= displayMaxTime && <div className="absolute top-0 text-xs font-mono bg-red-500/90 backdrop-blur-sm text-white rounded px-1.5 py-0.5" style={{ left: `${mainValueToPos(finalCursorTime)}px`, transform: 'translateX(-50%)' }}>{formatTooltip(finalCursorTime)}</div>}
+                    </div>
+                    
+                    {/* Main Timeline Area */}
+                    <div 
+                        onMouseDown={(e) => handleMouseDown(e, 'new_selection')}
+                        onMouseMove={handleDensityHover}
+                        onMouseLeave={handleDensityLeave}
+                        className="w-full cursor-crosshair bg-gray-200 dark:bg-gray-700/50 rounded p-1 overflow-hidden mt-6"
+                    >
+                        <div ref={mainContainerRef} className="relative">
+                            <div className="space-y-3">
+                                {barComponents.map(bar => (
+                                    <bar.Comp key={bar.key} valueToPosition={mainValueToPos} {...bar.props} />
+                                ))}
+                            </div>
+                             {startPos >= 0 && endPos >= 0 && (endPos > startPos) && (
+                                <div
+                                    className="absolute top-0 bottom-0 bg-sky-500/20 dark:bg-sky-400/20 z-10 border-x-4 border-sky-600 dark:border-sky-400"
+                                    style={{ left: `${startPos}px`, width: `${Math.max(0, endPos - startPos)}px` }}
+                                >
+                                    <div
+                                        data-handle="left"
+                                        onMouseDown={(e) => handleMouseDown(e, 'select_left')}
+                                        className="absolute top-0 -left-2 w-4 h-full cursor-col-resize group"
+                                    >
+                                        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-8 w-1.5 bg-sky-600 dark:bg-sky-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
+                                    </div>
+                                    <div
+                                        data-handle="right"
+                                        onMouseDown={(e) => handleMouseDown(e, 'select_right')}
+                                        className="absolute top-0 -right-2 w-4 h-full cursor-col-resize group"
+                                    >
+                                         <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-8 w-1.5 bg-sky-600 dark:bg-sky-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
+                                    </div>
+                                </div>
+                            )}
+                            {finalCursorTime !== null && mainContainerWidth > 0 && finalCursorTime >= displayMinTime && finalCursorTime <= displayMaxTime && (
+                                <div 
+                                    data-handle="cursor"
+                                    onMouseDown={(e) => handleMouseDown(e, 'cursor')}
+                                    className="absolute top-0 bottom-0 bg-red-500 z-30 cursor-col-resize" 
+                                    style={{ left: `${mainValueToPos(finalCursorTime)}px`, width: '4pt', transform: 'translateX(-2pt)' }} 
+                                />
+                            )}
+                        </div>
+                    </div>
+                    {/* Time Axis Ticks */}
+                    <div className="relative w-full h-6 mt-1 pointer-events-none">
+                        {ticks.map(tick => {
+                            const pos = mainValueToPos(tick);
+                            if (pos < 20 || pos > mainContainerWidth - 20) return null;
+                            return (
+                                <div key={tick} className="absolute top-0 text-center" style={{ left: `${pos}px`, transform: 'translateX(-50%)' }}>
+                                    <div className="w-px h-1.5 bg-gray-400 dark:bg-gray-500 mx-auto" />
+                                    <span className="block mt-0.5 text-xs text-gray-500 dark:text-gray-400 font-mono whitespace-nowrap">
+                                        {formatTickLabel(tick, displayMaxTime - displayMinTime)}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+                
+                <div className="w-auto flex-shrink-0 self-start pt-6 flex flex-col items-center gap-1">
+                     <button onClick={onZoomToSelection} disabled={!zoomToSelectionEnabled} className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" title="Zoom to Selection"><Icon name="ArrowsPointingIn" iconSet={iconSet} className="w-5 h-5"/></button>
+                     <button onClick={onZoomToExtent} disabled={!viewRange} className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" title="Zoom to Extent"><Icon name="ArrowsPointingOut" iconSet={iconSet} className="w-5 h-5"/></button>
+                     <button onClick={onClear} className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" title="Clear time selection"><Icon name="XMark" iconSet={iconSet} className="w-6 h-6"/></button>
+                </div>
+            </div>
+            <div className="flex items-start gap-3 w-full mt-2">
+                <div className="w-16 flex-shrink-0"></div>
+                <div className="flex-grow" ref={overviewContainerRef}>
+                    {overviewContainerWidth > 0 && (
+                        <OverviewBrush
+                            minTime={minTime} maxTime={maxTime}
+                            viewMin={displayMinTime} viewMax={displayMaxTime}
+                            selectedMin={selectedStartTime}
+                            selectedMax={selectedEndTime}
+                            density={overallLogDensity} theme={theme}
+                            valueToPosition={overviewValueToPos} positionToValue={overviewPosToValue}
+                            onViewRangeChange={onViewRangeChange}
+                            onRangeChange={onRangeChange}
+                            uiScale={uiScale}
+                        />
+                    )}
+                </div>
+                <div className="w-[60px] flex-shrink-0"/>
+            </div>
+            {densityTooltip && 'counts' in densityTooltip.bucketData && <DensityTooltip {...densityTooltip} theme={theme} />}
         </div>
     );
 };
 
+const DensityTooltip: React.FC<{ x: number, y: number, bucketData: LogDensityPointByLevel, theme: Theme }> = ({ x, y, bucketData, theme }) => {
+    const ref = React.useRef<HTMLDivElement>(null);
+    const [style, setStyle] = React.useState<React.CSSProperties>({
+        position: 'fixed',
+        top: y,
+        left: x,
+        transform: 'translate(-50%, -110%)',
+    });
+
+    React.useLayoutEffect(() => {
+        if (ref.current) {
+            const rect = ref.current.getBoundingClientRect();
+            let newX = x;
+            let newY = y;
+            let transform = 'translate(-50%, -110%)';
+
+            if (rect.right > window.innerWidth) {
+                newX = window.innerWidth - rect.width / 2 - 10;
+            }
+            if (rect.left < 0) {
+                newX = rect.width / 2 + 10;
+            }
+            if (rect.top < 0) {
+                newY = y + rect.height + 20; // Flip below
+                transform = 'translate(-50%, 20px)';
+            }
+            
+            setStyle({
+                position: 'fixed',
+                top: newY,
+                left: newX,
+                transform: transform,
+            });
+        }
+    }, [x, y]);
+
+
+    const total = Object.values(bucketData.counts).reduce((sum, count) => sum + count, 0);
+    const sortedLevels = Object.entries(bucketData.counts).sort((a,b) => b[1] - a[1]);
+
+    return (
+        <div ref={ref} style={style} className="z-50 p-2.5 bg-gray-800/90 dark:bg-black/80 text-white rounded-lg shadow-2xl pointer-events-none w-56 backdrop-blur-sm animate-fadeIn">
+            <div className="text-center mb-2">
+                <p className="text-xs text-gray-400">Time Bucket</p>
+                <p className="font-mono text-sm">{new Date(bucketData.time).toLocaleString()}</p>
+                <p className="font-bold text-lg">{total.toLocaleString()} <span className="text-sm font-normal text-gray-300">logs</span></p>
+            </div>
+            <div className="space-y-1">
+                {sortedLevels.map(([level, count]) => {
+                    const percentage = total > 0 ? (count / total) * 100 : 0;
+                    return (
+                        <div key={level} className="text-xs">
+                            <div className="flex justify-between items-center mb-0.5">
+                                <span className="font-semibold" style={{ color: getLevelColor(level, theme) }}>{level}</span>
+                                <span className="font-mono">{count.toLocaleString()} ({percentage.toFixed(1)}%)</span>
+                            </div>
+                            <div className="w-full bg-gray-600/50 rounded-full h-1.5">
+                                <div className="h-1.5 rounded-full" style={{ width: `${percentage}%`, backgroundColor: getLevelColor(level, theme) }} />
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
+
+
+// Note: This is a placeholder for the OverviewBrush to satisfy type-checking since it's a large component.
+// The new implementation for overview density is below.
 const OverviewBrush: React.FC<{
     minTime: number;
     maxTime: number;
@@ -177,7 +654,7 @@ const OverviewBrush: React.FC<{
     viewMax: number;
     selectedMin: number | null;
     selectedMax: number | null;
-    density: LogDensityPoint[];
+    density: (LogDensityPointByLevel[] | LogDensityPoint[]); // Accept both types
     theme: Theme;
     valueToPosition: ValueToPositionFn;
     positionToValue: PositionToValueFn;
@@ -294,6 +771,15 @@ const OverviewBrush: React.FC<{
     const selectionLeft = currentSelection ? valueToPosition(currentSelection.start) : -1;
     const selectionWidth = currentSelection ? valueToPosition(currentSelection.end) - selectionLeft : 0;
 
+    const maxTotalCount = React.useMemo(() => {
+        // FIX: Add explicit types to reduce callback and a type cast to fix type inference errors.
+         return density.reduce((max, bucket) => {
+            const total = 'counts' in bucket ? Object.values(bucket.counts).reduce((sum: number, count: number) => sum + count, 0) : (bucket as LogDensityPoint).count;
+            return Math.max(max, total);
+        }, 1);
+    }, [density]);
+
+
     return (
         <div
             ref={containerRef}
@@ -301,15 +787,23 @@ const OverviewBrush: React.FC<{
             className="relative w-full h-10 bg-gray-200 dark:bg-gray-700/50 rounded p-0.5 cursor-crosshair"
         >
             <div className="w-full h-full flex pointer-events-none">
-                {density.map((bucket, i) => (
-                    <div
-                        key={`density-${i}`}
-                        style={{
-                            flex: '1 1 0%',
-                            backgroundColor: getHeatmapColor(bucket.count, theme)
-                        }}
-                    />
-                ))}
+                {density.map((bucket, i) => {
+                    // FIX: Add explicit types to reduce callback and a type cast to fix type inference errors.
+                    const total = 'counts' in bucket ? Object.values(bucket.counts).reduce((s: number, c: number) => s + c, 0) : (bucket as LogDensityPoint).count;
+                    const opacity = total > 0 ? 0.3 + (total / maxTotalCount) * 0.7 : 0;
+                     if ('counts' in bucket && total > 0) {
+                        return (
+                             <div key={i} style={{ flex: '1 1 0%'}} className="flex flex-col">
+                                 {Object.entries(bucket.counts).map(([level, count]) => (
+                                    <div key={level} style={{ height: `${(count/total)*100}%`, backgroundColor: getLevelColor(level, theme) }}/>
+                                 ))}
+                             </div>
+                        )
+                    }
+                    return (
+                        <div key={`density-${i}`} style={{ flex: '1 1 0%', backgroundColor: `rgba(147, 197, 253, ${opacity})`}} />
+                    );
+                })}
             </div>
             
             {selectionLeft >= 0 && selectionWidth > 0 && (
@@ -326,325 +820,6 @@ const OverviewBrush: React.FC<{
             >
                 <div onMouseDown={(e) => handleBrushMouseDown(e, 'brush_left')} className="absolute left-0 top-0 w-2 h-full cursor-col-resize bg-sky-600/50 hover:bg-sky-600" />
                 <div onMouseDown={(e) => handleBrushMouseDown(e, 'brush_right')} className="absolute right-0 top-0 w-2 h-full cursor-col-resize bg-sky-600/50 hover:bg-sky-600" />
-            </div>
-        </div>
-    );
-};
-
-
-export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
-    minTime, maxTime, selectedStartTime, selectedEndTime,
-    onRangeChange, onClear, theme,
-    pageTimestampRanges, fileTimeRanges, logDensity, overallLogDensity, datesWithLogs, viewMode, onGoToPage,
-    onCursorChange, onFileSelect, onDateSelect,
-    cursorTime = null, activeFileName = null, activeDate = null, currentPage = null,
-    viewRange, onViewRangeChange, onZoomToSelection, onZoomToExtent, zoomToSelectionEnabled, iconSet, uiScale
-}) => {
-    const mainContainerRef = React.useRef<HTMLDivElement>(null);
-    const overviewContainerRef = React.useRef<HTMLDivElement>(null);
-    const [dragState, setDragState] = React.useState<DragState | null>(null);
-    const [tempSelection, setTempSelection] = React.useState<{ start: number, end: number} | null>(null);
-    const [tempCursorTime, setTempCursorTime] = React.useState<number | null>(null);
-    
-    const displayMinTime = viewRange?.min ?? minTime;
-    const displayMaxTime = viewRange?.max ?? maxTime;
-
-    const useResizeObserver = (ref: React.RefObject<HTMLElement>) => {
-        const [width, setWidth] = React.useState(0);
-        React.useEffect(() => {
-            const el = ref.current;
-            if (!el) return;
-            const resizeObserver = new ResizeObserver(entries => {
-                if (entries[0]) setWidth(entries[0].contentRect.width);
-            });
-            resizeObserver.observe(el);
-            setWidth(el.clientWidth);
-            return () => resizeObserver.disconnect();
-        }, [ref]);
-        return width;
-    };
-    
-    const mainContainerWidth = useResizeObserver(mainContainerRef);
-    const overviewContainerWidth = useResizeObserver(overviewContainerRef);
-
-    const mainPosToValue = React.useCallback((p: number) => {
-        if (mainContainerWidth === 0 || displayMaxTime === displayMinTime) return displayMinTime;
-        return displayMinTime + (p / mainContainerWidth) * (displayMaxTime - displayMinTime);
-    }, [displayMinTime, displayMaxTime, mainContainerWidth]);
-
-    const mainValueToPos = React.useCallback((v: number) => {
-        if (displayMaxTime === displayMinTime) return 0;
-        return ((v - displayMinTime) / (displayMaxTime - displayMinTime)) * mainContainerWidth;
-    }, [displayMinTime, displayMaxTime, mainContainerWidth]);
-    
-    const overviewValueToPos = React.useCallback((v: number) => ((v - minTime) / (maxTime - minTime)) * overviewContainerWidth, [minTime, maxTime, overviewContainerWidth]);
-    const overviewPosToValue = React.useCallback((p: number) => minTime + (p / overviewContainerWidth) * (maxTime - minTime), [minTime, maxTime, overviewContainerWidth]);
-
-    React.useEffect(() => {
-        // When the parent's cursorTime prop updates to be close to our temporary
-        // drag state, it signifies the update is complete. We then clear our
-        // temporary state, allowing the prop to become the source of truth again.
-        // This prevents the cursor from jumping back to its old position after a drag.
-        if (tempCursorTime !== null && cursorTime !== null && Math.abs(tempCursorTime - cursorTime) < 1000) { // 1s tolerance for rounding
-          setTempCursorTime(null);
-        }
-    }, [cursorTime, tempCursorTime]);
-
-
-    const handleMouseDown = (
-        e: React.MouseEvent,
-        type: 'select_left' | 'select_right' | 'cursor' | 'new_selection'
-    ) => {
-        e.stopPropagation();
-        e.preventDefault();
-        
-        const rect = mainContainerRef.current!.getBoundingClientRect();
-        const clickPos = (e.clientX - rect.left) / uiScale;
-        const clickTime = mainPosToValue(clickPos);
-
-        if (type === 'cursor') {
-            setDragState({ type: 'cursor', startX: e.clientX });
-        } else if (type === 'new_selection') {
-            setDragState({ type: 'new_selection', startX: e.clientX, startTime: clickTime });
-        } else { // select_left or select_right
-            setDragState({
-                type: type,
-                startX: e.clientX,
-                initialStart: selectedStartTime || displayMinTime,
-                initialEnd: selectedEndTime || displayMaxTime,
-            });
-        }
-    };
-    
-    React.useEffect(() => {
-        const handleMouseMove = (e: MouseEvent) => {
-            if (!dragState || !mainContainerRef.current) return;
-            e.preventDefault();
-            const rect = mainContainerRef.current.getBoundingClientRect();
-            const currentUnscaledPos = (e.clientX - rect.left) / uiScale;
-            const currentTime = mainPosToValue(currentUnscaledPos);
-
-            switch (dragState.type) {
-                case 'new_selection': {
-                    const start = Math.min(dragState.startTime, currentTime);
-                    const end = Math.max(dragState.startTime, currentTime);
-                    setTempSelection({ start, end });
-                    break;
-                }
-                case 'select_left': {
-                    const newStart = Math.min(dragState.initialEnd, Math.max(displayMinTime, currentTime));
-                    setTempSelection({ start: newStart, end: dragState.initialEnd });
-                    break;
-                }
-                case 'select_right': {
-                    const newEnd = Math.max(dragState.initialStart, Math.min(displayMaxTime, currentTime));
-                    setTempSelection({ start: dragState.initialStart, end: newEnd });
-                    break;
-                }
-                case 'cursor': {
-                     const newCursorTime = Math.max(displayMinTime, Math.min(displayMaxTime, currentTime));
-                     setTempCursorTime(newCursorTime);
-                     break;
-                }
-            }
-        };
-
-        const handleMouseUp = (e: MouseEvent) => {
-            if (!dragState) return;
-            
-            if (dragState.type === 'new_selection') {
-                if (Math.abs(e.clientX - dragState.startX) < 5) {
-                    onCursorChange(dragState.startTime);
-                } else if (tempSelection) {
-                    onRangeChange(tempSelection.start, tempSelection.end);
-                }
-            } else if (dragState.type === 'select_left' || dragState.type === 'select_right') {
-                if (tempSelection) {
-                    onRangeChange(tempSelection.start, tempSelection.end);
-                }
-            } else if (dragState.type === 'cursor' && tempCursorTime !== null) {
-                onCursorChange(tempCursorTime);
-            }
-
-            setDragState(null);
-            setTempSelection(null);
-        };
-
-        if (dragState) {
-            document.body.style.cursor = 'col-resize';
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp);
-        }
-        return () => {
-            document.body.style.cursor = 'default';
-            document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
-        };
-    }, [dragState, mainPosToValue, displayMinTime, displayMaxTime, onRangeChange, onCursorChange, tempSelection, tempCursorTime, uiScale]);
-
-    const barComponents = [];
-    const barProps = { displayMinTime: displayMinTime, displayMaxTime: displayMaxTime };
-    if (viewMode === 'pagination' && pageTimestampRanges.length > 0 && onGoToPage) barComponents.push({key: 'page', label: 'Pages', Comp: Bar, props: { ...barProps, items: pageTimestampRanges, isActive: (item: any) => item.page === currentPage, onSelect: (item: any) => onGoToPage(item.page), getLabel: (item: any) => item.page, getTitle: (item: any) => `Page ${item.page}`, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
-    if (fileTimeRanges.length > 0) barComponents.push({key: 'file', label: 'Files', Comp: Bar, props: { ...barProps, items: fileTimeRanges, isActive: (item: any) => item.name === activeFileName, onSelect: (item: any) => onFileSelect(item.name), getLabel: (item: any) => item.name.split('/').pop(), getTitle: (item: any) => item.name, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
-    if (datesWithLogs.length > 0) barComponents.push({key: 'date', label: 'Date', Comp: Bar, props: { ...barProps, items: datesWithLogs, isActive: (item: any) => item === activeDate, onSelect: (item: any) => onDateSelect(item), getLabel: (item: any) => item, getTitle: (item: any) => item, getStart: (item: any) => new Date(`${item}T00:00:00.000Z`).getTime(), getEnd: (item: any) => new Date(`${item}T23:59:59.999Z`).getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
-    if (logDensity.length > 0) barComponents.push({key: 'density', label: 'Density', Comp: DensityBar, props: { items: logDensity, theme: theme, displayMinTime: displayMinTime, displayMaxTime: displayMaxTime }});
-
-    const currentStart = tempSelection?.start ?? selectedStartTime;
-    const currentEnd = tempSelection?.end ?? selectedEndTime;
-
-    const visibleSelectionStart = currentStart !== null ? Math.max(currentStart, displayMinTime) : null;
-    const visibleSelectionEnd = currentEnd !== null ? Math.min(currentEnd, displayMaxTime) : null;
-
-    const startPos = visibleSelectionStart !== null ? mainValueToPos(visibleSelectionStart) : -1;
-    const endPos = visibleSelectionEnd !== null ? mainValueToPos(visibleSelectionEnd) : -1;
-
-     const formatTickLabel = (time: number, duration: number): string => {
-        const d = new Date(time);
-        if (duration <= 2 * 60 * 1000) { // < 2 minutes
-            return d.toLocaleTimeString('en-US', { hour12: false, minute: '2-digit', second: '2-digit' });
-        }
-        if (duration <= 2 * 60 * 60 * 1000) { // < 2 hours
-            return d.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
-        }
-        if (duration <= 2 * 24 * 60 * 60 * 1000) { // < 2 days
-            return `${d.toLocaleDateString('en-CA', { month: '2-digit', day: '2-digit' })} ${d.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })}`;
-        }
-        return d.toLocaleDateString('en-CA'); // YYYY-MM-DD
-    };
-
-    const ticks = React.useMemo(() => {
-        if (!mainContainerWidth || mainContainerWidth < 100) return [];
-
-        const tickCount = Math.max(2, Math.floor(mainContainerWidth / 120));
-        const duration = displayMaxTime - displayMinTime;
-        if (duration <= 0) return [];
-
-        const niceIntervals = [
-            1000, 5000, 15000, 30000, // seconds
-            60 * 1000, 5 * 60 * 1000, 15 * 60 * 1000, 30 * 60 * 1000, // minutes
-            60 * 60 * 1000, 2 * 60 * 60 * 1000, 6 * 60 * 60 * 1000, 12 * 60 * 60 * 1000, // hours
-            24 * 60 * 60 * 1000, 2 * 24 * 60 * 60 * 1000, 7 * 24 * 60 * 60 * 1000 // days
-        ];
-        const targetStep = duration / tickCount;
-        const step = niceIntervals.find(i => i > targetStep) || niceIntervals[niceIntervals.length - 1];
-
-        const tickValues: number[] = [];
-        const startTick = Math.ceil(displayMinTime / step) * step;
-
-        for (let t = startTick; t <= displayMaxTime; t += step) {
-            tickValues.push(t);
-        }
-        return tickValues;
-    }, [displayMinTime, displayMaxTime, mainContainerWidth]);
-    
-    const finalCursorTime = tempCursorTime ?? cursorTime;
-
-    return (
-        <div className="w-full">
-            <div className="flex items-start gap-3 w-full">
-                <div className="w-16 flex-shrink-0 text-right">
-                     {/* This div is a spacer to align with the timeline content */}
-                    <div className="h-6" />
-                    <div className="space-y-3">
-                        {barComponents.map(bar => (
-                            <div key={bar.key} className="h-5 text-xs font-semibold text-gray-600 dark:text-gray-400 flex items-center justify-end pr-2">
-                                {bar.label}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-                
-                <div className="flex-grow flex flex-col relative">
-                     {/* Tooltips Container */}
-                    <div className="absolute top-0 w-full h-6 pointer-events-none z-40">
-                         {startPos >= 0 && <div className="absolute top-0 text-xs font-mono text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-1.5 py-0.5 rounded shadow" style={{ left: `${startPos}px`, transform: 'translateX(-50%)' }}>{formatTooltip(currentStart)}</div>}
-                         {endPos >= 0 && (endPos - startPos > 60) && <div className="absolute top-0 text-xs font-mono text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-1.5 py-0.5 rounded shadow" style={{ left: `${endPos}px`, transform: 'translateX(-50%)' }}>{formatTooltip(currentEnd)}</div>}
-                         {finalCursorTime !== null && finalCursorTime >= displayMinTime && finalCursorTime <= displayMaxTime && <div className="absolute top-0 text-xs font-mono bg-red-500/90 backdrop-blur-sm text-white rounded px-1.5 py-0.5" style={{ left: `${mainValueToPos(finalCursorTime)}px`, transform: 'translateX(-50%)' }}>{formatTooltip(finalCursorTime)}</div>}
-                    </div>
-                    
-                    {/* Main Timeline Area */}
-                    <div 
-                        onMouseDown={(e) => handleMouseDown(e, 'new_selection')}
-                        className="w-full cursor-crosshair bg-gray-200 dark:bg-gray-700/50 rounded p-1 overflow-hidden mt-6"
-                    >
-                        <div ref={mainContainerRef} className="relative">
-                            <div className="space-y-3">
-                                {barComponents.map(bar => (
-                                    <bar.Comp key={bar.key} valueToPosition={mainValueToPos} {...bar.props} />
-                                ))}
-                            </div>
-                             {startPos >= 0 && endPos >= 0 && (endPos > startPos) && (
-                                <div
-                                    className="absolute top-0 bottom-0 bg-sky-500/20 dark:bg-sky-400/20 z-10 border-x-4 border-sky-600 dark:border-sky-400"
-                                    style={{ left: `${startPos}px`, width: `${Math.max(0, endPos - startPos)}px` }}
-                                >
-                                    <div
-                                        data-handle="left"
-                                        onMouseDown={(e) => handleMouseDown(e, 'select_left')}
-                                        className="absolute top-0 -left-2 w-4 h-full cursor-col-resize group"
-                                    >
-                                        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-8 w-1.5 bg-sky-600 dark:bg-sky-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
-                                    </div>
-                                    <div
-                                        data-handle="right"
-                                        onMouseDown={(e) => handleMouseDown(e, 'select_right')}
-                                        className="absolute top-0 -right-2 w-4 h-full cursor-col-resize group"
-                                    >
-                                         <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-8 w-1.5 bg-sky-600 dark:bg-sky-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
-                                    </div>
-                                </div>
-                            )}
-                            {finalCursorTime !== null && mainContainerWidth > 0 && finalCursorTime >= displayMinTime && finalCursorTime <= displayMaxTime && (
-                                <div 
-                                    data-handle="cursor"
-                                    onMouseDown={(e) => handleMouseDown(e, 'cursor')}
-                                    className="absolute top-0 bottom-0 bg-red-500 z-30 cursor-col-resize" 
-                                    style={{ left: `${mainValueToPos(finalCursorTime)}px`, width: '4pt', transform: 'translateX(-2pt)' }} 
-                                />
-                            )}
-                        </div>
-                    </div>
-                    {/* Time Axis Ticks */}
-                    <div className="relative w-full h-6 mt-1 pointer-events-none">
-                        {ticks.map(tick => {
-                            const pos = mainValueToPos(tick);
-                            if (pos < 20 || pos > mainContainerWidth - 20) return null;
-                            return (
-                                <div key={tick} className="absolute top-0 text-center" style={{ left: `${pos}px`, transform: 'translateX(-50%)' }}>
-                                    <div className="w-px h-1.5 bg-gray-400 dark:bg-gray-500 mx-auto" />
-                                    <span className="block mt-0.5 text-xs text-gray-500 dark:text-gray-400 font-mono whitespace-nowrap">
-                                        {formatTickLabel(tick, displayMaxTime - displayMinTime)}
-                                    </span>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-                
-                <div className="w-auto flex-shrink-0 self-start pt-6 flex flex-col items-center gap-1">
-                     <button onClick={onZoomToSelection} disabled={!zoomToSelectionEnabled} className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" title="Zoom to Selection"><Icon name="ArrowsPointingIn" iconSet={iconSet} className="w-5 h-5"/></button>
-                     <button onClick={onZoomToExtent} disabled={!viewRange} className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" title="Zoom to Extent"><Icon name="ArrowsPointingOut" iconSet={iconSet} className="w-5 h-5"/></button>
-                     <button onClick={onClear} className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" title="Clear time selection"><Icon name="XMark" iconSet={iconSet} className="w-6 h-6"/></button>
-                </div>
-            </div>
-            <div className="flex items-start gap-3 w-full mt-2">
-                <div className="w-16 flex-shrink-0"></div>
-                <div className="flex-grow" ref={overviewContainerRef}>
-                    {overviewContainerWidth > 0 && (
-                        <OverviewBrush
-                            minTime={minTime} maxTime={maxTime}
-                            viewMin={displayMinTime} viewMax={displayMaxTime}
-                            selectedMin={selectedStartTime}
-                            selectedMax={selectedEndTime}
-                            density={overallLogDensity} theme={theme}
-                            valueToPosition={overviewValueToPos} positionToValue={overviewPosToValue}
-                            onViewRangeChange={onViewRangeChange}
-                            onRangeChange={onRangeChange}
-                            uiScale={uiScale}
-                        />
-                    )}
-                </div>
-                <div className="w-[60px] flex-shrink-0"/>
             </div>
         </div>
     );

@@ -2,9 +2,9 @@ import React from 'react';
 import { 
     LogEntry, ConsoleMessage, FilterState, ConsoleMessageType, DashboardData, 
     PageTimestampRange, SessionFile, ColumnVisibilityState, ColumnStyles, 
-    PanelWidths, ViewMode, OverallTimeRange, FileTimeRange, LogDensityPoint, 
+    PanelWidths, ViewMode, OverallTimeRange, FileTimeRange, LogDensityPointByLevel, 
     IconSet, LogTableDensity, Theme, Settings as SettingsType, ProgressPhase,
-    StockInfoEntry, StockInfoFilters, ToastMessage, StockArticleSuggestion
+    StockInfoEntry, StockInfoFilters, ToastMessage, StockArticleSuggestion, LogDensityPoint
 } from './types.ts';
 import { LogTable } from './components/LogTable.tsx';
 import { ProgressIndicator } from './components/ProgressIndicator.tsx';
@@ -132,8 +132,8 @@ const App: React.FC = () => {
   
   const [dashboardData, setDashboardData] = React.useState<DashboardData>(initialDashboardData);
   const [fileTimeRanges, setFileTimeRanges] = React.useState<FileTimeRange[]>([]);
-  const [logDensity, setLogDensity] = React.useState<LogDensityPoint[]>([]);
-  const [overallLogDensity, setOverallLogDensity] = React.useState<LogDensityPoint[]>([]);
+  const [logDensity, setLogDensity] = React.useState<LogDensityPointByLevel[]>([]);
+  const [overallLogDensity, setOverallLogDensity] = React.useState<LogDensityPointByLevel[]>([]);
   const [datesWithLogs, setDatesWithLogs] = React.useState<string[]>([]);
 
   const [activeView, setActiveView] = React.useState<'data' | 'viewer' | 'dashboard' | 'console' | 'settings' | 'info' | 'stock'>('data');
@@ -257,6 +257,7 @@ const App: React.FC = () => {
     setOverallTimeRange(null);
     setOverallStockTimeRange(null);
     setOverallStockDensity([]);
+    setOverallLogDensity([]);
     setTimelineViewRange(null);
     setActiveSessionName(null);
     setUniqueValues({ level: [], sndrtype: [], sndrname: [], fileName: [] });
@@ -311,7 +312,7 @@ const App: React.FC = () => {
                 max: new Date(maxTime + 'Z').getTime()
             };
             setOverallTimeRange(overallRange);
-            setOverallLogDensity(newDb.getLogDensity(initialFilters, 300));
+            setOverallLogDensity(newDb.getLogDensityByLevel(initialFilters, 300));
         }
 
         if (fromSessionLoad) {
@@ -618,7 +619,7 @@ const App: React.FC = () => {
           };
           setDashboardData(newDashboardData);
           setFileTimeRanges(db.getTimeRangePerFile(appliedFilters));
-          setLogDensity(db.getLogDensity(appliedFilters, 200));
+          setLogDensity(db.getLogDensityByLevel(appliedFilters, 200));
           setDatesWithLogs(db.getDatesWithLogs(appliedFilters));
           
           // 2. Conditionally fetch the actual log entries
