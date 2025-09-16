@@ -380,6 +380,16 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     const overviewValueToPos = React.useCallback((v: number) => ((v - minTime) / (maxTime - minTime)) * overviewContainerWidth, [minTime, maxTime, overviewContainerWidth]);
     const overviewPosToValue = React.useCallback((p: number) => minTime + (p / overviewContainerWidth) * (maxTime - minTime), [minTime, maxTime, overviewContainerWidth]);
 
+    React.useEffect(() => {
+        // When the parent's cursorTime prop updates to be close to our temporary
+        // drag state, it signifies the update is complete. We then clear our
+        // temporary state, allowing the prop to become the source of truth again.
+        // This prevents the cursor from jumping back to its old position after a drag.
+        if (tempCursorTime !== null && cursorTime !== null && Math.abs(tempCursorTime - cursorTime) < 1000) { // 1s tolerance for rounding
+          setTempCursorTime(null);
+        }
+    }, [cursorTime, tempCursorTime]);
+
 
     const handleMouseDown = (
         e: React.MouseEvent,
@@ -458,7 +468,6 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
 
             setDragState(null);
             setTempSelection(null);
-            setTempCursorTime(null);
         };
 
         if (dragState) {
