@@ -91,6 +91,7 @@ interface LogTableProps {
     logTableDensity: LogTableDensity;
     onLogTableDensityChange: (density: LogTableDensity) => void;
     uiScale: number;
+    cursorTime: number | null;
 }
 
 export const LogTable: React.FC<LogTableProps> = (props) => {
@@ -98,6 +99,9 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     const [contextMenuState, setContextMenuState] = React.useState<ContextMenuState>(null);
     const tableContainerRef = React.useRef<HTMLDivElement>(null);
     const rowRefs = React.useRef<Map<number, HTMLTableRowElement | null>>(new Map());
+    
+    const panelWidthsRef = React.useRef(props.panelWidths);
+    panelWidthsRef.current = props.panelWidths;
 
     const {
         entries,
@@ -160,14 +164,14 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     };
     
     const handleFilterResize = (deltaX: number) => {
-        const newWidth = Math.max(240, Math.min(800, props.panelWidths.filters + deltaX));
-        props.onPanelWidthsChange({ ...props.panelWidths, filters: newWidth });
+        const newWidth = Math.max(240, Math.min(800, panelWidthsRef.current.filters + deltaX));
+        props.onPanelWidthsChange({ ...panelWidthsRef.current, filters: newWidth });
     };
 
     const handleDetailsResize = (deltaX: number) => {
         // Delta is positive when moving right, which should decrease the details panel width
-        const newWidth = Math.max(300, Math.min(1200, props.panelWidths.details - deltaX));
-        props.onPanelWidthsChange({ ...props.panelWidths, details: newWidth });
+        const newWidth = Math.max(300, Math.min(1200, panelWidthsRef.current.details - deltaX));
+        props.onPanelWidthsChange({ ...panelWidthsRef.current, details: newWidth });
     };
 
     return (
@@ -199,6 +203,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                     zoomToSelectionEnabled={!!(props.appliedFilters.dateFrom && props.appliedFilters.dateTo)}
                     iconSet={props.iconSet}
                     uiScale={props.uiScale}
+                    cursorTime={props.cursorTime}
                    />
                 </div>
             )}

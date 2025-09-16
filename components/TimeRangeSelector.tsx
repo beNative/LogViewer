@@ -583,8 +583,8 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                                 <div 
                                     data-handle="cursor"
                                     onMouseDown={(e) => handleMouseDown(e, 'cursor')}
-                                    className="absolute top-0 bottom-0 bg-red-500 z-30 cursor-col-resize w-0.5" 
-                                    style={{ left: `${mainValueToPos(cursorTime)}px` }} 
+                                    className="absolute top-0 bottom-0 bg-red-500 z-30 cursor-col-resize" 
+                                    style={{ left: `${mainValueToPos(cursorTime)}px`, width: '4pt', transform: 'translateX(-2pt)' }} 
                                 />
                             )}
                         </div>

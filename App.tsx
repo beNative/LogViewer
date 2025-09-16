@@ -1263,17 +1263,21 @@ const App: React.FC = () => {
     }
   };
   
-  const handlePanelWidthsChange = async (newWidths: PanelWidths) => {
+  const handlePanelWidthsChange = (newWidths: PanelWidths) => {
     setPanelWidths(newWidths);
     if (window.electronAPI) {
-        try {
-            const settings = await window.electronAPI.getSettings();
-            await window.electronAPI.setSettings({ ...settings, panelWidths: newWidths });
-            logToConsole('Panel widths saved.', 'DEBUG');
-        } catch (err) {
-            const msg = err instanceof Error ? err.message : String(err);
-            logToConsole(`Failed to save panel widths: ${msg}`, 'ERROR');
-        }
+        // Debounce saving to avoid excessive writes during drag
+        clearTimeout((window as any).__panelWidthsSaveTimeout);
+        (window as any).__panelWidthsSaveTimeout = setTimeout(async () => {
+            try {
+                const settings = await window.electronAPI.getSettings();
+                await window.electronAPI.setSettings({ ...settings, panelWidths: newWidths });
+                logToConsole('Panel widths saved.', 'DEBUG');
+            } catch (err) {
+                const msg = err instanceof Error ? err.message : String(err);
+                logToConsole(`Failed to save panel widths: ${msg}`, 'ERROR');
+            }
+        }, 500);
     }
   };
 
@@ -1912,6 +1916,16 @@ const handleUiScaleChange = async (newScale: number) => {
 
 
   const totalPages = Math.ceil(totalFilteredCount / pageSize);
+  
+  // Find the selected entry's time for the timeline cursor
+  const selectedEntryForCursor = React.useMemo(() => {
+    if (keyboardSelectedId === null) return null;
+    return filteredEntries.find(e => e.id === keyboardSelectedId);
+  }, [keyboardSelectedId, filteredEntries]);
+
+  const cursorTime = selectedEntryForCursor 
+    ? new Date(selectedEntryForCursor.time.replace(/ (\d+)$/, '.$1') + 'Z').getTime() 
+    : null;
 
   return (
     <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
@@ -2011,6 +2025,7 @@ const handleUiScaleChange = async (newScale: number) => {
                 logTableDensity={logTableDensity}
                 onLogTableDensityChange={handleLogTableDensityChange}
                 uiScale={uiScale}
+                cursorTime={cursorTime}
               />
             ) : (
                 <div className="flex-grow flex items-center justify-center p-8 text-center bg-white dark:bg-gray-900">
