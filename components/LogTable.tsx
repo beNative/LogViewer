@@ -140,7 +140,58 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         if (!props.isDetailPanelVisible) {
             props.onDetailPanelVisibilityChange(true);
         }
+        tableContainerRef.current?.focus({ preventScroll: true });
     };
+
+    // Keyboard navigation effect
+    React.useEffect(() => {
+        const container = tableContainerRef.current;
+        if (!container) return;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (!['ArrowUp', 'ArrowDown'].includes(e.key)) {
+                return;
+            }
+            e.preventDefault();
+
+            const currentIndex = entries.findIndex(entry => entry.id === keyboardSelectedId);
+
+            if (currentIndex === -1) {
+                if (entries.length > 0) {
+                    setKeyboardSelectedId(entries[0].id);
+                }
+                return;
+            }
+
+            let nextIndex = currentIndex;
+            if (e.key === 'ArrowDown') {
+                nextIndex = currentIndex + 1;
+            } else if (e.key === 'ArrowUp') {
+                nextIndex = currentIndex - 1;
+            }
+
+            if (nextIndex >= 0 && nextIndex < entries.length) {
+                setKeyboardSelectedId(entries[nextIndex].id);
+            } else if (viewMode === 'scroll' && e.key === 'ArrowDown' && nextIndex >= entries.length && hasMore) {
+                onLoadMore();
+            }
+        };
+        
+        container.addEventListener('keydown', handleKeyDown);
+        return () => container.removeEventListener('keydown', handleKeyDown);
+
+    }, [entries, keyboardSelectedId, setKeyboardSelectedId, hasMore, onLoadMore, viewMode]);
+
+    // Scroll into view effect
+    React.useEffect(() => {
+        if (keyboardSelectedId !== null) {
+            const rowEl = rowRefs.current.get(keyboardSelectedId);
+            if (rowEl) {
+                rowEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            }
+        }
+    }, [keyboardSelectedId]);
+
 
     const handleContextMenu = (e: React.MouseEvent, entry: LogEntry, key: ColumnKey, value: string) => {
         e.preventDefault();
@@ -221,7 +272,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                             <Icon name="SidebarRight" iconSet={props.iconSet} className="w-5 h-5"/>
                         </button>
                     </div>
-                    <div className="overflow-auto" ref={tableContainerRef}>
+                    <div className="overflow-auto outline-none" ref={tableContainerRef} tabIndex={-1}>
                         <table className="min-w-full table-fixed font-sans">
                             <thead className="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 shadow-sm">
                                 <tr>

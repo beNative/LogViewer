@@ -40,7 +40,7 @@ interface TimeRangeSelectorProps {
 type DragState =
   | { type: 'select_left'; startX: number; initialStart: number; initialEnd: number }
   | { type: 'select_right'; startX: number; initialStart: number; initialEnd: number }
-  | { type: 'cursor'; startX: number; initialCursor: number }
+  | { type: 'cursor'; startX: number }
   | { type: 'new_selection'; startX: number; startTime: number };
 
 const PALETTE = [
@@ -391,14 +391,18 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
         const clickPos = (e.clientX - rect.left) / uiScale;
         const clickTime = mainPosToValue(clickPos);
 
-        setDragState({
-            type,
-            startX: e.clientX,
-            startTime: clickTime,
-            initialStart: selectedStartTime || displayMinTime,
-            initialEnd: selectedEndTime || displayMaxTime,
-            initialCursor: cursorTime || clickTime,
-        });
+        if (type === 'cursor') {
+            setDragState({ type: 'cursor', startX: e.clientX });
+        } else if (type === 'new_selection') {
+            setDragState({ type: 'new_selection', startX: e.clientX, startTime: clickTime });
+        } else { // select_left or select_right
+            setDragState({
+                type: type,
+                startX: e.clientX,
+                initialStart: selectedStartTime || displayMinTime,
+                initialEnd: selectedEndTime || displayMaxTime,
+            });
+        }
     };
     
     React.useEffect(() => {
@@ -406,32 +410,28 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
             if (!dragState || !mainContainerRef.current) return;
             e.preventDefault();
             const rect = mainContainerRef.current.getBoundingClientRect();
-            
-            const deltaX = e.clientX - dragState.startX;
-            const unscaledDeltaX = deltaX / uiScale;
-            const deltaTime = mainPosToValue(unscaledDeltaX) - mainPosToValue(0);
+            const currentUnscaledPos = (e.clientX - rect.left) / uiScale;
+            const currentTime = mainPosToValue(currentUnscaledPos);
 
             switch (dragState.type) {
                 case 'new_selection': {
-                    const currentUnscaledPos = (e.clientX - rect.left) / uiScale;
-                    const currentTime = mainPosToValue(currentUnscaledPos);
                     const start = Math.min(dragState.startTime, currentTime);
                     const end = Math.max(dragState.startTime, currentTime);
                     setTempSelection({ start, end });
                     break;
                 }
                 case 'select_left': {
-                    const newStart = Math.min(dragState.initialEnd, Math.max(displayMinTime, dragState.initialStart + deltaTime));
+                    const newStart = Math.min(dragState.initialEnd, Math.max(displayMinTime, currentTime));
                     setTempSelection({ start: newStart, end: dragState.initialEnd });
                     break;
                 }
                 case 'select_right': {
-                    const newEnd = Math.max(dragState.initialStart, Math.min(displayMaxTime, dragState.initialEnd + deltaTime));
+                    const newEnd = Math.max(dragState.initialStart, Math.min(displayMaxTime, currentTime));
                     setTempSelection({ start: dragState.initialStart, end: newEnd });
                     break;
                 }
                 case 'cursor': {
-                     const newCursorTime = Math.max(displayMinTime, Math.min(displayMaxTime, dragState.initialCursor + deltaTime));
+                     const newCursorTime = Math.max(displayMinTime, Math.min(displayMaxTime, currentTime));
                      onCursorChange(newCursorTime);
                      break;
                 }
@@ -452,6 +452,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                     onRangeChange(tempSelection.start, tempSelection.end);
                 }
             }
+            // No action on mouseUp for 'cursor' type, as it's updated live during move.
 
             setDragState(null);
             setTempSelection(null);
