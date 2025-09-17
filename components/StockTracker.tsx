@@ -1,5 +1,5 @@
 import React from 'react';
-import { StockInfoEntry, StockInfoFilters, IconSet, Theme, LogDensityPoint, OverallTimeRange, StockArticleSuggestion } from '../types.ts';
+import { StockInfoEntry, StockInfoFilters, IconSet, Theme, LogDensityPoint, OverallTimeRange, StockArticleSuggestion, TimelineBarVisibility } from '../types.ts';
 import { Icon } from './icons/index.tsx';
 import { StockHistoryChart } from './StockHistoryChart.tsx';
 import { TimeRangeSelector } from './TimeRangeSelector.tsx';
@@ -15,12 +15,14 @@ interface StockTrackerProps {
   uiScale: number;
   onRebuildStockData: () => Promise<void>;
   onFetchSuggestions: (searchTerm: string, timeFilters: StockInfoFilters) => Promise<StockArticleSuggestion[]>;
+  timelineBarVisibility: TimelineBarVisibility;
+  onTimelineBarVisibilityChange: (newVisibility: TimelineBarVisibility) => void;
 }
 
 const inputStyles = "w-full bg-white dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white sm:text-sm rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition";
 
 
-export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, isBusy, iconSet, theme, overallTimeRange, overallStockDensity, uiScale, onRebuildStockData, onFetchSuggestions }) => {
+export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, isBusy, iconSet, theme, overallTimeRange, overallStockDensity, uiScale, onRebuildStockData, onFetchSuggestions, timelineBarVisibility, onTimelineBarVisibilityChange }) => {
     const [filters, setFilters] = React.useState<StockInfoFilters>({
         searchTerm: '',
         dateFrom: '',
@@ -304,6 +306,8 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                                 zoomToSelectionEnabled={zoomToSelectionEnabled}
                                 iconSet={iconSet}
                                 uiScale={uiScale}
+                                timelineBarVisibility={timelineBarVisibility}
+                                onTimelineBarVisibilityChange={onTimelineBarVisibilityChange}
                             />
                         ) : (
                             <div className="h-40 flex items-center justify-center bg-gray-200 dark:bg-gray-700/50 rounded-lg text-sm text-gray-500 dark:text-gray-400 text-center p-4">

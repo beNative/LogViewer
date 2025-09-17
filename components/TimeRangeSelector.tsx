@@ -1,7 +1,8 @@
 import React from 'react';
-import { PageTimestampRange, FileTimeRange, LogDensityPointByLevel, ViewMode, OverallTimeRange, IconSet, LogDensityPoint } from '../types.ts';
+import { PageTimestampRange, FileTimeRange, LogDensityPointByLevel, ViewMode, OverallTimeRange, IconSet, LogDensityPoint, TimelineBarVisibility } from '../types.ts';
 import { Icon } from './icons/index.tsx';
 import { Tooltip } from './Tooltip.tsx';
+import { TimelineBarVisibilityMenu } from './TimelineBarVisibilityMenu.tsx';
 
 type Theme = 'light' | 'dark';
 type ValueToPositionFn = (value: number) => number;
@@ -39,6 +40,8 @@ interface TimeRangeSelectorProps {
     zoomToSelectionEnabled: boolean;
     iconSet: IconSet;
     uiScale: number;
+    timelineBarVisibility: TimelineBarVisibility;
+    onTimelineBarVisibilityChange: (newVisibility: TimelineBarVisibility) => void;
 }
 
 type DragState =
@@ -245,7 +248,8 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     pageTimestampRanges, fileTimeRanges, logDensity, overallLogDensity, datesWithLogs, viewMode, onGoToPage,
     onCursorChange, onFileSelect, onDateSelect,
     cursorTime = null, activeFileName = null, activeDate = null, currentPage = null,
-    viewRange, onViewRangeChange, onZoomToSelection, onZoomToExtent, zoomToSelectionEnabled, iconSet, uiScale
+    viewRange, onViewRangeChange, onZoomToSelection, onZoomToExtent, zoomToSelectionEnabled, iconSet, uiScale,
+    timelineBarVisibility, onTimelineBarVisibilityChange
 }) => {
     const mainContainerRef = React.useRef<HTMLDivElement>(null);
     const overviewContainerRef = React.useRef<HTMLDivElement>(null);
@@ -253,6 +257,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     const [tempSelection, setTempSelection] = React.useState<{ start: number, end: number} | null>(null);
     const [tempCursorTime, setTempCursorTime] = React.useState<number | null>(null);
     const [densityTooltip, setDensityTooltip] = React.useState<{ x: number, y: number, bucketData: BucketData } | null>(null);
+    const [contextMenu, setContextMenu] = React.useState<{ x: number, y: number } | null>(null);
 
     const displayMinTime = viewRange?.min ?? minTime;
     const displayMaxTime = viewRange?.max ?? maxTime;
@@ -419,12 +424,18 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     
     const handleDensityLeave = () => setDensityTooltip(null);
 
+    const handleLabelsContextMenu = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setContextMenu({ x: e.clientX, y: e.clientY });
+    };
+
+
     const barComponents = [];
     const barProps = { displayMinTime: displayMinTime, displayMaxTime: displayMaxTime };
-    if (viewMode === 'pagination' && pageTimestampRanges.length > 0 && onGoToPage) barComponents.push({key: 'page', label: 'Pages', Comp: Bar, props: { ...barProps, items: pageTimestampRanges, isActive: (item: any) => item.page === currentPage, onSelect: (item: any) => onGoToPage(item.page), getLabel: (item: any) => item.page, getTitle: (item: any) => `Page ${item.page}`, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
-    if (fileTimeRanges.length > 0) barComponents.push({key: 'file', label: 'Files', Comp: Bar, props: { ...barProps, items: fileTimeRanges, isActive: (item: any) => item.name === activeFileName, onSelect: (item: any) => onFileSelect(item.name), getLabel: (item: any) => item.name.split('/').pop(), getTitle: (item: any) => item.name, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
-    if (datesWithLogs.length > 0) barComponents.push({key: 'date', label: 'Date', Comp: Bar, props: { ...barProps, items: datesWithLogs, isActive: (item: any) => item === activeDate, onSelect: (item: any) => onDateSelect(item), getLabel: (item: any) => item, getTitle: (item: any) => item, getStart: (item: any) => new Date(`${item}T00:00:00.000Z`).getTime(), getEnd: (item: any) => new Date(`${item}T23:59:59.999Z`).getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
-    if (logDensity.length > 0) barComponents.push({
+    if (timelineBarVisibility.pages && viewMode === 'pagination' && pageTimestampRanges.length > 0 && onGoToPage) barComponents.push({key: 'page', label: 'Pages', Comp: Bar, props: { ...barProps, items: pageTimestampRanges, isActive: (item: any) => item.page === currentPage, onSelect: (item: any) => onGoToPage(item.page), getLabel: (item: any) => item.page, getTitle: (item: any) => `Page ${item.page}`, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
+    if (timelineBarVisibility.files && fileTimeRanges.length > 0) barComponents.push({key: 'file', label: 'Files', Comp: Bar, props: { ...barProps, items: fileTimeRanges, isActive: (item: any) => item.name === activeFileName, onSelect: (item: any) => onFileSelect(item.name), getLabel: (item: any) => item.name.split('/').pop(), getTitle: (item: any) => item.name, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
+    if (timelineBarVisibility.dates && datesWithLogs.length > 0) barComponents.push({key: 'date', label: 'Date', Comp: Bar, props: { ...barProps, items: datesWithLogs, isActive: (item: any) => item === activeDate, onSelect: (item: any) => onDateSelect(item), getLabel: (item: any) => item, getTitle: (item: any) => item, getStart: (item: any) => new Date(`${item}T00:00:00.000Z`).getTime(), getEnd: (item: any) => new Date(`${item}T23:59:59.999Z`).getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
+    if (timelineBarVisibility.density && logDensity.length > 0) barComponents.push({
         key: 'density', 
         label: 'Density', 
         Comp: DensityBar, 
@@ -491,7 +502,10 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     return (
         <div className="w-full">
             <div className="flex items-start gap-3 w-full">
-                <div className="w-16 flex-shrink-0 text-right">
+                <div 
+                    className="w-16 flex-shrink-0 text-right"
+                    onContextMenu={handleLabelsContextMenu}
+                >
                      {/* This div is a spacer to align with the timeline content */}
                     <div className="h-6" />
                     <div className="space-y-3">
@@ -524,7 +538,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                             </div>
                              {startPos >= 0 && endPos >= 0 && (endPos > startPos) && (
                                 <div
-                                    className="absolute top-0 bottom-0 bg-sky-500/20 dark:bg-sky-400/20 z-10 border-x-4 border-sky-600 dark:border-sky-400 pointer-events-none"
+                                    className="absolute top-0 bottom-0 bg-sky-500/20 dark:bg-sky-400/20 z-10 pointer-events-none"
                                     style={{ left: `${startPos}px`, width: `${Math.max(0, endPos - startPos)}px` }}
                                 >
                                     <div
@@ -582,26 +596,38 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                     </Tooltip>
                 </div>
             </div>
-            <div className="flex items-start gap-3 w-full mt-2">
-                <div className="w-16 flex-shrink-0"></div>
-                <div className="flex-grow" ref={overviewContainerRef}>
-                    {overviewContainerWidth > 0 && (
-                        <OverviewBrush
-                            minTime={minTime} maxTime={maxTime}
-                            viewMin={displayMinTime} viewMax={displayMaxTime}
-                            selectedMin={selectedStartTime}
-                            selectedMax={selectedEndTime}
-                            density={overallLogDensity} theme={theme}
-                            valueToPosition={overviewValueToPos} positionToValue={overviewPosToValue}
-                            onViewRangeChange={onViewRangeChange}
-                            onRangeChange={onRangeChange}
-                            uiScale={uiScale}
-                        />
-                    )}
+            {timelineBarVisibility.overview && (
+                 <div className="flex items-start gap-3 w-full mt-2">
+                    <div className="w-16 flex-shrink-0"></div>
+                    <div className="flex-grow" ref={overviewContainerRef}>
+                        {overviewContainerWidth > 0 && (
+                            <OverviewBrush
+                                minTime={minTime} maxTime={maxTime}
+                                viewMin={displayMinTime} viewMax={displayMaxTime}
+                                selectedMin={selectedStartTime}
+                                selectedMax={selectedEndTime}
+                                density={overallLogDensity} theme={theme}
+                                valueToPosition={overviewValueToPos} positionToValue={overviewPosToValue}
+                                onViewRangeChange={onViewRangeChange}
+                                onRangeChange={onRangeChange}
+                                uiScale={uiScale}
+                            />
+                        )}
+                    </div>
+                    <div className="w-[60px] flex-shrink-0"/>
                 </div>
-                <div className="w-[60px] flex-shrink-0"/>
-            </div>
+            )}
             {densityTooltip && <DensityTooltip {...densityTooltip} theme={theme} />}
+            {contextMenu && (
+                <TimelineBarVisibilityMenu
+                    x={contextMenu.x}
+                    y={contextMenu.y}
+                    onClose={() => setContextMenu(null)}
+                    visibility={timelineBarVisibility}
+                    onVisibilityChange={onTimelineBarVisibilityChange}
+                    viewMode={viewMode}
+                />
+            )}
         </div>
     );
 };

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ColumnStyleSettings } from './ColumnStyleSettings.tsx';
-import { ColumnStyles, ViewMode, IconSet, LogTableDensity, Settings as SettingsType, ColumnVisibilityState, PanelWidths, FilterState } from '../types.ts';
+import { ColumnStyles, ViewMode, IconSet, LogTableDensity, Settings as SettingsType, ColumnVisibilityState, PanelWidths, FilterState, TimelineBarVisibility } from '../types.ts';
 import { JsonEditor } from './JsonEditor.tsx';
 import { Icon, IconName } from './icons/index.tsx';
 import { DensityControl } from './DensityControl.tsx';
@@ -38,6 +38,8 @@ interface SettingsProps {
   columnVisibility: ColumnVisibilityState;
   customFilterPresets: Record<string, FilterState>;
   panelWidths: PanelWidths;
+  timelineBarVisibility: TimelineBarVisibility;
+  onTimelineBarVisibilityChange: (newVisibility: TimelineBarVisibility) => void;
 }
 
 const ToggleSwitch: React.FC<{
@@ -133,6 +135,7 @@ export const Settings: React.FC<SettingsProps> = (props) => {
         isTimeRangeSelectorVisible, onTimeRangeSelectorVisibilityChange,
         isDetailPanelVisible, onDetailPanelVisibilityChange,
         isFocusDebuggerVisible, onFocusDebuggerVisibilityChange,
+        timelineBarVisibility, onTimelineBarVisibilityChange,
         logTableDensity, onLogTableDensityChange,
         allowPrerelease, onAllowPrereleaseChange,
         isAutoUpdateEnabled, onAutoUpdateEnabledChange,
@@ -299,11 +302,22 @@ export const Settings: React.FC<SettingsProps> = (props) => {
                         </div>
                     )}
                      {activeCategory === 'behavior' && (
-                        <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                             <h2 className="text-xl font-bold text-gray-800 dark:text-sky-400 pb-4">Behavior</h2>
-                             <SegmentedControl label="Log Viewer Mode" value={viewMode} onChange={onViewModeChange} options={[{ label: 'Paginate', value: 'pagination' }, { label: 'Scroll', value: 'scroll' }]} />
-                             <ToggleSwitch label="Show Timeline by Default" enabled={isTimeRangeSelectorVisible} onChange={onTimeRangeSelectorVisibilityChange} />
-                             <ToggleSwitch label="Show Details Panel by Default" enabled={isDetailPanelVisible} onChange={onDetailPanelVisibilityChange} />
+                        <div>
+                            <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                                <h2 className="text-xl font-bold text-gray-800 dark:text-sky-400 pb-4">Behavior</h2>
+                                <SegmentedControl label="Log Viewer Mode" value={viewMode} onChange={onViewModeChange} options={[{ label: 'Paginate', value: 'pagination' }, { label: 'Scroll', value: 'scroll' }]} />
+                                <ToggleSwitch label="Show Timeline by Default" enabled={isTimeRangeSelectorVisible} onChange={onTimeRangeSelectorVisibilityChange} />
+                                <ToggleSwitch label="Show Details Panel by Default" enabled={isDetailPanelVisible} onChange={onDetailPanelVisibilityChange} />
+                            </div>
+                            <div className="divide-y divide-gray-200 dark:divide-gray-700 mt-6">
+                                 <h3 className="text-lg font-bold text-gray-800 dark:text-sky-400 pb-4">Timeline Display</h3>
+                                 <p className="py-3 text-sm text-gray-500 dark:text-gray-400">Control which contextual bars are visible in the timeline selector. These can also be toggled by right-clicking the timeline labels.</p>
+                                 <ToggleSwitch label="Show Pages Bar" enabled={timelineBarVisibility.pages} onChange={(e) => onTimelineBarVisibilityChange({...timelineBarVisibility, pages: e})} />
+                                 <ToggleSwitch label="Show Files Bar" enabled={timelineBarVisibility.files} onChange={(e) => onTimelineBarVisibilityChange({...timelineBarVisibility, files: e})} />
+                                 <ToggleSwitch label="Show Dates Bar" enabled={timelineBarVisibility.dates} onChange={(e) => onTimelineBarVisibilityChange({...timelineBarVisibility, dates: e})} />
+                                 <ToggleSwitch label="Show Density Bar" enabled={timelineBarVisibility.density} onChange={(e) => onTimelineBarVisibilityChange({...timelineBarVisibility, density: e})} />
+                                 <ToggleSwitch label="Show Overview Bar" enabled={timelineBarVisibility.overview} onChange={(e) => onTimelineBarVisibilityChange({...timelineBarVisibility, overview: e})} />
+                            </div>
                         </div>
                     )}
                     {activeCategory === 'updates' && (

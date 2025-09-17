@@ -149,6 +149,14 @@ export type LogTableDensity = 'compact' | 'normal' | 'comfortable';
 
 export type ProgressPhase = 'reading' | 'unzipping' | 'parsing' | 'inserting' | 'indexing' | 'loading';
 
+export type TimelineBarVisibility = {
+    pages: boolean;
+    files: boolean;
+    dates: boolean;
+    density: boolean;
+    overview: boolean;
+};
+
 export type Settings = {
     theme: Theme;
     viewMode: ViewMode;
@@ -164,6 +172,7 @@ export type Settings = {
     isTimeRangeSelectorVisible: boolean;
     isDetailPanelVisible: boolean;
     isFocusDebuggerVisible: boolean;
+    timelineBarVisibility: TimelineBarVisibility;
     uiScale: number;
 };
 

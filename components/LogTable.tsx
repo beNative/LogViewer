@@ -1,5 +1,5 @@
 import React from 'react';
-import { LogEntry, FilterState, PageTimestampRange, ColumnVisibilityState, ColumnStyles, ColumnKey, PanelWidths, ViewMode, ConsoleMessage, OverallTimeRange, FileTimeRange, LogDensityPointByLevel, IconSet, LogTableDensity, Theme } from '../types.ts';
+import { LogEntry, FilterState, PageTimestampRange, ColumnVisibilityState, ColumnStyles, ColumnKey, PanelWidths, ViewMode, ConsoleMessage, OverallTimeRange, FileTimeRange, LogDensityPointByLevel, IconSet, LogTableDensity, Theme, TimelineBarVisibility } from '../types.ts';
 import { Icon } from './icons/index.tsx';
 import { FilterBar } from './FilterBar.tsx';
 import { LogDetailPanel } from './LogDetailPanel.tsx';
@@ -93,6 +93,8 @@ interface LogTableProps {
     onLogTableDensityChange: (density: LogTableDensity) => void;
     uiScale: number;
     cursorTime: number | null;
+    timelineBarVisibility: TimelineBarVisibility;
+    onTimelineBarVisibilityChange: (newVisibility: TimelineBarVisibility) => void;
 }
 
 export const LogTable: React.FC<LogTableProps> = (props) => {
@@ -270,6 +272,8 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                     iconSet={props.iconSet}
                     uiScale={props.uiScale}
                     cursorTime={props.cursorTime}
+                    timelineBarVisibility={props.timelineBarVisibility}
+                    onTimelineBarVisibilityChange={props.onTimelineBarVisibilityChange}
                    />
                 </div>
             )}

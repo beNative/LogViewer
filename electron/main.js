@@ -65,6 +65,14 @@ function getSettings() {
       msg: { font: MONO_FONT_STACK, isBold: false, isItalic: false, fontSize: 13, color: '#1F2937', darkColor: '#F3F4F6' },
     };
 
+    const defaultTimelineBarVisibility = {
+        pages: true,
+        files: true,
+        dates: true,
+        density: true,
+        overview: true,
+    };
+
     const defaultSettings = {
         theme: "light",
         viewMode: "pagination",
@@ -88,7 +96,9 @@ function getSettings() {
             details: 500,
         },
         isTimeRangeSelectorVisible: true,
+        isDetailPanelVisible: false,
         isFocusDebuggerVisible: false,
+        timelineBarVisibility: defaultTimelineBarVisibility,
         uiScale: 1,
     };
     try {
@@ -130,7 +140,12 @@ function getSettings() {
                     ...(loadedSettings.panelWidths || {}),
                 },
                 isTimeRangeSelectorVisible: loadedSettings.isTimeRangeSelectorVisible ?? defaultSettings.isTimeRangeSelectorVisible,
+                isDetailPanelVisible: loadedSettings.isDetailPanelVisible ?? defaultSettings.isDetailPanelVisible,
                 isFocusDebuggerVisible: loadedSettings.isFocusDebuggerVisible ?? defaultSettings.isFocusDebuggerVisible,
+                timelineBarVisibility: {
+                    ...defaultSettings.timelineBarVisibility,
+                    ...(loadedSettings.timelineBarVisibility || {}),
+                },
                 uiScale: loadedSettings.uiScale ?? defaultSettings.uiScale,
             };
             
