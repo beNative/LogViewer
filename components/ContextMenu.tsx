@@ -114,17 +114,19 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                 </li>
                  <div className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
                 <li>
+                    {/* FIX: Changed iconName from "Clipboard" to "ClipboardDocument" to match available icons. */}
                     <MenuItem
                         label="Copy Message"
-                        iconName="Clipboard"
+                        iconName="ClipboardDocument"
                         iconSet={iconSet}
                         onClick={() => handleCopy(entry.msg)}
                     />
                 </li>
                 <li>
+                    {/* FIX: Changed iconName from "Clipboard" to "ClipboardDocument" to match available icons. */}
                     <MenuItem
                         label="Copy Row as JSON"
-                        iconName="Clipboard"
+                        iconName="ClipboardDocument"
                         iconSet={iconSet}
                         onClick={() => handleCopy(JSON.stringify(entry, null, 2))}
                     />

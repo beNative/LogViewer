@@ -52,10 +52,81 @@ const DetailRow: React.FC<{
 
 export const LogDetailPanel: React.FC<LogDetailPanelProps> = ({ entry, onClose, width, highlightTerms = [], theme, onApplyFilter, columnStyles, iconSet }) => {
     
+    const [activeTab, setActiveTab] = React.useState<'parsed' | 'raw'>('parsed');
+    const [copiedState, setCopiedState] = React.useState<'parsed' | 'raw' | null>(null);
+
     const parsedContent = React.useMemo(() => {
         if (!entry) return null;
         return parseLogMessage(entry.msg);
     }, [entry]);
+
+    React.useEffect(() => {
+        // When the entry changes, reset the tab to the default and clear copy feedback
+        setActiveTab('parsed');
+        setCopiedState(null);
+    }, [entry?.id]);
+
+    const getCopyContent = (type: 'parsed' | 'raw'): string => {
+        if (type === 'raw' || !entry || !parsedContent) {
+            return entry?.msg || '';
+        }
+
+        switch (parsedContent.type) {
+            case 'text':
+            case 'xml':
+                return parsedContent.data as string;
+            case 'sql':
+                return (parsedContent.data as { sql: string }).sql;
+            case 'kv':
+                return (parsedContent.data as { key: string; value: string }[])
+                    .map(pair => `${pair.key}=${pair.value}`)
+                    .join('\n');
+            case 'grid':
+                const gridData = parsedContent.data as GridData;
+                const header = gridData.headers.join('\t');
+                const rows = gridData.rows.map(row => row.join('\t')).join('\n');
+                return `${header}\n${rows}`;
+            default:
+                return entry.msg;
+        }
+    };
+    
+    const handleCopy = (type: 'parsed' | 'raw') => {
+        const content = getCopyContent(type);
+        navigator.clipboard.writeText(content);
+        setCopiedState(type);
+        setTimeout(() => setCopiedState(null), 2000);
+    };
+
+    const TabButton: React.FC<{ label: string; tabName: 'parsed' | 'raw'; }> = ({ label, tabName }) => {
+        const isActive = activeTab === tabName;
+        return (
+             <button
+                onClick={() => setActiveTab(tabName)}
+                className={`px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${
+                    isActive 
+                    ? 'bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300' 
+                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200/60 dark:hover:bg-gray-700/60'
+                }`}
+             >
+                {label}
+             </button>
+        );
+    };
+
+    const CopyButton: React.FC<{ type: 'parsed' | 'raw' }> = ({ type }) => {
+        const hasCopied = copiedState === type;
+        return (
+            <Tooltip content={hasCopied ? 'Copied!' : 'Copy to clipboard'}>
+                <button
+                    onClick={() => handleCopy(type)}
+                    className="p-1.5 text-gray-400 dark:text-gray-500 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-sky-500 dark:hover:text-sky-400 focus:outline-none transition-all"
+                >
+                    <Icon name={hasCopied ? "CheckCircle" : "ClipboardDocument"} iconSet={iconSet} className={`w-5 h-5 ${hasCopied ? 'text-green-500' : ''}`} />
+                </button>
+            </Tooltip>
+        );
+    };
 
     const getStyle = (key: ColumnKey): React.CSSProperties => {
         const styleConf = columnStyles[key];
@@ -146,36 +217,49 @@ export const LogDetailPanel: React.FC<LogDetailPanelProps> = ({ entry, onClose, 
                                 </div>
                             )}
 
-                            {parsedContent.type === 'grid' && (
-                                <GridView data={parsedContent.data as GridData} />
-                            )}
+                            <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 mb-3">
+                                <TabButton label="Parsed" tabName="parsed" />
+                                <TabButton label="Raw" tabName="raw" />
+                            </div>
 
-                            {parsedContent.type === 'kv' && (
-                                <KeyValueTableView data={parsedContent.data as {key: string, value: string}[]} />
-                            )}
-
-                            {parsedContent.type === 'xml' && (
-                                <XmlTreeView xmlString={parsedContent.data as string} />
-                            )}
-
-                            {parsedContent.type === 'sql' && (
-                                <>
-                                    <SqlSyntaxHighlighter sql={(parsedContent.data as {sql: string}).sql} />
-                                    {(parsedContent.data as {result: string | null}).result && (
-                                        <div className="mt-2 bg-green-50 dark:bg-green-900/40 rounded-lg p-3 ring-1 ring-green-200 dark:ring-green-700/50">
-                                            <h4 className="text-xs font-semibold text-green-700 dark:text-green-400 mb-1.5 uppercase tracking-wider">Query Result</h4>
-                                            <pre className="text-sm text-green-800 dark:text-green-200 whitespace-pre-wrap break-all font-mono">
-                                                <code>{(parsedContent.data as {result: string}).result}</code>
+                            {activeTab === 'parsed' && (
+                                <div className="relative group/parsed">
+                                    <div className="absolute top-1 right-1 z-10 opacity-0 group-hover/parsed:opacity-100 transition-opacity">
+                                        <CopyButton type="parsed" />
+                                    </div>
+                                    {parsedContent.type === 'grid' && <GridView data={parsedContent.data as GridData} />}
+                                    {parsedContent.type === 'kv' && <KeyValueTableView data={parsedContent.data as {key: string, value: string}[]} />}
+                                    {parsedContent.type === 'xml' && <XmlTreeView xmlString={parsedContent.data as string} />}
+                                    {parsedContent.type === 'sql' && (
+                                        <>
+                                            <SqlSyntaxHighlighter sql={(parsedContent.data as {sql: string}).sql} />
+                                            {(parsedContent.data as {result: string | null}).result && (
+                                                <div className="mt-2 bg-green-50 dark:bg-green-900/40 rounded-lg p-3 ring-1 ring-green-200 dark:ring-green-700/50">
+                                                    <h4 className="text-xs font-semibold text-green-700 dark:text-green-400 mb-1.5 uppercase tracking-wider">Query Result</h4>
+                                                    <pre className="text-sm text-green-800 dark:text-green-200 whitespace-pre-wrap break-all font-mono">
+                                                        <code>{(parsedContent.data as {result: string}).result}</code>
+                                                    </pre>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                    {parsedContent.type === 'text' && (
+                                        <div className="bg-gray-100 dark:bg-gray-900/70 rounded-lg p-3 ring-1 ring-gray-200 dark:ring-gray-700">
+                                            <pre className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-all font-mono">
+                                                <code dangerouslySetInnerHTML={{ __html: highlightText(parsedContent.data as string, highlightTerms, theme) }} />
                                             </pre>
                                         </div>
                                     )}
-                                </>
+                                </div>
                             )}
 
-                            {parsedContent.type === 'text' && (
-                                <div className="bg-gray-100 dark:bg-gray-900/70 rounded-lg p-3 ring-1 ring-gray-200 dark:ring-gray-700">
+                             {activeTab === 'raw' && (
+                                <div className="relative group/raw bg-gray-100 dark:bg-gray-900/70 rounded-lg p-3 ring-1 ring-gray-200 dark:ring-gray-700">
+                                    <div className="absolute top-1 right-1 z-10 opacity-0 group-hover/raw:opacity-100 transition-opacity">
+                                        <CopyButton type="raw" />
+                                    </div>
                                     <pre className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-all font-mono">
-                                        <code dangerouslySetInnerHTML={{ __html: highlightText(parsedContent.data as string, highlightTerms, theme) }} />
+                                        <code>{entry.msg}</code>
                                     </pre>
                                 </div>
                             )}
