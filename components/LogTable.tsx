@@ -66,7 +66,6 @@ interface LogTableProps {
     onSavePreset: (name: string) => void;
     onDeletePreset: (name: string) => void;
     onLoadPreset: (name: string) => void;
-    onLoadMore: () => void;
     onJumpToOffset: (offset: number) => void;
     hasMore: boolean;
     isBusy: boolean;
@@ -142,7 +141,6 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         entriesOffset,
         totalFilteredCount,
         viewMode,
-        onLoadMore,
         onJumpToOffset,
         hasMore,
         isBusy,
@@ -233,14 +231,15 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
             if (nextIndex >= 0 && nextIndex < entries.length) {
                 setKeyboardSelectedId(entries[nextIndex].id);
             } else if (viewMode === 'scroll' && e.key === 'ArrowDown' && nextIndex >= entries.length && hasMore) {
-                onLoadMore();
+                // When navigating past the end, jump to the next block of data.
+                onJumpToOffset(entriesOffset + entries.length);
             }
         };
         
         container.addEventListener('keydown', handleKeyDown);
         return () => container.removeEventListener('keydown', handleKeyDown);
 
-    }, [entries, keyboardSelectedId, setKeyboardSelectedId, hasMore, onLoadMore, viewMode]);
+    }, [entries, keyboardSelectedId, setKeyboardSelectedId, hasMore, onJumpToOffset, viewMode, entriesOffset]);
 
     // Scroll into view effect
     React.useEffect(() => {

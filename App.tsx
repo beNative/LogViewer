@@ -219,48 +219,13 @@ const App: React.FC = () => {
     logToConsole('Console cleared.', 'INFO');
   }, [logToConsole]);
 
-  const handleLoadMore = React.useCallback(() => {
-    if (!db || !hasMoreLogs || isBusy) return;
-
-    setIsBusy(true);
-    setTimeout(() => {
-        try {
-            const currentWindowSize = filteredEntries.length;
-            const nextOffset = entriesOffset + currentWindowSize;
-            logToConsole(`Loading more logs at offset ${nextOffset.toLocaleString()}...`, 'DEBUG');
-            
-            const newEntries = db.queryLogEntries(appliedFilters, INFINITE_SCROLL_CHUNK_SIZE, nextOffset);
-
-            setFilteredEntries(prev => {
-                const combined = [...prev, ...newEntries];
-                if (combined.length > MAX_SCROLL_WINDOW_SIZE) {
-                    const excess = combined.length - MAX_SCROLL_WINDOW_SIZE;
-                    // Slide the window forward by trimming from the start
-                    setEntriesOffset(prevOffset => prevOffset + excess);
-                    return combined.slice(excess);
-                }
-                return combined;
-            });
-
-            setHasMoreLogs(nextOffset + newEntries.length < totalFilteredCount);
-            logToConsole(`Loaded ${newEntries.length} more logs.`, 'DEBUG');
-        } catch(e) {
-            const msg = e instanceof Error ? e.message : String(e);
-            setError(msg);
-            logToConsole(`Error loading more logs: ${msg}`, 'ERROR');
-        } finally {
-            setIsBusy(false);
-        }
-    }, 0);
-  }, [db, hasMoreLogs, isBusy, entriesOffset, appliedFilters, totalFilteredCount, logToConsole, filteredEntries.length]);
-
   const handleJumpToOffset = React.useCallback((offset: number) => {
     if (!db || isBusy) return;
     setIsBusy(true); // Set busy immediately to prevent race conditions
     setTimeout(() => {
         try {
-            // Fetch a new window of data centered around the target offset
-            const windowSize = INFINITE_SCROLL_CHUNK_SIZE * 3; // e.g., 600
+            // Fetch a new, larger window of data centered around the target offset
+            const windowSize = MAX_SCROLL_WINDOW_SIZE; 
             const newOffset = Math.max(0, offset - Math.floor(windowSize / 2));
             logToConsole(`Jumping to log offset ${newOffset.toLocaleString()}...`, 'DEBUG');
             
@@ -690,7 +655,7 @@ const App: React.FC = () => {
                   setPageTimestampRanges(ranges);
                   setHasMoreLogs(false);
               } else { // 'scroll' mode (Infinite Scroll)
-                  const entries = db.queryLogEntries(appliedFilters, INFINITE_SCROLL_CHUNK_SIZE * 3, 0); // Load a bigger initial window
+                  const entries = db.queryLogEntries(appliedFilters, MAX_SCROLL_WINDOW_SIZE, 0); // Load a big initial window
                   setFilteredEntries(entries);
                   setEntriesOffset(0);
                   setHasMoreLogs(entries.length < count);
@@ -2084,7 +2049,6 @@ const handleUiScaleChange = async (newScale: number) => {
                 onSavePreset={handleSaveFilterPreset}
                 onDeletePreset={handleDeleteFilterPreset}
                 onLoadPreset={handleLoadFilterPreset}
-                onLoadMore={handleLoadMore}
                 onJumpToOffset={handleJumpToOffset}
                 hasMore={hasMoreLogs}
                 isBusy={isBusy}
