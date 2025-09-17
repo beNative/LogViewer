@@ -135,12 +135,13 @@ export const DataHub: React.FC<DataHubProps> = ({
       e.target.value = '';
     }
   };
-
-  return (
-    <div className="flex-grow bg-gray-100 dark:bg-gray-900/50 overflow-y-auto">
-        <div className="grid grid-cols-1 xl:grid-cols-5 gap-8 p-4 sm:p-6 lg:p-8">
-            {/* Left Column: Session Management */}
-            {isElectron && (
+  
+  // Render the full-featured desktop layout
+  if (isElectron) {
+      return (
+        <div className="flex-grow bg-gray-100 dark:bg-gray-900/50 overflow-y-auto">
+            <div className="grid grid-cols-1 xl:grid-cols-5 gap-8 p-4 sm:p-6 lg:p-8">
+                {/* Left Column: Session Management */}
                 <div className="xl:col-span-3 flex flex-col h-full min-h-0 gap-6">
                     {hasData && activeSessionDetails && (
                         <ActiveSessionInfo
@@ -170,34 +171,63 @@ export const DataHub: React.FC<DataHubProps> = ({
                         </div>
                     </div>
                 </div>
-            )}
 
-            {/* Right Column: Actions */}
-            <div className={`flex flex-col gap-8 ${isElectron ? 'xl:col-span-2' : 'xl:col-span-5'}`}>
-                <div className="flex-grow flex flex-col gap-8 p-6 bg-white dark:bg-gray-800/50 rounded-2xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
-                    <div>
-                        <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                            <Icon name="DocumentPlus" iconSet={iconSet} className="w-6 h-6 text-sky-500" />
-                            <span>Create New Session</span>
-                        </h2>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Drag and drop log files to start a new analysis. A new session will be created and saved automatically.</p>
+                {/* Right Column: Actions */}
+                <div className="xl:col-span-2 flex flex-col gap-8">
+                    <div className="flex-grow flex flex-col gap-8 p-6 bg-white dark:bg-gray-800/50 rounded-2xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
+                        <div>
+                            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <Icon name="DocumentPlus" iconSet={iconSet} className="w-6 h-6 text-sky-500" />
+                                <span>Create New Session</span>
+                            </h2>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Drag and drop log files to start a new analysis. A new session will be created and saved automatically.</p>
+                        </div>
+                        <div className="flex-grow min-h-[200px]">
+                            <Dropzone onFileDrop={onCreateSessionFromFiles} error={error} iconSet={iconSet} />
+                        </div>
                     </div>
-                    <div className="flex-grow min-h-[200px]">
-                        <Dropzone onFileDrop={onCreateSessionFromFiles} error={error} iconSet={iconSet} />
+
+                    <div className="p-6 bg-white dark:bg-gray-800/50 rounded-2xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-2">
+                            <Icon name="Cog" iconSet={iconSet} className="w-6 h-6 text-purple-500" />
+                            <span>More Actions</span>
+                        </h2>
+                        <div className="divide-y divide-gray-200 dark:divide-gray-700/60 -mx-4">
+                            <input type="file" ref={importInputRef} onChange={handleFileSelect} className="hidden" accept=".sqlite,application/x-sqlite3" />
+                            <ActionButton icon="ArrowUpTray" title="Import Session" description="Load an external .sqlite database file." onClick={handleImportClick} iconSet={iconSet} />
+                            <ActionButton icon="Download" title="Export Active Session" description="Save the current session to a file." onClick={onDownloadDb} disabled={!hasData} iconSet={iconSet} />
+                            <ActionButton icon="ArchiveBox" title="New Blank Session" description="Start a fresh, empty session." onClick={onNewSession} iconSet={iconSet} />
+                        </div>
                     </div>
                 </div>
+            </div>
+        </div>
+      );
+  }
 
-                <div className="p-6 bg-white dark:bg-gray-800/50 rounded-2xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-2">
-                        <Icon name="Cog" iconSet={iconSet} className="w-6 h-6 text-purple-500" />
-                        <span>More Actions</span>
-                    </h2>
-                    <div className="divide-y divide-gray-200 dark:divide-gray-700/60 -mx-4">
-                        <input type="file" ref={importInputRef} onChange={handleFileSelect} className="hidden" accept=".sqlite,application/x-sqlite3" />
-                        <ActionButton icon="ArrowUpTray" title="Import Session" description="Load an external .sqlite database file." onClick={handleImportClick} iconSet={iconSet} />
-                        <ActionButton icon="Download" title="Export Active Session" description="Save the current session to a file." onClick={onDownloadDb} disabled={!hasData} iconSet={iconSet} />
-                        <ActionButton icon="ArchiveBox" title="New Blank Session" description="Start a fresh, empty session." onClick={onNewSession} iconSet={iconSet} />
-                    </div>
+  // Render the simplified web layout
+  return (
+    <div className="flex-grow bg-gray-100 dark:bg-gray-900/50 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <div className="max-w-3xl mx-auto">
+            <div className="text-center p-8 bg-white dark:bg-gray-800/50 rounded-2xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
+                <Icon name="InformationCircle" iconSet={iconSet} className="w-16 h-16 text-sky-500 dark:text-sky-400 mx-auto mb-4" />
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Desktop Version Recommended</h2>
+                <p className="mt-2 text-gray-600 dark:text-gray-300">
+                    For the best experience, including session management, automatic saving, and application updates, please use the desktop application.
+                </p>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    The web version provides a basic, temporary log viewer.
+                </p>
+            </div>
+
+            <div className="mt-8 p-6 bg-white dark:bg-gray-800/50 rounded-2xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
+                 <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <Icon name="DocumentPlus" iconSet={iconSet} className="w-6 h-6 text-sky-500" />
+                    <span>Load Log Files</span>
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-4">Drag and drop log files to start a temporary analysis session.</p>
+                <div className="h-64">
+                    <Dropzone onFileDrop={onCreateSessionFromFiles} error={error} iconSet={iconSet} />
                 </div>
             </div>
         </div>
