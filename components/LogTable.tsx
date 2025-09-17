@@ -100,10 +100,14 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     const [selectedEntry, setSelectedEntry] = React.useState<LogEntry | null>(null);
     const [contextMenuState, setContextMenuState] = React.useState<ContextMenuState>(null);
     const [headerContextMenu, setHeaderContextMenu] = React.useState<{ x: number, y: number } | null>(null);
-    const [scrollTop, setScrollTop] = React.useState(0);
     const viewportRef = React.useRef<HTMLDivElement>(null);
     const rowRefs = React.useRef<Map<number, HTMLTableRowElement | null>>(new Map());
     
+    // Refs for performant scroll handling
+    const scrollTopRef = React.useRef(0);
+    const tickingRef = React.useRef(false);
+    const [, forceUpdate] = React.useReducer(x => x + 1, 0);
+
     const panelWidthsRef = React.useRef(props.panelWidths);
     panelWidthsRef.current = props.panelWidths;
 
@@ -269,11 +273,21 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     };
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const currentScrollTop = e.currentTarget.scrollTop;
+        scrollTopRef.current = currentScrollTop;
+
+        if (!tickingRef.current) {
+            window.requestAnimationFrame(() => {
+                forceUpdate();
+                tickingRef.current = false;
+            });
+            tickingRef.current = true;
+        }
+
         if (viewMode !== 'scroll') return;
-        setScrollTop(e.currentTarget.scrollTop);
 
         const { scrollHeight, clientHeight } = e.currentTarget;
-        if (scrollHeight - scrollTop - clientHeight < 1000 && hasMore && !isBusy) {
+        if (scrollHeight - currentScrollTop - clientHeight < 1000 && hasMore && !isBusy) {
             onLoadMore();
         }
     };
@@ -287,6 +301,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     let bottomSpacerHeight = 0;
 
     if (viewMode === 'scroll' && viewportRef.current) {
+        const scrollTop = scrollTopRef.current;
         const rowHeight = getRowHeight(logTableDensity);
         const viewportHeight = viewportRef.current.clientHeight;
         const overscan = 20;
