@@ -1,76 +1,64 @@
 import { LogMessageContent, GridData } from './types.ts';
 
 const parseKeyValueMessage = (msg: string): { prefix: string | null; pairs: { key: string; value: string }[] } | null => {
-    // Heuristic: If message contains semicolons and the last segment looks like a K/V pair,
-    // use a more robust parser that handles unstructured data before the pairs.
     const parts = msg.split(';');
-    if (parts.length > 1 && parts[parts.length - 1].includes('=')) {
+    // Heuristic: Message is likely K/V if it has an equals sign.
+    if (parts.length > 0 && msg.includes('=')) {
         const pairs: { key: string; value: string }[] = [];
-        let firstKvPairIndex = parts.length;
+        let firstKvPartIndex = -1; // The index of the first part (from the right) that contains a K/V pair.
 
         for (let i = parts.length - 1; i >= 0; i--) {
             const part = parts[i].trim();
             if (!part) continue;
 
-            const match = part.match(/^([a-zA-Z0-9_.\[\]-]+)=(.*)$/s);
-            if (match) {
-                pairs.unshift({ key: match[1].trim(), value: match[2].trim() });
-                firstKvPairIndex = i;
+            const eqIndex = part.lastIndexOf('=');
+            if (eqIndex <= 0) { // No '=', or starts with '=', invalid.
+                break;
+            }
+
+            const potentialValue = part.substring(eqIndex + 1);
+            const keyPart = part.substring(0, eqIndex);
+            
+            // A valid key is the last "word" before the '='.
+            // Allowed characters in key: alphanum, underscore, dot, hyphen, and square brackets.
+            const keyMatch = keyPart.match(/([a-zA-Z0-9_.\[\]-]+)$/);
+
+            if (keyMatch) {
+                const key = keyMatch[0];
+                const prefixInPart = keyPart.substring(0, keyMatch.index).trim();
+
+                // Heuristic: If a prefix exists within a part, it must be empty or end with a colon.
+                // Otherwise, it's likely part of an unstructured value (like a URL query string) and not a real prefix.
+                if (prefixInPart && !prefixInPart.endsWith(':')) {
+                    break;
+                }
+                
+                pairs.unshift({ key, value: potentialValue.trim() });
+                firstKvPartIndex = i;
+
+                // If we found a prefix within this part, it's the beginning of the K/V section, so we stop.
+                if (prefixInPart) {
+                    break;
+                }
             } else {
-                break; // Stop when a part is not a K/V pair
+                // Couldn't extract a valid key-like token before the '=', so this isn't a K/V pair.
+                break;
             }
         }
 
         if (pairs.length > 0) {
-            // The entire part before the key-value pairs is treated as the prefix.
-            // This prevents creating an artificial "Message" key for unstructured data like URLs.
-            const prefix = parts.slice(0, firstKvPairIndex).join(';').trim();
+            // Reconstruct the prefix from all parts before the first K/V part, plus any prefix inside that first part.
+            const firstPartWithKv = parts[firstKvPartIndex];
+            const eqIndex = firstPartWithKv.lastIndexOf('=');
+            const keyPart = firstPartWithKv.substring(0, eqIndex);
+            const keyMatch = keyPart.match(/([a-zA-Z0-9_.\[\]-]+)$/);
+            
+            const prefixInFirstPart = keyMatch ? keyPart.substring(0, keyMatch.index) : '';
+
+            const prefix = [...parts.slice(0, firstKvPartIndex), prefixInFirstPart].join(';').trim();
+            
             return { prefix: prefix || null, pairs };
         }
-    }
-
-    // --- Fallback to original, more generic parser for comma-separated or other formats ---
-    if (!msg.includes('=')) return null;
-    
-    let messageBody = msg;
-    let prefix: string | null = null;
-    
-    const firstEqIndex = msg.indexOf('=');
-    if (firstEqIndex > -1) {
-        const lastColonBeforeEq = msg.substring(0, firstEqIndex).lastIndexOf(':');
-        if (lastColonBeforeEq > -1) {
-            prefix = msg.substring(0, lastColonBeforeEq + 1).trim();
-            messageBody = msg.substring(lastColonBeforeEq + 1).trim();
-        }
-    }
-
-    const fallbackPairs: { key: string; value: string }[] = [];
-    // Use word boundary and allow hyphens. This is a bit more robust than the original.
-    const regex = /\b([a-zA-Z0-9_.\[\]-]+)=/g;
-    const matches = [...messageBody.matchAll(regex)];
-
-    if (matches.length > 0) {
-        for (let i = 0; i < matches.length; i++) {
-            const currentMatch = matches[i];
-            const nextMatch = matches[i + 1];
-
-            const key = currentMatch[1];
-            const valueStartIndex = (currentMatch.index ?? 0) + currentMatch[0].length;
-            const valueEndIndex = nextMatch ? nextMatch.index : messageBody.length;
-            
-            let value = messageBody.substring(valueStartIndex, valueEndIndex).trim();
-            
-            if (value.endsWith(',') || value.endsWith(';')) {
-                value = value.slice(0, -1).trim();
-            }
-
-            fallbackPairs.push({ key, value });
-        }
-    }
-    
-    if (fallbackPairs.length > 0) {
-        // The original required at least 2 pairs. We'll be more lenient.
-        return { prefix, pairs: fallbackPairs };
     }
 
     return null;
