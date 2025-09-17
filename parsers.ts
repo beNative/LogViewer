@@ -49,21 +49,33 @@ const parseKeyValueMessage = (msg: string): { prefix: string; pairs: { key: stri
 
 const SQL_KEYWORDS = [
   'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'FROM', 'WHERE', 'GROUP BY', 'ORDER BY', 
-  'CREATE', 'TABLE', 'DROP', 'ALTER', 'JOIN', 'LIMIT'
+  'CREATE', 'TABLE', 'DROP', 'ALTER', 'JOIN', 'LIMIT', 'SET', 'VALUES', 'INTO', 'LEFT JOIN', 'RIGHT JOIN'
 ];
 
 const parseSqlMessage = (msg: string): { prefix: string | null; sql: string; result: string | null } | null => {
     const upperMsg = msg.toUpperCase();
+    
+    // High-confidence patterns
+    const isSelect = upperMsg.includes('SELECT') && upperMsg.includes('FROM');
+    const isUpdate = upperMsg.includes('UPDATE') && upperMsg.includes('SET');
+    const isInsert = upperMsg.includes('INSERT INTO') && upperMsg.includes('VALUES');
+    const isDelete = upperMsg.includes('DELETE FROM') && upperMsg.includes('WHERE');
+
+    // Lower-confidence heuristic
     let keywordCount = 0;
     for (const keyword of SQL_KEYWORDS) {
         if (upperMsg.includes(keyword)) {
             keywordCount++;
         }
     }
-    
     const hasResultArrow = msg.includes('->');
-    // Heuristic: be more lenient if we see the arrow
-    const isSql = (keywordCount >= 2 && msg.includes(';')) || keywordCount > 4 || (keywordCount >= 2 && hasResultArrow);
+
+    // A message is likely SQL if it matches a strong pattern, or has several keywords and other hints.
+    const isSql = isSelect || isUpdate || isInsert || isDelete || 
+                  (keywordCount >= 4 && upperMsg.includes('WHERE')) || // multiple keywords + WHERE is a good sign
+                  (keywordCount >= 2 && msg.includes(';')) || // semicolon is a strong hint
+                  (keywordCount >= 2 && hasResultArrow);
+
 
     if (!isSql) {
         return null;
@@ -148,6 +160,7 @@ const parseGridViewMessage = (msg: string): { prefix: string | null, data: GridD
         // Skip lines that look like they could be part of a header or are just separators
         if (!/^\s*\S/.test(dataLine)) continue;
         
+        // FIX: A single row should be a string array, not a string[][].
         const rowValues: string[] = [];
         for (let i = 0; i < headerPositions.length; i++) {
             const currentBoundary = headerPositions[i];
@@ -189,13 +202,7 @@ export const parseLogMessage = (msg: string): LogMessageContent => {
         }
     }
     
-    // 2. Check for Grid View
-    const gridResult = parseGridViewMessage(msg);
-    if (gridResult) {
-        return { type: 'grid', prefix: gridResult.prefix, data: gridResult.data };
-    }
-
-    // 3. Check for SQL
+    // 2. Check for SQL (moved up)
     const sqlResult = parseSqlMessage(msg);
     if (sqlResult) {
         return { 
@@ -203,6 +210,12 @@ export const parseLogMessage = (msg: string): LogMessageContent => {
             prefix: sqlResult.prefix, 
             data: { sql: sqlResult.sql, result: sqlResult.result }
         };
+    }
+
+    // 3. Check for Grid View
+    const gridResult = parseGridViewMessage(msg);
+    if (gridResult) {
+        return { type: 'grid', prefix: gridResult.prefix, data: gridResult.data };
     }
     
     // 4. Check for Key-Value.
