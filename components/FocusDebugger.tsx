@@ -166,7 +166,6 @@ const DebugInfoDisplay: React.FC<{ title: string; info: ElementDebugInfo | null;
                      <details>
                         <summary className="font-semibold text-gray-300 cursor-pointer select-none">Parent Tree</summary>
                          <div className="pl-2 pt-1 mt-1 border-l border-gray-600">
-                            {/* FIX: The 'isCode' prop is not a valid attribute for a span element. Replaced with 'font-mono' class for monospace styling. */}
                             <span className="text-white break-all font-mono">{info.parents.join(' < ')}</span>
                         </div>
                     </details>

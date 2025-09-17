@@ -63,24 +63,30 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newSearchTerm = e.target.value;
-        setFilters({ ...filters, searchTerm: newSearchTerm });
+        
+        // Use a functional update to get the latest state and prevent stale closures in the timeout.
+        setFilters(prevFilters => {
+            const newFilters = { ...prevFilters, searchTerm: newSearchTerm };
 
-        if (debounceTimeoutRef.current) {
-            clearTimeout(debounceTimeoutRef.current);
-        }
+            if (debounceTimeoutRef.current) {
+                clearTimeout(debounceTimeoutRef.current);
+            }
 
-        if (newSearchTerm.length < 2) {
-            setSuggestions([]);
-            setIsSuggestionsVisible(false);
-            return;
-        }
-
-        debounceTimeoutRef.current = window.setTimeout(async () => {
-            const fetchedSuggestions = await onFetchSuggestions(newSearchTerm, filters);
-            setSuggestions(fetchedSuggestions);
-            setIsSuggestionsVisible(fetchedSuggestions.length > 0);
-            setActiveSuggestionIndex(-1);
-        }, 300);
+            if (newSearchTerm.length < 2) {
+                setSuggestions([]);
+                setIsSuggestionsVisible(false);
+            } else {
+                debounceTimeoutRef.current = window.setTimeout(async () => {
+                    // Use the up-to-date newFilters object for the API call.
+                    const fetchedSuggestions = await onFetchSuggestions(newSearchTerm, newFilters);
+                    setSuggestions(fetchedSuggestions);
+                    setIsSuggestionsVisible(fetchedSuggestions.length > 0);
+                    setActiveSuggestionIndex(-1);
+                }, 300);
+            }
+            
+            return newFilters;
+        });
     };
 
     const handleSuggestionClick = (suggestion: StockArticleSuggestion) => {
