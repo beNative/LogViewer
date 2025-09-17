@@ -969,16 +969,9 @@ const App: React.FC = () => {
 
         const now = new Date();
         const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-').replace('T', '_');
-        const defaultSessionName = `session_${timestamp}`;
-
-        let sessionName = window.prompt("Enter a name for the new session:", defaultSessionName);
-        if (!sessionName || sessionName.trim() === '') {
-            sessionName = defaultSessionName;
-            logToConsole('No name provided, using default.', 'WARNING');
-        }
-        if (!sessionName.toLowerCase().endsWith('.sqlite')) {
-            sessionName += '.sqlite';
-        }
+        const sessionName = `session_${timestamp}.sqlite`;
+        
+        logToConsole(`New session will be saved with generated name: ${sessionName}`, 'INFO');
 
         const success = await saveCurrentDbAsSession(sessionName); 
         if (success) {
