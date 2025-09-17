@@ -1,4 +1,4 @@
-# Log Analyser (Desktop Edition)
+# Log Analyser
 
 A sophisticated, client-side log analysis tool that allows users to drag-and-drop XML or ZIP log files, parses them, and displays them in a powerful, filterable, and searchable interface. It runs as a standalone desktop application using Electron, installed via a standard setup wizard that allows for customizing the installation directory.
 
