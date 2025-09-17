@@ -154,7 +154,68 @@ const parseSqlMessage = (msg: string): { prefix: string | null; sql: string; res
     return { prefix, sql, result };
 };
 
+const parseSpaceDelimitedTable = (msg: string): { prefix: string | null, data: GridData } | null => {
+    const lines = msg.split('\n').filter(line => line.trim().length > 0);
+    if (lines.length < 2) return null;
+
+    const headerLine = lines[0];
+    const dataLines = lines.slice(1);
+
+    // Heuristic 1: This format seems to always have a colon in the header line.
+    const lastColonIndex = headerLine.lastIndexOf(':');
+    if (lastColonIndex === -1 || lastColonIndex === headerLine.length - 1) {
+        return null;
+    }
+    
+    // Heuristic 2: The first word on the first data line must be a number.
+    const firstDataWord = dataLines[0].trim().split(/\s+/)[0];
+    if (!firstDataWord || isNaN(parseInt(firstDataWord, 10))) {
+        return null;
+    }
+
+    // Heuristic 3: The first word of the header part should NOT be a number.
+    const potentialHeaderString = headerLine.substring(lastColonIndex + 1).trim();
+    const firstHeaderWord = potentialHeaderString.split(/\s+/)[0];
+    if (!firstHeaderWord || !isNaN(parseInt(firstHeaderWord, 10))) {
+        return null;
+    }
+
+    // If all heuristics pass, we are confident this is the target format.
+    const prefix = headerLine.substring(0, lastColonIndex + 1).trim();
+    const headers = potentialHeaderString.split(/\s+/).filter(Boolean);
+    
+    if (headers.length < 3) return null;
+
+    const rows: string[][] = [];
+    // This regex specifically looks for a date, then a time. If it fails, it looks for any non-space characters.
+    const valueRegex = /(\d{1,2}\/\d{1,2}\/\d{4}\s+\d{2}:\d{2}:\d{2})|(\S+)/g;
+
+    for (const line of dataLines) {
+        const matches = [...line.trim().matchAll(valueRegex)];
+        if (matches.length === 0) continue;
+
+        const rowValues = matches.map(match => match[0]); 
+        
+        while (rowValues.length < headers.length) {
+            rowValues.push('');
+        }
+        rows.push(rowValues.slice(0, headers.length));
+    }
+
+    if (rows.length === 0) return null;
+
+    return { prefix, data: { headers, rows } };
+};
+
+
 const parseGridViewMessage = (msg: string): { prefix: string | null, data: GridData } | null => {
+    // ATTEMPT 1: Try the new space-delimited parser first, as it's more specific.
+    const ssvResult = parseSpaceDelimitedTable(msg);
+    if (ssvResult) {
+        return ssvResult;
+    }
+    
+    // ATTEMPT 2: Fallback to the original fixed-width parser.
     const lines = msg.split('\n').filter(line => line.trim().length > 0);
     if (lines.length < 2) return null;
 
