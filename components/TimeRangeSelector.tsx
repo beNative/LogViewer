@@ -265,15 +265,26 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     const useResizeObserver = (ref: React.RefObject<HTMLElement>) => {
         const [width, setWidth] = React.useState(0);
         React.useEffect(() => {
-            const el = ref.current;
-            if (!el) return;
+            const element = ref.current;
+            if (!element) {
+                // When element is not present (e.g., hidden), reset width.
+                setWidth(0);
+                return;
+            }
+    
             const resizeObserver = new ResizeObserver(entries => {
-                if (entries[0]) setWidth(entries[0].contentRect.width);
+                if (entries[0]) {
+                    setWidth(entries[0].contentRect.width);
+                }
             });
-            resizeObserver.observe(el);
-            setWidth(el.clientWidth);
-            return () => resizeObserver.disconnect();
-        }, [ref]);
+    
+            resizeObserver.observe(element);
+    
+            // Cleanup: Disconnect observer when component unmounts or ref changes.
+            return () => {
+                resizeObserver.disconnect();
+            };
+        }, [ref.current]); // Dependency on the actual DOM element is crucial.
         return width;
     };
     
