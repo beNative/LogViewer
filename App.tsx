@@ -256,12 +256,12 @@ const App: React.FC = () => {
 
   const handleJumpToOffset = React.useCallback((offset: number) => {
     if (!db || isBusy) return;
-    setIsBusy(true);
+    setIsBusy(true); // Set busy immediately to prevent race conditions
     setTimeout(() => {
         try {
             // Fetch a new window of data centered around the target offset
-            const windowSize = INFINITE_SCROLL_CHUNK_SIZE * 3;
-            const newOffset = Math.max(0, offset - INFINITE_SCROLL_CHUNK_SIZE);
+            const windowSize = INFINITE_SCROLL_CHUNK_SIZE * 3; // e.g., 600
+            const newOffset = Math.max(0, offset - Math.floor(windowSize / 2));
             logToConsole(`Jumping to log offset ${newOffset.toLocaleString()}...`, 'DEBUG');
             
             const newEntries = db.queryLogEntries(appliedFilters, windowSize, newOffset);

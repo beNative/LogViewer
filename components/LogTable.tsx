@@ -345,30 +345,31 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     let bottomSpacerHeight = 0;
     
     if (viewMode === 'scroll') {
-        // --- Smart Data Fetching Logic ---
-        if (viewportRef.current && !isBusy) {
+        // --- Re-architected Smart Data Fetching Logic ---
+        if (viewportRef.current && !isBusy && totalFilteredCount > 0) {
             const scrollTop = scrollTopRef.current;
             const rowHeight = getRowHeight(logTableDensity);
             
+            // Calculate the window of rows that SHOULD be visible
             const requiredTopIndex = Math.floor(scrollTop / rowHeight);
+            const viewportHeight = viewportRef.current.clientHeight;
+            const visibleItemCount = Math.ceil(viewportHeight / rowHeight);
+            const requiredBottomIndex = requiredTopIndex + visibleItemCount;
 
-            const loadedRange = {
+            // The currently loaded window of data
+            const loadedWindow = {
                 start: entriesOffset,
                 end: entriesOffset + entries.length
             };
-
-            const isNearEndOfData = requiredTopIndex > loadedRange.end - (INFINITE_SCROLL_CHUNK_SIZE * 2);
-
-            // A "jump" is when the required view is completely outside our loaded data window.
-            const isJump = requiredTopIndex < loadedRange.start || requiredTopIndex > loadedRange.end;
-
-            if (isJump) {
-                // We've jumped to a completely different, unloaded area.
-                // Fetch a new window of data centered around the required index.
+            
+            // Check if the required viewport is outside our currently loaded data window.
+            const needsData = requiredTopIndex < loadedWindow.start || requiredBottomIndex > loadedWindow.end;
+            
+            if (needsData) {
+                // If we need data, we always perform a jump. This replaces the incremental
+                // loading cascade with a single, larger data fetch that re-centers the view.
+                // This is the key fix for the "endless scrolling" bug on scrollbar drag.
                 onJumpToOffset(requiredTopIndex);
-            } else if (isNearEndOfData && hasMore) {
-                // We are near the end of the loaded data, perform a normal incremental load.
-                onLoadMore();
             }
         }
 
@@ -394,7 +395,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
             // The spacers are calculated based on the absolute positions in the full dataset.
             topSpacerHeight = (entriesOffset + clampedStartIndex) * rowHeight;
             const absoluteEndIndex = entriesOffset + endIndexInWindow;
-            bottomSpacerHeight = (totalFilteredCount - absoluteEndIndex) * rowHeight;
+            bottomSpacerHeight = Math.max(0, (totalFilteredCount - absoluteEndIndex) * rowHeight);
         }
     }
 
