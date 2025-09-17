@@ -4,6 +4,28 @@ This document tracks the major changes, new features, and bug fixes for the Log 
 
 ---
 
+### **Version 0.19.0** - Advanced Parsing & Detail View
+
+_Date: 2025-09-17_
+
+This release introduces a significantly more powerful log message parser and a completely redesigned Log Detail panel for more flexible analysis.
+
+#### ✨ Features & Improvements
+- **Enhanced Log Parsing Engine**: The core message parser has been overhauled to understand more complex log formats:
+    - **Improved SQL Detection**: Accurately identifies SQL statements, even complex ones, preventing them from being misinterpreted as tables.
+    - **Smarter Key-Value Parsing**: Correctly handles messages with unstructured prefixes (like file paths or URLs) and values containing special characters like `[]`.
+    - **Space-Delimited Table Support**: Added a new parser to correctly render table-like log messages that use spaces as delimiters.
+- **Redesigned Log Detail Panel**: The panel for inspecting individual log entries has been rebuilt for better usability:
+    - **New "Raw" Tab**: A new tab that displays the complete, unformatted, original log message.
+    - **"Parsed" Tab**: The default structured view is now explicitly labeled. Any detected message prefix is now shown here for better context.
+    - **Copy to Clipboard**: Both the "Parsed" and "Raw" tabs now feature dedicated copy buttons, making it easy to extract data.
+
+#### 📚 Documentation
+- All documentation has been updated to reflect the new parsing capabilities and the redesigned Log Detail panel.
+- The application version has been incremented to `0.19.0`.
+
+---
+
 ### **Version 0.18.0** - UI Streamlining & Vertical Compactness
 
 _Date: 2025-09-17_

@@ -1,6 +1,6 @@
 {
   "name": "log-analyser",
-  "version": "0.18.0",
+  "version": "0.19.0",
   "description": "An application to view formatted XML log files by dragging and dropping them. It parses the XML and displays the data in a clean, readable table.",
   "main": "electron/main.js",
   "homepage": "./",

@@ -16,7 +16,7 @@ A sophisticated, client-side log analysis tool that allows users to drag-and-dro
 - **In-Memory Database**: Utilizes `sql.js` to store log data in an in-memory SQLite database, enabling fast and complex queries without a server.
 - **Tabbed Navigation**:
     - **Data Hub**: A central area to manage sessions, create new sessions from files, and import/export external databases.
-    - **Log Viewer**: The main analysis view featuring a filter panel, the main log table, and resizable side panels. Column visibility is managed via a right-click context menu on the table header. A global status bar provides persistent data and view controls (like density and details panel visibility).
+    - **Log Viewer**: The main analysis view featuring a filter panel, the main log table, and resizable side panels. It includes a redesigned Details Panel with both parsed and raw message views and copy-to-clipboard functionality. Column visibility is managed via a right-click context menu on the table header, and a global status bar provides persistent data and view controls.
     - **Stock Tracker**: A specialized view to parse, search, and visualize stock level information from log messages.
     - **Dashboard**: A visualization hub with interactive charts that provide a high-level overview of the *currently filtered* data.
     - **Application Log**: See real-time feedback, processing status, and errors from the application in a clean, full-screen interface with search and filtering capabilities.

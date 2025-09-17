@@ -92,7 +92,11 @@ This table displays the log entries that match your currently applied filters. Y
 - **Right-click on the table header** to open a context menu for showing or hiding columns.
 
 ### 4.3. The Details Panel
-When toggled on, this panel appears on the right and shows the full, parsed details of the currently selected log entry. It provides a structured view of the data and can render special formats like XML, SQL, and Key-Value pairs.
+When toggled on, this panel appears on the right and shows the full details of the currently selected log entry. It features a tabbed interface for viewing the message content:
+
+- **Parsed Tab**: This is the default view, displaying the log message in a structured, easy-to-read format. The application automatically detects and renders special content like XML trees, highlighted SQL queries, tables, or Key-Value pairs. A "Copy" button in the corner allows you to copy a clean, text-based representation of this structured data.
+
+- **Raw Tab**: This tab shows the complete, original, and unformatted text of the log message exactly as it was received. It also includes a "Copy" button to easily grab the raw string.
 
 ---
 

@@ -10,6 +10,7 @@ The Log Analyser is a **desktop application** built using **Electron**. This arc
 - **Framework**: The UI is built using **React** with **TypeScript**. It leverages functional components and hooks for state management and side effects.
 - **Bundler**: **esbuild** is used for fast and efficient bundling of the TypeScript and React code.
 - **Data Storage**: Log data is stored in an in-memory **SQLite database** powered by **sql.js**, a library that compiles SQLite to WebAssembly. This allows for powerful and efficient SQL-based querying directly in the browser context of the Electron window. The database is structured into a main `logs` table and a specialized `stock_info` table for optimized queries.
+- **Log Parsing Engine (`parsers.ts`)**: A sophisticated parsing module that analyzes raw log messages. It uses a series of heuristics to detect and format various content types, including XML, key-value pairs (with complex prefixes), multi-format tables, and SQL statements. It provides the structured data for the Log Viewer's "Parsed" details tab.
 - **Data Visualization**: Charts are rendered using **Chart.js**, a powerful and flexible open-source charting library. The application also uses `chartjs-adapter-date-fns` for time-series axes and `chartjs-plugin-zoom` for interactive drag-to-select functionality.
 - **Styling**: **Tailwind CSS** is used for utility-first styling. A **PostCSS** build step processes the CSS to include vendor prefixes and apply Tailwind transformations. The application has been refactored to consolidate all styling into utility classes and a central stylesheet, removing inline styles for improved maintainability.
 
@@ -86,7 +87,7 @@ A core feature of the desktop application is persistent session management. This
 - `dist/`: The output directory for all built assets (CSS and JS).
 - `App.tsx`: The root component of the application, managing state and views.
 - `db.ts`: The `Database` class abstraction for `sql.js`.
-- `types.ts`, `utils.ts`, `parsers.ts`: Shared types and helper functions.
+- `types.ts`, `utils.ts`, `parsers.ts`: Shared types, utility functions, and the core log message parsing engine.
 - `components/`: Directory containing all reusable React components, including `LogTable.tsx`, `Dashboard.tsx`, `StockTracker.tsx`, and `ColumnVisibilityMenu.tsx`.
 - `*.md`: Documentation files.
 
