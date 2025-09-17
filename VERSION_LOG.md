@@ -4,6 +4,18 @@ This document tracks the major changes, new features, and bug fixes for the Log 
 
 ---
 
+### **Version 0.17.0** - Maintenance & Documentation Release
+
+_Date: 2025-09-04_
+
+This is a maintenance release focused on preparing the application for publication. The version number has been increased, and all documentation has been thoroughly reviewed and updated to reflect the complete feature set.
+
+#### ✨ Features & Improvements
+- **Comprehensive Documentation**: The `README.md`, `FUNCTIONAL_MANUAL.md`, and `TECHNICAL_MANUAL.md` have all been updated to include descriptions of the **Stock Tracker** feature and other recent enhancements, ensuring all documentation is current and accurate.
+- **Version Bump**: The official application version has been incremented to `0.17.0`.
+
+---
+
 ### **Version 0.16.0** - UI Enhancements & Filter Simplification
 
 _Date: 2025-09-03_

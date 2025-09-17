@@ -13,10 +13,11 @@ The application will automatically check for updates and notify you via non-intr
 The application is organized into several main tabs, which you can switch between using the header navigation. The recommended workflow is now session-centric:
 
 - **Data Hub**: Your starting point. Here you will load an existing session or create a new one.
-- **Log Viewer**: For analyzing and filtering your log entries within the active session.
+- **Log Viewer**: For analyzing and filtering your generic log entries within the active session.
+- **Stock Tracker**: For searching and visualizing stock-specific information found within the logs.
 - **Dashboard**: For a high-level visual overview of your filtered data within the active session.
 - **Application Log**: For viewing application status messages and errors.
-- **Info**: For viewing in-app documentation, manuals, and version logs.
+- **Info**: For viewing in-app documentation, manuals, version logs, and the "About" dialog.
 - **Settings**: For managing application configuration and appearance.
 
 ---
@@ -101,7 +102,27 @@ When toggled on, this panel appears on the right and shows the full, parsed deta
 
 ---
 
-## 5. The Status Bar
+## 5. Stock Tracker
+
+This tab is a specialized tool for analyzing stock level information that is embedded within the log messages. When log files are first processed, the application automatically extracts any `StockInfoMessage` data and stores it in a separate, structured table for efficient querying.
+
+### 5.1. Searching
+- **Article Search**: Enter the name or ID of an article (minimum 2 characters). As you type, a dropdown will appear with suggestions from the database. You can click a suggestion or continue typing.
+- **Date Range**: Use the date and time inputs, or the graphical timeline selector, to narrow your search to a specific period.
+- **Search Button**: Click "Search" to execute the query. The results will appear below.
+
+### 5.2. Results
+After a search, two panels will display the results:
+- **Stock History Table**: A chronological list of all stock level changes for the searched article within the selected time frame. It shows the exact timestamp, article name, and the reported quantity at that time.
+- **Quantity Over Time Chart**: A line graph that visually plots the quantity from the history table over time, making it easy to spot trends, drops, or replenishments.
+
+### 5.3. Rebuild Stock Data
+- **Purpose**: This button is an advanced utility. If you suspect the stock data is incomplete or corrupted, or if the parsing logic has been updated in a new version of the application, you can use this feature.
+- **Action**: It will delete all existing stock data for the current session and re-scan every log entry to extract it again. This can be a slow process and the session is saved automatically upon completion.
+
+---
+
+## 6. The Status Bar
 
 A persistent status bar is located at the very bottom of the application window. It provides at-a-glance information and quick controls.
 
@@ -120,19 +141,19 @@ A persistent status bar is located at the very bottom of the application window.
 
 ---
 
-## 6. Dashboard
+## 7. Dashboard
 
 This tab provides a high-level visual overview of your **currently filtered** log data.
 
-### 6.1. Timeline Chart
+### 7.1. Timeline Chart
 This bar chart shows the volume of log entries over time. You can **click and drag** horizontally across the chart to select a specific time range. Doing so will immediately apply that range as a filter and switch you back to the Log Viewer to see the results.
 
-### 6.2. Category Charts
+### 7.2. Category Charts
 These donut charts show the distribution of logs by **Level** and **Sender Type**. You can **click on a slice** of a chart to instantly add a filter for that category and see the results in the Log Viewer.
 
 ---
 
-## 7. Application Log
+## 8. Application Log
 
 This tab displays a real-time feed of messages from the application itself, presented in a clean, full-screen view for maximum readability. It's useful for:
 - Seeing the progress of file processing.
@@ -143,17 +164,17 @@ You can filter the messages by type (DEBUG, INFO, WARNING, ERROR) using the togg
 
 ---
 
-## 8. Settings
+## 9. Settings
 
 This tab allows you to configure various aspects of the application and is divided into two main views: **Controls** and **JSON Source**.
 
-### 8.1. Controls View
+### 9.1. Controls View
 This is the default view and provides user-friendly controls for common settings.
 - **Appearance**: Toggle between Light and Dark themes, change the active icon set, adjust the UI Scale, and adjust the density of rows in the log table.
 - **Log Table Styles**: Customize the font, font size, style (bold/italic), and color for each column in the Log Viewer.
 - **Updates**: Opt-in to receive pre-release (beta) versions of the application. Enabling this requires an application restart to take effect.
 
-### 8.2. JSON Source View
+### 9.2. JSON Source View
 For advanced users, this tab provides direct access to the `settings.json` configuration file.
 - **Editable JSON**: The main part of this view is a syntax-highlighted editor displaying the raw JSON content of your settings file. You can make direct changes here.
 - **Save**: After editing the JSON, click this button to apply and save your changes. The application will validate the JSON before saving.

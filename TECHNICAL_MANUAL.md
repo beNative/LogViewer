@@ -9,7 +9,7 @@ The Log Analyser is a **desktop application** built using **Electron**. This arc
 - **Application Shell**: **Electron** is used to create the native application wrapper and provides access to the underlying operating system via Node.js APIs.
 - **Framework**: The UI is built using **React** with **TypeScript**. It leverages functional components and hooks for state management and side effects.
 - **Bundler**: **esbuild** is used for fast and efficient bundling of the TypeScript and React code.
-- **Data Storage**: Log data is stored in an in-memory **SQLite database** powered by **sql.js**, a library that compiles SQLite to WebAssembly. This allows for powerful and efficient SQL-based querying directly in the browser context of the Electron window.
+- **Data Storage**: Log data is stored in an in-memory **SQLite database** powered by **sql.js**, a library that compiles SQLite to WebAssembly. This allows for powerful and efficient SQL-based querying directly in the browser context of the Electron window. The database is structured into a main `logs` table and a specialized `stock_info` table for optimized queries.
 - **Data Visualization**: Charts are rendered using **Chart.js**, a powerful and flexible open-source charting library. The application also uses `chartjs-adapter-date-fns` for time-series axes and `chartjs-plugin-zoom` for interactive drag-to-select functionality.
 - **Styling**: **Tailwind CSS** is used for utility-first styling. A **PostCSS** build step processes the CSS to include vendor prefixes and apply Tailwind transformations. The application has been refactored to consolidate all styling into utility classes and a central stylesheet, removing inline styles for improved maintainability.
 
@@ -87,13 +87,13 @@ A core feature of the desktop application is persistent session management. This
 - `App.tsx`: The root component of the application, managing state and views.
 - `db.ts`: The `Database` class abstraction for `sql.js`.
 - `types.ts`, `utils.ts`, `parsers.ts`: Shared types and helper functions.
-- `components/`: Directory containing all reusable React components.
+- `components/`: Directory containing all reusable React components, including `LogTable.tsx`, `Dashboard.tsx`, and `StockTracker.tsx`.
 - `*.md`: Documentation files.
 
 ## 4. State Management and Data Flow
 The state management and data flow within the React application remain largely unchanged from the web version, with the primary addition being the initial fetching of application settings from the main process via the preload script. The separation between `formFilters` and `appliedFilters` continues to be the core pattern for ensuring synchronized data fetching between the Log Viewer and the Dashboard.
 
-The UI features a global **`StatusBar.tsx`** component, which is managed at the root `App.tsx` level to provide persistent application-wide feedback. The **`LogTable.tsx`** component has been refactored to delegate its display controls (e.g., density, column visibility) to a new dedicated toolbar, cleaning up its internal structure. The previous complex `VirtualizedLogView` has been removed, with the infinite scroll implementation now handled directly within `LogTable.tsx`, simplifying the rendering logic.
+The UI features a global **`StatusBar.tsx`** component, which is managed at the root `App.tsx` level to provide persistent application-wide feedback. The **`LogTable.tsx`** component has been refactored to delegate its display controls (e.g., density, column visibility) to a new dedicated toolbar, cleaning up its internal structure. The previous complex `VirtualizedLogView` has been removed, with the infinite scroll implementation now handled directly within `LogTable.tsx`, simplifying the rendering logic. The **`StockTracker.tsx`** component manages its own local form state for search terms and dates, but its primary data (`stockHistory`) is fetched and managed at the `App.tsx` level.
 
 ### Column Visibility
 The visibility of columns in the Log Viewer is managed by a new state object, `columnVisibility`, within `App.tsx`. This state is initialized from and persisted to the `settings.json` file via IPC handlers in the main process. The state is passed as props to `LogTable.tsx`, which conditionally renders table headers (`<th>`) and cells (`<td>`) based on the current visibility settings. A new component, `ColumnSelector.tsx`, provides the UI for modifying this state.
