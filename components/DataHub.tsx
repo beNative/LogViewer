@@ -4,6 +4,7 @@ import { Icon } from './icons';
 import { SessionFile, IconSet, OverallTimeRange } from '../types';
 import { SessionManager } from './SessionManager';
 import { formatBytes } from '../utils';
+import { Tooltip } from './Tooltip.tsx';
 
 interface DataHubProps {
   onCreateSessionFromFiles: (files: FileList) => void;
@@ -56,19 +57,82 @@ const ActiveSessionInfo: React.FC<{
     overallTimeRange: OverallTimeRange | null;
     loadedFileNames: string[];
     onAddFilesToSession: (files: FileList) => void;
+    onRenameSession: (oldName: string, newName: string) => Promise<boolean>;
     iconSet: IconSet;
-}> = ({ session, totalEntryCount, overallTimeRange, loadedFileNames, onAddFilesToSession, iconSet }) => {
+}> = ({ session, totalEntryCount, overallTimeRange, loadedFileNames, onAddFilesToSession, onRenameSession, iconSet }) => {
     
     const timeRangeString = overallTimeRange
         ? `${new Date(overallTimeRange.min).toLocaleString()} - ${new Date(overallTimeRange.max).toLocaleString()}`
         : 'N/A';
+    
+    const [isRenaming, setIsRenaming] = React.useState(false);
+    const [newName, setNewName] = React.useState(session.name);
+    const inputRef = React.useRef<HTMLInputElement>(null);
+
+    React.useEffect(() => {
+        setNewName(session.name);
+        setIsRenaming(false);
+    }, [session.name]);
+
+    React.useEffect(() => {
+        if (isRenaming) {
+            inputRef.current?.focus();
+            inputRef.current?.select();
+        }
+    }, [isRenaming]);
+
+    const handleRename = async () => {
+        if (newName && newName !== session.name) {
+            const success = await onRenameSession(session.name, newName);
+            if (success) {
+                setIsRenaming(false);
+            }
+        } else {
+            setNewName(session.name);
+            setIsRenaming(false);
+        }
+    };
+    
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') handleRename();
+        if (e.key === 'Escape') {
+            setNewName(session.name);
+            setIsRenaming(false);
+        }
+    };
 
     return (
         <div className="p-6 bg-white dark:bg-gray-800/50 rounded-2xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm flex-shrink-0">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
-                <Icon name="Database" iconSet={iconSet} className="w-6 h-6 text-sky-500" />
-                <span>Active Session: <span className="text-sky-600 dark:text-sky-400">{session.name}</span></span>
-            </h2>
+            <div className="group flex items-center justify-between gap-4 mb-4">
+                <div className="flex items-center gap-2 min-w-0">
+                    <Icon name="Database" iconSet={iconSet} className="w-6 h-6 text-sky-500 flex-shrink-0" />
+                    {isRenaming ? (
+                         <input
+                            ref={inputRef}
+                            type="text"
+                            value={newName}
+                            onChange={(e) => setNewName(e.target.value)}
+                            onBlur={handleRename}
+                            onKeyDown={handleKeyDown}
+                            className="w-full bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-xl font-bold text-sky-600 dark:text-sky-400 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition"
+                        />
+                    ) : (
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-white truncate">
+                             <span>Active Session: <span className="text-sky-600 dark:text-sky-400">{session.name}</span></span>
+                        </h2>
+                    )}
+                </div>
+                {!isRenaming && (
+                    <Tooltip content="Rename Session">
+                        <button
+                            onClick={() => setIsRenaming(true)}
+                            className="p-2 text-gray-400 hover:text-gray-800 dark:hover:text-white rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+                        >
+                            <Icon name="PencilSquare" iconSet={iconSet} className="w-5 h-5" />
+                        </button>
+                    </Tooltip>
+                )}
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm">
                 <div className="flex justify-between border-b border-gray-200 dark:border-gray-700/50 py-1.5">
                     <span className="text-gray-500 dark:text-gray-400">Total Records:</span>
@@ -150,6 +214,7 @@ export const DataHub: React.FC<DataHubProps> = ({
                             overallTimeRange={overallTimeRange}
                             loadedFileNames={loadedFileNames}
                             onAddFilesToSession={onAddFilesToSession}
+                            onRenameSession={onRenameSession}
                             iconSet={iconSet}
                         />
                     )}
