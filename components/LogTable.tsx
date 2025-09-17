@@ -343,45 +343,47 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                 </aside>
                 <Splitter onDrag={handleFilterResize} />
                 <main className="flex-grow min-h-0 flex flex-col min-w-0">
-                    <div className="overflow-auto outline-none flex-grow" ref={viewportRef} tabIndex={-1} onScroll={handleScroll}>
-                        <table key={visibilityKey} className="min-w-full table-fixed font-sans">
-                            <thead className="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 shadow-sm">
-                                <tr onContextMenu={(e) => {
-                                    e.preventDefault();
-                                    setHeaderContextMenu({ x: e.clientX, y: e.clientY });
-                                }}>
-                                    {columnVisibility.time && <th style={{width: '12%', minWidth: '170px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Time</th>}
-                                    {columnVisibility.level && <th style={{width: '8%', minWidth: '90px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Level</th>}
-                                    {columnVisibility.sndrtype && <th style={{width: '10%', minWidth: '120px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Sender Type</th>}
-                                    {columnVisibility.sndrname && <th style={{width: '10%', minWidth: '120px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Sender Name</th>}
-                                    {columnVisibility.fileName && <th style={{width: '15%', minWidth: '150px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Filename</th>}
-                                    {columnVisibility.msg && <th style={{width: '45%'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Message</th>}
-                                </tr>
-                            </thead>
-                             <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                                {viewMode === 'scroll' && topSpacerHeight > 0 && (
-                                    <tr><td style={{ height: topSpacerHeight }} colSpan={visibleColumnCount}></td></tr>
-                                )}
-                                {virtualEntries.map(entry => (
-                                    <tr key={entry.id}
-                                        ref={el => { rowRefs.current.set(entry.id, el); }}
-                                        onClick={() => handleRowClick(entry)}
-                                        className={`transition-colors duration-100 cursor-pointer ${keyboardSelectedId === entry.id ? 'bg-sky-100 dark:bg-sky-900/50' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
-                                    >
-                                        {columnVisibility.time && <td onContextMenu={(e) => handleContextMenu(e, entry, 'time', entry.time)} style={getStyle('time')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap`}>{entry.time}</td>}
-                                        {columnVisibility.level && <td onContextMenu={(e) => handleContextMenu(e, entry, 'level', entry.level)} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap`}><span style={getStyle('level')} className={`px-2 py-0.5 rounded-full text-xs font-medium ${getLevelColor(entry.level)}`}>{entry.level}</span></td>}
-                                        {columnVisibility.sndrtype && <td onContextMenu={(e) => handleContextMenu(e, entry, 'sndrtype', entry.sndrtype)} style={getStyle('sndrtype')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.sndrtype}</td>}
-                                        {columnVisibility.sndrname && <td onContextMenu={(e) => handleContextMenu(e, entry, 'sndrname', entry.sndrname)} style={getStyle('sndrname')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.sndrname}</td>}
-                                        {columnVisibility.fileName && <td onContextMenu={(e) => handleContextMenu(e, entry, 'fileName', entry.fileName)} style={getStyle('fileName')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.fileName}</td>}
-                                        {columnVisibility.msg && <td onContextMenu={(e) => handleContextMenu(e, entry, 'msg', entry.msg)} style={getStyle('msg')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`} dangerouslySetInnerHTML={{ __html: highlightText(entry.msg, [appliedFilters.includeMsg], theme) }}></td>}
+                    <div className="relative flex-grow">
+                        <div className="absolute inset-0 overflow-auto outline-none" ref={viewportRef} tabIndex={-1} onScroll={handleScroll}>
+                            <table key={visibilityKey} className="min-w-full table-fixed font-sans">
+                                <thead className="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 shadow-sm">
+                                    <tr onContextMenu={(e) => {
+                                        e.preventDefault();
+                                        setHeaderContextMenu({ x: e.clientX, y: e.clientY });
+                                    }}>
+                                        {columnVisibility.time && <th style={{width: '12%', minWidth: '170px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Time</th>}
+                                        {columnVisibility.level && <th style={{width: '8%', minWidth: '90px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Level</th>}
+                                        {columnVisibility.sndrtype && <th style={{width: '10%', minWidth: '120px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Sender Type</th>}
+                                        {columnVisibility.sndrname && <th style={{width: '10%', minWidth: '120px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Sender Name</th>}
+                                        {columnVisibility.fileName && <th style={{width: '15%', minWidth: '150px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Filename</th>}
+                                        {columnVisibility.msg && <th style={{width: '45%'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Message</th>}
                                     </tr>
-                                ))}
-                                {viewMode === 'scroll' && bottomSpacerHeight > 0 && (
-                                    <tr><td style={{ height: bottomSpacerHeight }} colSpan={visibleColumnCount}></td></tr>
-                                )}
-                             </tbody>
-                        </table>
-                        {isBusy && <div className="p-4 text-center">Loading...</div>}
+                                </thead>
+                                 <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                                    {viewMode === 'scroll' && topSpacerHeight > 0 && (
+                                        <tr><td style={{ height: topSpacerHeight }} colSpan={visibleColumnCount}></td></tr>
+                                    )}
+                                    {virtualEntries.map(entry => (
+                                        <tr key={entry.id}
+                                            ref={el => { rowRefs.current.set(entry.id, el); }}
+                                            onClick={() => handleRowClick(entry)}
+                                            className={`transition-colors duration-100 cursor-pointer ${keyboardSelectedId === entry.id ? 'bg-sky-100 dark:bg-sky-900/50' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
+                                        >
+                                            {columnVisibility.time && <td onContextMenu={(e) => handleContextMenu(e, entry, 'time', entry.time)} style={getStyle('time')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap`}>{entry.time}</td>}
+                                            {columnVisibility.level && <td onContextMenu={(e) => handleContextMenu(e, entry, 'level', entry.level)} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap`}><span style={getStyle('level')} className={`px-2 py-0.5 rounded-full text-xs font-medium ${getLevelColor(entry.level)}`}>{entry.level}</span></td>}
+                                            {columnVisibility.sndrtype && <td onContextMenu={(e) => handleContextMenu(e, entry, 'sndrtype', entry.sndrtype)} style={getStyle('sndrtype')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.sndrtype}</td>}
+                                            {columnVisibility.sndrname && <td onContextMenu={(e) => handleContextMenu(e, entry, 'sndrname', entry.sndrname)} style={getStyle('sndrname')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.sndrname}</td>}
+                                            {columnVisibility.fileName && <td onContextMenu={(e) => handleContextMenu(e, entry, 'fileName', entry.fileName)} style={getStyle('fileName')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.fileName}</td>}
+                                            {columnVisibility.msg && <td onContextMenu={(e) => handleContextMenu(e, entry, 'msg', entry.msg)} style={getStyle('msg')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`} dangerouslySetInnerHTML={{ __html: highlightText(entry.msg, [appliedFilters.includeMsg], theme) }}></td>}
+                                        </tr>
+                                    ))}
+                                    {viewMode === 'scroll' && bottomSpacerHeight > 0 && (
+                                        <tr><td style={{ height: bottomSpacerHeight }} colSpan={visibleColumnCount}></td></tr>
+                                    )}
+                                 </tbody>
+                            </table>
+                            {isBusy && <div className="p-4 text-center">Loading...</div>}
+                        </div>
                     </div>
                 </main>
                 {props.isDetailPanelVisible && (
