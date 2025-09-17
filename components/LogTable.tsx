@@ -12,6 +12,8 @@ import { ColumnVisibilityMenu } from './ColumnVisibilityMenu';
 
 type ContextMenuState = { x: number; y: number; entry: LogEntry; value: string; key: ColumnKey } | null;
 
+const MAX_SPACER_HEIGHT = 8000000; // 8 million pixels, a safe value for most browsers
+
 export const getLevelColor = (level: string) => {
     switch (level?.toUpperCase()) {
         case 'ERROR':
@@ -100,7 +102,23 @@ interface LogTableProps {
     onUserScrollStart: () => void;
 }
 
-const INFINITE_SCROLL_CHUNK_SIZE = 200;
+const renderSpacers = (totalHeight: number, colSpan: number, keyPrefix: string) => {
+    if (totalHeight <= 0) return null;
+    const spacers = [];
+    let heightRemaining = totalHeight;
+    let i = 0;
+    while (heightRemaining > 0) {
+        const height = Math.min(heightRemaining, MAX_SPACER_HEIGHT);
+        spacers.push(
+            <tr key={`${keyPrefix}-${i}`}>
+                <td style={{ height }} colSpan={colSpan}></td>
+            </tr>
+        );
+        heightRemaining -= height;
+        i++;
+    }
+    return spacers;
+};
 
 export const LogTable: React.FC<LogTableProps> = (props) => {
     const [selectedEntry, setSelectedEntry] = React.useState<LogEntry | null>(null);
@@ -459,9 +477,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                                     </tr>
                                 </thead>
                                  <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                                    {topSpacerHeight > 0 && (
-                                        <tr><td style={{ height: topSpacerHeight }} colSpan={visibleColumnCount}></td></tr>
-                                    )}
+                                    {renderSpacers(topSpacerHeight, visibleColumnCount, 'top-spacer')}
                                     {virtualEntries.map(entry => (
                                         <tr key={entry.id}
                                             ref={el => { rowRefs.current.set(entry.id, el); }}
@@ -476,9 +492,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                                             {columnVisibility.msg && <td onContextMenu={(e) => handleContextMenu(e, entry, 'msg', entry.msg)} style={getStyle('msg')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`} dangerouslySetInnerHTML={{ __html: highlightText(entry.msg, [appliedFilters.includeMsg], theme) }}></td>}
                                         </tr>
                                     ))}
-                                    {bottomSpacerHeight > 0 && (
-                                        <tr><td style={{ height: bottomSpacerHeight }} colSpan={visibleColumnCount}></td></tr>
-                                    )}
+                                    {renderSpacers(bottomSpacerHeight, visibleColumnCount, 'bottom-spacer')}
                                  </tbody>
                             </table>
                             {isBusy && <div className="p-4 text-center">Loading...</div>}
