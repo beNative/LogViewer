@@ -238,6 +238,8 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         props.onPanelWidthsChange({ ...panelWidthsRef.current, details: newWidth });
     };
 
+    const visibilityKey = Object.values(props.columnVisibility).join('-');
+
     return (
         <div className="flex flex-col flex-grow min-h-0 bg-gray-100 dark:bg-gray-900">
             {props.isTimeRangeSelectorVisible && props.overallTimeRange && (
@@ -288,15 +290,15 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                         </Tooltip>
                     </div>
                     <div className="overflow-auto outline-none" ref={tableContainerRef} tabIndex={-1}>
-                        <table className="min-w-full table-fixed font-sans">
+                        <table key={visibilityKey} className="min-w-full table-auto font-sans">
                             <thead className="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 shadow-sm">
                                 <tr>
-                                    {columnVisibility.time && <th style={{width: '180px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Time</th>}
-                                    {columnVisibility.level && <th style={{width: '100px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Level</th>}
-                                    {columnVisibility.sndrtype && <th style={{width: '150px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Sender Type</th>}
-                                    {columnVisibility.sndrname && <th style={{width: '150px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Sender Name</th>}
-                                    {columnVisibility.fileName && <th style={{width: '200px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Filename</th>}
-                                    {columnVisibility.msg && <th className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Message</th>}
+                                    {columnVisibility.time && <th style={{width: '12%', minWidth: '170px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Time</th>}
+                                    {columnVisibility.level && <th style={{width: '8%', minWidth: '90px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Level</th>}
+                                    {columnVisibility.sndrtype && <th style={{width: '10%', minWidth: '120px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Sender Type</th>}
+                                    {columnVisibility.sndrname && <th style={{width: '10%', minWidth: '120px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Sender Name</th>}
+                                    {columnVisibility.fileName && <th style={{width: '15%', minWidth: '150px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Filename</th>}
+                                    {columnVisibility.msg && <th style={{width: '45%'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Message</th>}
                                 </tr>
                             </thead>
                              <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">

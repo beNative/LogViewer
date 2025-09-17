@@ -38,7 +38,7 @@ export const ColumnSelector: React.FC<ColumnSelectorProps> = ({ visibility, onCh
                 <Icon name="ChevronDown" iconSet={iconSet} className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
             </button>
             {isOpen && (
-                <div className="absolute bottom-full mb-2 right-0 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-20">
+                <div className="absolute top-full mt-2 right-0 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-20">
                     <div className="p-2 border-b border-gray-200 dark:border-gray-700">
                         <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 px-2">Visible Columns</p>
                     </div>
