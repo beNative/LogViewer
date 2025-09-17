@@ -22,24 +22,10 @@ const parseKeyValueMessage = (msg: string): { prefix: string | null; pairs: { ke
         }
 
         if (pairs.length > 0) {
-            const mainPart = parts.slice(0, firstKvPairIndex).join(';').trim();
-            let prefix: string | null = null;
-            let unstructuredValue = mainPart;
-
-            const lastColonIndex = mainPart.lastIndexOf(':');
-            // Check for a prefix, but avoid matching drive letters like "D:"
-            if (lastColonIndex > -1 && lastColonIndex < mainPart.length - 1) {
-                const potentialPrefix = mainPart.substring(0, lastColonIndex + 1);
-                if (!/^[a-zA-Z]:$/.test(potentialPrefix.trim())) {
-                    prefix = potentialPrefix.trim();
-                    unstructuredValue = mainPart.substring(lastColonIndex + 1).trim();
-                }
-            }
-
-            if (unstructuredValue) {
-                pairs.unshift({ key: 'Message', value: unstructuredValue });
-            }
-            return { prefix, pairs };
+            // The entire part before the key-value pairs is treated as the prefix.
+            // This prevents creating an artificial "Message" key for unstructured data like URLs.
+            const prefix = parts.slice(0, firstKvPairIndex).join(';').trim();
+            return { prefix: prefix || null, pairs };
         }
     }
 
