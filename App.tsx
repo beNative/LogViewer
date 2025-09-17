@@ -5,7 +5,7 @@ import {
     PanelWidths, ViewMode, OverallTimeRange, FileTimeRange, LogDensityPointByLevel, 
     IconSet, LogTableDensity, Theme, Settings as SettingsType, ProgressPhase,
     StockInfoEntry, StockInfoFilters, ToastMessage, StockArticleSuggestion, LogDensityPoint,
-    TimelineBarVisibility
+    TimelineBarVisibility,
 } from './types';
 import { LogTable } from './components/LogTable';
 import { ProgressIndicator } from './components/ProgressIndicator';
@@ -687,14 +687,22 @@ const App: React.FC = () => {
   }, [jumpToEntryId, filteredEntries]);
 
   
-  const saveCurrentDbAsSession = React.useCallback(async (name: string): Promise<boolean> => {
-    if (!isElectron || !db) return false;
+  const saveCurrentDbAsSession = React.useCallback(async (dbToSave: Database, name: string): Promise<boolean> => {
+    if (!isElectron || !dbToSave) return false;
 
-    // The 'appliedFilters' are now saved to the DB meta table whenever they are applied,
-    // so we no longer need to explicitly save them here. This is more robust.
+    // Persist the currently active filters to the session DB's metadata before exporting it.
+    // This ensures that when the session is reloaded, it starts with the same view.
+    try {
+        dbToSave.setMeta('appliedFilters', JSON.stringify(appliedFilters));
+        logToConsole('Saved current filter configuration to the session database.', 'DEBUG');
+    } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        logToConsole(`Could not save filters to session metadata: ${msg}`, 'WARNING');
+    }
     
-    const buffer = db.export();
-    if (buffer.length <= 1024 && totalEntryCount === 0) {
+    const buffer = dbToSave.export();
+    const totalEntriesInDb = dbToSave.getTotalEntryCount();
+    if (buffer.length <= 1024 && totalEntriesInDb === 0) {
         logToConsole('Database is empty, skipping session save.', 'DEBUG');
         return true; // Technically not a failure
     }
@@ -717,20 +725,24 @@ const App: React.FC = () => {
         logToConsole(`Failed to save session: ${msg}`, 'ERROR');
         return false;
     }
-  }, [db, isElectron, logToConsole, fetchSessions, totalEntryCount, setActiveSessionName, setIsDirty, setError]);
+  }, [isElectron, logToConsole, fetchSessions, appliedFilters, setActiveSessionName, setIsDirty, setError]);
 
   const handleSaveSession = React.useCallback(async () => {
+    if (!db) {
+        logToConsole('Cannot save session, no database is active.', 'WARNING');
+        return false;
+    }
     if (activeSessionName) {
-      return await saveCurrentDbAsSession(activeSessionName);
+      return await saveCurrentDbAsSession(db, activeSessionName);
     } else {
       // If the session is new (no active name), generate one automatically.
       const now = new Date();
       const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-').replace('T', '_');
       const newSessionName = `session_${timestamp}.sqlite`;
       logToConsole(`New session detected. Saving with generated name: ${newSessionName}`, 'INFO');
-      return await saveCurrentDbAsSession(newSessionName);
+      return await saveCurrentDbAsSession(db, newSessionName);
     }
-  }, [activeSessionName, saveCurrentDbAsSession, logToConsole]);
+  }, [activeSessionName, saveCurrentDbAsSession, logToConsole, db]);
 
   const processFilesToDb = React.useCallback(async (files: FileList, targetDb: Database) => {
     setIsLoading(true);
@@ -973,7 +985,7 @@ const App: React.FC = () => {
         
         logToConsole(`New session will be saved with generated name: ${sessionName}`, 'INFO');
 
-        const success = await saveCurrentDbAsSession(sessionName); 
+        const success = await saveCurrentDbAsSession(newSessionDb, sessionName); 
         if (success) {
             logToConsole('New session created and saved successfully.', 'INFO');
             addToast({ type: 'success', title: 'Session Created', message: `New session '${sessionName}' created successfully.` });
