@@ -7,6 +7,9 @@ type Theme = 'light' | 'dark';
 type ValueToPositionFn = (value: number) => number;
 type PositionToValueFn = (pos: number) => number;
 
+// New union type for clarity
+type BucketData = LogDensityPointByLevel | LogDensityPoint;
+
 interface TimeRangeSelectorProps {
     minTime: number;
     maxTime: number;
@@ -17,7 +20,6 @@ interface TimeRangeSelectorProps {
     theme: Theme;
     pageTimestampRanges: PageTimestampRange[];
     fileTimeRanges: FileTimeRange[];
-    // FIX: Allow both types of density data.
     logDensity: (LogDensityPointByLevel[] | LogDensityPoint[]);
     overallLogDensity: (LogDensityPointByLevel[] | LogDensityPoint[]);
     datesWithLogs: string[];
@@ -250,7 +252,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     const [dragState, setDragState] = React.useState<DragState | null>(null);
     const [tempSelection, setTempSelection] = React.useState<{ start: number, end: number} | null>(null);
     const [tempCursorTime, setTempCursorTime] = React.useState<number | null>(null);
-    const [densityTooltip, setDensityTooltip] = React.useState<{ x: number, y: number, bucketData: LogDensityPointByLevel } | null>(null);
+    const [densityTooltip, setDensityTooltip] = React.useState<{ x: number, y: number, bucketData: BucketData } | null>(null);
 
     const displayMinTime = viewRange?.min ?? minTime;
     const displayMaxTime = viewRange?.max ?? maxTime;
@@ -388,24 +390,33 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
         const rect = e.currentTarget.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const hoverTime = mainPosToValue(x);
+
+        if (logDensity.length < 2) {
+            setDensityTooltip(null);
+            return;
+        }
+
+        const bucketDuration = logDensity[1].time - logDensity[0].time;
+        const bucketIndex = Math.floor((hoverTime - logDensity[0].time) / bucketDuration);
+        const bucketData = logDensity[bucketIndex];
         
-        if (logDensity.length > 1 && 'counts' in logDensity[0]) {
-            const levelDensity = logDensity as LogDensityPointByLevel[];
-            const bucketDuration = levelDensity[1].time - levelDensity[0].time;
-            const bucketIndex = Math.floor((hoverTime - levelDensity[0].time) / bucketDuration);
-            const bucketData = levelDensity[bucketIndex];
-            
-            if (bucketData && Object.keys(bucketData.counts).length > 0) {
-                setDensityTooltip({
-                    x: e.clientX,
-                    y: rect.top,
-                    bucketData: bucketData
-                });
-            } else {
-                setDensityTooltip(null);
-            }
+        if (!bucketData) {
+            setDensityTooltip(null);
+            return;
+        }
+        
+        const isLevelData = 'counts' in bucketData;
+        const hasData = isLevelData 
+            ? Object.keys((bucketData as LogDensityPointByLevel).counts).length > 0 
+            : (bucketData as LogDensityPoint).count > 0;
+
+        if (hasData) {
+            setDensityTooltip({ x: e.clientX, y: rect.top, bucketData: bucketData });
+        } else {
+            setDensityTooltip(null);
         }
     };
+    
     const handleDensityLeave = () => setDensityTooltip(null);
 
     const barComponents = [];
@@ -590,12 +601,12 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                 </div>
                 <div className="w-[60px] flex-shrink-0"/>
             </div>
-            {densityTooltip && 'counts' in densityTooltip.bucketData && <DensityTooltip {...densityTooltip} theme={theme} />}
+            {densityTooltip && <DensityTooltip {...densityTooltip} theme={theme} />}
         </div>
     );
 };
 
-const DensityTooltip: React.FC<{ x: number, y: number, bucketData: LogDensityPointByLevel, theme: Theme }> = ({ x, y, bucketData, theme }) => {
+const DensityTooltip: React.FC<{ x: number, y: number, bucketData: BucketData, theme: Theme }> = ({ x, y, bucketData, theme }) => {
     const ref = React.useRef<HTMLDivElement>(null);
     const [style, setStyle] = React.useState<React.CSSProperties>({
         position: 'fixed',
@@ -631,33 +642,36 @@ const DensityTooltip: React.FC<{ x: number, y: number, bucketData: LogDensityPoi
         }
     }, [x, y]);
 
-
-    const total = Object.values(bucketData.counts).reduce((sum, count) => sum + count, 0);
-    const sortedLevels = Object.entries(bucketData.counts).sort((a,b) => b[1] - a[1]);
+    const isLevelData = 'counts' in bucketData;
+    const total = isLevelData ? Object.values(bucketData.counts).reduce((sum, count) => sum + count, 0) : bucketData.count;
+    const sortedLevels = isLevelData ? Object.entries(bucketData.counts).sort((a,b) => b[1] - a[1]) : [];
+    const unitLabel = isLevelData ? 'logs' : 'density';
 
     return (
         <div ref={ref} style={style} className="z-50 p-2.5 bg-gray-800/90 dark:bg-black/80 text-white rounded-lg shadow-2xl pointer-events-none w-56 backdrop-blur-sm animate-fadeIn">
             <div className="text-center mb-2">
                 <p className="text-xs text-gray-400">Time Bucket</p>
                 <p className="font-mono text-sm">{new Date(bucketData.time).toLocaleString()}</p>
-                <p className="font-bold text-lg">{total.toLocaleString()} <span className="text-sm font-normal text-gray-300">logs</span></p>
+                <p className="font-bold text-lg">{total.toLocaleString()} <span className="text-sm font-normal text-gray-300">{unitLabel}</span></p>
             </div>
-            <div className="space-y-1">
-                {sortedLevels.map(([level, count]) => {
-                    const percentage = total > 0 ? (count / total) * 100 : 0;
-                    return (
-                        <div key={level} className="text-xs">
-                            <div className="flex justify-between items-center mb-0.5">
-                                <span className="font-semibold" style={{ color: getLevelColor(level, theme) }}>{level}</span>
-                                <span className="font-mono">{count.toLocaleString()} ({percentage.toFixed(1)}%)</span>
+            {isLevelData && (
+                <div className="space-y-1">
+                    {sortedLevels.map(([level, count]) => {
+                        const percentage = total > 0 ? (count / total) * 100 : 0;
+                        return (
+                            <div key={level} className="text-xs">
+                                <div className="flex justify-between items-center mb-0.5">
+                                    <span className="font-semibold" style={{ color: getLevelColor(level, theme) }}>{level}</span>
+                                    <span className="font-mono">{count.toLocaleString()} ({percentage.toFixed(1)}%)</span>
+                                </div>
+                                <div className="w-full bg-gray-600/50 rounded-full h-1.5">
+                                    <div className="h-1.5 rounded-full" style={{ width: `${percentage}%`, backgroundColor: getLevelColor(level, theme) }} />
+                                </div>
                             </div>
-                            <div className="w-full bg-gray-600/50 rounded-full h-1.5">
-                                <div className="h-1.5 rounded-full" style={{ width: `${percentage}%`, backgroundColor: getLevelColor(level, theme) }} />
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
+                        );
+                    })}
+                </div>
+            )}
         </div>
     );
 };
@@ -790,8 +804,7 @@ const OverviewBrush: React.FC<{
     const selectionWidth = currentSelection ? valueToPosition(currentSelection.end) - selectionLeft : 0;
 
     const maxTotalCount = React.useMemo(() => {
-        // FIX: Add explicit types to reduce callback and a type cast to fix type inference errors.
-         return density.reduce((max: number, bucket: LogDensityPointByLevel | LogDensityPoint) => {
+        return density.reduce((max: number, bucket: LogDensityPointByLevel | LogDensityPoint) => {
             const total = 'counts' in bucket ? Object.values(bucket.counts).reduce((sum: number, count: number) => sum + count, 0) : (bucket as LogDensityPoint).count;
             return Math.max(max, total);
         }, 1);
@@ -806,7 +819,6 @@ const OverviewBrush: React.FC<{
         >
             <div className="w-full h-full flex pointer-events-none">
                 {density.map((bucket: LogDensityPointByLevel | LogDensityPoint, i) => {
-                    // FIX: Add explicit types to reduce callback and a type cast to fix type inference errors.
                     const total: number = 'counts' in bucket ? Object.values(bucket.counts).reduce((s: number, c: number) => s + c, 0) : (bucket as LogDensityPoint).count;
                     const opacity = total > 0 ? 0.3 + (total / maxTotalCount) * 0.7 : 0;
                      if ('counts' in bucket && total > 0) {
