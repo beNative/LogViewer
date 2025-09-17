@@ -524,20 +524,20 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                             </div>
                              {startPos >= 0 && endPos >= 0 && (endPos > startPos) && (
                                 <div
-                                    className="absolute top-0 bottom-0 bg-sky-500/20 dark:bg-sky-400/20 z-10 border-x-4 border-sky-600 dark:border-sky-400"
+                                    className="absolute top-0 bottom-0 bg-sky-500/20 dark:bg-sky-400/20 z-10 border-x-4 border-sky-600 dark:border-sky-400 pointer-events-none"
                                     style={{ left: `${startPos}px`, width: `${Math.max(0, endPos - startPos)}px` }}
                                 >
                                     <div
                                         data-handle="left"
                                         onMouseDown={(e) => handleMouseDown(e, 'select_left')}
-                                        className="absolute top-0 -left-2 w-4 h-full cursor-col-resize group"
+                                        className="absolute top-0 -left-2 w-4 h-full cursor-col-resize group pointer-events-auto"
                                     >
                                         <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-8 w-1.5 bg-sky-600 dark:bg-sky-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
                                     </div>
                                     <div
                                         data-handle="right"
                                         onMouseDown={(e) => handleMouseDown(e, 'select_right')}
-                                        className="absolute top-0 -right-2 w-4 h-full cursor-col-resize group"
+                                        className="absolute top-0 -right-2 w-4 h-full cursor-col-resize group pointer-events-auto"
                                     >
                                          <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-8 w-1.5 bg-sky-600 dark:bg-sky-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
                                     </div>
