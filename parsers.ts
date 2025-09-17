@@ -18,7 +18,7 @@ const parseKeyValueMessage = (msg: string): { prefix: string; pairs: { key: stri
     }
     
     const pairs: { key: string; value: string }[] = [];
-    const regex = /\b([a-zA-Z0-9_]+)=/g;
+    const regex = /\b([a-zA-Z0-9_.\[\]]+)=/g;
     const matches = [...messageBody.matchAll(regex)];
 
     if (matches.length > 0) {
