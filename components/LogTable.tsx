@@ -244,7 +244,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     return (
         <div className="flex flex-col flex-grow min-h-0 bg-gray-100 dark:bg-gray-900">
             {props.isTimeRangeSelectorVisible && props.overallTimeRange && (
-                <div className="flex-shrink-0 p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50">
+                <div className="flex-shrink-0 p-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50">
                    <TimeRangeSelector 
                     minTime={props.overallTimeRange.min}
                     maxTime={props.overallTimeRange.max}

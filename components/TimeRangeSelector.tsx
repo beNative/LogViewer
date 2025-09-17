@@ -518,8 +518,8 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                     onContextMenu={handleLabelsContextMenu}
                 >
                      {/* This div is a spacer to align with the timeline content */}
-                    <div className="h-6" />
-                    <div className="space-y-3">
+                    <div className="h-4" />
+                    <div className="space-y-2">
                         {barComponents.map(bar => (
                             <div key={bar.key} className="h-5 text-xs font-semibold text-gray-600 dark:text-gray-400 flex items-center justify-end pr-2">
                                 {bar.label}
@@ -530,7 +530,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                 
                 <div className="flex-grow flex flex-col relative">
                      {/* Tooltips Container */}
-                    <div className="absolute top-0 w-full h-6 pointer-events-none z-40">
+                    <div className="absolute top-0 w-full h-5 pointer-events-none z-40">
                          {startPos >= 0 && <div className="absolute top-0 text-xs font-mono text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-1.5 py-0.5 rounded shadow" style={{ left: `${startPos}px`, transform: 'translateX(-50%)' }}>{formatTooltip(currentStart)}</div>}
                          {endPos >= 0 && (endPos - startPos > 60) && <div className="absolute top-0 text-xs font-mono text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-1.5 py-0.5 rounded shadow" style={{ left: `${endPos}px`, transform: 'translateX(-50%)' }}>{formatTooltip(currentEnd)}</div>}
                          {finalCursorTime !== null && finalCursorTime >= displayMinTime && finalCursorTime <= displayMaxTime && <div className="absolute top-0 text-xs font-mono bg-red-500/90 backdrop-blur-sm text-white rounded px-1.5 py-0.5" style={{ left: `${mainValueToPos(finalCursorTime)}px`, transform: 'translateX(-50%)' }}>{formatTooltip(finalCursorTime)}</div>}
@@ -539,10 +539,10 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                     {/* Main Timeline Area */}
                     <div 
                         onMouseDown={(e) => handleMouseDown(e, 'new_selection')}
-                        className="w-full cursor-crosshair bg-gray-200 dark:bg-gray-700/50 rounded p-1 overflow-hidden mt-6"
+                        className="w-full cursor-crosshair bg-gray-200 dark:bg-gray-700/50 rounded p-1 overflow-hidden mt-4"
                     >
                         <div ref={mainContainerRef} className="relative">
-                            <div className="space-y-3">
+                            <div className="space-y-2">
                                 {barComponents.map(bar => (
                                     <bar.Comp key={bar.key} valueToPosition={mainValueToPos} {...bar.props} />
                                 ))}
@@ -579,7 +579,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                         </div>
                     </div>
                     {/* Time Axis Ticks */}
-                    <div className="relative w-full h-6 mt-1 pointer-events-none">
+                    <div className="relative w-full h-5 mt-1 pointer-events-none">
                         {ticks.map(tick => {
                             const pos = mainValueToPos(tick);
                             if (pos < 20 || pos > mainContainerWidth - 20) return null;
@@ -595,15 +595,15 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                     </div>
                 </div>
                 
-                <div className="w-auto flex-shrink-0 self-start pt-6 flex flex-col items-center gap-1">
+                <div className="w-auto flex-shrink-0 self-start pt-4 flex flex-col items-center gap-1">
                      <Tooltip content="Zoom to Selection">
-                        <button onClick={onZoomToSelection} disabled={!zoomToSelectionEnabled} className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"><Icon name="ArrowsPointingIn" iconSet={iconSet} className="w-5 h-5"/></button>
+                        <button onClick={onZoomToSelection} disabled={!zoomToSelectionEnabled} className="p-1.5 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"><Icon name="ArrowsPointingIn" iconSet={iconSet} className="w-4 h-4"/></button>
                      </Tooltip>
                      <Tooltip content="Zoom to Extent">
-                        <button onClick={onZoomToExtent} disabled={!viewRange} className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"><Icon name="ArrowsPointingOut" iconSet={iconSet} className="w-5 h-5"/></button>
+                        <button onClick={onZoomToExtent} disabled={!viewRange} className="p-1.5 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"><Icon name="ArrowsPointingOut" iconSet={iconSet} className="w-4 h-4"/></button>
                      </Tooltip>
                      <Tooltip content="Clear time selection">
-                        <button onClick={onClear} className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"><Icon name="XMark" iconSet={iconSet} className="w-6 h-6"/></button>
+                        <button onClick={onClear} className="p-1.5 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"><Icon name="XMark" iconSet={iconSet} className="w-4 h-4"/></button>
                     </Tooltip>
                 </div>
             </div>
