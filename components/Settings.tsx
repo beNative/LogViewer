@@ -42,6 +42,9 @@ interface SettingsProps {
   onTimelineBarVisibilityChange: (newVisibility: TimelineBarVisibility) => void;
 }
 
+// FIX: Added missing 'inputStyles' constant definition.
+const inputStyles = "w-full bg-white dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white sm:text-sm rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition";
+
 const ToggleSwitch: React.FC<{
   label: string;
   enabled: boolean;
@@ -294,8 +297,94 @@ export const Settings: React.FC<SettingsProps> = (props) => {
                                     <button onClick={() => onUiScaleChange(tempUiScale)} disabled={!isScaleDirty} className="px-3 py-1.5 text-sm font-semibold rounded-md transition-colors bg-sky-600 text-white hover:bg-sky-700 disabled:bg-gray-400 disabled:dark:bg-gray-600 disabled:cursor-not-allowed">Apply</button>
                                 </div>
                             </div>
+                            <SegmentedControl
+                                label="Icon Set"
+                                value={iconSet}
+                                onChange={onIconSetChange}
+                                options={[
+                                    { label: 'Sharp', value: 'sharp' },
+                                    { label: 'Solid', value: 'solid' },
+                                ]}
+                            />
                             <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-700">
-// FIX: The component was missing its return statement, causing a type error. The main JSX structure for the component has been added.
+                                <span className="font-medium text-gray-800 dark:text-gray-200">Log Table Density</span>
+                                <DensityControl value={logTableDensity} onChange={onLogTableDensityChange} />
+                            </div>
+                        </div>
+                    )}
+                    {activeCategory === 'behavior' && (
+                        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                            <h2 className="text-xl font-bold text-gray-800 dark:text-sky-400 pb-4">Behavior</h2>
+                            <SegmentedControl
+                                label="Log Viewer Mode"
+                                value={viewMode}
+                                onChange={onViewModeChange}
+                                options={[
+                                    { label: 'Paginate', value: 'pagination' },
+                                    { label: 'Scroll', value: 'scroll' },
+                                ]}
+                            />
+                            <ToggleSwitch label="Show Timeline By Default" enabled={isTimeRangeSelectorVisible} onChange={onTimeRangeSelectorVisibilityChange} />
+                            <ToggleSwitch label="Show Details Panel By Default" enabled={isDetailPanelVisible} onChange={onDetailPanelVisibilityChange} />
+
+                            <div>
+                                <h3 className="font-medium text-gray-800 dark:text-gray-200 pt-3">Timeline Bar Visibility</h3>
+                                <div className="pl-4">
+                                    <ToggleSwitch label="Pages Bar" enabled={timelineBarVisibility.pages} onChange={(val) => onTimelineBarVisibilityChange({...timelineBarVisibility, pages: val})} />
+                                    <ToggleSwitch label="Files Bar" enabled={timelineBarVisibility.files} onChange={(val) => onTimelineBarVisibilityChange({...timelineBarVisibility, files: val})} />
+                                    <ToggleSwitch label="Dates Bar" enabled={timelineBarVisibility.dates} onChange={(val) => onTimelineBarVisibilityChange({...timelineBarVisibility, dates: val})} />
+                                    <ToggleSwitch label="Density Bar" enabled={timelineBarVisibility.density} onChange={(val) => onTimelineBarVisibilityChange({...timelineBarVisibility, density: val})} />
+                                    <ToggleSwitch label="Overview Bar" enabled={timelineBarVisibility.overview} onChange={(val) => onTimelineBarVisibilityChange({...timelineBarVisibility, overview: val})} />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    {activeCategory === 'updates' && (
+                        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                            <h2 className="text-xl font-bold text-gray-800 dark:text-sky-400 pb-4">Updates</h2>
+                            <ToggleSwitch label="Enable Automatic Updates" enabled={isAutoUpdateEnabled} onChange={onAutoUpdateEnabledChange} />
+                            <ToggleSwitch label="Update to Pre-releases" enabled={allowPrerelease} onChange={onAllowPrereleaseChange} />
+                        </div>
+                    )}
+                    {activeCategory === 'integrations' && (
+                         <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                             <h2 className="text-xl font-bold text-gray-800 dark:text-sky-400 pb-4">Integrations</h2>
+                             <div className="py-3 border-b border-gray-200 dark:border-gray-700">
+                                <label htmlFor="githubToken" className="block font-medium text-gray-800 dark:text-gray-200">GitHub Token (for private updates)</label>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <input 
+                                        type={isTokenVisible ? 'text' : 'password'}
+                                        id="githubToken"
+                                        value={localGithubToken}
+                                        onChange={(e) => setLocalGithubToken(e.target.value)}
+                                        className={`${inputStyles} flex-grow`}
+                                        placeholder="ghp_..."
+                                    />
+                                    <button onClick={() => setIsTokenVisible(!isTokenVisible)} className="p-1.5 text-gray-500 dark:text-gray-400 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">
+                                        <Icon name={isTokenVisible ? 'EyeSlash' : 'Eye'} iconSet={iconSet} className="w-5 h-5" />
+                                    </button>
+                                    <button onClick={handleSaveToken} disabled={!isTokenDirty} className="px-3 py-1.5 text-sm font-semibold rounded-md transition-colors bg-sky-600 text-white hover:bg-sky-700 disabled:bg-gray-400 disabled:dark:bg-gray-600 disabled:cursor-not-allowed">Save</button>
+                                </div>
+                             </div>
+                         </div>
+                    )}
+                    {activeCategory === 'styles' && (
+                        <div>
+                             <h2 className="text-xl font-bold text-gray-800 dark:text-sky-400 pb-4">Table Styles</h2>
+                             <ColumnStyleSettings styles={columnStyles} onChange={onColumnStylesChange} />
+                        </div>
+                    )}
+                    {activeCategory === 'debugging' && (
+                        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                            <h2 className="text-xl font-bold text-gray-800 dark:text-sky-400 pb-4">Debugging</h2>
+                            <ToggleSwitch label="Show Focus/Hover Inspector" enabled={isFocusDebuggerVisible} onChange={onFocusDebuggerVisibilityChange} />
+                        </div>
+                    )}
+                </div>
+            </main>
+        </div>
+    );
+
     return (
         <div className="flex flex-col h-full bg-white dark:bg-gray-800">
             <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-700">
