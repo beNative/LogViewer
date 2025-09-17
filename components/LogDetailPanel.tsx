@@ -70,25 +70,39 @@ export const LogDetailPanel: React.FC<LogDetailPanelProps> = ({ entry, onClose, 
         if (type === 'raw' || !entry || !parsedContent) {
             return entry?.msg || '';
         }
-
+    
+        let parsedString = '';
         switch (parsedContent.type) {
             case 'text':
             case 'xml':
-                return parsedContent.data as string;
+                parsedString = parsedContent.data as string;
+                break;
             case 'sql':
-                return (parsedContent.data as { sql: string }).sql;
+                const sqlData = parsedContent.data as { sql: string, result: string | null };
+                parsedString = sqlData.result ? `${sqlData.sql}\n\n-- Result --\n${sqlData.result}` : sqlData.sql;
+                break;
             case 'kv':
-                return (parsedContent.data as { key: string; value: string }[])
+                parsedString = (parsedContent.data as { key: string; value: string }[])
                     .map(pair => `${pair.key}=${pair.value}`)
                     .join('\n');
+                break;
             case 'grid':
                 const gridData = parsedContent.data as GridData;
                 const header = gridData.headers.join('\t');
                 const rows = gridData.rows.map(row => row.join('\t')).join('\n');
-                return `${header}\n${rows}`;
+                parsedString = `${header}\n${rows}`;
+                break;
             default:
-                return entry.msg;
+                // Fallback for unknown parsed types
+                parsedString = entry.msg;
+                break;
         }
+    
+        // Prepend the prefix if it exists
+        if (parsedContent.prefix) {
+            return `${parsedContent.prefix}\n\n${parsedString}`;
+        }
+        return parsedString;
     };
     
     const handleCopy = (type: 'parsed' | 'raw') => {
@@ -208,48 +222,49 @@ export const LogDetailPanel: React.FC<LogDetailPanelProps> = ({ entry, onClose, 
                         <div className="mt-4">
                             <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Message</label>
                             
-                            {parsedContent.prefix && (
-                                <div className="bg-gray-100 dark:bg-gray-900/70 rounded-lg p-3 ring-1 ring-gray-200 dark:ring-gray-700 mb-2">
-                                    <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-500 mb-1.5 uppercase tracking-wider">Message Prefix</h4>
-                                    <pre className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-all font-mono">
-                                        <code dangerouslySetInnerHTML={{ __html: highlightText(parsedContent.prefix, highlightTerms, theme) }} />
-                                    </pre>
-                                </div>
-                            )}
-
                             <div className="flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 mb-3">
                                 <TabButton label="Parsed" tabName="parsed" />
                                 <TabButton label="Raw" tabName="raw" />
                             </div>
 
                             {activeTab === 'parsed' && (
-                                <div className="relative group/parsed">
-                                    <div className="absolute top-1 right-1 z-10 opacity-0 group-hover/parsed:opacity-100 transition-opacity">
-                                        <CopyButton type="parsed" />
-                                    </div>
-                                    {parsedContent.type === 'grid' && <GridView data={parsedContent.data as GridData} />}
-                                    {parsedContent.type === 'kv' && <KeyValueTableView data={parsedContent.data as {key: string, value: string}[]} />}
-                                    {parsedContent.type === 'xml' && <XmlTreeView xmlString={parsedContent.data as string} />}
-                                    {parsedContent.type === 'sql' && (
-                                        <>
-                                            <SqlSyntaxHighlighter sql={(parsedContent.data as {sql: string}).sql} />
-                                            {(parsedContent.data as {result: string | null}).result && (
-                                                <div className="mt-2 bg-green-50 dark:bg-green-900/40 rounded-lg p-3 ring-1 ring-green-200 dark:ring-green-700/50">
-                                                    <h4 className="text-xs font-semibold text-green-700 dark:text-green-400 mb-1.5 uppercase tracking-wider">Query Result</h4>
-                                                    <pre className="text-sm text-green-800 dark:text-green-200 whitespace-pre-wrap break-all font-mono">
-                                                        <code>{(parsedContent.data as {result: string}).result}</code>
-                                                    </pre>
-                                                </div>
-                                            )}
-                                        </>
-                                    )}
-                                    {parsedContent.type === 'text' && (
+                                <div className="space-y-3">
+                                    {parsedContent.prefix && (
                                         <div className="bg-gray-100 dark:bg-gray-900/70 rounded-lg p-3 ring-1 ring-gray-200 dark:ring-gray-700">
+                                            <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-500 mb-1.5 uppercase tracking-wider">Message Prefix</h4>
                                             <pre className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-all font-mono">
-                                                <code dangerouslySetInnerHTML={{ __html: highlightText(parsedContent.data as string, highlightTerms, theme) }} />
+                                                <code dangerouslySetInnerHTML={{ __html: highlightText(parsedContent.prefix, highlightTerms, theme) }} />
                                             </pre>
                                         </div>
                                     )}
+                                    <div className="relative group/parsed">
+                                        <div className="absolute top-1 right-1 z-10 opacity-0 group-hover/parsed:opacity-100 transition-opacity">
+                                            <CopyButton type="parsed" />
+                                        </div>
+                                        {parsedContent.type === 'grid' && <GridView data={parsedContent.data as GridData} />}
+                                        {parsedContent.type === 'kv' && <KeyValueTableView data={parsedContent.data as {key: string, value: string}[]} />}
+                                        {parsedContent.type === 'xml' && <XmlTreeView xmlString={parsedContent.data as string} />}
+                                        {parsedContent.type === 'sql' && (
+                                            <>
+                                                <SqlSyntaxHighlighter sql={(parsedContent.data as {sql: string}).sql} />
+                                                {(parsedContent.data as {result: string | null}).result && (
+                                                    <div className="mt-2 bg-green-50 dark:bg-green-900/40 rounded-lg p-3 ring-1 ring-green-200 dark:ring-green-700/50">
+                                                        <h4 className="text-xs font-semibold text-green-700 dark:text-green-400 mb-1.5 uppercase tracking-wider">Query Result</h4>
+                                                        <pre className="text-sm text-green-800 dark:text-green-200 whitespace-pre-wrap break-all font-mono">
+                                                            <code>{(parsedContent.data as {result: string}).result}</code>
+                                                        </pre>
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
+                                        {parsedContent.type === 'text' && (
+                                            <div className="bg-gray-100 dark:bg-gray-900/70 rounded-lg p-3 ring-1 ring-gray-200 dark:ring-gray-700">
+                                                <pre className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-all font-mono">
+                                                    <code dangerouslySetInnerHTML={{ __html: highlightText(parsedContent.data as string, highlightTerms, theme) }} />
+                                                </pre>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             )}
 
