@@ -135,9 +135,11 @@ const DensityBar: React.FC<{
     theme: Theme;
     displayMinTime: number;
     displayMaxTime: number;
-}> = ({ items, valueToPosition, theme, displayMinTime, displayMaxTime }) => {
+    onMouseMove?: (e: React.MouseEvent<HTMLDivElement>) => void;
+    onMouseLeave?: (e: React.MouseEvent<HTMLDivElement>) => void;
+}> = ({ items, valueToPosition, theme, displayMinTime, displayMaxTime, onMouseMove, onMouseLeave }) => {
     if (items.length === 0) {
-        return <div className="relative w-full h-5" />;
+        return <div className="relative w-full h-5" onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} />;
     }
 
     const isLevelDensity = 'counts' in items[0];
@@ -152,10 +154,10 @@ const DensityBar: React.FC<{
         }, [levelItems]);
 
         const bucketDuration = levelItems.length > 1 ? levelItems[1].time - levelItems[0].time : 0;
-        if (bucketDuration === 0) return <div className="relative w-full h-5" />;
+        if (bucketDuration === 0) return <div className="relative w-full h-5" onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} />;
 
         return (
-            <div className="relative w-full h-5">
+            <div className="relative w-full h-5" onMouseMove={onMouseMove} onMouseLeave={onMouseLeave}>
                 {levelItems.map((bucket, i) => {
                     const start = bucket.time;
                     const end = bucket.time + bucketDuration;
@@ -203,10 +205,10 @@ const DensityBar: React.FC<{
         }, [simpleItems]);
 
         const bucketDuration = simpleItems.length > 1 ? simpleItems[1].time - simpleItems[0].time : 0;
-        if (bucketDuration === 0) return <div className="relative w-full h-5" />;
+        if (bucketDuration === 0) return <div className="relative w-full h-5" onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} />;
 
         return (
-            <div className="relative w-full h-5">
+            <div className="relative w-full h-5" onMouseMove={onMouseMove} onMouseLeave={onMouseLeave}>
                 {simpleItems.map((bucket, i) => {
                     const start = bucket.time;
                     const end = bucket.time + bucketDuration;
@@ -382,12 +384,47 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
         };
     }, [dragState, mainPosToValue, displayMinTime, displayMaxTime, onRangeChange, onCursorChange, tempSelection, tempCursorTime, uiScale]);
 
+    const handleDensityHover = (e: React.MouseEvent<HTMLDivElement>) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const hoverTime = mainPosToValue(x);
+        
+        if (logDensity.length > 1 && 'counts' in logDensity[0]) {
+            const levelDensity = logDensity as LogDensityPointByLevel[];
+            const bucketDuration = levelDensity[1].time - levelDensity[0].time;
+            const bucketIndex = Math.floor((hoverTime - levelDensity[0].time) / bucketDuration);
+            const bucketData = levelDensity[bucketIndex];
+            
+            if (bucketData && Object.keys(bucketData.counts).length > 0) {
+                setDensityTooltip({
+                    x: e.clientX,
+                    y: rect.top,
+                    bucketData: bucketData
+                });
+            } else {
+                setDensityTooltip(null);
+            }
+        }
+    };
+    const handleDensityLeave = () => setDensityTooltip(null);
+
     const barComponents = [];
     const barProps = { displayMinTime: displayMinTime, displayMaxTime: displayMaxTime };
     if (viewMode === 'pagination' && pageTimestampRanges.length > 0 && onGoToPage) barComponents.push({key: 'page', label: 'Pages', Comp: Bar, props: { ...barProps, items: pageTimestampRanges, isActive: (item: any) => item.page === currentPage, onSelect: (item: any) => onGoToPage(item.page), getLabel: (item: any) => item.page, getTitle: (item: any) => `Page ${item.page}`, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
     if (fileTimeRanges.length > 0) barComponents.push({key: 'file', label: 'Files', Comp: Bar, props: { ...barProps, items: fileTimeRanges, isActive: (item: any) => item.name === activeFileName, onSelect: (item: any) => onFileSelect(item.name), getLabel: (item: any) => item.name.split('/').pop(), getTitle: (item: any) => item.name, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
     if (datesWithLogs.length > 0) barComponents.push({key: 'date', label: 'Date', Comp: Bar, props: { ...barProps, items: datesWithLogs, isActive: (item: any) => item === activeDate, onSelect: (item: any) => onDateSelect(item), getLabel: (item: any) => item, getTitle: (item: any) => item, getStart: (item: any) => new Date(`${item}T00:00:00.000Z`).getTime(), getEnd: (item: any) => new Date(`${item}T23:59:59.999Z`).getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
-    if (logDensity.length > 0) barComponents.push({key: 'density', label: 'Density', Comp: DensityBar, props: { items: logDensity, theme: theme, ...barProps }});
+    if (logDensity.length > 0) barComponents.push({
+        key: 'density', 
+        label: 'Density', 
+        Comp: DensityBar, 
+        props: { 
+            items: logDensity, 
+            theme: theme, 
+            ...barProps, 
+            onMouseMove: handleDensityHover, 
+            onMouseLeave: handleDensityLeave 
+        }
+    });
 
     const currentStart = tempSelection?.start ?? selectedStartTime;
     const currentEnd = tempSelection?.end ?? selectedEndTime;
@@ -439,30 +476,6 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     
     const finalCursorTime = tempCursorTime ?? cursorTime;
 
-    const handleDensityHover = (e: React.MouseEvent) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const hoverTime = mainPosToValue(x);
-        
-        if (logDensity.length > 1 && 'counts' in logDensity[0]) {
-            const levelDensity = logDensity as LogDensityPointByLevel[];
-            const bucketDuration = levelDensity[1].time - levelDensity[0].time;
-            const bucketIndex = Math.floor((hoverTime - levelDensity[0].time) / bucketDuration);
-            const bucketData = levelDensity[bucketIndex];
-            
-            if (bucketData && Object.keys(bucketData.counts).length > 0) {
-                setDensityTooltip({
-                    x: e.clientX,
-                    y: rect.top,
-                    bucketData: bucketData
-                });
-            } else {
-                setDensityTooltip(null);
-            }
-        }
-    };
-    const handleDensityLeave = () => setDensityTooltip(null);
-
 
     return (
         <div className="w-full">
@@ -490,8 +503,6 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                     {/* Main Timeline Area */}
                     <div 
                         onMouseDown={(e) => handleMouseDown(e, 'new_selection')}
-                        onMouseMove={handleDensityHover}
-                        onMouseLeave={handleDensityLeave}
                         className="w-full cursor-crosshair bg-gray-200 dark:bg-gray-700/50 rounded p-1 overflow-hidden mt-6"
                     >
                         <div ref={mainContainerRef} className="relative">
