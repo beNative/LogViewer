@@ -31,13 +31,31 @@ const parseMarkdown = (markdown: string): string => {
     // Blockquotes
     html = html.replace(/^\> (.*$)/gim, '<blockquote class="border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic my-4 text-gray-600 dark:text-gray-400">$1</blockquote>');
 
-    // Lists
-    html = html.replace(/^(?:\*|-|\d+\.) (.*$)/gim, '<li>$1</li>');
-    html = html.replace(/^(<li>.*<\/li>(?:\n|$))+/gim, (match) => {
-        return match.includes('1.') ? `<ol class="list-decimal list-inside pl-4 my-4 space-y-1">${match}</ol>` 
-                                    : `<ul class="list-disc list-inside pl-4 my-4 space-y-1">${match}</ul>`;
-    });
-     html = html.replace(/<\/ul>\s*<ul>/g, '').replace(/<\/ol>\s*<ol>/g, '');
+    // Lists (NEW multi-pass, inside-out logic)
+    for (let i = 4; i >= 0; i--) {
+        const indent = ' '.repeat(i * 4);
+        // Regex to find a list item and its multi-line, indented content.
+        // It stops when it sees a new list item at the same level, a double newline, or the end of the string.
+        const itemRegex = new RegExp(`^${indent}(\\*|-|\\d+\\.)\\s+([\\s\\S]*?)(?=\\n^${indent}(?:\\*|-|\\d+\\.)|\\n{2,}|$)`, 'gm');
+        html = html.replace(itemRegex, (match, marker, content) => {
+            // The content might contain already parsed sub-lists or simple text that needs to be dedented.
+            const dedentRegex = new RegExp(`^${indent} {2,4}`, 'gm');
+            const dedentedContent = content.replace(dedentRegex, '');
+            return `${indent}<li>${dedentedContent.trim()}</li>`;
+        });
+        
+        // Regex to wrap a block of <li>s at the current indentation level into a <ul> or <ol>.
+        const listBlockRegex = new RegExp(`^(${indent}<li>[\\s\\S]*?</li>\n?)+`, 'gm');
+        html = html.replace(listBlockRegex, (match) => {
+            const dedentedBlock = match.replace(new RegExp(`^${indent}`, 'gm'), '');
+            const listType = dedentedBlock.match(/^\s*<li>\s*\d+\./) ? 'ol' : 'ul';
+            const classes = i === 0
+                ? `list-${listType === 'ol' ? 'decimal' : 'disc'} list-inside pl-4 my-4 space-y-1`
+                : `list-${listType === 'ol' ? 'decimal' : 'disc'} list-inside pl-4 space-y-1`;
+            return `${indent}<${listType} class="${classes}">${dedentedBlock}</${listType}>`;
+        });
+    }
+
 
     // Inline elements - order is important!
     html = html.replace(/`([^`]+)`/g, '<code class="bg-gray-200 dark:bg-gray-700 rounded px-1.5 py-1 font-mono text-sm text-sky-600 dark:text-sky-400 mx-0.5">$1</code>');
@@ -60,6 +78,10 @@ const parseMarkdown = (markdown: string): string => {
     // Cleanup paragraphs around block elements
     html = html.replace(/<p>(\s*)<(ul|ol|li|blockquote|hr|pre|h[1-6])/g, '<$2');
     html = html.replace(/<\/(ul|ol|li|blockquote|hr|pre|h[1-6])>(\s*)<\/p>/g, '</$1>');
+    
+    // Cleanup <br> tags before lists inside other elements (like <li>)
+    html = html.replace(/<br\s*\/?>(\s*<(ul|ol))/g, '$1');
+
 
     return html;
 }

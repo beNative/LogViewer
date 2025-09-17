@@ -371,7 +371,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                             ref={tableContainerRef}
                             onKeyDown={handleHistoryTableKeyDown}
                             tabIndex={0}
-                            className="overflow-y-auto max-h-96 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800/50 focus:ring-sky-500 rounded-md"
+                            className="overflow-y-auto max-h-96 focus:outline-none rounded-md"
                         >
                             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead className="bg-gray-50 dark:bg-gray-800/50 sticky top-0">
@@ -386,7 +386,6 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                                     {history.map((entry, index) => (
                                         <tr 
                                             key={`${entry.timestamp}-${index}`}
-                                            // FIX: The ref callback for a list of items should return void. `Map.set` returns the map, causing a type error. Wrapping the call in braces fixes this.
                                             ref={el => { rowRefs.current.set(index, el); }}
                                             onClick={() => handleRowClick(index)}
                                             className={`cursor-pointer transition-colors duration-150 ${selectedHistoryIndex === index ? 'bg-sky-100 dark:bg-sky-900/50' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
@@ -394,7 +393,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                                             <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-mono">{entry.timestamp}</td>
                                             <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-mono">{entry.article_id}</td>
                                             <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">{entry.article_name}</td>
-                                            <td className="px-3 py-2 whitespace-nowrap text-sm text-right text-gray-800 dark:text-gray-200 font-semibold">{entry.quantity.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
+                                            <td className="px-3 py-2 whitespace-nowrap text-sm text-right text-gray-800 dark:text-gray-200 font-semibold">{Math.round(entry.quantity).toLocaleString()}</td>
                                         </tr>
                                     ))}
                                 </tbody>
