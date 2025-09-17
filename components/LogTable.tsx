@@ -283,7 +283,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                 </aside>
                 <Splitter onDrag={handleFilterResize} />
                 <main className="flex-grow min-h-0 flex flex-col">
-                    <div className="overflow-auto outline-none flex-grow" ref={tableContainerRef} tabIndex={-1}>
+                    <div className="overflow-auto outline-none flex-grow min-w-0" ref={tableContainerRef} tabIndex={-1}>
                         <table key={visibilityKey} className="min-w-full table-auto font-sans">
                             <thead className="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 shadow-sm">
                                 <tr onContextMenu={(e) => {
