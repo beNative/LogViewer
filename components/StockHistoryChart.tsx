@@ -8,9 +8,10 @@ type Theme = 'light' | 'dark';
 interface StockHistoryChartProps {
   data: StockChartDataPoint[];
   theme: Theme;
+  selectedIndex: number | null;
 }
 
-export const StockHistoryChart: React.FC<StockHistoryChartProps> = ({ data, theme }) => {
+export const StockHistoryChart: React.FC<StockHistoryChartProps> = ({ data, theme, selectedIndex }) => {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const chartRef = React.useRef<any>(null);
 
@@ -24,6 +25,14 @@ export const StockHistoryChart: React.FC<StockHistoryChartProps> = ({ data, them
       chartRef.current.destroy();
     }
 
+    const pointRadii = data.map((_, index) => selectedIndex === index ? 7 : 3);
+    const pointHitRadii = data.map((_, index) => selectedIndex === index ? 10 : 3);
+    const pointBorderWidths = data.map((_, index) => selectedIndex === index ? 3 : 1);
+    const pointBorderColors = data.map((_, index) => selectedIndex === index 
+        ? (theme === 'dark' ? 'rgba(251, 146, 60, 1)' : 'rgba(234, 88, 12, 1)') // orange
+        : 'rgba(16, 185, 129, 1)' // green
+    );
+
     const chartData = {
         labels: data.map(d => new Date(d.time)),
         datasets: [{
@@ -32,7 +41,10 @@ export const StockHistoryChart: React.FC<StockHistoryChartProps> = ({ data, them
             backgroundColor: 'rgba(16, 185, 129, 0.2)',
             borderColor: 'rgba(16, 185, 129, 1)',
             borderWidth: 2,
-            pointRadius: 3,
+            pointRadius: pointRadii,
+            pointHitRadius: pointHitRadii,
+            pointBorderWidth: pointBorderWidths,
+            pointBorderColor: pointBorderColors,
             pointBackgroundColor: 'rgba(16, 185, 129, 1)',
             tension: 0.1,
             fill: true,
@@ -78,7 +90,7 @@ export const StockHistoryChart: React.FC<StockHistoryChartProps> = ({ data, them
       }
     });
 
-  }, [data, theme]);
+  }, [data, theme, selectedIndex]);
 
   return <canvas ref={canvasRef} />;
 };

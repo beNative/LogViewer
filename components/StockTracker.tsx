@@ -34,6 +34,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
     const [suggestions, setSuggestions] = React.useState<StockArticleSuggestion[]>([]);
     const [isSuggestionsVisible, setIsSuggestionsVisible] = React.useState(false);
     const [activeSuggestionIndex, setActiveSuggestionIndex] = React.useState(-1);
+    const [selectedHistoryIndex, setSelectedHistoryIndex] = React.useState<number | null>(null);
     const debounceTimeoutRef = React.useRef<number | null>(null);
     const suggestionContainerRef = React.useRef<HTMLDivElement>(null);
 
@@ -64,27 +65,29 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
     }, []);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newSearchTerm = e.target.value;
+        const { name, value } = e.target;
         
         // Use a functional update to get the latest state and prevent stale closures in the timeout.
         setFilters(prevFilters => {
-            const newFilters = { ...prevFilters, searchTerm: newSearchTerm };
+            const newFilters = { ...prevFilters, [name]: value };
 
-            if (debounceTimeoutRef.current) {
-                clearTimeout(debounceTimeoutRef.current);
-            }
+            if (name === 'searchTerm') {
+                if (debounceTimeoutRef.current) {
+                    clearTimeout(debounceTimeoutRef.current);
+                }
 
-            if (newSearchTerm.length < 2) {
-                setSuggestions([]);
-                setIsSuggestionsVisible(false);
-            } else {
-                debounceTimeoutRef.current = window.setTimeout(async () => {
-                    // Use the up-to-date newFilters object for the API call.
-                    const fetchedSuggestions = await onFetchSuggestions(newSearchTerm, newFilters);
-                    setSuggestions(fetchedSuggestions);
-                    setIsSuggestionsVisible(fetchedSuggestions.length > 0);
-                    setActiveSuggestionIndex(-1);
-                }, 300);
+                if (value.length < 2) {
+                    setSuggestions([]);
+                    setIsSuggestionsVisible(false);
+                } else {
+                    debounceTimeoutRef.current = window.setTimeout(async () => {
+                        // Use the up-to-date newFilters object for the API call.
+                        const fetchedSuggestions = await onFetchSuggestions(value, newFilters);
+                        setSuggestions(fetchedSuggestions);
+                        setIsSuggestionsVisible(fetchedSuggestions.length > 0);
+                        setActiveSuggestionIndex(-1);
+                    }, 300);
+                }
             }
             
             return newFilters;
@@ -119,6 +122,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
+        setSelectedHistoryIndex(null);
         onSearch(filters);
         setIsSuggestionsVisible(false);
     };
@@ -222,9 +226,23 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                     </button>
                 </div>
                 <form onSubmit={handleSearch} className="space-y-4">
-                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                        <div className="md:col-span-2" ref={suggestionContainerRef}>
-                            <label htmlFor="searchTerm" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Article ID or Name</label>
+                    <div className="grid grid-cols-1 md:grid-cols-10 gap-4 items-end">
+                        <div className="md:col-span-3">
+                            <label htmlFor="dateFromStock" className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">From</label>
+                            <div className="flex gap-2">
+                                <input type="date" name="dateFrom" id="dateFromStock" value={filters.dateFrom} onChange={handleInputChange} className={inputStyles} />
+                                <input type="time" name="timeFrom" id="timeFromStock" value={filters.timeFrom} onChange={handleInputChange} className={inputStyles} step="1" />
+                            </div>
+                        </div>
+                        <div className="md:col-span-3">
+                            <label htmlFor="dateToStock" className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">To</label>
+                            <div className="flex gap-2">
+                                <input type="date" name="dateTo" id="dateToStock" value={filters.dateTo} onChange={handleInputChange} className={inputStyles} />
+                                <input type="time" name="timeTo" id="timeToStock" value={filters.timeTo} onChange={handleInputChange} className={inputStyles} step="1" />
+                            </div>
+                        </div>
+                        <div className="md:col-span-3" ref={suggestionContainerRef}>
+                            <label htmlFor="searchTerm" className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Article ID or Name</label>
                             <div className="relative">
                                 <input
                                     type="text"
@@ -257,30 +275,14 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                         <button
                             type="submit"
                             disabled={isBusy || !filters.searchTerm}
-                            className="inline-flex items-center justify-center gap-2 px-4 py-2 font-semibold rounded-lg transition-colors duration-200 bg-sky-600 hover:bg-sky-700 text-white dark:bg-sky-600 dark:hover:bg-sky-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="md:col-span-1 h-10 inline-flex items-center justify-center gap-2 px-4 py-2 font-semibold rounded-lg transition-colors duration-200 bg-sky-600 hover:bg-sky-700 text-white dark:bg-sky-600 dark:hover:bg-sky-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <Icon name="Filter" iconSet={iconSet} className="w-5 h-5" />
-                            <span>{isBusy ? 'Searching...' : 'Search'}</span>
+                            <span>{isBusy ? '...' : 'Search'}</span>
                         </button>
                     </div>
 
                     <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
-                         <div className="grid grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label htmlFor="dateFrom" className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">From</label>
-                                <div className="flex gap-2">
-                                    <input type="date" name="dateFrom" id="dateFrom" value={filters.dateFrom} onChange={handleInputChange} className={inputStyles} />
-                                    <input type="time" name="timeFrom" id="timeFrom" value={filters.timeFrom} onChange={handleInputChange} className={inputStyles} step="1" />
-                                </div>
-                            </div>
-                            <div>
-                                <label htmlFor="dateTo" className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">To</label>
-                                <div className="flex gap-2">
-                                    <input type="date" name="dateTo" id="dateTo" value={filters.dateTo} onChange={handleInputChange} className={inputStyles} />
-                                    <input type="time" name="timeTo" id="timeTo" value={filters.timeTo} onChange={handleInputChange} className={inputStyles} step="1" />
-                                </div>
-                            </div>
-                        </div>
                         {overallTimeRange ? (
                             <TimeRangeSelector
                                 minTime={new Date(overallTimeRange.min + 'Z').getTime()}
@@ -327,14 +329,20 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                                 <thead className="bg-gray-50 dark:bg-gray-800/50 sticky top-0">
                                     <tr>
                                         <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Timestamp</th>
+                                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Article ID</th>
                                         <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Article Name</th>
                                         <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Quantity</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200/50 dark:divide-gray-700/50">
                                     {history.map((entry, index) => (
-                                        <tr key={`${entry.timestamp}-${index}`}>
+                                        <tr 
+                                            key={`${entry.timestamp}-${index}`}
+                                            onClick={() => setSelectedHistoryIndex(index)}
+                                            className={`cursor-pointer transition-colors duration-150 ${selectedHistoryIndex === index ? 'bg-sky-100 dark:bg-sky-900/50' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
+                                        >
                                             <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-mono">{entry.timestamp}</td>
+                                            <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-mono">{entry.article_id}</td>
                                             <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">{entry.article_name}</td>
                                             <td className="px-3 py-2 whitespace-nowrap text-sm text-right text-gray-800 dark:text-gray-200 font-semibold">{entry.quantity}</td>
                                         </tr>
@@ -346,7 +354,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                      <div className="bg-white dark:bg-gray-800/50 p-4 sm:p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
                         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Quantity Over Time</h3>
                         <div className="h-96">
-                            <StockHistoryChart data={chartData} theme={theme} />
+                            <StockHistoryChart data={chartData} theme={theme} selectedIndex={selectedHistoryIndex} />
                         </div>
                     </div>
                  </div>
