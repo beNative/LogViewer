@@ -99,6 +99,19 @@ export const StockHistoryChart: React.FC<StockHistoryChartProps> = ({ data, them
             backgroundColor: tooltipBgColor,
             titleColor: tooltipTitleColor,
             bodyColor: tooltipBodyColor,
+            callbacks: {
+              title: (tooltipItems: any[]) => {
+                if (!tooltipItems || tooltipItems.length === 0) return '';
+                const date = new Date(tooltipItems[0].parsed.x);
+                if (isNaN(date.getTime())) return '';
+                
+                const isoString = date.toISOString(); // YYYY-MM-DDTHH:mm:ss.sssZ
+                const datePart = isoString.substring(0, 10);
+                const timePart = isoString.substring(11, 23); // Includes milliseconds
+
+                return [datePart, timePart];
+              }
+            }
           },
         }
       }
