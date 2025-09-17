@@ -647,37 +647,46 @@ const DensityTooltip: React.FC<{ x: number, y: number, bucketData: BucketData, t
     const ref = React.useRef<HTMLDivElement>(null);
     const [style, setStyle] = React.useState<React.CSSProperties>({
         position: 'fixed',
-        top: y,
-        left: x,
-        transform: 'translate(-50%, -110%)',
+        // Start off-screen and invisible to prevent flicker while calculating position
+        top: -9999,
+        left: -9999,
+        opacity: 0,
     });
 
     React.useLayoutEffect(() => {
         if (ref.current) {
-            const rect = ref.current.getBoundingClientRect();
-            let newX = x;
-            let newY = y;
-            let transform = 'translate(-50%, -110%)';
+            const tooltip = ref.current;
+            const { width, height } = tooltip.getBoundingClientRect();
+            const GAP = 10; // 10px gap from viewport edges
 
-            if (rect.right > window.innerWidth) {
-                newX = window.innerWidth - rect.width / 2 - 10;
+            // Default position: centered above the cursor
+            let newTop = y - height - GAP;
+            let newLeft = x - (width / 2);
+
+            // Check for top boundary collision
+            if (newTop < GAP) {
+                // Not enough space above, flip to below
+                newTop = y + 20; // Some gap below the cursor
             }
-            if (rect.left < 0) {
-                newX = rect.width / 2 + 10;
+
+            // Check for left boundary collision
+            if (newLeft < GAP) {
+                newLeft = GAP;
             }
-            if (rect.top < 0) {
-                newY = y + rect.height + 20; // Flip below
-                transform = 'translate(-50%, 20px)';
+
+            // Check for right boundary collision
+            if (newLeft + width > window.innerWidth - GAP) {
+                newLeft = window.innerWidth - width - GAP;
             }
             
             setStyle({
                 position: 'fixed',
-                top: newY,
-                left: newX,
-                transform: transform,
+                top: newTop,
+                left: newLeft,
+                // The animate-fadeIn class will handle the opacity transition
             });
         }
-    }, [x, y]);
+    }, [x, y, bucketData]);
 
     const isLevelData = 'counts' in bucketData;
     const total = isLevelData ? Object.values(bucketData.counts).reduce((sum, count) => sum + count, 0) : bucketData.count;
