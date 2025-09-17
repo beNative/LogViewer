@@ -37,6 +37,8 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
     const [selectedHistoryIndex, setSelectedHistoryIndex] = React.useState<number | null>(null);
     const debounceTimeoutRef = React.useRef<number | null>(null);
     const suggestionContainerRef = React.useRef<HTMLDivElement>(null);
+    const tableContainerRef = React.useRef<HTMLDivElement>(null);
+    const rowRefs = React.useRef<Map<number, HTMLTableRowElement | null>>(new Map());
 
 
     React.useEffect(() => {
@@ -64,10 +66,17 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+     // Effect to scroll the selected history item into view
+    React.useEffect(() => {
+        if (selectedHistoryIndex !== null) {
+            const rowEl = rowRefs.current.get(selectedHistoryIndex);
+            rowEl?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
+    }, [selectedHistoryIndex]);
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         
-        // Use a functional update to get the latest state and prevent stale closures in the timeout.
         setFilters(prevFilters => {
             const newFilters = { ...prevFilters, [name]: value };
 
@@ -81,8 +90,14 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                     setIsSuggestionsVisible(false);
                 } else {
                     debounceTimeoutRef.current = window.setTimeout(async () => {
-                        // Use the up-to-date newFilters object for the API call.
-                        const fetchedSuggestions = await onFetchSuggestions(value, newFilters);
+                        const timeFilters: StockInfoFilters = {
+                            searchTerm: '', // Not needed for suggestion fetching based on time
+                            dateFrom: newFilters.dateFrom,
+                            timeFrom: newFilters.timeFrom,
+                            dateTo: newFilters.dateTo,
+                            timeTo: newFilters.timeTo,
+                        };
+                        const fetchedSuggestions = await onFetchSuggestions(value, timeFilters);
                         setSuggestions(fetchedSuggestions);
                         setIsSuggestionsVisible(fetchedSuggestions.length > 0);
                         setActiveSuggestionIndex(-1);
@@ -100,7 +115,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
         setIsSuggestionsVisible(false);
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent) => {
+    const handleSuggestionKeyDown = (e: React.KeyboardEvent) => {
         if (!isSuggestionsVisible || suggestions.length === 0) return;
 
         if (e.key === 'ArrowDown') {
@@ -135,6 +150,34 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
         )) {
             onRebuildStockData();
         }
+    };
+    
+    const handleHistoryTableKeyDown = (e: React.KeyboardEvent) => {
+        if (!['ArrowUp', 'ArrowDown'].includes(e.key)) {
+            return;
+        }
+        e.preventDefault();
+
+        if (history.length === 0) return;
+        
+        const currentIndex = selectedHistoryIndex;
+        let nextIndex: number;
+
+        if (currentIndex === null) {
+            nextIndex = e.key === 'ArrowUp' ? history.length - 1 : 0;
+        } else {
+            if (e.key === 'ArrowUp') {
+                nextIndex = Math.max(0, currentIndex - 1);
+            } else { // ArrowDown
+                nextIndex = Math.min(history.length - 1, currentIndex + 1);
+            }
+        }
+        setSelectedHistoryIndex(nextIndex);
+    };
+    
+    const handleRowClick = (index: number) => {
+        setSelectedHistoryIndex(index);
+        tableContainerRef.current?.focus({ preventScroll: true });
     };
 
     const chartData = React.useMemo(() => {
@@ -250,7 +293,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                                     id="searchTerm"
                                     value={filters.searchTerm}
                                     onChange={handleInputChange}
-                                    onKeyDown={handleKeyDown}
+                                    onKeyDown={handleSuggestionKeyDown}
                                     onFocus={() => { if (suggestions.length > 0) setIsSuggestionsVisible(true); }}
                                     className={inputStyles}
                                     placeholder="e.g., CARTEOL (min 2 chars)"
@@ -324,7 +367,12 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                     <div className="bg-white dark:bg-gray-800/50 p-4 sm:p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
                         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Stock History</h3>
-                         <div className="overflow-x-auto max-h-96">
+                         <div
+                            ref={tableContainerRef}
+                            onKeyDown={handleHistoryTableKeyDown}
+                            tabIndex={0}
+                            className="overflow-y-auto max-h-96 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800/50 focus:ring-sky-500 rounded-md"
+                        >
                             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead className="bg-gray-50 dark:bg-gray-800/50 sticky top-0">
                                     <tr>
@@ -338,13 +386,15 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                                     {history.map((entry, index) => (
                                         <tr 
                                             key={`${entry.timestamp}-${index}`}
-                                            onClick={() => setSelectedHistoryIndex(index)}
+                                            // FIX: The ref callback for a list of items should return void. `Map.set` returns the map, causing a type error. Wrapping the call in braces fixes this.
+                                            ref={el => { rowRefs.current.set(index, el); }}
+                                            onClick={() => handleRowClick(index)}
                                             className={`cursor-pointer transition-colors duration-150 ${selectedHistoryIndex === index ? 'bg-sky-100 dark:bg-sky-900/50' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
                                         >
                                             <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-mono">{entry.timestamp}</td>
                                             <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-mono">{entry.article_id}</td>
                                             <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">{entry.article_name}</td>
-                                            <td className="px-3 py-2 whitespace-nowrap text-sm text-right text-gray-800 dark:text-gray-200 font-semibold">{entry.quantity}</td>
+                                            <td className="px-3 py-2 whitespace-nowrap text-sm text-right text-gray-800 dark:text-gray-200 font-semibold">{entry.quantity.toLocaleString(undefined, { maximumFractionDigits: 0 })}</td>
                                         </tr>
                                     ))}
                                 </tbody>

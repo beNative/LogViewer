@@ -6,7 +6,7 @@ This document tracks the major changes, new features, and bug fixes for the Log 
 
 ### **Version 0.18.0** - UI Streamlining & Vertical Compactness
 
-_Date: 2025-09-18_
+_Date: 2025-09-17_
 
 This release focuses on streamlining the Log Viewer interface by relocating controls to more intuitive locations and reducing the vertical space occupied by the timeline controls.
 

@@ -61,6 +61,7 @@ export const StockHistoryChart: React.FC<StockHistoryChartProps> = ({ data, them
       type: 'line',
       data: chartData,
       options: {
+        animation: false,
         maintainAspectRatio: false,
         responsive: true,
         scales: {
@@ -68,9 +69,22 @@ export const StockHistoryChart: React.FC<StockHistoryChartProps> = ({ data, them
             type: 'time',
             time: {
                 tooltipFormat: 'yyyy-MM-dd HH:mm:ss',
+                displayFormats: {
+                    minute: 'MMM d, HH:mm:ss',
+                    hour: 'MMM d, HH:mm',
+                    day: 'MMM d, yyyy',
+                    week: 'MMM d, yyyy',
+                    month: 'MMM yyyy',
+                    year: 'yyyy',
+                }
             },
             grid: { color: gridColor },
-            ticks: { color: tickColor, maxRotation: 25, autoSkip: true }
+            ticks: { 
+                color: tickColor, 
+                maxRotation: 0,
+                autoSkip: true,
+                maxTicksLimit: 10,
+            }
           },
           y: {
             beginAtZero: false,
