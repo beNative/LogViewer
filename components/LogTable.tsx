@@ -107,6 +107,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     const scrollTopRef = React.useRef(0);
     const tickingRef = React.useRef(false);
     const [, forceUpdate] = React.useReducer(x => x + 1, 0);
+    const userScrollingRef = React.useRef<number | null>(null);
 
     const panelWidthsRef = React.useRef(props.panelWidths);
     panelWidthsRef.current = props.panelWidths;
@@ -213,7 +214,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
 
     // Scroll into view effect
     React.useEffect(() => {
-        if (keyboardSelectedId === null) return;
+        if (keyboardSelectedId === null || userScrollingRef.current) return;
     
         if (viewMode === 'scroll' && viewportRef.current) {
             const index = entries.findIndex(e => e.id === keyboardSelectedId);
@@ -273,6 +274,15 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     };
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        // Set a flag to indicate the user is scrolling, which prevents the "scroll into view"
+        // effect from fighting with the user's manual scroll action.
+        if (userScrollingRef.current) {
+            clearTimeout(userScrollingRef.current);
+        }
+        userScrollingRef.current = window.setTimeout(() => {
+            userScrollingRef.current = null;
+        }, 150); // Debounce timeout: if user stops scrolling for 150ms, allow programmatic scroll.
+
         const currentScrollTop = e.currentTarget.scrollTop;
         scrollTopRef.current = currentScrollTop;
 
@@ -283,13 +293,6 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
             });
             tickingRef.current = true;
         }
-
-        if (viewMode !== 'scroll') return;
-
-        const { scrollHeight, clientHeight } = e.currentTarget;
-        if (scrollHeight - currentScrollTop - clientHeight < 1000 && hasMore && !isBusy) {
-            onLoadMore();
-        }
     };
     
     const visibilityKey = Object.values(props.columnVisibility).join('-');
@@ -299,20 +302,40 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     let virtualEntries: LogEntry[] = entries;
     let topSpacerHeight = 0;
     let bottomSpacerHeight = 0;
+    
+    if (viewMode === 'scroll') {
+        // Data loading logic: on every render, check if the viewport needs data that isn't loaded yet.
+        if (viewportRef.current && entries.length < totalFilteredCount && hasMore && !isBusy) {
+            const scrollTop = scrollTopRef.current;
+            const rowHeight = getRowHeight(logTableDensity);
+            const viewportHeight = viewportRef.current.clientHeight;
+            const overscan = 20;
 
-    if (viewMode === 'scroll' && viewportRef.current) {
-        const scrollTop = scrollTopRef.current;
-        const rowHeight = getRowHeight(logTableDensity);
-        const viewportHeight = viewportRef.current.clientHeight;
-        const overscan = 20;
+            const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - overscan);
+            const visibleItemCount = Math.ceil(viewportHeight / rowHeight);
+            const requiredEndIndex = startIndex + visibleItemCount + (overscan * 2);
 
-        const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - overscan);
-        const visibleItemCount = Math.ceil(viewportHeight / rowHeight);
-        const endIndex = Math.min(entries.length, startIndex + visibleItemCount + (overscan * 2));
+            // If the required data window extends beyond what's loaded, fetch more.
+            if (requiredEndIndex > entries.length) {
+                onLoadMore();
+            }
+        }
 
-        virtualEntries = entries.slice(startIndex, endIndex);
-        topSpacerHeight = startIndex * rowHeight;
-        bottomSpacerHeight = (totalFilteredCount - endIndex) * rowHeight;
+        // Virtualization rendering logic
+        if (viewportRef.current) {
+            const scrollTop = scrollTopRef.current;
+            const rowHeight = getRowHeight(logTableDensity);
+            const viewportHeight = viewportRef.current.clientHeight;
+            const overscan = 20;
+
+            const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - overscan);
+            const visibleItemCount = Math.ceil(viewportHeight / rowHeight);
+            const endIndex = Math.min(entries.length, startIndex + visibleItemCount + (overscan * 2));
+
+            virtualEntries = entries.slice(startIndex, endIndex);
+            topSpacerHeight = startIndex * rowHeight;
+            bottomSpacerHeight = (totalFilteredCount - endIndex) * rowHeight;
+        }
     }
 
 

@@ -220,20 +220,29 @@ const App: React.FC = () => {
   const handleLoadMore = React.useCallback(() => {
     if (!db || !hasMoreLogs || isBusy) return;
 
-    // Use a timeout to allow any UI state to update before blocking the main thread.
+    setIsBusy(true);
+    // Defer the database query to the next event loop tick.
+    // This allows the UI to update with the `isBusy=true` state immediately,
+    // preventing multiple, simultaneous calls to this function from rapid-fire events.
     setTimeout(() => {
-        setIsBusy(true);
-        const newOffset = entriesOffset + INFINITE_SCROLL_CHUNK_SIZE;
-        logToConsole(`Loading more logs at offset ${newOffset.toLocaleString()}...`, 'DEBUG');
+        try {
+            const newOffset = entriesOffset + INFINITE_SCROLL_CHUNK_SIZE;
+            logToConsole(`Loading more logs at offset ${newOffset.toLocaleString()}...`, 'DEBUG');
 
-        const newEntries = db.queryLogEntries(appliedFilters, INFINITE_SCROLL_CHUNK_SIZE, newOffset);
-        
-        setFilteredEntries(prev => [...prev, ...newEntries]);
-        setEntriesOffset(newOffset);
-        setHasMoreLogs(newOffset + newEntries.length < totalFilteredCount);
-        setIsBusy(false);
-        logToConsole(`Loaded ${newEntries.length} more logs.`, 'DEBUG');
-    }, 10);
+            const newEntries = db.queryLogEntries(appliedFilters, INFINITE_SCROLL_CHUNK_SIZE, newOffset);
+            
+            setFilteredEntries(prev => [...prev, ...newEntries]);
+            setEntriesOffset(newOffset);
+            setHasMoreLogs(newOffset + newEntries.length < totalFilteredCount);
+            logToConsole(`Loaded ${newEntries.length} more logs.`, 'DEBUG');
+        } catch(e) {
+            const msg = e instanceof Error ? e.message : String(e);
+            setError(msg);
+            logToConsole(`Error loading more logs: ${msg}`, 'ERROR');
+        } finally {
+            setIsBusy(false);
+        }
+    }, 0);
   }, [db, hasMoreLogs, isBusy, entriesOffset, appliedFilters, totalFilteredCount, logToConsole]);
 
   const fetchSessions = React.useCallback(async () => {
