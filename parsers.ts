@@ -1,13 +1,54 @@
 import { LogMessageContent, GridData } from './types.ts';
 
-const parseKeyValueMessage = (msg: string): { prefix: string; pairs: { key: string; value: string }[] } | null => {
-    if (!msg.includes('=')) {
-        return null;
+const parseKeyValueMessage = (msg: string): { prefix: string | null; pairs: { key: string; value: string }[] } | null => {
+    // Heuristic: If message contains semicolons and the last segment looks like a K/V pair,
+    // use a more robust parser that handles unstructured data before the pairs.
+    const parts = msg.split(';');
+    if (parts.length > 1 && parts[parts.length - 1].includes('=')) {
+        const pairs: { key: string; value: string }[] = [];
+        let firstKvPairIndex = parts.length;
+
+        for (let i = parts.length - 1; i >= 0; i--) {
+            const part = parts[i].trim();
+            if (!part) continue;
+
+            const match = part.match(/^([a-zA-Z0-9_.\[\]-]+)=(.*)$/s);
+            if (match) {
+                pairs.unshift({ key: match[1].trim(), value: match[2].trim() });
+                firstKvPairIndex = i;
+            } else {
+                break; // Stop when a part is not a K/V pair
+            }
+        }
+
+        if (pairs.length > 0) {
+            const mainPart = parts.slice(0, firstKvPairIndex).join(';').trim();
+            let prefix: string | null = null;
+            let unstructuredValue = mainPart;
+
+            const lastColonIndex = mainPart.lastIndexOf(':');
+            // Check for a prefix, but avoid matching drive letters like "D:"
+            if (lastColonIndex > -1 && lastColonIndex < mainPart.length - 1) {
+                const potentialPrefix = mainPart.substring(0, lastColonIndex + 1);
+                if (!/^[a-zA-Z]:$/.test(potentialPrefix.trim())) {
+                    prefix = potentialPrefix.trim();
+                    unstructuredValue = mainPart.substring(lastColonIndex + 1).trim();
+                }
+            }
+
+            if (unstructuredValue) {
+                pairs.unshift({ key: 'Message', value: unstructuredValue });
+            }
+            return { prefix, pairs };
+        }
     }
 
+    // --- Fallback to original, more generic parser for comma-separated or other formats ---
+    if (!msg.includes('=')) return null;
+    
     let messageBody = msg;
-    let prefix = '';
-
+    let prefix: string | null = null;
+    
     const firstEqIndex = msg.indexOf('=');
     if (firstEqIndex > -1) {
         const lastColonBeforeEq = msg.substring(0, firstEqIndex).lastIndexOf(':');
@@ -16,9 +57,10 @@ const parseKeyValueMessage = (msg: string): { prefix: string; pairs: { key: stri
             messageBody = msg.substring(lastColonBeforeEq + 1).trim();
         }
     }
-    
-    const pairs: { key: string; value: string }[] = [];
-    const regex = /\b([a-zA-Z0-9_.\[\]]+)=/g;
+
+    const fallbackPairs: { key: string; value: string }[] = [];
+    // Use word boundary and allow hyphens. This is a bit more robust than the original.
+    const regex = /\b([a-zA-Z0-9_.\[\]-]+)=/g;
     const matches = [...messageBody.matchAll(regex)];
 
     if (matches.length > 0) {
@@ -36,16 +78,18 @@ const parseKeyValueMessage = (msg: string): { prefix: string; pairs: { key: stri
                 value = value.slice(0, -1).trim();
             }
 
-            pairs.push({ key, value });
+            fallbackPairs.push({ key, value });
         }
     }
-
-    if (pairs.length >= 2) {
-        return { prefix, pairs };
+    
+    if (fallbackPairs.length > 0) {
+        // The original required at least 2 pairs. We'll be more lenient.
+        return { prefix, pairs: fallbackPairs };
     }
 
     return null;
 };
+
 
 const SQL_KEYWORDS = [
   'SELECT', 'INSERT', 'UPDATE', 'DELETE', 'FROM', 'WHERE', 'GROUP BY', 'ORDER BY', 
