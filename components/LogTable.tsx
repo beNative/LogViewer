@@ -32,6 +32,7 @@ export const getLevelColor = (level: string) => {
 
 interface LogTableProps {
     entries: LogEntry[];
+    entriesOffset: number;
     totalFilteredCount: number;
     loadedFileNames: string[];
     pageTimestampRanges: PageTimestampRange[];
@@ -64,6 +65,7 @@ interface LogTableProps {
     onDeletePreset: (name: string) => void;
     onLoadPreset: (name: string) => void;
     onLoadMore: () => void;
+    onJumpToOffset: (offset: number) => void;
     hasMore: boolean;
     isBusy: boolean;
     logToConsole: (message: string, type: ConsoleMessage['type']) => void;
@@ -96,6 +98,8 @@ interface LogTableProps {
     onTimelineBarVisibilityChange: (newVisibility: TimelineBarVisibility) => void;
 }
 
+const INFINITE_SCROLL_CHUNK_SIZE = 200;
+
 export const LogTable: React.FC<LogTableProps> = (props) => {
     const [selectedEntry, setSelectedEntry] = React.useState<LogEntry | null>(null);
     const [contextMenuState, setContextMenuState] = React.useState<ContextMenuState>(null);
@@ -114,9 +118,11 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
 
     const {
         entries,
+        entriesOffset,
         totalFilteredCount,
         viewMode,
         onLoadMore,
+        onJumpToOffset,
         hasMore,
         isBusy,
         columnVisibility,
@@ -217,10 +223,12 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         if (keyboardSelectedId === null || userScrollingRef.current) return;
     
         if (viewMode === 'scroll' && viewportRef.current) {
-            const index = entries.findIndex(e => e.id === keyboardSelectedId);
-            if (index > -1) {
+            // Calculate the absolute index of the selected item
+            const absoluteIndex = entries.findIndex(e => e.id === keyboardSelectedId);
+            if (absoluteIndex > -1) {
+                const globalIndex = entriesOffset + absoluteIndex;
                 const rowHeight = getRowHeight(logTableDensity);
-                const targetScrollTop = index * rowHeight;
+                const targetScrollTop = globalIndex * rowHeight;
     
                 const { scrollTop: currentScrollTop, clientHeight: viewportHeight } = viewportRef.current;
     
@@ -228,7 +236,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                 if (targetScrollTop < currentScrollTop || targetScrollTop + rowHeight > currentScrollTop + viewportHeight) {
                     viewportRef.current.scrollTo({
                         top: targetScrollTop - (viewportHeight / 2) + (rowHeight / 2), // Center it
-                        behavior: 'auto', // Use 'auto' for instant jump, 'smooth' can be slow
+                        behavior: 'auto',
                     });
                 }
             }
@@ -238,7 +246,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                 rowEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
             }
         }
-    }, [keyboardSelectedId, entries, viewMode, logTableDensity, getRowHeight]);
+    }, [keyboardSelectedId, entries, viewMode, logTableDensity, getRowHeight, entriesOffset]);
 
 
     const handleContextMenu = (e: React.MouseEvent, entry: LogEntry, key: ColumnKey, value: string) => {
@@ -274,14 +282,12 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     };
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-        // Set a flag to indicate the user is scrolling, which prevents the "scroll into view"
-        // effect from fighting with the user's manual scroll action.
         if (userScrollingRef.current) {
             clearTimeout(userScrollingRef.current);
         }
         userScrollingRef.current = window.setTimeout(() => {
             userScrollingRef.current = null;
-        }, 150); // Debounce timeout: if user stops scrolling for 150ms, allow programmatic scroll.
+        }, 150);
 
         const currentScrollTop = e.currentTarget.scrollTop;
         scrollTopRef.current = currentScrollTop;
@@ -304,37 +310,56 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     let bottomSpacerHeight = 0;
     
     if (viewMode === 'scroll') {
-        // Data loading logic: on every render, check if the viewport needs data that isn't loaded yet.
-        if (viewportRef.current && entries.length < totalFilteredCount && hasMore && !isBusy) {
+        // --- Smart Data Fetching Logic ---
+        if (viewportRef.current && !isBusy) {
             const scrollTop = scrollTopRef.current;
             const rowHeight = getRowHeight(logTableDensity);
-            const viewportHeight = viewportRef.current.clientHeight;
-            const overscan = 20;
+            
+            const requiredTopIndex = Math.floor(scrollTop / rowHeight);
 
-            const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - overscan);
-            const visibleItemCount = Math.ceil(viewportHeight / rowHeight);
-            const requiredEndIndex = startIndex + visibleItemCount + (overscan * 2);
+            const loadedRange = {
+                start: entriesOffset,
+                end: entriesOffset + entries.length
+            };
 
-            // If the required data window extends beyond what's loaded, fetch more.
-            if (requiredEndIndex > entries.length) {
+            const isNearEndOfData = requiredTopIndex > loadedRange.end - (INFINITE_SCROLL_CHUNK_SIZE * 2);
+
+            // A "jump" is when the required view is completely outside our loaded data window.
+            const isJump = requiredTopIndex < loadedRange.start || requiredTopIndex > loadedRange.end;
+
+            if (isJump) {
+                // We've jumped to a completely different, unloaded area.
+                // Fetch a new window of data centered around the required index.
+                onJumpToOffset(requiredTopIndex);
+            } else if (isNearEndOfData && hasMore) {
+                // We are near the end of the loaded data, perform a normal incremental load.
                 onLoadMore();
             }
         }
 
-        // Virtualization rendering logic
+        // --- Virtualization Rendering Logic ---
         if (viewportRef.current) {
             const scrollTop = scrollTopRef.current;
             const rowHeight = getRowHeight(logTableDensity);
-            const viewportHeight = viewportRef.current.clientHeight;
             const overscan = 20;
 
-            const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - overscan);
-            const visibleItemCount = Math.ceil(viewportHeight / rowHeight);
-            const endIndex = Math.min(entries.length, startIndex + visibleItemCount + (overscan * 2));
+            // Calculate the start index of the items to render, relative to the *full dataset*.
+            const absoluteStartIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - overscan);
+            
+            // Convert the absolute start index to an index relative to our current `entries` window.
+            const startIndexInWindow = absoluteStartIndex - entriesOffset;
+            
+            const visibleItemCount = Math.ceil(viewportRef.current.clientHeight / rowHeight);
+            const endIndexInWindow = Math.min(entries.length, startIndexInWindow + visibleItemCount + (overscan * 2));
+            
+            const clampedStartIndex = Math.max(0, startIndexInWindow);
 
-            virtualEntries = entries.slice(startIndex, endIndex);
-            topSpacerHeight = startIndex * rowHeight;
-            bottomSpacerHeight = (totalFilteredCount - endIndex) * rowHeight;
+            virtualEntries = entries.slice(clampedStartIndex, endIndexInWindow);
+            
+            // The spacers are calculated based on the absolute positions in the full dataset.
+            topSpacerHeight = (entriesOffset + clampedStartIndex) * rowHeight;
+            const absoluteEndIndex = entriesOffset + endIndexInWindow;
+            bottomSpacerHeight = (totalFilteredCount - absoluteEndIndex) * rowHeight;
         }
     }
 
@@ -398,7 +423,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                                     </tr>
                                 </thead>
                                  <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                                    {viewMode === 'scroll' && topSpacerHeight > 0 && (
+                                    {topSpacerHeight > 0 && (
                                         <tr><td style={{ height: topSpacerHeight }} colSpan={visibleColumnCount}></td></tr>
                                     )}
                                     {virtualEntries.map(entry => (
@@ -415,7 +440,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                                             {columnVisibility.msg && <td onContextMenu={(e) => handleContextMenu(e, entry, 'msg', entry.msg)} style={getStyle('msg')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`} dangerouslySetInnerHTML={{ __html: highlightText(entry.msg, [appliedFilters.includeMsg], theme) }}></td>}
                                         </tr>
                                     ))}
-                                    {viewMode === 'scroll' && bottomSpacerHeight > 0 && (
+                                    {bottomSpacerHeight > 0 && (
                                         <tr><td style={{ height: bottomSpacerHeight }} colSpan={visibleColumnCount}></td></tr>
                                     )}
                                  </tbody>

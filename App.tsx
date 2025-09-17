@@ -26,6 +26,7 @@ import { FocusDebugger } from './components/FocusDebugger';
 // JSZip is loaded from script tag
 declare const JSZip: any;
 const INFINITE_SCROLL_CHUNK_SIZE = 200;
+const MAX_SCROLL_WINDOW_SIZE = 2000; // Keep up to 10 chunks in memory
 const UPDATE_TOAST_ID = 'app-update-toast';
 
 const initialFilters: FilterState = {
@@ -221,19 +222,26 @@ const App: React.FC = () => {
     if (!db || !hasMoreLogs || isBusy) return;
 
     setIsBusy(true);
-    // Defer the database query to the next event loop tick.
-    // This allows the UI to update with the `isBusy=true` state immediately,
-    // preventing multiple, simultaneous calls to this function from rapid-fire events.
     setTimeout(() => {
         try {
-            const newOffset = entriesOffset + INFINITE_SCROLL_CHUNK_SIZE;
-            logToConsole(`Loading more logs at offset ${newOffset.toLocaleString()}...`, 'DEBUG');
-
-            const newEntries = db.queryLogEntries(appliedFilters, INFINITE_SCROLL_CHUNK_SIZE, newOffset);
+            const currentWindowSize = filteredEntries.length;
+            const nextOffset = entriesOffset + currentWindowSize;
+            logToConsole(`Loading more logs at offset ${nextOffset.toLocaleString()}...`, 'DEBUG');
             
-            setFilteredEntries(prev => [...prev, ...newEntries]);
-            setEntriesOffset(newOffset);
-            setHasMoreLogs(newOffset + newEntries.length < totalFilteredCount);
+            const newEntries = db.queryLogEntries(appliedFilters, INFINITE_SCROLL_CHUNK_SIZE, nextOffset);
+
+            setFilteredEntries(prev => {
+                const combined = [...prev, ...newEntries];
+                if (combined.length > MAX_SCROLL_WINDOW_SIZE) {
+                    const excess = combined.length - MAX_SCROLL_WINDOW_SIZE;
+                    // Slide the window forward by trimming from the start
+                    setEntriesOffset(prevOffset => prevOffset + excess);
+                    return combined.slice(excess);
+                }
+                return combined;
+            });
+
+            setHasMoreLogs(nextOffset + newEntries.length < totalFilteredCount);
             logToConsole(`Loaded ${newEntries.length} more logs.`, 'DEBUG');
         } catch(e) {
             const msg = e instanceof Error ? e.message : String(e);
@@ -243,7 +251,34 @@ const App: React.FC = () => {
             setIsBusy(false);
         }
     }, 0);
-  }, [db, hasMoreLogs, isBusy, entriesOffset, appliedFilters, totalFilteredCount, logToConsole]);
+  }, [db, hasMoreLogs, isBusy, entriesOffset, appliedFilters, totalFilteredCount, logToConsole, filteredEntries.length]);
+
+  const handleJumpToOffset = React.useCallback((offset: number) => {
+    if (!db || isBusy) return;
+    setIsBusy(true);
+    setTimeout(() => {
+        try {
+            // Fetch a new window of data centered around the target offset
+            const windowSize = INFINITE_SCROLL_CHUNK_SIZE * 3;
+            const newOffset = Math.max(0, offset - INFINITE_SCROLL_CHUNK_SIZE);
+            logToConsole(`Jumping to log offset ${newOffset.toLocaleString()}...`, 'DEBUG');
+            
+            const newEntries = db.queryLogEntries(appliedFilters, windowSize, newOffset);
+            
+            // Replace the old window entirely
+            setFilteredEntries(newEntries);
+            setEntriesOffset(newOffset);
+            setHasMoreLogs(newOffset + newEntries.length < totalFilteredCount);
+            logToConsole(`Loaded new window of ${newEntries.length} logs.`, 'DEBUG');
+        } catch(e) {
+            const msg = e instanceof Error ? e.message : String(e);
+            setError(msg);
+            logToConsole(`Error jumping to offset: ${msg}`, 'ERROR');
+        } finally {
+            setIsBusy(false);
+        }
+    }, 0);
+  }, [db, isBusy, appliedFilters, totalFilteredCount, logToConsole]);
 
   const fetchSessions = React.useCallback(async () => {
     if (!window.electronAPI) return;
@@ -654,7 +689,7 @@ const App: React.FC = () => {
                   setPageTimestampRanges(ranges);
                   setHasMoreLogs(false);
               } else { // 'scroll' mode (Infinite Scroll)
-                  const entries = db.queryLogEntries(appliedFilters, INFINITE_SCROLL_CHUNK_SIZE, 0);
+                  const entries = db.queryLogEntries(appliedFilters, INFINITE_SCROLL_CHUNK_SIZE * 3, 0); // Load a bigger initial window
                   setFilteredEntries(entries);
                   setEntriesOffset(0);
                   setHasMoreLogs(entries.length < count);
@@ -1702,31 +1737,9 @@ const handleUiScaleChange = async (newScale: number) => {
             setCurrentPage(newPage);
         }
     } else { // Scroll mode (infinite scroll)
-       const isEntryLoaded = filteredEntries.some(e => e.id === nearestEntry.id);
-       if (isEntryLoaded) {
-           logToConsole(`Entry ${nearestEntry.id} already loaded, selecting.`, 'DEBUG');
-           return;
-       }
-
-       logToConsole(`Jumping to index ${index} in scroll mode. Refetching data window.`, 'DEBUG');
-       setIsBusy(true);
-
-       // Center the new view on the target entry
-       const newOffset = Math.max(0, index - Math.floor(INFINITE_SCROLL_CHUNK_SIZE / 2));
-       
-       setTimeout(() => {
-           const newEntries = db.queryLogEntries(appliedFilters, INFINITE_SCROLL_CHUNK_SIZE, newOffset);
-           
-           // Replace the current entries with the new window.
-           setFilteredEntries(newEntries);
-           setEntriesOffset(newOffset);
-           setHasMoreLogs(newOffset + newEntries.length < totalFilteredCount);
-           
-           setIsBusy(false);
-           logToConsole(`Loaded window of ${newEntries.length} logs for jump-to-time.`, 'DEBUG');
-       }, 50);
+       handleJumpToOffset(index);
     }
-  }, [db, isBusy, appliedFilters, viewMode, pageSize, currentPage, logToConsole, filteredEntries, totalFilteredCount]);
+  }, [db, isBusy, appliedFilters, viewMode, pageSize, currentPage, logToConsole, handleJumpToOffset]);
 
   const handleFileSelect = React.useCallback((fileName: string) => {
       if (db) {
@@ -2032,6 +2045,7 @@ const handleUiScaleChange = async (newScale: number) => {
             {hasData ? (
               <LogTable 
                 entries={filteredEntries}
+                entriesOffset={entriesOffset}
                 totalFilteredCount={totalFilteredCount}
                 loadedFileNames={loadedFileNames}
                 pageTimestampRanges={pageTimestampRanges}
@@ -2059,6 +2073,7 @@ const handleUiScaleChange = async (newScale: number) => {
                 onDeletePreset={handleDeleteFilterPreset}
                 onLoadPreset={handleLoadFilterPreset}
                 onLoadMore={handleLoadMore}
+                onJumpToOffset={handleJumpToOffset}
                 hasMore={hasMoreLogs}
                 isBusy={isBusy}
                 logToConsole={logToConsole}
