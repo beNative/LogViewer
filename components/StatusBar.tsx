@@ -1,7 +1,8 @@
 import React from 'react';
-import { ConsoleMessage, IconSet, Theme, ViewMode } from '../types.ts';
+import { ConsoleMessage, IconSet, LogTableDensity, Theme, ViewMode } from '../types.ts';
 import { Icon } from './icons/index.tsx';
 import { Tooltip } from './Tooltip.tsx';
+import { DensityControl } from './DensityControl.tsx';
 
 // Props interface
 interface StatusBarProps {
@@ -21,6 +22,10 @@ interface StatusBarProps {
     theme: Theme;
     onThemeChange: () => void;
     iconSet: IconSet;
+    logTableDensity: LogTableDensity;
+    onLogTableDensityChange: (density: LogTableDensity) => void;
+    isDetailPanelVisible: boolean;
+    onDetailPanelVisibilityChange: (isVisible: boolean) => void;
 }
 
 const StatItem: React.FC<{ icon: React.ReactNode; label: string; value: string | number; title?: string }> = ({ icon, label, value, title }) => (
@@ -47,7 +52,9 @@ export const StatusBar: React.FC<StatusBarProps> = (props) => {
         totalEntries, filteredCount, activeSessionName, isDirty,
         viewMode, currentPage, totalPages, visibleRowCount,
         isBusy, lastConsoleMessage, theme, onThemeChange, iconSet,
-        pageSize, onPageSizeChange, onGoToPage
+        pageSize, onPageSizeChange, onGoToPage,
+        logTableDensity, onLogTableDensityChange,
+        isDetailPanelVisible, onDetailPanelVisibilityChange
     } = props;
 
     const startEntry = (currentPage - 1) * pageSize + 1;
@@ -100,6 +107,17 @@ export const StatusBar: React.FC<StatusBarProps> = (props) => {
                  )}
                  {viewMode === 'scroll' && filteredCount > 0 && (
                      <span>Showing <span className="font-semibold text-gray-800 dark:text-gray-200">{visibleRowCount.toLocaleString()}</span> of <span className="font-semibold text-gray-800 dark:text-gray-200">{filteredCount.toLocaleString()}</span> rows</span>
+                 )}
+                 {(totalPages > 0 || (viewMode === 'scroll' && filteredCount > 0)) && (
+                    <div className="flex items-center gap-2">
+                        <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
+                        <DensityControl value={logTableDensity} onChange={onLogTableDensityChange} />
+                        <Tooltip content={isDetailPanelVisible ? "Hide Details" : "Show Details"}>
+                            <button onClick={() => onDetailPanelVisibilityChange(!isDetailPanelVisible)} className="p-1.5 text-gray-500 dark:text-gray-400 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                                <Icon name="SidebarRight" iconSet={iconSet} className="w-5 h-5"/>
+                            </button>
+                        </Tooltip>
+                    </div>
                  )}
             </div>
 

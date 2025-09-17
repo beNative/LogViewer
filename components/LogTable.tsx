@@ -4,13 +4,11 @@ import { Icon } from './icons/index.tsx';
 import { FilterBar } from './FilterBar.tsx';
 import { LogDetailPanel } from './LogDetailPanel.tsx';
 import { highlightText } from '../utils.ts';
-import { ColumnSelector } from './ColumnSelector.tsx';
 import { TimeRangeSelector } from './TimeRangeSelector.tsx';
 import { ActiveFilters } from './ActiveFilters.tsx';
 import { ContextMenu } from './ContextMenu.tsx';
-import { DensityControl } from './DensityControl.tsx';
 import { Splitter } from './Splitter.tsx';
-import { Tooltip } from './Tooltip.tsx';
+import { ColumnVisibilityMenu } from './ColumnVisibilityMenu.tsx';
 
 type ContextMenuState = { x: number; y: number; entry: LogEntry; value: string; key: ColumnKey } | null;
 
@@ -100,6 +98,7 @@ interface LogTableProps {
 export const LogTable: React.FC<LogTableProps> = (props) => {
     const [selectedEntry, setSelectedEntry] = React.useState<LogEntry | null>(null);
     const [contextMenuState, setContextMenuState] = React.useState<ContextMenuState>(null);
+    const [headerContextMenu, setHeaderContextMenu] = React.useState<{ x: number, y: number } | null>(null);
     const tableContainerRef = React.useRef<HTMLDivElement>(null);
     const rowRefs = React.useRef<Map<number, HTMLTableRowElement | null>>(new Map());
     
@@ -283,20 +282,14 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                     <FilterBar {...props} />
                 </aside>
                 <Splitter onDrag={handleFilterResize} />
-                <main className="flex-grow grid grid-rows-[auto_1fr] min-h-0">
-                    <div className="flex-shrink-0 flex items-center justify-end gap-4 p-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                        <ColumnSelector visibility={props.columnVisibility} onChange={props.onColumnVisibilityChange} iconSet={props.iconSet} />
-                        <DensityControl value={props.logTableDensity} onChange={props.onLogTableDensityChange} />
-                         <Tooltip content={props.isDetailPanelVisible ? "Hide Details" : "Show Details"}>
-                            <button onClick={() => props.onDetailPanelVisibilityChange(!props.isDetailPanelVisible)} className="p-2 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                                <Icon name="SidebarRight" iconSet={props.iconSet} className="w-5 h-5"/>
-                            </button>
-                        </Tooltip>
-                    </div>
+                <main className="flex-grow min-h-0">
                     <div className="overflow-auto outline-none" ref={tableContainerRef} tabIndex={-1}>
                         <table key={visibilityKey} className="min-w-full table-auto font-sans">
                             <thead className="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 shadow-sm">
-                                <tr>
+                                <tr onContextMenu={(e) => {
+                                    e.preventDefault();
+                                    setHeaderContextMenu({ x: e.clientX, y: e.clientY });
+                                }}>
                                     {columnVisibility.time && <th style={{width: '12%', minWidth: '170px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Time</th>}
                                     {columnVisibility.level && <th style={{width: '8%', minWidth: '90px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Level</th>}
                                     {columnVisibility.sndrtype && <th style={{width: '10%', minWidth: '120px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Sender Type</th>}
@@ -342,6 +335,15 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                 )}
             </div>
              {contextMenuState && <ContextMenu {...contextMenuState} onClose={() => setContextMenuState(null)} onFilter={props.onContextMenuFilter} iconSet={props.iconSet} contextKey={contextMenuState.key} contextValue={contextMenuState.value} />}
+             {headerContextMenu && (
+                <ColumnVisibilityMenu
+                    x={headerContextMenu.x}
+                    y={headerContextMenu.y}
+                    visibility={props.columnVisibility}
+                    onChange={props.onColumnVisibilityChange}
+                    onClose={() => setHeaderContextMenu(null)}
+                />
+             )}
         </div>
     );
 };

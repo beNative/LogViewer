@@ -2180,6 +2180,10 @@ const handleUiScaleChange = async (newScale: number) => {
         theme={theme}
         onThemeChange={() => handleThemeChange(theme === 'light' ? 'dark' : 'light')}
         iconSet={iconSet}
+        logTableDensity={logTableDensity}
+        onLogTableDensityChange={handleLogTableDensityChange}
+        isDetailPanelVisible={isDetailPanelVisible}
+        onDetailPanelVisibilityChange={handleDetailPanelVisibilityChange}
       />
       <FocusDebugger isVisible={isFocusDebuggerVisible} iconSet={iconSet} />
     </div>
