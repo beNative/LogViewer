@@ -1,7 +1,7 @@
 import React from 'react';
-import { formatBytes } from '../utils.ts';
-import { Icon } from './icons/index.tsx';
-import { IconSet, ProgressPhase } from '../types.ts';
+import { formatBytes } from '../utils';
+import { Icon } from './icons';
+import { IconSet, ProgressPhase } from '../types';
 
 type IconName = React.ComponentProps<typeof Icon>['name'];
 

@@ -1,7 +1,7 @@
 import React from 'react';
-import { ConsoleMessage, ConsoleMessageType, IconSet, Theme } from '../types.ts';
-import { Icon } from './icons/index.tsx';
-import { highlightText } from '../utils.ts';
+import { ConsoleMessage, ConsoleMessageType, IconSet, Theme } from '../types';
+import { Icon } from './icons';
+import { highlightText } from '../utils';
 
 interface ConsoleProps {
   messages: ConsoleMessage[];

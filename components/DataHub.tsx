@@ -1,9 +1,9 @@
 import React from 'react';
-import { Dropzone } from './Dropzone.tsx';
-import { Icon } from './icons/index.tsx';
-import { SessionFile, IconSet, OverallTimeRange } from '../types.ts';
-import { SessionManager } from './SessionManager.tsx';
-import { formatBytes } from '../utils.ts';
+import { Dropzone } from './Dropzone';
+import { Icon } from './icons';
+import { SessionFile, IconSet, OverallTimeRange } from '../types';
+import { SessionManager } from './SessionManager';
+import { formatBytes } from '../utils';
 
 interface DataHubProps {
   onCreateSessionFromFiles: (files: FileList) => void;

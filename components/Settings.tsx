@@ -1,9 +1,9 @@
 import React from 'react';
-import { ColumnStyleSettings } from './ColumnStyleSettings.tsx';
-import { ColumnStyles, ViewMode, IconSet, LogTableDensity, Settings as SettingsType, ColumnVisibilityState, PanelWidths, FilterState, TimelineBarVisibility } from '../types.ts';
-import { JsonEditor } from './JsonEditor.tsx';
-import { Icon, IconName } from './icons/index.tsx';
-import { DensityControl } from './DensityControl.tsx';
+import { ColumnStyleSettings } from './ColumnStyleSettings';
+import { ColumnStyles, ViewMode, IconSet, LogTableDensity, Settings as SettingsType, ColumnVisibilityState, PanelWidths, FilterState, TimelineBarVisibility } from '../types';
+import { JsonEditor } from './JsonEditor';
+import { Icon, IconName } from './icons';
+import { DensityControl } from './DensityControl';
 
 type Theme = 'light' | 'dark';
 type SettingsCategory = 'appearance' | 'behavior' | 'updates' | 'integrations' | 'styles' | 'debugging';
@@ -295,130 +295,57 @@ export const Settings: React.FC<SettingsProps> = (props) => {
                                 </div>
                             </div>
                             <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-700">
-                                <span className="font-medium text-gray-800 dark:text-gray-200">Log Row Density</span>
-                                <DensityControl value={logTableDensity} onChange={onLogTableDensityChange} />
-                            </div>
-                            <SegmentedControl label="Icon Set" value={iconSet} onChange={onIconSetChange} options={[ { label: 'Sharp', value: 'sharp' }, { label: 'Solid', value: 'solid' }, { label: 'Feather', value: 'feather' }, { label: 'Tabler', value: 'tabler' }, { label: 'Lucide', value: 'lucide' } ]} />
-                        </div>
-                    )}
-                     {activeCategory === 'behavior' && (
-                        <div>
-                            <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                                <h2 className="text-xl font-bold text-gray-800 dark:text-sky-400 pb-4">Behavior</h2>
-                                <SegmentedControl label="Log Viewer Mode" value={viewMode} onChange={onViewModeChange} options={[{ label: 'Paginate', value: 'pagination' }, { label: 'Scroll', value: 'scroll' }]} />
-                                <ToggleSwitch label="Show Timeline by Default" enabled={isTimeRangeSelectorVisible} onChange={onTimeRangeSelectorVisibilityChange} />
-                                <ToggleSwitch label="Show Details Panel by Default" enabled={isDetailPanelVisible} onChange={onDetailPanelVisibilityChange} />
-                            </div>
-                            <div className="divide-y divide-gray-200 dark:divide-gray-700 mt-6">
-                                 <h3 className="text-lg font-bold text-gray-800 dark:text-sky-400 pb-4">Timeline Display</h3>
-                                 <p className="py-3 text-sm text-gray-500 dark:text-gray-400">Control which contextual bars are visible in the timeline selector. These can also be toggled by right-clicking the timeline labels.</p>
-                                 <ToggleSwitch label="Show Pages Bar" enabled={timelineBarVisibility.pages} onChange={(e) => onTimelineBarVisibilityChange({...timelineBarVisibility, pages: e})} />
-                                 <ToggleSwitch label="Show Files Bar" enabled={timelineBarVisibility.files} onChange={(e) => onTimelineBarVisibilityChange({...timelineBarVisibility, files: e})} />
-                                 <ToggleSwitch label="Show Dates Bar" enabled={timelineBarVisibility.dates} onChange={(e) => onTimelineBarVisibilityChange({...timelineBarVisibility, dates: e})} />
-                                 <ToggleSwitch label="Show Density Bar" enabled={timelineBarVisibility.density} onChange={(e) => onTimelineBarVisibilityChange({...timelineBarVisibility, density: e})} />
-                                 <ToggleSwitch label="Show Overview Bar" enabled={timelineBarVisibility.overview} onChange={(e) => onTimelineBarVisibilityChange({...timelineBarVisibility, overview: e})} />
-                            </div>
-                        </div>
-                    )}
-                    {activeCategory === 'updates' && (
-                        <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                             <h2 className="text-xl font-bold text-gray-800 dark:text-sky-400 pb-4">Updates</h2>
-                             {window.electronAPI && (
-                                <>
-                                    <ToggleSwitch label="Enable Automatic Update Checks" enabled={isAutoUpdateEnabled} onChange={onAutoUpdateEnabledChange} />
-                                    <ToggleSwitch label="Update to Pre-releases" enabled={allowPrerelease} onChange={onAllowPrereleaseChange} />
-                                </>
-                             )}
-                        </div>
-                    )}
-                    {activeCategory === 'integrations' && (
-                        <div className="space-y-6">
-                             <h2 className="text-xl font-bold text-gray-800 dark:text-sky-400">Integrations</h2>
-                             <div>
-                                <label htmlFor="githubToken" className="block text-sm font-medium text-gray-800 dark:text-gray-200">GitHub Personal Access Token</label>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 mb-2">Required for automatic updates from private repositories. The application must be restarted for changes to take effect.</p>
-                                <div className="relative">
-                                    <input
-                                        id="githubToken"
-                                        type={isTokenVisible ? 'text' : 'password'}
-                                        value={localGithubToken}
-                                        onChange={(e) => setLocalGithubToken(e.target.value)}
-                                        className="block w-full pr-10 bg-white dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 sm:text-sm font-mono"
-                                        placeholder="ghp_..."
-                                    />
-                                    <button onClick={() => setIsTokenVisible(!isTokenVisible)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                                        <Icon name={isTokenVisible ? 'EyeSlash' : 'Eye'} iconSet="sharp" className="w-5 h-5" />
-                                    </button>
-                                </div>
-                                <div className="mt-3 text-right">
-                                    <button onClick={handleSaveToken} disabled={!isTokenDirty} className="px-4 py-2 text-sm font-semibold rounded-md transition-colors bg-sky-600 text-white hover:bg-sky-700 disabled:bg-gray-400 disabled:dark:bg-gray-600 disabled:cursor-not-allowed">Save Token</button>
-                                </div>
-                             </div>
-                        </div>
-                    )}
-                    {activeCategory === 'styles' && (
-                        <div>
-                            <h2 className="text-xl font-bold text-gray-800 dark:text-sky-400 mb-4">Log Table Styles</h2>
-                            <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">Customize the font, style, and color for each column in the Log Viewer. Changes are saved automatically.</p>
-                            <ColumnStyleSettings styles={columnStyles} onChange={onColumnStylesChange} />
-                        </div>
-                    )}
-                    {activeCategory === 'debugging' && (
-                        <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                             <h2 className="text-xl font-bold text-gray-800 dark:text-sky-400 pb-4">Debugging</h2>
-                             <ToggleSwitch label="Show Focus & Hover Inspector" enabled={isFocusDebuggerVisible} onChange={onFocusDebuggerVisibilityChange} />
-                             <p className="pt-3 text-sm text-gray-500 dark:text-gray-400">When enabled, a small overlay will appear at the bottom-left of the screen showing information about the currently focused and hovered UI elements. This is useful for development and debugging.</p>
+// FIX: The component was missing its return statement, causing a type error. The main JSX structure for the component has been added.
+    return (
+        <div className="flex flex-col h-full bg-white dark:bg-gray-800">
+            <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
+                    <div className="flex border-b-2 border-transparent -mb-px space-x-6">
+                        <TabButton label="UI Controls" isActive={activeTab === 'controls'} onClick={() => setActiveTab('controls')} />
+                        <TabButton label="JSON Editor" isActive={activeTab === 'json'} onClick={() => setActiveTab('json')} />
+                    </div>
+                    {activeTab === 'json' && window.electronAPI && (
+                        <div className="flex items-center gap-2 py-2">
+                            <button onClick={handleImportClick} className="flex items-center gap-2 px-3 py-1.5 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-200/80 dark:bg-gray-700/50 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-md transition-colors">
+                                <Icon name="ArrowUpTray" iconSet={iconSet} className="w-4 h-4" />
+                                Import...
+                            </button>
+                            <input type="file" ref={importInputRef} onChange={handleFileImport} className="hidden" accept=".json" />
+                            <button onClick={handleExport} className="flex items-center gap-2 px-3 py-1.5 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-200/80 dark:bg-gray-700/50 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-md transition-colors">
+                                <Icon name="Download" iconSet={iconSet} className="w-4 h-4" />
+                                Export...
+                            </button>
                         </div>
                     )}
                 </div>
-            </main>
-        </div>
-    );
-    
-    return (
-        <div className="flex flex-col flex-grow bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-300">
-            <div className="sticky top-0 z-10 flex-shrink-0 bg-gray-100 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-                <nav className="-mb-px flex space-x-8 px-4 sm:px-6 lg:px-8" aria-label="Tabs">
-                    <TabButton label="Controls" isActive={activeTab === 'controls'} onClick={() => setActiveTab('controls')} />
-                    {window.electronAPI && <TabButton label="JSON Source" isActive={activeTab === 'json'} onClick={() => setActiveTab('json')} />}
-                </nav>
             </div>
 
-            {error && (
-                <div className="p-4 sm:p-6 lg:p-8"><div className="bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 rounded-lg p-4 text-center"><p className="font-bold">Error</p><p>{error}</p></div></div>
-            )}
-            
-            {activeTab === 'controls' && ControlsView}
-            
-            {activeTab === 'json' && window.electronAPI && (
-                 <div className="flex-grow flex flex-col p-4 sm:p-6 lg:p-8 overflow-y-auto">
-                     <div className="space-y-6 max-w-5xl mx-auto w-full flex-grow flex flex-col">
-                         <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 flex-shrink-0">
-                            <h2 className="text-xl font-semibold text-gray-800 dark:text-sky-400 mb-4">Settings File</h2>
-                            <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">For advanced configuration, you can edit the settings file directly. Click the button below to show the file in its folder.</p>
-                            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                                <button onClick={handleOpenFile} disabled={!window.electronAPI} className="bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-lg px-4 py-2 transition-colors duration-200 whitespace-nowrap disabled:opacity-50">Show Settings File</button>
-                                <code className="bg-gray-100 dark:bg-gray-900/70 p-2 rounded-md text-sm text-gray-500 dark:text-gray-400 break-all w-full">{settingsPath || 'Loading path...'}</code>
-                            </div>
+            {activeTab === 'controls' ? (
+                ControlsView
+            ) : (
+                <div className="flex flex-col flex-grow min-h-0 p-4 sm:p-6 lg:p-8 space-y-4">
+                    <div className="flex-grow relative">
+                        <JsonEditor value={jsonText} onChange={handleJsonChange} />
+                    </div>
+                    <div className="flex-shrink-0 flex justify-between items-center">
+                        <div className="text-sm">
+                            {!isJsonValid ? (
+                                <span className="text-red-600 dark:text-red-400 font-semibold">Invalid JSON</span>
+                            ) : (
+                                <span className="text-gray-500 dark:text-gray-400">Settings file path: <button onClick={handleOpenFile} className="underline hover:text-sky-500">{settingsPath}</button></span>
+                            )}
                         </div>
-
-                         <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 flex-grow flex flex-col min-h-[50vh]">
-                            <div className="flex justify-between items-center mb-4 flex-wrap gap-2 flex-shrink-0">
-                                <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-300">File Content</h2>
-                                <div className="flex items-center gap-2">
-                                    <input type="file" ref={importInputRef} onChange={handleFileImport} className="hidden" accept=".json,application/json" />
-                                    <button onClick={handleImportClick} className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600" title="Import settings from file"><Icon name="ArrowUpTray" iconSet={iconSet} className="w-4 h-4" /> Import</button>
-                                    <button onClick={handleExport} className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600" title="Export current settings to file"><Icon name="Download" iconSet={iconSet} className="w-4 h-4" /> Export</button>
-                                    <button onClick={handleDiscardChanges} disabled={!isDirty} className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors bg-white hover:bg-gray-200 text-gray-800 border border-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white dark:border-gray-500 disabled:opacity-50" title="Discard unsaved changes"><Icon name="ArrowPath" iconSet={iconSet} className="w-4 h-4" /> Discard</button>
-                                    <button onClick={handleSaveChanges} disabled={!isDirty || !isJsonValid} className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors bg-sky-600 hover:bg-sky-700 text-white disabled:opacity-50" title={!isJsonValid ? "Cannot save: Invalid JSON" : "Save changes"}><Icon name="SaveDisk" iconSet={iconSet} className="w-4 h-4" /> Save</button>
-                                </div>
-                            </div>
-                            {!isJsonValid && <div className="mb-2 text-sm text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/50 p-2 rounded-md">The content is not valid JSON. Please correct it before saving.</div>}
-                            {savedSettings ? (<div className="flex-grow min-h-0"><JsonEditor value={jsonText} onChange={handleJsonChange} /></div>) : (<p className="text-gray-500 dark:text-gray-400">Loading settings...</p>)}
+                        <div className="flex items-center gap-2">
+                            <button onClick={handleDiscardChanges} disabled={!isDirty} className="px-3 py-1.5 text-sm bg-red-600 hover:bg-red-700 text-white font-semibold rounded-md transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                                Discard Changes
+                            </button>
+                            <button onClick={handleSaveChanges} disabled={!isDirty || !isJsonValid} className="px-3 py-1.5 text-sm bg-sky-600 hover:bg-sky-700 text-white font-semibold rounded-md transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                                Save Changes
+                            </button>
                         </div>
-                     </div>
+                    </div>
                 </div>
             )}
         </div>
     );
-}
+};

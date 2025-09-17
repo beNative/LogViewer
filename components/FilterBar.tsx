@@ -1,10 +1,10 @@
 import React from 'react';
-import { FilterState, IconSet } from '../types.ts';
-import { MultiSelectDropdown } from './MultiSelectDropdown.tsx';
-import { areFiltersEqual, areArraysEqualUnordered } from '../utils.ts';
-import { SqlEditor } from './SqlEditor.tsx';
-import { Icon } from './icons/index.tsx';
-import { Tooltip } from './Tooltip.tsx';
+import { FilterState, IconSet } from '../types';
+import { MultiSelectDropdown } from './MultiSelectDropdown';
+import { areFiltersEqual, areArraysEqualUnordered } from '../utils';
+import { SqlEditor } from './SqlEditor';
+import { Icon } from './icons';
+import { Tooltip } from './Tooltip';
 
 interface FilterBarProps {
     filters: FilterState;

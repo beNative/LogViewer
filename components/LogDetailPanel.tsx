@@ -1,14 +1,14 @@
 import React from 'react';
-import { LogEntry, ColumnStyles, ColumnKey, GridData, IconSet } from '../types.ts';
-import { getLevelColor } from './LogTable.tsx';
-import { highlightText } from '../utils.ts';
-import { XmlTreeView } from './XmlTreeView.tsx';
-import { KeyValueTableView } from './KeyValueTableView.tsx';
-import { SqlSyntaxHighlighter } from './SqlSyntaxHighlighter.tsx';
-import { parseLogMessage } from '../parsers.ts';
-import { GridView } from './GridView.tsx';
-import { Icon } from './icons/index.tsx';
-import { Tooltip } from './Tooltip.tsx';
+import { LogEntry, ColumnStyles, ColumnKey, GridData, IconSet } from '../types';
+import { getLevelColor } from './LogTable';
+import { highlightText } from '../utils';
+import { XmlTreeView } from './XmlTreeView';
+import { KeyValueTableView } from './KeyValueTableView';
+import { SqlSyntaxHighlighter } from './SqlSyntaxHighlighter';
+import { parseLogMessage } from '../parsers';
+import { GridView } from './GridView';
+import { Icon } from './icons';
+import { Tooltip } from './Tooltip';
 
 type Theme = 'light' | 'dark';
 

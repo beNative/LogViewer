@@ -1,6 +1,6 @@
 import React from 'react';
-import { Icon, IconName } from './icons/index.tsx';
-import { IconSet } from '../types.ts';
+import { Icon, IconName } from './icons';
+import { IconSet } from '../types';
 
 interface HeaderProps {
     activeView: 'data' | 'viewer' | 'dashboard' | 'console' | 'settings' | 'info' | 'stock';

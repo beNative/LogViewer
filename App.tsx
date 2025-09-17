@@ -6,22 +6,22 @@ import {
     IconSet, LogTableDensity, Theme, Settings as SettingsType, ProgressPhase,
     StockInfoEntry, StockInfoFilters, ToastMessage, StockArticleSuggestion, LogDensityPoint,
     TimelineBarVisibility
-} from './types.ts';
-import { LogTable } from './components/LogTable.tsx';
-import { ProgressIndicator } from './components/ProgressIndicator.tsx';
-import { Database, getSqlDateTime } from './db.ts';
-import { Header } from './components/Header.tsx';
-import { Console } from './components/Console.tsx';
-import { DataHub } from './components/DataHub.tsx';
-import { Icon } from './components/icons/index.tsx';
-import { Dashboard } from './components/Dashboard.tsx';
-import { Settings } from './components/Settings.tsx';
-import { Info } from './components/Info.tsx';
-import { StatusBar } from './components/StatusBar.tsx';
-import { AboutDialog } from './components/AboutDialog.tsx';
-import { StockTracker } from './components/StockTracker.tsx';
-import { Toast } from './components/Toast.tsx';
-import { FocusDebugger } from './components/FocusDebugger.tsx';
+} from './types';
+import { LogTable } from './components/LogTable';
+import { ProgressIndicator } from './components/ProgressIndicator';
+import { Database, getSqlDateTime } from './db';
+import { Header } from './components/Header';
+import { Console } from './components/Console';
+import { DataHub } from './components/DataHub';
+import { Icon } from './components/icons';
+import { Dashboard } from './components/Dashboard';
+import { Settings } from './components/Settings';
+import { Info } from './components/Info';
+import { StatusBar } from './components/StatusBar';
+import { AboutDialog } from './components/AboutDialog';
+import { StockTracker } from './components/StockTracker';
+import { Toast } from './components/Toast';
+import { FocusDebugger } from './components/FocusDebugger';
 
 // JSZip is loaded from script tag
 declare const JSZip: any;
@@ -962,22 +962,28 @@ const App: React.FC = () => {
     logToConsole(`Creating new session from ${files.length} file(s)...`, 'INFO');
 
     try {
-        // 1. Create a brand new database instance in memory.
         const newSessionDb = await Database.create();
-        
-        // 2. Process the dropped files into this new, empty database.
         await processFilesToDb(files, newSessionDb);
-
-        // 3. Now that data is loaded, make this the active DB and update the app state.
         setDb(newSessionDb);
-        await updateStateFromDb(newSessionDb, false); // `false` because not loading filters from a saved session.
-        
-        // 4. Since this is a new session, activeSessionName will be null.
-        // handleSaveSession will generate a new name automatically.
-        const success = await handleSaveSession(); 
+        await updateStateFromDb(newSessionDb, false);
+
+        const now = new Date();
+        const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-').replace('T', '_');
+        const defaultSessionName = `session_${timestamp}`;
+
+        let sessionName = window.prompt("Enter a name for the new session:", defaultSessionName);
+        if (!sessionName || sessionName.trim() === '') {
+            sessionName = defaultSessionName;
+            logToConsole('No name provided, using default.', 'WARNING');
+        }
+        if (!sessionName.toLowerCase().endsWith('.sqlite')) {
+            sessionName += '.sqlite';
+        }
+
+        const success = await saveCurrentDbAsSession(sessionName); 
         if (success) {
             logToConsole('New session created and saved successfully.', 'INFO');
-            addToast({ type: 'success', title: 'Session Created', message: `New session created successfully.` });
+            addToast({ type: 'success', title: 'Session Created', message: `New session '${sessionName}' created successfully.` });
         } else {
             throw new Error('Failed to save the new session after processing files.');
         }
@@ -986,13 +992,12 @@ const App: React.FC = () => {
         setError(msg);
         logToConsole(msg, 'ERROR');
         addToast({ type: 'error', title: 'Session Creation Failed', message: msg });
-        // On failure, reset to a clean state
         await handleNewSession(false);
     } finally {
         setProgressMessage('Done!');
         setTimeout(() => setIsLoading(false), 500);
     }
-  }, [processFilesToDb, updateStateFromDb, logToConsole, handleSaveSession, addToast, handleNewSession]);
+  }, [processFilesToDb, updateStateFromDb, logToConsole, saveCurrentDbAsSession, addToast, handleNewSession]);
 
   const handleAddFilesToCurrentSession = React.useCallback(async (files: FileList) => {
     if (!db) {
@@ -2037,7 +2042,6 @@ const handleUiScaleChange = async (newScale: number) => {
                 customFilterPresets={customFilterPresets}
                 onSavePreset={handleSaveFilterPreset}
                 onDeletePreset={handleDeleteFilterPreset}
-                // FIX: Corrected typo in function name for loading filter presets from `handleLoadPreset` to `handleLoadFilterPreset`.
                 onLoadPreset={handleLoadFilterPreset}
                 onLoadMore={handleLoadMore}
                 hasMore={hasMoreLogs}

@@ -1,14 +1,14 @@
 import React from 'react';
-import { LogEntry, FilterState, PageTimestampRange, ColumnVisibilityState, ColumnStyles, ColumnKey, PanelWidths, ViewMode, ConsoleMessage, OverallTimeRange, FileTimeRange, LogDensityPointByLevel, IconSet, LogTableDensity, Theme, TimelineBarVisibility } from '../types.ts';
-import { Icon } from './icons/index.tsx';
-import { FilterBar } from './FilterBar.tsx';
-import { LogDetailPanel } from './LogDetailPanel.tsx';
-import { highlightText } from '../utils.ts';
-import { TimeRangeSelector } from './TimeRangeSelector.tsx';
-import { ActiveFilters } from './ActiveFilters.tsx';
-import { ContextMenu } from './ContextMenu.tsx';
-import { Splitter } from './Splitter.tsx';
-import { ColumnVisibilityMenu } from './ColumnVisibilityMenu.tsx';
+import { LogEntry, FilterState, PageTimestampRange, ColumnVisibilityState, ColumnStyles, ColumnKey, PanelWidths, ViewMode, ConsoleMessage, OverallTimeRange, FileTimeRange, LogDensityPointByLevel, IconSet, LogTableDensity, Theme, TimelineBarVisibility } from '../types';
+import { Icon } from './icons';
+import { FilterBar } from './FilterBar';
+import { LogDetailPanel } from './LogDetailPanel';
+import { highlightText } from '../utils';
+import { TimeRangeSelector } from './TimeRangeSelector';
+import { ActiveFilters } from './ActiveFilters';
+import { ContextMenu } from './ContextMenu';
+import { Splitter } from './Splitter';
+import { ColumnVisibilityMenu } from './ColumnVisibilityMenu';
 
 type ContextMenuState = { x: number; y: number; entry: LogEntry; value: string; key: ColumnKey } | null;
 

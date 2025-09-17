@@ -1,4 +1,3 @@
-// Fix: Changed import from "./types" to "./types.ts"
 import { SessionFile, Settings } from "./types.ts";
 
 export interface IElectronAPI {

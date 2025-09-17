@@ -1,6 +1,6 @@
 import React from 'react';
-import { Icon } from './icons/index.tsx';
-import { IconSet } from '../types.ts';
+import { Icon } from './icons';
+import { IconSet } from '../types';
 
 interface DropzoneProps {
   onFileDrop: (files: FileList) => void;

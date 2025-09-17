@@ -1,8 +1,8 @@
 import React from 'react';
-import { DashboardData, IconSet } from '../types.ts';
-import { TimelineChart } from './TimelineChart.tsx';
-import { CategoryChart } from './CategoryChart.tsx';
-import { Icon } from './icons/index.tsx';
+import { DashboardData, IconSet } from '../types';
+import { TimelineChart } from './TimelineChart';
+import { CategoryChart } from './CategoryChart';
+import { Icon } from './icons';
 
 type Theme = 'light' | 'dark';
 
