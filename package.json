@@ -14,6 +14,8 @@
     "start": "npm run build && electron .",
     "serve": "npm run build:css && concurrently \"npm run build:css -- --watch\" \"esbuild index.tsx --bundle --outfile=dist/bundle.js --jsx=automatic --servedir=. --serve=:3000\"",
     "dist": "npm run clean && npm run build && electron-builder",
+    "dist:32": "npm run clean && npm run build && electron-builder --ia32",
+    "dist:64": "npm run clean && npm run build && electron-builder --x64",
     "publish": "npm run clean && npm run build && electron-builder --publish always"
   },
   "devDependencies": {
@@ -53,7 +55,8 @@
         {
           "target": "nsis",
           "arch": [
-            "x64"
+            "x64",
+            "ia32"
           ]
         }
       ]
