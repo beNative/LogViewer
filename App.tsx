@@ -166,6 +166,7 @@ const App: React.FC = () => {
   
   const [hasMoreLogs, setHasMoreLogs] = React.useState(true);
   const [keyboardSelectedId, setKeyboardSelectedId] = React.useState<number | null>(null);
+  const [scrollCursorTime, setScrollCursorTime] = React.useState<number | null>(null);
   const [jumpToEntryId, setJumpToEntryId] = React.useState<number | null>(null);
   const [isInitialLoad, setIsInitialLoad] = React.useState(true);
   const [toasts, setToasts] = React.useState<ToastMessage[]>([]);
@@ -1988,17 +1989,28 @@ const handleUiScaleChange = async (newScale: number) => {
     }, [db, hasData, logToConsole, addToast, updateStateFromDb, handleSaveSession]);
 
 
+  const handleViewCenterChange = React.useCallback((time: number) => {
+    setScrollCursorTime(time);
+  }, []);
+
+  const handleUserScrollStart = React.useCallback(() => {
+    if (keyboardSelectedId !== null) {
+        setKeyboardSelectedId(null);
+    }
+  }, [keyboardSelectedId]);
+
   const totalPages = Math.ceil(totalFilteredCount / pageSize);
   
-  // Find the selected entry's time for the timeline cursor
   const selectedEntryForCursor = React.useMemo(() => {
     if (keyboardSelectedId === null) return null;
     return filteredEntries.find(e => e.id === keyboardSelectedId);
   }, [keyboardSelectedId, filteredEntries]);
 
-  const cursorTime = selectedEntryForCursor 
+  const selectionCursorTime = selectedEntryForCursor 
     ? new Date(selectedEntryForCursor.time.replace(/ (\d+)$/, '.$1') + 'Z').getTime() 
     : null;
+
+  const cursorTime = selectionCursorTime ?? scrollCursorTime;
 
   return (
     <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
@@ -2104,6 +2116,8 @@ const handleUiScaleChange = async (newScale: number) => {
                 cursorTime={cursorTime}
                 timelineBarVisibility={timelineBarVisibility}
                 onTimelineBarVisibilityChange={handleTimelineBarVisibilityChange}
+                onViewCenterChange={handleViewCenterChange}
+                onUserScrollStart={handleUserScrollStart}
               />
             ) : (
                 <div className="flex-grow flex items-center justify-center p-8 text-center bg-white dark:bg-gray-900">

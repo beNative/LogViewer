@@ -96,6 +96,8 @@ interface LogTableProps {
     cursorTime: number | null;
     timelineBarVisibility: TimelineBarVisibility;
     onTimelineBarVisibilityChange: (newVisibility: TimelineBarVisibility) => void;
+    onViewCenterChange: (time: number) => void;
+    onUserScrollStart: () => void;
 }
 
 const INFINITE_SCROLL_CHUNK_SIZE = 200;
@@ -112,6 +114,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     const tickingRef = React.useRef(false);
     const [, forceUpdate] = React.useReducer(x => x + 1, 0);
     const userScrollingRef = React.useRef<number | null>(null);
+    const programmaticScrollRef = React.useRef(false);
 
     const panelWidthsRef = React.useRef(props.panelWidths);
     panelWidthsRef.current = props.panelWidths;
@@ -132,7 +135,10 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         setKeyboardSelectedId,
         appliedFilters,
         theme,
-        jumpToEntryId
+        jumpToEntryId,
+        overallTimeRange,
+        onViewCenterChange,
+        onUserScrollStart,
     } = props;
     
     const getRowHeight = React.useCallback((density: LogTableDensity): number => {
@@ -234,6 +240,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     
                 // Check if the target row is outside the visible area
                 if (targetScrollTop < currentScrollTop || targetScrollTop + rowHeight > currentScrollTop + viewportHeight) {
+                    programmaticScrollRef.current = true;
                     viewportRef.current.scrollTo({
                         top: targetScrollTop - (viewportHeight / 2) + (rowHeight / 2), // Center it
                         behavior: 'auto',
@@ -282,18 +289,46 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     };
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        if (programmaticScrollRef.current) {
+            programmaticScrollRef.current = false; // Consume the flag
+            scrollTopRef.current = e.currentTarget.scrollTop;
+            if (!tickingRef.current) {
+                window.requestAnimationFrame(() => {
+                    forceUpdate();
+                    tickingRef.current = false;
+                });
+                tickingRef.current = true;
+            }
+            return;
+        }
+        
+        // This is a user-initiated scroll.
         if (userScrollingRef.current) {
             clearTimeout(userScrollingRef.current);
+        } else {
+            // First scroll event in a sequence, notify App to clear selection.
+            onUserScrollStart();
         }
         userScrollingRef.current = window.setTimeout(() => {
             userScrollingRef.current = null;
         }, 150);
 
-        const currentScrollTop = e.currentTarget.scrollTop;
-        scrollTopRef.current = currentScrollTop;
+        scrollTopRef.current = e.currentTarget.scrollTop;
 
         if (!tickingRef.current) {
             window.requestAnimationFrame(() => {
+                if (viewportRef.current && overallTimeRange && totalFilteredCount > 0) {
+                    const { scrollTop, clientHeight } = viewportRef.current;
+                    const rowHeight = getRowHeight(logTableDensity);
+                    const centerScrollTop = scrollTop + clientHeight / 2;
+                    const centerIndex = Math.round(centerScrollTop / rowHeight);
+
+                    const totalDuration = overallTimeRange.max - overallTimeRange.min;
+                    const timeRatio = Math.min(1, Math.max(0, centerIndex / totalFilteredCount));
+                    const estimatedTime = overallTimeRange.min + timeRatio * totalDuration;
+                    onViewCenterChange(estimatedTime);
+                }
+
                 forceUpdate();
                 tickingRef.current = false;
             });
