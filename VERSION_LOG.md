@@ -6,7 +6,7 @@ This document tracks the major changes, new features, and bug fixes for the Log 
 
 ### **Version 0.17.0** - Maintenance & Documentation Release
 
-_Date: 2025-09-04_
+_Date: 2025-09-17_
 
 This is a maintenance release focused on preparing the application for publication. The version number has been increased, and all documentation has been thoroughly reviewed and updated to reflect the complete feature set.
 
@@ -18,7 +18,7 @@ This is a maintenance release focused on preparing the application for publicati
 
 ### **Version 0.16.0** - UI Enhancements & Filter Simplification
 
-_Date: 2025-09-03_
+_Date: 2025-09-17_
 
 This release introduces resizable UI panels for a more flexible layout and documents the recently-implemented simplification of the attribute filtering controls.
 
@@ -30,7 +30,7 @@ This release introduces resizable UI panels for a more flexible layout and docum
 
 ### **Version 0.15.0** - Professional Auto-Updates
 
-_Date: 2025-09-02_
+_Date: 2025-09-17_
 
 This release overhauls the application's update mechanism to be more professional, informative, and user-friendly.
 
@@ -43,7 +43,7 @@ This release overhauls the application's update mechanism to be more professiona
 
 ### **Version 0.14.0** - Full-Screen Application Log & UX Polish
 
-_Date: 2025-09-01_
+_Date: 2025-09-07_
 
 This release enhances the developer experience by providing an improved, full-screen view for the Application Log with new filtering capabilities.
 
