@@ -84,18 +84,12 @@ This panel on the left side of the screen contains all the controls to filter yo
 
 This is where you view and interact with your log data.
 
-#### The Toolbar
-Located directly above the log table, this toolbar contains all controls for changing the appearance and behavior of the table:
-- **Density**: Adjusts the row spacing between "Compact", "Normal", and "Comfortable".
-- **View Mode**: Toggles the table between "Paginate" (viewing data in discrete pages) and "Scroll" (an infinitely scrolling list).
-- **Columns**: Opens a dropdown to show or hide specific columns in the table.
-- **Details**: Toggles the visibility of the "Details Panel" on the right.
-
 #### The Log Table
 This table displays the log entries that match your currently applied filters. You can:
 - **Click** a row to select it and view its full contents in the Details Panel.
 - **Use Keyboard Navigation** (Arrow keys, PageUp/Down, Home/End) to move through the entries.
-- **Right-click** on a cell to open a context menu for quick filtering (for both inclusion and exclusion) or copying data.
+- **Right-click on a cell** to open a context menu for quick filtering (for both inclusion and exclusion) or copying data.
+- **Right-click on the table header** to open a context menu for showing or hiding columns.
 
 ### 4.3. The Details Panel
 When toggled on, this panel appears on the right and shows the full, parsed details of the currently selected log entry. It provides a structured view of the data and can render special formats like XML, SQL, and Key-Value pairs.
@@ -131,9 +125,7 @@ A persistent status bar is located at the very bottom of the application window.
     - **Filtered Entries**: The number of logs matching the current filters.
     - **Session Name**: The name of the active session file. An asterisk (`*`) indicates unsaved changes.
 
-- **Center**: Shows context-aware view information:
-    - In **Paginate Mode**: It displays full pagination controls (current page, total pages, navigation buttons) and a dropdown to change the number of rows per page.
-    - In **Scroll Mode**: It shows the count of currently visible rows.
+- **Center**: Shows context-aware view information. In **Paginate Mode**, it displays full pagination controls. In **Scroll Mode**, it shows the row count. This area also contains controls for adjusting the table row **Density** (Compact, Normal, Comfortable) and toggling the **Details Panel** visibility.
 
 - **Right Side**: Provides real-time application feedback:
     - **Status Message**: Shows the most recent message from the "Application Log", giving you live feedback on what the app is doing (e.g., "Applying filters...").
@@ -169,10 +161,13 @@ You can filter the messages by type (DEBUG, INFO, WARNING, ERROR) using the togg
 This tab allows you to configure various aspects of the application and is divided into two main views: **Controls** and **JSON Source**.
 
 ### 9.1. Controls View
-This is the default view and provides user-friendly controls for common settings.
-- **Appearance**: Toggle between Light and Dark themes, change the active icon set, adjust the UI Scale, and adjust the density of rows in the log table.
-- **Log Table Styles**: Customize the font, font size, style (bold/italic), and color for each column in the Log Viewer.
+This is the default view and provides user-friendly controls for common settings, organized by category.
+
+- **Appearance**: Toggle between Light and Dark themes, change the active icon set, adjust the global UI Scale, and adjust the density of rows in the log table.
+- **Behavior**: Control the default log viewer mode (Paginate/Scroll), toggle the default visibility of the main Timeline, and individually toggle the visibility of each contextual bar within the timeline (Pages, Files, Dates, Density, and the Overview).
 - **Updates**: Opt-in to receive pre-release (beta) versions of the application. Enabling this requires an application restart to take effect.
+- **Table Styles**: Customize the font, font size, style (bold/italic), and color for each column in the Log Viewer.
+- **Debugging**: Contains options for developers, such as an inspector for UI focus and hover states.
 
 ### 9.2. JSON Source View
 For advanced users, this tab provides direct access to the `settings.json` configuration file.

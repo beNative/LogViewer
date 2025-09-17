@@ -4,6 +4,30 @@ This document tracks the major changes, new features, and bug fixes for the Log 
 
 ---
 
+### **Version 0.18.0** - UI Streamlining & Vertical Compactness
+
+_Date: 2025-09-18_
+
+This release focuses on streamlining the Log Viewer interface by relocating controls to more intuitive locations and reducing the vertical space occupied by the timeline controls.
+
+#### ✨ Features & Improvements
+- **Status Bar Controls**: The "Row Density" selector and the "Toggle Details" button have been moved from the Log Viewer toolbar to the main Status Bar for centralized access.
+- **Header Context Menu**: The "Columns" button has been removed. Column visibility is now managed via a more direct right-click context menu on the log table's header.
+- **Compact Timeline**: The vertical margins and button sizes on the timeline selector have been significantly reduced, making the entire component more compact and leaving more room for log data.
+- **Configurable Timeline Bars**: The visibility of each bar in the timeline (Pages, Files, Dates, Density, Overview) is now configurable. Settings can be changed in the Settings page or via a new right-click context menu on the timeline's labels.
+
+#### 🐛 Bug Fixes
+- Fixed a bug where the timeline's "Overview" bar would not reappear after being hidden and then shown again.
+- Corrected a log message parser bug where identifiers containing dots or brackets (e.g., `aPrmAxes[BCF].iRunH`) were not parsed correctly.
+- Fixed several critical CSS layout bugs that caused the log table to render incorrectly when changing column visibility or loading large datasets.
+- Addressed an issue where a previous "Columns" dropdown panel would appear on top of its button instead of below it.
+
+#### 📚 Documentation
+- All documentation (`README.md`, manuals) has been updated to reflect the new UI layout and features.
+- The application version has been incremented to `0.18.0`.
+
+---
+
 ### **Version 0.17.0** - Maintenance & Documentation Release
 
 _Date: 2025-09-17_
