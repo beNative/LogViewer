@@ -32,6 +32,7 @@ export const getLevelColor = (level: string) => {
 
 interface LogTableProps {
     entries: LogEntry[];
+    totalFilteredCount: number;
     loadedFileNames: string[];
     pageTimestampRanges: PageTimestampRange[];
     onViewModeChange: (newMode: ViewMode) => void;
@@ -99,7 +100,8 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     const [selectedEntry, setSelectedEntry] = React.useState<LogEntry | null>(null);
     const [contextMenuState, setContextMenuState] = React.useState<ContextMenuState>(null);
     const [headerContextMenu, setHeaderContextMenu] = React.useState<{ x: number, y: number } | null>(null);
-    const tableContainerRef = React.useRef<HTMLDivElement>(null);
+    const [scrollTop, setScrollTop] = React.useState(0);
+    const viewportRef = React.useRef<HTMLDivElement>(null);
     const rowRefs = React.useRef<Map<number, HTMLTableRowElement | null>>(new Map());
     
     const panelWidthsRef = React.useRef(props.panelWidths);
@@ -107,6 +109,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
 
     const {
         entries,
+        totalFilteredCount,
         viewMode,
         onLoadMore,
         hasMore,
@@ -120,6 +123,14 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         theme,
         jumpToEntryId
     } = props;
+    
+    const getRowHeight = React.useCallback((density: LogTableDensity): number => {
+        switch (density) {
+            case 'compact': return 24;
+            case 'normal': return 28;
+            case 'comfortable': return 36;
+        }
+    }, []);
     
     // This effect ensures the details panel stays in sync with keyboard navigation.
     React.useEffect(() => {
@@ -154,12 +165,12 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         if (!props.isDetailPanelVisible) {
             props.onDetailPanelVisibilityChange(true);
         }
-        tableContainerRef.current?.focus({ preventScroll: true });
+        viewportRef.current?.focus({ preventScroll: true });
     };
 
     // Keyboard navigation effect
     React.useEffect(() => {
-        const container = tableContainerRef.current;
+        const container = viewportRef.current;
         if (!container) return;
 
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -198,13 +209,31 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
 
     // Scroll into view effect
     React.useEffect(() => {
-        if (keyboardSelectedId !== null) {
+        if (keyboardSelectedId === null) return;
+    
+        if (viewMode === 'scroll' && viewportRef.current) {
+            const index = entries.findIndex(e => e.id === keyboardSelectedId);
+            if (index > -1) {
+                const rowHeight = getRowHeight(logTableDensity);
+                const targetScrollTop = index * rowHeight;
+    
+                const { scrollTop: currentScrollTop, clientHeight: viewportHeight } = viewportRef.current;
+    
+                // Check if the target row is outside the visible area
+                if (targetScrollTop < currentScrollTop || targetScrollTop + rowHeight > currentScrollTop + viewportHeight) {
+                    viewportRef.current.scrollTo({
+                        top: targetScrollTop - (viewportHeight / 2) + (rowHeight / 2), // Center it
+                        behavior: 'auto', // Use 'auto' for instant jump, 'smooth' can be slow
+                    });
+                }
+            }
+        } else { // pagination mode
             const rowEl = rowRefs.current.get(keyboardSelectedId);
             if (rowEl) {
                 rowEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
             }
         }
-    }, [keyboardSelectedId]);
+    }, [keyboardSelectedId, entries, viewMode, logTableDensity, getRowHeight]);
 
 
     const handleContextMenu = (e: React.MouseEvent, entry: LogEntry, key: ColumnKey, value: string) => {
@@ -239,7 +268,38 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         props.onPanelWidthsChange({ ...panelWidthsRef.current, details: newWidth });
     };
 
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        if (viewMode !== 'scroll') return;
+        setScrollTop(e.currentTarget.scrollTop);
+
+        const { scrollHeight, clientHeight } = e.currentTarget;
+        if (scrollHeight - scrollTop - clientHeight < 1000 && hasMore && !isBusy) {
+            onLoadMore();
+        }
+    };
+    
     const visibilityKey = Object.values(props.columnVisibility).join('-');
+    const visibleColumnCount = React.useMemo(() => Object.values(props.columnVisibility).filter(Boolean).length, [props.columnVisibility]);
+
+    // Virtualization calculations for scroll mode
+    let virtualEntries: LogEntry[] = entries;
+    let topSpacerHeight = 0;
+    let bottomSpacerHeight = 0;
+
+    if (viewMode === 'scroll' && viewportRef.current) {
+        const rowHeight = getRowHeight(logTableDensity);
+        const viewportHeight = viewportRef.current.clientHeight;
+        const overscan = 20;
+
+        const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - overscan);
+        const visibleItemCount = Math.ceil(viewportHeight / rowHeight);
+        const endIndex = Math.min(entries.length, startIndex + visibleItemCount + (overscan * 2));
+
+        virtualEntries = entries.slice(startIndex, endIndex);
+        topSpacerHeight = startIndex * rowHeight;
+        bottomSpacerHeight = (totalFilteredCount - endIndex) * rowHeight;
+    }
+
 
     return (
         <div className="flex flex-col flex-grow min-h-0 bg-gray-100 dark:bg-gray-900">
@@ -283,8 +343,8 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                 </aside>
                 <Splitter onDrag={handleFilterResize} />
                 <main className="flex-grow min-h-0 flex flex-col min-w-0">
-                    <div className="overflow-auto outline-none flex-grow" ref={tableContainerRef} tabIndex={-1}>
-                        <table key={visibilityKey} className="min-w-full table-auto font-sans">
+                    <div className="overflow-auto outline-none flex-grow" ref={viewportRef} tabIndex={-1} onScroll={handleScroll}>
+                        <table key={visibilityKey} className="min-w-full table-fixed font-sans">
                             <thead className="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 shadow-sm">
                                 <tr onContextMenu={(e) => {
                                     e.preventDefault();
@@ -299,7 +359,10 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                                 </tr>
                             </thead>
                              <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                                {entries.map(entry => (
+                                {viewMode === 'scroll' && topSpacerHeight > 0 && (
+                                    <tr><td style={{ height: topSpacerHeight }} colSpan={visibleColumnCount}></td></tr>
+                                )}
+                                {virtualEntries.map(entry => (
                                     <tr key={entry.id}
                                         ref={el => { rowRefs.current.set(entry.id, el); }}
                                         onClick={() => handleRowClick(entry)}
@@ -313,6 +376,9 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                                         {columnVisibility.msg && <td onContextMenu={(e) => handleContextMenu(e, entry, 'msg', entry.msg)} style={getStyle('msg')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`} dangerouslySetInnerHTML={{ __html: highlightText(entry.msg, [appliedFilters.includeMsg], theme) }}></td>}
                                     </tr>
                                 ))}
+                                {viewMode === 'scroll' && bottomSpacerHeight > 0 && (
+                                    <tr><td style={{ height: bottomSpacerHeight }} colSpan={visibleColumnCount}></td></tr>
+                                )}
                              </tbody>
                         </table>
                         {isBusy && <div className="p-4 text-center">Loading...</div>}

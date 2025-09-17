@@ -2023,6 +2023,7 @@ const handleUiScaleChange = async (newScale: number) => {
             {hasData ? (
               <LogTable 
                 entries={filteredEntries}
+                totalFilteredCount={totalFilteredCount}
                 loadedFileNames={loadedFileNames}
                 pageTimestampRanges={pageTimestampRanges}
                 onViewModeChange={handleViewModeChange}
