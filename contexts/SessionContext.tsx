@@ -423,7 +423,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }, [db, hasData, activeSessionName]);
     
     const handleRebuildStockDataInWorker = useCallback(async () => {
-        return new Promise<void>(async (resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             if (!db || !hasData) {
                 const message = 'No data is currently loaded.';
                 logToConsole(`Rebuild failed: ${message}`, 'ERROR');
@@ -443,66 +443,81 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
             setProgress(0);
             setDetailedProgress({ currentFile: '', fileBytesRead: 0, fileTotalBytes: 0, fileLogCount: null });
 
-            if (workerRef.current) workerRef.current.terminate();
+            try {
+                if (workerRef.current) workerRef.current.terminate();
 
-            const worker = new Worker('./dist/worker.js');
-            workerRef.current = worker;
-            const dbBuffer = db.export();
-            
-            worker.onmessage = async (event) => {
-                const { type, payload } = event.data;
-                switch (type) {
-                    case 'progress':
-                        setProgressPhase(payload.phase as ProgressPhase);
-                        setProgressMessage(payload.message);
-                        setProgress(payload.progress);
-                        break;
-                    case 'done-rebuild':
-                        try {
-                            const newDb = await Database.createFromBuffer(payload.dbBuffer);
-                            await updateStateFromDb(newDb);
-                            setDb(newDb);
-                            setIsDirty(true);
-                            await handleSaveSession();
-                            addToast({ type: 'success', title: 'Rebuild Complete', message: `Successfully rebuilt ${payload.count.toLocaleString()} stock entries.` });
-                            resolve();
-                        } catch (e) {
-                            const msg = e instanceof Error ? e.message : "Error processing rebuild results.";
-                            logToConsole(`Stock rebuild post-processing failed: ${msg}`, 'ERROR');
+                const worker = new Worker('./dist/worker.js');
+                workerRef.current = worker;
+                
+                worker.onmessage = async (event) => {
+                    const { type, payload } = event.data;
+                    switch (type) {
+                        case 'progress':
+                            setProgressPhase(payload.phase as ProgressPhase);
+                            setProgressMessage(payload.message);
+                            setProgress(payload.progress);
+                            break;
+                        case 'done-rebuild':
+                            try {
+                                const newDb = await Database.createFromBuffer(payload.dbBuffer);
+                                await updateStateFromDb(newDb);
+                                setDb(newDb);
+                                setIsDirty(true);
+                                await handleSaveSession();
+                                addToast({ type: 'success', title: 'Rebuild Complete', message: `Successfully rebuilt ${payload.count.toLocaleString()} stock entries.` });
+                                resolve();
+                            } catch (e) {
+                                const msg = e instanceof Error ? e.message : "Error processing rebuild results.";
+                                logToConsole(`Stock rebuild post-processing failed: ${msg}`, 'ERROR');
+                                addToast({ type: 'error', title: 'Rebuild Failed', message: msg });
+                                reject(new Error(msg));
+                            } finally {
+                                worker.terminate();
+                                workerRef.current = null;
+                                setIsLoading(false);
+                                setIsProcessing(false);
+                            }
+                            break;
+                        case 'error':
+                            const msg = payload.error || "An unknown worker error occurred.";
+                            logToConsole(`Stock rebuild failed in worker: ${msg}`, 'ERROR');
                             addToast({ type: 'error', title: 'Rebuild Failed', message: msg });
-                            reject(new Error(msg));
-                        } finally {
                             worker.terminate();
                             workerRef.current = null;
                             setIsLoading(false);
                             setIsProcessing(false);
-                        }
-                        break;
-                    case 'error':
-                        const msg = payload.error || "An unknown worker error occurred.";
-                        logToConsole(`Stock rebuild failed in worker: ${msg}`, 'ERROR');
-                        addToast({ type: 'error', title: 'Rebuild Failed', message: msg });
-                        worker.terminate();
-                        workerRef.current = null;
-                        setIsLoading(false);
-                        setIsProcessing(false);
-                        reject(new Error(msg));
-                        break;
-                }
-            };
-            
-            worker.onerror = (err) => {
-                const msg = err.message || "The rebuild worker crashed unexpectedly.";
-                logToConsole(`Stock rebuild worker crashed: ${msg}`, 'ERROR');
-                worker.terminate();
-                workerRef.current = null;
+                            reject(new Error(msg));
+                            break;
+                    }
+                };
+                
+                worker.onerror = (err) => {
+                    const msg = err.message || "The rebuild worker crashed unexpectedly.";
+                    logToConsole(`Stock rebuild worker crashed: ${msg}`, 'ERROR');
+                    worker.terminate();
+                    workerRef.current = null;
+                    setIsLoading(false);
+                    setIsProcessing(false);
+                    addToast({ type: 'error', title: 'Rebuild Failed', message: msg });
+                    reject(err);
+                };
+                
+                const dbBuffer = db.export();
+                worker.postMessage({ type: 'rebuild-stock', payload: { dbBuffer } }, [dbBuffer.buffer]);
+
+            } catch (e) {
+                const msg = e instanceof Error ? e.message : "An unexpected error occurred during rebuild setup.";
+                logToConsole(`Stock rebuild setup failed: ${msg}`, 'ERROR');
+                addToast({ type: 'error', title: 'Rebuild Failed', message: msg });
+                
                 setIsLoading(false);
                 setIsProcessing(false);
-                addToast({ type: 'error', title: 'Rebuild Failed', message: msg });
-                reject(err);
-            };
-            
-            worker.postMessage({ type: 'rebuild-stock', payload: { dbBuffer } }, [dbBuffer.buffer]);
+                if (workerRef.current) {
+                    workerRef.current.terminate();
+                    workerRef.current = null;
+                }
+                reject(new Error(msg));
+            }
         });
     }, [db, hasData, addToast, isProcessing, setIsLoading, setProgress, setProgressMessage, setProgressPhase, setProgressTitle, updateStateFromDb, handleSaveSession, setDetailedProgress, logToConsole]);
 

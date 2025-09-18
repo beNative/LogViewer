@@ -126,7 +126,7 @@ const handleRebuildStockData = async (payload: any) => {
     `);
     db.exec("DELETE FROM stock_info;");
     
-    const countResult = db.exec("SELECT COUNT(*) FROM logs WHERE msg LIKE '%<StockInfoMessage%'");
+    const countResult = db.exec("SELECT COUNT(*) FROM logs WHERE LOWER(msg) LIKE '%<stockinfomessage%'");
     const totalToScan = countResult[0]?.values[0]?.[0] || 0;
     if (totalToScan === 0) {
         const finalDbBuffer = db.export();
@@ -138,7 +138,7 @@ const handleRebuildStockData = async (payload: any) => {
     // FIX: Added 'i' (case-insensitive) flag to handle variations in XML tag casing (e.g., <stockinfomessage>).
     const stockRegex = /<WWKS[^>]*?TimeStamp=["'](?<timestamp>[^"']+)["'][^>]*?>.*?<StockInfoMessage[^>]*?Id=["'](?<message_id>[^"']+)["'][^>]*?Source=["'](?<source>[^"']+)["'][^>]*?Destination=["'](?<destination>[^"']+)["'][^>]*?>.*?<Article[^>]*?Id=["'](?<article_id>[^"']+)["'][^>]*?Name=["'](?<article_name>[^"']+)["'][^>]*?DosageForm=["'](?<dosage_form>[^"']+)["'][^>]*?MaxSubItemQuantity=["'](?<max_sub_item_quantity>[^"']+)["'][^>]*?Quantity=["'](?<quantity>[^"']+)["'][^>]*?\/>.*?<\/StockInfoMessage>.*?<\/WWKS>/sgi;
     
-    const selectStmt = db.prepare("SELECT msg FROM logs WHERE msg LIKE '%<StockInfoMessage%'");
+    const selectStmt = db.prepare("SELECT msg FROM logs WHERE LOWER(msg) LIKE '%<stockinfomessage%'");
     
     const stockEntriesToInsert = [];
     let processedCount = 0;
