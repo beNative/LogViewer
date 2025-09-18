@@ -12,8 +12,6 @@ import { ColumnVisibilityMenu } from './ColumnVisibilityMenu';
 
 type ContextMenuState = { x: number; y: number; entry: LogEntry; value: string; key: ColumnKey } | null;
 
-const MAX_SPACER_HEIGHT = 8000000; // 8 million pixels, a safe value for most browsers
-
 export const getLevelColor = (level: string) => {
     switch (level?.toUpperCase()) {
         case 'ERROR':
@@ -34,8 +32,6 @@ export const getLevelColor = (level: string) => {
 
 interface LogTableProps {
     entries: LogEntry[];
-    entriesOffset: number;
-    totalFilteredCount: number;
     loadedFileNames: string[];
     pageTimestampRanges: PageTimestampRange[];
     onViewModeChange: (newMode: ViewMode) => void;
@@ -66,7 +62,7 @@ interface LogTableProps {
     onSavePreset: (name: string) => void;
     onDeletePreset: (name: string) => void;
     onLoadPreset: (name: string) => void;
-    onJumpToOffset: (offset: number) => void;
+    onLoadMore: () => void;
     hasMore: boolean;
     isBusy: boolean;
     logToConsole: (message: string, type: ConsoleMessage['type']) => void;
@@ -97,51 +93,22 @@ interface LogTableProps {
     cursorTime: number | null;
     timelineBarVisibility: TimelineBarVisibility;
     onTimelineBarVisibilityChange: (newVisibility: TimelineBarVisibility) => void;
-    onViewCenterChange: (time: number) => void;
-    onUserScrollStart: () => void;
 }
-
-const renderSpacers = (totalHeight: number, colSpan: number, keyPrefix: string) => {
-    if (totalHeight <= 0) return null;
-    const spacers = [];
-    let heightRemaining = totalHeight;
-    let i = 0;
-    while (heightRemaining > 0) {
-        const height = Math.min(heightRemaining, MAX_SPACER_HEIGHT);
-        spacers.push(
-            <tr key={`${keyPrefix}-${i}`}>
-                <td style={{ height }} colSpan={colSpan}></td>
-            </tr>
-        );
-        heightRemaining -= height;
-        i++;
-    }
-    return spacers;
-};
 
 export const LogTable: React.FC<LogTableProps> = (props) => {
     const [selectedEntry, setSelectedEntry] = React.useState<LogEntry | null>(null);
     const [contextMenuState, setContextMenuState] = React.useState<ContextMenuState>(null);
     const [headerContextMenu, setHeaderContextMenu] = React.useState<{ x: number, y: number } | null>(null);
-    const viewportRef = React.useRef<HTMLDivElement>(null);
+    const tableContainerRef = React.useRef<HTMLDivElement>(null);
     const rowRefs = React.useRef<Map<number, HTMLTableRowElement | null>>(new Map());
     
-    // Refs for performant scroll handling
-    const scrollTopRef = React.useRef(0);
-    const tickingRef = React.useRef(false);
-    const [, forceUpdate] = React.useReducer(x => x + 1, 0);
-    const userScrollingRef = React.useRef<number | null>(null);
-    const programmaticScrollRef = React.useRef(false);
-
     const panelWidthsRef = React.useRef(props.panelWidths);
     panelWidthsRef.current = props.panelWidths;
 
     const {
         entries,
-        entriesOffset,
-        totalFilteredCount,
         viewMode,
-        onJumpToOffset,
+        onLoadMore,
         hasMore,
         isBusy,
         columnVisibility,
@@ -151,19 +118,8 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         setKeyboardSelectedId,
         appliedFilters,
         theme,
-        jumpToEntryId,
-        overallTimeRange,
-        onViewCenterChange,
-        onUserScrollStart,
+        jumpToEntryId
     } = props;
-    
-    const getRowHeight = React.useCallback((density: LogTableDensity): number => {
-        switch (density) {
-            case 'compact': return 24;
-            case 'normal': return 28;
-            case 'comfortable': return 36;
-        }
-    }, []);
     
     // This effect ensures the details panel stays in sync with keyboard navigation.
     React.useEffect(() => {
@@ -198,12 +154,12 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         if (!props.isDetailPanelVisible) {
             props.onDetailPanelVisibilityChange(true);
         }
-        viewportRef.current?.focus({ preventScroll: true });
+        tableContainerRef.current?.focus({ preventScroll: true });
     };
 
     // Keyboard navigation effect
     React.useEffect(() => {
-        const container = viewportRef.current;
+        const container = tableContainerRef.current;
         if (!container) return;
 
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -231,46 +187,24 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
             if (nextIndex >= 0 && nextIndex < entries.length) {
                 setKeyboardSelectedId(entries[nextIndex].id);
             } else if (viewMode === 'scroll' && e.key === 'ArrowDown' && nextIndex >= entries.length && hasMore) {
-                // When navigating past the end, jump to the next block of data.
-                onJumpToOffset(entriesOffset + entries.length);
+                onLoadMore();
             }
         };
         
         container.addEventListener('keydown', handleKeyDown);
         return () => container.removeEventListener('keydown', handleKeyDown);
 
-    }, [entries, keyboardSelectedId, setKeyboardSelectedId, hasMore, onJumpToOffset, viewMode, entriesOffset]);
+    }, [entries, keyboardSelectedId, setKeyboardSelectedId, hasMore, onLoadMore, viewMode]);
 
     // Scroll into view effect
     React.useEffect(() => {
-        if (keyboardSelectedId === null || userScrollingRef.current) return;
-    
-        if (viewMode === 'scroll' && viewportRef.current) {
-            // Calculate the absolute index of the selected item
-            const absoluteIndex = entries.findIndex(e => e.id === keyboardSelectedId);
-            if (absoluteIndex > -1) {
-                const globalIndex = entriesOffset + absoluteIndex;
-                const rowHeight = getRowHeight(logTableDensity);
-                const targetScrollTop = globalIndex * rowHeight;
-    
-                const { scrollTop: currentScrollTop, clientHeight: viewportHeight } = viewportRef.current;
-    
-                // Check if the target row is outside the visible area
-                if (targetScrollTop < currentScrollTop || targetScrollTop + rowHeight > currentScrollTop + viewportHeight) {
-                    programmaticScrollRef.current = true;
-                    viewportRef.current.scrollTo({
-                        top: targetScrollTop - (viewportHeight / 2) + (rowHeight / 2), // Center it
-                        behavior: 'auto',
-                    });
-                }
-            }
-        } else { // pagination mode
+        if (keyboardSelectedId !== null) {
             const rowEl = rowRefs.current.get(keyboardSelectedId);
             if (rowEl) {
                 rowEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
             }
         }
-    }, [keyboardSelectedId, entries, viewMode, logTableDensity, getRowHeight, entriesOffset]);
+    }, [keyboardSelectedId]);
 
 
     const handleContextMenu = (e: React.MouseEvent, entry: LogEntry, key: ColumnKey, value: string) => {
@@ -305,117 +239,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         props.onPanelWidthsChange({ ...panelWidthsRef.current, details: newWidth });
     };
 
-    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-        if (programmaticScrollRef.current) {
-            programmaticScrollRef.current = false; // Consume the flag
-            scrollTopRef.current = e.currentTarget.scrollTop;
-            if (!tickingRef.current) {
-                window.requestAnimationFrame(() => {
-                    forceUpdate();
-                    tickingRef.current = false;
-                });
-                tickingRef.current = true;
-            }
-            return;
-        }
-        
-        // This is a user-initiated scroll.
-        if (userScrollingRef.current) {
-            clearTimeout(userScrollingRef.current);
-        } else {
-            // First scroll event in a sequence, notify App to clear selection.
-            onUserScrollStart();
-        }
-        userScrollingRef.current = window.setTimeout(() => {
-            userScrollingRef.current = null;
-        }, 150);
-
-        scrollTopRef.current = e.currentTarget.scrollTop;
-
-        if (!tickingRef.current) {
-            window.requestAnimationFrame(() => {
-                if (viewportRef.current && overallTimeRange && totalFilteredCount > 0) {
-                    const { scrollTop, clientHeight } = viewportRef.current;
-                    const rowHeight = getRowHeight(logTableDensity);
-                    const centerScrollTop = scrollTop + clientHeight / 2;
-                    const centerIndex = Math.round(centerScrollTop / rowHeight);
-
-                    const totalDuration = overallTimeRange.max - overallTimeRange.min;
-                    const timeRatio = Math.min(1, Math.max(0, centerIndex / totalFilteredCount));
-                    const estimatedTime = overallTimeRange.min + timeRatio * totalDuration;
-                    onViewCenterChange(estimatedTime);
-                }
-
-                forceUpdate();
-                tickingRef.current = false;
-            });
-            tickingRef.current = true;
-        }
-    };
-    
     const visibilityKey = Object.values(props.columnVisibility).join('-');
-    const visibleColumnCount = React.useMemo(() => Object.values(props.columnVisibility).filter(Boolean).length, [props.columnVisibility]);
-
-    // Virtualization calculations for scroll mode
-    let virtualEntries: LogEntry[] = entries;
-    let topSpacerHeight = 0;
-    let bottomSpacerHeight = 0;
-    
-    if (viewMode === 'scroll') {
-        // --- Re-architected Smart Data Fetching Logic ---
-        if (viewportRef.current && !isBusy && totalFilteredCount > 0) {
-            const scrollTop = scrollTopRef.current;
-            const rowHeight = getRowHeight(logTableDensity);
-            
-            // Calculate the window of rows that SHOULD be visible
-            const requiredTopIndex = Math.floor(scrollTop / rowHeight);
-            const viewportHeight = viewportRef.current.clientHeight;
-            const visibleItemCount = Math.ceil(viewportHeight / rowHeight);
-            const requiredBottomIndex = requiredTopIndex + visibleItemCount;
-
-            // The currently loaded window of data
-            const loadedWindow = {
-                start: entriesOffset,
-                end: entriesOffset + entries.length
-            };
-            
-            // Check if the required viewport is outside our currently loaded data window.
-            const needsData = requiredTopIndex < loadedWindow.start || requiredBottomIndex > loadedWindow.end;
-            
-            if (needsData) {
-                // If we need data, we always perform a jump. This replaces the incremental
-                // loading cascade with a single, larger data fetch that re-centers the view.
-                // This is the key fix for the "endless scrolling" bug on scrollbar drag.
-                onJumpToOffset(requiredTopIndex);
-            }
-        }
-
-        // --- Virtualization Rendering Logic ---
-        if (viewportRef.current) {
-            const scrollTop = scrollTopRef.current;
-            const rowHeight = getRowHeight(logTableDensity);
-            const overscan = 20;
-
-            // Calculate the start index of the items to render, relative to the *full dataset*.
-            const absoluteStartIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - overscan);
-            
-            // Convert the absolute start index to an index relative to our current `entries` window.
-            const startIndexInWindow = absoluteStartIndex - entriesOffset;
-            
-            const visibleItemCount = Math.ceil(viewportRef.current.clientHeight / rowHeight);
-            const endIndexInWindow = Math.min(entries.length, startIndexInWindow + visibleItemCount + (overscan * 2));
-            
-            const clampedStartIndex = Math.max(0, startIndexInWindow);
-
-            virtualEntries = entries.slice(clampedStartIndex, endIndexInWindow);
-            
-            // The spacers are calculated based on the absolute positions in the full dataset.
-            topSpacerHeight = (entriesOffset + clampedStartIndex) * rowHeight;
-            const absoluteEndIndex = entriesOffset + endIndexInWindow;
-            bottomSpacerHeight = Math.max(0, (totalFilteredCount - absoluteEndIndex) * rowHeight);
-        }
-    }
-
 
     return (
         <div className="flex flex-col flex-grow min-h-0 bg-gray-100 dark:bg-gray-900">
@@ -459,43 +283,39 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                 </aside>
                 <Splitter onDrag={handleFilterResize} />
                 <main className="flex-grow min-h-0 flex flex-col min-w-0">
-                    <div className="relative flex-grow">
-                        <div className="absolute inset-0 overflow-auto outline-none" ref={viewportRef} tabIndex={-1} onScroll={handleScroll}>
-                            <table key={visibilityKey} className="min-w-full table-fixed font-sans">
-                                <thead className="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 shadow-sm">
-                                    <tr onContextMenu={(e) => {
-                                        e.preventDefault();
-                                        setHeaderContextMenu({ x: e.clientX, y: e.clientY });
-                                    }}>
-                                        {columnVisibility.time && <th style={{width: '12%', minWidth: '170px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Time</th>}
-                                        {columnVisibility.level && <th style={{width: '8%', minWidth: '90px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Level</th>}
-                                        {columnVisibility.sndrtype && <th style={{width: '10%', minWidth: '120px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Sender Type</th>}
-                                        {columnVisibility.sndrname && <th style={{width: '10%', minWidth: '120px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Sender Name</th>}
-                                        {columnVisibility.fileName && <th style={{width: '15%', minWidth: '150px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Filename</th>}
-                                        {columnVisibility.msg && <th style={{width: '45%'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Message</th>}
+                    <div className="overflow-auto outline-none flex-grow" ref={tableContainerRef} tabIndex={-1}>
+                        <table key={visibilityKey} className="min-w-full table-auto font-sans">
+                            <thead className="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 shadow-sm">
+                                <tr onContextMenu={(e) => {
+                                    e.preventDefault();
+                                    setHeaderContextMenu({ x: e.clientX, y: e.clientY });
+                                }}>
+                                    {columnVisibility.time && <th style={{width: '12%', minWidth: '170px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Time</th>}
+                                    {columnVisibility.level && <th style={{width: '8%', minWidth: '90px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Level</th>}
+                                    {columnVisibility.sndrtype && <th style={{width: '10%', minWidth: '120px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Sender Type</th>}
+                                    {columnVisibility.sndrname && <th style={{width: '10%', minWidth: '120px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Sender Name</th>}
+                                    {columnVisibility.fileName && <th style={{width: '15%', minWidth: '150px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Filename</th>}
+                                    {columnVisibility.msg && <th style={{width: '45%'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Message</th>}
+                                </tr>
+                            </thead>
+                             <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                                {entries.map(entry => (
+                                    <tr key={entry.id}
+                                        ref={el => { rowRefs.current.set(entry.id, el); }}
+                                        onClick={() => handleRowClick(entry)}
+                                        className={`transition-colors duration-100 cursor-pointer ${keyboardSelectedId === entry.id ? 'bg-sky-100 dark:bg-sky-900/50' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
+                                    >
+                                        {columnVisibility.time && <td onContextMenu={(e) => handleContextMenu(e, entry, 'time', entry.time)} style={getStyle('time')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap`}>{entry.time}</td>}
+                                        {columnVisibility.level && <td onContextMenu={(e) => handleContextMenu(e, entry, 'level', entry.level)} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap`}><span style={getStyle('level')} className={`px-2 py-0.5 rounded-full text-xs font-medium ${getLevelColor(entry.level)}`}>{entry.level}</span></td>}
+                                        {columnVisibility.sndrtype && <td onContextMenu={(e) => handleContextMenu(e, entry, 'sndrtype', entry.sndrtype)} style={getStyle('sndrtype')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.sndrtype}</td>}
+                                        {columnVisibility.sndrname && <td onContextMenu={(e) => handleContextMenu(e, entry, 'sndrname', entry.sndrname)} style={getStyle('sndrname')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.sndrname}</td>}
+                                        {columnVisibility.fileName && <td onContextMenu={(e) => handleContextMenu(e, entry, 'fileName', entry.fileName)} style={getStyle('fileName')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.fileName}</td>}
+                                        {columnVisibility.msg && <td onContextMenu={(e) => handleContextMenu(e, entry, 'msg', entry.msg)} style={getStyle('msg')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`} dangerouslySetInnerHTML={{ __html: highlightText(entry.msg, [appliedFilters.includeMsg], theme) }}></td>}
                                     </tr>
-                                </thead>
-                                 <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                                    {renderSpacers(topSpacerHeight, visibleColumnCount, 'top-spacer')}
-                                    {virtualEntries.map(entry => (
-                                        <tr key={entry.id}
-                                            ref={el => { rowRefs.current.set(entry.id, el); }}
-                                            onClick={() => handleRowClick(entry)}
-                                            className={`transition-colors duration-100 cursor-pointer ${keyboardSelectedId === entry.id ? 'bg-sky-100 dark:bg-sky-900/50' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
-                                        >
-                                            {columnVisibility.time && <td onContextMenu={(e) => handleContextMenu(e, entry, 'time', entry.time)} style={getStyle('time')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap`}>{entry.time}</td>}
-                                            {columnVisibility.level && <td onContextMenu={(e) => handleContextMenu(e, entry, 'level', entry.level)} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap`}><span style={getStyle('level')} className={`px-2 py-0.5 rounded-full text-xs font-medium ${getLevelColor(entry.level)}`}>{entry.level}</span></td>}
-                                            {columnVisibility.sndrtype && <td onContextMenu={(e) => handleContextMenu(e, entry, 'sndrtype', entry.sndrtype)} style={getStyle('sndrtype')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.sndrtype}</td>}
-                                            {columnVisibility.sndrname && <td onContextMenu={(e) => handleContextMenu(e, entry, 'sndrname', entry.sndrname)} style={getStyle('sndrname')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.sndrname}</td>}
-                                            {columnVisibility.fileName && <td onContextMenu={(e) => handleContextMenu(e, entry, 'fileName', entry.fileName)} style={getStyle('fileName')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.fileName}</td>}
-                                            {columnVisibility.msg && <td onContextMenu={(e) => handleContextMenu(e, entry, 'msg', entry.msg)} style={getStyle('msg')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`} dangerouslySetInnerHTML={{ __html: highlightText(entry.msg, [appliedFilters.includeMsg], theme) }}></td>}
-                                        </tr>
-                                    ))}
-                                    {renderSpacers(bottomSpacerHeight, visibleColumnCount, 'bottom-spacer')}
-                                 </tbody>
-                            </table>
-                            {isBusy && <div className="p-4 text-center">Loading...</div>}
-                        </div>
+                                ))}
+                             </tbody>
+                        </table>
+                        {isBusy && <div className="p-4 text-center">Loading...</div>}
                     </div>
                 </main>
                 {props.isDetailPanelVisible && (

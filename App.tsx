@@ -26,7 +26,6 @@ import { FocusDebugger } from './components/FocusDebugger';
 // JSZip is loaded from script tag
 declare const JSZip: any;
 const INFINITE_SCROLL_CHUNK_SIZE = 200;
-const MAX_SCROLL_WINDOW_SIZE = 2000; // Keep up to 10 chunks in memory
 const UPDATE_TOAST_ID = 'app-update-toast';
 
 const initialFilters: FilterState = {
@@ -166,7 +165,6 @@ const App: React.FC = () => {
   
   const [hasMoreLogs, setHasMoreLogs] = React.useState(true);
   const [keyboardSelectedId, setKeyboardSelectedId] = React.useState<number | null>(null);
-  const [scrollCursorTime, setScrollCursorTime] = React.useState<number | null>(null);
   const [jumpToEntryId, setJumpToEntryId] = React.useState<number | null>(null);
   const [isInitialLoad, setIsInitialLoad] = React.useState(true);
   const [toasts, setToasts] = React.useState<ToastMessage[]>([]);
@@ -219,32 +217,24 @@ const App: React.FC = () => {
     logToConsole('Console cleared.', 'INFO');
   }, [logToConsole]);
 
-  const handleJumpToOffset = React.useCallback((offset: number) => {
-    if (!db || isBusy) return;
-    setIsBusy(true); // Set busy immediately to prevent race conditions
+  const handleLoadMore = React.useCallback(() => {
+    if (!db || !hasMoreLogs || isBusy) return;
+
+    // Use a timeout to allow any UI state to update before blocking the main thread.
     setTimeout(() => {
-        try {
-            // Fetch a new, larger window of data centered around the target offset
-            const windowSize = MAX_SCROLL_WINDOW_SIZE; 
-            const newOffset = Math.max(0, offset - Math.floor(windowSize / 2));
-            logToConsole(`Jumping to log offset ${newOffset.toLocaleString()}...`, 'DEBUG');
-            
-            const newEntries = db.queryLogEntries(appliedFilters, windowSize, newOffset);
-            
-            // Replace the old window entirely
-            setFilteredEntries(newEntries);
-            setEntriesOffset(newOffset);
-            setHasMoreLogs(newOffset + newEntries.length < totalFilteredCount);
-            logToConsole(`Loaded new window of ${newEntries.length} logs.`, 'DEBUG');
-        } catch(e) {
-            const msg = e instanceof Error ? e.message : String(e);
-            setError(msg);
-            logToConsole(`Error jumping to offset: ${msg}`, 'ERROR');
-        } finally {
-            setIsBusy(false);
-        }
-    }, 0);
-  }, [db, isBusy, appliedFilters, totalFilteredCount, logToConsole]);
+        setIsBusy(true);
+        const newOffset = entriesOffset + INFINITE_SCROLL_CHUNK_SIZE;
+        logToConsole(`Loading more logs at offset ${newOffset.toLocaleString()}...`, 'DEBUG');
+
+        const newEntries = db.queryLogEntries(appliedFilters, INFINITE_SCROLL_CHUNK_SIZE, newOffset);
+        
+        setFilteredEntries(prev => [...prev, ...newEntries]);
+        setEntriesOffset(newOffset);
+        setHasMoreLogs(newOffset + newEntries.length < totalFilteredCount);
+        setIsBusy(false);
+        logToConsole(`Loaded ${newEntries.length} more logs.`, 'DEBUG');
+    }, 10);
+  }, [db, hasMoreLogs, isBusy, entriesOffset, appliedFilters, totalFilteredCount, logToConsole]);
 
   const fetchSessions = React.useCallback(async () => {
     if (!window.electronAPI) return;
@@ -655,7 +645,7 @@ const App: React.FC = () => {
                   setPageTimestampRanges(ranges);
                   setHasMoreLogs(false);
               } else { // 'scroll' mode (Infinite Scroll)
-                  const entries = db.queryLogEntries(appliedFilters, MAX_SCROLL_WINDOW_SIZE, 0); // Load a big initial window
+                  const entries = db.queryLogEntries(appliedFilters, INFINITE_SCROLL_CHUNK_SIZE, 0);
                   setFilteredEntries(entries);
                   setEntriesOffset(0);
                   setHasMoreLogs(entries.length < count);
@@ -1703,9 +1693,31 @@ const handleUiScaleChange = async (newScale: number) => {
             setCurrentPage(newPage);
         }
     } else { // Scroll mode (infinite scroll)
-       handleJumpToOffset(index);
+       const isEntryLoaded = filteredEntries.some(e => e.id === nearestEntry.id);
+       if (isEntryLoaded) {
+           logToConsole(`Entry ${nearestEntry.id} already loaded, selecting.`, 'DEBUG');
+           return;
+       }
+
+       logToConsole(`Jumping to index ${index} in scroll mode. Refetching data window.`, 'DEBUG');
+       setIsBusy(true);
+
+       // Center the new view on the target entry
+       const newOffset = Math.max(0, index - Math.floor(INFINITE_SCROLL_CHUNK_SIZE / 2));
+       
+       setTimeout(() => {
+           const newEntries = db.queryLogEntries(appliedFilters, INFINITE_SCROLL_CHUNK_SIZE, newOffset);
+           
+           // Replace the current entries with the new window.
+           setFilteredEntries(newEntries);
+           setEntriesOffset(newOffset);
+           setHasMoreLogs(newOffset + newEntries.length < totalFilteredCount);
+           
+           setIsBusy(false);
+           logToConsole(`Loaded window of ${newEntries.length} logs for jump-to-time.`, 'DEBUG');
+       }, 50);
     }
-  }, [db, isBusy, appliedFilters, viewMode, pageSize, currentPage, logToConsole, handleJumpToOffset]);
+  }, [db, isBusy, appliedFilters, viewMode, pageSize, currentPage, logToConsole, filteredEntries, totalFilteredCount]);
 
   const handleFileSelect = React.useCallback((fileName: string) => {
       if (db) {
@@ -1954,28 +1966,17 @@ const handleUiScaleChange = async (newScale: number) => {
     }, [db, hasData, logToConsole, addToast, updateStateFromDb, handleSaveSession]);
 
 
-  const handleViewCenterChange = React.useCallback((time: number) => {
-    setScrollCursorTime(time);
-  }, []);
-
-  const handleUserScrollStart = React.useCallback(() => {
-    if (keyboardSelectedId !== null) {
-        setKeyboardSelectedId(null);
-    }
-  }, [keyboardSelectedId]);
-
   const totalPages = Math.ceil(totalFilteredCount / pageSize);
   
+  // Find the selected entry's time for the timeline cursor
   const selectedEntryForCursor = React.useMemo(() => {
     if (keyboardSelectedId === null) return null;
     return filteredEntries.find(e => e.id === keyboardSelectedId);
   }, [keyboardSelectedId, filteredEntries]);
 
-  const selectionCursorTime = selectedEntryForCursor 
+  const cursorTime = selectedEntryForCursor 
     ? new Date(selectedEntryForCursor.time.replace(/ (\d+)$/, '.$1') + 'Z').getTime() 
     : null;
-
-  const cursorTime = selectionCursorTime ?? scrollCursorTime;
 
   return (
     <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
@@ -2022,8 +2023,6 @@ const handleUiScaleChange = async (newScale: number) => {
             {hasData ? (
               <LogTable 
                 entries={filteredEntries}
-                entriesOffset={entriesOffset}
-                totalFilteredCount={totalFilteredCount}
                 loadedFileNames={loadedFileNames}
                 pageTimestampRanges={pageTimestampRanges}
                 onViewModeChange={handleViewModeChange}
@@ -2049,7 +2048,7 @@ const handleUiScaleChange = async (newScale: number) => {
                 onSavePreset={handleSaveFilterPreset}
                 onDeletePreset={handleDeleteFilterPreset}
                 onLoadPreset={handleLoadFilterPreset}
-                onJumpToOffset={handleJumpToOffset}
+                onLoadMore={handleLoadMore}
                 hasMore={hasMoreLogs}
                 isBusy={isBusy}
                 logToConsole={logToConsole}
@@ -2080,8 +2079,6 @@ const handleUiScaleChange = async (newScale: number) => {
                 cursorTime={cursorTime}
                 timelineBarVisibility={timelineBarVisibility}
                 onTimelineBarVisibilityChange={handleTimelineBarVisibilityChange}
-                onViewCenterChange={handleViewCenterChange}
-                onUserScrollStart={handleUserScrollStart}
               />
             ) : (
                 <div className="flex-grow flex items-center justify-center p-8 text-center bg-white dark:bg-gray-900">
