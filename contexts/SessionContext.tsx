@@ -4,6 +4,7 @@ import { Database } from '../db';
 import { useUI } from './UIContext';
 import { useConsole } from './ConsoleContext';
 import { useToast } from './ToastContext';
+import { useSettings } from './SettingsContext';
 
 declare const JSZip: any;
 
@@ -42,6 +43,7 @@ const SessionContext = createContext<SessionContextType | undefined>(undefined);
 export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { setIsLoading, setProgress, setProgressMessage, setProgressPhase, setDetailedProgress, setProgressTitle, setIsInitialLoad, addToast, error, setError, setActiveView } = useUI();
     const { logToConsole } = useConsole();
+    const { logSqlQueries } = useSettings();
     
     const [db, setDb] = useState<Database | null>(null);
     const [isElectron, setIsElectron] = useState(false);
@@ -59,6 +61,13 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     // State that is also part of DataContext but needed here for updates
     const [overallStockTimeRange, setOverallStockTimeRange] = useState<{ min: string, max: string } | null>(null);
     const [overallStockDensity, setOverallStockDensity] = useState<any[]>([]);
+
+    // Effect to attach logger to the DB instance when it changes or the setting changes
+    useEffect(() => {
+        if (db) {
+            db.setLogger(logToConsole, logSqlQueries);
+        }
+    }, [db, logToConsole, logSqlQueries]);
 
     const fetchSessions = useCallback(async () => {
         if (!window.electronAPI) return;
