@@ -40,6 +40,7 @@ A sophisticated, client-side log analysis tool that allows users to drag-and-dro
 - **Application Shell**: Electron
 - **Automatic Updates**: electron-updater
 - **Frontend**: React, TypeScript
+- **State Management**: A modern, scalable architecture using React Context Providers and custom hooks to separate concerns and manage application state.
 - **Bundler**: esbuild
 - **Styling**: Tailwind CSS with a PostCSS build step
 - **Database**: sql.js (SQLite compiled for the browser)

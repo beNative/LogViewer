@@ -49,13 +49,13 @@ A key feature of the desktop app is the `settings.json` file.
 - **IPC Handlers (`main.js`)**: The main process defines handlers for IPC channels:
     - `get-settings`: Reads `settings.json` from the user data directory (or creates it with defaults if it doesn't exist) and returns its content.
     - `set-settings`: Receives a settings object from the renderer and writes it to `settings.json`. This is how user preferences are persisted.
-- **Renderer Communication (`App.tsx`, `Settings.tsx`)**: The React components call the functions exposed on `window.electronAPI` (e.g., `window.electronAPI.getSettings()`) to interact with the settings file without ever having direct access to the file system.
+- **Renderer Communication (`SettingsContext.tsx`)**: The settings-related components call the functions exposed on `window.electronAPI` (e.g., `window.electronAPI.getSettings()`) to interact with the settings file without ever having direct access to the file system.
 
 #### Automatic File Logging
 The application maintains a persistent log file for diagnostic purposes.
 - **Log Rotation**: A new log file named `app-log-YYYY-MM-DD.log` is created daily in the application's user data directory.
 - **IPC Handler (`main.js`)**: The main process listens on a one-way `log-message` IPC channel. When it receives a message, it formats it with a timestamp and level, and appends it to the current day's log file.
-- **Renderer Communication (`App.tsx`)**: The central `logToConsole` function in the React app has been augmented. In addition to updating the in-app console's state, it also calls `window.electronAPI.logMessage()`. This sends the log event to the main process to be written to disk.
+- **Renderer Communication (`ConsoleContext.tsx`)**: The central `logToConsole` function, provided by the `useConsole` hook, both updates the in-app console's state and calls `window.electronAPI.logMessage()`. This sends the log event to the main process to be written to disk.
 
 #### Session Management
 A core feature of the desktop application is persistent session management. This allows the user's work to be saved automatically and resumed later.
@@ -67,11 +67,11 @@ A core feature of the desktop application is persistent session management. This
     - `save-session`: Receives a database buffer from the renderer. It generates a new timestamped filename (or uses a provided hint) and saves the buffer as a new `.sqlite` file in the `sessions` directory.
     - `delete-session`: Deletes a specified session file from the `sessions` directory.
     - `rename-session`: Renames a session file within the `sessions` directory.
-- **Renderer Communication (`App.tsx`, `DataHub.tsx`)**:
-    - On startup, `App.tsx` calls `window.electronAPI.listSessions()` to fetch the list of existing sessions.
-    - The `DataHub.tsx` component passes this list to the new `SessionManager.tsx` component, which renders the UI for browsing and interacting with the sessions.
-    - When the user adds new files via the `Dropzone`, `App.tsx` orchestrates the processing and then calls `window.electronAPI.saveSession()` to persist the new database.
-    - All actions (load, rename, delete) are initiated from the UI, call the relevant `window.electronAPI` function, and then trigger a refresh of the session list to update the UI.
+- **Renderer Communication (`SessionContext.tsx`, `DataHub.tsx`)**:
+    - The `SessionProvider` calls `window.electronAPI.listSessions()` to fetch the list of existing sessions.
+    - The `DataHub.tsx` component consumes this list from `useSession()` and renders the UI for browsing and interacting with the sessions.
+    - When the user adds new files via the `Dropzone`, the component orchestrates the processing via `useSession()`, which then calls `window.electronAPI.saveSession()` to persist the new database.
+    - All actions (load, rename, delete) are initiated from the UI, call the relevant `window.electronAPI` function via the context, and then trigger a refresh of the session list to update the UI.
 
 ## 3. File Structure
 
@@ -85,16 +85,45 @@ A core feature of the desktop application is persistent session management. This
 - `index.tsx`: The script that bootstraps the React application.
 - `styles.css`: The source file for Tailwind CSS styles.
 - `dist/`: The output directory for all built assets (CSS and JS).
-- `App.tsx`: The root component of the application, managing state and views.
+- `App.tsx`: The root component of the application, managing views and layout.
 - `db.ts`: The `Database` class abstraction for `sql.js`.
 - `types.ts`, `utils.ts`, `parsers.ts`: Shared types, utility functions, and the core log message parsing engine.
-- `components/`: Directory containing all reusable React components, including `LogTable.tsx`, `Dashboard.tsx`, `StockTracker.tsx`, and `ColumnVisibilityMenu.tsx`.
+- `components/`: Directory containing all reusable React components.
+- `contexts/`: Directory containing all React Context providers for state management.
 - `*.md`: Documentation files.
 
 ## 4. State Management and Data Flow
-The state management and data flow within the React application remain largely unchanged from the web version, with the primary addition being the initial fetching of application settings from the main process via the preload script. The separation between `formFilters` and `appliedFilters` continues to be the core pattern for ensuring synchronized data fetching between the Log Viewer and the Dashboard.
 
-The UI features a global **`StatusBar.tsx`** component, managed at the root `App.tsx` level. It provides persistent application-wide feedback and houses global view controls like row density and details panel visibility. The **`LogTable.tsx`** component has been refactored. Its display controls have been relocated: column visibility is now managed by a context menu on the header, while density and detail panel controls have been moved to the global StatusBar. The infinite scroll implementation is now handled directly within `LogTable.tsx`, simplifying the rendering logic. The **`StockTracker.tsx`** component manages its own local form state for search terms and dates, but its primary data (`stockHistory`) is fetched and managed at the `App.tsx` level.
+The application's state management has been architected for scalability and maintainability, adhering to modern React principles of composition and separation of concerns. The core of this architecture is a system of **React Context Providers** and **custom hooks**.
 
-### Column Visibility
-The visibility of columns in the Log Viewer is managed by a new state object, `columnVisibility`, within `App.tsx`. This state is initialized from and persisted to the `settings.json` file via IPC handlers in the main process. The state is passed as props to `LogTable.tsx`, which conditionally renders table headers (`<th>`) and cells (`<td>`) based on the current visibility settings. A new component, `ColumnVisibilityMenu.tsx`, provides the UI for modifying this state.
+### 4.1. Context Providers (`contexts/` directory)
+
+Instead of a single, monolithic state object, the application's state is divided into logical domains, each managed by its own Context Provider. This ensures that components only re-render when the specific slice of state they care about changes. The providers are composed in `contexts/AppProvider.tsx`.
+
+-   **`SessionContext`**: Manages the core database instance (`db`), session files (`.sqlite`), and all related logic, including creating, saving, loading, and processing sessions.
+-   **`DataContext`**: Responsible for all data fetching and filtering logic. It handles querying the database for log entries and stock information based on the applied filters.
+-   **`SettingsContext`**: Manages all user-configurable application settings (theme, view mode, column styles, etc.) and handles their persistence to the `settings.json` file.
+-   **`UIContext`**: Controls global UI state, such as the active view, loading indicators, dialog visibility, and other transient UI flags.
+-   **`ConsoleContext`**: Manages the state for the in-app "Application Log", including messages and filters.
+-   **`ToastContext`**: Handles the state and lifecycle of toast notifications.
+
+### 4.2. Custom Hooks
+
+Components access state and dispatch actions by using custom hooks, which are simple wrappers around `useContext`. This provides a clean, descriptive API for interacting with the application's state.
+
+-   `useSession()`: Provides access to session data and functions like `loadSession`, `saveSession`, etc.
+-   `useData()`: Exposes filtered data (`filteredEntries`, `stockHistory`) and data-related actions like `handleApplyFilters`.
+-   `useSettings()`: Allows components to read and update user settings.
+-   `useUI()`: Provides access to UI state like `isLoading`, `activeView`, etc.
+
+### 4.3. Data Flow Example: Applying a Filter
+
+1.  A user interacts with a filter control in the `FilterBar.tsx` component.
+2.  The component calls a state setter function obtained from `useData()`, updating the local `formFilters` state within `DataContext`.
+3.  The user clicks the "Apply" button, which calls `handleApplyFilters()` from `useData()`.
+4.  `handleApplyFilters()` updates the `appliedFilters` state within `DataContext`.
+5.  A `useEffect` hook inside `DataProvider` detects the change in `appliedFilters`. It then uses the `db` instance from `SessionContext` to execute new queries against the database.
+6.  The results of the queries (e.g., a new set of `filteredEntries`) are stored in `DataContext`'s state.
+7.  Components like `LogTable.tsx`, which also use `useData()`, receive the new `filteredEntries` and re-render to display the updated data.
+
+This decoupled, context-based flow ensures that concerns are neatly separated: `SettingsContext` knows nothing about data filtering, and `DataContext` knows nothing about session file management. The root `App.tsx` component is now a clean container responsible only for layout and composing the main views, passing down the necessary functions and state obtained from the custom hooks.

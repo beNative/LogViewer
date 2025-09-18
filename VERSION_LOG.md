@@ -4,6 +4,20 @@ This document tracks the major changes, new features, and bug fixes for the Log 
 
 ---
 
+### **Version 0.20.0** - Architectural Refactor & Maintainability
+
+_Date: 2025-09-18_
+
+This is a significant architectural release focused on improving the long-term health and maintainability of the codebase. While there are no new user-facing features, the application's internal structure has been completely modernized.
+
+#### 🛠️ Under the Hood
+- **Major Code Refactoring**: The monolithic `App.tsx` component, which previously managed all application state and logic, has been broken down following the principle of **Separation of Concerns**.
+- **Context-Based State Management**: All global state is now managed through a series of dedicated React Context Providers (`SessionContext`, `DataContext`, `SettingsContext`, `UIContext`, `ConsoleContext`, `ToastContext`). This decentralizes state management, making the data flow clearer and more predictable.
+- **Custom Hooks**: Business logic and state access are now encapsulated in custom hooks (e.g., `useSession`, `useData`), simplifying components and making logic reusable.
+- **Improved Scalability**: This new architecture makes it significantly easier to add new features, debug issues, and maintain the application in the future. `App.tsx` now serves as a clean, readable container component.
+
+---
+
 ### **Version 0.19.0** - Advanced Parsing & Detail View
 
 _Date: 2025-09-17_

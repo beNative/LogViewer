@@ -97,7 +97,7 @@ const App: React.FC = () => {
               isOpen={isAboutDialogOpen}
               onClose={() => setIsAboutDialogOpen(false)}
               iconSet={iconSet}
-              version="0.19.0"
+              version="0.20.0"
           />
       )}
       {isLoading && <ProgressIndicator progress={progress} message={progressMessage} phase={progressPhase} detailedProgress={detailedProgress} iconSet={iconSet} />}
