@@ -442,15 +442,18 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setProgress(0);
         setDetailedProgress({ currentFile: '', fileBytesRead: 0, fileTotalBytes: 0, fileLogCount: null });
     
+        let payloadFromWorker: { dbBuffer: Uint8Array, count: number } | null = null;
+    
         try {
             if (workerRef.current) {
                 workerRef.current.terminate();
             }
             const worker = new Worker('./dist/worker.js');
             workerRef.current = worker;
-            
-            await new Promise<void>((resolve, reject) => {
-                worker.onmessage = async (event) => {
+    
+            // Step 1: Await the result from the worker.
+            payloadFromWorker = await new Promise<{ dbBuffer: Uint8Array, count: number }>((resolve, reject) => {
+                worker.onmessage = (event) => {
                     const { type, payload } = event.data;
                     switch (type) {
                         case 'progress':
@@ -459,29 +462,29 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
                             setProgress(payload.progress);
                             break;
                         case 'done-rebuild':
-                            try {
-                                const newDb = await Database.createFromBuffer(payload.dbBuffer);
-                                await updateStateFromDb(newDb);
-                                setDb(newDb);
-                                setIsDirty(true);
-                                await handleSaveSession();
-                                addToast({ type: 'success', title: 'Rebuild Complete', message: `Successfully rebuilt ${payload.count.toLocaleString()} stock entries.` });
-                                resolve();
-                            } catch (e) {
-                                reject(e);
-                            }
+                            resolve(payload); // Resolve with the raw data
                             break;
                         case 'error':
                             reject(new Error(payload.error));
                             break;
                     }
                 };
-                
-                worker.onerror = (err) => reject(err);
-                
+                worker.onerror = (err) => reject(new Error(`Worker error: ${err.message || 'Unknown worker error'}`));
+    
                 const dbBuffer = db.export();
                 worker.postMessage({ type: 'rebuild-stock', payload: { dbBuffer } }, [dbBuffer.buffer]);
             });
+    
+            // Step 2: Process the result from the worker in the main async function body.
+            if (payloadFromWorker) {
+                const newDb = await Database.createFromBuffer(payloadFromWorker.dbBuffer);
+                await updateStateFromDb(newDb);
+                setDb(newDb);
+                setIsDirty(true);
+                await handleSaveSession();
+                addToast({ type: 'success', title: 'Rebuild Complete', message: `Successfully rebuilt ${payloadFromWorker.count.toLocaleString()} stock entries.` });
+            }
+    
         } catch (e) {
             const msg = e instanceof Error ? e.message : "An unexpected error occurred during rebuild.";
             logToConsole(`Stock rebuild failed: ${msg}`, 'ERROR');
