@@ -7,6 +7,47 @@ importScripts('https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js'
 // Define the type for the SQL.js library, as it's not available in the worker's global scope by default.
 declare const initSqlJs: (config: { locateFile: (file: string) => string; }) => Promise<any>;
 
+/**
+ * A fast, lightweight XML parser using regular expressions, specifically for the <log ... /> format.
+ * This avoids the dependency on DOMParser, which could cause errors in some worker environments.
+ * @param xmlContent The raw XML string content.
+ * @returns An array of log entry objects.
+ */
+function parseLogXml(xmlContent: string) {
+    const entries = [];
+    // Regex to find <log ... /> tags and capture their attributes content.
+    const logRegex = /<log\s+([^>]+)\/?>/g;
+    // Regex to find key="value" pairs within the attributes string.
+    const attrRegex = /(\S+)=["'](.*?)["']/g;
+
+    // A simple decoder for common XML entities.
+    const decoder = (str: string) => 
+        str.replace(/&quot;/g, '"')
+           .replace(/&apos;/g, "'")
+           .replace(/&lt;/g, '<')
+           .replace(/&gt;/g, '>')
+           .replace(/&amp;/g, '&');
+
+    for (const match of xmlContent.matchAll(logRegex)) {
+        const attrsContent = match[1];
+        const entry: Record<string, string> = {};
+        
+        for (const attrMatch of attrsContent.matchAll(attrRegex)) {
+            entry[attrMatch[1]] = decoder(attrMatch[2]);
+        }
+
+        entries.push({
+            time: entry.time || '',
+            level: entry.level || '',
+            sndrtype: entry.sndrtype || '',
+            sndrname: entry.sndrname || '',
+            msg: entry.msg || '',
+        });
+    }
+    return entries;
+}
+
+
 // Main message handler for the worker
 self.onmessage = async (event) => {
     try {
@@ -33,7 +74,6 @@ self.onmessage = async (event) => {
             );
         `);
         
-        const parser = new DOMParser();
         let totalLogsToInsert = 0;
         let totalLogsInserted = 0;
 
@@ -41,18 +81,10 @@ self.onmessage = async (event) => {
         postMessage({ type: 'progress', payload: { phase: 'parsing', message: 'Parsing XML files...', progress: 40, details: {} } });
         const allParsedEntries = [];
         for (const [i, xmlFile] of xmlFiles.entries()) {
-            const doc = parser.parseFromString(xmlFile.content, "application/xml");
-            const logNodes = doc.querySelectorAll('log');
-            if (logNodes.length === 0) continue;
+            // Use the new, fast regex parser instead of DOMParser
+            const entries = parseLogXml(xmlFile.content);
+            if (entries.length === 0) continue;
 
-            const entries = Array.from(logNodes).map(node => ({
-                time: node.getAttribute('time') || '',
-                level: node.getAttribute('level') || '',
-                sndrtype: node.getAttribute('sndrtype') || '',
-                sndrname: node.getAttribute('sndrname') || '',
-                msg: node.getAttribute('msg') || '',
-            }));
-            
             allParsedEntries.push({ fileName: xmlFile.name, entries });
             totalLogsToInsert += entries.length;
             
@@ -77,7 +109,7 @@ self.onmessage = async (event) => {
                  postMessage({ type: 'progress', payload: {
                     phase: 'inserting',
                     message: `Inserting ${entries.length.toLocaleString()} entries from ${fileName}...`,
-                    progress: 60 + 30 * (totalLogsInserted / totalLogsToInsert),
+                    progress: 60 + 30 * (totalLogsInserted / (totalLogsToInsert || 1)),
                     details: { currentFile: fileName, fileLogCount: entries.length }
                 }});
 
@@ -105,14 +137,13 @@ self.onmessage = async (event) => {
         
         // --- Done ---
         const dbBuffer = db.export();
-        // FIX: Replaced the Transferable[] syntax with the modern options object to resolve a TypeScript error where the linter incorrectly assumes a 'window' context for the worker's postMessage function.
         postMessage({ 
             type: 'done', 
             payload: { 
                 dbBuffer, 
                 count: totalLogsInserted 
             }
-        }, { transfer: [dbBuffer.buffer] }); // Transfer buffer for performance
+        }, { transfer: [dbBuffer.buffer] });
 
     } catch (e) {
         const error = e instanceof Error ? e.message : 'An unknown error occurred in the worker.';
