@@ -35,7 +35,7 @@ type SessionContextType = {
     overallStockDensity: any[]; // Use any to avoid circular dependency with DataContext
     setOverallStockDensity: React.Dispatch<React.SetStateAction<any[]>>;
     handleCancelProcessing: () => void;
-    handleRebuildStockDataInWorker: () => Promise<void>;
+    handleRebuildStockDataInWorker: () => void;
 };
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -422,7 +422,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         URL.revokeObjectURL(url);
     }, [db, hasData, activeSessionName]);
     
-    const handleRebuildStockDataInWorker = useCallback(async () => {
+    const handleRebuildStockDataInWorker = useCallback(() => {
         if (!db || !hasData) {
             const message = 'No data is currently loaded to rebuild from.';
             logToConsole(`Rebuild failed: ${message}`, 'ERROR');
@@ -435,69 +435,86 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
             addToast({ type: 'warning', title: 'Busy', message });
             return;
         }
-    
+
         setIsLoading(true);
         setIsProcessing(true);
         setProgressTitle("Rebuilding Stock Data...");
         setProgress(0);
         setDetailedProgress({ currentFile: '', fileBytesRead: 0, fileTotalBytes: 0, fileLogCount: null });
-    
-        let payloadFromWorker: { dbBuffer: Uint8Array, count: number } | null = null;
-    
-        try {
-            if (workerRef.current) {
-                workerRef.current.terminate();
-            }
-            const worker = new Worker('./dist/worker.js');
-            workerRef.current = worker;
-    
-            // Step 1: Await the result from the worker.
-            payloadFromWorker = await new Promise<{ dbBuffer: Uint8Array, count: number }>((resolve, reject) => {
-                worker.onmessage = (event) => {
-                    const { type, payload } = event.data;
-                    switch (type) {
-                        case 'progress':
-                            setProgressPhase(payload.phase as ProgressPhase);
-                            setProgressMessage(payload.message);
-                            setProgress(payload.progress);
-                            break;
-                        case 'done-rebuild':
-                            resolve(payload); // Resolve with the raw data
-                            break;
-                        case 'error':
-                            reject(new Error(payload.error));
-                            break;
-                    }
-                };
-                worker.onerror = (err) => reject(new Error(`Worker error: ${err.message || 'Unknown worker error'}`));
-    
-                const dbBuffer = db.export();
-                worker.postMessage({ type: 'rebuild-stock', payload: { dbBuffer } }, [dbBuffer.buffer]);
-            });
-    
-            // Step 2: Process the result from the worker in the main async function body.
-            if (payloadFromWorker) {
-                const newDb = await Database.createFromBuffer(payloadFromWorker.dbBuffer);
-                await updateStateFromDb(newDb);
-                setDb(newDb);
-                setIsDirty(true);
-                await handleSaveSession();
-                addToast({ type: 'success', title: 'Rebuild Complete', message: `Successfully rebuilt ${payloadFromWorker.count.toLocaleString()} stock entries.` });
-            }
-    
-        } catch (e) {
-            const msg = e instanceof Error ? e.message : "An unexpected error occurred during rebuild.";
-            logToConsole(`Stock rebuild failed: ${msg}`, 'ERROR');
-            addToast({ type: 'error', title: 'Rebuild Failed', message: msg });
-        } finally {
+
+        if (workerRef.current) {
+            workerRef.current.terminate();
+        }
+        
+        const worker = new Worker('./dist/worker.js');
+        workerRef.current = worker;
+        
+        const cleanup = () => {
             if (workerRef.current) {
                 workerRef.current.terminate();
                 workerRef.current = null;
             }
             setIsLoading(false);
             setIsProcessing(false);
+        };
+
+        worker.onmessage = async (event) => {
+            const { type, payload } = event.data;
+            switch (type) {
+                case 'progress':
+                    setProgressPhase(payload.phase as ProgressPhase);
+                    setProgressMessage(payload.message);
+                    setProgress(payload.progress);
+                    break;
+                case 'done-rebuild':
+                    try {
+                        const newDb = await Database.createFromBuffer(payload.dbBuffer);
+                        await updateStateFromDb(newDb);
+                        setDb(newDb);
+                        setIsDirty(true);
+                        await handleSaveSession();
+                        addToast({ type: 'success', title: 'Rebuild Complete', message: `Successfully rebuilt ${payload.count.toLocaleString()} stock entries.` });
+                    } catch(e) {
+                        const msg = e instanceof Error ? e.message : "An unexpected error occurred during rebuild post-processing.";
+                        logToConsole(`Stock rebuild post-processing failed: ${msg}`, 'ERROR');
+                        addToast({ type: 'error', title: 'Rebuild Failed', message: msg });
+                    } finally {
+                        cleanup();
+                    }
+                    break;
+                case 'error':
+                    {
+                        const msg = payload.error || "An unknown error occurred in the worker.";
+                        logToConsole(`Stock rebuild failed in worker: ${msg}`, 'ERROR');
+                        addToast({ type: 'error', title: 'Rebuild Failed', message: msg });
+                        cleanup();
+                    }
+                    break;
+            }
+        };
+        
+        worker.onerror = (err) => {
+            const msg = err.message || 'Unknown worker error';
+            logToConsole(`Stock rebuild worker crashed: ${msg}`, 'ERROR');
+            addToast({ type: 'error', title: 'Rebuild Crashed', message: msg });
+            cleanup();
+        };
+        
+        try {
+            const dbBuffer = db.export();
+            worker.postMessage({ type: 'rebuild-stock', payload: { dbBuffer } }, [dbBuffer.buffer]);
+        } catch (e) {
+            const msg = e instanceof Error ? e.message : 'Failed to export database for worker.';
+            logToConsole(`Stock rebuild failed pre-flight: ${msg}`, 'ERROR');
+            addToast({ type: 'error', title: 'Rebuild Failed', message: msg });
+            cleanup();
         }
-    }, [db, hasData, addToast, isProcessing, setIsLoading, setProgress, setProgressMessage, setProgressPhase, setProgressTitle, updateStateFromDb, handleSaveSession, setDetailedProgress, logToConsole]);
+    }, [
+        db, hasData, addToast, isProcessing, setIsLoading, setProgress, 
+        setProgressMessage, setProgressPhase, setProgressTitle, 
+        updateStateFromDb, handleSaveSession, setDetailedProgress, 
+        logToConsole, setDb, setIsDirty, setIsProcessing
+    ]);
 
     // Electron-specific effects
     useEffect(() => {
