@@ -100,6 +100,7 @@ function getSettings() {
         isFocusDebuggerVisible: false,
         timelineBarVisibility: defaultTimelineBarVisibility,
         uiScale: 1,
+        logSqlQueries: false,
     };
     try {
         if (fs.existsSync(settingsPath)) {
@@ -147,6 +148,7 @@ function getSettings() {
                     ...(loadedSettings.timelineBarVisibility || {}),
                 },
                 uiScale: loadedSettings.uiScale ?? defaultSettings.uiScale,
+                logSqlQueries: loadedSettings.logSqlQueries ?? defaultSettings.logSqlQueries,
             };
             
             // Clean up deprecated keys from old versions

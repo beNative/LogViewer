@@ -174,6 +174,7 @@ export type Settings = {
     isFocusDebuggerVisible: boolean;
     timelineBarVisibility: TimelineBarVisibility;
     uiScale: number;
+    logSqlQueries: boolean;
 };
 
 export type ToastMessage = {

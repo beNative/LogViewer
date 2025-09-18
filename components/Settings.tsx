@@ -33,6 +33,8 @@ interface SettingsProps {
   onGithubTokenChange: (token: string) => void;
   uiScale: number;
   onUiScaleChange: (newScale: number) => void;
+  logSqlQueries: boolean;
+  onLogSqlQueriesChange: (enabled: boolean) => void;
   onFullSettingsUpdate: (newSettings: SettingsType) => Promise<void>;
   // Props needed for constructing the full settings object
   columnVisibility: ColumnVisibilityState;
@@ -144,6 +146,7 @@ export const Settings: React.FC<SettingsProps> = (props) => {
         isAutoUpdateEnabled, onAutoUpdateEnabledChange,
         githubToken, onGithubTokenChange,
         uiScale, onUiScaleChange,
+        logSqlQueries, onLogSqlQueriesChange,
         onFullSettingsUpdate
     } = props;
     
@@ -378,6 +381,7 @@ export const Settings: React.FC<SettingsProps> = (props) => {
                         <div className="divide-y divide-gray-200 dark:divide-gray-700">
                             <h2 className="text-xl font-bold text-gray-800 dark:text-sky-400 pb-4">Debugging</h2>
                             <ToggleSwitch label="Show Focus/Hover Inspector" enabled={isFocusDebuggerVisible} onChange={onFocusDebuggerVisibilityChange} />
+                            <ToggleSwitch label="Log SQL Queries to Console" enabled={logSqlQueries} onChange={onLogSqlQueriesChange} />
                         </div>
                     )}
                 </div>

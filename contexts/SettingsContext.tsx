@@ -34,6 +34,7 @@ type SettingsContextType = {
     isFocusDebuggerVisible: boolean;
     timelineBarVisibility: TimelineBarVisibility;
     uiScale: number;
+    logSqlQueries: boolean;
     onThemeChange: (newTheme: Theme) => void;
     onViewModeChange: (newMode: ViewMode) => void;
     onAllowPrereleaseChange: (allow: boolean) => void;
@@ -49,6 +50,7 @@ type SettingsContextType = {
     onFocusDebuggerVisibilityChange: (isVisible: boolean) => void;
     onTimelineBarVisibilityChange: (newVisibility: TimelineBarVisibility) => void;
     onUiScaleChange: (newScale: number) => void;
+    onLogSqlQueriesChange: (enabled: boolean) => void;
     onFullSettingsUpdate: (newSettings: SettingsType) => Promise<void>;
     onSaveFilterPreset: (name: string, filtersToSave: FilterState) => Promise<void>;
     onDeleteFilterPreset: (name: string) => Promise<void>;
@@ -78,6 +80,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const [isAutoUpdateEnabled, setIsAutoUpdateEnabled] = useState<boolean>(true);
     const [githubToken, setGithubToken] = useState<string>('');
     const [uiScale, setUiScale] = useState<number>(1);
+    const [logSqlQueries, setLogSqlQueries] = useState<boolean>(false);
     
     // Load settings on startup
     useEffect(() => {
@@ -106,6 +109,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             setIsAutoUpdateEnabled(settings.isAutoUpdateEnabled ?? true);
             setGithubToken(settings.githubToken || '');
             setUiScale(settings.uiScale || 1);
+            setLogSqlQueries(settings.logSqlQueries ?? false);
         }).catch(err => logToConsole(`Failed to load settings: ${err.message}`, 'ERROR'));
     }, [logToConsole]);
 
@@ -140,6 +144,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const onAutoUpdateEnabledChange = (enabled: boolean) => { setIsAutoUpdateEnabled(enabled); updateSettings({ isAutoUpdateEnabled: enabled }); };
     const onGithubTokenChange = (token: string) => { setGithubToken(token); updateSettings({ githubToken: token }); };
     const onUiScaleChange = (newScale: number) => { setUiScale(newScale); updateSettings({ uiScale: newScale }); };
+    const onLogSqlQueriesChange = (enabled: boolean) => { setLogSqlQueries(enabled); updateSettings({ logSqlQueries: enabled }); };
     
     const onFullSettingsUpdate = async (newSettings: SettingsType) => {
         setTheme(newSettings.theme);
@@ -158,6 +163,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setIsAutoUpdateEnabled(newSettings.isAutoUpdateEnabled);
         setGithubToken(newSettings.githubToken);
         setUiScale(newSettings.uiScale);
+        setLogSqlQueries(newSettings.logSqlQueries);
         await updateSettings(newSettings);
         addToast({ type: 'success', title: 'Settings Updated', message: 'Settings have been imported.' });
     };
@@ -191,11 +197,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const value: SettingsContextType = {
         theme, viewMode, allowPrerelease, isAutoUpdateEnabled, githubToken, iconSet, logTableDensity,
         columnVisibility, customFilterPresets, columnStyles, panelWidths, isTimeRangeSelectorVisible,
-        isDetailPanelVisible, isFocusDebuggerVisible, timelineBarVisibility, uiScale,
+        isDetailPanelVisible, isFocusDebuggerVisible, timelineBarVisibility, uiScale, logSqlQueries,
         onThemeChange, onViewModeChange, onAllowPrereleaseChange, onAutoUpdateEnabledChange, onGithubTokenChange,
         onIconSetChange, onLogTableDensityChange, onColumnVisibilityChange, onColumnStylesChange,
         onPanelWidthsChange, onTimeRangeSelectorVisibilityChange, onDetailPanelVisibilityChange,
-        onFocusDebuggerVisibilityChange, onTimelineBarVisibilityChange, onUiScaleChange,
+        onFocusDebuggerVisibilityChange, onTimelineBarVisibilityChange, onUiScaleChange, onLogSqlQueriesChange,
         onFullSettingsUpdate, onSaveFilterPreset, onDeleteFilterPreset, onLoadFilterPreset,
     };
     
