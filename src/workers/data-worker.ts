@@ -135,7 +135,8 @@ const handleRebuildStockData = async (payload: any) => {
     }
 
     // FIX: Added the 'g' (global) flag to the regex to fix "matchAll" error.
-    const stockRegex = /<WWKS[^>]*?TimeStamp=["'](?<timestamp>[^"']+)["'][^>]*?>.*?<StockInfoMessage[^>]*?Id=["'](?<message_id>[^"']+)["'][^>]*?Source=["'](?<source>[^"']+)["'][^>]*?Destination=["'](?<destination>[^"']+)["'][^>]*?>.*?<Article[^>]*?Id=["'](?<article_id>[^"']+)["'][^>]*?Name=["'](?<article_name>[^"']+)["'][^>]*?DosageForm=["'](?<dosage_form>[^"']+)["'][^>]*?MaxSubItemQuantity=["'](?<max_sub_item_quantity>[^"']+)["'][^>]*?Quantity=["'](?<quantity>[^"']+)["'][^>]*?\/>.*?<\/StockInfoMessage>.*?<\/WWKS>/sg;
+    // FIX: Added 'i' (case-insensitive) flag to handle variations in XML tag casing (e.g., <stockinfomessage>).
+    const stockRegex = /<WWKS[^>]*?TimeStamp=["'](?<timestamp>[^"']+)["'][^>]*?>.*?<StockInfoMessage[^>]*?Id=["'](?<message_id>[^"']+)["'][^>]*?Source=["'](?<source>[^"']+)["'][^>]*?Destination=["'](?<destination>[^"']+)["'][^>]*?>.*?<Article[^>]*?Id=["'](?<article_id>[^"']+)["'][^>]*?Name=["'](?<article_name>[^"']+)["'][^>]*?DosageForm=["'](?<dosage_form>[^"']+)["'][^>]*?MaxSubItemQuantity=["'](?<max_sub_item_quantity>[^"']+)["'][^>]*?Quantity=["'](?<quantity>[^"']+)["'][^>]*?\/>.*?<\/StockInfoMessage>.*?<\/WWKS>/sgi;
     
     const selectStmt = db.prepare("SELECT msg FROM logs WHERE msg LIKE '%<StockInfoMessage%'");
     
