@@ -458,17 +458,25 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
                         setProgress(payload.progress);
                         break;
                     case 'done-rebuild':
-                        const newDb = await Database.createFromBuffer(payload.dbBuffer);
-                        await updateStateFromDb(newDb);
-                        setDb(newDb);
-                        setIsDirty(true);
-                        await handleSaveSession();
-                        worker.terminate();
-                        workerRef.current = null;
-                        setIsLoading(false);
-                        setIsProcessing(false);
-                        addToast({ type: 'success', title: 'Rebuild Complete', message: `Successfully rebuilt ${payload.count.toLocaleString()} stock entries.` });
-                        resolve();
+                        try {
+                            const newDb = await Database.createFromBuffer(payload.dbBuffer);
+                            await updateStateFromDb(newDb);
+                            setDb(newDb);
+                            setIsDirty(true);
+                            await handleSaveSession();
+                            addToast({ type: 'success', title: 'Rebuild Complete', message: `Successfully rebuilt ${payload.count.toLocaleString()} stock entries.` });
+                            resolve();
+                        } catch (e) {
+                            const msg = e instanceof Error ? e.message : "Error processing rebuild results.";
+                            logToConsole(`Stock rebuild post-processing failed: ${msg}`, 'ERROR');
+                            addToast({ type: 'error', title: 'Rebuild Failed', message: msg });
+                            reject(new Error(msg));
+                        } finally {
+                            worker.terminate();
+                            workerRef.current = null;
+                            setIsLoading(false);
+                            setIsProcessing(false);
+                        }
                         break;
                     case 'error':
                         const msg = payload.error || "An unknown worker error occurred.";
