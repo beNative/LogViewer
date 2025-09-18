@@ -109,16 +109,33 @@ const handleRebuildStockData = async (payload: any) => {
     const db = new SQL.Database(dbBuffer);
     
     postMessage({ type: 'progress', payload: { phase: 'parsing', message: 'Clearing old stock data...', progress: 5 } });
+    // FIX: Ensure the stock_info table exists before trying to delete from it.
+    // This prevents errors when rebuilding on a new/blank session.
+    db.exec(`
+        CREATE TABLE IF NOT EXISTS stock_info (
+            timestamp TEXT,
+            message_id INTEGER,
+            source TEXT,
+            destination TEXT,
+            article_id TEXT,
+            article_name TEXT,
+            dosage_form TEXT,
+            max_sub_item_quantity INTEGER,
+            quantity INTEGER
+        );
+    `);
     db.exec("DELETE FROM stock_info;");
     
     const countResult = db.exec("SELECT COUNT(*) FROM logs WHERE msg LIKE '%<StockInfoMessage%'");
     const totalToScan = countResult[0]?.values[0]?.[0] || 0;
     if (totalToScan === 0) {
-        postMessage({ type: 'done-rebuild', payload: { dbBuffer: db.export(), count: 0 } });
+        const finalDbBuffer = db.export();
+        postMessage({ type: 'done-rebuild', payload: { dbBuffer: finalDbBuffer, count: 0 } }, { transfer: [finalDbBuffer.buffer] });
         return;
     }
 
-    const stockRegex = /<WWKS[^>]*?TimeStamp=["'](?<timestamp>[^"']+)["'][^>]*?>.*?<StockInfoMessage[^>]*?Id=["'](?<message_id>[^"']+)["'][^>]*?Source=["'](?<source>[^"']+)["'][^>]*?Destination=["'](?<destination>[^"']+)["'][^>]*?>.*?<Article[^>]*?Id=["'](?<article_id>[^"']+)["'][^>]*?Name=["'](?<article_name>[^"']+)["'][^>]*?DosageForm=["'](?<dosage_form>[^"']+)["'][^>]*?MaxSubItemQuantity=["'](?<max_sub_item_quantity>[^"']+)["'][^>]*?Quantity=["'](?<quantity>[^"']+)["'][^>]*?\/>.*?<\/StockInfoMessage>.*?<\/WWKS>/s;
+    // FIX: Added the 'g' (global) flag to the regex to fix "matchAll" error.
+    const stockRegex = /<WWKS[^>]*?TimeStamp=["'](?<timestamp>[^"']+)["'][^>]*?>.*?<StockInfoMessage[^>]*?Id=["'](?<message_id>[^"']+)["'][^>]*?Source=["'](?<source>[^"']+)["'][^>]*?Destination=["'](?<destination>[^"']+)["'][^>]*?>.*?<Article[^>]*?Id=["'](?<article_id>[^"']+)["'][^>]*?Name=["'](?<article_name>[^"']+)["'][^>]*?DosageForm=["'](?<dosage_form>[^"']+)["'][^>]*?MaxSubItemQuantity=["'](?<max_sub_item_quantity>[^"']+)["'][^>]*?Quantity=["'](?<quantity>[^"']+)["'][^>]*?\/>.*?<\/StockInfoMessage>.*?<\/WWKS>/sg;
     
     const selectStmt = db.prepare("SELECT msg FROM logs WHERE msg LIKE '%<StockInfoMessage%'");
     
@@ -127,19 +144,21 @@ const handleRebuildStockData = async (payload: any) => {
 
     while (selectStmt.step()) {
         const [msg] = selectStmt.get();
-        for (const match of msg.matchAll(stockRegex)) {
-            if (match.groups) {
-                stockEntriesToInsert.push({
-                    timestamp: new Date(match.groups.timestamp).toISOString(),
-                    message_id: parseInt(match.groups.message_id || '0', 10),
-                    source: match.groups.source || 'N/A',
-                    destination: match.groups.destination || 'N/A',
-                    article_id: match.groups.article_id || 'N/A',
-                    article_name: match.groups.article_name || 'N/A',
-                    dosage_form: match.groups.dosage_form || 'N/A',
-                    max_sub_item_quantity: parseInt(match.groups.max_sub_item_quantity || '0', 10),
-                    quantity: parseInt(match.groups.quantity || '0', 10),
-                });
+        if (typeof msg === 'string') {
+            for (const match of msg.matchAll(stockRegex)) {
+                if (match.groups) {
+                    stockEntriesToInsert.push({
+                        timestamp: new Date(match.groups.timestamp).toISOString(),
+                        message_id: parseInt(match.groups.message_id || '0', 10),
+                        source: match.groups.source || 'N/A',
+                        destination: match.groups.destination || 'N/A',
+                        article_id: match.groups.article_id || 'N/A',
+                        article_name: match.groups.article_name || 'N/A',
+                        dosage_form: match.groups.dosage_form || 'N/A',
+                        max_sub_item_quantity: parseInt(match.groups.max_sub_item_quantity || '0', 10),
+                        quantity: parseInt(match.groups.quantity || '0', 10),
+                    });
+                }
             }
         }
         processedCount++;

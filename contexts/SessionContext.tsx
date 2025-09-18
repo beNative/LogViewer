@@ -73,6 +73,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     
     const handleNewSession = useCallback(async (log = true) => {
         const newDb = await Database.create();
+        newDb.createTable(); // Ensure tables exist even on a blank session
         setDb(newDb);
         setHasData(false);
         setTotalEntryCount(0);
@@ -93,6 +94,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         logToConsole('Initializing database...', 'INFO');
         if (isElectronEnv) fetchSessions();
         Database.create().then(database => {
+            database.createTable(); // Ensure tables exist on initial load
             setDb(database);
             logToConsole('Database ready.', 'DEBUG');
         }).catch(e => {
@@ -414,12 +416,16 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const handleRebuildStockDataInWorker = useCallback(async () => {
         return new Promise<void>(async (resolve, reject) => {
             if (!db || !hasData) {
-                addToast({ type: 'error', title: 'Rebuild Failed', message: 'No data is currently loaded.' });
-                return reject();
+                const message = 'No data is currently loaded.';
+                logToConsole(`Rebuild failed: ${message}`, 'ERROR');
+                addToast({ type: 'error', title: 'Rebuild Failed', message });
+                return reject(new Error(message));
             }
             if (isProcessing) {
-                addToast({ type: 'warning', title: 'Busy', message: 'Another process is already running.' });
-                return reject();
+                 const message = 'Another process is already running.';
+                 logToConsole(`Rebuild failed: ${message}`, 'WARNING');
+                addToast({ type: 'warning', title: 'Busy', message });
+                return reject(new Error(message));
             }
 
             setIsLoading(true);
@@ -457,6 +463,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
                         break;
                     case 'error':
                         const msg = payload.error || "An unknown worker error occurred.";
+                        logToConsole(`Stock rebuild failed in worker: ${msg}`, 'ERROR');
                         addToast({ type: 'error', title: 'Rebuild Failed', message: msg });
                         worker.terminate();
                         workerRef.current = null;
@@ -468,17 +475,19 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
             };
             
             worker.onerror = (err) => {
+                const msg = err.message || "The rebuild worker crashed unexpectedly.";
+                logToConsole(`Stock rebuild worker crashed: ${msg}`, 'ERROR');
                 worker.terminate();
                 workerRef.current = null;
                 setIsLoading(false);
                 setIsProcessing(false);
-                addToast({ type: 'error', title: 'Rebuild Failed', message: err.message });
+                addToast({ type: 'error', title: 'Rebuild Failed', message: msg });
                 reject(err);
             };
             
             worker.postMessage({ type: 'rebuild-stock', payload: { dbBuffer } }, [dbBuffer.buffer]);
         });
-    }, [db, hasData, addToast, isProcessing, setIsLoading, setProgress, setProgressMessage, setProgressPhase, setProgressTitle, updateStateFromDb, handleSaveSession, setDetailedProgress]);
+    }, [db, hasData, addToast, isProcessing, setIsLoading, setProgress, setProgressMessage, setProgressPhase, setProgressTitle, updateStateFromDb, handleSaveSession, setDetailedProgress, logToConsole]);
 
     // Electron-specific effects
     useEffect(() => {
