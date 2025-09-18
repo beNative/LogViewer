@@ -423,32 +423,33 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }, [db, hasData, activeSessionName]);
     
     const handleRebuildStockDataInWorker = useCallback(async () => {
-        return new Promise<void>((resolve, reject) => {
-            if (!db || !hasData) {
-                const message = 'No data is currently loaded.';
-                logToConsole(`Rebuild failed: ${message}`, 'ERROR');
-                addToast({ type: 'error', title: 'Rebuild Failed', message });
-                return reject(new Error(message));
+        if (!db || !hasData) {
+            const message = 'No data is currently loaded to rebuild from.';
+            logToConsole(`Rebuild failed: ${message}`, 'ERROR');
+            addToast({ type: 'error', title: 'Rebuild Failed', message });
+            return;
+        }
+        if (isProcessing) {
+            const message = 'Another process is already running.';
+            logToConsole(`Rebuild failed: ${message}`, 'WARNING');
+            addToast({ type: 'warning', title: 'Busy', message });
+            return;
+        }
+    
+        setIsLoading(true);
+        setIsProcessing(true);
+        setProgressTitle("Rebuilding Stock Data...");
+        setProgress(0);
+        setDetailedProgress({ currentFile: '', fileBytesRead: 0, fileTotalBytes: 0, fileLogCount: null });
+    
+        try {
+            if (workerRef.current) {
+                workerRef.current.terminate();
             }
-            if (isProcessing) {
-                 const message = 'Another process is already running.';
-                 logToConsole(`Rebuild failed: ${message}`, 'WARNING');
-                addToast({ type: 'warning', title: 'Busy', message });
-                return reject(new Error(message));
-            }
-
-            setIsLoading(true);
-            setIsProcessing(true);
-            setProgressTitle("Rebuilding Stock Data...");
-            setProgress(0);
-            setDetailedProgress({ currentFile: '', fileBytesRead: 0, fileTotalBytes: 0, fileLogCount: null });
-
-            try {
-                if (workerRef.current) workerRef.current.terminate();
-
-                const worker = new Worker('./dist/worker.js');
-                workerRef.current = worker;
-                
+            const worker = new Worker('./dist/worker.js');
+            workerRef.current = worker;
+            
+            await new Promise<void>((resolve, reject) => {
                 worker.onmessage = async (event) => {
                     const { type, payload } = event.data;
                     switch (type) {
@@ -467,58 +468,32 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
                                 addToast({ type: 'success', title: 'Rebuild Complete', message: `Successfully rebuilt ${payload.count.toLocaleString()} stock entries.` });
                                 resolve();
                             } catch (e) {
-                                const msg = e instanceof Error ? e.message : "Error processing rebuild results.";
-                                logToConsole(`Stock rebuild post-processing failed: ${msg}`, 'ERROR');
-                                addToast({ type: 'error', title: 'Rebuild Failed', message: msg });
-                                reject(new Error(msg));
-                            } finally {
-                                worker.terminate();
-                                workerRef.current = null;
-                                setIsLoading(false);
-                                setIsProcessing(false);
+                                reject(e);
                             }
                             break;
                         case 'error':
-                            const msg = payload.error || "An unknown worker error occurred.";
-                            logToConsole(`Stock rebuild failed in worker: ${msg}`, 'ERROR');
-                            addToast({ type: 'error', title: 'Rebuild Failed', message: msg });
-                            worker.terminate();
-                            workerRef.current = null;
-                            setIsLoading(false);
-                            setIsProcessing(false);
-                            reject(new Error(msg));
+                            reject(new Error(payload.error));
                             break;
                     }
                 };
                 
-                worker.onerror = (err) => {
-                    const msg = err.message || "The rebuild worker crashed unexpectedly.";
-                    logToConsole(`Stock rebuild worker crashed: ${msg}`, 'ERROR');
-                    worker.terminate();
-                    workerRef.current = null;
-                    setIsLoading(false);
-                    setIsProcessing(false);
-                    addToast({ type: 'error', title: 'Rebuild Failed', message: msg });
-                    reject(err);
-                };
+                worker.onerror = (err) => reject(err);
                 
                 const dbBuffer = db.export();
                 worker.postMessage({ type: 'rebuild-stock', payload: { dbBuffer } }, [dbBuffer.buffer]);
-
-            } catch (e) {
-                const msg = e instanceof Error ? e.message : "An unexpected error occurred during rebuild setup.";
-                logToConsole(`Stock rebuild setup failed: ${msg}`, 'ERROR');
-                addToast({ type: 'error', title: 'Rebuild Failed', message: msg });
-                
-                setIsLoading(false);
-                setIsProcessing(false);
-                if (workerRef.current) {
-                    workerRef.current.terminate();
-                    workerRef.current = null;
-                }
-                reject(new Error(msg));
+            });
+        } catch (e) {
+            const msg = e instanceof Error ? e.message : "An unexpected error occurred during rebuild.";
+            logToConsole(`Stock rebuild failed: ${msg}`, 'ERROR');
+            addToast({ type: 'error', title: 'Rebuild Failed', message: msg });
+        } finally {
+            if (workerRef.current) {
+                workerRef.current.terminate();
+                workerRef.current = null;
             }
-        });
+            setIsLoading(false);
+            setIsProcessing(false);
+        }
     }, [db, hasData, addToast, isProcessing, setIsLoading, setProgress, setProgressMessage, setProgressPhase, setProgressTitle, updateStateFromDb, handleSaveSession, setDetailedProgress, logToConsole]);
 
     // Electron-specific effects
