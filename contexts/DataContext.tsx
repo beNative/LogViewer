@@ -4,6 +4,7 @@ import { getSqlDateTime } from '../db';
 import { useSession } from './SessionContext';
 import { useUI } from './UIContext';
 import { useConsole } from './ConsoleContext';
+import { useSettings } from './SettingsContext';
 
 const INFINITE_SCROLL_CHUNK_SIZE = 200;
 
@@ -72,7 +73,7 @@ type DataContextType = {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { db, hasData, loadedFileNames, totalEntryCount, setIsDirty, handleSaveSession, updateStateFromDb, overallStockTimeRange, setOverallStockTimeRange, overallStockDensity, setOverallStockDensity } = useSession();
+    const { db, hasData, loadedFileNames, setIsDirty, handleSaveSession, updateStateFromDb, overallStockTimeRange, setOverallStockTimeRange, overallStockDensity, setOverallStockDensity } = useSession();
     const { logToConsole, lastConsoleMessage } = useConsole();
     const { setIsBusy, isBusy, isStockBusy, setIsStockBusy, setActiveView, setJumpToEntryId, jumpToEntryId, isInitialLoad, setIsInitialLoad, keyboardSelectedId, setKeyboardSelectedId, addToast } = useUI();
     const { viewMode } = useSettings();
@@ -105,19 +106,44 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Effect to initialize/reset filters when data source changes
     useEffect(() => {
         if (db && hasData) {
-            let newFilters = { ...initialFilters };
-            const { minTime, maxTime } = db.getMinMaxTime();
-            if (minTime && maxTime) {
-                const [minDate, minTimeStr] = minTime.split(' ');
-                const [maxDate, maxTimeStr] = maxTime.split(' ');
-                newFilters = {
-                    ...initialFilters,
-                    dateFrom: minDate, timeFrom: minTimeStr.substring(0, 8),
-                    dateTo: maxDate, timeTo: maxTimeStr.substring(0, 8),
-                };
+            const savedFiltersJson = db.getMeta('appliedFilters');
+            let filtersToUse = { ...initialFilters };
+            let loadedFromSession = false;
+
+            if (savedFiltersJson) {
+                try {
+                    const savedFilters = JSON.parse(savedFiltersJson);
+                    if (savedFilters && typeof savedFilters === 'object' && 'sqlQueryEnabled' in savedFilters) {
+                        filtersToUse = { ...initialFilters, ...savedFilters };
+                        logToConsole('Loaded saved filters from session.', 'INFO');
+                        loadedFromSession = true;
+                    } else {
+                        throw new Error('Invalid format');
+                    }
+                } catch (e) {
+                     logToConsole(`Could not parse saved filters, using defaults.`, 'WARNING');
+                }
             }
-            setFormFilters(newFilters);
-            setAppliedFilters(newFilters);
+
+            if (!loadedFromSession) {
+                const { minTime, maxTime } = db.getMinMaxTime();
+                if (minTime && maxTime) {
+                    const [minDate, minTimeStr] = minTime.split(' ');
+                    const [maxDate, maxTimeStr] = maxTime.split(' ');
+                    filtersToUse = {
+                        ...initialFilters,
+                        dateFrom: minDate, timeFrom: minTimeStr.substring(0, 8),
+                        dateTo: maxDate, timeTo: maxTimeStr.substring(0, 8),
+                    };
+                }
+            }
+
+            setFormFilters(filtersToUse);
+            setAppliedFilters(filtersToUse);
+            if (loadedFromSession) {
+                setIsInitialLoad(false); // A loaded session should show data immediately.
+            }
+
             setUniqueValues({
                 level: db.getUniqueColumnValues('level'),
                 sndrtype: db.getUniqueColumnValues('sndrtype'),
@@ -130,7 +156,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setAppliedFilters(initialFilters);
             setUniqueValues({ level: [], sndrtype: [], sndrname: [], fileName: [] });
         }
-    }, [db, hasData, loadedFileNames]);
+    }, [db, hasData, loadedFileNames, logToConsole, setIsInitialLoad]);
 
 
     // Main data fetching effect
@@ -402,14 +428,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                setIsBusy(false);
            }, 50);
         }
-    }, [db, isBusy, appliedFilters, viewMode, pageSize, currentPage, logToConsole, filteredEntries, totalFilteredCount, setJumpToEntryId, setIsInitialLoad, setIsBusy]);
+    }, [db, isBusy, appliedFilters, viewMode, pageSize, currentPage, filteredEntries, totalFilteredCount, setJumpToEntryId, setIsInitialLoad, setIsBusy]);
 
     const handleFileSelect = useCallback((fileName: string) => {
         if (db) {
             const range = db.getTimeRangePerFile({ ...initialFilters, fileName: [fileName], fileNameFilterMode: 'include' });
             if (range.length > 0 && range[0].startTime && range[0].endTime) {
-                const min = new Date(range[0].startTime + 'Z').getTime();
-                const max = new Date(range[0].endTime + 'Z').getTime();
+                const min = new Date(range[0].startTime.replace(' ', 'T') + 'Z').getTime();
+                const max = new Date(range[0].endTime.replace(' ', 'T') + 'Z').getTime();
                 if (min < max) setTimelineViewRange({ min, max });
             }
         }
@@ -477,9 +503,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsStockBusy(true);
         setTimeout(async () => {
             try {
-                const onProgress = (processed: number, total: number) => {
+                const onProgress = (processed: number, total: number, parsed: number) => {
                     const progressPercentage = total > 0 ? (processed / total) * 100 : 100;
-                    addToast({ id: 'rebuild-stock', type: 'progress', title: 'Rebuilding Stock Data', message: `Scanning... ${processed.toLocaleString()}/${total.toLocaleString()}`, progress: progressPercentage });
+                    addToast({ id: 'rebuild-stock', type: 'progress', title: 'Rebuilding Stock Data', message: `Scanning... ${processed.toLocaleString()}/${total.toLocaleString()} (${parsed} found)`, progress: progressPercentage });
                 };
                 const rebuiltCount = db.rebuildStockInfoFromLogs(onProgress);
                 await updateStateFromDb(db, false);
@@ -521,7 +547,3 @@ export const useData = (): DataContextType => {
     }
     return context;
 };
-
-// We need to import useSettings at the bottom to avoid circular dependency issues in module resolution
-// since SettingsContext also imports some hooks.
-import { useSettings } from './SettingsContext';
