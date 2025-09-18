@@ -16,6 +16,7 @@ interface ProgressIndicatorProps {
     fileLogCount: number | null;
   }
   iconSet: IconSet;
+  onCancel: () => void;
 }
 
 const phaseDetails: Record<ProgressPhase, { iconName: IconName; label: string, isAnimated?: boolean }> = {
@@ -28,7 +29,7 @@ const phaseDetails: Record<ProgressPhase, { iconName: IconName; label: string, i
 };
 
 
-export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ progress, message, phase, detailedProgress, iconSet }) => {
+export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ progress, message, phase, detailedProgress, iconSet, onCancel }) => {
   const currentPhase = phaseDetails[phase];
 
   return (
@@ -68,6 +69,15 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ progress, 
           ></div>
         </div>
         <p className="text-gray-900 dark:text-white font-mono text-2xl mt-4">{progress.toFixed(0)}%</p>
+
+        <div className="mt-6">
+            <button
+                onClick={onCancel}
+                className="px-4 py-2 text-sm font-semibold text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900/40 hover:bg-red-200 dark:hover:bg-red-800/60 rounded-lg transition-colors"
+            >
+                Cancel
+            </button>
+        </div>
       </div>
     </div>
   );

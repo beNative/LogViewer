@@ -44,7 +44,7 @@ const App: React.FC = () => {
         isElectron, sessions, activeSessionName, isDirty, hasData, totalEntryCount,
         overallTimeRange, loadedFileNames, error,
         handleCreateNewSessionFromFiles, handleAddFilesToCurrentSession, handleImportDb,
-        handleDownloadDb, handleNewSession, handleLoadSession, onRenameSession, onDeleteSession
+        handleDownloadDb, handleNewSession, handleLoadSession, onRenameSession, onDeleteSession, handleCancelProcessing
     } = useSession();
 
     // Data (Log & Stock) State and Actions from Hooks
@@ -100,7 +100,7 @@ const App: React.FC = () => {
               version="0.20.0"
           />
       )}
-      {isLoading && <ProgressIndicator progress={progress} message={progressMessage} phase={progressPhase} detailedProgress={detailedProgress} iconSet={iconSet} />}
+      {isLoading && <ProgressIndicator progress={progress} message={progressMessage} phase={progressPhase} detailedProgress={detailedProgress} iconSet={iconSet} onCancel={handleCancelProcessing} />}
       <Header activeView={activeView} onViewChange={setActiveView} isBusy={isBusy || isStockBusy} iconSet={iconSet} />
       <main className="flex-grow flex flex-col min-h-0">
         {activeView === 'data' && (
