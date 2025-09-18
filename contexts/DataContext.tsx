@@ -58,6 +58,7 @@ type DataContextType = {
 
     // Stock Tracker State & Logic
     stockHistory: StockInfoEntry[];
+    setStockHistory: React.Dispatch<React.SetStateAction<StockInfoEntry[]>>;
     overallStockTimeRange: { min: string, max: string } | null;
     overallStockDensity: LogDensityPoint[];
     handleSearchStock: (filters: StockInfoFilters) => void;
@@ -73,7 +74,7 @@ type DataContextType = {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { db, hasData, loadedFileNames, setIsDirty, handleSaveSession, updateStateFromDb, overallStockTimeRange, setOverallStockTimeRange, overallStockDensity, setOverallStockDensity } = useSession();
+    const { db, hasData, loadedFileNames, handleRebuildStockDataInWorker, overallStockTimeRange, setOverallStockTimeRange, overallStockDensity, setOverallStockDensity } = useSession();
     const { logToConsole, lastConsoleMessage } = useConsole();
     const { setIsBusy, isBusy, isStockBusy, setIsStockBusy, setActiveView, setJumpToEntryId, jumpToEntryId, isInitialLoad, setIsInitialLoad, keyboardSelectedId, setKeyboardSelectedId, addToast } = useUI();
     const { viewMode } = useSettings();
@@ -251,13 +252,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             try {
                 db.setMeta('appliedFilters', JSON.stringify(formFilters));
                 logToConsole('Saved current filter configuration to the session database.', 'DEBUG');
-                setIsDirty(true);
             } catch(e) {
                 const msg = e instanceof Error ? e.message : String(e);
                 logToConsole(`Could not save filters to session: ${msg}`, 'WARNING');
             }
         }
-    }, [db, formFilters, logToConsole, setIsDirty, setIsInitialLoad]);
+    }, [db, formFilters, logToConsole, setIsInitialLoad]);
 
     const handleResetFilters = useCallback(() => {
         logToConsole('Resetting filters...', 'INFO');
@@ -275,10 +275,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setCurrentPage(1);
         setEntriesOffset(0);
     }, [logToConsole, db, setIsInitialLoad]);
-
-    // ... All other handle... functions from App.tsx related to data filtering and fetching go here ...
-    // This is a large chunk of logic that is being moved.
-    // I will include the most important ones for brevity in thought process, but implement all.
 
     const onLoadMore = useCallback(() => {
         if (!db || !hasMoreLogs || isBusy) return;
@@ -498,28 +494,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, [db, logToConsole]);
 
     const handleRebuildStockData = useCallback(async () => {
-        if (!db || !hasData) { addToast({ type: 'error', title: 'Rebuild Failed', message: 'No data is currently loaded.' }); return; }
-        addToast({ id: 'rebuild-stock', type: 'progress', title: 'Rebuilding Stock Data', message: 'Initializing...', progress: 0, duration: 0 });
-        setIsStockBusy(true);
-        setTimeout(async () => {
-            try {
-                const onProgress = (processed: number, total: number, parsed: number) => {
-                    const progressPercentage = total > 0 ? (processed / total) * 100 : 100;
-                    addToast({ id: 'rebuild-stock', type: 'progress', title: 'Rebuilding Stock Data', message: `Scanning... ${processed.toLocaleString()}/${total.toLocaleString()} (${parsed} found)`, progress: progressPercentage });
-                };
-                const rebuiltCount = db.rebuildStockInfoFromLogs(onProgress);
-                await updateStateFromDb(db, false);
-                setStockHistory([]);
-                setIsDirty(true);
-                await handleSaveSession();
-                addToast({ id: 'rebuild-stock', type: 'success', title: 'Rebuild Complete', message: `Successfully rebuilt ${rebuiltCount.toLocaleString()} stock entries.` });
-            } catch (e) {
-                const msg = e instanceof Error ? e.message : String(e);
-                addToast({ id: 'rebuild-stock', type: 'error', title: 'Rebuild Failed', message: msg });
-            } finally { setIsStockBusy(false); }
-        }, 50);
-    }, [db, hasData, addToast, updateStateFromDb, handleSaveSession, setIsDirty, setIsStockBusy]);
-
+        if (!db || !hasData) {
+            addToast({ type: 'error', title: 'Rebuild Failed', message: 'No data is currently loaded.' });
+            return;
+        }
+        await handleRebuildStockDataInWorker();
+        // After worker is done, the SessionContext will call updateStateFromDb, which will
+        // update the stock time range and density. We just need to clear the local history.
+        setStockHistory([]);
+    }, [db, hasData, addToast, handleRebuildStockDataInWorker]);
 
     const value = {
         filteredEntries, totalFilteredCount, hasMoreLogs, pageTimestampRanges, formFilters, setFormFilters,
@@ -528,7 +511,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         onLoadMore, goToPage, handlePageSizeChange, handleRemoveAppliedFilter, handleContextMenuFilter, handleCursorChange,
         handleFileSelect, handleDateSelect, handleApplyDetailFilter, timelineViewRange, setTimelineViewRange,
         handleTimelineZoomToSelection, handleTimelineZoomReset, dashboardData, handleTimeRangeSelect, handleCategorySelect,
-        stockHistory, overallStockTimeRange, overallStockDensity, handleSearchStock, handleRebuildStockData,
+        stockHistory, setStockHistory, overallStockTimeRange, overallStockDensity, handleSearchStock, handleRebuildStockData,
         handleFetchStockSuggestions, logToConsoleForEntries: logToConsole, lastConsoleMessageForStatus: lastConsoleMessage,
         keyboardSelectedId, setKeyboardSelectedId, jumpToEntryId, isInitialLoad
     };

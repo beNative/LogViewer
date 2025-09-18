@@ -23,6 +23,8 @@ type UIContextType = {
     setProgressPhase: React.Dispatch<React.SetStateAction<ProgressPhase>>;
     detailedProgress: { currentFile: string; fileBytesRead: number; fileTotalBytes: number; fileLogCount: number | null; };
     setDetailedProgress: React.Dispatch<React.SetStateAction<{ currentFile: string; fileBytesRead: number; fileTotalBytes: number; fileLogCount: number | null; }>>;
+    progressTitle: string;
+    setProgressTitle: React.Dispatch<React.SetStateAction<string>>;
 
     // Interaction State
     keyboardSelectedId: number | null;
@@ -53,6 +55,7 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const [progressMessage, setProgressMessage] = useState<string>('');
     const [progressPhase, setProgressPhase] = useState<ProgressPhase>('reading');
     const [detailedProgress, setDetailedProgress] = useState({ currentFile: '', fileBytesRead: 0, fileTotalBytes: 0, fileLogCount: null as number | null });
+    const [progressTitle, setProgressTitle] = useState('Processing Files...');
     
     const [keyboardSelectedId, setKeyboardSelectedId] = useState<number | null>(null);
     const [jumpToEntryId, setJumpToEntryId] = useState<number | null>(null);
@@ -69,6 +72,7 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         progressMessage, setProgressMessage,
         progressPhase, setProgressPhase,
         detailedProgress, setDetailedProgress,
+        progressTitle, setProgressTitle,
         keyboardSelectedId, setKeyboardSelectedId,
         jumpToEntryId, setJumpToEntryId,
         isInitialLoad, setIsInitialLoad,

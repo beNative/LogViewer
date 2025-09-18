@@ -25,7 +25,7 @@ const App: React.FC = () => {
     // UI State and Actions from Hooks
     const {
         activeView, setActiveView, isAboutDialogOpen, setIsAboutDialogOpen,
-        isLoading, progress, progressMessage, progressPhase, detailedProgress,
+        isLoading, progress, progressMessage, progressPhase, detailedProgress, progressTitle,
         isBusy, isStockBusy,
     } = useUI();
 
@@ -100,7 +100,7 @@ const App: React.FC = () => {
               version="0.20.0"
           />
       )}
-      {isLoading && <ProgressIndicator progress={progress} message={progressMessage} phase={progressPhase} detailedProgress={detailedProgress} iconSet={iconSet} onCancel={handleCancelProcessing} />}
+      {isLoading && <ProgressIndicator title={progressTitle} progress={progress} message={progressMessage} phase={progressPhase} detailedProgress={detailedProgress} iconSet={iconSet} onCancel={handleCancelProcessing} />}
       <Header activeView={activeView} onViewChange={setActiveView} isBusy={isBusy || isStockBusy} iconSet={iconSet} />
       <main className="flex-grow flex flex-col min-h-0">
         {activeView === 'data' && (

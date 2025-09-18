@@ -34,12 +34,13 @@ type SessionContextType = {
     overallStockDensity: any[]; // Use any to avoid circular dependency with DataContext
     setOverallStockDensity: React.Dispatch<React.SetStateAction<any[]>>;
     handleCancelProcessing: () => void;
+    handleRebuildStockDataInWorker: () => Promise<void>;
 };
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
 export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { setIsLoading, setProgress, setProgressMessage, setProgressPhase, setDetailedProgress, setIsInitialLoad, addToast, error, setError, setActiveView } = useUI();
+    const { setIsLoading, setProgress, setProgressMessage, setProgressPhase, setDetailedProgress, setProgressTitle, setIsInitialLoad, addToast, error, setError, setActiveView } = useUI();
     const { logToConsole } = useConsole();
     
     const [db, setDb] = useState<Database | null>(null);
@@ -53,6 +54,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const [loadedFileNames, setLoadedFileNames] = useState<string[]>([]);
     const sessionNameHint = useRef<string | null>(null);
     const workerRef = useRef<Worker | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
 
     // State that is also part of DataContext but needed here for updates
     const [overallStockTimeRange, setOverallStockTimeRange] = useState<{ min: string, max: string } | null>(null);
@@ -142,9 +144,11 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     const processFilesToDb = useCallback(async (files: FileList) => {
         return new Promise<{ db: Database, count: number }>(async (resolve, reject) => {
-            if (workerRef.current) {
-                workerRef.current.terminate();
+            if (isProcessing) {
+                return reject(new Error("Another process is already running."));
             }
+            setIsProcessing(true);
+            if (workerRef.current) workerRef.current.terminate();
 
             const worker = new Worker('./dist/worker.js');
             workerRef.current = worker;
@@ -158,15 +162,17 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
                         setProgress(payload.progress);
                         setDetailedProgress(payload.details);
                         break;
-                    case 'done':
+                    case 'done-import':
                         const finalDb = await Database.createFromBuffer(payload.dbBuffer);
                         worker.terminate();
                         workerRef.current = null;
+                        setIsProcessing(false);
                         resolve({ db: finalDb, count: payload.count });
                         break;
                     case 'error':
                         worker.terminate();
                         workerRef.current = null;
+                        setIsProcessing(false);
                         reject(new Error(payload.error));
                         break;
                 }
@@ -175,13 +181,12 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
             worker.onerror = (err) => {
                 worker.terminate();
                 workerRef.current = null;
+                setIsProcessing(false);
                 reject(new Error(`Worker error: ${err.message}`));
             };
             
-            // --- Main Thread Tasks: File Reading & Unzipping ---
             const xmlFiles: { name: string; content: string }[] = [];
-            let totalSize = 0;
-            for (const file of files) totalSize += file.size;
+            let totalSize = Array.from(files).reduce((acc, file) => acc + file.size, 0);
             let bytesRead = 0;
 
             setProgressPhase('reading');
@@ -198,6 +203,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
                             }
                         }
                     } catch (e) {
+                        setIsProcessing(false);
                         return reject(new Error(`Failed to read zip file ${file.name}: ${(e as Error).message}`));
                     }
                 } else if (file.name.endsWith('.xml')) {
@@ -208,16 +214,16 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 setProgress(30 * (bytesRead / totalSize));
             }
             
-            // --- Delegate to Worker ---
-            worker.postMessage({ xmlFiles });
+            worker.postMessage({ type: 'import-logs', payload: { xmlFiles } });
         });
-    }, [setProgress, setProgressMessage, setProgressPhase, setDetailedProgress]);
+    }, [isProcessing, setProgress, setProgressMessage, setProgressPhase, setDetailedProgress]);
 
     const handleCancelProcessing = useCallback(() => {
         if (workerRef.current) {
             workerRef.current.terminate();
             workerRef.current = null;
             setIsLoading(false);
+            setIsProcessing(false);
             setError('Processing was cancelled by the user.');
             logToConsole('User cancelled file processing.', 'WARNING');
             addToast({ type: 'warning', title: 'Cancelled', message: 'The file processing was cancelled.'});
@@ -338,6 +344,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (files.length === 0) return;
         setIsLoading(true);
         setError(null);
+        setProgressTitle("Processing Files...");
         sessionNameHint.current = `session_from_${files[0].name.replace(/\.[^/.]+$/, "")}.sqlite`;
 
         try {
@@ -358,11 +365,9 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         } finally {
             setIsLoading(false);
         }
-    }, [processFilesToDb, updateStateFromDb, isElectron, saveCurrentDbAsSession, addToast, setIsLoading, setError, setActiveView]);
+    }, [processFilesToDb, updateStateFromDb, isElectron, saveCurrentDbAsSession, addToast, setIsLoading, setError, setActiveView, setProgressTitle]);
 
     const handleAddFilesToCurrentSession = useCallback(async (files: FileList) => {
-        // This is a complex operation mixing worker and existing state.
-        // For this POC, we'll keep it simple and just create a new session.
         logToConsole("Adding files to an existing session is not yet supported with Web Workers. Creating a new session instead.", "INFO");
         await handleCreateNewSessionFromFiles(files);
     }, [handleCreateNewSessionFromFiles, logToConsole]);
@@ -405,15 +410,82 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     }, [db, hasData, activeSessionName]);
+    
+    const handleRebuildStockDataInWorker = useCallback(async () => {
+        return new Promise<void>(async (resolve, reject) => {
+            if (!db || !hasData) {
+                addToast({ type: 'error', title: 'Rebuild Failed', message: 'No data is currently loaded.' });
+                return reject();
+            }
+            if (isProcessing) {
+                addToast({ type: 'warning', title: 'Busy', message: 'Another process is already running.' });
+                return reject();
+            }
 
+            setIsLoading(true);
+            setIsProcessing(true);
+            setProgressTitle("Rebuilding Stock Data...");
+            setProgress(0);
+            setDetailedProgress({ currentFile: '', fileBytesRead: 0, fileTotalBytes: 0, fileLogCount: null });
+
+            if (workerRef.current) workerRef.current.terminate();
+
+            const worker = new Worker('./dist/worker.js');
+            workerRef.current = worker;
+            const dbBuffer = db.export();
+            
+            worker.onmessage = async (event) => {
+                const { type, payload } = event.data;
+                switch (type) {
+                    case 'progress':
+                        setProgressPhase(payload.phase as ProgressPhase);
+                        setProgressMessage(payload.message);
+                        setProgress(payload.progress);
+                        break;
+                    case 'done-rebuild':
+                        const newDb = await Database.createFromBuffer(payload.dbBuffer);
+                        await updateStateFromDb(newDb);
+                        setDb(newDb);
+                        setIsDirty(true);
+                        await handleSaveSession();
+                        worker.terminate();
+                        workerRef.current = null;
+                        setIsLoading(false);
+                        setIsProcessing(false);
+                        addToast({ type: 'success', title: 'Rebuild Complete', message: `Successfully rebuilt ${payload.count.toLocaleString()} stock entries.` });
+                        resolve();
+                        break;
+                    case 'error':
+                        const msg = payload.error || "An unknown worker error occurred.";
+                        addToast({ type: 'error', title: 'Rebuild Failed', message: msg });
+                        worker.terminate();
+                        workerRef.current = null;
+                        setIsLoading(false);
+                        setIsProcessing(false);
+                        reject(new Error(msg));
+                        break;
+                }
+            };
+            
+            worker.onerror = (err) => {
+                worker.terminate();
+                workerRef.current = null;
+                setIsLoading(false);
+                setIsProcessing(false);
+                addToast({ type: 'error', title: 'Rebuild Failed', message: err.message });
+                reject(err);
+            };
+            
+            worker.postMessage({ type: 'rebuild-stock', payload: { dbBuffer } }, [dbBuffer.buffer]);
+        });
+    }, [db, hasData, addToast, isProcessing, setIsLoading, setProgress, setProgressMessage, setProgressPhase, setProgressTitle, updateStateFromDb, handleSaveSession, setDetailedProgress]);
 
     // Electron-specific effects
     useEffect(() => {
         if (!isElectron) return;
         window.isAppDirty = () => ({ isDirty: isDirty, sessionName: activeSessionName });
         const removeListener = window.electronAPI.onSaveBeforeQuit(async () => {
-            const success = await handleSaveSession();
-            // Always quit, even if save fails, to prevent getting stuck. Toast will show error.
+            await handleSaveSession();
             window.electronAPI.savedAndReadyToQuit();
         });
         return () => { delete window.isAppDirty; removeListener(); };
@@ -432,7 +504,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         overallTimeRange, loadedFileNames, error, handleNewSession, handleSaveSession, handleLoadSession,
         onRenameSession, onDeleteSession, handleCreateNewSessionFromFiles, handleAddFilesToCurrentSession,
         handleImportDb, handleDownloadDb, updateStateFromDb, overallStockTimeRange, setOverallStockTimeRange,
-        overallStockDensity, setOverallStockDensity, handleCancelProcessing
+        overallStockDensity, setOverallStockDensity, handleCancelProcessing, handleRebuildStockDataInWorker
     };
     
     return (

@@ -6,6 +6,7 @@ import { IconSet, ProgressPhase } from '../types';
 type IconName = React.ComponentProps<typeof Icon>['name'];
 
 interface ProgressIndicatorProps {
+  title: string;
   progress: number;
   message: string;
   phase: ProgressPhase;
@@ -29,13 +30,13 @@ const phaseDetails: Record<ProgressPhase, { iconName: IconName; label: string, i
 };
 
 
-export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ progress, message, phase, detailedProgress, iconSet, onCancel }) => {
+export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ title, progress, message, phase, detailedProgress, iconSet, onCancel }) => {
   const currentPhase = phaseDetails[phase];
 
   return (
     <div className="fixed inset-0 bg-gray-900 bg-opacity-80 dark:bg-opacity-80 flex flex-col items-center justify-center z-50 transition-opacity duration-300">
       <div className="w-full max-w-lg p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-xl text-center">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Processing Files...</h2>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">{title}</h2>
         
         <div className="flex items-center justify-center gap-3 my-4 text-sky-600 dark:text-sky-400">
             <Icon name={currentPhase.iconName} iconSet={iconSet} className={`w-8 h-8 ${currentPhase.isAnimated ? 'animate-spin' : ''}`} />
