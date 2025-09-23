@@ -20,6 +20,7 @@ import { useConsole } from './contexts/ConsoleContext';
 import { useSettings } from './contexts/SettingsContext';
 import { useSession } from './contexts/SessionContext';
 import { useData } from './contexts/DataContext';
+import { TitleBar } from './components/TitleBar';
 
 const App: React.FC = () => {
     // UI State and Actions from Hooks
@@ -87,6 +88,7 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+       <TitleBar />
        <div className="fixed bottom-4 right-4 z-50 w-full max-w-sm space-y-3">
           {toasts.map(toast => (
               <Toast key={toast.id} toast={toast} onDismiss={() => removeToast(toast.id)} iconSet={iconSet} />

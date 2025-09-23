@@ -376,6 +376,30 @@ const iconDefs = {
             </svg>
         )
     },
+    Maximize: {
+        sharp: (props: React.SVGProps<SVGSVGElement>) => (
+            <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+                <rect x="4.5" y="4.5" width="15" height="15" rx="1" />
+            </svg>
+        ),
+        solid: (props: React.SVGProps<SVGSVGElement>) => (
+            <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+                 <path d="M3 3.75A.75.75 0 013.75 3h16.5a.75.75 0 01.75.75v16.5a.75.75 0 01-.75.75H3.75a.75.75 0 01-.75-.75V3.75z" />
+            </svg>
+        )
+    },
+    Minimize: {
+        sharp: (props: React.SVGProps<SVGSVGElement>) => (
+            <svg fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" {...props}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" />
+            </svg>
+        ),
+        solid: (props: React.SVGProps<SVGSVGElement>) => (
+             <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+                <path fillRule="evenodd" d="M4 12a1 1 0 011-1h14a1 1 0 110 2H5a1 1 0 01-1-1z" clipRule="evenodd" />
+            </svg>
+        )
+    },
     Moon: {
         sharp: (props: React.SVGProps<SVGSVGElement>) => (
             <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
@@ -422,6 +446,19 @@ const iconDefs = {
         solid: (props: React.SVGProps<SVGSVGElement>) => (
             <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
                 <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 9a.75.75 0 00-1.5 0v2.25H9a.75.75 0 000 1.5h2.25V15a.75.75 0 001.5 0v-2.25H15a.75.75 0 000-1.5h-2.25V9z" clipRule="evenodd" />
+            </svg>
+        )
+    },
+    Restore: {
+        sharp: (props: React.SVGProps<SVGSVGElement>) => (
+            <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 8.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v8.25A2.25 2.25 0 006 16.5h2.25m8.25-8.25H18a2.25 2.25 0 012.25 2.25v8.25A2.25 2.25 0 0118 21H9.75A2.25 2.25 0 017.5 18.75V16.5" />
+            </svg>
+        ),
+        solid: (props: React.SVGProps<SVGSVGElement>) => (
+            <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+                <path fillRule="evenodd" d="M3 6.75A.75.75 0 013.75 6h6a.75.75 0 01.75.75v10.5a.75.75 0 01-.75.75h-6a.75.75 0 01-.75-.75V6.75zM14.25 6a.75.75 0 01.75-.75h3a.75.75 0 01.75.75v3a.75.75 0 01-1.5 0V7.5h-1.5a.75.75 0 01-.75-.75z" clipRule="evenodd" />
+                <path d="M15 11.25a.75.75 0 01.75-.75h1.5a.75.75 0 01.75.75v7.5a.75.75 0 01-.75.75h-7.5a.75.75 0 01-.75-.75v-1.5a.75.75 0 011.5 0v.75h5.25v-6z" />
             </svg>
         )
     },

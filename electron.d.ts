@@ -22,6 +22,12 @@ export interface IElectronAPI {
     setTitle: (title: string) => void;
     onSaveBeforeQuit: (callback: () => void) => () => void; // Returns a function to unsubscribe
     savedAndReadyToQuit: () => void;
+    // Window Controls
+    minimizeWindow: () => void;
+    maximizeWindow: () => void;
+    closeWindow: () => void;
+    isWindowMaximized: () => Promise<boolean>;
+    onWindowMaximizedStatus: (callback: (isMaximized: boolean) => void) => () => void;
     // Auto-updater
     onUpdateStatus: (callback: (status: string, data: any) => void) => () => void;
     installUpdate: () => void;

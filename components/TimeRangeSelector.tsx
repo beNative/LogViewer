@@ -663,7 +663,7 @@ const DensityTooltip: React.FC<{ x: number, y: number, bucketData: BucketData, t
             let newTop = y - height - GAP;
             let newLeft = x - (width / 2);
 
-            // Check for top boundary collision
+            // Check for vertical boundary collision
             if (newTop < GAP) {
                 // Not enough space above, flip to below
                 newTop = y + 20; // Some gap below the cursor
@@ -784,8 +784,8 @@ const OverviewBrush: React.FC<{
             return;
         }
 
-        let newMin = dragState.initialMin;
-        let newMax = dragState.initialMax;
+        let newMin: number = dragState.initialMin;
+        let newMax: number = dragState.initialMax;
 
         if (dragState.type === 'brush') {
             newMin += deltaTime;

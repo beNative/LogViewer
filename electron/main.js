@@ -183,11 +183,20 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
     },
+    frame: false,
+    titleBarStyle: 'hidden',
     autoHideMenuBar: true,
   };
   mainWindow = new BrowserWindow(windowOptions);
   
   const settings = getSettings();
+
+  mainWindow.on('maximize', () => {
+    mainWindow.webContents.send('window-maximized-status', true);
+  });
+  mainWindow.on('unmaximize', () => {
+    mainWindow.webContents.send('window-maximized-status', false);
+  });
 
   mainWindow.once('ready-to-show', () => {
     log('INFO', 'Main window is ready to show.');
@@ -472,6 +481,28 @@ app.whenReady().then(() => {
         log('INFO', 'Renderer requested application quit and install.');
         autoUpdater.quitAndInstall();
     });
+
+    // Window control IPC Handlers
+    ipcMain.on('window-minimize', () => {
+        mainWindow.minimize();
+    });
+
+    ipcMain.on('window-maximize', () => {
+        if (mainWindow.isMaximized()) {
+            mainWindow.unmaximize();
+        } else {
+            mainWindow.maximize();
+        }
+    });
+
+    ipcMain.on('window-close', () => {
+        mainWindow.close();
+    });
+
+    ipcMain.handle('window-is-maximized', () => {
+        return mainWindow.isMaximized();
+    });
+
 
     createWindow();
 

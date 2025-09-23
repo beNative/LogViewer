@@ -32,6 +32,18 @@ contextBridge.exposeInMainWorld('electronAPI', {
         return () => ipcRenderer.removeListener('save-before-quit', listener);
     },
     savedAndReadyToQuit: () => ipcRenderer.send('saved-and-ready-to-quit'),
+    
+    // Window Controls
+    minimizeWindow: () => ipcRenderer.send('window-minimize'),
+    maximizeWindow: () => ipcRenderer.send('window-maximize'),
+    closeWindow: () => ipcRenderer.send('window-close'),
+    isWindowMaximized: () => ipcRenderer.invoke('window-is-maximized'),
+    onWindowMaximizedStatus: (callback) => {
+        const listener = (event, isMaximized) => callback(isMaximized);
+        ipcRenderer.on('window-maximized-status', listener);
+        return () => ipcRenderer.removeListener('window-maximized-status', listener);
+    },
+
 
     // Auto-updater
     onUpdateStatus: (callback) => {
