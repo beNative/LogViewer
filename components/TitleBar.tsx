@@ -28,7 +28,6 @@ export const TitleBar: React.FC<TitleBarProps> = ({ activeView }) => {
     const searchInputRef = useRef<HTMLInputElement>(null);
     const debounceTimeoutRef = useRef<number | null>(null);
 
-    // Use local state to control the input, making it a controlled component.
     const [inputValue, setInputValue] = useState('');
 
     const isConsole = activeView === 'console';
@@ -51,23 +50,19 @@ export const TitleBar: React.FC<TitleBarProps> = ({ activeView }) => {
         return () => { isMounted = false; removeListener(); };
     }, []);
 
-    // Sync local input value when view changes or the underlying search term changes
+    // This effect runs ONLY when the active view changes.
+    // It populates the input with the correct value from the context for the new view.
     useEffect(() => {
         if (isConsole) {
             setInputValue(consoleSearchTerm);
         } else if (isViewer) {
+            // Only use the first line of includeMsg for the search bar
             setInputValue(formFilters.includeMsg.split('\n')[0] || '');
         } else {
             setInputValue(''); // Clear for other views
         }
-    }, [activeView, consoleSearchTerm, formFilters.includeMsg]);
+    }, [activeView]);
 
-    // Focus input when switching TO a searchable view
-    useEffect(() => {
-        if (isSearchable) {
-            searchInputRef.current?.focus();
-        }
-    }, [isSearchable, activeView]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = e.target.value;
@@ -79,17 +74,14 @@ export const TitleBar: React.FC<TitleBarProps> = ({ activeView }) => {
             // Update the form filters state in real-time
             setFormFilters(prev => ({ ...prev, includeMsg: newValue }));
             
-            // Debounce the expensive database query
             if (debounceTimeoutRef.current) {
                 clearTimeout(debounceTimeoutRef.current);
             }
             debounceTimeoutRef.current = window.setTimeout(() => {
-                // Check if the input is still focused before applying, to prevent race conditions
-                // or applying filters after the user has navigated away.
                 if (document.activeElement === searchInputRef.current) {
                     handleApplyFilters();
                 }
-            }, 500); // 500ms debounce
+            }, 500);
         }
     };
     
@@ -98,7 +90,6 @@ export const TitleBar: React.FC<TitleBarProps> = ({ activeView }) => {
         if (isConsole) {
             setConsoleSearchTerm('');
         } else if (isViewer) {
-            // Use the dedicated remove function which handles form and applied state
             handleRemoveAppliedFilter('includeMsg');
         }
         searchInputRef.current?.focus();

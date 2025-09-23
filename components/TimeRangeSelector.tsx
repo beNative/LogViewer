@@ -777,14 +777,14 @@ const OverviewBrush: React.FC<{
         const unscaledDeltaX = deltaX / uiScale;
         const deltaTime = positionToValue(unscaledDeltaX) - positionToValue(0);
 
-        // FIX: Replaced a simple `else` with a more explicit `else if` to ensure TypeScript correctly
-        // narrows the type of `dragState`, resolving errors where `initialMin` and `initialMax` were
-        // inferred as `unknown` and preventing arithmetic operations.
         if (dragState.type === 'new_overview_selection') {
             const start = Math.min(dragState.startTime, currentTime);
             const end = Math.max(dragState.startTime, currentTime);
             setTempSelection({ start, end });
-        } else if (dragState.type === 'brush' || dragState.type === 'brush_left' || dragState.type === 'brush_right') {
+        } else {
+            // FIX: Use a simple 'else' block. TypeScript can correctly infer that if the type is not
+            // 'new_overview_selection', it must be one of the other types in the union,
+            // all of which contain 'initialMin' and 'initialMax' as numbers.
             let newMin = dragState.initialMin;
             let newMax = dragState.initialMax;
 
