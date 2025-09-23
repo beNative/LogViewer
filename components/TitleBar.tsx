@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Icon } from './icons';
 import { useSettings } from '../contexts/SettingsContext';
 import { useConsole } from '../contexts/ConsoleContext';
+import { useData } from '../contexts/DataContext';
 
 interface TitleBarProps {
     activeView: 'data' | 'viewer' | 'dashboard' | 'console' | 'settings' | 'info' | 'stock';
@@ -23,8 +24,16 @@ export const TitleBar: React.FC<TitleBarProps> = ({ activeView }) => {
     const [isMaximized, setIsMaximized] = useState(false);
     const { iconSet } = useSettings();
     const { consoleSearchTerm, setConsoleSearchTerm } = useConsole();
-    const isConsoleSearchActive = activeView === 'console';
+    const { formFilters, setFormFilters, handleApplyFilters, handleRemoveAppliedFilter } = useData();
     const searchInputRef = useRef<HTMLInputElement>(null);
+    const debounceTimeoutRef = useRef<number | null>(null);
+
+    // Use local state to control the input, making it a controlled component.
+    const [inputValue, setInputValue] = useState('');
+
+    const isConsole = activeView === 'console';
+    const isViewer = activeView === 'viewer';
+    const isSearchable = isConsole || isViewer;
 
     useEffect(() => {
         if (!window.electronAPI) return;
@@ -32,38 +41,82 @@ export const TitleBar: React.FC<TitleBarProps> = ({ activeView }) => {
         let isMounted = true;
 
         window.electronAPI.isWindowMaximized().then(status => {
-            if (isMounted) {
-                setIsMaximized(status);
-            }
+            if (isMounted) setIsMaximized(status);
         });
         
         const removeListener = window.electronAPI.onWindowMaximizedStatus(status => {
-            if (isMounted) {
-                setIsMaximized(status);
-            }
+            if (isMounted) setIsMaximized(status);
         });
         
-        return () => {
-            isMounted = false;
-            removeListener();
-        };
-
+        return () => { isMounted = false; removeListener(); };
     }, []);
 
-    // Effect to auto-focus the search input when the console becomes active
+    // Sync local input value when view changes or the underlying search term changes
     useEffect(() => {
-        if (isConsoleSearchActive) {
+        if (isConsole) {
+            setInputValue(consoleSearchTerm);
+        } else if (isViewer) {
+            setInputValue(formFilters.includeMsg.split('\n')[0] || '');
+        } else {
+            setInputValue(''); // Clear for other views
+        }
+    }, [activeView, consoleSearchTerm, formFilters.includeMsg]);
+
+    // Focus input when switching TO a searchable view
+    useEffect(() => {
+        if (isSearchable) {
             searchInputRef.current?.focus();
         }
-    }, [isConsoleSearchActive]);
+    }, [isSearchable, activeView]);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value;
+        setInputValue(newValue); // Update local state immediately for responsiveness
+
+        if (isConsole) {
+            setConsoleSearchTerm(newValue);
+        } else if (isViewer) {
+            // Update the form filters state in real-time
+            setFormFilters(prev => ({ ...prev, includeMsg: newValue }));
+            
+            // Debounce the expensive database query
+            if (debounceTimeoutRef.current) {
+                clearTimeout(debounceTimeoutRef.current);
+            }
+            debounceTimeoutRef.current = window.setTimeout(() => {
+                // Check if the input is still focused before applying, to prevent race conditions
+                // or applying filters after the user has navigated away.
+                if (document.activeElement === searchInputRef.current) {
+                    handleApplyFilters();
+                }
+            }, 500); // 500ms debounce
+        }
+    };
+    
+    const handleClear = () => {
+        setInputValue('');
+        if (isConsole) {
+            setConsoleSearchTerm('');
+        } else if (isViewer) {
+            // Use the dedicated remove function which handles form and applied state
+            handleRemoveAppliedFilter('includeMsg');
+        }
+        searchInputRef.current?.focus();
+    };
+    
+    const getPlaceholder = () => {
+        switch(activeView) {
+            case 'viewer': return 'Search log messages (real-time)...';
+            case 'console': return 'Search application log (real-time)...';
+            default: return 'Command Palette';
+        }
+    };
 
     const handleMinimize = () => window.electronAPI?.minimizeWindow();
     const handleMaximize = () => window.electronAPI?.maximizeWindow();
     const handleClose = () => window.electronAPI?.closeWindow();
 
-    if (!window.electronAPI) {
-        return null;
-    }
+    if (!window.electronAPI) return null;
     
     return (
         <header 
@@ -80,26 +133,21 @@ export const TitleBar: React.FC<TitleBarProps> = ({ activeView }) => {
             <div className="flex-grow flex items-center justify-center px-4" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
                 <div className="relative w-full max-w-md">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Icon name="Filter" iconSet={iconSet} className="w-4 h-4 text-gray-400" />
+                         <Icon name={isSearchable ? "Filter" : "Terminal"} iconSet={iconSet} className="w-4 h-4 text-gray-400" />
                     </div>
                     <input
                         ref={searchInputRef}
                         type="text"
-                        placeholder={isConsoleSearchActive ? "Search Application Log..." : "Command Palette"}
-                        value={isConsoleSearchActive ? consoleSearchTerm : ""}
-                        onChange={(e) => {
-                            if (isConsoleSearchActive) {
-                                setConsoleSearchTerm(e.target.value);
-                            }
-                        }}
-                        disabled={!isConsoleSearchActive}
-                        className="w-full h-6 pl-10 pr-8 py-1 text-xs bg-gray-100 dark:bg-gray-700/80 border border-gray-300 dark:border-gray-600/50 rounded-md focus:ring-1 focus:ring-sky-500 focus:border-sky-500 transition-all placeholder-gray-400 disabled:bg-gray-200/50 disabled:dark:bg-gray-700/40"
+                        placeholder={getPlaceholder()}
+                        value={inputValue}
+                        onChange={handleInputChange}
+                        className="w-full h-6 pl-10 pr-8 py-1 text-xs bg-gray-100 dark:bg-gray-700/80 border border-gray-300 dark:border-gray-600/50 rounded-md focus:ring-1 focus:ring-sky-500 focus:border-sky-500 transition-all placeholder-gray-400"
                     />
-                     {isConsoleSearchActive && consoleSearchTerm && (
+                     {inputValue && (
                         <button
-                            onClick={() => setConsoleSearchTerm('')}
+                            onClick={handleClear}
                             className="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                            aria-label="Clear filter"
+                            aria-label="Clear search"
                         >
                             <Icon name="XCircle" iconSet={iconSet} className="w-4 h-4" />
                         </button>
