@@ -1,6 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Icon } from './icons';
 import { useSettings } from '../contexts/SettingsContext';
+import { useConsole } from '../contexts/ConsoleContext';
+
+interface TitleBarProps {
+    activeView: 'data' | 'viewer' | 'dashboard' | 'console' | 'settings' | 'info' | 'stock';
+}
 
 const WindowControlButton: React.FC<{ onClick: () => void; children: React.ReactNode; className?: string, title: string }> = ({ onClick, children, className = '', title }) => (
     <button
@@ -14,9 +19,12 @@ const WindowControlButton: React.FC<{ onClick: () => void; children: React.React
 );
 
 
-export const TitleBar: React.FC = () => {
+export const TitleBar: React.FC<TitleBarProps> = ({ activeView }) => {
     const [isMaximized, setIsMaximized] = useState(false);
     const { iconSet } = useSettings();
+    const { consoleSearchTerm, setConsoleSearchTerm } = useConsole();
+    const isConsoleSearchActive = activeView === 'console';
+    const searchInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (!window.electronAPI) return;
@@ -42,11 +50,17 @@ export const TitleBar: React.FC = () => {
 
     }, []);
 
+    // Effect to auto-focus the search input when the console becomes active
+    useEffect(() => {
+        if (isConsoleSearchActive) {
+            searchInputRef.current?.focus();
+        }
+    }, [isConsoleSearchActive]);
+
     const handleMinimize = () => window.electronAPI?.minimizeWindow();
     const handleMaximize = () => window.electronAPI?.maximizeWindow();
     const handleClose = () => window.electronAPI?.closeWindow();
 
-    // The component should only render in an Electron environment
     if (!window.electronAPI) {
         return null;
     }
@@ -68,11 +82,28 @@ export const TitleBar: React.FC = () => {
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <Icon name="Filter" iconSet={iconSet} className="w-4 h-4 text-gray-400" />
                     </div>
-                    <input 
+                    <input
+                        ref={searchInputRef}
                         type="text"
-                        placeholder="Command Palette"
-                        className="w-full h-6 px-10 py-1 text-xs bg-gray-100 dark:bg-gray-700/80 border border-gray-300 dark:border-gray-600/50 rounded-md focus:ring-1 focus:ring-sky-500 focus:border-sky-500 transition-all placeholder-gray-400"
+                        placeholder={isConsoleSearchActive ? "Search Application Log..." : "Command Palette"}
+                        value={isConsoleSearchActive ? consoleSearchTerm : ""}
+                        onChange={(e) => {
+                            if (isConsoleSearchActive) {
+                                setConsoleSearchTerm(e.target.value);
+                            }
+                        }}
+                        disabled={!isConsoleSearchActive}
+                        className="w-full h-6 pl-10 pr-8 py-1 text-xs bg-gray-100 dark:bg-gray-700/80 border border-gray-300 dark:border-gray-600/50 rounded-md focus:ring-1 focus:ring-sky-500 focus:border-sky-500 transition-all placeholder-gray-400 disabled:bg-gray-200/50 disabled:dark:bg-gray-700/40"
                     />
+                     {isConsoleSearchActive && consoleSearchTerm && (
+                        <button
+                            onClick={() => setConsoleSearchTerm('')}
+                            className="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                            aria-label="Clear filter"
+                        >
+                            <Icon name="XCircle" iconSet={iconSet} className="w-4 h-4" />
+                        </button>
+                    )}
                 </div>
             </div>
 

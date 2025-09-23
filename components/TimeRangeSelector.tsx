@@ -777,41 +777,42 @@ const OverviewBrush: React.FC<{
         const unscaledDeltaX = deltaX / uiScale;
         const deltaTime = positionToValue(unscaledDeltaX) - positionToValue(0);
 
+        // FIX: Refactor to use if-else to help TypeScript's control flow analysis
+        // This resolves errors where `initialMin` and `initialMax` were treated as 'unknown'.
         if (dragState.type === 'new_overview_selection') {
             const start = Math.min(dragState.startTime, currentTime);
             const end = Math.max(dragState.startTime, currentTime);
             setTempSelection({ start, end });
-            return;
-        }
+        } else {
+            let newMin = dragState.initialMin;
+            let newMax = dragState.initialMax;
 
-        let newMin: number = dragState.initialMin;
-        let newMax: number = dragState.initialMax;
-
-        if (dragState.type === 'brush') {
-            newMin += deltaTime;
-            newMax += deltaTime;
-            if (newMin < minTime) {
-                const diff = minTime - newMin;
-                newMin = minTime;
-                newMax += diff;
+            if (dragState.type === 'brush') {
+                newMin += deltaTime;
+                newMax += deltaTime;
+                if (newMin < minTime) {
+                    const diff = minTime - newMin;
+                    newMin = minTime;
+                    newMax += diff;
+                }
+                if (newMax > maxTime) {
+                    const diff = newMax - maxTime;
+                    newMax = maxTime;
+                    newMin -= diff;
+                }
+            } else if (dragState.type === 'brush_left') {
+                newMin += deltaTime;
+                if (newMin < minTime) newMin = minTime;
+                if (newMin >= newMax) newMin = newMax - 1;
+            } else { // brush_right
+                newMax += deltaTime;
+                if (newMax > maxTime) newMax = maxTime;
+                if (newMax <= newMin) newMax = newMin + 1;
             }
-            if (newMax > maxTime) {
-                const diff = newMax - maxTime;
-                newMax = maxTime;
-                newMin -= diff;
+    
+            if (newMin < newMax) {
+                onViewRangeChange({ min: newMin, max: newMax });
             }
-        } else if (dragState.type === 'brush_left') {
-            newMin += deltaTime;
-            if (newMin < minTime) newMin = minTime;
-            if (newMin >= newMax) newMin = newMax - 1;
-        } else { // brush_right
-            newMax += deltaTime;
-            if (newMax > maxTime) newMax = maxTime;
-            if (newMax <= newMin) newMax = newMin + 1;
-        }
-
-        if (newMin < newMax) {
-            onViewRangeChange({ min: newMin, max: newMax });
         }
     }, [dragState, minTime, maxTime, positionToValue, onViewRangeChange, uiScale]);
 

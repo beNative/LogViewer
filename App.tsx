@@ -31,7 +31,7 @@ const App: React.FC = () => {
     } = useUI();
 
     const { toasts, removeToast } = useToast();
-    const { consoleMessages, consoleFilters, setConsoleFilters, consoleSearchTerm, setConsoleSearchTerm, handleClearConsole } = useConsole();
+    const { consoleMessages, consoleFilters, setConsoleFilters, consoleSearchTerm } = useConsole();
     
     // Settings State and Actions from Hooks
     const settings = useSettings();
@@ -88,7 +88,7 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-       <TitleBar />
+       <TitleBar activeView={activeView} />
        <div className="fixed bottom-4 right-4 z-50 w-full max-w-sm space-y-3">
           {toasts.map(toast => (
               <Toast key={toast.id} toast={toast} onDismiss={() => removeToast(toast.id)} iconSet={iconSet} />
@@ -231,12 +231,11 @@ const App: React.FC = () => {
         {activeView === 'console' && (
              <Console
                 messages={consoleMessages}
-                onClear={handleClearConsole}
+                onClear={useConsole().handleClearConsole}
                 filters={consoleFilters}
                 onFiltersChange={setConsoleFilters}
                 iconSet={iconSet}
                 searchTerm={consoleSearchTerm}
-                onSearchTermChange={setConsoleSearchTerm}
                 theme={theme}
              />
         )}
