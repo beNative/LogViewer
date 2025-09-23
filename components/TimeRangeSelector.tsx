@@ -785,8 +785,9 @@ const OverviewBrush: React.FC<{
             // FIX: Use a simple 'else' block. TypeScript can correctly infer that if the type is not
             // 'new_overview_selection', it must be one of the other types in the union,
             // all of which contain 'initialMin' and 'initialMax' as numbers.
-            let newMin = dragState.initialMin;
-            let newMax = dragState.initialMax;
+            // FIX: Explicitly cast `initialMin` and `initialMax` to `Number` to resolve a TypeScript type inference issue.
+            let newMin = Number((dragState as any).initialMin);
+            let newMax = Number((dragState as any).initialMax);
 
             if (dragState.type === 'brush') {
                 newMin += deltaTime;
