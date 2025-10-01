@@ -1,4 +1,5 @@
 import React from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { LogEntry, FilterState, PageTimestampRange, ColumnVisibilityState, ColumnStyles, ColumnKey, PanelWidths, ViewMode, ConsoleMessage, OverallTimeRange, FileTimeRange, LogDensityPointByLevel, IconSet, LogTableDensity, Theme, TimelineBarVisibility } from '../types';
 import { Icon } from './icons';
 import { FilterBar } from './FilterBar';
@@ -100,7 +101,6 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     const [contextMenuState, setContextMenuState] = React.useState<ContextMenuState>(null);
     const [headerContextMenu, setHeaderContextMenu] = React.useState<{ x: number, y: number } | null>(null);
     const tableContainerRef = React.useRef<HTMLDivElement>(null);
-    const rowRefs = React.useRef<Map<number, HTMLTableRowElement | null>>(new Map());
     
     const panelWidthsRef = React.useRef(props.panelWidths);
     panelWidthsRef.current = props.panelWidths;
@@ -127,11 +127,16 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
             setSelectedEntry(null);
             return;
         }
-        const entry = entries.find(e => e.id === keyboardSelectedId);
-        if (entry) {
+
+        const index = entries.findIndex(e => e.id === keyboardSelectedId);
+        if (index !== -1) {
+            const entry = entries[index];
             setSelectedEntry(entry);
+            rowVirtualizer.scrollToIndex(index, { align: 'auto' });
+        } else {
+            setSelectedEntry(null);
         }
-    }, [keyboardSelectedId, entries]);
+    }, [keyboardSelectedId, entries, rowVirtualizer]);
 
     const getRowClass = (density: LogTableDensity) => {
         switch (density) {
@@ -146,7 +151,31 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
             case 'normal': return 'px-3';
             case 'comfortable': return 'px-4';
         }
-    }
+    };
+
+    const rowHeight = React.useMemo(() => {
+        switch (logTableDensity) {
+            case 'compact':
+                return 28;
+            case 'normal':
+                return 36;
+            case 'comfortable':
+                return 44;
+            default:
+                return 36;
+        }
+    }, [logTableDensity]);
+
+    const estimateRowHeight = React.useCallback(() => rowHeight, [rowHeight]);
+
+    const rowVirtualizer = useVirtualizer({
+        count: entries.length,
+        getScrollElement: () => tableContainerRef.current,
+        estimateSize: estimateRowHeight,
+        overscan: 6,
+    });
+
+    const virtualRows = rowVirtualizer.getVirtualItems();
 
     const handleRowClick = (entry: LogEntry) => {
         setSelectedEntry(entry);
@@ -195,17 +224,6 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         return () => container.removeEventListener('keydown', handleKeyDown);
 
     }, [entries, keyboardSelectedId, setKeyboardSelectedId, hasMore, onLoadMore, viewMode]);
-
-    // Scroll into view effect
-    React.useEffect(() => {
-        if (keyboardSelectedId !== null) {
-            const rowEl = rowRefs.current.get(keyboardSelectedId);
-            if (rowEl) {
-                rowEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-            }
-        }
-    }, [keyboardSelectedId]);
-
 
     const handleContextMenu = (e: React.MouseEvent, entry: LogEntry, key: ColumnKey, value: string) => {
         e.preventDefault();
@@ -284,8 +302,8 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                 <Splitter onDrag={handleFilterResize} />
                 <main className="flex-grow min-h-0 flex flex-col min-w-0">
                     <div className="overflow-auto outline-none flex-grow" ref={tableContainerRef} tabIndex={-1}>
-                        <table key={visibilityKey} className="min-w-full table-auto font-sans">
-                            <thead className="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 shadow-sm">
+                        <table key={visibilityKey} className="min-w-full table-fixed font-sans" style={{ borderSpacing: 0 }}>
+                            <thead className="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 shadow-sm" style={{ display: 'table', tableLayout: 'fixed', width: '100%' }}>
                                 <tr onContextMenu={(e) => {
                                     e.preventDefault();
                                     setHeaderContextMenu({ x: e.clientX, y: e.clientY });
@@ -298,21 +316,40 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                                     {columnVisibility.msg && <th style={{width: '45%'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Message</th>}
                                 </tr>
                             </thead>
-                             <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                                {entries.map(entry => (
-                                    <tr key={entry.id}
-                                        ref={el => { rowRefs.current.set(entry.id, el); }}
-                                        onClick={() => handleRowClick(entry)}
-                                        className={`transition-colors duration-100 cursor-pointer ${keyboardSelectedId === entry.id ? 'bg-sky-100 dark:bg-sky-900/50' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
-                                    >
-                                        {columnVisibility.time && <td onContextMenu={(e) => handleContextMenu(e, entry, 'time', entry.time)} style={getStyle('time')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap`}>{entry.time}</td>}
-                                        {columnVisibility.level && <td onContextMenu={(e) => handleContextMenu(e, entry, 'level', entry.level)} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap`}><span style={getStyle('level')} className={`px-2 py-0.5 rounded-full text-xs font-medium ${getLevelColor(entry.level)}`}>{entry.level}</span></td>}
-                                        {columnVisibility.sndrtype && <td onContextMenu={(e) => handleContextMenu(e, entry, 'sndrtype', entry.sndrtype)} style={getStyle('sndrtype')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.sndrtype}</td>}
-                                        {columnVisibility.sndrname && <td onContextMenu={(e) => handleContextMenu(e, entry, 'sndrname', entry.sndrname)} style={getStyle('sndrname')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.sndrname}</td>}
-                                        {columnVisibility.fileName && <td onContextMenu={(e) => handleContextMenu(e, entry, 'fileName', entry.fileName)} style={getStyle('fileName')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.fileName}</td>}
-                                        {columnVisibility.msg && <td onContextMenu={(e) => handleContextMenu(e, entry, 'msg', entry.msg)} style={getStyle('msg')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`} dangerouslySetInnerHTML={{ __html: highlightText(entry.msg, [appliedFilters.includeMsg], theme) }}></td>}
-                                    </tr>
-                                ))}
+                             <tbody
+                                className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700"
+                                style={{ position: 'relative', display: 'block', height: `${rowVirtualizer.getTotalSize()}px`, width: '100%' }}
+                            >
+                                {virtualRows.map((virtualRow) => {
+                                    const entry = entries[virtualRow.index];
+                                    if (!entry) return null;
+                                    return (
+                                        <tr
+                                            key={entry.id}
+                                            ref={virtualRow.measureElement}
+                                            onClick={() => handleRowClick(entry)}
+                                            className={`transition-colors duration-100 cursor-pointer border-b border-gray-200 dark:border-gray-700 ${keyboardSelectedId === entry.id ? 'bg-sky-100 dark:bg-sky-900/50' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: 0,
+                                                right: 0,
+                                                transform: `translateY(${virtualRow.start}px)`,
+                                                height: `${virtualRow.size}px`,
+                                                display: 'table',
+                                                tableLayout: 'fixed',
+                                                width: '100%',
+                                            }}
+                                        >
+                                            {columnVisibility.time && <td onContextMenu={(e) => handleContextMenu(e, entry, 'time', entry.time)} style={getStyle('time')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap`}>{entry.time}</td>}
+                                            {columnVisibility.level && <td onContextMenu={(e) => handleContextMenu(e, entry, 'level', entry.level)} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap`}><span style={getStyle('level')} className={`px-2 py-0.5 rounded-full text-xs font-medium ${getLevelColor(entry.level)}`}>{entry.level}</span></td>}
+                                            {columnVisibility.sndrtype && <td onContextMenu={(e) => handleContextMenu(e, entry, 'sndrtype', entry.sndrtype)} style={getStyle('sndrtype')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.sndrtype}</td>}
+                                            {columnVisibility.sndrname && <td onContextMenu={(e) => handleContextMenu(e, entry, 'sndrname', entry.sndrname)} style={getStyle('sndrname')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.sndrname}</td>}
+                                            {columnVisibility.fileName && <td onContextMenu={(e) => handleContextMenu(e, entry, 'fileName', entry.fileName)} style={getStyle('fileName')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.fileName}</td>}
+                                            {columnVisibility.msg && <td onContextMenu={(e) => handleContextMenu(e, entry, 'msg', entry.msg)} style={getStyle('msg')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`} dangerouslySetInnerHTML={{ __html: highlightText(entry.msg, [appliedFilters.includeMsg], theme) }}></td>}
+                                        </tr>
+                                    );
+                                })}
                              </tbody>
                         </table>
                         {isBusy && <div className="p-4 text-center">Loading...</div>}
