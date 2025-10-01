@@ -61,7 +61,7 @@ export const TitleBar: React.FC<TitleBarProps> = ({ activeView }) => {
         } else {
             setInputValue(''); // Clear for other views
         }
-    }, [activeView]);
+    }, [activeView, consoleSearchTerm, formFilters.includeMsg, isConsole, isViewer]);
 
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,19 +71,50 @@ export const TitleBar: React.FC<TitleBarProps> = ({ activeView }) => {
         if (isConsole) {
             setConsoleSearchTerm(newValue);
         } else if (isViewer) {
-            // Update the form filters state in real-time
-            setFormFilters(prev => ({ ...prev, includeMsg: newValue }));
-            
+            // Update only the first line of the include message filter to avoid
+            // clobbering additional terms configured from the filter panel.
+            setFormFilters(prev => {
+                const [, ...remainingLines] = prev.includeMsg.split('\n');
+                const rebuiltIncludeMsg = remainingLines.length > 0
+                    ? [newValue, ...remainingLines].join('\n')
+                    : newValue;
+                return { ...prev, includeMsg: rebuiltIncludeMsg };
+            });
+        }
+    };
+
+    useEffect(() => {
+        if (!isViewer) {
+            if (debounceTimeoutRef.current) {
+                clearTimeout(debounceTimeoutRef.current);
+                debounceTimeoutRef.current = null;
+            }
+            return;
+        }
+
+        if (debounceTimeoutRef.current) {
+            clearTimeout(debounceTimeoutRef.current);
+        }
+
+        debounceTimeoutRef.current = window.setTimeout(() => {
+            handleApplyFilters();
+        }, 500);
+
+        return () => {
+            if (debounceTimeoutRef.current) {
+                clearTimeout(debounceTimeoutRef.current);
+                debounceTimeoutRef.current = null;
+            }
+        };
+    }, [inputValue, isViewer, handleApplyFilters]);
+
+    useEffect(() => {
+        return () => {
             if (debounceTimeoutRef.current) {
                 clearTimeout(debounceTimeoutRef.current);
             }
-            debounceTimeoutRef.current = window.setTimeout(() => {
-                if (document.activeElement === searchInputRef.current) {
-                    handleApplyFilters();
-                }
-            }, 500);
-        }
-    };
+        };
+    }, []);
     
     const handleClear = () => {
         setInputValue('');
