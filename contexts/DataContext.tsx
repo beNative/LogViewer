@@ -1,12 +1,13 @@
 import React, { createContext, useState, useCallback, useContext, useEffect, useRef } from 'react';
-import { FilterState, LogEntry, PageTimestampRange, DashboardData, FileTimeRange, LogDensityPointByLevel, StockInfoEntry, StockInfoFilters, StockArticleSuggestion, LogDensityPoint, ConsoleMessage } from '../types';
+import { FilterState, LogEntry, PageTimestampRange, DashboardData, FileTimeRange, LogDensityPointByLevel, StockInfoEntry, StockInfoFilters, StockArticleSuggestion, LogDensityPoint, ConsoleMessage, LogTableDensity } from '../types';
 import { getSqlDateTime } from '../db';
 import { useSession } from './SessionContext';
 import { useUI } from './UIContext';
 import { useConsole } from './ConsoleContext';
 import { useSettings } from './SettingsContext';
 
-const INFINITE_SCROLL_CHUNK_SIZE = 200;
+const DEFAULT_SCROLL_CHUNK_SIZE = 200;
+const MIN_SCROLL_CHUNK_SIZE = 50;
 
 const initialFilters: FilterState = {
   dateFrom: '', timeFrom: '', dateTo: '', timeTo: '', level: [], levelFilterMode: 'include',
@@ -38,6 +39,7 @@ type DataContextType = {
     handleResetFilters: () => void;
     handleClearTimeRange: () => void;
     onLoadMore: () => void;
+    setLogTableViewportHeight: (height: number | null) => void;
     goToPage: (pageNumber: number) => void;
     handlePageSizeChange: (newSize: number) => void;
     handleRemoveAppliedFilter: (key: keyof FilterState, valueToRemove?: string) => void;
@@ -77,7 +79,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { db, hasData, loadedFileNames, handleRebuildStockDataInWorker, overallStockTimeRange, setOverallStockTimeRange, overallStockDensity, setOverallStockDensity } = useSession();
     const { logToConsole, lastConsoleMessage } = useConsole();
     const { setIsBusy, isBusy, isStockBusy, setIsStockBusy, setActiveView, setJumpToEntryId, jumpToEntryId, isInitialLoad, setIsInitialLoad, keyboardSelectedId, setKeyboardSelectedId, addToast } = useUI();
-    const { viewMode } = useSettings();
+    const { viewMode, logTableDensity, uiScale } = useSettings();
 
     // Log Viewer State
     const [filteredEntries, setFilteredEntries] = useState<LogEntry[]>([]);
@@ -91,6 +93,41 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [pageTimestampRanges, setPageTimestampRanges] = useState<PageTimestampRange[]>([]);
     const [hasMoreLogs, setHasMoreLogs] = useState(true);
     const [timelineViewRange, setTimelineViewRange] = useState<{ min: number; max: number } | null>(null);
+    const [tableViewportHeight, setTableViewportHeight] = useState<number | null>(null);
+    const [infiniteScrollChunkSize, setInfiniteScrollChunkSize] = useState(DEFAULT_SCROLL_CHUNK_SIZE);
+
+    const getRowHeightForDensity = useCallback((density: LogTableDensity) => {
+        switch (density) {
+            case 'compact':
+                return 28;
+            case 'comfortable':
+                return 44;
+            case 'normal':
+            default:
+                return 36;
+        }
+    }, []);
+
+    const updateTableViewportHeight = useCallback((height: number | null) => {
+        setTableViewportHeight(prev => (prev === height ? prev : height));
+    }, []);
+
+    const computeInfiniteScrollChunkSize = useCallback(() => {
+        const baseRowHeight = getRowHeightForDensity(logTableDensity);
+        const scaledRowHeight = baseRowHeight * (uiScale || 1);
+
+        if (!tableViewportHeight || tableViewportHeight <= 0 || !Number.isFinite(scaledRowHeight) || scaledRowHeight <= 0) {
+            return DEFAULT_SCROLL_CHUNK_SIZE;
+        }
+
+        const rowsPerViewport = Math.max(1, Math.ceil(tableViewportHeight / scaledRowHeight));
+        return Math.max(MIN_SCROLL_CHUNK_SIZE, rowsPerViewport * 2);
+    }, [getRowHeightForDensity, logTableDensity, tableViewportHeight, uiScale]);
+
+    useEffect(() => {
+        const newSize = computeInfiniteScrollChunkSize();
+        setInfiniteScrollChunkSize(prev => (prev === newSize ? prev : newSize));
+    }, [computeInfiniteScrollChunkSize]);
 
     // Dashboard State
     const [dashboardData, setDashboardData] = useState<DashboardData>(initialDashboardData);
@@ -204,9 +241,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     setPageTimestampRanges(ranges);
                     setHasMoreLogs(false);
                 } else { // 'scroll' mode
-                    const entries = db.queryLogEntries(appliedFilters, INFINITE_SCROLL_CHUNK_SIZE, 0);
+                    const entries = db.queryLogEntries(appliedFilters, infiniteScrollChunkSize, 0);
                     setFilteredEntries(entries);
-                    setEntriesOffset(0);
+                    setEntriesOffset(entries.length);
                     setHasMoreLogs(entries.length < count);
                     setPageTimestampRanges([]);
                 }
@@ -228,7 +265,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }, 50);
 
         return () => clearTimeout(busyTaskRef.current);
-    }, [db, hasData, appliedFilters, currentPage, pageSize, viewMode, logToConsole, isInitialLoad, setIsBusy]);
+    }, [db, hasData, appliedFilters, currentPage, pageSize, viewMode, logToConsole, isInitialLoad, setIsBusy, infiniteScrollChunkSize]);
 
     useEffect(() => {
         if (jumpToEntryId && filteredEntries.length > 0) {
@@ -280,16 +317,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!db || !hasMoreLogs || isBusy) return;
         setTimeout(() => {
             setIsBusy(true);
-            const newOffset = entriesOffset + INFINITE_SCROLL_CHUNK_SIZE;
-            logToConsole(`Loading more logs at offset ${newOffset.toLocaleString()}...`, 'DEBUG');
-            const newEntries = db.queryLogEntries(appliedFilters, INFINITE_SCROLL_CHUNK_SIZE, newOffset);
+            const offset = entriesOffset;
+            logToConsole(`Loading more logs at offset ${offset.toLocaleString()} with batch size ${infiniteScrollChunkSize.toLocaleString()}...`, 'DEBUG');
+            const newEntries = db.queryLogEntries(appliedFilters, infiniteScrollChunkSize, offset);
             setFilteredEntries(prev => [...prev, ...newEntries]);
-            setEntriesOffset(newOffset);
-            setHasMoreLogs(newOffset + newEntries.length < totalFilteredCount);
+            const nextOffset = offset + newEntries.length;
+            setEntriesOffset(nextOffset);
+            setHasMoreLogs(nextOffset < totalFilteredCount);
             setIsBusy(false);
             logToConsole(`Loaded ${newEntries.length} more logs.`, 'DEBUG');
         }, 10);
-    }, [db, hasMoreLogs, isBusy, entriesOffset, appliedFilters, totalFilteredCount, logToConsole, setIsBusy]);
+    }, [db, hasMoreLogs, isBusy, entriesOffset, appliedFilters, totalFilteredCount, logToConsole, setIsBusy, infiniteScrollChunkSize]);
     
     const goToPage = useCallback((pageNumber: number) => setCurrentPage(pageNumber), []);
     const handlePageSizeChange = useCallback((newSize: number) => { setPageSize(newSize); setCurrentPage(1); }, []);
@@ -415,16 +453,18 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else {
            if (filteredEntries.some(e => e.id === nearestEntry.id)) return;
            setIsBusy(true);
-           const newOffset = Math.max(0, index - Math.floor(INFINITE_SCROLL_CHUNK_SIZE / 2));
+           const batchSize = infiniteScrollChunkSize;
+           const newOffset = Math.max(0, index - Math.floor(batchSize / 2));
            setTimeout(() => {
-               const newEntries = db.queryLogEntries(appliedFilters, INFINITE_SCROLL_CHUNK_SIZE, newOffset);
+               const newEntries = db.queryLogEntries(appliedFilters, batchSize, newOffset);
                setFilteredEntries(newEntries);
-               setEntriesOffset(newOffset);
-               setHasMoreLogs(newOffset + newEntries.length < totalFilteredCount);
+               const nextOffset = newOffset + newEntries.length;
+               setEntriesOffset(nextOffset);
+               setHasMoreLogs(nextOffset < totalFilteredCount);
                setIsBusy(false);
            }, 50);
         }
-    }, [db, isBusy, appliedFilters, viewMode, pageSize, currentPage, filteredEntries, totalFilteredCount, setJumpToEntryId, setIsInitialLoad, setIsBusy]);
+    }, [db, isBusy, appliedFilters, viewMode, pageSize, currentPage, filteredEntries, totalFilteredCount, setJumpToEntryId, setIsInitialLoad, setIsBusy, infiniteScrollChunkSize]);
 
     const handleFileSelect = useCallback((fileName: string) => {
         if (db) {
@@ -508,7 +548,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         filteredEntries, totalFilteredCount, hasMoreLogs, pageTimestampRanges, formFilters, setFormFilters,
         appliedFilters, uniqueValues, fileTimeRanges, logDensity, overallLogDensity, datesWithLogs,
         currentPage, totalPages: Math.ceil(totalFilteredCount / pageSize), pageSize, handleApplyFilters, handleResetFilters, handleClearTimeRange,
-        onLoadMore, goToPage, handlePageSizeChange, handleRemoveAppliedFilter, handleContextMenuFilter, handleCursorChange,
+        onLoadMore, setLogTableViewportHeight: updateTableViewportHeight, goToPage, handlePageSizeChange, handleRemoveAppliedFilter, handleContextMenuFilter, handleCursorChange,
         handleFileSelect, handleDateSelect, handleApplyDetailFilter, timelineViewRange, setTimelineViewRange,
         handleTimelineZoomToSelection, handleTimelineZoomReset, dashboardData, handleTimeRangeSelect, handleCategorySelect,
         stockHistory, setStockHistory, overallStockTimeRange, overallStockDensity, handleSearchStock, handleRebuildStockData,

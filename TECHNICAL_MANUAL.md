@@ -60,7 +60,7 @@ The DataContext maintains two filter states:
 - `formFilters` – what the user is editing in the UI.
 - `appliedFilters` – the snapshot pushed into database queries.
 
-When the user applies filters, DataContext resets offsets, fetches counts, recomputes dashboards, and retrieves the first page (or chunk) of rows via `db.getFilteredEntries`. Infinite scroll is implemented by tracking an offset and requesting additional chunks (`INFINITE_SCROLL_CHUNK_SIZE = 200`), whereas pagination derives `pageTimestampRanges` to support jumping between pages while maintaining timeline context.
+When the user applies filters, DataContext resets offsets, fetches counts, recomputes dashboards, and retrieves the first page (or chunk) of rows via `db.getFilteredEntries`. Infinite scroll is implemented by tracking an offset and requesting additional chunks sized to roughly two table viewports (computed from the current container height and density), whereas pagination derives `pageTimestampRanges` to support jumping between pages while maintaining timeline context.
 
 Keyboard navigation and the timeline cursor are coordinated through `useUI` so other views (e.g., charts) can highlight the selected record.
 
