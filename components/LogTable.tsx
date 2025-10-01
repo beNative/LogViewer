@@ -10,6 +10,7 @@ import { ActiveFilters } from './ActiveFilters';
 import { ContextMenu } from './ContextMenu';
 import { Splitter } from './Splitter';
 import { ColumnVisibilityMenu } from './ColumnVisibilityMenu';
+import { useData } from '../contexts/DataContext';
 
 type ContextMenuState = { x: number; y: number; entry: LogEntry; value: string; key: ColumnKey } | null;
 
@@ -119,8 +120,11 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         setKeyboardSelectedId,
         appliedFilters,
         theme,
-        jumpToEntryId
+        jumpToEntryId,
+        uiScale
     } = props;
+
+    const { setLogTableViewportHeight } = useData();
 
     const visibleColumnCount = React.useMemo(
         () => Object.values(columnVisibility).filter(Boolean).length || 1,
@@ -165,6 +169,62 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     });
 
     const virtualRows = rowVirtualizer.getVirtualItems();
+
+    React.useEffect(() => {
+        if (viewMode !== 'scroll') {
+            setLogTableViewportHeight(null);
+            return;
+        }
+
+        const container = tableContainerRef.current;
+        if (!container) {
+            setLogTableViewportHeight(null);
+            return;
+        }
+
+        const updateHeight = () => setLogTableViewportHeight(container.clientHeight);
+        updateHeight();
+
+        let resizeObserver: ResizeObserver | null = null;
+        let resizeListener: (() => void) | null = null;
+
+        if (typeof ResizeObserver !== 'undefined') {
+            resizeObserver = new ResizeObserver(entries => {
+                for (const entry of entries) {
+                    if (entry.target === container) {
+                        setLogTableViewportHeight(entry.contentRect.height);
+                    }
+                }
+            });
+            resizeObserver.observe(container);
+        } else {
+            resizeListener = () => updateHeight();
+            window.addEventListener('resize', resizeListener);
+        }
+
+        return () => {
+            if (resizeObserver) {
+                resizeObserver.disconnect();
+            }
+            if (resizeListener) {
+                window.removeEventListener('resize', resizeListener);
+            }
+            setLogTableViewportHeight(null);
+        };
+    }, [setLogTableViewportHeight, viewMode]);
+
+    React.useEffect(() => {
+        if (viewMode !== 'scroll') {
+            return;
+        }
+
+        const container = tableContainerRef.current;
+        if (!container) {
+            return;
+        }
+
+        setLogTableViewportHeight(container.clientHeight);
+    }, [logTableDensity, uiScale, setLogTableViewportHeight, viewMode]);
 
     React.useEffect(() => {
         if (!isBusy) {
@@ -327,7 +387,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                     onZoomToExtent={props.onTimelineZoomReset}
                     zoomToSelectionEnabled={!!(props.appliedFilters.dateFrom && props.appliedFilters.dateTo)}
                     iconSet={props.iconSet}
-                    uiScale={props.uiScale}
+                    uiScale={uiScale}
                     cursorTime={props.cursorTime}
                     timelineBarVisibility={props.timelineBarVisibility}
                     onTimelineBarVisibilityChange={props.onTimelineBarVisibilityChange}
