@@ -663,7 +663,7 @@ const DensityTooltip: React.FC<{ x: number, y: number, bucketData: BucketData, t
             let newTop = y - height - GAP;
             let newLeft = x - (width / 2);
 
-            // Check for top boundary collision
+            // Check for vertical boundary collision
             if (newTop < GAP) {
                 // Not enough space above, flip to below
                 newTop = y + 20; // Some gap below the cursor
@@ -781,37 +781,40 @@ const OverviewBrush: React.FC<{
             const start = Math.min(dragState.startTime, currentTime);
             const end = Math.max(dragState.startTime, currentTime);
             setTempSelection({ start, end });
-            return;
-        }
+        } else {
+            // FIX: Use a simple 'else' block. TypeScript can correctly infer that if the type is not
+            // 'new_overview_selection', it must be one of the other types in the union,
+            // all of which contain 'initialMin' and 'initialMax' as numbers.
+            // FIX: Explicitly cast `initialMin` and `initialMax` to `Number` to resolve a TypeScript type inference issue.
+            let newMin = Number((dragState as any).initialMin);
+            let newMax = Number((dragState as any).initialMax);
 
-        let newMin = dragState.initialMin;
-        let newMax = dragState.initialMax;
-
-        if (dragState.type === 'brush') {
-            newMin += deltaTime;
-            newMax += deltaTime;
-            if (newMin < minTime) {
-                const diff = minTime - newMin;
-                newMin = minTime;
-                newMax += diff;
+            if (dragState.type === 'brush') {
+                newMin += deltaTime;
+                newMax += deltaTime;
+                if (newMin < minTime) {
+                    const diff = minTime - newMin;
+                    newMin = minTime;
+                    newMax += diff;
+                }
+                if (newMax > maxTime) {
+                    const diff = newMax - maxTime;
+                    newMax = maxTime;
+                    newMin -= diff;
+                }
+            } else if (dragState.type === 'brush_left') {
+                newMin += deltaTime;
+                if (newMin < minTime) newMin = minTime;
+                if (newMin >= newMax) newMin = newMax - 1;
+            } else if (dragState.type === 'brush_right') {
+                newMax += deltaTime;
+                if (newMax > maxTime) newMax = maxTime;
+                if (newMax <= newMin) newMax = newMin + 1;
             }
-            if (newMax > maxTime) {
-                const diff = newMax - maxTime;
-                newMax = maxTime;
-                newMin -= diff;
+    
+            if (newMin < newMax) {
+                onViewRangeChange({ min: newMin, max: newMax });
             }
-        } else if (dragState.type === 'brush_left') {
-            newMin += deltaTime;
-            if (newMin < minTime) newMin = minTime;
-            if (newMin >= newMax) newMin = newMax - 1;
-        } else { // brush_right
-            newMax += deltaTime;
-            if (newMax > maxTime) newMax = maxTime;
-            if (newMax <= newMin) newMax = newMin + 1;
-        }
-
-        if (newMin < newMax) {
-            onViewRangeChange({ min: newMin, max: newMax });
         }
     }, [dragState, minTime, maxTime, positionToValue, onViewRangeChange, uiScale]);
 

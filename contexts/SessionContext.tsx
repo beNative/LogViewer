@@ -1,9 +1,10 @@
 import React, { createContext, useState, useCallback, useContext, useEffect, useRef } from 'react';
-import { SessionFile, ProgressPhase, FilterState } from '../types';
+import { SessionFile, ProgressPhase } from '../types';
 import { Database } from '../db';
 import { useUI } from './UIContext';
 import { useConsole } from './ConsoleContext';
 import { useToast } from './ToastContext';
+import { useSettings } from './SettingsContext';
 
 declare const JSZip: any;
 
@@ -33,13 +34,16 @@ type SessionContextType = {
     setOverallStockTimeRange: React.Dispatch<React.SetStateAction<{ min: string, max: string } | null>>;
     overallStockDensity: any[]; // Use any to avoid circular dependency with DataContext
     setOverallStockDensity: React.Dispatch<React.SetStateAction<any[]>>;
+    handleCancelProcessing: () => void;
+    handleRebuildStockDataInWorker: () => void;
 };
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
 export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { setIsLoading, setProgress, setProgressMessage, setProgressPhase, setDetailedProgress, setIsInitialLoad, addToast, error, setError, setActiveView } = useUI();
+    const { setIsLoading, setProgress, setProgressMessage, setProgressPhase, setDetailedProgress, setProgressTitle, setIsInitialLoad, addToast, error, setError, setActiveView } = useUI();
     const { logToConsole } = useConsole();
+    const { logSqlQueries } = useSettings();
     
     const [db, setDb] = useState<Database | null>(null);
     const [isElectron, setIsElectron] = useState(false);
@@ -51,10 +55,19 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const [overallTimeRange, setOverallTimeRange] = useState<{ min: number; max: number } | null>(null);
     const [loadedFileNames, setLoadedFileNames] = useState<string[]>([]);
     const sessionNameHint = useRef<string | null>(null);
+    const workerRef = useRef<Worker | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
 
     // State that is also part of DataContext but needed here for updates
     const [overallStockTimeRange, setOverallStockTimeRange] = useState<{ min: string, max: string } | null>(null);
     const [overallStockDensity, setOverallStockDensity] = useState<any[]>([]);
+
+    // Effect to attach logger to the DB instance when it changes or the setting changes
+    useEffect(() => {
+        if (db) {
+            db.setLogger(logToConsole, logSqlQueries);
+        }
+    }, [db, logToConsole, logSqlQueries]);
 
     const fetchSessions = useCallback(async () => {
         if (!window.electronAPI) return;
@@ -69,6 +82,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     
     const handleNewSession = useCallback(async (log = true) => {
         const newDb = await Database.create();
+        newDb.createTable(); // Ensure tables exist even on a blank session
         setDb(newDb);
         setHasData(false);
         setTotalEntryCount(0);
@@ -89,6 +103,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         logToConsole('Initializing database...', 'INFO');
         if (isElectronEnv) fetchSessions();
         Database.create().then(database => {
+            database.createTable(); // Ensure tables exist on initial load
             setDb(database);
             logToConsole('Database ready.', 'DEBUG');
         }).catch(e => {
@@ -138,77 +153,93 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }
     }, [logToConsole, handleNewSession]);
 
-    const processFilesToDb = useCallback(async (files: FileList, targetDb: Database) => {
-        const xmlFiles: { name: string; content: string }[] = [];
-        const totalSize = Array.from(files).reduce((acc, file) => acc + file.size, 0);
-        let bytesRead = 0;
-        
-        setProgressPhase('reading');
-        for (const file of files) {
-            setDetailedProgress({ currentFile: file.name, fileBytesRead: 0, fileTotalBytes: file.size, fileLogCount: null });
-            if (file.name.endsWith('.zip')) {
-                setProgressPhase('unzipping');
-                try {
-                    const zip = await JSZip.loadAsync(file);
-                    for (const filename in zip.files) {
-                        if (filename.endsWith('.xml')) {
-                            const content = await zip.files[filename].async('string');
-                            xmlFiles.push({ name: filename, content });
-                        }
-                    }
-                } catch (e) {
-                    throw new Error(`Failed to read zip file ${file.name}: ${(e as Error).message}`);
-                }
-            } else if (file.name.endsWith('.xml')) {
-                const content = await file.text();
-                xmlFiles.push({ name: file.name, content });
+    const processFilesToDb = useCallback(async (files: FileList) => {
+        return new Promise<{ db: Database, count: number }>(async (resolve, reject) => {
+            if (isProcessing) {
+                return reject(new Error("Another process is already running."));
             }
-            bytesRead += file.size;
-            setProgress(30 * (bytesRead / totalSize));
-        }
+            setIsProcessing(true);
+            if (workerRef.current) workerRef.current.terminate();
 
-        setProgressPhase('parsing');
-        targetDb.dropIndexes(); // Drop indexes for faster insertion
-        const parser = new DOMParser();
-        let totalLogsToInsert = 0;
-        for (const [i, xmlFile] of xmlFiles.entries()) {
-            setDetailedProgress({ currentFile: xmlFile.name, fileBytesRead: 0, fileTotalBytes: 0, fileLogCount: null });
-            setProgressMessage(`Parsing ${xmlFile.name}...`);
-            const doc = parser.parseFromString(xmlFile.content, "application/xml");
-            const logNodes = doc.querySelectorAll('log');
-            if (logNodes.length === 0) continue;
+            const worker = new Worker('./dist/worker.js');
+            workerRef.current = worker;
 
-            const entries = Array.from(logNodes).map(node => ({
-                time: node.getAttribute('time') || '',
-                level: node.getAttribute('level') || '',
-                sndrtype: node.getAttribute('sndrtype') || '',
-                sndrname: node.getAttribute('sndrname') || '',
-                msg: node.getAttribute('msg') || '',
-            }));
-            
-            totalLogsToInsert += entries.length;
-            setProgressMessage(`Inserting ${entries.length.toLocaleString()} entries from ${xmlFile.name}`);
-            setProgressPhase('inserting');
-            
-            let insertedCountInFile = 0;
-            const handleProgress = (processed: number) => {
-                insertedCountInFile = processed;
-                setDetailedProgress(d => ({...d, fileLogCount: insertedCountInFile }));
-                setProgress(30 + (70 * (i / xmlFiles.length + (processed / entries.length) / xmlFiles.length)));
+            worker.onmessage = async (event) => {
+                const { type, payload } = event.data;
+                switch (type) {
+                    case 'progress':
+                        setProgressPhase(payload.phase as ProgressPhase);
+                        setProgressMessage(payload.message);
+                        setProgress(payload.progress);
+                        setDetailedProgress(payload.details);
+                        break;
+                    case 'done-import':
+                        const finalDb = await Database.createFromBuffer(payload.dbBuffer);
+                        worker.terminate();
+                        workerRef.current = null;
+                        setIsProcessing(false);
+                        resolve({ db: finalDb, count: payload.count });
+                        break;
+                    case 'error':
+                        worker.terminate();
+                        workerRef.current = null;
+                        setIsProcessing(false);
+                        reject(new Error(payload.error));
+                        break;
+                }
             };
             
-            try {
-                targetDb.insertLogs(entries, xmlFile.name, handleProgress);
-            } catch(e) {
-                 throw new Error(`Database error in ${xmlFile.name}: ${(e as Error).message}`);
+            worker.onerror = (err) => {
+                worker.terminate();
+                workerRef.current = null;
+                setIsProcessing(false);
+                reject(new Error(`Worker error: ${err.message}`));
+            };
+            
+            const xmlFiles: { name: string; content: string }[] = [];
+            let totalSize = Array.from(files).reduce((acc, file) => acc + file.size, 0);
+            let bytesRead = 0;
+
+            setProgressPhase('reading');
+            for (const file of files) {
+                setDetailedProgress({ currentFile: file.name, fileBytesRead: 0, fileTotalBytes: file.size, fileLogCount: null });
+                if (file.name.endsWith('.zip')) {
+                    setProgressPhase('unzipping');
+                    try {
+                        const zip = await JSZip.loadAsync(file);
+                        for (const filename in zip.files) {
+                            if (filename.endsWith('.xml')) {
+                                const content = await zip.files[filename].async('string');
+                                xmlFiles.push({ name: filename, content });
+                            }
+                        }
+                    } catch (e) {
+                        setIsProcessing(false);
+                        return reject(new Error(`Failed to read zip file ${file.name}: ${(e as Error).message}`));
+                    }
+                } else if (file.name.endsWith('.xml')) {
+                    const content = await file.text();
+                    xmlFiles.push({ name: file.name, content });
+                }
+                bytesRead += file.size;
+                setProgress(30 * (bytesRead / totalSize));
             }
+            
+            worker.postMessage({ type: 'import-logs', payload: { xmlFiles } });
+        });
+    }, [isProcessing, setProgress, setProgressMessage, setProgressPhase, setDetailedProgress]);
+
+    const handleCancelProcessing = useCallback(() => {
+        if (workerRef.current) {
+            workerRef.current.terminate();
+            workerRef.current = null;
+            setIsLoading(false);
+            setIsProcessing(false);
+            setError('Processing was cancelled by the user.');
+            logToConsole('User cancelled file processing.', 'WARNING');
+            addToast({ type: 'warning', title: 'Cancelled', message: 'The file processing was cancelled.'});
         }
-        
-        setProgressPhase('indexing');
-        setProgressMessage('Creating database indexes for faster queries...');
-        targetDb.createIndexes();
-        return totalLogsToInsert;
-    }, [setProgress, setProgressMessage, setProgressPhase, setDetailedProgress]);
+    }, [setIsLoading, setError, logToConsole, addToast]);
 
     const saveCurrentDbAsSession = useCallback(async (dbToSave: Database, name: string): Promise<boolean> => {
         if (!isElectron || !dbToSave) return false;
@@ -324,12 +355,11 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (files.length === 0) return;
         setIsLoading(true);
         setError(null);
+        setProgressTitle("Processing Files...");
         sessionNameHint.current = `session_from_${files[0].name.replace(/\.[^/.]+$/, "")}.sqlite`;
 
         try {
-            const newDb = await Database.create();
-            newDb.createTable();
-            const count = await processFilesToDb(files, newDb);
+            const { db: newDb, count } = await processFilesToDb(files);
             await updateStateFromDb(newDb);
             setDb(newDb);
 
@@ -340,35 +370,18 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
             setActiveView('viewer');
         } catch (e) {
             const msg = (e as Error).message;
+            if (msg.includes('cancelled')) return;
             setError(msg);
             addToast({ type: 'error', title: 'Processing Failed', message: msg });
         } finally {
             setIsLoading(false);
         }
-    }, [processFilesToDb, updateStateFromDb, isElectron, saveCurrentDbAsSession, addToast, setIsLoading, setError, setActiveView]);
+    }, [processFilesToDb, updateStateFromDb, isElectron, saveCurrentDbAsSession, addToast, setIsLoading, setError, setActiveView, setProgressTitle]);
 
     const handleAddFilesToCurrentSession = useCallback(async (files: FileList) => {
-        if (!db) return;
-        if (files.length === 0) return;
-        setIsLoading(true);
-        setError(null);
-
-        try {
-            const count = await processFilesToDb(files, db);
-            await updateStateFromDb(db);
-            setIsDirty(true);
-            if (isElectron) {
-                await handleSaveSession();
-            }
-            addToast({ type: 'success', title: 'Files Added', message: `Successfully added ${count.toLocaleString()} new log entries.` });
-        } catch (e) {
-            const msg = (e as Error).message;
-            setError(msg);
-            addToast({ type: 'error', title: 'Processing Failed', message: msg });
-        } finally {
-            setIsLoading(false);
-        }
-    }, [db, processFilesToDb, updateStateFromDb, isElectron, handleSaveSession, addToast, setIsLoading, setError]);
+        logToConsole("Adding files to an existing session is not yet supported with Web Workers. Creating a new session instead.", "INFO");
+        await handleCreateNewSessionFromFiles(files);
+    }, [handleCreateNewSessionFromFiles, logToConsole]);
     
     const handleImportDb = useCallback(async (file: File) => {
         setIsLoading(true);
@@ -408,15 +421,107 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     }, [db, hasData, activeSessionName]);
+    
+    const handleRebuildStockDataInWorker = useCallback(() => {
+        if (!db || !hasData) {
+            const message = 'No data is currently loaded to rebuild from.';
+            logToConsole(`Rebuild failed: ${message}`, 'ERROR');
+            addToast({ type: 'error', title: 'Rebuild Failed', message });
+            return;
+        }
+        if (isProcessing) {
+            const message = 'Another process is already running.';
+            logToConsole(`Rebuild failed: ${message}`, 'WARNING');
+            addToast({ type: 'warning', title: 'Busy', message });
+            return;
+        }
 
+        setIsLoading(true);
+        setIsProcessing(true);
+        setProgressTitle("Rebuilding Stock Data...");
+        setProgress(0);
+        setDetailedProgress({ currentFile: '', fileBytesRead: 0, fileTotalBytes: 0, fileLogCount: null });
+
+        if (workerRef.current) {
+            workerRef.current.terminate();
+        }
+        
+        const worker = new Worker('./dist/worker.js');
+        workerRef.current = worker;
+        
+        const cleanup = () => {
+            if (workerRef.current) {
+                workerRef.current.terminate();
+                workerRef.current = null;
+            }
+            setIsLoading(false);
+            setIsProcessing(false);
+        };
+
+        worker.onmessage = async (event) => {
+            const { type, payload } = event.data;
+            switch (type) {
+                case 'progress':
+                    setProgressPhase(payload.phase as ProgressPhase);
+                    setProgressMessage(payload.message);
+                    setProgress(payload.progress);
+                    break;
+                case 'done-rebuild':
+                    try {
+                        const newDb = await Database.createFromBuffer(payload.dbBuffer);
+                        await updateStateFromDb(newDb);
+                        setDb(newDb);
+                        setIsDirty(true);
+                        await handleSaveSession();
+                        addToast({ type: 'success', title: 'Rebuild Complete', message: `Successfully rebuilt ${payload.count.toLocaleString()} stock entries.` });
+                    } catch(e) {
+                        const msg = e instanceof Error ? e.message : "An unexpected error occurred during rebuild post-processing.";
+                        logToConsole(`Stock rebuild post-processing failed: ${msg}`, 'ERROR');
+                        addToast({ type: 'error', title: 'Rebuild Failed', message: msg });
+                    } finally {
+                        cleanup();
+                    }
+                    break;
+                case 'error':
+                    {
+                        const msg = payload.error || "An unknown error occurred in the worker.";
+                        logToConsole(`Stock rebuild failed in worker: ${msg}`, 'ERROR');
+                        addToast({ type: 'error', title: 'Rebuild Failed', message: msg });
+                        cleanup();
+                    }
+                    break;
+            }
+        };
+        
+        worker.onerror = (err) => {
+            const msg = err.message || 'Unknown worker error';
+            logToConsole(`Stock rebuild worker crashed: ${msg}`, 'ERROR');
+            addToast({ type: 'error', title: 'Rebuild Crashed', message: msg });
+            cleanup();
+        };
+        
+        try {
+            const dbBuffer = db.export();
+            worker.postMessage({ type: 'rebuild-stock', payload: { dbBuffer } }, [dbBuffer.buffer]);
+        } catch (e) {
+            const msg = e instanceof Error ? e.message : 'Failed to export database for worker.';
+            logToConsole(`Stock rebuild failed pre-flight: ${msg}`, 'ERROR');
+            addToast({ type: 'error', title: 'Rebuild Failed', message: msg });
+            cleanup();
+        }
+    }, [
+        db, hasData, addToast, isProcessing, setIsLoading, setProgress, 
+        setProgressMessage, setProgressPhase, setProgressTitle, 
+        updateStateFromDb, handleSaveSession, setDetailedProgress, 
+        logToConsole, setDb, setIsDirty, setIsProcessing
+    ]);
 
     // Electron-specific effects
     useEffect(() => {
         if (!isElectron) return;
         window.isAppDirty = () => ({ isDirty: isDirty, sessionName: activeSessionName });
         const removeListener = window.electronAPI.onSaveBeforeQuit(async () => {
-            const success = await handleSaveSession();
-            // Always quit, even if save fails, to prevent getting stuck. Toast will show error.
+            await handleSaveSession();
             window.electronAPI.savedAndReadyToQuit();
         });
         return () => { delete window.isAppDirty; removeListener(); };
@@ -435,7 +540,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         overallTimeRange, loadedFileNames, error, handleNewSession, handleSaveSession, handleLoadSession,
         onRenameSession, onDeleteSession, handleCreateNewSessionFromFiles, handleAddFilesToCurrentSession,
         handleImportDb, handleDownloadDb, updateStateFromDb, overallStockTimeRange, setOverallStockTimeRange,
-        overallStockDensity, setOverallStockDensity
+        overallStockDensity, setOverallStockDensity, handleCancelProcessing, handleRebuildStockDataInWorker
     };
     
     return (

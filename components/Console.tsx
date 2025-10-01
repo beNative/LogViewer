@@ -10,7 +10,6 @@ interface ConsoleProps {
   onFiltersChange: (newFilters: Record<ConsoleMessageType, boolean>) => void;
   iconSet: IconSet;
   searchTerm: string;
-  onSearchTermChange: (term: string) => void;
   theme: Theme;
 }
 
@@ -54,7 +53,7 @@ const FilterButton: React.FC<{
 };
 
 
-export const Console: React.FC<ConsoleProps> = ({ messages, onClear, filters, onFiltersChange, iconSet, searchTerm, onSearchTermChange, theme }) => {
+export const Console: React.FC<ConsoleProps> = ({ messages, onClear, filters, onFiltersChange, iconSet, searchTerm, theme }) => {
   const consoleEndRef = React.useRef<HTMLDivElement>(null);
 
   const messageCounts = React.useMemo(() => {
@@ -85,29 +84,7 @@ export const Console: React.FC<ConsoleProps> = ({ messages, onClear, filters, on
   return (
     <div className="bg-white dark:bg-gray-800 flex flex-col flex-grow">
       <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 flex-shrink-0 flex-wrap gap-4">
-          <h3 className="font-mono text-sm font-semibold text-gray-600 dark:text-gray-300">APPLICATION LOG</h3>
-
-          <div className="relative flex-grow min-w-[200px] max-w-lg">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Icon name="Filter" iconSet={iconSet} className="w-5 h-5 text-gray-400" />
-              </div>
-              <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => onSearchTermChange(e.target.value)}
-                  placeholder="Filter messages..."
-                  className="block w-full pl-10 pr-10 py-1.5 bg-gray-100 dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 rounded-md focus:ring-sky-500 focus:border-sky-500 transition"
-              />
-              {searchTerm && (
-                  <button
-                      onClick={() => onSearchTermChange('')}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                      aria-label="Clear filter"
-                  >
-                      <Icon name="XCircle" iconSet={iconSet} className="w-5 h-5" />
-                  </button>
-              )}
-          </div>
+          <h3 className="font-mono text-sm font-semibold text-gray-600 dark:text-gray-300 flex-grow">APPLICATION LOG</h3>
           
           <div className="flex items-center gap-4">
             <div className="flex items-center space-x-2">

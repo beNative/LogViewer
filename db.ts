@@ -1,4 +1,4 @@
-import { FilterState, LogEntry, TimelineDataPoint, CategoryDataPoint, PageTimestampRange, FileTimeRange, LogDensityPoint, StockInfoEntry, StockInfoFilters, StockArticleSuggestion, LogDensityPointByLevel } from './types.ts';
+import { FilterState, LogEntry, TimelineDataPoint, CategoryDataPoint, PageTimestampRange, FileTimeRange, LogDensityPoint, StockInfoEntry, StockInfoFilters, StockArticleSuggestion, LogDensityPointByLevel, ConsoleMessageType } from './types.ts';
 
 // sql.js is loaded from a script tag and will be on the window object
 declare const initSqlJs: (config: { locateFile: (file: string) => string; }) => Promise<any>;
@@ -19,9 +19,24 @@ export const getSqlDateTime = (dateStr: string, timeStr: string, endOfDay = fals
 
 export class Database {
     private db: any;
+    private logToConsole?: (message: string, type: ConsoleMessageType) => void;
+    private logSqlQueries?: boolean;
 
     private constructor(db: any) {
         this.db = db;
+    }
+
+    public setLogger(logger: (message: string, type: ConsoleMessageType) => void, logSql: boolean) {
+        this.logToConsole = logger;
+        this.logSqlQueries = logSql;
+    }
+
+    private _logSql(sql: string, params?: (string | number | null)[]) {
+        if (this.logSqlQueries && this.logToConsole) {
+            const cleanSql = sql.trim().replace(/\s+/g, ' ');
+            let paramStr = params && params.length > 0 ? `\n  Params: ${JSON.stringify(params)}` : '';
+            this.logToConsole(`[SQL] ${cleanSql}${paramStr}`, 'DEBUG');
+        }
     }
 
     static async create(): Promise<Database> {
@@ -43,7 +58,7 @@ export class Database {
     createTable() {
         // Using "IF NOT EXISTS" is crucial for appending data to existing sessions
         // without dropping the table. This now ONLY creates tables. Indexes are handled separately.
-        this.db.exec(`
+        const sql1 = `
             CREATE TABLE IF NOT EXISTS logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 time TEXT,
@@ -53,14 +68,14 @@ export class Database {
                 msg TEXT,
                 fileName TEXT
             );
-        `);
-        this.db.exec(`
+        `;
+        const sql2 = `
             CREATE TABLE IF NOT EXISTS meta (
                 key TEXT PRIMARY KEY,
                 value TEXT
             );
-        `);
-        this.db.exec(`
+        `;
+        const sql3 = `
             CREATE TABLE IF NOT EXISTS stock_info (
                 timestamp TEXT,
                 message_id INTEGER,
@@ -72,42 +87,48 @@ export class Database {
                 max_sub_item_quantity INTEGER,
                 quantity INTEGER
             );
-        `);
+        `;
+        this._logSql(sql1); this.db.exec(sql1);
+        this._logSql(sql2); this.db.exec(sql2);
+        this._logSql(sql3); this.db.exec(sql3);
     }
 
     dropIndexes() {
-        // Drop all indexes for faster bulk inserts.
-        this.db.exec(`DROP INDEX IF EXISTS idx_time;`);
-        this.db.exec(`DROP INDEX IF EXISTS idx_level;`);
-        this.db.exec(`DROP INDEX IF EXISTS idx_sndrtype;`);
-        this.db.exec(`DROP INDEX IF EXISTS idx_sndrname;`);
-        this.db.exec(`DROP INDEX IF EXISTS idx_fileName;`);
-        this.db.exec(`DROP INDEX IF EXISTS idx_stock_timestamp;`);
-        this.db.exec(`DROP INDEX IF EXISTS idx_stock_article_id;`);
-        this.db.exec(`DROP INDEX IF EXISTS idx_stock_article_name;`);
+        const queries = [
+            `DROP INDEX IF EXISTS idx_time;`, `DROP INDEX IF EXISTS idx_level;`,
+            `DROP INDEX IF EXISTS idx_sndrtype;`, `DROP INDEX IF EXISTS idx_sndrname;`,
+            `DROP INDEX IF EXISTS idx_fileName;`, `DROP INDEX IF EXISTS idx_stock_timestamp;`,
+            `DROP INDEX IF EXISTS idx_stock_article_id;`, `DROP INDEX IF EXISTS idx_stock_article_name;`
+        ];
+        queries.forEach(q => { this._logSql(q); this.db.exec(q); });
     }
 
     createIndexes() {
-        // Recreate all indexes. Can be called after bulk inserts.
-        this.db.exec(`CREATE INDEX IF NOT EXISTS idx_time ON logs(time);`);
-        this.db.exec(`CREATE INDEX IF NOT EXISTS idx_level ON logs(level);`);
-        this.db.exec(`CREATE INDEX IF NOT EXISTS idx_sndrtype ON logs(sndrtype);`);
-        this.db.exec(`CREATE INDEX IF NOT EXISTS idx_sndrname ON logs(sndrname);`);
-        this.db.exec(`CREATE INDEX IF NOT EXISTS idx_fileName ON logs(fileName);`);
-        this.db.exec(`CREATE INDEX IF NOT EXISTS idx_stock_timestamp ON stock_info(timestamp);`);
-        this.db.exec(`CREATE INDEX IF NOT EXISTS idx_stock_article_id ON stock_info(article_id);`);
-        this.db.exec(`CREATE INDEX IF NOT EXISTS idx_stock_article_name ON stock_info(article_name);`);
+        const queries = [
+            `CREATE INDEX IF NOT EXISTS idx_time ON logs(time);`, `CREATE INDEX IF NOT EXISTS idx_level ON logs(level);`,
+            `CREATE INDEX IF NOT EXISTS idx_sndrtype ON logs(sndrtype);`, `CREATE INDEX IF NOT EXISTS idx_sndrname ON logs(sndrname);`,
+            `CREATE INDEX IF NOT EXISTS idx_fileName ON logs(fileName);`, `CREATE INDEX IF NOT EXISTS idx_stock_timestamp ON stock_info(timestamp);`,
+            `CREATE INDEX IF NOT EXISTS idx_stock_article_id ON stock_info(article_id);`, `CREATE INDEX IF NOT EXISTS idx_stock_article_name ON stock_info(article_name);`
+        ];
+        queries.forEach(q => { this._logSql(q); this.db.exec(q); });
     }
 
     setMeta(key: string, value: string) {
-        const stmt = this.db.prepare(`INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)`);
-        stmt.run([key, value]);
+        const sql = `INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)`;
+        const params = [key, value];
+        this._logSql(sql, params);
+        const stmt = this.db.prepare(sql);
+        stmt.run(params);
         stmt.free();
     }
 
     getMeta(key: string): string | null {
         try {
-            const stmt = this.db.prepare(`SELECT value FROM meta WHERE key = ?`);
+            const sql = `SELECT value FROM meta WHERE key = ?`;
+            const params = [key];
+            this._logSql(sql, params);
+            const stmt = this.db.prepare(sql);
+            stmt.bind(params);
             let value: string | null = null;
             if (stmt.step()) {
                 value = stmt.get()[0] as string;
@@ -130,10 +151,15 @@ export class Database {
             return;
         }
 
-        const stmt = this.db.prepare(`
+        const sql = `
             INSERT INTO logs (time, level, sndrtype, sndrname, msg, fileName) 
             VALUES (?, ?, ?, ?, ?, ?)
-        `);
+        `;
+        this._logSql(`BEGIN TRANSACTION;`);
+        this._logSql(sql, ['(sample)']); // Log a sample of the prepared statement
+        this._logSql(`COMMIT;`);
+
+        const stmt = this.db.prepare(sql);
 
         this.db.exec("BEGIN TRANSACTION;");
         try {
@@ -165,10 +191,15 @@ export class Database {
     insertStockInfo(entries: Omit<StockInfoEntry, 'id'>[]) {
         if (entries.length === 0) return;
 
-        const stmt = this.db.prepare(`
+        const sql = `
             INSERT INTO stock_info (timestamp, message_id, source, destination, article_id, article_name, dosage_form, max_sub_item_quantity, quantity)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `);
+        `;
+        this._logSql('BEGIN TRANSACTION;');
+        this._logSql(sql, ['(sample)']);
+        this._logSql('COMMIT;');
+
+        const stmt = this.db.prepare(sql);
 
         this.db.exec("BEGIN TRANSACTION;");
         try {
@@ -195,96 +226,6 @@ export class Database {
             stmt.free();
         }
     }
-
-    rebuildStockInfoFromLogs(onProgress?: (processed: number, total: number, parsed: number) => void): number {
-        // Clear the table first
-        this.db.exec("DELETE FROM stock_info;");
-
-        // Count total logs to scan for progress calculation
-        const countResult = this.db.exec("SELECT COUNT(*) FROM logs WHERE msg LIKE '%<StockInfoMessage%'");
-        const totalToScan = countResult.length > 0 && countResult[0].values.length > 0 ? countResult[0].values[0][0] : 0;
-        
-        if (totalToScan === 0) {
-            onProgress?.(0, 0, 0);
-            return 0;
-        }
-
-        onProgress?.(0, totalToScan, 0);
-
-        // Select only logs that are likely to contain stock info
-        const selectStmt = this.db.prepare("SELECT time, msg FROM logs WHERE msg LIKE '%<StockInfoMessage%'");
-        
-        const stockEntriesToInsert: Omit<StockInfoEntry, 'id'>[] = [];
-        let processedCount = 0;
-        let successfullyParsedCount = 0;
-
-        while (selectStmt.step()) {
-            const [time, msg] = selectStmt.get();
-            if (msg.includes('<WWKS') && msg.includes('<StockInfoMessage')) {
-                try {
-                    const xmlStartIndex = msg.indexOf('<WWKS');
-                    const xmlEndIndex = msg.lastIndexOf('</WWKS>') + 7;
-
-                    if (xmlStartIndex > -1 && xmlEndIndex > xmlStartIndex) {
-                        const xmlFragment = msg.substring(xmlStartIndex, xmlEndIndex);
-                        const wwksParser = new DOMParser();
-                        const wwksDoc = wwksParser.parseFromString(xmlFragment, "application/xml");
-                        
-                        if (wwksDoc.getElementsByTagName("parsererror").length === 0) {
-                            const wwksNode = wwksDoc.querySelector('WWKS');
-                            const stockNode = wwksDoc.querySelector('StockInfoMessage');
-                            const articleNode = stockNode?.querySelector('Article');
-                            
-                            if (wwksNode && stockNode && articleNode) {
-                                let parsedTimestamp: string;
-                                const wwksTimestamp = wwksNode.getAttribute('TimeStamp');
-                                if (wwksTimestamp) {
-                                    parsedTimestamp = new Date(wwksTimestamp).toISOString();
-                                } else {
-                                    // Fallback to the log entry's timestamp
-                                    parsedTimestamp = new Date(time.replace(/ (\d+)$/, '.$1') + 'Z').toISOString();
-                                }
-
-                                const stockEntry = {
-                                    timestamp: parsedTimestamp,
-                                    message_id: parseInt(stockNode.getAttribute('Id') || '0', 10),
-                                    source: stockNode.getAttribute('Source') || 'N/A',
-                                    destination: stockNode.getAttribute('Destination') || 'N/A',
-                                    article_id: articleNode.getAttribute('Id') || 'N/A',
-                                    article_name: articleNode.getAttribute('Name') || 'N/A',
-                                    dosage_form: articleNode.getAttribute('DosageForm') || 'N/A',
-                                    max_sub_item_quantity: parseInt(articleNode.getAttribute('MaxSubItemQuantity') || '0', 10),
-                                    quantity: parseInt(articleNode.getAttribute('Quantity') || '0', 10),
-                                };
-                                stockEntriesToInsert.push(stockEntry);
-                                successfullyParsedCount++;
-                            }
-                        }
-                    }
-                } catch (e) {
-                    // Log or handle parsing errors for individual messages, but don't stop the whole process
-                    console.warn(`Could not parse stock info from a log message: ${e instanceof Error ? e.message : String(e)}`);
-                }
-            }
-            
-            processedCount++;
-            // Report progress periodically to avoid overwhelming the main thread with state updates
-            if (onProgress && (processedCount % 100 === 0 || processedCount === totalToScan)) {
-                onProgress(processedCount, totalToScan, successfullyParsedCount);
-            }
-        }
-        selectStmt.free();
-
-        if (stockEntriesToInsert.length > 0) {
-            this.insertStockInfo(stockEntriesToInsert);
-        }
-
-        // Final progress update to ensure it hits 100%
-        onProgress?.(totalToScan, totalToScan, successfullyParsedCount);
-
-        return successfullyParsedCount;
-    }
-
 
     private _buildStockWhereClause(filters: StockInfoFilters): { whereSql: string, params: (string | number)[] } {
         const whereClauses: string[] = [];
@@ -322,6 +263,7 @@ export class Database {
             ORDER BY timestamp ASC
         `.trim().replace(/\s\s+/g, ' ');
 
+        this._logSql(sql, params);
         const stmt = this.db.prepare(sql);
         stmt.bind(params);
 
@@ -376,6 +318,7 @@ export class Database {
             LIMIT 15
         `;
 
+        this._logSql(sql, params);
         const stmt = this.db.prepare(sql);
         stmt.bind(params);
 
@@ -441,7 +384,9 @@ export class Database {
     getTotalEntryCount(): number {
       let totalEntries = 0;
       try {
-          const totalResult = this.db.exec("SELECT COUNT(*) FROM logs");
+          const sql = "SELECT COUNT(*) FROM logs";
+          this._logSql(sql);
+          const totalResult = this.db.exec(sql);
           if (totalResult.length > 0 && totalResult[0].values.length > 0) {
                totalEntries = totalResult[0].values[0][0];
           }
@@ -458,6 +403,7 @@ export class Database {
             const saneQuery = filters.sqlQuery.trim().replace(/;$/, '');
             const sql = `SELECT COUNT(*) FROM (${saneQuery})`;
             try {
+                this._logSql(sql);
                 const stmt = this.db.prepare(sql);
                 let count = 0;
                 if (stmt.step()) {
@@ -473,6 +419,7 @@ export class Database {
 
         const { whereSql, params } = this._buildWhereClause(filters);
         const sql = `SELECT COUNT(*) FROM logs ${whereSql}`;
+        this._logSql(sql, params);
         const stmt = this.db.prepare(sql);
         stmt.bind(params);
         let count = 0;
@@ -487,9 +434,11 @@ export class Database {
         if (filters.sqlQueryEnabled && filters.sqlQuery) {
              const saneQuery = filters.sqlQuery.trim().replace(/;$/, '');
              const sql = `${saneQuery} LIMIT ? OFFSET ?`;
+             const params = [limit, offset];
              try {
+                this._logSql(sql, params);
                 const stmt = this.db.prepare(sql);
-                stmt.bind([limit, offset]);
+                stmt.bind(params);
                 const entries: LogEntry[] = [];
                 const columnNames = stmt.getColumnNames();
 
@@ -518,8 +467,10 @@ export class Database {
 
         const { whereSql, params } = this._buildWhereClause(filters);
         const sql = `SELECT id, time, level, sndrtype, sndrname, msg, fileName FROM logs ${whereSql} ORDER BY time ASC LIMIT ? OFFSET ?`;
+        const finalParams = [...params, limit, offset];
+        this._logSql(sql, finalParams);
         const stmt = this.db.prepare(sql);
-        stmt.bind([...params, limit, offset]);
+        stmt.bind(finalParams);
 
         const entries: LogEntry[] = [];
         while (stmt.step()) {
@@ -560,9 +511,11 @@ export class Database {
         
         const ranges: PageTimestampRange[] = [];
         try {
+            const finalParams = [pageSize, ...params];
+            this._logSql(sql, finalParams);
             const stmt = this.db.prepare(sql);
             // The first '?' is for pageSize in the window function, then come the filter params
-            stmt.bind([pageSize, ...params]);
+            stmt.bind(finalParams);
             while (stmt.step()) {
                 const [page, startTime, endTime] = stmt.get();
                 ranges.push({ page, startTime, endTime });
@@ -576,7 +529,9 @@ export class Database {
 
     getUniqueColumnValues(columnName: 'level' | 'sndrtype' | 'sndrname' | 'fileName'): string[] {
         try {
-            const stmt = this.db.prepare(`SELECT DISTINCT ${columnName} FROM logs WHERE ${columnName} IS NOT NULL ORDER BY ${columnName}`);
+            const sql = `SELECT DISTINCT ${columnName} FROM logs WHERE ${columnName} IS NOT NULL ORDER BY ${columnName}`;
+            this._logSql(sql);
+            const stmt = this.db.prepare(sql);
             const values: string[] = [];
             while(stmt.step()){
                 values.push(stmt.get()[0]);
@@ -593,7 +548,9 @@ export class Database {
         let result = { minTime: null, maxTime: null };
         try {
             const { whereSql, params } = this._buildWhereClause(filters || {} as FilterState);
-            const stmt = this.db.prepare(`SELECT MIN(time), MAX(time) FROM logs ${whereSql}`);
+            const sql = `SELECT MIN(time), MAX(time) FROM logs ${whereSql}`;
+            this._logSql(sql, params);
+            const stmt = this.db.prepare(sql);
             stmt.bind(params);
             if (stmt.step()) {
                 const [min, max] = stmt.get();
@@ -612,7 +569,9 @@ export class Database {
         let result = { minTime: null, maxTime: null };
         try {
             const { whereSql, params } = this._buildStockWhereClause(filters || {} as StockInfoFilters);
-            const stmt = this.db.prepare(`SELECT MIN(timestamp), MAX(timestamp) FROM stock_info ${whereSql}`);
+            const sql = `SELECT MIN(timestamp), MAX(timestamp) FROM stock_info ${whereSql}`;
+            this._logSql(sql, params);
+            const stmt = this.db.prepare(sql);
             stmt.bind(params);
             if (stmt.step()) {
                 const [min, max] = stmt.get();
@@ -658,8 +617,10 @@ export class Database {
         
         const results: TimelineDataPoint[] = [];
         try {
+            const finalParams = [timeFormat, ...params];
+            this._logSql(sql, finalParams);
             const stmt = this.db.prepare(sql);
-            stmt.bind([timeFormat, ...params]);
+            stmt.bind(finalParams);
             while (stmt.step()) {
                 const [time, count] = stmt.get();
                 results.push({ time, count });
@@ -680,6 +641,7 @@ export class Database {
         const sql = `SELECT ${columnName}, COUNT(*) as count FROM logs ${whereSql} GROUP BY ${columnName} ORDER BY count DESC`;
         const results: CategoryDataPoint[] = [];
         try {
+            this._logSql(sql, params);
             const stmt = this.db.prepare(sql);
             stmt.bind(params);
             while(stmt.step()){
@@ -710,6 +672,7 @@ export class Database {
         `;
         const results: FileTimeRange[] = [];
         try {
+            this._logSql(sql, params);
             const stmt = this.db.prepare(sql);
             stmt.bind(params);
             while (stmt.step()) {
@@ -731,6 +694,7 @@ export class Database {
         const sql = `SELECT DISTINCT strftime('%Y-%m-%d', time) FROM logs ${whereSql} ORDER BY 1`;
         const dates: string[] = [];
         try {
+            this._logSql(sql, params);
             const stmt = this.db.prepare(sql);
             stmt.bind(params);
             while (stmt.step()) {
@@ -775,8 +739,10 @@ export class Database {
 
         const bucketMap: Map<number, Record<string, number>> = new Map();
         try {
+            const finalParams = [minTime, bucketDuration, ...params];
+            this._logSql(sql, finalParams);
             const stmt = this.db.prepare(sql);
-            stmt.bind([minTime, bucketDuration, ...params]);
+            stmt.bind(finalParams);
             while (stmt.step()) {
                 const [bucket, level, count] = stmt.get();
                 if (typeof bucket !== 'number' || typeof level !== 'string' || typeof count !== 'number') continue;
@@ -828,8 +794,10 @@ export class Database {
     
         const dbResults: { bucket: number; count: number }[] = [];
         try {
+            const finalParams = [minTime, bucketDuration, ...params];
+            this._logSql(sql, finalParams);
             const stmt = this.db.prepare(sql);
-            stmt.bind([minTime, bucketDuration, ...params]);
+            stmt.bind(finalParams);
             while (stmt.step()) {
                 const [bucket, count] = stmt.get();
                 dbResults.push({ bucket, count });
@@ -877,8 +845,10 @@ export class Database {
         `;
 
         try {
+            const finalParams = [...params, timeAsSqlString];
+            this._logSql(sql, finalParams);
             const stmt = this.db.prepare(sql);
-            stmt.bind([...params, timeAsSqlString]);
+            stmt.bind(finalParams);
             if (stmt.step()) {
                 const row = stmt.get();
                 const entry: LogEntry = { id: row[0], time: row[1], level: row[2], sndrtype: row[3], sndrname: row[4], msg: row[5], fileName: row[6] };
@@ -907,8 +877,10 @@ export class Database {
         `;
 
         try {
+            const finalParams = [...params, entryId];
+            this._logSql(sql, finalParams);
             const stmt = this.db.prepare(sql);
-            stmt.bind([...params, entryId]);
+            stmt.bind(finalParams);
             if (stmt.step()) {
                 const rowNumber = stmt.get()[0] as number;
                 stmt.free();

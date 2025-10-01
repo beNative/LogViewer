@@ -20,17 +20,18 @@ import { useConsole } from './contexts/ConsoleContext';
 import { useSettings } from './contexts/SettingsContext';
 import { useSession } from './contexts/SessionContext';
 import { useData } from './contexts/DataContext';
+import { TitleBar } from './components/TitleBar';
 
 const App: React.FC = () => {
     // UI State and Actions from Hooks
     const {
         activeView, setActiveView, isAboutDialogOpen, setIsAboutDialogOpen,
-        isLoading, progress, progressMessage, progressPhase, detailedProgress,
+        isLoading, progress, progressMessage, progressPhase, detailedProgress, progressTitle,
         isBusy, isStockBusy,
     } = useUI();
 
     const { toasts, removeToast } = useToast();
-    const { consoleMessages, consoleFilters, setConsoleFilters, consoleSearchTerm, setConsoleSearchTerm, handleClearConsole } = useConsole();
+    const { consoleMessages, consoleFilters, setConsoleFilters, consoleSearchTerm } = useConsole();
     
     // Settings State and Actions from Hooks
     const settings = useSettings();
@@ -44,7 +45,7 @@ const App: React.FC = () => {
         isElectron, sessions, activeSessionName, isDirty, hasData, totalEntryCount,
         overallTimeRange, loadedFileNames, error,
         handleCreateNewSessionFromFiles, handleAddFilesToCurrentSession, handleImportDb,
-        handleDownloadDb, handleNewSession, handleLoadSession, onRenameSession, onDeleteSession
+        handleDownloadDb, handleNewSession, handleLoadSession, onRenameSession, onDeleteSession, handleCancelProcessing
     } = useSession();
 
     // Data (Log & Stock) State and Actions from Hooks
@@ -87,6 +88,7 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+       <TitleBar activeView={activeView} />
        <div className="fixed bottom-4 right-4 z-50 w-full max-w-sm space-y-3">
           {toasts.map(toast => (
               <Toast key={toast.id} toast={toast} onDismiss={() => removeToast(toast.id)} iconSet={iconSet} />
@@ -100,7 +102,7 @@ const App: React.FC = () => {
               version="0.20.0"
           />
       )}
-      {isLoading && <ProgressIndicator progress={progress} message={progressMessage} phase={progressPhase} detailedProgress={detailedProgress} iconSet={iconSet} />}
+      {isLoading && <ProgressIndicator title={progressTitle} progress={progress} message={progressMessage} phase={progressPhase} detailedProgress={detailedProgress} iconSet={iconSet} onCancel={handleCancelProcessing} />}
       <Header activeView={activeView} onViewChange={setActiveView} isBusy={isBusy || isStockBusy} iconSet={iconSet} />
       <main className="flex-grow flex flex-col min-h-0">
         {activeView === 'data' && (
@@ -229,12 +231,11 @@ const App: React.FC = () => {
         {activeView === 'console' && (
              <Console
                 messages={consoleMessages}
-                onClear={handleClearConsole}
+                onClear={useConsole().handleClearConsole}
                 filters={consoleFilters}
                 onFiltersChange={setConsoleFilters}
                 iconSet={iconSet}
                 searchTerm={consoleSearchTerm}
-                onSearchTermChange={setConsoleSearchTerm}
                 theme={theme}
              />
         )}

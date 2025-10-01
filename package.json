@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+<<<<<<< HEAD
+full contents of package.json
+=======
 {
   "name": "log-analyser",
   "version": "0.20.0",
@@ -70,3 +74,7 @@
     }
   }
 }
+>>>>>>> parent of ab415ef (feat: Implement data processing in web worker)
+=======
+full contents of package.json
+>>>>>>> 28b777a936c04850a14bbff88a8348056b8b27d5

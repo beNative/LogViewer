@@ -6,6 +6,7 @@ import { IconSet, ProgressPhase } from '../types';
 type IconName = React.ComponentProps<typeof Icon>['name'];
 
 interface ProgressIndicatorProps {
+  title: string;
   progress: number;
   message: string;
   phase: ProgressPhase;
@@ -16,6 +17,7 @@ interface ProgressIndicatorProps {
     fileLogCount: number | null;
   }
   iconSet: IconSet;
+  onCancel: () => void;
 }
 
 const phaseDetails: Record<ProgressPhase, { iconName: IconName; label: string, isAnimated?: boolean }> = {
@@ -28,13 +30,13 @@ const phaseDetails: Record<ProgressPhase, { iconName: IconName; label: string, i
 };
 
 
-export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ progress, message, phase, detailedProgress, iconSet }) => {
+export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ title, progress, message, phase, detailedProgress, iconSet, onCancel }) => {
   const currentPhase = phaseDetails[phase];
 
   return (
     <div className="fixed inset-0 bg-gray-900 bg-opacity-80 dark:bg-opacity-80 flex flex-col items-center justify-center z-50 transition-opacity duration-300">
       <div className="w-full max-w-lg p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-xl text-center">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Processing Files...</h2>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">{title}</h2>
         
         <div className="flex items-center justify-center gap-3 my-4 text-sky-600 dark:text-sky-400">
             <Icon name={currentPhase.iconName} iconSet={iconSet} className={`w-8 h-8 ${currentPhase.isAnimated ? 'animate-spin' : ''}`} />
@@ -68,6 +70,15 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ progress, 
           ></div>
         </div>
         <p className="text-gray-900 dark:text-white font-mono text-2xl mt-4">{progress.toFixed(0)}%</p>
+
+        <div className="mt-6">
+            <button
+                onClick={onCancel}
+                className="px-4 py-2 text-sm font-semibold text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900/40 hover:bg-red-200 dark:hover:bg-red-800/60 rounded-lg transition-colors"
+            >
+                Cancel
+            </button>
+        </div>
       </div>
     </div>
   );
