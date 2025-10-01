@@ -121,23 +121,6 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         jumpToEntryId
     } = props;
     
-    // This effect ensures the details panel stays in sync with keyboard navigation.
-    React.useEffect(() => {
-        if (keyboardSelectedId === null) {
-            setSelectedEntry(null);
-            return;
-        }
-
-        const index = entries.findIndex(e => e.id === keyboardSelectedId);
-        if (index !== -1) {
-            const entry = entries[index];
-            setSelectedEntry(entry);
-            rowVirtualizer.scrollToIndex(index, { align: 'auto' });
-        } else {
-            setSelectedEntry(null);
-        }
-    }, [keyboardSelectedId, entries, rowVirtualizer]);
-
     const getRowClass = (density: LogTableDensity) => {
         switch (density) {
             case 'compact': return 'py-0.5';
@@ -176,6 +159,23 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     });
 
     const virtualRows = rowVirtualizer.getVirtualItems();
+
+    // This effect ensures the details panel stays in sync with keyboard navigation.
+    React.useEffect(() => {
+        if (keyboardSelectedId === null) {
+            setSelectedEntry(null);
+            return;
+        }
+
+        const index = entries.findIndex(e => e.id === keyboardSelectedId);
+        if (index !== -1) {
+            const entry = entries[index];
+            setSelectedEntry(entry);
+            rowVirtualizer.scrollToIndex(index, { align: 'auto' });
+        } else {
+            setSelectedEntry(null);
+        }
+    }, [keyboardSelectedId, entries, rowVirtualizer]);
 
     const handleRowClick = (entry: LogEntry) => {
         setSelectedEntry(entry);
