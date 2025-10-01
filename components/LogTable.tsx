@@ -14,6 +14,22 @@ import { useData } from '../contexts/DataContext';
 
 type ContextMenuState = { x: number; y: number; entry: LogEntry; value: string; key: ColumnKey } | null;
 
+type ColumnDefinition = {
+    key: ColumnKey;
+    label: string;
+    minWidth: number;
+    flex: number;
+};
+
+const COLUMN_DEFINITIONS: ColumnDefinition[] = [
+    { key: 'time', label: 'Time', minWidth: 170, flex: 1.3 },
+    { key: 'level', label: 'Level', minWidth: 90, flex: 0.8 },
+    { key: 'sndrtype', label: 'Sender Type', minWidth: 120, flex: 1.1 },
+    { key: 'sndrname', label: 'Sender Name', minWidth: 120, flex: 1.2 },
+    { key: 'fileName', label: 'Filename', minWidth: 150, flex: 1.4 },
+    { key: 'msg', label: 'Message', minWidth: 240, flex: 3.0 },
+];
+
 export const getLevelColor = (level: string) => {
     switch (level?.toUpperCase()) {
         case 'ERROR':
@@ -126,10 +142,19 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
 
     const { setLogTableViewportHeight } = useData();
 
-    const visibleColumnCount = React.useMemo(
-        () => Object.values(columnVisibility).filter(Boolean).length || 1,
+    const columns = React.useMemo(
+        () => COLUMN_DEFINITIONS.filter(column => columnVisibility[column.key]),
         [columnVisibility]
     );
+
+    const gridTemplateColumns = React.useMemo(
+        () => columns.length
+            ? columns.map(column => `minmax(${column.minWidth}px, ${column.flex}fr)`).join(' ')
+            : '1fr',
+        [columns]
+    );
+
+    const visibleColumnCount = columns.length || 1;
     
     const getRowClass = (density: LogTableDensity) => {
         switch (density) {
@@ -330,6 +355,83 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         setContextMenuState({ x: e.clientX, y: e.clientY, entry, key, value });
     };
 
+    const renderCell = (column: ColumnDefinition, entry: LogEntry) => {
+        const baseClasses = `${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)}`;
+
+        switch (column.key) {
+            case 'time':
+                return (
+                    <div
+                        key="time"
+                        onContextMenu={(e) => handleContextMenu(e, entry, 'time', entry.time)}
+                        style={getStyle('time')}
+                        className={`${baseClasses} whitespace-nowrap`}
+                    >
+                        {entry.time}
+                    </div>
+                );
+            case 'level':
+                return (
+                    <div
+                        key="level"
+                        onContextMenu={(e) => handleContextMenu(e, entry, 'level', entry.level)}
+                        className={`${baseClasses} whitespace-nowrap`}
+                    >
+                        <span
+                            style={getStyle('level')}
+                            className={`px-2 py-0.5 rounded-full text-xs font-medium ${getLevelColor(entry.level)}`}
+                        >
+                            {entry.level}
+                        </span>
+                    </div>
+                );
+            case 'sndrtype':
+                return (
+                    <div
+                        key="sndrtype"
+                        onContextMenu={(e) => handleContextMenu(e, entry, 'sndrtype', entry.sndrtype)}
+                        style={getStyle('sndrtype')}
+                        className={`${baseClasses} whitespace-nowrap truncate`}
+                    >
+                        {entry.sndrtype}
+                    </div>
+                );
+            case 'sndrname':
+                return (
+                    <div
+                        key="sndrname"
+                        onContextMenu={(e) => handleContextMenu(e, entry, 'sndrname', entry.sndrname)}
+                        style={getStyle('sndrname')}
+                        className={`${baseClasses} whitespace-nowrap truncate`}
+                    >
+                        {entry.sndrname}
+                    </div>
+                );
+            case 'fileName':
+                return (
+                    <div
+                        key="fileName"
+                        onContextMenu={(e) => handleContextMenu(e, entry, 'fileName', entry.fileName)}
+                        style={getStyle('fileName')}
+                        className={`${baseClasses} whitespace-nowrap truncate`}
+                    >
+                        {entry.fileName}
+                    </div>
+                );
+            case 'msg':
+            default:
+                return (
+                    <div
+                        key="msg"
+                        onContextMenu={(e) => handleContextMenu(e, entry, 'msg', entry.msg)}
+                        style={getStyle('msg')}
+                        className={`${baseClasses} whitespace-nowrap truncate`}
+                        dangerouslySetInnerHTML={{ __html: highlightText(entry.msg, [appliedFilters.includeMsg], theme) }}
+                    />
+                );
+        }
+    };
+
     const getStyle = (key: ColumnKey): React.CSSProperties => {
         const styleConf = columnStyles[key];
         if (!styleConf) return {};
@@ -356,8 +458,6 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         const newWidth = Math.max(300, Math.min(1200, panelWidthsRef.current.details - deltaX));
         props.onPanelWidthsChange({ ...panelWidthsRef.current, details: newWidth });
     };
-
-    const visibilityKey = Object.values(props.columnVisibility).join('-');
 
     return (
         <div className="flex flex-col flex-grow min-h-0 bg-gray-100 dark:bg-gray-900">
@@ -402,38 +502,47 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                 <Splitter onDrag={handleFilterResize} />
                 <main className="flex-grow min-h-0 flex flex-col min-w-0">
                     <div className="overflow-auto outline-none flex-grow" ref={tableContainerRef} tabIndex={-1}>
-                        <table key={visibilityKey} className="min-w-full table-fixed font-sans" style={{ borderSpacing: 0 }}>
-                            <thead className="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 shadow-sm" style={{ display: 'table', tableLayout: 'fixed', width: '100%' }}>
-                                <tr onContextMenu={(e) => {
+                        <div className="relative min-w-full">
+                            <div
+                                className="sticky top-0 z-10 shadow-sm"
+                                onContextMenu={(e) => {
                                     e.preventDefault();
                                     setHeaderContextMenu({ x: e.clientX, y: e.clientY });
-                                }}>
-                                    {columnVisibility.time && <th style={{width: '12%', minWidth: '170px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Time</th>}
-                                    {columnVisibility.level && <th style={{width: '8%', minWidth: '90px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Level</th>}
-                                    {columnVisibility.sndrtype && <th style={{width: '10%', minWidth: '120px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Sender Type</th>}
-                                    {columnVisibility.sndrname && <th style={{width: '10%', minWidth: '120px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Sender Name</th>}
-                                    {columnVisibility.fileName && <th style={{width: '15%', minWidth: '150px'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Filename</th>}
-                                    {columnVisibility.msg && <th style={{width: '45%'}} className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>Message</th>}
-                                </tr>
-                            </thead>
-                             <tbody
-                                className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700"
-                                style={{
-                                    position: 'relative',
-                                    display: 'block',
-                                    height: `${rowVirtualizer.getTotalSize() + (isBusy ? rowHeight : 0)}px`,
-                                    width: '100%'
                                 }}
+                            >
+                                <div
+                                    className="grid font-sans bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 items-center"
+                                    style={{ gridTemplateColumns }}
+                                >
+                                    {columns.length > 0 ? (
+                                        columns.map((column) => (
+                                            <div
+                                                key={column.key}
+                                                className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}
+                                            >
+                                                {column.label}
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className={`py-2 ${getCellClass(logTableDensity)} text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
+                                            No columns selected
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <div
+                                className="relative bg-white dark:bg-gray-900"
+                                style={{ height: `${rowVirtualizer.getTotalSize() + (isBusy ? rowHeight : 0)}px` }}
                             >
                                 {virtualRows.map((virtualRow) => {
                                     const entry = entries[virtualRow.index];
                                     if (!entry) return null;
+
                                     return (
-                                        <tr
+                                        <div
                                             key={entry.id}
-                                            ref={virtualRow.measureElement}
                                             onClick={() => handleRowClick(entry)}
-                                            className={`transition-colors duration-100 cursor-pointer border-b border-gray-200 dark:border-gray-700 ${keyboardSelectedId === entry.id ? 'bg-sky-100 dark:bg-sky-900/50' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
+                                            className={`grid font-sans items-center transition-colors duration-100 cursor-pointer border-b border-gray-200 dark:border-gray-700 ${keyboardSelectedId === entry.id ? 'bg-sky-100 dark:bg-sky-900/50' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
                                             style={{
                                                 position: 'absolute',
                                                 top: 0,
@@ -441,39 +550,36 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                                                 right: 0,
                                                 transform: `translateY(${virtualRow.start}px)`,
                                                 height: `${virtualRow.size}px`,
-                                                display: 'table',
-                                                tableLayout: 'fixed',
-                                                width: '100%',
+                                                gridTemplateColumns,
                                             }}
                                         >
-                                            {columnVisibility.time && <td onContextMenu={(e) => handleContextMenu(e, entry, 'time', entry.time)} style={getStyle('time')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap`}>{entry.time}</td>}
-                                            {columnVisibility.level && <td onContextMenu={(e) => handleContextMenu(e, entry, 'level', entry.level)} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap`}><span style={getStyle('level')} className={`px-2 py-0.5 rounded-full text-xs font-medium ${getLevelColor(entry.level)}`}>{entry.level}</span></td>}
-                                            {columnVisibility.sndrtype && <td onContextMenu={(e) => handleContextMenu(e, entry, 'sndrtype', entry.sndrtype)} style={getStyle('sndrtype')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.sndrtype}</td>}
-                                            {columnVisibility.sndrname && <td onContextMenu={(e) => handleContextMenu(e, entry, 'sndrname', entry.sndrname)} style={getStyle('sndrname')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.sndrname}</td>}
-                                            {columnVisibility.fileName && <td onContextMenu={(e) => handleContextMenu(e, entry, 'fileName', entry.fileName)} style={getStyle('fileName')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`}>{entry.fileName}</td>}
-                                            {columnVisibility.msg && <td onContextMenu={(e) => handleContextMenu(e, entry, 'msg', entry.msg)} style={getStyle('msg')} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} whitespace-nowrap truncate`} dangerouslySetInnerHTML={{ __html: highlightText(entry.msg, [appliedFilters.includeMsg], theme) }}></td>}
-                                        </tr>
+                                            {columns.map((column) => renderCell(column, entry))}
+                                        </div>
                                     );
                                 })}
                                 {isBusy && (
-                                    <tr
+                                    <div
                                         key="loading"
+                                        className="grid font-sans items-center border-t border-gray-200 dark:border-gray-700"
                                         style={{
                                             position: 'absolute',
                                             top: `${rowVirtualizer.getTotalSize()}px`,
                                             left: 0,
                                             right: 0,
                                             height: `${rowHeight}px`,
-                                            display: 'table',
-                                            tableLayout: 'fixed',
-                                            width: '100%'
+                                            gridTemplateColumns,
                                         }}
                                     >
-                                        <td colSpan={visibleColumnCount} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} text-center text-sm text-gray-500 dark:text-gray-400`}>Loading...</td>
-                                    </tr>
+                                        <div
+                                            className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} text-center text-sm text-gray-500 dark:text-gray-400`}
+                                            style={{ gridColumn: '1 / -1' }}
+                                        >
+                                            Loading...
+                                        </div>
+                                    </div>
                                 )}
-                             </tbody>
-                        </table>
+                            </div>
+                        </div>
                     </div>
                 </main>
                 {props.isDetailPanelVisible && (
