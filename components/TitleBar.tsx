@@ -110,7 +110,7 @@ export const TitleBar: React.FC<TitleBarProps> = ({ activeView }) => {
     if (!window.electronAPI) return null;
     
     return (
-        <header 
+        <header
             className="flex-shrink-0 bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-200 h-8 flex items-center justify-between"
             style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
         >
@@ -121,7 +121,7 @@ export const TitleBar: React.FC<TitleBarProps> = ({ activeView }) => {
                 </div>
             </div>
 
-            <div className="flex-grow flex items-center justify-center px-4" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+            <div className="flex-grow flex items-center justify-center px-4">
                 <div className="relative w-full max-w-md">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                          <Icon name={isSearchable ? "Filter" : "Terminal"} iconSet={iconSet} className="w-4 h-4 text-gray-400" />
@@ -133,12 +133,14 @@ export const TitleBar: React.FC<TitleBarProps> = ({ activeView }) => {
                         value={inputValue}
                         onChange={handleInputChange}
                         className="w-full h-6 pl-10 pr-8 py-1 text-xs bg-gray-100 dark:bg-gray-700/80 border border-gray-300 dark:border-gray-600/50 rounded-md focus:ring-1 focus:ring-sky-500 focus:border-sky-500 transition-all placeholder-gray-400"
+                        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
                     />
                      {inputValue && (
                         <button
                             onClick={handleClear}
                             className="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                             aria-label="Clear search"
+                            style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
                         >
                             <Icon name="XCircle" iconSet={iconSet} className="w-4 h-4" />
                         </button>
