@@ -101,6 +101,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     const [contextMenuState, setContextMenuState] = React.useState<ContextMenuState>(null);
     const [headerContextMenu, setHeaderContextMenu] = React.useState<{ x: number, y: number } | null>(null);
     const tableContainerRef = React.useRef<HTMLDivElement>(null);
+    const pendingLoadRef = React.useRef(false);
     
     const panelWidthsRef = React.useRef(props.panelWidths);
     panelWidthsRef.current = props.panelWidths;
@@ -120,6 +121,11 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         theme,
         jumpToEntryId
     } = props;
+
+    const visibleColumnCount = React.useMemo(
+        () => Object.values(columnVisibility).filter(Boolean).length || 1,
+        [columnVisibility]
+    );
     
     const getRowClass = (density: LogTableDensity) => {
         switch (density) {
@@ -159,6 +165,40 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     });
 
     const virtualRows = rowVirtualizer.getVirtualItems();
+
+    React.useEffect(() => {
+        if (!isBusy) {
+            pendingLoadRef.current = false;
+        }
+    }, [isBusy]);
+
+    React.useEffect(() => {
+        const container = tableContainerRef.current;
+        if (!container) {
+            return;
+        }
+
+        const threshold = Math.max(estimateRowHeight(), 200);
+
+        const maybeLoadMore = () => {
+            if (pendingLoadRef.current || isBusy || !hasMore) {
+                return;
+            }
+
+            const { scrollTop, clientHeight, scrollHeight } = container;
+            if (scrollHeight - (scrollTop + clientHeight) <= threshold) {
+                pendingLoadRef.current = true;
+                onLoadMore();
+            }
+        };
+
+        container.addEventListener('scroll', maybeLoadMore);
+        maybeLoadMore();
+
+        return () => {
+            container.removeEventListener('scroll', maybeLoadMore);
+        };
+    }, [estimateRowHeight, hasMore, isBusy, onLoadMore]);
 
     // This effect ensures the details panel stays in sync with keyboard navigation.
     React.useEffect(() => {
@@ -318,7 +358,12 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                             </thead>
                              <tbody
                                 className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700"
-                                style={{ position: 'relative', display: 'block', height: `${rowVirtualizer.getTotalSize()}px`, width: '100%' }}
+                                style={{
+                                    position: 'relative',
+                                    display: 'block',
+                                    height: `${rowVirtualizer.getTotalSize() + (isBusy ? rowHeight : 0)}px`,
+                                    width: '100%'
+                                }}
                             >
                                 {virtualRows.map((virtualRow) => {
                                     const entry = entries[virtualRow.index];
@@ -350,9 +395,25 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                                         </tr>
                                     );
                                 })}
+                                {isBusy && (
+                                    <tr
+                                        key="loading"
+                                        style={{
+                                            position: 'absolute',
+                                            top: `${rowVirtualizer.getTotalSize()}px`,
+                                            left: 0,
+                                            right: 0,
+                                            height: `${rowHeight}px`,
+                                            display: 'table',
+                                            tableLayout: 'fixed',
+                                            width: '100%'
+                                        }}
+                                    >
+                                        <td colSpan={visibleColumnCount} className={`${getRowClass(logTableDensity)} ${getCellClass(logTableDensity)} text-center text-sm text-gray-500 dark:text-gray-400`}>Loading...</td>
+                                    </tr>
+                                )}
                              </tbody>
                         </table>
-                        {isBusy && <div className="p-4 text-center">Loading...</div>}
                     </div>
                 </main>
                 {props.isDetailPanelVisible && (
