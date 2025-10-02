@@ -1,7 +1,17 @@
 import initSqlJs, { SqlJsStatic } from 'sql.js';
 import { FilterState, LogEntry, TimelineDataPoint, CategoryDataPoint, PageTimestampRange, FileTimeRange, LogDensityPoint, StockInfoEntry, StockInfoFilters, StockArticleSuggestion, LogDensityPointByLevel, ConsoleMessageType } from './types.ts';
 
-const locateSqlWasm = (file: string) => new URL(`./${file}`, import.meta.url).toString();
+const locateSqlWasm = (file: string) => {
+    if (typeof window !== 'undefined' && window.location) {
+        return new URL(`./dist/${file}`, window.location.href).toString();
+    }
+
+    if (typeof globalThis?.location?.href === 'string') {
+        return new URL(`./dist/${file}`, globalThis.location.href).toString();
+    }
+
+    return `./dist/${file}`;
+};
 type SqlJsDatabase = InstanceType<SqlJsStatic['Database']>;
 
 // Helper to convert date/time inputs to a UTC SQL-comparable format.
