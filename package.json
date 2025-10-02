@@ -9,10 +9,11 @@
   "scripts": {
     "build:css": "postcss styles.css -o dist/styles.css",
     "build:js": "esbuild index.tsx --bundle --outfile=dist/bundle.js --jsx=automatic",
-    "build": "npm run build:css && npm run build:js",
+    "copy:sql": "node scripts/copy-sql-assets.mjs",
+    "build": "npm run build:css && npm run build:js && npm run copy:sql",
     "clean": "rimraf release-builds",
     "start": "npm run build && electron .",
-    "serve": "npm run build:css && concurrently \"npm run build:css -- --watch\" \"esbuild index.tsx --bundle --outfile=dist/bundle.js --jsx=automatic --servedir=. --serve=:3000\"",
+    "serve": "npm run build:css && npm run copy:sql && concurrently \"npm run build:css -- --watch\" \"esbuild index.tsx --bundle --outfile=dist/bundle.js --jsx=automatic --servedir=. --serve=:3000\"",
     "dist": "npm run clean && npm run build && electron-builder",
     "dist:32": "npm run clean && npm run build && electron-builder --ia32",
     "dist:64": "npm run clean && npm run build && electron-builder --x64",
@@ -35,7 +36,8 @@
   },
   "dependencies": {
     "electron-updater": "^6.2.1",
-    "@tanstack/react-virtual": "^3.1.1"
+    "@tanstack/react-virtual": "^3.1.1",
+    "sql.js": "^1.10.3"
   },
   "build": {
     "appId": "com.meditech.loganalyser",
