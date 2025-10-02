@@ -2,7 +2,9 @@
 // It does not have access to the DOM, window object, or React components.
 
 // Import the sql.js library. Since it's not a module, we use importScripts.
-importScripts('https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js');
+importScripts('./sql-wasm.js');
+
+const locateSqlAsset = (file: string) => new URL(file, self.location.href).toString();
 
 // Define the type for the SQL.js library, as it's not available in the worker's global scope by default.
 declare const initSqlJs: (config: { locateFile: (file: string) => string; }) => Promise<any>;
@@ -51,7 +53,7 @@ const handleImportLogs = async (payload: any) => {
     }
 
     postMessage({ type: 'progress', payload: { phase: 'parsing', message: 'Initializing database engine...', progress: 30, details: {} } });
-    const SQL = await initSqlJs({ locateFile: (file: string) => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${file}` });
+    const SQL = await initSqlJs({ locateFile: locateSqlAsset });
     const db = new SQL.Database();
     db.exec(`CREATE TABLE logs (id INTEGER PRIMARY KEY, time TEXT, level TEXT, sndrtype TEXT, sndrname TEXT, msg TEXT, fileName TEXT);`);
     
@@ -105,7 +107,7 @@ const handleRebuildStockData = async (payload: any) => {
     if (!dbBuffer) throw new Error("Worker received no database buffer for stock rebuild.");
 
     postMessage({ type: 'progress', payload: { phase: 'loading', message: 'Loading database...', progress: 0 } });
-    const SQL = await initSqlJs({ locateFile: (file: string) => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${file}` });
+    const SQL = await initSqlJs({ locateFile: locateSqlAsset });
     const db = new SQL.Database(dbBuffer);
     
     postMessage({ type: 'progress', payload: { phase: 'parsing', message: 'Clearing old stock data...', progress: 5 } });

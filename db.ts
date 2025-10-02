@@ -1,7 +1,18 @@
+import initSqlJs, { SqlJsStatic } from 'sql.js';
 import { FilterState, LogEntry, TimelineDataPoint, CategoryDataPoint, PageTimestampRange, FileTimeRange, LogDensityPoint, StockInfoEntry, StockInfoFilters, StockArticleSuggestion, LogDensityPointByLevel, ConsoleMessageType } from './types.ts';
 
-// sql.js is loaded from a script tag and will be on the window object
-declare const initSqlJs: (config: { locateFile: (file: string) => string; }) => Promise<any>;
+const locateSqlWasm = (file: string) => {
+    if (typeof window !== 'undefined' && window.location) {
+        return new URL(`./dist/${file}`, window.location.href).toString();
+    }
+
+    if (typeof globalThis?.location?.href === 'string') {
+        return new URL(`./dist/${file}`, globalThis.location.href).toString();
+    }
+
+    return `./dist/${file}`;
+};
+type SqlJsDatabase = InstanceType<SqlJsStatic['Database']>;
 
 // Helper to convert date/time inputs to a UTC SQL-comparable format.
 export const getSqlDateTime = (dateStr: string, timeStr: string, endOfDay = false): string | null => {
@@ -18,11 +29,11 @@ export const getSqlDateTime = (dateStr: string, timeStr: string, endOfDay = fals
 };
 
 export class Database {
-    private db: any;
+    private db: SqlJsDatabase;
     private logToConsole?: (message: string, type: ConsoleMessageType) => void;
     private logSqlQueries?: boolean;
 
-    private constructor(db: any) {
+    private constructor(db: SqlJsDatabase) {
         this.db = db;
     }
 
@@ -41,7 +52,7 @@ export class Database {
 
     static async create(): Promise<Database> {
         const SQL = await initSqlJs({
-            locateFile: (file: string) => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${file}`
+            locateFile: locateSqlWasm
         });
         const db = new SQL.Database();
         return new Database(db);
@@ -49,7 +60,7 @@ export class Database {
 
     static async createFromBuffer(buffer: Uint8Array): Promise<Database> {
         const SQL = await initSqlJs({
-            locateFile: (file: string) => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${file}`
+            locateFile: locateSqlWasm
         });
         const db = new SQL.Database(buffer);
         return new Database(db);
