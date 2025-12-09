@@ -284,7 +284,8 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         if (!container) return;
 
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (!['ArrowUp', 'ArrowDown'].includes(e.key)) {
+            const navKeys = ['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End'];
+            if (!navKeys.includes(e.key)) {
                 return;
             }
             e.preventDefault();
@@ -298,15 +299,45 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                 return;
             }
 
+            // Calculate visible rows per page based on container height
+            const visibleRows = Math.max(1, Math.floor(container.clientHeight / rowHeight) - 1);
+
             let nextIndex = currentIndex;
-            if (e.key === 'ArrowDown') {
-                nextIndex = currentIndex + 1;
-            } else if (e.key === 'ArrowUp') {
-                nextIndex = currentIndex - 1;
+            switch (e.key) {
+                case 'ArrowDown':
+                    nextIndex = currentIndex + 1;
+                    break;
+                case 'ArrowUp':
+                    nextIndex = currentIndex - 1;
+                    break;
+                case 'PageDown':
+                    nextIndex = Math.min(currentIndex + visibleRows, entries.length - 1);
+                    break;
+                case 'PageUp':
+                    nextIndex = Math.max(currentIndex - visibleRows, 0);
+                    break;
+                case 'Home':
+                    nextIndex = 0;
+                    break;
+                case 'End':
+                    nextIndex = entries.length - 1;
+                    // If we're at the end and there's more data, load it
+                    if (viewMode === 'scroll' && hasMore && !isBusy) {
+                        onLoadMore();
+                    }
+                    break;
             }
 
             if (nextIndex >= 0 && nextIndex < entries.length) {
                 setKeyboardSelectedId(entries[nextIndex].id);
+
+                // Check if we're near the end and should trigger autoload
+                if (viewMode === 'scroll' && hasMore && !isBusy) {
+                    const remainingEntries = entries.length - nextIndex;
+                    if (remainingEntries <= visibleRows) {
+                        onLoadMore();
+                    }
+                }
             } else if (viewMode === 'scroll' && e.key === 'ArrowDown' && nextIndex >= entries.length && hasMore) {
                 onLoadMore();
             }
@@ -315,7 +346,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         container.addEventListener('keydown', handleKeyDown);
         return () => container.removeEventListener('keydown', handleKeyDown);
 
-    }, [entries, keyboardSelectedId, setKeyboardSelectedId, hasMore, onLoadMore, viewMode]);
+    }, [entries, keyboardSelectedId, setKeyboardSelectedId, hasMore, onLoadMore, viewMode, rowHeight, isBusy]);
 
     const handleContextMenu = React.useCallback((e: React.MouseEvent, entry: LogEntry, key: ColumnKey, value: string) => {
         e.preventDefault();
