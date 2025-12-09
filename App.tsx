@@ -11,6 +11,7 @@ import { FocusDebugger } from './components/FocusDebugger';
 import { Icon } from './components/icons';
 import { LogTable } from './components/LogTable';
 import { ProgressIndicator } from './components/ProgressIndicator';
+import { BottomLogPanel } from './components/BottomLogPanel';
 
 // Lazy load less frequently used components for better initial load performance
 const Settings = React.lazy(() => import('./components/Settings').then(m => ({ default: m.Settings })));
@@ -41,7 +42,11 @@ const App: React.FC = () => {
   } = useUI();
 
   const { toasts, removeToast } = useToast();
-  const { consoleMessages, consoleFilters, setConsoleFilters, consoleSearchTerm } = useConsole();
+  const { consoleMessages, consoleFilters, setConsoleFilters, consoleSearchTerm, handleClearConsole } = useConsole();
+
+  // Bottom log panel state
+  const [isBottomLogPanelVisible, setIsBottomLogPanelVisible] = React.useState(false);
+  const [bottomLogPanelHeight, setBottomLogPanelHeight] = React.useState(200);
 
   // Settings State and Actions from Hooks
   const settings = useSettings();
@@ -113,7 +118,7 @@ const App: React.FC = () => {
         />
       )}
       {isLoading && <ProgressIndicator title={progressTitle} progress={progress} message={progressMessage} phase={progressPhase} detailedProgress={detailedProgress} iconSet={iconSet} onCancel={handleCancelProcessing} />}
-      <Header activeView={activeView} onViewChange={setActiveView} isBusy={isBusy || isStockBusy} iconSet={iconSet} />
+      <Header activeView={activeView} onViewChange={setActiveView} isBusy={isBusy || isStockBusy} iconSet={iconSet} onToggleLogPanel={() => setIsBottomLogPanelVisible(!isBottomLogPanelVisible)} isLogPanelVisible={isBottomLogPanelVisible} />
       <main className="flex-grow flex flex-col min-h-0">
         {activeView === 'data' && (
           <DataHub
@@ -240,17 +245,7 @@ const App: React.FC = () => {
             />
           </Suspense>
         )}
-        {activeView === 'console' && (
-          <Console
-            messages={consoleMessages}
-            onClear={useConsole().handleClearConsole}
-            filters={consoleFilters}
-            onFiltersChange={setConsoleFilters}
-            iconSet={iconSet}
-            searchTerm={consoleSearchTerm}
-            theme={theme}
-          />
-        )}
+
         {activeView === 'info' && (
           <Suspense fallback={<LazyLoadFallback />}>
             <Info
@@ -265,6 +260,18 @@ const App: React.FC = () => {
           </Suspense>
         )}
       </main>
+      <BottomLogPanel
+        isVisible={isBottomLogPanelVisible}
+        onToggle={() => setIsBottomLogPanelVisible(!isBottomLogPanelVisible)}
+        messages={consoleMessages}
+        onClear={handleClearConsole}
+        filters={consoleFilters}
+        onFiltersChange={setConsoleFilters}
+        iconSet={iconSet}
+        theme={theme}
+        height={bottomLogPanelHeight}
+        onHeightChange={setBottomLogPanelHeight}
+      />
       <StatusBar
         totalEntries={totalEntryCount}
         filteredCount={data.totalFilteredCount}

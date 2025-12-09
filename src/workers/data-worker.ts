@@ -149,13 +149,22 @@ const handleImportLogs = async (payload: ImportLogsPayload) => {
 
 
 const handleRebuildStockData = async (payload: RebuildStockPayload) => {
+    console.log('[Worker] handleRebuildStockData started');
     const { dbBuffer } = payload;
-    if (!dbBuffer) throw new Error("Worker received no database buffer for stock rebuild.");
+    if (!dbBuffer) {
+        console.error('[Worker] No database buffer received!');
+        throw new Error("Worker received no database buffer for stock rebuild.");
+    }
+    console.log('[Worker] Database buffer received, size:', dbBuffer.byteLength);
 
     postMessage({ type: 'progress', payload: { phase: 'loading', message: 'Loading database...', progress: 0 } });
+    console.log('[Worker] Initializing SQL.js...');
     const SQL = await initSqlJs({ locateFile: locateSqlAsset });
+    console.log('[Worker] SQL.js initialized, creating database from buffer...');
     const db = new SQL.Database(dbBuffer);
+    console.log('[Worker] Database loaded from buffer');
 
+    console.log('[Worker] Creating/clearing stock_info table...');
     postMessage({ type: 'progress', payload: { phase: 'parsing', message: 'Clearing old stock data...', progress: 5 } });
     // FIX: Ensure the stock_info table exists before trying to delete from it.
     // This prevents errors when rebuilding on a new/blank session.
@@ -173,10 +182,15 @@ const handleRebuildStockData = async (payload: RebuildStockPayload) => {
         );
     `);
     db.exec("DELETE FROM stock_info;");
+    console.log('[Worker] Stock_info table cleared');
 
+    console.log('[Worker] Counting logs with StockInfoMessage...');
     const countResult = db.exec("SELECT COUNT(*) FROM logs WHERE LOWER(msg) LIKE '%<stockinfomessage%'");
     const totalToScan = countResult[0]?.values[0]?.[0] || 0;
+    console.log('[Worker] Found', totalToScan, 'logs to scan for stock info');
+
     if (totalToScan === 0) {
+        console.log('[Worker] No stock info messages found, returning empty result');
         const finalDbBuffer = db.export();
         postMessage({ type: 'done-rebuild', payload: { dbBuffer: finalDbBuffer, count: 0 } }, { transfer: [finalDbBuffer.buffer] });
         return;
@@ -247,17 +261,22 @@ const handleRebuildStockData = async (payload: RebuildStockPayload) => {
 
 // Main message handler for the worker
 self.onmessage = async (event) => {
+    console.log('[Worker] Received message:', event.data?.type);
     try {
         const { type, payload } = event.data;
         if (type === 'import-logs') {
+            console.log('[Worker] Starting import-logs command');
             await handleImportLogs(payload);
         } else if (type === 'rebuild-stock') {
+            console.log('[Worker] Starting rebuild-stock command');
             await handleRebuildStockData(payload);
         } else {
+            console.error('[Worker] Unknown command:', type);
             throw new Error(`Unknown worker command: ${type}`);
         }
     } catch (e) {
         const error = e instanceof Error ? e.message : 'An unknown error occurred in the worker.';
+        console.error('[Worker] Error:', error);
         postMessage({ type: 'error', payload: { error } });
     }
 };

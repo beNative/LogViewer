@@ -3,8 +3,8 @@ import { ProgressPhase } from '../types';
 import { useToast } from './ToastContext';
 
 type UIContextType = {
-    activeView: 'data' | 'viewer' | 'dashboard' | 'console' | 'settings' | 'info' | 'stock';
-    setActiveView: React.Dispatch<React.SetStateAction<'data' | 'viewer' | 'dashboard' | 'console' | 'settings' | 'info' | 'stock'>>;
+    activeView: 'data' | 'viewer' | 'dashboard' | 'settings' | 'info' | 'stock';
+    setActiveView: React.Dispatch<React.SetStateAction<'data' | 'viewer' | 'dashboard' | 'settings' | 'info' | 'stock'>>;
     isAboutDialogOpen: boolean;
     setIsAboutDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 
@@ -50,7 +50,7 @@ const UIContext = createContext<UIContextType | undefined>(undefined);
 export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { addToast } = useToast();
 
-    const [activeView, setActiveView] = useState<'data' | 'viewer' | 'dashboard' | 'console' | 'settings' | 'info' | 'stock'>('data');
+    const [activeView, setActiveView] = useState<'data' | 'viewer' | 'dashboard' | 'settings' | 'info' | 'stock'>('data');
     const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
 
     const [isLoading, setIsLoading] = useState<boolean>(false);

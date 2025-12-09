@@ -3,10 +3,12 @@ import { Icon, IconName } from './icons';
 import { IconSet } from '../types';
 
 interface HeaderProps {
-    activeView: 'data' | 'viewer' | 'dashboard' | 'console' | 'settings' | 'info' | 'stock';
-    onViewChange: (view: 'data' | 'viewer' | 'dashboard' | 'console' | 'settings' | 'info' | 'stock') => void;
+    activeView: 'data' | 'viewer' | 'dashboard' | 'settings' | 'info' | 'stock';
+    onViewChange: (view: 'data' | 'viewer' | 'dashboard' | 'settings' | 'info' | 'stock') => void;
     isBusy: boolean;
     iconSet: IconSet;
+    onToggleLogPanel: () => void;
+    isLogPanelVisible: boolean;
 }
 
 type NavColor = 'purple' | 'yellow' | 'red' | 'indigo' | 'blue' | 'green' | 'teal';
@@ -86,7 +88,7 @@ const NavItem: React.FC<{
     );
 };
 
-export const Header: React.FC<HeaderProps> = ({ activeView, onViewChange, isBusy, iconSet }) => {
+export const Header: React.FC<HeaderProps> = ({ activeView, onViewChange, isBusy, iconSet, onToggleLogPanel, isLogPanelVisible }) => {
     return (
         <header className="flex-shrink-0 bg-gray-100 dark:bg-gray-900 p-3">
             <nav className="flex items-center">
@@ -126,8 +128,8 @@ export const Header: React.FC<HeaderProps> = ({ activeView, onViewChange, isBusy
                     <NavItem
                         iconName="Terminal"
                         label="Application Log"
-                        isActive={activeView === 'console'}
-                        onClick={() => onViewChange('console')}
+                        isActive={isLogPanelVisible}
+                        onClick={onToggleLogPanel}
                         color="indigo"
                         iconSet={iconSet}
                     />
@@ -136,7 +138,7 @@ export const Header: React.FC<HeaderProps> = ({ activeView, onViewChange, isBusy
 
                 {isBusy && (
                     <div className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-sky-600 dark:text-sky-400 animate-pulse">
-                        <Icon name="Spinner" iconSet={iconSet} className="w-5 h-5 animate-spin" />
+                        <Icon name="ArrowPath" iconSet={iconSet} className="w-5 h-5 animate-spin" />
                         <span>Processing...</span>
                     </div>
                 )}

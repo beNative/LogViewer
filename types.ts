@@ -116,6 +116,13 @@ export type SessionFile = {
 
 export type ColumnKey = 'time' | 'level' | 'sndrtype' | 'sndrname' | 'fileName' | 'msg';
 
+export type ColumnDefinition = {
+    key: ColumnKey;
+    label: string;
+    minWidth: number;
+    flex: number;
+};
+
 export type ColumnVisibilityState = Record<ColumnKey, boolean>;
 
 export type ColumnStyle = {

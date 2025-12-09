@@ -1,6 +1,6 @@
 import React from 'react';
 import { ColumnVisibilityState, ColumnKey } from '../types.ts';
-import { COLUMN_DEFINITIONS } from '../utils.ts';
+import { COLUMN_DEFINITIONS } from '../constants';
 
 // Props interface
 interface ColumnVisibilityMenuProps {
@@ -20,8 +20,8 @@ const MenuItem: React.FC<{
 }> = ({ label, columnKey, checked, onChange }) => (
     <li>
         <label className="flex w-full items-center space-x-3 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
-            <input 
-                type="checkbox" 
+            <input
+                type="checkbox"
                 checked={checked}
                 onChange={() => onChange(columnKey)}
                 className="h-4 w-4 rounded bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-500 text-sky-600 dark:text-sky-500 focus:ring-sky-500 cursor-pointer"

@@ -3,23 +3,24 @@ import { StockInfoEntry, StockInfoFilters, IconSet, Theme, LogDensityPoint, Over
 import { Icon } from './icons/index.tsx';
 import { StockHistoryChart } from './StockHistoryChart.tsx';
 import { TimeRangeSelector } from './TimeRangeSelector.tsx';
+import { useConfirmDialog } from '../contexts/ConfirmDialogContext';
 
 interface StockTrackerProps {
-  onSearch: (filters: StockInfoFilters) => void;
-  history: StockInfoEntry[];
-  isBusy: boolean;
-  iconSet: IconSet;
-  theme: Theme;
-  overallTimeRange: { min: string, max: string } | null;
-  overallStockDensity: LogDensityPoint[];
-  uiScale: number;
-  onRebuildStockData: () => Promise<void>;
-  onFetchSuggestions: (searchTerm: string, timeFilters: StockInfoFilters) => Promise<StockArticleSuggestion[]>;
-  timelineBarVisibility: TimelineBarVisibility;
-  onTimelineBarVisibilityChange: (newVisibility: TimelineBarVisibility) => void;
+    onSearch: (filters: StockInfoFilters) => void;
+    history: StockInfoEntry[];
+    isBusy: boolean;
+    iconSet: IconSet;
+    theme: Theme;
+    overallTimeRange: { min: string, max: string } | null;
+    overallStockDensity: LogDensityPoint[];
+    uiScale: number;
+    onRebuildStockData: () => Promise<void>;
+    onFetchSuggestions: (searchTerm: string, timeFilters: StockInfoFilters) => Promise<StockArticleSuggestion[]>;
+    timelineBarVisibility: TimelineBarVisibility;
+    onTimelineBarVisibilityChange: (newVisibility: TimelineBarVisibility) => void;
 }
 
-const inputStyles = "w-full bg-white dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white sm:text-sm rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition";
+const inputStyles = "w-full px-3 py-2 bg-white dark:bg-gray-700/80 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white sm:text-sm rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition";
 
 
 export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, isBusy, iconSet, theme, overallTimeRange, overallStockDensity, uiScale, onRebuildStockData, onFetchSuggestions, timelineBarVisibility, onTimelineBarVisibilityChange }) => {
@@ -39,6 +40,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
     const suggestionContainerRef = React.useRef<HTMLDivElement>(null);
     const tableContainerRef = React.useRef<HTMLDivElement>(null);
     const rowRefs = React.useRef<Map<number, HTMLTableRowElement | null>>(new Map());
+    const { confirm } = useConfirmDialog();
 
 
     React.useEffect(() => {
@@ -66,7 +68,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-     // Effect to scroll the selected history item into view
+    // Effect to scroll the selected history item into view
     React.useEffect(() => {
         if (selectedHistoryIndex !== null) {
             const rowEl = rowRefs.current.get(selectedHistoryIndex);
@@ -76,9 +78,11 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        
+        console.log('[StockTracker] handleInputChange called:', { name, value, targetId: e.target.id });
+
         setFilters(prevFilters => {
             const newFilters = { ...prevFilters, [name]: value };
+            console.log('[StockTracker] Filters updated:', newFilters);
 
             if (name === 'searchTerm') {
                 if (debounceTimeoutRef.current) {
@@ -104,7 +108,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                     }, 300);
                 }
             }
-            
+
             return newFilters;
         });
     };
@@ -142,16 +146,18 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
         setIsSuggestionsVisible(false);
     };
 
-    const handleRebuildClick = () => {
-        if (window.confirm(
-            'Are you sure you want to rebuild the stock data?\n\n' +
-            'This will clear all existing stock information and recreate it from the log entries in the current session. ' +
-            'This process can be slow and the session will be saved automatically.'
-        )) {
+    const handleRebuildClick = async () => {
+        const confirmed = await confirm({
+            title: 'Rebuild Stock Data',
+            message: 'This will clear all existing stock information and recreate it from the log entries in the current session. This process can be slow and the session will be saved automatically.',
+            confirmText: 'Rebuild',
+            type: 'warning',
+        });
+        if (confirmed) {
             onRebuildStockData();
         }
     };
-    
+
     const handleHistoryTableKeyDown = (e: React.KeyboardEvent) => {
         if (!['ArrowUp', 'ArrowDown'].includes(e.key)) {
             return;
@@ -159,7 +165,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
         e.preventDefault();
 
         if (history.length === 0) return;
-        
+
         const currentIndex = selectedHistoryIndex;
         let nextIndex: number;
 
@@ -174,7 +180,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
         }
         setSelectedHistoryIndex(nextIndex);
     };
-    
+
     const handleRowClick = (index: number) => {
         setSelectedHistoryIndex(index);
         tableContainerRef.current?.focus({ preventScroll: true });
@@ -194,7 +200,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
 
         const dateToYYYYMMDD = (d: Date) => d.toISOString().split('T')[0];
         const dateToHHMMSS = (d: Date) => d.toISOString().split('T')[1].substring(0, 8);
-        
+
         setFilters(currentFilters => ({
             ...currentFilters,
             dateFrom: dateToYYYYMMDD(startDate),
@@ -217,7 +223,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
     const getSelectedTimestamps = React.useCallback(() => {
         let selectedStartTime: number | null = null;
         let selectedEndTime: number | null = null;
-    
+
         if (filters.dateFrom) {
             let timePart = filters.timeFrom || '00:00:00';
             if (timePart.length === 5) timePart += ':00';
@@ -227,12 +233,12 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                 selectedStartTime = date.getTime();
             }
         }
-         if (filters.dateTo) {
+        if (filters.dateTo) {
             let timePart = filters.timeTo || '23:59:59';
             if (timePart.length === 5) timePart += ':00';
             const dateString = `${filters.dateTo}T${timePart}.999Z`;
             const date = new Date(dateString);
-             if (!isNaN(date.getTime())) {
+            if (!isNaN(date.getTime())) {
                 selectedEndTime = date.getTime();
             }
         }
@@ -341,9 +347,9 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                                 overallLogDensity={overallStockDensity}
                                 datesWithLogs={[]}
                                 viewMode="scroll"
-                                onCursorChange={() => {}}
-                                onFileSelect={() => {}}
-                                onDateSelect={() => {}}
+                                onCursorChange={() => { }}
+                                onFileSelect={() => { }}
+                                onDateSelect={() => { }}
                                 viewRange={timelineViewRange}
                                 onViewRangeChange={setTimelineViewRange}
                                 onZoomToSelection={handleTimelineZoomToSelection}
@@ -362,12 +368,12 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                     </div>
                 </form>
             </div>
-            
+
             {history.length > 0 && (
-                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                     <div className="bg-white dark:bg-gray-800/50 p-4 sm:p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
                         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Stock History</h3>
-                         <div
+                        <div
                             ref={tableContainerRef}
                             onKeyDown={handleHistoryTableKeyDown}
                             tabIndex={0}
@@ -384,7 +390,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                                 </thead>
                                 <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200/50 dark:divide-gray-700/50">
                                     {history.map((entry, index) => (
-                                        <tr 
+                                        <tr
                                             key={`${entry.timestamp}-${index}`}
                                             ref={el => { rowRefs.current.set(index, el); }}
                                             onClick={() => handleRowClick(index)}
@@ -400,13 +406,13 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                             </table>
                         </div>
                     </div>
-                     <div className="bg-white dark:bg-gray-800/50 p-4 sm:p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
+                    <div className="bg-white dark:bg-gray-800/50 p-4 sm:p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
                         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Quantity Over Time</h3>
                         <div className="h-96">
                             <StockHistoryChart data={chartData} theme={theme} selectedIndex={selectedHistoryIndex} />
                         </div>
                     </div>
-                 </div>
+                </div>
             )}
 
             {!isBusy && history.length === 0 && (

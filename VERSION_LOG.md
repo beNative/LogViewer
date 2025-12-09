@@ -1,6 +1,37 @@
 # Version Log
 
-All notable changes to this project will be documented in this file. The current application version is **0.21.0**.
+All notable changes to this project will be documented in this file. The current application version is **0.23.0**.
+
+## 0.23.0 – 2025-12-09
+
+### Added
+
+- **Collapsible Application Log Panel**: New resizable panel at bottom of screen for real-time application log viewing. Toggle via "Application Log" button in header.
+- **Styled Confirm Dialogs**: Replaced all native `window.confirm()` dialogs with beautifully styled modal dialogs matching the app theme. Includes danger (red), warning (orange), and info (blue) variants.
+- **Comprehensive Stock Rebuild Logging**: Added detailed logging throughout the stock data rebuild process for better debugging.
+
+### Changed
+
+- **Console Tab Removed**: Replaced with the new collapsible bottom log panel for a cleaner UI.
+- **Application Log Button**: Now toggles the bottom log panel visibility instead of switching views.
+
+### Fixed
+
+- **React Hooks Violation**: Fixed conditional hook call in App.tsx that was causing potential UI blocking issues.
+- **Stock Tracker Input Styling**: Added missing border and padding to input fields for proper visibility.
+
+## 0.22.0 – 2025-12-09
+
+### Fixed
+
+- **Status Bar Row Count**: Fixed issue where the status bar would display "Showing 0 of YYY rows" on initial load by removing unnecessary `isInitialLoad` check in `DataContext`.
+- **Icon Imports**: Standardized all icon imports to use a single `components/icons/index.tsx` file, resolving build errors and inconsistencies.
+- **Build Process**: replaced hardcoded `magick` dependency with `sharp` library for robust SVG-to-PNG icon generation during build.
+
+### Changed
+
+- **App Icon**: Updated application icon to a new modern, professional design (SVG source).
+- **Icon System**: Refactored icon system to support both 'sharp' and 'solid' variants with a simpler API.
 
 ## 0.21.0 – 2025-12-09
 

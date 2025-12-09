@@ -1,8 +1,8 @@
 import React from 'react';
 // Fix: Changed import from "../types" to "../types.ts"
 import { ColumnKey, ColumnStyle, ColumnStyles } from '../types.ts';
-import { COLUMN_DEFINITIONS } from '../utils';
-import { ChevronDownIcon } from './icons/ChevronDownIcon';
+import { COLUMN_DEFINITIONS } from '../constants';
+import { Icon } from './icons';
 import { Tooltip } from './Tooltip.tsx';
 
 const FONT_FAMILIES_WEB = ['sans-serif', 'serif', 'monospace', 'system-ui', 'inherit'];
@@ -50,7 +50,7 @@ interface ColumnStyleEditorProps {
 }
 
 const ColumnStyleEditor: React.FC<ColumnStyleEditorProps> = ({ columnKey, label, style, fontList, onChange }) => {
-    
+
     const handleChange = <K extends keyof ColumnStyle>(key: K, value: ColumnStyle[K]) => {
         onChange(columnKey, { ...style, [key]: value });
     };
@@ -65,7 +65,7 @@ const ColumnStyleEditor: React.FC<ColumnStyleEditorProps> = ({ columnKey, label,
     return (
         <div className="grid grid-cols-1 md:grid-cols-5 gap-x-4 gap-y-2 items-center p-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
             <div className="font-semibold text-gray-800 dark:text-gray-200">{label}</div>
-            
+
             <div className="relative">
                 <input
                     list={`font-list-${columnKey}`}
@@ -77,7 +77,7 @@ const ColumnStyleEditor: React.FC<ColumnStyleEditorProps> = ({ columnKey, label,
                 <datalist id={`font-list-${columnKey}`}>
                     {fontList.map(f => <option key={f} value={f} />)}
                 </datalist>
-                <ChevronDownIcon className="absolute top-1/2 right-2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                <Icon name="ChevronDown" className="absolute top-1/2 right-2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
             </div>
 
             <div className="flex items-center gap-2">
@@ -102,7 +102,7 @@ const ColumnStyleEditor: React.FC<ColumnStyleEditorProps> = ({ columnKey, label,
                         B
                     </button>
                 </Tooltip>
-                 <Tooltip content="Italic">
+                <Tooltip content="Italic">
                     <button
                         onClick={() => handleChange('isItalic', !style.isItalic)}
                         className={`px-3 py-1 text-sm italic rounded-md transition-colors w-9 h-9 flex items-center justify-center ${style.isItalic ? 'bg-sky-600 text-white' : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'}`}
@@ -112,10 +112,10 @@ const ColumnStyleEditor: React.FC<ColumnStyleEditorProps> = ({ columnKey, label,
                     </button>
                 </Tooltip>
             </div>
-            
+
             <div>
                 <Tooltip content={columnKey === 'level' ? "Color for 'Level' is handled automatically." : "Light theme color"}>
-                    <input 
+                    <input
                         type="color"
                         value={style.color}
                         onChange={e => handleChange('color', e.target.value)}
@@ -124,12 +124,12 @@ const ColumnStyleEditor: React.FC<ColumnStyleEditorProps> = ({ columnKey, label,
                         aria-label={`${label} light theme color`}
                     />
                 </Tooltip>
-                 {columnKey !== 'level' && <ColorSwatches colors={LIGHT_THEME_SWATCHES} onSelect={color => handleChange('color', color)} />}
+                {columnKey !== 'level' && <ColorSwatches colors={LIGHT_THEME_SWATCHES} onSelect={color => handleChange('color', color)} />}
             </div>
 
             <div>
-                 <Tooltip content={columnKey === 'level' ? "Color for 'Level' is handled automatically." : "Dark theme color"}>
-                     <input 
+                <Tooltip content={columnKey === 'level' ? "Color for 'Level' is handled automatically." : "Dark theme color"}>
+                    <input
                         type="color"
                         value={style.darkColor}
                         onChange={e => handleChange('darkColor', e.target.value)}
@@ -174,7 +174,7 @@ export const ColumnStyleSettings: React.FC<ColumnStyleSettingsProps> = ({ styles
             setIsLoadingFonts(false);
         }
     }, []);
-    
+
     const handleStyleChange = (key: ColumnKey, newStyle: ColumnStyle) => {
         onChange({ ...styles, [key]: newStyle });
     };
@@ -183,7 +183,7 @@ export const ColumnStyleSettings: React.FC<ColumnStyleSettingsProps> = ({ styles
 
     return (
         <div className="space-y-2">
-             <div className="grid grid-cols-1 md:grid-cols-5 gap-x-4 gap-y-2 items-center px-3 pb-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-x-4 gap-y-2 items-center px-3 pb-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
                 <span>Column</span>
                 <span>Font</span>
                 <span>Size &amp; Style</span>

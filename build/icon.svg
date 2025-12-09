@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e3a8a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4c1d95;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="15" result="coloredBlur" />
+      <feMerge>
+        <feMergeNode in="coloredBlur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect x="0" y="0" width="512" height="512" rx="100" ry="100" fill="url(#grad1)" />
+  
+  <!-- Content Group -->
+  <g transform="translate(56, 56) scale(0.78)">
+    <!-- Data Lines Background -->
+    <path d="M50 100 H462 M50 200 H462 M50 300 H462 M50 400 H462" stroke="#ffffff" stroke-width="4" stroke-opacity="0.2" stroke-linecap="round" />
+    <path d="M100 100 L150 140 L200 80 L300 220 L350 180 L400 320" fill="none" stroke="#22d3ee" stroke-width="8" stroke-opacity="0.4" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Magnifying Glass / Search Symbol -->
+    <circle cx="210" cy="210" r="120" fill="none" stroke="#ffffff" stroke-width="35" filter="url(#glow)" />
+    <line x1="295" y1="295" x2="440" y2="440" stroke="#ffffff" stroke-width="35" stroke-linecap="round" filter="url(#glow)" />
+    
+    <!-- Inner Data Detail -->
+    <path d="M140 210 H280 M140 170 H250 M140 250 H220" stroke="#a5f3fc" stroke-width="12" stroke-linecap="round" />
+  </g>
+</svg>

@@ -8,7 +8,7 @@
 // ============================================================================
 
 /** Current application version - should match package.json */
-export const APP_VERSION = '0.21.0';
+export const APP_VERSION = '0.23.0';
 
 /** Application name */
 export const APP_NAME = 'Log Analyser';
@@ -77,3 +77,19 @@ export const TRANSITION_DURATION_MS = 150;
 
 /** Toast notification auto-dismiss duration */
 export const TOAST_DURATION_MS = 5000;
+
+// ============================================================================
+// Table Configuration
+// ============================================================================
+
+import { ColumnKey } from './types.ts';
+
+/** Definition of all available columns in the log table */
+export const COLUMN_DEFINITIONS: { key: ColumnKey; label: string; minWidth: number; flex: number }[] = [
+    { key: 'time', label: 'Time', minWidth: 170, flex: 1.3 },
+    { key: 'level', label: 'Level', minWidth: 90, flex: 0.8 },
+    { key: 'sndrtype', label: 'Sender Type', minWidth: 120, flex: 1.1 },
+    { key: 'sndrname', label: 'Sender Name', minWidth: 120, flex: 1.2 },
+    { key: 'fileName', label: 'Filename', minWidth: 150, flex: 1.4 },
+    { key: 'msg', label: 'Message', minWidth: 240, flex: 3.0 },
+];

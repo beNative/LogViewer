@@ -161,6 +161,8 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }
     }, [logToConsole, handleNewSession]);
 
+    const processingRejectRef = useRef<((reason?: any) => void) | null>(null);
+
     const processFilesToDb = useCallback(async (files: FileList) => {
         return new Promise<{ db: Database, count: number }>(async (resolve, reject) => {
             // Use ref for synchronous check to prevent race conditions
@@ -168,6 +170,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 return reject(new Error("Another process is already running."));
             }
             isProcessingRef.current = true;
+            processingRejectRef.current = reject;
             setIsProcessing(true);
             if (workerRef.current) workerRef.current.terminate();
 
@@ -188,6 +191,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
                         worker.terminate();
                         workerRef.current = null;
                         isProcessingRef.current = false;
+                        processingRejectRef.current = null;
                         setIsProcessing(false);
                         resolve({ db: finalDb, count: payload.count });
                         break;
@@ -195,6 +199,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
                         worker.terminate();
                         workerRef.current = null;
                         isProcessingRef.current = false;
+                        processingRejectRef.current = null;
                         setIsProcessing(false);
                         reject(new Error(payload.error));
                         break;
@@ -202,11 +207,20 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
             };
 
             worker.onerror = (err) => {
+                // Extract detailed error information from the ErrorEvent
+                const errorDetails = [
+                    err.message || 'No error message',
+                    err.filename ? `File: ${err.filename}` : null,
+                    err.lineno ? `Line: ${err.lineno}` : null,
+                    err.colno ? `Column: ${err.colno}` : null,
+                ].filter(Boolean).join(', ');
                 worker.terminate();
                 workerRef.current = null;
                 isProcessingRef.current = false;
+                processingRejectRef.current = null;
                 setIsProcessing(false);
-                reject(new Error(`Worker error: ${err.message}`));
+                logToConsole(`Worker error during import: ${errorDetails}`, 'ERROR');
+                reject(new Error(err.message || `Worker error: ${errorDetails}`));
             };
 
             const xmlFiles: { name: string; content: string }[] = [];
@@ -228,6 +242,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
                         }
                     } catch (e) {
                         isProcessingRef.current = false;
+                        processingRejectRef.current = null;
                         setIsProcessing(false);
                         return reject(new Error(`Failed to read zip file ${file.name}: ${(e as Error).message}`));
                     }
@@ -247,14 +262,20 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (workerRef.current) {
             workerRef.current.terminate();
             workerRef.current = null;
-            setIsLoading(false);
-            isProcessingRef.current = false;
-            setIsProcessing(false);
-            setError('Processing was cancelled by the user.');
-            logToConsole('User cancelled file processing.', 'WARNING');
-            addToast({ type: 'warning', title: 'Cancelled', message: 'The file processing was cancelled.' });
         }
-    }, [setIsLoading, setError, logToConsole, addToast]);
+        if (processingRejectRef.current) {
+            processingRejectRef.current(new Error("Cancelled by user"));
+            processingRejectRef.current = null;
+        }
+        isProcessingRef.current = false;
+        setIsLoading(false);
+        setIsProcessing(false);
+        setProgress(0);
+        setProgressMessage('');
+        setProgressPhase('loading'); // Reset phase
+        logToConsole('User cancelled file processing.', 'WARNING');
+        addToast({ type: 'warning', title: 'Cancelled', message: 'The file processing was cancelled.' });
+    }, [setIsLoading, setProgress, setProgressMessage, setProgressPhase, logToConsole, addToast]);
 
     const saveCurrentDbAsSession = useCallback(async (dbToSave: Database, name: string): Promise<boolean> => {
         if (!isElectron || !dbToSave) return false;
@@ -453,6 +474,9 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
             return;
         }
 
+        logToConsole('Starting stock data rebuild...', 'INFO');
+        logToConsole(`Database state: hasData=${hasData}, totalEntries=${db?.getTotalEntryCount() || 0}`, 'DEBUG');
+
         setIsLoading(true);
         setIsProcessing(true);
         setProgressTitle("Rebuilding Stock Data...");
@@ -460,11 +484,14 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setDetailedProgress({ currentFile: '', fileBytesRead: 0, fileTotalBytes: 0, fileLogCount: null });
 
         if (workerRef.current) {
+            logToConsole('Terminating existing worker...', 'DEBUG');
             workerRef.current.terminate();
         }
 
+        logToConsole('Creating new worker from ./dist/worker.js...', 'DEBUG');
         const worker = new Worker('./dist/worker.js');
         workerRef.current = worker;
+        logToConsole('Worker created successfully', 'DEBUG');
 
         const cleanup = () => {
             if (workerRef.current) {
@@ -480,17 +507,23 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
             const { type, payload } = event.data;
             switch (type) {
                 case 'progress':
+                    logToConsole(`Stock rebuild progress: ${payload.phase} - ${payload.message} (${payload.progress?.toFixed(1)}%)`, 'DEBUG');
                     setProgressPhase(payload.phase as ProgressPhase);
                     setProgressMessage(payload.message);
                     setProgress(payload.progress);
                     break;
                 case 'done-rebuild':
+                    logToConsole(`Stock rebuild worker completed: ${payload.count} entries`, 'INFO');
                     try {
+                        logToConsole('Creating database from worker buffer...', 'DEBUG');
                         const newDb = await Database.createFromBuffer(payload.dbBuffer);
+                        logToConsole('Updating state from database...', 'DEBUG');
                         await updateStateFromDb(newDb);
                         setDb(newDb);
                         setIsDirty(true);
+                        logToConsole('Saving session...', 'DEBUG');
                         await handleSaveSession();
+                        logToConsole(`Stock rebuild complete: ${payload.count} entries rebuilt`, 'INFO');
                         addToast({ type: 'success', title: 'Rebuild Complete', message: `Successfully rebuilt ${payload.count.toLocaleString()} stock entries.` });
                     } catch (e) {
                         const msg = e instanceof Error ? e.message : "An unexpected error occurred during rebuild post-processing.";
@@ -512,9 +545,16 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         };
 
         worker.onerror = (err) => {
-            const msg = err.message || 'Unknown worker error';
+            // Extract detailed error information from the ErrorEvent
+            const errorDetails = [
+                err.message || 'No error message',
+                err.filename ? `File: ${err.filename}` : null,
+                err.lineno ? `Line: ${err.lineno}` : null,
+                err.colno ? `Column: ${err.colno}` : null,
+            ].filter(Boolean).join(', ');
+            const msg = errorDetails || 'Unknown worker error (no details available)';
             logToConsole(`Stock rebuild worker crashed: ${msg}`, 'ERROR');
-            addToast({ type: 'error', title: 'Rebuild Crashed', message: msg });
+            addToast({ type: 'error', title: 'Rebuild Crashed', message: err.message || 'Worker crashed unexpectedly. Check console for details.' });
             cleanup();
         };
 

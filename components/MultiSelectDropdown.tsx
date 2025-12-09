@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDownIcon } from './icons/ChevronDownIcon.tsx';
+import { Icon } from './icons/index.tsx';
 
 interface MultiSelectDropdownProps {
     label: string;
@@ -44,7 +44,7 @@ export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
             : [...selectedOptions, option];
         onSelectionChange(newSelection);
     };
-    
+
     const buttonLabel = React.useMemo(() => {
         if (selectedOptions.length > 0) {
             const selectionText = selectedOptions.join(', ');
@@ -56,7 +56,7 @@ export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
     const filteredOptions = options.filter(option =>
         option.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    
+
     const handleSelectAll = () => {
         const selectedSet = new Set(selectedOptions);
         filteredOptions.forEach(opt => selectedSet.add(opt));
@@ -71,12 +71,12 @@ export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
 
     return (
         <div className="relative w-full" ref={wrapperRef}>
-            <button 
-                onClick={() => setIsOpen(!isOpen)} 
+            <button
+                onClick={() => setIsOpen(!isOpen)}
                 className="w-full h-10 px-3 py-2 bg-white dark:bg-gray-700/80 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-gray-900 dark:text-white text-sm flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-800 focus:ring-sky-500"
             >
                 <span className="truncate">{buttonLabel}</span>
-                <ChevronDownIcon className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isOpen ? 'transform rotate-180' : ''}`} />
+                <Icon name="ChevronDown" className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isOpen ? 'transform rotate-180' : ''}`} />
             </button>
 
             {isOpen && (
@@ -92,9 +92,9 @@ export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
                             className="w-full px-2 py-1.5 bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white sm:text-sm rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition"
                         />
                         <div className="flex items-center justify-between mt-2">
-                             <span className="text-xs text-gray-500 dark:text-gray-400 px-1">
+                            <span className="text-xs text-gray-500 dark:text-gray-400 px-1">
                                 {filteredOptions.length} visible
-                             </span>
+                            </span>
                             <div className="flex items-center space-x-2">
                                 <button
                                     onClick={handleDeselectAll}
@@ -118,14 +118,14 @@ export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
                             filteredOptions.map(option => (
                                 <li key={option}>
                                     <label className="flex w-full items-center space-x-3 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer">
-                                        <input 
-                                            type="checkbox" 
+                                        <input
+                                            type="checkbox"
                                             checked={selectedOptions.includes(option)}
                                             onChange={() => handleSelect(option)}
                                             className="h-4 w-4 rounded bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-500 text-sky-600 dark:text-sky-500 focus:ring-sky-500 cursor-pointer"
                                         />
                                         <span className="text-sm text-gray-800 dark:text-gray-200 truncate" title={option}>{option}</span>
-                                     </label>
+                                    </label>
                                 </li>
                             ))
                         ) : (

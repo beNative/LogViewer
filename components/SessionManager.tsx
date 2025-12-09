@@ -3,6 +3,7 @@ import { SessionFile, IconSet } from '../types.ts';
 import { formatBytes } from '../utils.ts';
 import { Icon } from './icons/index.tsx';
 import { Tooltip } from './Tooltip.tsx';
+import { useConfirmDialog } from '../contexts/ConfirmDialogContext';
 
 
 const SessionItem: React.FC<{
@@ -17,6 +18,7 @@ const SessionItem: React.FC<{
     const [isRenaming, setIsRenaming] = React.useState(false);
     const [newName, setNewName] = React.useState(session.name);
     const inputRef = React.useRef<HTMLInputElement>(null);
+    const { confirm } = useConfirmDialog();
 
     React.useEffect(() => {
         if (isRenaming) {
@@ -24,7 +26,7 @@ const SessionItem: React.FC<{
             inputRef.current?.select();
         }
     }, [isRenaming]);
-    
+
     const handleRename = async () => {
         if (newName && newName !== session.name) {
             const success = await onRename(session.name, newName);
@@ -36,7 +38,7 @@ const SessionItem: React.FC<{
             setIsRenaming(false);
         }
     };
-    
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') handleRename();
         if (e.key === 'Escape') {
@@ -45,8 +47,14 @@ const SessionItem: React.FC<{
         }
     };
 
-    const handleDelete = () => {
-        if(window.confirm(`Are you sure you want to permanently delete '${session.name}'?`)) {
+    const handleDelete = async () => {
+        const confirmed = await confirm({
+            title: 'Delete Session',
+            message: `Are you sure you want to permanently delete '${session.name}'?`,
+            confirmText: 'Delete',
+            type: 'danger',
+        });
+        if (confirmed) {
             onDelete(session.name);
         }
     }
@@ -62,11 +70,11 @@ const SessionItem: React.FC<{
     };
 
     return (
-        <li 
+        <li
             className={`relative rounded-lg transition-all duration-150 group ${isActive ? 'bg-sky-50 dark:bg-sky-900/40 ring-2 ring-sky-500' : 'hover:bg-gray-100/70 dark:hover:bg-gray-700/40'}`}
         >
             <span className={`absolute left-0 top-2 bottom-2 w-1 rounded-r-full transition-colors ${isActive ? 'bg-sky-500' : 'bg-transparent'}`} />
-            <button 
+            <button
                 onClick={() => onLoad(session.name)}
                 disabled={isRenaming}
                 className="w-full text-left pl-4 pr-16 py-3 flex items-center gap-4 cursor-pointer disabled:cursor-default"

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ColumnKey, ColumnVisibilityState, IconSet } from '../types.ts';
-import { COLUMN_DEFINITIONS } from '../utils.ts';
+import { COLUMN_DEFINITIONS } from '../constants';
 import { Icon } from './icons/index.tsx';
 
 interface ColumnSelectorProps {

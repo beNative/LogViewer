@@ -231,6 +231,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         clearTimeout(busyTaskRef.current);
 
         if (!isInitialLoad) {
+            // We only clear entries if it's NOT the initial load, 
+            // because on initial load we want to fetch them immediately in the timeout below.
+            // Actually, we usually want to clear before fetching new ones to avoid stale data flicker.
+            // But if we are fixing the "Showing 0 rows" bug, we want the fetch to happen.
+            // Let's keep it empty here, the fetch below will populate it.
             setFilteredEntries([]);
         }
         setEntriesOffset(0);
@@ -249,7 +254,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setLogDensity(db.getLogDensityByLevel(appliedFilters, 200));
             setDatesWithLogs(db.getDatesWithLogs(appliedFilters));
 
-            if (count > 0 && !isInitialLoad) {
+            if (count > 0) {
                 if (viewMode === 'pagination') {
                     const entries = db.queryLogEntries(appliedFilters, pageSize, (currentPage - 1) * pageSize);
                     const ranges = db.getPageTimestampRanges(appliedFilters, pageSize);
@@ -263,6 +268,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     setHasMoreLogs(entries.length < count);
                     setPageTimestampRanges([]);
                 }
+                if (isInitialLoad) {
+                    // If this was the initial load, we've now loaded data, so turn it off.
+                    // This prevents "Data is ready..." message and ensures normal operation.
+                    setIsInitialLoad(false);
+                }
                 logToConsole(`View updated. Found ${count} matching entries.`, 'DEBUG');
             } else {
                 setFilteredEntries([]);
@@ -273,8 +283,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     setFileTimeRanges([]);
                     setLogDensity([]);
                     setDatesWithLogs([]);
-                } else if (isInitialLoad) {
-                    logToConsole(`Data is ready. Found ${count} matching entries. Apply filters to view.`, 'INFO');
                 }
             }
             setIsBusy(false);

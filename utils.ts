@@ -10,14 +10,7 @@ const escapeHtml = (unsafe: string): string => {
         .replace(/'/g, "&#039;");
 }
 
-export const COLUMN_DEFINITIONS: { key: ColumnKey; label: string }[] = [
-    { key: 'time', label: 'Timestamp' },
-    { key: 'level', label: 'Level' },
-    { key: 'sndrtype', label: 'Sender Type' },
-    { key: 'sndrname', label: 'Sender Name' },
-    { key: 'fileName', label: 'Filename' },
-    { key: 'msg', label: 'Message' },
-];
+
 
 /**
  * Wraps search terms found within a block of text with <mark> tags for highlighting.
