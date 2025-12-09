@@ -455,6 +455,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                                     rowHeight={rowHeight}
                                     gridTemplateColumns={gridTemplateColumns}
                                     logTableDensity={logTableDensity}
+                                    entriesCount={entries.length}
                                 />
                             </div>
                         </div>

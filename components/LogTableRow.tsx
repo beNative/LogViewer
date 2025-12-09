@@ -124,7 +124,10 @@ export const LogTableRow: React.FC<LogTableRowProps> = React.memo(({
     return (
         <div
             onClick={() => onRowClick(entry)}
-            className={`grid font-sans items-center transition-colors duration-100 cursor-pointer border-b border-gray-200 dark:border-gray-700 ${isSelected ? 'bg-sky-100 dark:bg-sky-900/50' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
+            className={`grid font-sans items-center transition-colors duration-100 cursor-pointer border-b border-gray-200 dark:border-gray-700 ${isSelected
+                    ? 'bg-sky-100 dark:bg-sky-900/60 border-l-4 border-l-sky-500'
+                    : 'hover:bg-gray-50 dark:hover:bg-gray-800/50 border-l-4 border-l-transparent'
+                }`}
             style={style}
         >
             {columns.map((column) => renderCell(column))}
