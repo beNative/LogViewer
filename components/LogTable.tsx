@@ -205,6 +205,11 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         setLogTableViewportHeight(container.clientHeight);
     }, [logTableDensity, uiScale, setLogTableViewportHeight, viewMode]);
 
+    // Force remeasure all items when row height changes (density change)
+    React.useEffect(() => {
+        rowVirtualizer.measure();
+    }, [rowHeight, rowVirtualizer]);
+
     React.useEffect(() => {
         if (!isBusy) {
             pendingLoadRef.current = false;

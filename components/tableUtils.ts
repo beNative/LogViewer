@@ -26,9 +26,9 @@ export const getLevelColor = (level: string) => {
 
 export const getRowClass = (density: LogTableDensity) => {
     switch (density) {
-        case 'compact': return 'py-0.5';
+        case 'compact': return 'py-0';
         case 'normal': return 'py-1';
-        case 'comfortable': return 'py-2';
+        case 'comfortable': return 'py-2.5';
     }
 };
 
