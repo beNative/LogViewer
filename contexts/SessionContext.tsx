@@ -568,6 +568,11 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     );
 };
 
+/**
+ * Hook to access database session management functionality.
+ * @throws Error if used outside of SessionProvider
+ * @returns SessionContextType with database, session CRUD, and file import/export
+ */
 export const useSession = (): SessionContextType => {
     const context = useContext(SessionContext);
     if (context === undefined) {

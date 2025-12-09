@@ -7,12 +7,12 @@ import { useToast } from './ToastContext';
 const MONO_FONT_STACK = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
 const initialColumnVisibility: ColumnVisibilityState = { time: true, level: true, sndrtype: true, sndrname: true, fileName: true, msg: true };
 const initialColumnStyles: ColumnStyles = {
-  time: { font: MONO_FONT_STACK, fontSize: 13, isBold: false, isItalic: false, color: '#6B7280', darkColor: '#9CA3AF' },
-  level: { font: 'sans-serif', fontSize: 12, isBold: true, isItalic: false, color: '', darkColor: '' },
-  sndrtype: { font: 'sans-serif', fontSize: 14, isBold: false, isItalic: false, color: '#374151', darkColor: '#D1D5DB' },
-  sndrname: { font: 'sans-serif', fontSize: 14, isBold: false, isItalic: false, color: '#374151', darkColor: '#D1D5DB' },
-  fileName: { font: 'sans-serif', fontSize: 13, isBold: false, isItalic: false, color: '#6B7280', darkColor: '#9CA3AF' },
-  msg: { font: MONO_FONT_STACK, fontSize: 13, isBold: false, isItalic: false, color: '#1F2937', darkColor: '#F3F4F6' },
+    time: { font: MONO_FONT_STACK, fontSize: 13, isBold: false, isItalic: false, color: '#6B7280', darkColor: '#9CA3AF' },
+    level: { font: 'sans-serif', fontSize: 12, isBold: true, isItalic: false, color: '', darkColor: '' },
+    sndrtype: { font: 'sans-serif', fontSize: 14, isBold: false, isItalic: false, color: '#374151', darkColor: '#D1D5DB' },
+    sndrname: { font: 'sans-serif', fontSize: 14, isBold: false, isItalic: false, color: '#374151', darkColor: '#D1D5DB' },
+    fileName: { font: 'sans-serif', fontSize: 13, isBold: false, isItalic: false, color: '#6B7280', darkColor: '#9CA3AF' },
+    msg: { font: MONO_FONT_STACK, fontSize: 13, isBold: false, isItalic: false, color: '#1F2937', darkColor: '#F3F4F6' },
 };
 const initialPanelWidths: PanelWidths = { filters: 320, details: 500 };
 const initialTimelineBarVisibility: TimelineBarVisibility = { pages: true, files: true, dates: true, density: true, overview: true };
@@ -59,6 +59,11 @@ type SettingsContextType = {
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
+/**
+ * Provider for user preferences and application configuration.
+ * Manages theme, view mode, column visibility, filter presets, UI scale,
+ * and all other customizable settings. Syncs with Electron's persistent storage.
+ */
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { logToConsole } = useConsole();
     const { addToast } = useToast();
@@ -81,7 +86,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const [githubToken, setGithubToken] = useState<string>('');
     const [uiScale, setUiScale] = useState<number>(1);
     const [logSqlQueries, setLogSqlQueries] = useState<boolean>(false);
-    
+
     // Load settings on startup
     useEffect(() => {
         if (!window.electronAPI) return;
@@ -116,7 +121,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // Effects to apply settings to the DOM
     useEffect(() => { document.documentElement.classList.toggle('dark', theme === 'dark'); }, [theme]);
     useEffect(() => { (document.body.style as any).zoom = uiScale === 1 ? '' : `${uiScale}`; }, [uiScale]);
-    
+
     // Generic settings updater
     const updateSettings = useCallback(async (newSettings: Partial<SettingsType>) => {
         if (!window.electronAPI) return;
@@ -145,7 +150,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const onGithubTokenChange = (token: string) => { setGithubToken(token); updateSettings({ githubToken: token }); };
     const onUiScaleChange = (newScale: number) => { setUiScale(newScale); updateSettings({ uiScale: newScale }); };
     const onLogSqlQueriesChange = (enabled: boolean) => { setLogSqlQueries(enabled); updateSettings({ logSqlQueries: enabled }); };
-    
+
     const onFullSettingsUpdate = async (newSettings: SettingsType) => {
         setTheme(newSettings.theme);
         setViewMode(newSettings.viewMode);
@@ -173,27 +178,27 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setCustomFilterPresets(newPresets);
         await updateSettings({ customFilterPresets: newPresets });
         logToConsole(`Filter preset '${name.trim()}' saved.`, 'INFO');
-        addToast({ type: 'success', title: 'Preset Saved', message: `Preset '${name.trim()}' has been saved.`});
+        addToast({ type: 'success', title: 'Preset Saved', message: `Preset '${name.trim()}' has been saved.` });
     };
-    
+
     const onDeleteFilterPreset = async (name: string) => {
         const newPresets = { ...customFilterPresets };
         delete newPresets[name];
         setCustomFilterPresets(newPresets);
         await updateSettings({ customFilterPresets: newPresets });
         logToConsole(`Filter preset '${name}' deleted.`, 'INFO');
-        addToast({ type: 'info', title: 'Preset Deleted', message: `Preset '${name}' has been deleted.`});
+        addToast({ type: 'info', title: 'Preset Deleted', message: `Preset '${name}' has been deleted.` });
     };
 
     const onLoadFilterPreset = (name: string): FilterState | null => {
         if (customFilterPresets[name]) {
             logToConsole(`Loaded filter preset '${name}'. Click Apply to see results.`, 'INFO');
-            addToast({ type: 'info', title: 'Preset Loaded', message: `Preset '${name}' loaded. Click 'Apply' to see changes.`});
+            addToast({ type: 'info', title: 'Preset Loaded', message: `Preset '${name}' loaded. Click 'Apply' to see changes.` });
             return { ...customFilterPresets[name] };
         }
         return null;
     };
-    
+
     const value: SettingsContextType = {
         theme, viewMode, allowPrerelease, isAutoUpdateEnabled, githubToken, iconSet, logTableDensity,
         columnVisibility, customFilterPresets, columnStyles, panelWidths, isTimeRangeSelectorVisible,
@@ -204,7 +209,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         onFocusDebuggerVisibilityChange, onTimelineBarVisibilityChange, onUiScaleChange, onLogSqlQueriesChange,
         onFullSettingsUpdate, onSaveFilterPreset, onDeleteFilterPreset, onLoadFilterPreset,
     };
-    
+
     return (
         <SettingsContext.Provider value={value}>
             {children}
@@ -212,6 +217,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     );
 };
 
+/**
+ * Hook to access user preferences and application settings.
+ * @throws Error if used outside of SettingsProvider
+ * @returns SettingsContextType with settings values and change handlers
+ */
 export const useSettings = (): SettingsContextType => {
     const context = useContext(SettingsContext);
     if (context === undefined) {

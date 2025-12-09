@@ -80,6 +80,11 @@ type DataContextType = {
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
+/**
+ * Provider for log data querying, filtering, and analysis.
+ * Manages filtered entries, pagination/scroll state, dashboard data,
+ * timeline density, and stock tracker functionality built on top of SessionContext.
+ */
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { db, hasData, loadedFileNames, handleRebuildStockDataInWorker, overallStockTimeRange, setOverallStockTimeRange, overallStockDensity, setOverallStockDensity } = useSession();
     const { logToConsole, lastConsoleMessage } = useConsole();
@@ -580,6 +585,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 };
 
+/**
+ * Hook to access log data querying and filtering functionality.
+ * @throws Error if used outside of DataProvider
+ * @returns DataContextType with filtered entries, pagination, and stock data
+ */
 export const useData = (): DataContextType => {
     const context = useContext(DataContext);
     if (context === undefined) {
