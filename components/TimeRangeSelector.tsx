@@ -264,9 +264,15 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     const displayMinTime = viewRange?.min ?? minTime;
     const displayMaxTime = viewRange?.max ?? maxTime;
 
-    const useResizeObserver = (ref: React.RefObject<HTMLElement>) => {
+    const useResizeObserver = (ref: React.RefObject<HTMLElement>, isVisible: boolean = true) => {
         const [width, setWidth] = React.useState(0);
         React.useEffect(() => {
+            // When not visible, reset width
+            if (!isVisible) {
+                setWidth(0);
+                return;
+            }
+
             // Store element in local variable for stable reference in cleanup
             const element = ref.current;
             if (!element) {
@@ -288,12 +294,12 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                 resizeObserver.disconnect();
             };
             // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [ref]); // Use ref object (stable) instead of ref.current (changes without effect re-run)
+        }, [ref, isVisible]); // Re-run when visibility changes
         return width;
     };
 
     const mainContainerWidth = useResizeObserver(mainContainerRef);
-    const overviewContainerWidth = useResizeObserver(overviewContainerRef);
+    const overviewContainerWidth = useResizeObserver(overviewContainerRef, timelineBarVisibility.overview);
 
     const mainPosToValue = React.useCallback((p: number) => {
         if (mainContainerWidth === 0 || displayMaxTime === displayMinTime) return displayMinTime;
@@ -613,7 +619,9 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
             </div>
             {timelineBarVisibility.overview && (
                 <div className="flex items-start gap-3 w-full mt-2">
-                    <div className="w-16 flex-shrink-0"></div>
+                    <div className="w-16 flex-shrink-0 text-right pr-1 text-xs font-medium text-gray-500 dark:text-gray-400 pt-3">
+                        Overview
+                    </div>
                     <div className="flex-grow" ref={overviewContainerRef}>
                         {overviewContainerWidth > 0 && (
                             <OverviewBrush
