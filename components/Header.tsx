@@ -71,10 +71,10 @@ const NavItem: React.FC<{
 }> = ({ iconName, label, isActive, onClick, color, iconSet }) => {
     const styles = colorStyles[color];
     const baseClasses = "flex items-center space-x-2 px-3 py-2 text-sm font-semibold transition-all duration-200 rounded-md shadow-sm";
-    
+
     // A neutral background for inactive tabs.
     const inactiveBg = "bg-gray-200 dark:bg-gray-700/80 hover:bg-gray-300 dark:hover:bg-gray-600";
-    
+
     const buttonClasses = `${baseClasses} ${isActive ? `${styles.active} scale-105 shadow-lg` : `${styles.inactive} ${inactiveBg}`}`;
     const iconClasses = `w-5 h-5 ${isActive ? styles.iconActive : styles.iconInactive}`;
 
@@ -107,7 +107,7 @@ export const Header: React.FC<HeaderProps> = ({ activeView, onViewChange, isBusy
                         color="yellow"
                         iconSet={iconSet}
                     />
-                     <NavItem
+                    <NavItem
                         iconName="Cube"
                         label="Stock Tracker"
                         isActive={activeView === 'stock'}
@@ -133,16 +133,16 @@ export const Header: React.FC<HeaderProps> = ({ activeView, onViewChange, isBusy
                     />
                 </div>
                 <div className="flex-grow" />
-                
+
                 {isBusy && (
                     <div className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-sky-600 dark:text-sky-400 animate-pulse">
-                        <Icon name="ArrowPath" iconSet={iconSet} className="w-5 h-5 animate-spin" />
+                        <Icon name="Spinner" iconSet={iconSet} className="w-5 h-5 animate-spin" />
                         <span>Processing...</span>
                     </div>
                 )}
-                
+
                 <div className="flex items-center space-x-2">
-                     <NavItem
+                    <NavItem
                         iconName="BookOpen"
                         label="Info"
                         isActive={activeView === 'info'}
@@ -150,7 +150,7 @@ export const Header: React.FC<HeaderProps> = ({ activeView, onViewChange, isBusy
                         color="blue"
                         iconSet={iconSet}
                     />
-                     <NavItem
+                    <NavItem
                         iconName="Cog"
                         label="Settings"
                         isActive={activeView === 'settings'}
