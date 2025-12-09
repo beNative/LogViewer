@@ -30,6 +30,12 @@ const COLUMN_DEFINITIONS: ColumnDefinition[] = [
     { key: 'msg', label: 'Message', minWidth: 240, flex: 3.0 },
 ];
 
+/**
+ * Returns Tailwind CSS classes for log level badge styling.
+ * Provides both light and dark mode variants.
+ * @param level - The log level string (ERROR, WARNING, INFO, DEBUG, etc.)
+ * @returns String of Tailwind CSS classes for background and text colors
+ */
 export const getLevelColor = (level: string) => {
     switch (level?.toUpperCase()) {
         case 'ERROR':
@@ -119,7 +125,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     const [headerContextMenu, setHeaderContextMenu] = React.useState<{ x: number, y: number } | null>(null);
     const tableContainerRef = React.useRef<HTMLDivElement>(null);
     const pendingLoadRef = React.useRef(false);
-    
+
     const panelWidthsRef = React.useRef(props.panelWidths);
     panelWidthsRef.current = props.panelWidths;
 
@@ -155,7 +161,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     );
 
     const visibleColumnCount = columns.length || 1;
-    
+
     const getRowClass = (density: LogTableDensity) => {
         switch (density) {
             case 'compact': return 'py-0.5';
@@ -344,7 +350,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                 onLoadMore();
             }
         };
-        
+
         container.addEventListener('keydown', handleKeyDown);
         return () => container.removeEventListener('keydown', handleKeyDown);
 
@@ -447,7 +453,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         }
         return properties;
     };
-    
+
     const handleFilterResize = (deltaX: number) => {
         const newWidth = Math.max(240, Math.min(800, panelWidthsRef.current.filters + deltaX));
         props.onPanelWidthsChange({ ...panelWidthsRef.current, filters: newWidth });
@@ -463,35 +469,35 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         <div className="flex flex-col flex-grow min-h-0 bg-gray-100 dark:bg-gray-900">
             {props.isTimeRangeSelectorVisible && props.overallTimeRange && (
                 <div className="flex-shrink-0 p-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50">
-                   <TimeRangeSelector 
-                    minTime={props.overallTimeRange.min}
-                    maxTime={props.overallTimeRange.max}
-                    selectedStartTime={new Date(props.appliedFilters.dateFrom + 'T' + props.appliedFilters.timeFrom + 'Z').getTime()}
-                    selectedEndTime={new Date(props.appliedFilters.dateTo + 'T' + props.appliedFilters.timeTo + 'Z').getTime()}
-                    onRangeChange={props.onTimeRangeSelectorChange}
-                    onClear={props.onClearTimeRange}
-                    theme={props.theme}
-                    pageTimestampRanges={props.pageTimestampRanges}
-                    fileTimeRanges={props.fileTimeRanges}
-                    logDensity={props.logDensity}
-                    overallLogDensity={props.overallLogDensity}
-                    datesWithLogs={props.datesWithLogs}
-                    viewMode={props.viewMode}
-                    onGoToPage={() => {}}
-                    onCursorChange={props.onCursorChange}
-                    onFileSelect={props.onFileSelect}
-                    onDateSelect={props.onDateSelect}
-                    viewRange={props.timelineViewRange}
-                    onViewRangeChange={props.onTimelineViewRangeChange}
-                    onZoomToSelection={props.onTimelineZoomToSelection}
-                    onZoomToExtent={props.onTimelineZoomReset}
-                    zoomToSelectionEnabled={!!(props.appliedFilters.dateFrom && props.appliedFilters.dateTo)}
-                    iconSet={props.iconSet}
-                    uiScale={uiScale}
-                    cursorTime={props.cursorTime}
-                    timelineBarVisibility={props.timelineBarVisibility}
-                    onTimelineBarVisibilityChange={props.onTimelineBarVisibilityChange}
-                   />
+                    <TimeRangeSelector
+                        minTime={props.overallTimeRange.min}
+                        maxTime={props.overallTimeRange.max}
+                        selectedStartTime={new Date(props.appliedFilters.dateFrom + 'T' + props.appliedFilters.timeFrom + 'Z').getTime()}
+                        selectedEndTime={new Date(props.appliedFilters.dateTo + 'T' + props.appliedFilters.timeTo + 'Z').getTime()}
+                        onRangeChange={props.onTimeRangeSelectorChange}
+                        onClear={props.onClearTimeRange}
+                        theme={props.theme}
+                        pageTimestampRanges={props.pageTimestampRanges}
+                        fileTimeRanges={props.fileTimeRanges}
+                        logDensity={props.logDensity}
+                        overallLogDensity={props.overallLogDensity}
+                        datesWithLogs={props.datesWithLogs}
+                        viewMode={props.viewMode}
+                        onGoToPage={() => { }}
+                        onCursorChange={props.onCursorChange}
+                        onFileSelect={props.onFileSelect}
+                        onDateSelect={props.onDateSelect}
+                        viewRange={props.timelineViewRange}
+                        onViewRangeChange={props.onTimelineViewRangeChange}
+                        onZoomToSelection={props.onTimelineZoomToSelection}
+                        onZoomToExtent={props.onTimelineZoomReset}
+                        zoomToSelectionEnabled={!!(props.appliedFilters.dateFrom && props.appliedFilters.dateTo)}
+                        iconSet={props.iconSet}
+                        uiScale={uiScale}
+                        cursorTime={props.cursorTime}
+                        timelineBarVisibility={props.timelineBarVisibility}
+                        onTimelineBarVisibilityChange={props.onTimelineBarVisibilityChange}
+                    />
                 </div>
             )}
             <ActiveFilters appliedFilters={props.appliedFilters} onRemoveFilter={props.onRemoveAppliedFilter} iconSet={props.iconSet} />
@@ -598,8 +604,8 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                     </>
                 )}
             </div>
-             {contextMenuState && <ContextMenu {...contextMenuState} onClose={() => setContextMenuState(null)} onFilter={props.onContextMenuFilter} iconSet={props.iconSet} contextKey={contextMenuState.key} contextValue={contextMenuState.value} />}
-             {headerContextMenu && (
+            {contextMenuState && <ContextMenu {...contextMenuState} onClose={() => setContextMenuState(null)} onFilter={props.onContextMenuFilter} iconSet={props.iconSet} contextKey={contextMenuState.key} contextValue={contextMenuState.value} />}
+            {headerContextMenu && (
                 <ColumnVisibilityMenu
                     x={headerContextMenu.x}
                     y={headerContextMenu.y}
@@ -607,7 +613,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                     onChange={props.onColumnVisibilityChange}
                     onClose={() => setHeaderContextMenu(null)}
                 />
-             )}
+            )}
         </div>
     );
 };

@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file. The current
 - **DOMParser Error Boundary**: Added try-catch wrapper around XML parsing to handle malformed input gracefully.
 - **Type Coercion**: Removed unsafe `any` casting in TimeRangeSelector by leveraging TypeScript union narrowing.
 - **Synchronous File Operations**: Converted all Electron IPC file handlers to async using `fs.promises` to prevent main process blocking.
+- **Infinite Refresh Loop**: Fixed endless table refresh when window is resized by using ref to access `infiniteScrollChunkSize` without triggering effect re-runs.
 
 ### Improved
 

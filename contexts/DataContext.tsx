@@ -105,6 +105,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [timelineViewRange, setTimelineViewRange] = useState<{ min: number; max: number } | null>(null);
     const [tableViewportHeight, setTableViewportHeight] = useState<number | null>(null);
     const [infiniteScrollChunkSize, setInfiniteScrollChunkSize] = useState(DEFAULT_SCROLL_CHUNK_SIZE);
+    const infiniteScrollChunkSizeRef = useRef(infiniteScrollChunkSize);
 
     const getRowHeightForDensity = useCallback((density: LogTableDensity) => {
         switch (density) {
@@ -150,6 +151,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [stockHistory, setStockHistory] = useState<StockInfoEntry[]>([]);
 
     const busyTaskRef = useRef(0);
+
+    // Keep the ref in sync with state for use in effects without triggering re-renders
+    useEffect(() => {
+        infiniteScrollChunkSizeRef.current = infiniteScrollChunkSize;
+    }, [infiniteScrollChunkSize]);
 
     // Effect to initialize/reset filters when data source changes
     useEffect(() => {
@@ -251,7 +257,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     setPageTimestampRanges(ranges);
                     setHasMoreLogs(false);
                 } else { // 'scroll' mode
-                    const entries = db.queryLogEntries(appliedFilters, infiniteScrollChunkSize, 0);
+                    const entries = db.queryLogEntries(appliedFilters, infiniteScrollChunkSizeRef.current, 0);
                     setFilteredEntries(entries);
                     setEntriesOffset(entries.length);
                     setHasMoreLogs(entries.length < count);
@@ -275,7 +281,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }, 50);
 
         return () => clearTimeout(busyTaskRef.current);
-    }, [db, hasData, appliedFilters, currentPage, pageSize, viewMode, logToConsole, isInitialLoad, setIsBusy, infiniteScrollChunkSize]);
+    }, [db, hasData, appliedFilters, currentPage, pageSize, viewMode, logToConsole, isInitialLoad, setIsBusy]);
 
     useEffect(() => {
         if (jumpToEntryId && filteredEntries.length > 0) {
