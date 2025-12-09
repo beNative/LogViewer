@@ -39,3 +39,8 @@ declare global {
         isAppDirty?: () => { isDirty: boolean; sessionName: string | null };
     }
 }
+
+declare module '*.svg' {
+    const content: string;
+    export default content;
+}

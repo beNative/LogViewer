@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Icon } from './icons';
 import { useSettings } from '../contexts/SettingsContext';
 import { useData } from '../contexts/DataContext';
+import appIcon from '../build/icon.svg';
 
 interface TitleBarProps {
     activeView: 'data' | 'viewer' | 'dashboard' | 'settings' | 'info' | 'stock';
@@ -135,7 +136,7 @@ export const TitleBar: React.FC<TitleBarProps> = ({ activeView }) => {
         >
             <div className="flex items-center h-full">
                 <div className="flex items-center gap-2 px-3">
-                    <Icon name="BugAnt" iconSet={iconSet} className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+                    <img src={appIcon} alt="App Icon" className="w-5 h-5" />
                     <span className="text-sm font-semibold">Private Log Analyser</span>
                 </div>
             </div>
