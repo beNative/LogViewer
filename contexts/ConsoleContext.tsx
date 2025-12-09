@@ -6,8 +6,6 @@ type ConsoleContextType = {
     lastConsoleMessage: ConsoleMessage | null;
     consoleFilters: Record<ConsoleMessageType, boolean>;
     setConsoleFilters: React.Dispatch<React.SetStateAction<Record<ConsoleMessageType, boolean>>>;
-    consoleSearchTerm: string;
-    setConsoleSearchTerm: React.Dispatch<React.SetStateAction<string>>;
     logToConsole: (message: string, type: ConsoleMessageType) => void;
     handleClearConsole: () => void;
 };
@@ -30,7 +28,6 @@ export const ConsoleProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const [consoleMessages, setConsoleMessages] = useState<ConsoleMessage[]>([]);
     const [lastConsoleMessage, setLastConsoleMessage] = useState<ConsoleMessage | null>(null);
     const [consoleFilters, setConsoleFilters] = useState(initialConsoleFilters);
-    const [consoleSearchTerm, setConsoleSearchTerm] = useState('');
 
     const logToConsole = useCallback((message: string, type: ConsoleMessage['type']) => {
         if (window.electronAPI?.logMessage) {
@@ -55,8 +52,6 @@ export const ConsoleProvider: React.FC<{ children: React.ReactNode }> = ({ child
         lastConsoleMessage,
         consoleFilters,
         setConsoleFilters,
-        consoleSearchTerm,
-        setConsoleSearchTerm,
         logToConsole,
         handleClearConsole,
     };

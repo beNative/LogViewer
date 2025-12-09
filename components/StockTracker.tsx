@@ -78,11 +78,9 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        console.log('[StockTracker] handleInputChange called:', { name, value, targetId: e.target.id });
 
         setFilters(prevFilters => {
             const newFilters = { ...prevFilters, [name]: value };
-            console.log('[StockTracker] Filters updated:', newFilters);
 
             if (name === 'searchTerm') {
                 if (debounceTimeoutRef.current) {
