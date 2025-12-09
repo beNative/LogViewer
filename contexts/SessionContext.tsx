@@ -40,6 +40,12 @@ type SessionContextType = {
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
+/**
+ * Provider for database session management.
+ * Handles SQLite database lifecycle, file import/export, session persistence,
+ * and worker-based data processing operations.
+ * Must wrap components that need access to session state via useSession hook.
+ */
 export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { setIsLoading, setProgress, setProgressMessage, setProgressPhase, setDetailedProgress, setProgressTitle, setIsInitialLoad, addToast, error, setError, setActiveView } = useUI();
     const { logToConsole } = useConsole();
@@ -420,7 +426,9 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const handleDownloadDb = useCallback(() => {
         if (!db || !hasData) return;
         const data = db.export();
-        const blob = new Blob([data], { type: 'application/x-sqlite3' });
+        // Convert Uint8Array to ArrayBuffer for Blob compatibility
+        const arrayBuffer = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) as ArrayBuffer;
+        const blob = new Blob([arrayBuffer], { type: 'application/x-sqlite3' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;

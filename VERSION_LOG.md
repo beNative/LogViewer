@@ -24,9 +24,9 @@ All notable changes to this project will be documented in this file. The current
 
 ### Code Quality
 
-- **Type Safety**: Replaced `any` types with proper generic type parameters in `Bar` component.
+- **Type Safety**: Replaced `any` types with proper generic type parameters in `Bar` component. Fixed `Uint8Array` to `ArrayBuffer` compatibility in database export.
 - **Named Constants**: Extracted magic numbers to named constants (`ROW_HEIGHT_COMPACT`, `ROW_HEIGHT_NORMAL`, `ROW_HEIGHT_COMFORTABLE`).
-- **JSDoc Documentation**: Added documentation comments to key functions in `db.ts` and `parsers.ts` including `Database.create()`, `Database.createFromBuffer()`, `parseLogMessage()`, `parseSqlMessage()`, `parseKeyValueMessage()`, and `parseSpaceDelimitedTable()`.
+- **JSDoc Documentation**: Added documentation comments to key functions in `db.ts`, `parsers.ts`, and all context providers (`UIContext`, `SessionContext`, `ConsoleContext`) including their hooks.
 - **React StrictMode**: Verified application runs with React StrictMode enabled.
 
 ## 0.20.0 – 2024-06-01

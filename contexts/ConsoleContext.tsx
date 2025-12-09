@@ -21,6 +21,11 @@ const initialConsoleFilters: Record<ConsoleMessageType, boolean> = {
 
 const ConsoleContext = createContext<ConsoleContextType | undefined>(undefined);
 
+/**
+ * Provider for application console/logging functionality.
+ * Manages diagnostic messages with severity levels (DEBUG, INFO, WARNING, ERROR),
+ * integrates with Electron's file logging, and provides filtering and search.
+ */
 export const ConsoleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [consoleMessages, setConsoleMessages] = useState<ConsoleMessage[]>([]);
     const [lastConsoleMessage, setLastConsoleMessage] = useState<ConsoleMessage | null>(null);
@@ -31,10 +36,10 @@ export const ConsoleProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (window.electronAPI?.logMessage) {
             window.electronAPI.logMessage(type, message);
         }
-        const newMessage: ConsoleMessage = { 
-            message, 
-            type, 
-            timestamp: new Date().toLocaleTimeString('en-US', { hour12: false }) 
+        const newMessage: ConsoleMessage = {
+            message,
+            type,
+            timestamp: new Date().toLocaleTimeString('en-US', { hour12: false })
         };
         setConsoleMessages(prev => [...prev, newMessage]);
         setLastConsoleMessage(newMessage);
@@ -63,6 +68,11 @@ export const ConsoleProvider: React.FC<{ children: React.ReactNode }> = ({ child
     );
 };
 
+/**
+ * Hook to access console logging functionality.
+ * @throws Error if used outside of ConsoleProvider
+ * @returns ConsoleContextType with message logging and filtering capabilities
+ */
 export const useConsole = (): ConsoleContextType => {
     const context = useContext(ConsoleContext);
     if (context === undefined) {
