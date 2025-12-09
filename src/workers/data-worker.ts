@@ -1,13 +1,52 @@
 // This script runs in a separate thread as a Web Worker.
 // It does not have access to the DOM, window object, or React components.
 
+// Declare Web Worker global for TypeScript
+declare function importScripts(...urls: string[]): void;
+
 // Import the sql.js library. Since it's not a module, we use importScripts.
 importScripts('./sql-wasm.js');
 
 const locateSqlAsset = (file: string) => new URL(file, self.location.href).toString();
 
 // Define the type for the SQL.js library, as it's not available in the worker's global scope by default.
-declare const initSqlJs: (config: { locateFile: (file: string) => string; }) => Promise<any>;
+declare const initSqlJs: (config: { locateFile: (file: string) => string; }) => Promise<SqlJsStatic>;
+
+/**
+ * Type definitions for worker message payloads
+ */
+interface XmlFile {
+    name: string;
+    content: string;
+}
+
+interface ImportLogsPayload {
+    xmlFiles: XmlFile[];
+}
+
+interface RebuildStockPayload {
+    dbBuffer: Uint8Array;
+}
+
+interface SqlJsStatic {
+    Database: new (data?: ArrayLike<number>) => SqlJsDatabase;
+}
+
+interface SqlJsDatabase {
+    exec: (sql: string) => void;
+    run: (sql: string, params?: (string | number)[]) => void;
+    export: () => Uint8Array;
+    prepare: (sql: string) => SqlJsStatement;
+}
+
+interface SqlJsStatement {
+    bind: (params?: (string | number | null)[]) => void;
+    step: () => boolean;
+    get: () => unknown[];
+    getAsObject: () => Record<string, unknown>;
+    run: (params?: (string | number | null)[]) => void;
+    free: () => void;
+}
 
 /**
  * Pre-compiled regex for extracting stock info messages.
@@ -53,7 +92,7 @@ function parseLogXml(xmlContent: string) {
     return entries;
 }
 
-const handleImportLogs = async (payload: any) => {
+const handleImportLogs = async (payload: ImportLogsPayload) => {
     const { xmlFiles } = payload;
     if (!xmlFiles || !Array.isArray(xmlFiles)) {
         throw new Error("Worker received invalid data for log import.");
@@ -109,7 +148,7 @@ const handleImportLogs = async (payload: any) => {
 };
 
 
-const handleRebuildStockData = async (payload: any) => {
+const handleRebuildStockData = async (payload: RebuildStockPayload) => {
     const { dbBuffer } = payload;
     if (!dbBuffer) throw new Error("Worker received no database buffer for stock rebuild.");
 

@@ -29,11 +29,11 @@ type SessionContextType = {
     handleAddFilesToCurrentSession: (files: FileList) => Promise<void>;
     handleImportDb: (file: File) => Promise<void>;
     handleDownloadDb: () => void;
-    updateStateFromDb: (newDb: Database, fromSessionLoad: boolean) => Promise<void>;
+    updateStateFromDb: (newDb: Database) => Promise<void>;
     overallStockTimeRange: { min: string, max: string } | null;
     setOverallStockTimeRange: React.Dispatch<React.SetStateAction<{ min: string, max: string } | null>>;
-    overallStockDensity: any[]; // Use any to avoid circular dependency with DataContext
-    setOverallStockDensity: React.Dispatch<React.SetStateAction<any[]>>;
+    overallStockDensity: Array<{ time: number; count: number }>;
+    setOverallStockDensity: React.Dispatch<React.SetStateAction<Array<{ time: number; count: number }>>>;
     handleCancelProcessing: () => void;
     handleRebuildStockDataInWorker: () => void;
 };
@@ -68,7 +68,7 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     // State that is also part of DataContext but needed here for updates
     const [overallStockTimeRange, setOverallStockTimeRange] = useState<{ min: string, max: string } | null>(null);
-    const [overallStockDensity, setOverallStockDensity] = useState<any[]>([]);
+    const [overallStockDensity, setOverallStockDensity] = useState<Array<{ time: number; count: number }>>([]);
 
     // Effect to attach logger to the DB instance when it changes or the setting changes
     useEffect(() => {

@@ -31,6 +31,7 @@ All notable changes to this project will be documented in this file. The current
 - **React StrictMode**: Verified application runs with React StrictMode enabled.
 - **Error Boundary**: Added `ErrorBoundary` component for graceful error handling and recovery.
 - **Centralized Constants**: Created `constants.ts` with all app-wide configuration values (version, timing, sizes).
+- **Worker Type Safety**: Added proper TypeScript interfaces for worker message payloads (`ImportLogsPayload`, `RebuildStockPayload`) and SqlJs types, eliminating `any` usage.
 
 ## 0.20.0 – 2024-06-01
 
