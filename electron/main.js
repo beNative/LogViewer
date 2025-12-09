@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, shell, dialog, systemPreferences } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const fsp = require('fs').promises; // Async filesystem operations
 const { exec } = require('child_process');
 const { autoUpdater } = require('electron-updater');
 
@@ -57,12 +58,12 @@ try {
 function getSettings() {
     const MONO_FONT_STACK = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
     const defaultColumnStyles = {
-      time: { font: MONO_FONT_STACK, isBold: false, isItalic: false, fontSize: 13, color: '#6B7280', darkColor: '#9CA3AF' },
-      level: { font: 'sans-serif', isBold: true, isItalic: false, fontSize: 12, color: '', darkColor: '' },
-      sndrtype: { font: 'sans-serif', isBold: false, isItalic: false, fontSize: 14, color: '#374151', darkColor: '#D1D5DB' },
-      sndrname: { font: 'sans-serif', isBold: false, isItalic: false, fontSize: 14, color: '#374151', darkColor: '#D1D5DB' },
-      fileName: { font: 'sans-serif', isBold: false, isItalic: false, fontSize: 13, color: '#6B7280', darkColor: '#9CA3AF' },
-      msg: { font: MONO_FONT_STACK, isBold: false, isItalic: false, fontSize: 13, color: '#1F2937', darkColor: '#F3F4F6' },
+        time: { font: MONO_FONT_STACK, isBold: false, isItalic: false, fontSize: 13, color: '#6B7280', darkColor: '#9CA3AF' },
+        level: { font: 'sans-serif', isBold: true, isItalic: false, fontSize: 12, color: '', darkColor: '' },
+        sndrtype: { font: 'sans-serif', isBold: false, isItalic: false, fontSize: 14, color: '#374151', darkColor: '#D1D5DB' },
+        sndrname: { font: 'sans-serif', isBold: false, isItalic: false, fontSize: 14, color: '#374151', darkColor: '#D1D5DB' },
+        fileName: { font: 'sans-serif', isBold: false, isItalic: false, fontSize: 13, color: '#6B7280', darkColor: '#9CA3AF' },
+        msg: { font: MONO_FONT_STACK, isBold: false, isItalic: false, fontSize: 13, color: '#1F2937', darkColor: '#F3F4F6' },
     };
 
     const defaultTimelineBarVisibility = {
@@ -106,7 +107,7 @@ function getSettings() {
         if (fs.existsSync(settingsPath)) {
             const settingsData = fs.readFileSync(settingsPath, 'utf-8');
             const loadedSettings = JSON.parse(settingsData);
-            
+
             const mergedColumnStyles = { ...defaultColumnStyles };
             if (loadedSettings.columnStyles) {
                 for (const key in mergedColumnStyles) {
@@ -150,148 +151,152 @@ function getSettings() {
                 uiScale: loadedSettings.uiScale ?? defaultSettings.uiScale,
                 logSqlQueries: loadedSettings.logSqlQueries ?? defaultSettings.logSqlQueries,
             };
-            
+
             // Clean up deprecated keys from old versions
             delete finalSettings.apiKey;
-            
+
             return finalSettings;
         }
     } catch (error) {
         log('ERROR', `Could not read or parse settings.json: ${error.message}. Using defaults.`);
     }
-    
+
     // For any error or if file doesn't exist, write a fresh default file
     try {
         fs.writeFileSync(settingsPath, JSON.stringify(defaultSettings, null, 2));
         return defaultSettings;
     } catch (writeError) {
-         log('ERROR', `Could not create default settings.json: ${writeError.message}`);
-         return defaultSettings; // Return default in memory if write fails
+        log('ERROR', `Could not create default settings.json: ${writeError.message}`);
+        return defaultSettings; // Return default in memory if write fails
     }
 }
 
 
 // --- Main Window Creation ---
 function createWindow() {
-  log('INFO', 'createWindow() called.');
-  
-  const windowOptions = {
-    width: 1280,
-    height: 800,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-      contextIsolation: true,
-      nodeIntegration: false,
-    },
-    frame: false,
-    titleBarStyle: 'hidden',
-    autoHideMenuBar: true,
-  };
-  mainWindow = new BrowserWindow(windowOptions);
-  
-  const settings = getSettings();
+    log('INFO', 'createWindow() called.');
 
-  mainWindow.on('maximize', () => {
-    mainWindow.webContents.send('window-maximized-status', true);
-  });
-  mainWindow.on('unmaximize', () => {
-    mainWindow.webContents.send('window-maximized-status', false);
-  });
+    const windowOptions = {
+        width: 1280,
+        height: 800,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js'),
+            contextIsolation: true,
+            nodeIntegration: false,
+        },
+        frame: false,
+        titleBarStyle: 'hidden',
+        autoHideMenuBar: true,
+    };
+    mainWindow = new BrowserWindow(windowOptions);
 
-  mainWindow.once('ready-to-show', () => {
-    log('INFO', 'Main window is ready to show.');
-    if (settings.isAutoUpdateEnabled) {
-      log('INFO', '[Updater] Auto-updates enabled. Checking for updates...');
-      autoUpdater.checkForUpdates();
-    } else {
-      log('INFO', '[Updater] Auto-updates disabled. Skipping update check.');
+    const settings = getSettings();
+
+    mainWindow.on('maximize', () => {
+        mainWindow.webContents.send('window-maximized-status', true);
+    });
+    mainWindow.on('unmaximize', () => {
+        mainWindow.webContents.send('window-maximized-status', false);
+    });
+
+    mainWindow.once('ready-to-show', () => {
+        log('INFO', 'Main window is ready to show.');
+        if (settings.isAutoUpdateEnabled) {
+            log('INFO', '[Updater] Auto-updates enabled. Checking for updates...');
+            autoUpdater.checkForUpdates();
+        } else {
+            log('INFO', '[Updater] Auto-updates disabled. Skipping update check.');
+        }
+    });
+
+    const indexPath = path.join(__dirname, '..', 'index.html');
+    mainWindow.loadFile(indexPath);
+
+    let forceQuit = false;
+    app.on('before-quit', () => forceQuit = true);
+
+    mainWindow.on('close', async (e) => {
+        if (forceQuit) {
+            return;
+        }
+        e.preventDefault();
+
+        try {
+            const dirtyState = await mainWindow.webContents.executeJavaScript('window.isAppDirty && window.isAppDirty()', true);
+
+            if (!dirtyState || !dirtyState.isDirty) {
+                forceQuit = true;
+                app.quit();
+                return;
+            }
+
+            const { response } = await dialog.showMessageBox(mainWindow, {
+                type: 'question',
+                buttons: ['Save', 'Don\'t Save', 'Cancel'],
+                defaultId: 0,
+                cancelId: 2,
+                title: 'Unsaved Changes',
+                message: `Do you want to save the changes you made to "${dirtyState.sessionName || 'Unsaved Session'}"?`,
+                detail: 'Your changes will be lost if you don\'t save them.'
+            });
+
+            if (response === 2) { // Cancel
+                return;
+            }
+            if (response === 1) { // Don't Save
+                forceQuit = true;
+                app.quit();
+                return;
+            }
+            if (response === 0) { // Save
+                mainWindow.webContents.send('save-before-quit');
+            }
+
+        } catch (err) {
+            log('ERROR', `Error during close confirmation: ${err.message}`);
+            // If something went wrong, just quit to avoid an unresponsive app
+            forceQuit = true;
+            app.quit();
+        }
+    });
+
+    if (!app.isPackaged) {
+        mainWindow.webContents.openDevTools();
     }
-  });
-
-  const indexPath = path.join(__dirname, '..', 'index.html');
-  mainWindow.loadFile(indexPath);
-
-  let forceQuit = false;
-  app.on('before-quit', () => forceQuit = true);
-
-  mainWindow.on('close', async (e) => {
-    if (forceQuit) {
-      return;
-    }
-    e.preventDefault();
-
-    try {
-      const dirtyState = await mainWindow.webContents.executeJavaScript('window.isAppDirty && window.isAppDirty()', true);
-      
-      if (!dirtyState || !dirtyState.isDirty) {
-        forceQuit = true;
-        app.quit();
-        return;
-      }
-      
-      const { response } = await dialog.showMessageBox(mainWindow, {
-        type: 'question',
-        buttons: ['Save', 'Don\'t Save', 'Cancel'],
-        defaultId: 0,
-        cancelId: 2,
-        title: 'Unsaved Changes',
-        message: `Do you want to save the changes you made to "${dirtyState.sessionName || 'Unsaved Session'}"?`,
-        detail: 'Your changes will be lost if you don\'t save them.'
-      });
-
-      if (response === 2) { // Cancel
-        return; 
-      }
-      if (response === 1) { // Don't Save
-        forceQuit = true;
-        app.quit();
-        return;
-      }
-      if (response === 0) { // Save
-        mainWindow.webContents.send('save-before-quit');
-      }
-
-    } catch (err) {
-      log('ERROR', `Error during close confirmation: ${err.message}`);
-      // If something went wrong, just quit to avoid an unresponsive app
-      forceQuit = true;
-      app.quit();
-    }
-  });
-
-  if (!app.isPackaged) {
-    mainWindow.webContents.openDevTools();
-  }
 }
 
 // --- IPC Handlers for Session Management ---
 
-ipcMain.handle('list-sessions', () => {
+ipcMain.handle('list-sessions', async () => {
     try {
-        const files = fs.readdirSync(sessionsPath).filter(file => file.endsWith('.sqlite'));
-        return files.map(file => {
+        const files = await fsp.readdir(sessionsPath);
+        const sqliteFiles = files.filter(file => file.endsWith('.sqlite'));
+
+        const results = await Promise.all(sqliteFiles.map(async (file) => {
             const filePath = path.join(sessionsPath, file);
-            const stats = fs.statSync(filePath);
+            const stats = await fsp.stat(filePath);
             return {
                 name: file,
                 path: filePath,
                 size: stats.size,
                 mtime: stats.mtime.getTime(),
             };
-        }).sort((a, b) => b.mtime - a.mtime); // Sort by most recently modified
+        }));
+
+        return results.sort((a, b) => b.mtime - a.mtime); // Sort by most recently modified
     } catch (error) {
         log('ERROR', `IPC: Failed to list sessions: ${error.message}`);
         return [];
     }
 });
 
-ipcMain.handle('get-session-buffer', (event, fileName) => {
+
+ipcMain.handle('get-session-buffer', async (event, fileName) => {
     try {
         const filePath = path.join(sessionsPath, fileName);
-        if (!fs.existsSync(filePath)) {
-            throw new Error(`Session file not found: ${fileName}`);
-        }
-        const buffer = fs.readFileSync(filePath);
+        // Check if file exists using access (throws if not)
+        await fsp.access(filePath);
+        const buffer = await fsp.readFile(filePath);
         return { success: true, buffer };
     } catch (error) {
         log('ERROR', `IPC: Failed to get session buffer for ${fileName}: ${error.message}`);
@@ -299,16 +304,17 @@ ipcMain.handle('get-session-buffer', (event, fileName) => {
     }
 });
 
-ipcMain.handle('save-session', (event, buffer, fileName) => {
+
+ipcMain.handle('save-session', async (event, buffer, fileName) => {
     try {
         if (!fileName) {
             const now = new Date();
             const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-').replace('T', '_');
             fileName = `session_${timestamp}.sqlite`;
         }
-        
+
         const filePath = path.join(sessionsPath, fileName);
-        fs.writeFileSync(filePath, Buffer.from(buffer));
+        await fsp.writeFile(filePath, Buffer.from(buffer));
         return { success: true };
     } catch (error) {
         log('ERROR', `IPC: Failed to save session: ${error.message}`);
@@ -316,29 +322,42 @@ ipcMain.handle('save-session', (event, buffer, fileName) => {
     }
 });
 
-ipcMain.handle('delete-session', (event, fileName) => {
+
+ipcMain.handle('delete-session', async (event, fileName) => {
     try {
         const filePath = path.join(sessionsPath, fileName);
-        if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-            return { success: true };
-        }
-        throw new Error(`File not found for deletion: ${fileName}`);
+        // Check if file exists first
+        await fsp.access(filePath);
+        await fsp.unlink(filePath);
+        return { success: true };
     } catch (error) {
+        if (error.code === 'ENOENT') {
+            log('ERROR', `IPC: File not found for deletion: ${fileName}`);
+            return { success: false, error: `File not found for deletion: ${fileName}` };
+        }
         log('ERROR', `IPC: Failed to delete session ${fileName}: ${error.message}`);
         return { success: false, error: error.message };
     }
 });
 
-ipcMain.handle('rename-session', (event, oldName, newName) => {
+
+ipcMain.handle('rename-session', async (event, oldName, newName) => {
     try {
         const oldPath = path.join(sessionsPath, oldName);
         const newPath = path.join(sessionsPath, newName);
 
-        if (!fs.existsSync(oldPath)) throw new Error(`Source file not found: ${oldName}`);
-        if (fs.existsSync(newPath)) throw new Error(`Destination file already exists: ${newName}`);
+        // Check source exists
+        await fsp.access(oldPath);
 
-        fs.renameSync(oldPath, newPath);
+        // Check destination doesn't exist
+        try {
+            await fsp.access(newPath);
+            throw new Error(`Destination file already exists: ${newName}`);
+        } catch (e) {
+            if (e.code !== 'ENOENT') throw e; // Re-throw if not "file not found"
+        }
+
+        await fsp.rename(oldPath, newPath);
         return { success: true };
     } catch (error) {
         log('ERROR', `IPC: Failed to rename session ${oldName} to ${newName}: ${error.message}`);
@@ -346,21 +365,19 @@ ipcMain.handle('rename-session', (event, oldName, newName) => {
     }
 });
 
-ipcMain.handle('get-markdown-content', (event, fileName) => {
+ipcMain.handle('get-markdown-content', async (event, fileName) => {
     try {
         const appPath = app.getAppPath();
         // The markdown files are now packed into the application's root (app.asar in production).
         // This path works for both development (project root) and packaged (asar root) modes.
         const filePath = path.join(appPath, fileName);
 
-        if (fs.existsSync(filePath)) {
-            const content = fs.readFileSync(filePath, 'utf-8');
-            return { success: true, content };
-        } else {
-            log('WARNING', `IPC: Markdown file not found at ${filePath}`);
-            throw new Error(`File not found: ${fileName}`);
-        }
+        const content = await fsp.readFile(filePath, 'utf-8');
+        return { success: true, content };
     } catch (error) {
+        if (error.code === 'ENOENT') {
+            log('WARNING', `IPC: Markdown file not found at ${fileName}`);
+        }
         log('ERROR', `IPC: Failed to get markdown content for ${fileName}: ${error.message}`);
         return { success: false, error: error.message };
     }
@@ -372,13 +389,13 @@ app.whenReady().then(() => {
     log('INFO', "Electron 'ready' event fired. Setting up IPC handlers and creating window.");
 
     const settings = getSettings();
-    
+
     // Set GitHub token for auto-updater if present
     if (settings.githubToken) {
         process.env.GH_TOKEN = settings.githubToken;
         log('INFO', '[Updater] GitHub token found in settings and applied to process environment.');
     }
-    
+
     // Configure auto-updater
     autoUpdater.allowPrerelease = !!settings.allowPrerelease;
     autoUpdater.logger = {
@@ -398,7 +415,7 @@ app.whenReady().then(() => {
                 autoUpdater.allowPrerelease = !!newSettings.allowPrerelease;
                 log('INFO', `[Updater] allowPrerelease setting updated to: ${autoUpdater.allowPrerelease}. Restart required to take full effect.`);
             }
-             if (newSettings.hasOwnProperty('githubToken') && process.env.GH_TOKEN !== newSettings.githubToken) {
+            if (newSettings.hasOwnProperty('githubToken') && process.env.GH_TOKEN !== newSettings.githubToken) {
                 process.env.GH_TOKEN = newSettings.githubToken;
                 log('INFO', `[Updater] GitHub token updated. Restart required to take full effect.`);
             }
@@ -410,13 +427,13 @@ app.whenReady().then(() => {
     ipcMain.handle('get-settings-path', () => settingsPath);
     ipcMain.handle('show-settings-file', () => shell.showItemInFolder(settingsPath));
     ipcMain.on('log-message', (event, { level, message }) => log(level, `[Renderer] ${message}`));
-    
+
     // Custom IPC Handlers
     ipcMain.handle('get-system-fonts', () => {
         return new Promise((resolve, reject) => {
             if (process.platform === 'win32') {
                 const command = 'powershell -command "[System.Drawing.Text.InstalledFontCollection, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a]::new().Families.Name"';
-                
+
                 exec(command, (error, stdout, stderr) => {
                     if (error) {
                         log('ERROR', `Failed to get system fonts via PowerShell: ${stderr}. Falling back to Electron API.`);
@@ -428,13 +445,13 @@ app.whenReady().then(() => {
                             } else {
                                 resolve(fontList);
                             }
-                        } catch(e) {
-                             log('ERROR', `Electron API for fonts also failed: ${e.message}`);
-                             reject(e);
+                        } catch (e) {
+                            log('ERROR', `Electron API for fonts also failed: ${e.message}`);
+                            reject(e);
                         }
                         return;
                     }
-                    
+
                     const fonts = stdout.split('\r\n').filter(f => f.trim() !== '');
                     log('INFO', `Successfully fetched ${fonts.length} fonts via PowerShell.`);
                     resolve(fonts);
@@ -450,8 +467,8 @@ app.whenReady().then(() => {
                         resolve(fontList);
                     }
                 } catch (e) {
-                     log('ERROR', `Failed to get system fonts via Electron API: ${e.message}`);
-                     reject(e);
+                    log('ERROR', `Failed to get system fonts via Electron API: ${e.message}`);
+                    reject(e);
                 }
             }
         });
@@ -459,19 +476,19 @@ app.whenReady().then(() => {
 
     // Quit sequence handler
     ipcMain.on('saved-and-ready-to-quit', () => {
-      // This is called by the renderer after a successful save-on-quit
-      const allWindows = BrowserWindow.getAllWindows();
-      if (allWindows.length > 0) {
-        const win = allWindows[0];
-        // The 'close' event handler has a flag `forceQuit` which is now true
-        // and will allow the app to exit.
-        win.destroy(); // destroy instead of close to bypass listener again
-      }
-      app.quit();
+        // This is called by the renderer after a successful save-on-quit
+        const allWindows = BrowserWindow.getAllWindows();
+        if (allWindows.length > 0) {
+            const win = allWindows[0];
+            // The 'close' event handler has a flag `forceQuit` which is now true
+            // and will allow the app to exit.
+            win.destroy(); // destroy instead of close to bypass listener again
+        }
+        app.quit();
     });
 
     ipcMain.handle('set-title', (event, title) => {
-        if(mainWindow) {
+        if (mainWindow) {
             mainWindow.setTitle(title);
         }
     });
@@ -512,7 +529,7 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
+    if (process.platform !== 'darwin') app.quit();
 });
 
 app.on('will-quit', () => {

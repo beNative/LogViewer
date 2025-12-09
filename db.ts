@@ -33,6 +33,12 @@ export class Database {
     private logToConsole?: (message: string, type: ConsoleMessageType) => void;
     private logSqlQueries?: boolean;
 
+    // Cache for _buildWhereClause to avoid repeated computation for same filters
+    private _whereClauseCache: {
+        filterKey: string;
+        result: { whereSql: string, params: (string | number)[] };
+    } | null = null;
+
     private constructor(db: SqlJsDatabase) {
         this.db = db;
     }
@@ -50,6 +56,10 @@ export class Database {
         }
     }
 
+    /**
+     * Create a new empty Database instance.
+     * Initializes sql.js and returns a Database wrapper with no data.
+     */
     static async create(): Promise<Database> {
         const SQL = await initSqlJs({
             locateFile: locateSqlWasm
@@ -58,6 +68,11 @@ export class Database {
         return new Database(db);
     }
 
+    /**
+     * Create a Database instance from an existing SQLite buffer.
+     * Used when loading saved sessions or receiving data from a worker.
+     * @param buffer - Uint8Array containing the SQLite database file contents
+     */
     static async createFromBuffer(buffer: Uint8Array): Promise<Database> {
         const SQL = await initSqlJs({
             locateFile: locateSqlWasm
@@ -146,16 +161,16 @@ export class Database {
             }
             stmt.free();
             return value;
-        } catch(e) {
+        } catch (e) {
             // Meta table might not exist in very old DB files
             return null;
         }
     }
 
     insertLogs(
-      entries: Omit<LogEntry, 'id' | 'fileName'>[], 
-      fileName: string,
-      onProgress?: (processedCount: number) => void
+        entries: Omit<LogEntry, 'id' | 'fileName'>[],
+        fileName: string,
+        onProgress?: (processedCount: number) => void
     ) {
         if (entries.length === 0) {
             onProgress?.(0);
@@ -179,12 +194,12 @@ export class Database {
                     // Format time for SQLite: "2024-01-01 12:30:00 123" -> "2024-01-01 12:30:00.123"
                     const sqlTime = entry.time.replace(/ (\d+)$/, '.$1');
                     stmt.run([sqlTime, entry.level, entry.sndrtype, entry.sndrname, entry.msg, fileName]);
-                    
+
                     // Report progress periodically to avoid overwhelming the main thread
                     if (onProgress && (index % 500 === 0 || index === entries.length - 1)) {
                         onProgress(index + 1);
                     }
-                } catch(e) {
+                } catch (e) {
                     const originalError = e instanceof Error ? e.message : String(e);
                     const entryPreview = JSON.stringify(entry);
                     throw new Error(`Error on item #${index + 1} in file ${fileName}.\nDetails: ${originalError}\nLog Data: ${entryPreview}`);
@@ -241,31 +256,31 @@ export class Database {
     private _buildStockWhereClause(filters: StockInfoFilters): { whereSql: string, params: (string | number)[] } {
         const whereClauses: string[] = [];
         const params: (string | number)[] = [];
-    
+
         const fromDate = getSqlDateTime(filters.dateFrom, filters.timeFrom);
         if (fromDate) {
             whereClauses.push(`timestamp >= ?`);
             params.push(fromDate);
         }
-    
+
         const toDate = getSqlDateTime(filters.dateTo, filters.timeTo, true);
         if (toDate) {
             whereClauses.push(`timestamp <= ?`);
             params.push(toDate);
         }
-    
+
         if (filters.searchTerm) {
             whereClauses.push(`(article_id LIKE ? OR article_name LIKE ?)`);
             params.push(`%${filters.searchTerm}%`, `%${filters.searchTerm}%`);
         }
-        
+
         const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
         return { whereSql, params };
     }
 
     queryStockInfo(filters: StockInfoFilters): { entries: StockInfoEntry[], sql: string, params: (string | number)[] } {
         const { whereSql, params } = this._buildStockWhereClause(filters);
-        
+
         // Compact the SQL string for cleaner logging in the console
         const sql = `
             SELECT timestamp, message_id, source, destination, article_id, article_name, dosage_form, max_sub_item_quantity, quantity 
@@ -318,7 +333,7 @@ export class Database {
             whereClauses.push(`timestamp <= ?`);
             params.push(toDate);
         }
-        
+
         const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
 
         const sql = `
@@ -343,6 +358,12 @@ export class Database {
     }
 
     private _buildWhereClause(filters: FilterState): { whereSql: string, params: (string | number)[] } {
+        // Use memoization to avoid rebuilding for same filters
+        const filterKey = JSON.stringify(filters);
+        if (this._whereClauseCache && this._whereClauseCache.filterKey === filterKey) {
+            return this._whereClauseCache.result;
+        }
+
         const whereClauses: string[] = [];
         const params: (string | number)[] = [];
 
@@ -358,7 +379,7 @@ export class Database {
                 whereClauses.push(`time <= ?`);
                 params.push(toDate);
             }
-            
+
             const attributes: (keyof FilterState)[] = ['level', 'sndrtype', 'sndrname', 'fileName'];
             attributes.forEach(attr => {
                 const values = filters[attr] as string[] | undefined;
@@ -370,7 +391,11 @@ export class Database {
                     params.push(...values);
                 }
             });
-            
+
+            // NOTE: Message search uses LOWER(msg) LIKE '%term%' which cannot use indexes
+            // and requires full table scan. For large datasets, consider implementing SQLite
+            // FTS5 (Full-Text Search) extension for significantly faster text search.
+            // See: https://www.sqlite.org/fts5.html
             const includeTerms = filters.includeMsg?.split('\n').map(t => t.trim().toLowerCase()).filter(Boolean) || [];
             if (includeTerms.length > 0) {
                 const joiner = ` ${filters.includeMsgMode} `;
@@ -389,25 +414,30 @@ export class Database {
         }
 
         const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
-        return { whereSql, params };
+        const result = { whereSql, params };
+
+        // Cache the result
+        this._whereClauseCache = { filterKey, result };
+
+        return result;
     }
 
     getTotalEntryCount(): number {
-      let totalEntries = 0;
-      try {
-          const sql = "SELECT COUNT(*) FROM logs";
-          this._logSql(sql);
-          const totalResult = this.db.exec(sql);
-          if (totalResult.length > 0 && totalResult[0].values.length > 0) {
-               totalEntries = totalResult[0].values[0][0];
-          }
-      } catch(e) {
-          // Table might not exist yet if db was just imported and is invalid
-          return 0;
-      }
-      return totalEntries;
+        let totalEntries = 0;
+        try {
+            const sql = "SELECT COUNT(*) FROM logs";
+            this._logSql(sql);
+            const totalResult = this.db.exec(sql);
+            if (totalResult.length > 0 && totalResult[0].values.length > 0) {
+                totalEntries = totalResult[0].values[0][0];
+            }
+        } catch (e) {
+            // Table might not exist yet if db was just imported and is invalid
+            return 0;
+        }
+        return totalEntries;
     }
-    
+
     getFilteredLogCount(filters: FilterState): number {
         if (filters.sqlQueryEnabled && filters.sqlQuery) {
             // Sanitize by removing trailing semicolon to avoid issues with wrapping
@@ -443,10 +473,10 @@ export class Database {
 
     queryLogEntries(filters: FilterState, limit: number, offset: number): LogEntry[] {
         if (filters.sqlQueryEnabled && filters.sqlQuery) {
-             const saneQuery = filters.sqlQuery.trim().replace(/;$/, '');
-             const sql = `${saneQuery} LIMIT ? OFFSET ?`;
-             const params = [limit, offset];
-             try {
+            const saneQuery = filters.sqlQuery.trim().replace(/;$/, '');
+            const sql = `${saneQuery} LIMIT ? OFFSET ?`;
+            const params = [limit, offset];
+            try {
                 this._logSql(sql, params);
                 const stmt = this.db.prepare(sql);
                 stmt.bind(params);
@@ -471,8 +501,8 @@ export class Database {
                 stmt.free();
                 return entries;
             } catch (e) {
-                 console.error("Error executing custom SQL query:", e);
-                 throw e;
+                console.error("Error executing custom SQL query:", e);
+                throw e;
             }
         }
 
@@ -499,7 +529,7 @@ export class Database {
         }
 
         const { whereSql, params } = this._buildWhereClause(filters);
-        
+
         // Using a window function to group rows by page number, then find the min and max time in each group.
         // This is much more efficient than running a query for each page.
         const sql = `
@@ -519,7 +549,7 @@ export class Database {
             GROUP BY page_index
             ORDER BY page_index;
         `;
-        
+
         const ranges: PageTimestampRange[] = [];
         try {
             const finalParams = [pageSize, ...params];
@@ -539,22 +569,29 @@ export class Database {
     }
 
     getUniqueColumnValues(columnName: 'level' | 'sndrtype' | 'sndrname' | 'fileName'): string[] {
+        // Whitelist validation to prevent SQL injection - column names cannot be parameterized
+        const allowedColumns = ['level', 'sndrtype', 'sndrname', 'fileName'] as const;
+        if (!allowedColumns.includes(columnName)) {
+            console.error(`Invalid column name: ${columnName}`);
+            return [];
+        }
+
         try {
             const sql = `SELECT DISTINCT ${columnName} FROM logs WHERE ${columnName} IS NOT NULL ORDER BY ${columnName}`;
             this._logSql(sql);
             const stmt = this.db.prepare(sql);
             const values: string[] = [];
-            while(stmt.step()){
+            while (stmt.step()) {
                 values.push(stmt.get()[0]);
             }
             stmt.free();
             return values;
-        } catch(e) {
+        } catch (e) {
             // Table might not exist
             return [];
         }
     }
-    
+
     getMinMaxTime(filters?: FilterState): { minTime: string | null; maxTime: string | null } {
         let result = { minTime: null, maxTime: null };
         try {
@@ -566,11 +603,11 @@ export class Database {
             if (stmt.step()) {
                 const [min, max] = stmt.get();
                 if (min !== null && max !== null) {
-                  result = { minTime: min, maxTime: max };
+                    result = { minTime: min, maxTime: max };
                 }
             }
             stmt.free();
-        } catch(e) {
+        } catch (e) {
             // Table might not exist
         }
         return result;
@@ -587,11 +624,11 @@ export class Database {
             if (stmt.step()) {
                 const [min, max] = stmt.get();
                 if (min !== null && max !== null) {
-                  result = { minTime: min as string, maxTime: max as string };
+                    result = { minTime: min as string, maxTime: max as string };
                 }
             }
             stmt.free();
-        } catch(e) {
+        } catch (e) {
             // Table might not exist or be empty
         }
         return result;
@@ -625,7 +662,7 @@ export class Database {
             GROUP BY interval_start 
             ORDER BY interval_start
         `;
-        
+
         const results: TimelineDataPoint[] = [];
         try {
             const finalParams = [timeFormat, ...params];
@@ -645,7 +682,14 @@ export class Database {
     }
 
     getCountsByColumn(columnName: 'level' | 'sndrtype', filters: FilterState): CategoryDataPoint[] {
-         if (filters.sqlQueryEnabled && filters.sqlQuery) {
+        // Whitelist validation to prevent SQL injection - column names cannot be parameterized
+        const allowedColumns = ['level', 'sndrtype'] as const;
+        if (!allowedColumns.includes(columnName)) {
+            console.error(`Invalid column name: ${columnName}`);
+            return [];
+        }
+
+        if (filters.sqlQueryEnabled && filters.sqlQuery) {
             return []; // Cannot determine categories from arbitrary query
         }
         const { whereSql, params } = this._buildWhereClause(filters);
@@ -655,7 +699,7 @@ export class Database {
             this._logSql(sql, params);
             const stmt = this.db.prepare(sql);
             stmt.bind(params);
-            while(stmt.step()){
+            while (stmt.step()) {
                 const [name, count] = stmt.get();
                 if (name !== null) { // Exclude null groups
                     results.push({ name, count });
@@ -667,7 +711,7 @@ export class Database {
         }
         return results;
     }
-    
+
     getTimeRangePerFile(filters: FilterState): FileTimeRange[] {
         if (filters.sqlQueryEnabled && filters.sqlQuery) {
             return [];
@@ -736,7 +780,7 @@ export class Database {
         const bucketDuration = totalDuration / bucketCount;
 
         const { whereSql, params } = this._buildWhereClause(filters);
-        
+
         // Group by both bucket and level to get compositional counts
         const sql = `
             SELECT
@@ -770,30 +814,30 @@ export class Database {
             return [];
         }
 
-        // Create a full array of empty buckets and fill it with the DB results.
-        const densityData: LogDensityPointByLevel[] = [];
+        // Pre-allocate array for better performance with large bucket counts
+        const densityData: LogDensityPointByLevel[] = new Array(bucketCount);
         for (let i = 0; i < bucketCount; i++) {
-            densityData.push({
+            densityData[i] = {
                 time: minTimeMs + i * bucketDuration,
                 counts: bucketMap.get(i) || {},
-            });
+            };
         }
         return densityData;
     }
-    
+
     getStockDensity(filters: StockInfoFilters, bucketCount: number): LogDensityPoint[] {
         const { minTime, maxTime } = this.getMinMaxStockTime(filters);
         if (!minTime || !maxTime) return [];
-    
+
         const minTimeMs = new Date(minTime).getTime();
         const maxTimeMs = new Date(maxTime).getTime();
         const totalDuration = maxTimeMs - minTimeMs;
         if (totalDuration <= 0) return [];
-    
+
         const bucketDuration = totalDuration / bucketCount;
-    
+
         const { whereSql, params } = this._buildStockWhereClause(filters);
-        
+
         const sql = `
             SELECT
                 CAST((julianday(timestamp) - julianday(?)) * 86400000 / ? AS INTEGER) AS bucket,
@@ -802,7 +846,7 @@ export class Database {
             ${whereSql}
             GROUP BY bucket
         `;
-    
+
         const dbResults: { bucket: number; count: number }[] = [];
         try {
             const finalParams = [minTime, bucketDuration, ...params];
@@ -818,26 +862,30 @@ export class Database {
             console.error("Failed to get stock density:", e);
             return [];
         }
-        
-        const densityData = new Array(bucketCount).fill(0).map((_, i) => ({
-            time: minTimeMs + i * bucketDuration,
-            count: 0
-        }));
-        
+
+        // Pre-allocate and directly initialize for better performance
+        const densityData: LogDensityPoint[] = new Array(bucketCount);
+        for (let i = 0; i < bucketCount; i++) {
+            densityData[i] = {
+                time: minTimeMs + i * bucketDuration,
+                count: 0
+            };
+        }
+
         let maxCount = 0;
-        dbResults.forEach(row => {
+        for (const row of dbResults) {
             if (row.bucket >= 0 && row.bucket < bucketCount) {
                 densityData[row.bucket].count = row.count;
                 if (row.count > maxCount) maxCount = row.count;
             }
-        });
-        
+        }
+
         if (maxCount > 0) {
-            for (const bucket of densityData) {
-                bucket.count = Math.round((bucket.count / maxCount) * 100);
+            for (let i = 0; i < bucketCount; i++) {
+                densityData[i].count = Math.round((densityData[i].count / maxCount) * 100);
             }
         }
-    
+
         return densityData;
     }
 
@@ -846,7 +894,7 @@ export class Database {
 
         const { whereSql, params } = this._buildWhereClause(filters);
         const timeAsSqlString = new Date(time).toISOString().replace('T', ' ').replace('Z', '');
-        
+
         const sql = `
             SELECT id, time, level, sndrtype, sndrname, msg, fileName 
             FROM logs 
@@ -867,17 +915,17 @@ export class Database {
                 return entry;
             }
             stmt.free();
-        } catch(e) {
+        } catch (e) {
             console.error("Failed to get nearest log entry:", e);
         }
 
         return null;
     }
-    
+
     getLogEntryIndex(entryId: number, filters: FilterState): number {
         if (filters.sqlQueryEnabled) return -1;
         const { whereSql, params } = this._buildWhereClause(filters);
-        
+
         const sql = `
             WITH NumberedLogs AS (
                 SELECT id, ROW_NUMBER() OVER (ORDER BY time ASC) as rn

@@ -3,11 +3,11 @@ import { FilterState, ColumnKey } from './types.ts';
 // A simple utility to escape characters that have special meaning in HTML.
 const escapeHtml = (unsafe: string): string => {
     return unsafe
-         .replace(/&/g, "&amp;")
-         .replace(/</g, "&lt;")
-         .replace(/>/g, "&gt;")
-         .replace(/"/g, "&quot;")
-         .replace(/'/g, "&#039;");
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
 export const COLUMN_DEFINITIONS: { key: ColumnKey; label: string }[] = [
@@ -31,12 +31,12 @@ export const highlightText = (text: string, terms: string[], theme: 'light' | 'd
     if (!text || !terms || terms.length === 0) {
         return escapeHtml(text);
     }
-    
+
     // Filter out empty terms and escape special regex characters from each term.
     const validTerms = terms.filter(Boolean).map(term =>
         term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     );
-    
+
     if (validTerms.length === 0) {
         return escapeHtml(text);
     }
@@ -49,8 +49,8 @@ export const highlightText = (text: string, terms: string[], theme: 'light' | 'd
     const parts = text.split(regex);
 
     // This class only sets the background color. The text color is inherited from the parent.
-    const highlightClass = theme === 'dark' 
-        ? 'bg-yellow-500/40' 
+    const highlightClass = theme === 'dark'
+        ? 'bg-yellow-500/40'
         : 'bg-yellow-300/70';
 
     // Rebuild the string, wrapping the matched terms (which will be at odd indices)
@@ -67,16 +67,18 @@ export const highlightText = (text: string, terms: string[], theme: 'light' | 'd
 
 /**
  * Compares two arrays of strings for equality, ignoring the order of elements.
+ * Uses O(n) Set-based approach instead of O(n log n) sorting.
  * @param a The first array.
  * @param b The second array.
  * @returns True if the arrays contain the same elements, false otherwise.
  */
 export const areArraysEqualUnordered = (a: string[], b: string[]): boolean => {
     if (a.length !== b.length) return false;
-    // Sort copies of arrays to compare contents irrespective of order
-    const sortedA = [...a].sort();
-    const sortedB = [...b].sort();
-    return sortedA.join(',') === sortedB.join(',');
+    if (a.length === 0) return true;
+
+    // Use Set for O(n) lookup instead of O(n log n) sort
+    const setA = new Set(a);
+    return b.every(item => setA.has(item));
 };
 
 /**

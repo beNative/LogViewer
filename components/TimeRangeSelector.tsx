@@ -45,14 +45,14 @@ interface TimeRangeSelectorProps {
 }
 
 type DragState =
-  | { type: 'select_left'; startX: number; initialStart: number; initialEnd: number }
-  | { type: 'select_right'; startX: number; initialStart: number; initialEnd: number }
-  | { type: 'cursor'; startX: number }
-  | { type: 'new_selection'; startX: number; startTime: number };
+    | { type: 'select_left'; startX: number; initialStart: number; initialEnd: number }
+    | { type: 'select_right'; startX: number; initialStart: number; initialEnd: number }
+    | { type: 'cursor'; startX: number }
+    | { type: 'new_selection'; startX: number; startTime: number };
 
 const PALETTE = [
-  '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', 
-  '#6366f1', '#06b6d4', '#d946ef', '#f43f5e', '#14b8a6', '#eab308'
+    '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899',
+    '#6366f1', '#06b6d4', '#d946ef', '#f43f5e', '#14b8a6', '#eab308'
 ];
 
 const LOG_LEVEL_COLORS: Record<string, { light: string, dark: string }> = {
@@ -86,54 +86,56 @@ const formatTooltip = (time: number | null): React.ReactNode => {
     );
 };
 
-const Bar: React.FC<{
-    items: any[];
+// Generic Bar component for rendering timeline segments
+function Bar<T>({ items, valueToPosition, isActive, onSelect, getLabel, getTitle, getStart, getEnd, getColor, displayMinTime, displayMaxTime }: {
+    items: T[];
     valueToPosition: ValueToPositionFn;
-    isActive: (item: any) => boolean;
-    onSelect: (item: any) => void;
-    getLabel: (item: any) => string;
-    getTitle: (item: any) => string;
-    getStart: (item: any) => number;
-    getEnd: (item: any) => number;
+    isActive: (item: T) => boolean;
+    onSelect: (item: T) => void;
+    getLabel: (item: T) => string;
+    getTitle: (item: T) => string;
+    getStart: (item: T) => number;
+    getEnd: (item: T) => number;
     getColor: (index: number) => string;
     displayMinTime: number;
     displayMaxTime: number;
-}> = ({ items, valueToPosition, isActive, onSelect, getLabel, getTitle, getStart, getEnd, getColor, displayMinTime, displayMaxTime }) => (
-    <div className="relative w-full h-5">
-        {items.map((item, i) => {
-            const start = getStart(item);
-            const end = getEnd(item);
-            if (end < displayMinTime || start > displayMaxTime) {
-                return null;
-            }
+}): React.ReactElement {
+    return (
+        <div className="relative w-full h-5">
+            {items.map((item, i) => {
+                const start = getStart(item);
+                const end = getEnd(item);
+                if (end < displayMinTime || start > displayMaxTime) {
+                    return null;
+                }
 
-            const visibleStart = Math.max(start, displayMinTime);
-            const visibleEnd = Math.min(end, displayMaxTime);
+                const visibleStart = Math.max(start, displayMinTime);
+                const visibleEnd = Math.min(end, displayMaxTime);
 
-            const leftPx = valueToPosition(visibleStart);
-            const rightPx = valueToPosition(visibleEnd);
-            let widthPx = Math.max(1, rightPx - leftPx);
-            
-            return (
-                <Tooltip key={getTitle(item)} content={getTitle(item)}>
-                    <div
-                        onClick={(e) => { e.stopPropagation(); onSelect(item); }}
-                        className={`absolute h-5 flex items-center justify-center overflow-hidden transition-all duration-150 hover:scale-y-105 origin-bottom ${isActive(item) ? 'outline outline-4 outline-offset-2 outline-black dark:outline-white' : ''}`}
-                        style={{
-                            left: `${leftPx}px`,
-                            width: `${widthPx}px`,
-                            backgroundColor: getColor(i) + '99',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        {widthPx > 30 && <span className="text-xs font-semibold text-white whitespace-nowrap text-center mix-blend-luminosity pointer-events-none">{getLabel(item)}</span>}
-                    </div>
-                </Tooltip>
-            );
-        })}
-    </div>
-);
+                const leftPx = valueToPosition(visibleStart);
+                const rightPx = valueToPosition(visibleEnd);
+                let widthPx = Math.max(1, rightPx - leftPx);
 
+                return (
+                    <Tooltip key={getTitle(item)} content={getTitle(item)}>
+                        <div
+                            onClick={(e) => { e.stopPropagation(); onSelect(item); }}
+                            className={`absolute h-5 flex items-center justify-center overflow-hidden transition-all duration-150 hover:scale-y-105 origin-bottom ${isActive(item) ? 'outline outline-4 outline-offset-2 outline-black dark:outline-white' : ''}`}
+                            style={{
+                                left: `${leftPx}px`,
+                                width: `${widthPx}px`,
+                                backgroundColor: getColor(i) + '99',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            {widthPx > 30 && <span className="text-xs font-semibold text-white whitespace-nowrap text-center mix-blend-luminosity pointer-events-none">{getLabel(item)}</span>}
+                        </div>
+                    </Tooltip>
+                );
+            })}
+        </div>
+    );
+}
 const DensityBar: React.FC<{
     items: LogDensityPointByLevel[] | LogDensityPoint[];
     valueToPosition: ValueToPositionFn;
@@ -170,7 +172,7 @@ const DensityBar: React.FC<{
 
                     const bucketTotal = Object.values(bucket.counts).reduce((s, c) => s + c, 0);
                     if (bucketTotal === 0) return null;
-                    
+
                     const barHeightPercent = (bucketTotal / maxTotalCount) * 100;
                     const leftPx = valueToPosition(Math.max(start, displayMinTime));
                     const rightPx = valueToPosition(Math.min(end, displayMaxTime));
@@ -178,7 +180,7 @@ const DensityBar: React.FC<{
 
                     if (widthPx === 0) return null;
 
-                    const sortedLevels = Object.entries(bucket.counts).sort((a,b) => {
+                    const sortedLevels = Object.entries(bucket.counts).sort((a, b) => {
                         const order: Record<string, number> = { ERROR: 0, FATAL: 1, WARNING: 2, WARN: 3, INFO: 4 };
                         return (order[a[0].toUpperCase()] ?? 99) - (order[b[0].toUpperCase()] ?? 99);
                     });
@@ -254,7 +256,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     const mainContainerRef = React.useRef<HTMLDivElement>(null);
     const overviewContainerRef = React.useRef<HTMLDivElement>(null);
     const [dragState, setDragState] = React.useState<DragState | null>(null);
-    const [tempSelection, setTempSelection] = React.useState<{ start: number, end: number} | null>(null);
+    const [tempSelection, setTempSelection] = React.useState<{ start: number, end: number } | null>(null);
     const [tempCursorTime, setTempCursorTime] = React.useState<number | null>(null);
     const [densityTooltip, setDensityTooltip] = React.useState<{ x: number, y: number, bucketData: BucketData } | null>(null);
     const [contextMenu, setContextMenu] = React.useState<{ x: number, y: number } | null>(null);
@@ -265,29 +267,31 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     const useResizeObserver = (ref: React.RefObject<HTMLElement>) => {
         const [width, setWidth] = React.useState(0);
         React.useEffect(() => {
+            // Store element in local variable for stable reference in cleanup
             const element = ref.current;
             if (!element) {
                 // When element is not present (e.g., hidden), reset width.
                 setWidth(0);
                 return;
             }
-    
+
             const resizeObserver = new ResizeObserver(entries => {
                 if (entries[0]) {
                     setWidth(entries[0].contentRect.width);
                 }
             });
-    
+
             resizeObserver.observe(element);
-    
+
             // Cleanup: Disconnect observer when component unmounts or ref changes.
             return () => {
                 resizeObserver.disconnect();
             };
-        }, [ref.current]); // Dependency on the actual DOM element is crucial.
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [ref]); // Use ref object (stable) instead of ref.current (changes without effect re-run)
         return width;
     };
-    
+
     const mainContainerWidth = useResizeObserver(mainContainerRef);
     const overviewContainerWidth = useResizeObserver(overviewContainerRef);
 
@@ -300,13 +304,13 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
         if (displayMaxTime === displayMinTime) return 0;
         return ((v - displayMinTime) / (displayMaxTime - displayMinTime)) * mainContainerWidth;
     }, [displayMinTime, displayMaxTime, mainContainerWidth]);
-    
+
     const overviewValueToPos = React.useCallback((v: number) => ((v - minTime) / (maxTime - minTime)) * overviewContainerWidth, [minTime, maxTime, overviewContainerWidth]);
     const overviewPosToValue = React.useCallback((p: number) => minTime + (p / overviewContainerWidth) * (maxTime - minTime), [minTime, maxTime, overviewContainerWidth]);
 
     React.useEffect(() => {
         if (tempCursorTime !== null && cursorTime !== null && Math.abs(tempCursorTime - cursorTime) < 1000) {
-          setTempCursorTime(null);
+            setTempCursorTime(null);
         }
     }, [cursorTime, tempCursorTime]);
 
@@ -317,7 +321,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     ) => {
         e.stopPropagation();
         e.preventDefault();
-        
+
         const rect = mainContainerRef.current!.getBoundingClientRect();
         const clickPos = (e.clientX - rect.left) / uiScale;
         const clickTime = mainPosToValue(clickPos);
@@ -335,7 +339,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
             });
         }
     };
-    
+
     React.useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
             if (!dragState || !mainContainerRef.current) return;
@@ -362,16 +366,16 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                     break;
                 }
                 case 'cursor': {
-                     const newCursorTime = Math.max(displayMinTime, Math.min(displayMaxTime, currentTime));
-                     setTempCursorTime(newCursorTime);
-                     break;
+                    const newCursorTime = Math.max(displayMinTime, Math.min(displayMaxTime, currentTime));
+                    setTempCursorTime(newCursorTime);
+                    break;
                 }
             }
         };
 
         const handleMouseUp = (e: MouseEvent) => {
             if (!dragState) return;
-            
+
             if (dragState.type === 'new_selection') {
                 if (Math.abs(e.clientX - dragState.startX) < 5) {
                     onCursorChange(dragState.startTime);
@@ -415,15 +419,15 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
         const bucketDuration = logDensity[1].time - logDensity[0].time;
         const bucketIndex = Math.floor((hoverTime - logDensity[0].time) / bucketDuration);
         const bucketData = logDensity[bucketIndex];
-        
+
         if (!bucketData) {
             setDensityTooltip(null);
             return;
         }
-        
+
         const isLevelData = 'counts' in bucketData;
-        const hasData = isLevelData 
-            ? Object.keys((bucketData as LogDensityPointByLevel).counts).length > 0 
+        const hasData = isLevelData
+            ? Object.keys((bucketData as LogDensityPointByLevel).counts).length > 0
             : (bucketData as LogDensityPoint).count > 0;
 
         if (hasData) {
@@ -432,7 +436,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
             setDensityTooltip(null);
         }
     };
-    
+
     const handleDensityLeave = () => setDensityTooltip(null);
 
     const handleLabelsContextMenu = (e: React.MouseEvent) => {
@@ -443,19 +447,19 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
 
     const barComponents = [];
     const barProps = { displayMinTime: displayMinTime, displayMaxTime: displayMaxTime };
-    if (timelineBarVisibility.pages && viewMode === 'pagination' && pageTimestampRanges.length > 0 && onGoToPage) barComponents.push({key: 'page', label: 'Pages', Comp: Bar, props: { ...barProps, items: pageTimestampRanges, isActive: (item: any) => item.page === currentPage, onSelect: (item: any) => onGoToPage(item.page), getLabel: (item: any) => item.page, getTitle: (item: any) => `Page ${item.page}`, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
-    if (timelineBarVisibility.files && fileTimeRanges.length > 0) barComponents.push({key: 'file', label: 'Files', Comp: Bar, props: { ...barProps, items: fileTimeRanges, isActive: (item: any) => item.name === activeFileName, onSelect: (item: any) => onFileSelect(item.name), getLabel: (item: any) => item.name.split('/').pop(), getTitle: (item: any) => item.name, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
-    if (timelineBarVisibility.dates && datesWithLogs.length > 0) barComponents.push({key: 'date', label: 'Date', Comp: Bar, props: { ...barProps, items: datesWithLogs, isActive: (item: any) => item === activeDate, onSelect: (item: any) => onDateSelect(item), getLabel: (item: any) => item, getTitle: (item: any) => item, getStart: (item: any) => new Date(`${item}T00:00:00.000Z`).getTime(), getEnd: (item: any) => new Date(`${item}T23:59:59.999Z`).getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] }});
+    if (timelineBarVisibility.pages && viewMode === 'pagination' && pageTimestampRanges.length > 0 && onGoToPage) barComponents.push({ key: 'page', label: 'Pages', Comp: Bar, props: { ...barProps, items: pageTimestampRanges, isActive: (item: any) => item.page === currentPage, onSelect: (item: any) => onGoToPage(item.page), getLabel: (item: any) => item.page, getTitle: (item: any) => `Page ${item.page}`, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] } });
+    if (timelineBarVisibility.files && fileTimeRanges.length > 0) barComponents.push({ key: 'file', label: 'Files', Comp: Bar, props: { ...barProps, items: fileTimeRanges, isActive: (item: any) => item.name === activeFileName, onSelect: (item: any) => onFileSelect(item.name), getLabel: (item: any) => item.name.split('/').pop(), getTitle: (item: any) => item.name, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] } });
+    if (timelineBarVisibility.dates && datesWithLogs.length > 0) barComponents.push({ key: 'date', label: 'Date', Comp: Bar, props: { ...barProps, items: datesWithLogs, isActive: (item: any) => item === activeDate, onSelect: (item: any) => onDateSelect(item), getLabel: (item: any) => item, getTitle: (item: any) => item, getStart: (item: any) => new Date(`${item}T00:00:00.000Z`).getTime(), getEnd: (item: any) => new Date(`${item}T23:59:59.999Z`).getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] } });
     if (timelineBarVisibility.density && logDensity.length > 0) barComponents.push({
-        key: 'density', 
-        label: 'Density', 
-        Comp: DensityBar, 
-        props: { 
-            items: logDensity, 
-            theme: theme, 
-            ...barProps, 
-            onMouseMove: handleDensityHover, 
-            onMouseLeave: handleDensityLeave 
+        key: 'density',
+        label: 'Density',
+        Comp: DensityBar,
+        props: {
+            items: logDensity,
+            theme: theme,
+            ...barProps,
+            onMouseMove: handleDensityHover,
+            onMouseLeave: handleDensityLeave
         }
     });
 
@@ -468,7 +472,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     const startPos = visibleSelectionStart !== null ? mainValueToPos(visibleSelectionStart) : -1;
     const endPos = visibleSelectionEnd !== null ? mainValueToPos(visibleSelectionEnd) : -1;
 
-     const formatTickLabel = (time: number, duration: number): string => {
+    const formatTickLabel = (time: number, duration: number): string => {
         const d = new Date(time);
         if (duration <= 2 * 60 * 1000) { // < 2 minutes
             return d.toLocaleTimeString('en-US', { hour12: false, minute: '2-digit', second: '2-digit' });
@@ -506,18 +510,18 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
         }
         return tickValues;
     }, [displayMinTime, displayMaxTime, mainContainerWidth]);
-    
+
     const finalCursorTime = tempCursorTime ?? cursorTime;
 
 
     return (
         <div className="w-full">
             <div className="flex items-start gap-3 w-full">
-                <div 
+                <div
                     className="w-16 flex-shrink-0 text-right"
                     onContextMenu={handleLabelsContextMenu}
                 >
-                     {/* This div is a spacer to align with the timeline content */}
+                    {/* This div is a spacer to align with the timeline content */}
                     <div className="h-4" />
                     <div className="space-y-2">
                         {barComponents.map(bar => (
@@ -527,17 +531,17 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                         ))}
                     </div>
                 </div>
-                
+
                 <div className="flex-grow flex flex-col relative">
-                     {/* Tooltips Container */}
+                    {/* Tooltips Container */}
                     <div className="absolute top-0 w-full h-5 pointer-events-none z-40">
-                         {startPos >= 0 && <div className="absolute top-0 text-xs font-mono text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-1.5 py-0.5 rounded shadow" style={{ left: `${startPos}px`, transform: 'translateX(-50%)' }}>{formatTooltip(currentStart)}</div>}
-                         {endPos >= 0 && (endPos - startPos > 60) && <div className="absolute top-0 text-xs font-mono text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-1.5 py-0.5 rounded shadow" style={{ left: `${endPos}px`, transform: 'translateX(-50%)' }}>{formatTooltip(currentEnd)}</div>}
-                         {finalCursorTime !== null && finalCursorTime >= displayMinTime && finalCursorTime <= displayMaxTime && <div className="absolute top-0 text-xs font-mono bg-red-500/90 backdrop-blur-sm text-white rounded px-1.5 py-0.5" style={{ left: `${mainValueToPos(finalCursorTime)}px`, transform: 'translateX(-50%)' }}>{formatTooltip(finalCursorTime)}</div>}
+                        {startPos >= 0 && <div className="absolute top-0 text-xs font-mono text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-1.5 py-0.5 rounded shadow" style={{ left: `${startPos}px`, transform: 'translateX(-50%)' }}>{formatTooltip(currentStart)}</div>}
+                        {endPos >= 0 && (endPos - startPos > 60) && <div className="absolute top-0 text-xs font-mono text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-1.5 py-0.5 rounded shadow" style={{ left: `${endPos}px`, transform: 'translateX(-50%)' }}>{formatTooltip(currentEnd)}</div>}
+                        {finalCursorTime !== null && finalCursorTime >= displayMinTime && finalCursorTime <= displayMaxTime && <div className="absolute top-0 text-xs font-mono bg-red-500/90 backdrop-blur-sm text-white rounded px-1.5 py-0.5" style={{ left: `${mainValueToPos(finalCursorTime)}px`, transform: 'translateX(-50%)' }}>{formatTooltip(finalCursorTime)}</div>}
                     </div>
-                    
+
                     {/* Main Timeline Area */}
-                    <div 
+                    <div
                         onMouseDown={(e) => handleMouseDown(e, 'new_selection')}
                         className="w-full cursor-crosshair bg-gray-200 dark:bg-gray-700/50 rounded p-1 overflow-hidden mt-4"
                     >
@@ -547,7 +551,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                                     <bar.Comp key={bar.key} valueToPosition={mainValueToPos} {...bar.props} />
                                 ))}
                             </div>
-                             {startPos >= 0 && endPos >= 0 && (endPos > startPos) && (
+                            {startPos >= 0 && endPos >= 0 && (endPos > startPos) && (
                                 <div
                                     className="absolute top-0 bottom-0 bg-sky-500/20 dark:bg-sky-400/20 z-10 pointer-events-none"
                                     style={{ left: `${startPos}px`, width: `${Math.max(0, endPos - startPos)}px` }}
@@ -564,16 +568,16 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                                         onMouseDown={(e) => handleMouseDown(e, 'select_right')}
                                         className="absolute top-0 -right-2 w-4 h-full cursor-col-resize group pointer-events-auto"
                                     >
-                                         <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-8 w-1.5 bg-sky-600 dark:bg-sky-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
+                                        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-8 w-1.5 bg-sky-600 dark:bg-sky-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
                                     </div>
                                 </div>
                             )}
                             {finalCursorTime !== null && mainContainerWidth > 0 && finalCursorTime >= displayMinTime && finalCursorTime <= displayMaxTime && (
-                                <div 
+                                <div
                                     data-handle="cursor"
                                     onMouseDown={(e) => handleMouseDown(e, 'cursor')}
-                                    className="absolute top-0 bottom-0 bg-red-500 z-30 cursor-col-resize" 
-                                    style={{ left: `${mainValueToPos(finalCursorTime)}px`, width: '4pt', transform: 'translateX(-2pt)' }} 
+                                    className="absolute top-0 bottom-0 bg-red-500 z-30 cursor-col-resize"
+                                    style={{ left: `${mainValueToPos(finalCursorTime)}px`, width: '4pt', transform: 'translateX(-2pt)' }}
                                 />
                             )}
                         </div>
@@ -594,21 +598,21 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                         })}
                     </div>
                 </div>
-                
+
                 <div className="w-auto flex-shrink-0 self-start pt-4 flex flex-col items-center gap-1">
-                     <Tooltip content="Zoom to Selection">
-                        <button onClick={onZoomToSelection} disabled={!zoomToSelectionEnabled} className="p-1.5 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"><Icon name="ArrowsPointingIn" iconSet={iconSet} className="w-4 h-4"/></button>
-                     </Tooltip>
-                     <Tooltip content="Zoom to Extent">
-                        <button onClick={onZoomToExtent} disabled={!viewRange} className="p-1.5 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"><Icon name="ArrowsPointingOut" iconSet={iconSet} className="w-4 h-4"/></button>
-                     </Tooltip>
-                     <Tooltip content="Clear time selection">
-                        <button onClick={onClear} className="p-1.5 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"><Icon name="XMark" iconSet={iconSet} className="w-4 h-4"/></button>
+                    <Tooltip content="Zoom to Selection">
+                        <button onClick={onZoomToSelection} disabled={!zoomToSelectionEnabled} className="p-1.5 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"><Icon name="ArrowsPointingIn" iconSet={iconSet} className="w-4 h-4" /></button>
+                    </Tooltip>
+                    <Tooltip content="Zoom to Extent">
+                        <button onClick={onZoomToExtent} disabled={!viewRange} className="p-1.5 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"><Icon name="ArrowsPointingOut" iconSet={iconSet} className="w-4 h-4" /></button>
+                    </Tooltip>
+                    <Tooltip content="Clear time selection">
+                        <button onClick={onClear} className="p-1.5 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"><Icon name="XMark" iconSet={iconSet} className="w-4 h-4" /></button>
                     </Tooltip>
                 </div>
             </div>
             {timelineBarVisibility.overview && (
-                 <div className="flex items-start gap-3 w-full mt-2">
+                <div className="flex items-start gap-3 w-full mt-2">
                     <div className="w-16 flex-shrink-0"></div>
                     <div className="flex-grow" ref={overviewContainerRef}>
                         {overviewContainerWidth > 0 && (
@@ -625,7 +629,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                             />
                         )}
                     </div>
-                    <div className="w-[60px] flex-shrink-0"/>
+                    <div className="w-[60px] flex-shrink-0" />
                 </div>
             )}
             {densityTooltip && <DensityTooltip {...densityTooltip} theme={theme} />}
@@ -678,7 +682,7 @@ const DensityTooltip: React.FC<{ x: number, y: number, bucketData: BucketData, t
             if (newLeft + width > window.innerWidth - GAP) {
                 newLeft = window.innerWidth - width - GAP;
             }
-            
+
             setStyle({
                 position: 'fixed',
                 top: newTop,
@@ -690,7 +694,7 @@ const DensityTooltip: React.FC<{ x: number, y: number, bucketData: BucketData, t
 
     const isLevelData = 'counts' in bucketData;
     const total = isLevelData ? Object.values(bucketData.counts).reduce((sum, count) => sum + count, 0) : bucketData.count;
-    const sortedLevels = isLevelData ? Object.entries(bucketData.counts).sort((a,b) => b[1] - a[1]) : [];
+    const sortedLevels = isLevelData ? Object.entries(bucketData.counts).sort((a, b) => b[1] - a[1]) : [];
     const unitLabel = isLevelData ? 'logs' : 'density';
 
     return (
@@ -743,9 +747,9 @@ const OverviewBrush: React.FC<{
     const containerRef = React.useRef<HTMLDivElement>(null);
 
     type OverviewDragState =
-      | { type: 'brush'; startX: number; initialMin: number; initialMax: number }
-      | { type: 'brush_left' | 'brush_right'; startX: number; initialMin: number; initialMax: number }
-      | { type: 'new_overview_selection'; startX: number; startTime: number };
+        | { type: 'brush'; startX: number; initialMin: number; initialMax: number }
+        | { type: 'brush_left' | 'brush_right'; startX: number; initialMin: number; initialMax: number }
+        | { type: 'new_overview_selection'; startX: number; startTime: number };
 
     const [dragState, setDragState] = React.useState<OverviewDragState | null>(null);
     const [tempSelection, setTempSelection] = React.useState<{ start: number, end: number } | null>(null);
@@ -782,12 +786,10 @@ const OverviewBrush: React.FC<{
             const end = Math.max(dragState.startTime, currentTime);
             setTempSelection({ start, end });
         } else {
-            // FIX: Use a simple 'else' block. TypeScript can correctly infer that if the type is not
-            // 'new_overview_selection', it must be one of the other types in the union,
-            // all of which contain 'initialMin' and 'initialMax' as numbers.
-            // FIX: Explicitly cast `initialMin` and `initialMax` to `Number` to resolve a TypeScript type inference issue.
-            let newMin = Number((dragState as any).initialMin);
-            let newMax = Number((dragState as any).initialMax);
+            // After narrowing, TypeScript knows dragState has initialMin/initialMax
+            // since 'new_overview_selection' is excluded from the union
+            let newMin = dragState.initialMin;
+            let newMax = dragState.initialMax;
 
             if (dragState.type === 'brush') {
                 newMin += deltaTime;
@@ -811,7 +813,7 @@ const OverviewBrush: React.FC<{
                 if (newMax > maxTime) newMax = maxTime;
                 if (newMax <= newMin) newMax = newMin + 1;
             }
-    
+
             if (newMin < newMax) {
                 onViewRangeChange({ min: newMin, max: newMax });
             }
@@ -848,7 +850,7 @@ const OverviewBrush: React.FC<{
     const viewWidth = valueToPosition(viewMax) - viewLeft;
 
     const currentSelection = tempSelection || (selectedMin !== null && selectedMax !== null ? { start: selectedMin, end: selectedMax } : null);
-    
+
     const selectionLeft = currentSelection ? valueToPosition(currentSelection.start) : -1;
     const selectionWidth = currentSelection ? valueToPosition(currentSelection.end) - selectionLeft : 0;
 
@@ -870,21 +872,21 @@ const OverviewBrush: React.FC<{
                 {density.map((bucket: LogDensityPointByLevel | LogDensityPoint, i) => {
                     const total: number = 'counts' in bucket ? Object.values(bucket.counts).reduce((s: number, c: number) => s + c, 0) : (bucket as LogDensityPoint).count;
                     const opacity = total > 0 ? 0.3 + (total / maxTotalCount) * 0.7 : 0;
-                     if ('counts' in bucket && total > 0) {
+                    if ('counts' in bucket && total > 0) {
                         return (
-                             <div key={i} style={{ flex: '1 1 0%'}} className="flex flex-col">
-                                 {Object.entries(bucket.counts).map(([level, count]: [string, number]) => (
-                                    <div key={level} style={{ height: `${(count/total)*100}%`, backgroundColor: getLevelColor(level, theme) }}/>
-                                 ))}
-                             </div>
+                            <div key={i} style={{ flex: '1 1 0%' }} className="flex flex-col">
+                                {Object.entries(bucket.counts).map(([level, count]: [string, number]) => (
+                                    <div key={level} style={{ height: `${(count / total) * 100}%`, backgroundColor: getLevelColor(level, theme) }} />
+                                ))}
+                            </div>
                         )
                     }
                     return (
-                        <div key={`density-${i}`} style={{ flex: '1 1 0%', backgroundColor: `rgba(147, 197, 253, ${opacity})`}} />
+                        <div key={`density-${i}`} style={{ flex: '1 1 0%', backgroundColor: `rgba(147, 197, 253, ${opacity})` }} />
                     );
                 })}
             </div>
-            
+
             {selectionLeft >= 0 && selectionWidth > 0 && (
                 <div
                     className="absolute top-0 h-full bg-sky-500/20 dark:bg-sky-400/20 pointer-events-none"

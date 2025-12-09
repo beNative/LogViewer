@@ -9,11 +9,16 @@ import { useSettings } from './SettingsContext';
 const DEFAULT_SCROLL_CHUNK_SIZE = 200;
 const MIN_SCROLL_CHUNK_SIZE = 50;
 
+// Row height constants for different density modes (in pixels)
+const ROW_HEIGHT_COMPACT = 28;
+const ROW_HEIGHT_NORMAL = 36;
+const ROW_HEIGHT_COMFORTABLE = 44;
+
 const initialFilters: FilterState = {
-  dateFrom: '', timeFrom: '', dateTo: '', timeTo: '', level: [], levelFilterMode: 'include',
-  sndrtype: [], sndrtypeFilterMode: 'include', sndrname: [], sndrnameFilterMode: 'include',
-  fileName: [], fileNameFilterMode: 'include', includeMsg: '', excludeMsg: '',
-  includeMsgMode: 'OR', excludeMsgMode: 'AND', sqlQuery: '', sqlQueryEnabled: false,
+    dateFrom: '', timeFrom: '', dateTo: '', timeTo: '', level: [], levelFilterMode: 'include',
+    sndrtype: [], sndrtypeFilterMode: 'include', sndrname: [], sndrnameFilterMode: 'include',
+    fileName: [], fileNameFilterMode: 'include', includeMsg: '', excludeMsg: '',
+    includeMsgMode: 'OR', excludeMsgMode: 'AND', sqlQuery: '', sqlQueryEnabled: false,
 };
 
 const initialDashboardData: DashboardData = { timeline: [], levels: [], senderTypes: [] };
@@ -52,7 +57,7 @@ type DataContextType = {
     setTimelineViewRange: React.Dispatch<React.SetStateAction<{ min: number, max: number } | null>>;
     handleTimelineZoomToSelection: () => void;
     handleTimelineZoomReset: () => void;
-    
+
     // Dashboard State & Logic
     dashboardData: DashboardData;
     handleTimeRangeSelect: (startTime: number, endTime: number) => void;
@@ -87,7 +92,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [totalFilteredCount, setTotalFilteredCount] = useState(0);
     const [formFilters, setFormFilters] = useState<FilterState>(initialFilters);
     const [appliedFilters, setAppliedFilters] = useState<FilterState>(initialFilters);
-    const [uniqueValues, setUniqueValues] = useState<{level: string[]; sndrtype: string[]; sndrname: string[]; fileName: string[];}>({ level: [], sndrtype: [], sndrname: [], fileName: [] });
+    const [uniqueValues, setUniqueValues] = useState<{ level: string[]; sndrtype: string[]; sndrname: string[]; fileName: string[]; }>({ level: [], sndrtype: [], sndrname: [], fileName: [] });
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [pageSize, setPageSize] = useState<number>(1000);
     const [pageTimestampRanges, setPageTimestampRanges] = useState<PageTimestampRange[]>([]);
@@ -99,12 +104,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const getRowHeightForDensity = useCallback((density: LogTableDensity) => {
         switch (density) {
             case 'compact':
-                return 28;
+                return ROW_HEIGHT_COMPACT;
             case 'comfortable':
-                return 44;
+                return ROW_HEIGHT_COMFORTABLE;
             case 'normal':
             default:
-                return 36;
+                return ROW_HEIGHT_NORMAL;
         }
     }, []);
 
@@ -135,7 +140,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [logDensity, setLogDensity] = useState<LogDensityPointByLevel[]>([]);
     const [overallLogDensity, setOverallLogDensity] = useState<LogDensityPointByLevel[]>([]);
     const [datesWithLogs, setDatesWithLogs] = useState<string[]>([]);
-    
+
     // Stock Tracker State
     const [stockHistory, setStockHistory] = useState<StockInfoEntry[]>([]);
 
@@ -159,7 +164,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         throw new Error('Invalid format');
                     }
                 } catch (e) {
-                     logToConsole(`Could not parse saved filters, using defaults.`, 'WARNING');
+                    logToConsole(`Could not parse saved filters, using defaults.`, 'WARNING');
                 }
             }
 
@@ -213,7 +218,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         setIsBusy(true);
         clearTimeout(busyTaskRef.current);
-        
+
         if (!isInitialLoad) {
             setFilteredEntries([]);
         }
@@ -232,7 +237,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setFileTimeRanges(db.getTimeRangePerFile(appliedFilters));
             setLogDensity(db.getLogDensityByLevel(appliedFilters, 200));
             setDatesWithLogs(db.getDatesWithLogs(appliedFilters));
-            
+
             if (count > 0 && !isInitialLoad) {
                 if (viewMode === 'pagination') {
                     const entries = db.queryLogEntries(appliedFilters, pageSize, (currentPage - 1) * pageSize);
@@ -253,10 +258,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setPageTimestampRanges([]);
                 setHasMoreLogs(false);
                 if (count === 0) {
-                     setDashboardData(initialDashboardData);
-                     setFileTimeRanges([]);
-                     setLogDensity([]);
-                     setDatesWithLogs([]);
+                    setDashboardData(initialDashboardData);
+                    setFileTimeRanges([]);
+                    setLogDensity([]);
+                    setDatesWithLogs([]);
                 } else if (isInitialLoad) {
                     logToConsole(`Data is ready. Found ${count} matching entries. Apply filters to view.`, 'INFO');
                 }
@@ -289,7 +294,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             try {
                 db.setMeta('appliedFilters', JSON.stringify(formFilters));
                 logToConsole('Saved current filter configuration to the session database.', 'DEBUG');
-            } catch(e) {
+            } catch (e) {
                 const msg = e instanceof Error ? e.message : String(e);
                 logToConsole(`Could not save filters to session: ${msg}`, 'WARNING');
             }
@@ -328,13 +333,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             logToConsole(`Loaded ${newEntries.length} more logs.`, 'DEBUG');
         }, 10);
     }, [db, hasMoreLogs, isBusy, entriesOffset, appliedFilters, totalFilteredCount, logToConsole, setIsBusy, infiniteScrollChunkSize]);
-    
+
     const goToPage = useCallback((pageNumber: number) => setCurrentPage(pageNumber), []);
     const handlePageSizeChange = useCallback((newSize: number) => { setPageSize(newSize); setCurrentPage(1); }, []);
 
     const handleClearTimeRange = useCallback(() => {
         logToConsole('Clearing time range filters...', 'INFO');
-        const updater = (f: FilterState) => ({...f, dateFrom: '', timeFrom: '', dateTo: '', timeTo: ''});
+        const updater = (f: FilterState) => ({ ...f, dateFrom: '', timeFrom: '', dateTo: '', timeTo: '' });
         setFormFilters(updater);
         setAppliedFilters(updater);
         setIsInitialLoad(false);
@@ -347,7 +352,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const endDate = new Date(endTime);
         const dateToYYYYMMDD = (d: Date) => d.toISOString().split('T')[0];
         const dateToHHMMSS = (d: Date) => d.toISOString().split('T')[1].substring(0, 8);
-        const updater = (f: FilterState) => ({...f, dateFrom: dateToYYYYMMDD(startDate), timeFrom: dateToHHMMSS(startDate), dateTo: dateToYYYYMMDD(endDate), timeTo: dateToHHMMSS(endDate)});
+        const updater = (f: FilterState) => ({ ...f, dateFrom: dateToYYYYMMDD(startDate), timeFrom: dateToHHMMSS(startDate), dateTo: dateToYYYYMMDD(endDate), timeTo: dateToHHMMSS(endDate) });
         setFormFilters(updater);
         setAppliedFilters(updater);
         setIsInitialLoad(false);
@@ -359,7 +364,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const handleCategorySelect = useCallback((category: 'level' | 'sndrtype', value: string) => {
         setTimelineViewRange(null);
         const modeKey = `${category}FilterMode` as const;
-        const updater = (f: FilterState) => ({...f, [modeKey]: 'include', [category]: [...(f[category] || []), value]});
+        const updater = (f: FilterState) => ({ ...f, [modeKey]: 'include', [category]: [...(f[category] || []), value] });
         setFormFilters(updater);
         setAppliedFilters(updater);
         setIsInitialLoad(false);
@@ -443,26 +448,26 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         const index = db.getLogEntryIndex(nearestEntry.id, appliedFilters);
         if (index === -1) return;
-        
+
         setJumpToEntryId(nearestEntry.id);
         setIsInitialLoad(false);
-        
+
         if (viewMode === 'pagination') {
             const newPage = Math.floor(index / pageSize) + 1;
             if (newPage !== currentPage) setCurrentPage(newPage);
         } else {
-           if (filteredEntries.some(e => e.id === nearestEntry.id)) return;
-           setIsBusy(true);
-           const batchSize = infiniteScrollChunkSize;
-           const newOffset = Math.max(0, index - Math.floor(batchSize / 2));
-           setTimeout(() => {
-               const newEntries = db.queryLogEntries(appliedFilters, batchSize, newOffset);
-               setFilteredEntries(newEntries);
-               const nextOffset = newOffset + newEntries.length;
-               setEntriesOffset(nextOffset);
-               setHasMoreLogs(nextOffset < totalFilteredCount);
-               setIsBusy(false);
-           }, 50);
+            if (filteredEntries.some(e => e.id === nearestEntry.id)) return;
+            setIsBusy(true);
+            const batchSize = infiniteScrollChunkSize;
+            const newOffset = Math.max(0, index - Math.floor(batchSize / 2));
+            setTimeout(() => {
+                const newEntries = db.queryLogEntries(appliedFilters, batchSize, newOffset);
+                setFilteredEntries(newEntries);
+                const nextOffset = newOffset + newEntries.length;
+                setEntriesOffset(nextOffset);
+                setHasMoreLogs(nextOffset < totalFilteredCount);
+                setIsBusy(false);
+            }, 50);
         }
     }, [db, isBusy, appliedFilters, viewMode, pageSize, currentPage, filteredEntries, totalFilteredCount, setJumpToEntryId, setIsInitialLoad, setIsBusy, infiniteScrollChunkSize]);
 
@@ -475,7 +480,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 if (min < max) setTimelineViewRange({ min, max });
             }
         }
-        const updater = (f: FilterState) => ({...f, dateFrom: '', timeFrom: '', dateTo: '', timeTo: '', fileName: [fileName], fileNameFilterMode: 'include' as const});
+        const updater = (f: FilterState) => ({ ...f, dateFrom: '', timeFrom: '', dateTo: '', timeTo: '', fileName: [fileName], fileNameFilterMode: 'include' as const });
         setFormFilters(updater);
         setAppliedFilters(updater);
         setIsInitialLoad(false);
@@ -486,7 +491,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const handleDateSelect = useCallback((date: string) => {
         setTimelineViewRange({ min: new Date(`${date}T00:00:00.000Z`).getTime(), max: new Date(`${date}T23:59:59.999Z`).getTime() });
-        const updater = (f: FilterState) => ({...f, dateFrom: date, timeFrom: '00:00:00', dateTo: date, timeTo: '23:59:59', fileName: []});
+        const updater = (f: FilterState) => ({ ...f, dateFrom: date, timeFrom: '00:00:00', dateTo: date, timeTo: '23:59:59', fileName: [] });
         setFormFilters(updater);
         setAppliedFilters(updater);
         setIsInitialLoad(false);
@@ -522,14 +527,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         setOverallStockDensity(db.getStockDensity({} as StockInfoFilters, 300));
                     }
                 }
-            } catch (e) { logToConsole(`Stock search failed: ${e instanceof Error ? e.message : String(e)}`, 'ERROR');
+            } catch (e) {
+                logToConsole(`Stock search failed: ${e instanceof Error ? e.message : String(e)}`, 'ERROR');
             } finally { setIsStockBusy(false); }
         }, 50);
     }, [db, logToConsole, setIsStockBusy, overallStockTimeRange, setOverallStockDensity, setOverallStockTimeRange]);
-    
+
     const handleFetchStockSuggestions = useCallback(async (searchTerm: string, timeFilters: StockInfoFilters): Promise<StockArticleSuggestion[]> => {
         if (!db || searchTerm.length < 2) return [];
-        try { return db.getUniqueArticles(searchTerm, timeFilters); } 
+        try { return db.getUniqueArticles(searchTerm, timeFilters); }
         catch (e) { logToConsole(`Failed to fetch stock suggestions: ${e instanceof Error ? e.message : String(e)}`, 'ERROR'); return []; }
     }, [db, logToConsole]);
 
@@ -544,7 +550,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setStockHistory([]);
     }, [db, hasData, addToast, handleRebuildStockDataInWorker]);
 
-    const value = {
+    // Memoize context value to prevent unnecessary re-renders of consumers
+    const value = React.useMemo(() => ({
         filteredEntries, totalFilteredCount, hasMoreLogs, pageTimestampRanges, formFilters, setFormFilters,
         appliedFilters, uniqueValues, fileTimeRanges, logDensity, overallLogDensity, datesWithLogs,
         currentPage, totalPages: Math.ceil(totalFilteredCount / pageSize), pageSize, handleApplyFilters, handleResetFilters, handleClearTimeRange,
@@ -554,7 +561,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         stockHistory, setStockHistory, overallStockTimeRange, overallStockDensity, handleSearchStock, handleRebuildStockData,
         handleFetchStockSuggestions, logToConsoleForEntries: logToConsole, lastConsoleMessageForStatus: lastConsoleMessage,
         keyboardSelectedId, setKeyboardSelectedId, jumpToEntryId, isInitialLoad
-    };
+    }), [
+        filteredEntries, totalFilteredCount, hasMoreLogs, pageTimestampRanges, formFilters, setFormFilters,
+        appliedFilters, uniqueValues, fileTimeRanges, logDensity, overallLogDensity, datesWithLogs,
+        currentPage, totalFilteredCount, pageSize, handleApplyFilters, handleResetFilters, handleClearTimeRange,
+        onLoadMore, updateTableViewportHeight, goToPage, handlePageSizeChange, handleRemoveAppliedFilter, handleContextMenuFilter, handleCursorChange,
+        handleFileSelect, handleDateSelect, handleApplyDetailFilter, timelineViewRange, setTimelineViewRange,
+        handleTimelineZoomToSelection, handleTimelineZoomReset, dashboardData, handleTimeRangeSelect, handleCategorySelect,
+        stockHistory, setStockHistory, overallStockTimeRange, overallStockDensity, handleSearchStock, handleRebuildStockData,
+        handleFetchStockSuggestions, logToConsole, lastConsoleMessage,
+        keyboardSelectedId, setKeyboardSelectedId, jumpToEntryId, isInitialLoad
+    ]);
 
     return (
         <DataContext.Provider value={value}>
