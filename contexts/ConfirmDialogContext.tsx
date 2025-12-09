@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { IconSet } from '../types';
-import { Icon } from '../components/icons';
+import { Icon, IconName } from '../components/icons';
 
 type ConfirmDialogType = 'danger' | 'warning' | 'info';
 
@@ -58,7 +58,7 @@ export const ConfirmDialogProvider: React.FC<{ children: React.ReactNode; iconSe
         setDialogState(prev => ({ ...prev, isOpen: false, resolve: null }));
     }, [dialogState.resolve]);
 
-    const typeStyles: Record<ConfirmDialogType, { icon: string; iconBg: string; iconColor: string }> = {
+    const typeStyles: Record<ConfirmDialogType, { icon: IconName; iconBg: string; iconColor: string }> = {
         danger: {
             icon: 'ExclamationTriangle',
             iconBg: 'bg-red-100 dark:bg-red-900',
@@ -98,7 +98,7 @@ export const ConfirmDialogProvider: React.FC<{ children: React.ReactNode; iconSe
                         {/* Icon */}
                         <div className={`mx-auto flex items-center justify-center h-16 w-16 rounded-full ${currentStyle.iconBg} mb-4`}>
                             <Icon
-                                name={currentStyle.icon as any}
+                                name={currentStyle.icon}
                                 iconSet={iconSet}
                                 className={`h-10 w-10 ${currentStyle.iconColor}`}
                             />
