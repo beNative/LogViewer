@@ -68,7 +68,7 @@ const App: React.FC = () => {
   const {
     filteredEntries, pageTimestampRanges, formFilters, setFormFilters,
     appliedFilters, handleApplyFilters, handleResetFilters, handleClearTimeRange,
-    uniqueValues, onLoadMore, hasMoreLogs, keyboardSelectedId, setKeyboardSelectedId,
+    uniqueValues, onLoadMore, hasMoreLogs, onLoadPrev, hasPrevLogs, keyboardSelectedId, setKeyboardSelectedId,
     jumpToEntryId, isInitialLoad, handleRemoveAppliedFilter, handleContextMenuFilter,
     handleCursorChange, handleFileSelect, handleDateSelect, handleApplyDetailFilter,
     timelineViewRange, setTimelineViewRange, handleTimelineZoomToSelection, handleTimelineZoomReset,
@@ -174,6 +174,8 @@ const App: React.FC = () => {
                 onLoadPreset={handleLoadPreset}
                 onLoadMore={onLoadMore}
                 hasMore={hasMoreLogs}
+                onLoadPrev={onLoadPrev}
+                hasPrevLogs={hasPrevLogs}
                 isBusy={isBusy}
                 logToConsole={data.logToConsoleForEntries}
                 overallTimeRange={overallTimeRange}

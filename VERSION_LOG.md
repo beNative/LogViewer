@@ -1,6 +1,18 @@
 # Version Log
 
-All notable changes to this project will be documented in this file. The current application version is **0.23.0**.
+All notable changes to this project will be documented in this file. The current application version is **0.24.0**.
+
+## 0.24.0 – 2025-12-09
+
+### Added
+
+- **Bidirectional Scrolling**: Implemented ability to load previous logs by scrolling to the top of the list. Feature includes seamless scroll position restoration to prevent view jumping.
+- **Title Bar Icon**: Added application icon to the title bar for consistent branding.
+
+### Fixed
+
+- **DataContext Stability**: Resolved structural issues and code duplication in `DataContext.tsx` that affected state consistency.
+- **Log Table Scrolling**: Enhanced scroll event handling to correctly detect top-of-list thresholds and trigger backward loading.
 
 ## 0.23.0 – 2025-12-09
 

@@ -7,10 +7,10 @@ Log Analyser is an Electron desktop application for exploring verbose XML-based 
 - **Session-based workflows** – Group multiple log files into named sessions that can be saved, reopened, renamed, or deleted at any time.
 - **Flexible ingestion** – Drag-and-drop raw XML log exports, append files to an existing session, or import a previously saved database snapshot.
 - **Powerful filtering** – Slice the data by time range, level, sender type, sender name, file, message contents, or ad-hoc SQL; toggle include/exclude modes per field and store reusable presets.
-- **Log viewer ergonomics** – Switch between infinite-scroll and paginated layouts, adjust density, configure column visibility, and inspect structured message details with keyboard navigation.
+- **Log viewer ergonomics** – Switch between bidirectional infinite-scroll and paginated layouts, adjust density, configure column visibility, and inspect structured message details with keyboard navigation.
 - **Insightful dashboards** – Visualise log volume over time and distributions by level or sender type; selecting a range pushes filters directly into the viewer.
 - **Stock information tracker** – Rebuild supply data from processed logs, search with auto-complete suggestions, and review history alongside log density overlays.
-- **Operational console** – Monitor background tasks, SQL tracing, and parsing events with severity filters and keyword search.
+- **Application log panel** – Monitor background tasks, SQL tracing, and parsing events with severity filters and keyword search (toggle via bottom panel).
 - **Cross-platform packaging** – Ship ready-to-install builds for Windows (x64 and ia32) with Electron Builder and auto-update support through GitHub releases.
 
 ## Getting started
@@ -62,7 +62,7 @@ Generated installers are written to the `release-builds/` directory.
 3. **Switch to the Viewer tab** to inspect log entries. Apply filters via the form on the left, use quick chips to remove active filters, and toggle between pagination or continuous scrolling. The detail panel displays parsed key/value, SQL, and grid payloads alongside the raw message.
 4. **Analyse trends on the Dashboard tab.** Drag across the timeline to constrain the viewer to a specific interval, or click a pie slice to include the corresponding level or sender type.
 5. **Investigate stock movements via Stock Tracker.** Submit searches with optional date/time boundaries, browse auto-complete suggestions, and rebuild derived stock data when the source logs change. The timeline bar can show log density to correlate operational spikes.
-6. **Monitor progress in the Console and Status Bar.** Background imports, SQL execution (when enabled), and worker activity surface here. Filter messages by severity or keyword and clear the console when finished.
+6. **Monitor progress in the Application Log and Status Bar.** Background imports, SQL execution (when enabled), and worker activity surface here. Filter messages by severity or keyword and clear the logs when finished.
 7. **Adjust preferences in Settings.** Choose light or dark theme, icon set, table density, column visibility, detail panel behaviour, timeline display, and manage saved filter presets.
 
 ## Project structure

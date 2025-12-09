@@ -57,6 +57,8 @@ interface LogTableProps {
     onLoadPreset: (name: string) => void;
     onLoadMore: () => void;
     hasMore: boolean;
+    onLoadPrev: () => void;
+    hasPrevLogs: boolean;
     isBusy: boolean;
     logToConsole: (message: string, type: ConsoleMessage['type']) => void;
     overallTimeRange: OverallTimeRange | null;
@@ -94,6 +96,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     const [headerContextMenu, setHeaderContextMenu] = React.useState<{ x: number, y: number } | null>(null);
     const tableContainerRef = React.useRef<HTMLDivElement>(null);
     const pendingLoadRef = React.useRef(false);
+    const previousScrollHeightRef = React.useRef(0);
 
     const panelWidthsRef = React.useRef(props.panelWidths);
     panelWidthsRef.current = props.panelWidths;
@@ -103,6 +106,8 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         viewMode,
         onLoadMore,
         hasMore,
+        onLoadPrev,
+        hasPrevLogs,
         isBusy,
         columnVisibility,
         columnStyles,
@@ -209,14 +214,30 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     // Use useLayoutEffect to measure synchronously before paint
     React.useLayoutEffect(() => {
         rowVirtualizer.measure();
+
+        // Handle scroll position restoration for bidirectional scrolling
+        let restoredScroll = false;
+        if (previousScrollHeightRef.current > 0 && tableContainerRef.current) {
+            const container = tableContainerRef.current;
+            const newScrollHeight = container.scrollHeight;
+            const diff = newScrollHeight - previousScrollHeightRef.current;
+
+            if (diff > 0) {
+                container.scrollTop += diff;
+                restoredScroll = true;
+            }
+            previousScrollHeightRef.current = 0;
+        }
+
         // After remeasure, scroll to keep selected entry in view
-        if (keyboardSelectedId !== null) {
+        // Only auto-scroll if we didn't just restore position, to avoid fighting
+        if (keyboardSelectedId !== null && !restoredScroll) {
             const index = entries.findIndex(e => e.id === keyboardSelectedId);
             if (index !== -1) {
                 rowVirtualizer.scrollToIndex(index, { align: 'auto' });
             }
         }
-    }, [rowHeight]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [rowHeight, entries]); // Added entries dependency to trigger recalculation on data change
 
     React.useEffect(() => {
         if (!isBusy) {
@@ -238,9 +259,14 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
             }
 
             const { scrollTop, clientHeight, scrollHeight } = container;
-            if (scrollHeight - (scrollTop + clientHeight) <= threshold) {
+
+            if (hasMore && scrollHeight - (scrollTop + clientHeight) <= threshold) {
                 pendingLoadRef.current = true;
                 onLoadMore();
+            } else if (hasPrevLogs && scrollTop <= 50) { // Small threshold for top to detect intention
+                pendingLoadRef.current = true;
+                previousScrollHeightRef.current = scrollHeight;
+                onLoadPrev();
             }
         };
 
@@ -250,7 +276,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         return () => {
             container.removeEventListener('scroll', maybeLoadMore);
         };
-    }, [estimateRowHeight, hasMore, isBusy, onLoadMore]);
+    }, [estimateRowHeight, hasMore, hasPrevLogs, isBusy, onLoadMore, onLoadPrev]);
 
     // This effect ensures the details panel stays in sync with keyboard navigation.
     React.useEffect(() => {

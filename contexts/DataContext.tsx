@@ -44,6 +44,9 @@ type DataContextType = {
     handleResetFilters: () => void;
     handleClearTimeRange: () => void;
     onLoadMore: () => void;
+    onLoadPrev: () => void;
+    entriesStartOffset: number;
+    hasPrevLogs: boolean;
     setLogTableViewportHeight: (height: number | null) => void;
     goToPage: (pageNumber: number) => void;
     handlePageSizeChange: (newSize: number) => void;
@@ -93,7 +96,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Log Viewer State
     const [filteredEntries, setFilteredEntries] = useState<LogEntry[]>([]);
-    const [entriesOffset, setEntriesOffset] = useState(0);
+    const [entriesEndOffset, setEntriesEndOffset] = useState(0); // Previously entriesOffset
+    const [entriesStartOffset, setEntriesStartOffset] = useState(0);
+    const [hasPrevLogs, setHasPrevLogs] = useState(false);
     const [totalFilteredCount, setTotalFilteredCount] = useState(0);
     const [formFilters, setFormFilters] = useState<FilterState>(initialFilters);
     const [appliedFilters, setAppliedFilters] = useState<FilterState>(initialFilters);
@@ -218,7 +223,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!db || !hasData) {
             setTotalFilteredCount(0);
             setFilteredEntries([]);
-            setEntriesOffset(0);
+            setTotalFilteredCount(0);
+            setFilteredEntries([]);
+            setEntriesEndOffset(0);
+            setEntriesStartOffset(0);
+            setHasPrevLogs(false);
             setDashboardData(initialDashboardData);
             setPageTimestampRanges([]);
             setFileTimeRanges([]);
@@ -238,7 +247,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // Let's keep it empty here, the fetch below will populate it.
             setFilteredEntries([]);
         }
-        setEntriesOffset(0);
+        setFilteredEntries([]);
+
+        setEntriesEndOffset(0);
+        setEntriesStartOffset(0);
+        setHasPrevLogs(false);
 
         busyTaskRef.current = window.setTimeout(() => {
             logToConsole(`Updating view...`, 'DEBUG');
@@ -264,7 +277,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 } else { // 'scroll' mode
                     const entries = db.queryLogEntries(appliedFilters, infiniteScrollChunkSizeRef.current, 0);
                     setFilteredEntries(entries);
-                    setEntriesOffset(entries.length);
+                    setEntriesEndOffset(entries.length);
+                    setEntriesStartOffset(0);
+                    setHasPrevLogs(false);
                     setHasMoreLogs(entries.length < count);
                     setPageTimestampRanges([]);
                 }
@@ -305,7 +320,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logToConsole('Applying filters...', 'INFO');
         setAppliedFilters(formFilters);
         setCurrentPage(1);
-        setEntriesOffset(0);
+        setEntriesEndOffset(0);
+        setEntriesStartOffset(0);
+        setHasPrevLogs(false);
         setTimelineViewRange(null);
         setIsInitialLoad(false);
 
@@ -334,24 +351,55 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAppliedFilters(newFilters);
         setIsInitialLoad(false);
         setCurrentPage(1);
-        setEntriesOffset(0);
+        setEntriesEndOffset(0);
+        setEntriesStartOffset(0);
+        setHasPrevLogs(false);
     }, [logToConsole, db, setIsInitialLoad]);
 
     const onLoadMore = useCallback(() => {
         if (!db || !hasMoreLogs || isBusy) return;
         setTimeout(() => {
             setIsBusy(true);
-            const offset = entriesOffset;
+            const offset = entriesEndOffset;
             logToConsole(`Loading more logs at offset ${offset.toLocaleString()} with batch size ${infiniteScrollChunkSize.toLocaleString()}...`, 'DEBUG');
             const newEntries = db.queryLogEntries(appliedFilters, infiniteScrollChunkSize, offset);
             setFilteredEntries(prev => [...prev, ...newEntries]);
             const nextOffset = offset + newEntries.length;
-            setEntriesOffset(nextOffset);
+            setEntriesEndOffset(nextOffset);
             setHasMoreLogs(nextOffset < totalFilteredCount);
             setIsBusy(false);
             logToConsole(`Loaded ${newEntries.length} more logs.`, 'DEBUG');
         }, 10);
-    }, [db, hasMoreLogs, isBusy, entriesOffset, appliedFilters, totalFilteredCount, logToConsole, setIsBusy, infiniteScrollChunkSize]);
+    }, [db, hasMoreLogs, isBusy, entriesEndOffset, appliedFilters, totalFilteredCount, logToConsole, setIsBusy, infiniteScrollChunkSize]);
+
+    const onLoadPrev = useCallback(() => {
+        if (!db || !hasPrevLogs || isBusy) return;
+        setTimeout(() => {
+            setIsBusy(true);
+            const batchSize = infiniteScrollChunkSize;
+            // Calculate new start offset, ensuring we don't go below 0
+            const newStartOffset = Math.max(0, entriesStartOffset - batchSize);
+            const countToLoad = entriesStartOffset - newStartOffset;
+
+            if (countToLoad <= 0) {
+                setHasPrevLogs(false);
+                setIsBusy(false);
+                return;
+            }
+
+            logToConsole(`Loading previous logs at offset ${newStartOffset.toLocaleString()} (count: ${countToLoad})...`, 'DEBUG');
+            const newEntries = db.queryLogEntries(appliedFilters, countToLoad, newStartOffset);
+
+            // Prepend new entries
+            setFilteredEntries(prev => [...newEntries, ...prev]);
+
+            setEntriesStartOffset(newStartOffset);
+            setHasPrevLogs(newStartOffset > 0);
+
+            setIsBusy(false);
+            logToConsole(`Loaded ${newEntries.length} previous logs.`, 'DEBUG');
+        }, 10);
+    }, [db, hasPrevLogs, isBusy, entriesStartOffset, appliedFilters, logToConsole, setIsBusy, infiniteScrollChunkSize]);
 
     const goToPage = useCallback((pageNumber: number) => setCurrentPage(pageNumber), []);
     const handlePageSizeChange = useCallback((newSize: number) => { setPageSize(newSize); setCurrentPage(1); }, []);
@@ -363,7 +411,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAppliedFilters(updater);
         setIsInitialLoad(false);
         setCurrentPage(1);
-        setEntriesOffset(0);
+        setEntriesEndOffset(0);
+        setEntriesStartOffset(0);
+        setHasPrevLogs(false);
     }, [logToConsole, setIsInitialLoad]);
 
     const handleTimeRangeSelect = useCallback((startTime: number, endTime: number) => {
@@ -376,7 +426,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAppliedFilters(updater);
         setIsInitialLoad(false);
         setCurrentPage(1);
-        setEntriesOffset(0);
+        setEntriesEndOffset(0);
+        setEntriesStartOffset(0);
+        setHasPrevLogs(false);
         setActiveView('viewer');
     }, [setIsInitialLoad, setActiveView]);
 
@@ -388,7 +440,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAppliedFilters(updater);
         setIsInitialLoad(false);
         setCurrentPage(1);
-        setEntriesOffset(0);
+        setEntriesEndOffset(0);
+        setEntriesStartOffset(0);
+        setHasPrevLogs(false);
         setActiveView('viewer');
     }, [setIsInitialLoad, setActiveView]);
 
@@ -414,7 +468,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAppliedFilters(updater);
         setIsInitialLoad(false);
         setCurrentPage(1);
-        setEntriesOffset(0);
+        setEntriesEndOffset(0);
+        setEntriesStartOffset(0);
+        setHasPrevLogs(false);
     }, [logToConsole, setIsInitialLoad]);
 
     const handleContextMenuFilter = useCallback((key: 'level' | 'sndrtype' | 'sndrname' | 'fileName', value: string, exclude: boolean) => {
@@ -435,7 +491,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAppliedFilters(updater);
         setIsInitialLoad(false);
         setCurrentPage(1);
-        setEntriesOffset(0);
+        setEntriesEndOffset(0);
+        setEntriesStartOffset(0);
+        setHasPrevLogs(false);
         setActiveView('viewer');
     }, [logToConsole, setIsInitialLoad, setActiveView]);
 
@@ -456,7 +514,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAppliedFilters(updater);
         setIsInitialLoad(false);
         setCurrentPage(1);
-        setEntriesOffset(0);
+        setEntriesEndOffset(0);
+        setEntriesStartOffset(0);
+        setHasPrevLogs(false);
         setActiveView('viewer');
     }, [logToConsole, setIsInitialLoad, setActiveView]);
 
@@ -483,7 +543,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 const newEntries = db.queryLogEntries(appliedFilters, batchSize, newOffset);
                 setFilteredEntries(newEntries);
                 const nextOffset = newOffset + newEntries.length;
-                setEntriesOffset(nextOffset);
+                setEntriesEndOffset(nextOffset);
+                setEntriesStartOffset(newOffset);
+                setHasPrevLogs(newOffset > 0);
                 setHasMoreLogs(nextOffset < totalFilteredCount);
                 setIsBusy(false);
             }, 50);
@@ -504,7 +566,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAppliedFilters(updater);
         setIsInitialLoad(false);
         setCurrentPage(1);
-        setEntriesOffset(0);
+        setEntriesEndOffset(0);
+        setEntriesStartOffset(0);
+        setHasPrevLogs(false);
         setActiveView('viewer');
     }, [db, setIsInitialLoad, setActiveView]);
 
@@ -515,7 +579,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAppliedFilters(updater);
         setIsInitialLoad(false);
         setCurrentPage(1);
-        setEntriesOffset(0);
+        setEntriesEndOffset(0);
+        setEntriesStartOffset(0);
+        setHasPrevLogs(false);
         setActiveView('viewer');
     }, [setIsInitialLoad, setActiveView]);
 
@@ -574,7 +640,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         filteredEntries, totalFilteredCount, hasMoreLogs, pageTimestampRanges, formFilters, setFormFilters,
         appliedFilters, uniqueValues, fileTimeRanges, logDensity, overallLogDensity, datesWithLogs,
         currentPage, totalPages: Math.ceil(totalFilteredCount / pageSize), pageSize, handleApplyFilters, handleResetFilters, handleClearTimeRange,
-        onLoadMore, setLogTableViewportHeight: updateTableViewportHeight, goToPage, handlePageSizeChange, handleRemoveAppliedFilter, handleContextMenuFilter, handleCursorChange,
+
+        onLoadMore, onLoadPrev, entriesStartOffset, hasPrevLogs, setLogTableViewportHeight: updateTableViewportHeight, goToPage, handlePageSizeChange, handleRemoveAppliedFilter, handleContextMenuFilter, handleCursorChange,
         handleFileSelect, handleDateSelect, handleApplyDetailFilter, timelineViewRange, setTimelineViewRange,
         handleTimelineZoomToSelection, handleTimelineZoomReset, dashboardData, handleTimeRangeSelect, handleCategorySelect,
         stockHistory, setStockHistory, overallStockTimeRange, overallStockDensity, handleSearchStock, handleRebuildStockData,
@@ -584,7 +651,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         filteredEntries, totalFilteredCount, hasMoreLogs, pageTimestampRanges, formFilters, setFormFilters,
         appliedFilters, uniqueValues, fileTimeRanges, logDensity, overallLogDensity, datesWithLogs,
         currentPage, totalFilteredCount, pageSize, handleApplyFilters, handleResetFilters, handleClearTimeRange,
-        onLoadMore, updateTableViewportHeight, goToPage, handlePageSizeChange, handleRemoveAppliedFilter, handleContextMenuFilter, handleCursorChange,
+        onLoadMore, onLoadPrev, entriesStartOffset, hasPrevLogs, updateTableViewportHeight, goToPage, handlePageSizeChange, handleRemoveAppliedFilter, handleContextMenuFilter, handleCursorChange,
         handleFileSelect, handleDateSelect, handleApplyDetailFilter, timelineViewRange, setTimelineViewRange,
         handleTimelineZoomToSelection, handleTimelineZoomReset, dashboardData, handleTimeRangeSelect, handleCategorySelect,
         stockHistory, setStockHistory, overallStockTimeRange, overallStockDensity, handleSearchStock, handleRebuildStockData,
