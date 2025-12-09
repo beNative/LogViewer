@@ -1,19 +1,28 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { APP_VERSION } from './constants';
 import { Header } from './components/Header';
 import { Console } from './components/Console';
 import { DataHub } from './components/DataHub';
 import { Dashboard } from './components/Dashboard';
-import { Settings } from './components/Settings';
-import { Info } from './components/Info';
 import { StatusBar } from './components/StatusBar';
 import { AboutDialog } from './components/AboutDialog';
-import { StockTracker } from './components/StockTracker';
 import { Toast } from './components/Toast';
 import { FocusDebugger } from './components/FocusDebugger';
 import { Icon } from './components/icons';
 import { LogTable } from './components/LogTable';
 import { ProgressIndicator } from './components/ProgressIndicator';
+
+// Lazy load less frequently used components for better initial load performance
+const Settings = React.lazy(() => import('./components/Settings').then(m => ({ default: m.Settings })));
+const Info = React.lazy(() => import('./components/Info').then(m => ({ default: m.Info })));
+const StockTracker = React.lazy(() => import('./components/StockTracker').then(m => ({ default: m.StockTracker })));
+
+/** Loading fallback for lazy loaded components */
+const LazyLoadFallback: React.FC = () => (
+  <div className="flex-grow flex items-center justify-center">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+  </div>
+);
 
 import { useUI } from './contexts/UIContext';
 import { useToast } from './contexts/ToastContext';
@@ -214,20 +223,22 @@ const App: React.FC = () => {
           />
         )}
         {activeView === 'stock' && (
-          <StockTracker
-            onSearch={handleSearchStock}
-            history={stockHistory}
-            isBusy={isStockBusy}
-            iconSet={iconSet}
-            theme={theme}
-            overallTimeRange={overallStockTimeRange}
-            overallStockDensity={overallStockDensity}
-            uiScale={settings.uiScale}
-            onRebuildStockData={handleRebuildStockData}
-            onFetchSuggestions={handleFetchStockSuggestions}
-            timelineBarVisibility={settings.timelineBarVisibility}
-            onTimelineBarVisibilityChange={settings.onTimelineBarVisibilityChange}
-          />
+          <Suspense fallback={<LazyLoadFallback />}>
+            <StockTracker
+              onSearch={handleSearchStock}
+              history={stockHistory}
+              isBusy={isStockBusy}
+              iconSet={iconSet}
+              theme={theme}
+              overallTimeRange={overallStockTimeRange}
+              overallStockDensity={overallStockDensity}
+              uiScale={settings.uiScale}
+              onRebuildStockData={handleRebuildStockData}
+              onFetchSuggestions={handleFetchStockSuggestions}
+              timelineBarVisibility={settings.timelineBarVisibility}
+              onTimelineBarVisibilityChange={settings.onTimelineBarVisibilityChange}
+            />
+          </Suspense>
         )}
         {activeView === 'console' && (
           <Console
@@ -241,13 +252,17 @@ const App: React.FC = () => {
           />
         )}
         {activeView === 'info' && (
-          <Info
-            iconSet={iconSet}
-            onOpenAboutDialog={() => setIsAboutDialogOpen(true)}
-          />
+          <Suspense fallback={<LazyLoadFallback />}>
+            <Info
+              iconSet={iconSet}
+              onOpenAboutDialog={() => setIsAboutDialogOpen(true)}
+            />
+          </Suspense>
         )}
         {activeView === 'settings' && (
-          <Settings {...settings} />
+          <Suspense fallback={<LazyLoadFallback />}>
+            <Settings {...settings} />
+          </Suspense>
         )}
       </main>
       <StatusBar

@@ -22,6 +22,8 @@ All notable changes to this project will be documented in this file. The current
 - **Regex Compilation**: Moved stock info regex to module level for single compilation at load time.
 - **Array Pre-allocation**: Optimized log density array creation using pre-allocation and direct index assignment.
 - **FTS5 Documentation**: Added documentation noting current LIKE query limitations and FTS5 as future upgrade path.
+- **Lazy Loading**: Implemented React.lazy() for Settings, Info, and StockTracker tabs to improve initial load performance.
+- **Debounce Hooks**: Created `useDebounce` and `useDebouncedCallback` custom hooks for filter input optimization.
 
 ### Code Quality
 
