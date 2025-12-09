@@ -64,31 +64,31 @@ export const StatusBar: React.FC<StatusBarProps> = (props) => {
         <footer className="flex-shrink-0 flex items-center justify-between px-3 py-1 border-t border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-400">
             {/* Left Section */}
             <div className="flex items-center gap-2">
-                 <StatItem icon={<Icon name="Database" iconSet={iconSet} className="w-4 h-4" />} label="Total" value={totalEntries.toLocaleString()} title="Total Entries in Database" />
-                 <StatItem icon={<Icon name="Filter" iconSet={iconSet} className="w-4 h-4" />} label="Filtered" value={filteredCount.toLocaleString()} title="Filtered Entries" />
-                 <div className="flex items-center gap-2 pl-2">
+                <StatItem icon={<Icon name="Database" iconSet={iconSet} className="w-4 h-4" />} label="Total" value={totalEntries.toLocaleString()} title="Total Entries in Database" />
+                <StatItem icon={<Icon name="Filter" iconSet={iconSet} className="w-4 h-4" />} label="Filtered" value={filteredCount.toLocaleString()} title="Filtered Entries" />
+                <div className="flex items-center gap-2 pl-2">
                     <Icon name="Folder" iconSet={iconSet} className="w-4 h-4 text-sky-600 dark:text-sky-500" />
                     <span className="font-semibold text-gray-800 dark:text-gray-200">{activeSessionName || 'Unsaved Session'}{isDirty ? '*' : ''}</span>
-                 </div>
+                </div>
             </div>
 
             {/* Middle Section */}
             <div className="flex items-center gap-4">
-                 {viewMode === 'pagination' && totalPages > 0 && (
-                     <div className="flex items-center gap-4">
+                {viewMode === 'pagination' && totalPages > 0 && (
+                    <div className="flex items-center gap-4">
                         <span className="whitespace-nowrap">
                             Showing <span className="font-semibold text-gray-800 dark:text-gray-200">{startEntry.toLocaleString()}-{endEntry.toLocaleString()}</span>
                         </span>
                         <div className="flex items-center space-x-1">
                             <button onClick={() => onGoToPage(currentPage - 1)} disabled={currentPage === 1} className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                                <Icon name="ChevronLeft" iconSet={iconSet} className="w-5 h-5"/>
+                                <Icon name="ChevronLeft" iconSet={iconSet} className="w-5 h-5" />
                             </button>
                             <span>Page <span className="font-semibold text-gray-800 dark:text-gray-200">{currentPage}</span> of <span className="font-semibold text-gray-800 dark:text-gray-200">{totalPages}</span></span>
-                             <button onClick={() => onGoToPage(currentPage + 1)} disabled={currentPage === totalPages} className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                                <Icon name="ChevronRight" iconSet={iconSet} className="w-5 h-5"/>
+                            <button onClick={() => onGoToPage(currentPage + 1)} disabled={currentPage === totalPages} className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <Icon name="ChevronRight" iconSet={iconSet} className="w-5 h-5" />
                             </button>
                         </div>
-                         <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-2">
                             <label htmlFor="pageSizeStatus" className="text-sm">Rows/page:</label>
                             <select
                                 id="pageSizeStatus"
@@ -103,22 +103,28 @@ export const StatusBar: React.FC<StatusBarProps> = (props) => {
                                 <option value="10000">10000</option>
                             </select>
                         </div>
-                     </div>
-                 )}
-                 {viewMode === 'scroll' && filteredCount > 0 && (
-                     <span>Showing <span className="font-semibold text-gray-800 dark:text-gray-200">{visibleRowCount.toLocaleString()}</span> of <span className="font-semibold text-gray-800 dark:text-gray-200">{filteredCount.toLocaleString()}</span> rows</span>
-                 )}
-                 {(totalPages > 0 || (viewMode === 'scroll' && filteredCount > 0)) && (
+                    </div>
+                )}
+                {viewMode === 'scroll' && filteredCount > 0 && (
+                    <span>
+                        <span className="font-semibold text-gray-800 dark:text-gray-200">{visibleRowCount.toLocaleString()}</span>
+                        {visibleRowCount < filteredCount ? ' loaded' : ''}
+                        {' of '}
+                        <span className="font-semibold text-gray-800 dark:text-gray-200">{filteredCount.toLocaleString()}</span>
+                        {' rows'}
+                    </span>
+                )}
+                {(totalPages > 0 || (viewMode === 'scroll' && filteredCount > 0)) && (
                     <div className="flex items-center gap-2">
                         <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
                         <DensityControl value={logTableDensity} onChange={onLogTableDensityChange} />
                         <Tooltip content={isDetailPanelVisible ? "Hide Details" : "Show Details"}>
                             <button onClick={() => onDetailPanelVisibilityChange(!isDetailPanelVisible)} className="p-1.5 text-gray-500 dark:text-gray-400 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                                <Icon name="SidebarRight" iconSet={iconSet} className="w-5 h-5"/>
+                                <Icon name="SidebarRight" iconSet={iconSet} className="w-5 h-5" />
                             </button>
                         </Tooltip>
                     </div>
-                 )}
+                )}
             </div>
 
             {/* Right Section */}
@@ -131,18 +137,18 @@ export const StatusBar: React.FC<StatusBarProps> = (props) => {
                 ) : (
                     lastConsoleMessage && (
                         <div className={`flex items-center gap-2 truncate ${getMessageColorClass(lastConsoleMessage.type)}`}>
-                             <Icon name={
+                            <Icon name={
                                 lastConsoleMessage.type === 'ERROR' ? 'XCircle' :
-                                lastConsoleMessage.type === 'WARNING' ? 'ExclamationTriangle' :
-                                lastConsoleMessage.type === 'DEBUG' ? 'CheckCircle' :
-                                'InformationCircle'
-                             } iconSet={iconSet} className="w-4 h-4 flex-shrink-0" />
+                                    lastConsoleMessage.type === 'WARNING' ? 'ExclamationTriangle' :
+                                        lastConsoleMessage.type === 'DEBUG' ? 'CheckCircle' :
+                                            'InformationCircle'
+                            } iconSet={iconSet} className="w-4 h-4 flex-shrink-0" />
                             <span className="truncate" title={lastConsoleMessage.message}>{lastConsoleMessage.message}</span>
                         </div>
                     )
                 )}
                 <Tooltip content="Toggle Theme">
-                     <button onClick={onThemeChange} className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <button onClick={onThemeChange} className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
                         <Icon name={theme === 'dark' ? 'Sun' : 'Moon'} iconSet={iconSet} className="w-5 h-5" />
                     </button>
                 </Tooltip>

@@ -206,13 +206,17 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     }, [logTableDensity, uiScale, setLogTableViewportHeight, viewMode]);
 
     // Force remeasure all items when row height changes (density change)
-    const previousRowHeightRef = React.useRef(rowHeight);
-    React.useEffect(() => {
-        if (previousRowHeightRef.current !== rowHeight) {
-            previousRowHeightRef.current = rowHeight;
-            rowVirtualizer.measure();
+    // Use useLayoutEffect to measure synchronously before paint
+    React.useLayoutEffect(() => {
+        rowVirtualizer.measure();
+        // After remeasure, scroll to keep selected entry in view
+        if (keyboardSelectedId !== null) {
+            const index = entries.findIndex(e => e.id === keyboardSelectedId);
+            if (index !== -1) {
+                rowVirtualizer.scrollToIndex(index, { align: 'auto' });
+            }
         }
-    });
+    }, [rowHeight]); // eslint-disable-line react-hooks/exhaustive-deps
 
     React.useEffect(() => {
         if (!isBusy) {
@@ -384,7 +388,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                             />
                             <div
                                 className="relative bg-white dark:bg-gray-900"
-                                style={{ height: `${rowVirtualizer.getTotalSize() + (isBusy ? rowHeight : 0)}px` }}
+                                style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
                             >
                                 {virtualRows.map((virtualRow) => {
                                     const entry = entries[virtualRow.index];
