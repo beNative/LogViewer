@@ -166,6 +166,13 @@ export const BottomLogPanel: React.FC<BottomLogPanelProps> = ({
                     >
                         Clear
                     </button>
+                    <button
+                        onClick={onToggle}
+                        className="ml-1 p-1 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+                        title="Close panel"
+                    >
+                        <Icon name="XMark" iconSet={iconSet} className="w-4 h-4" />
+                    </button>
                 </div>
             </div>
 
