@@ -1,4 +1,5 @@
 import React from 'react';
+import { APP_VERSION } from './constants';
 import { Header } from './components/Header';
 import { Console } from './components/Console';
 import { DataHub } from './components/DataHub';
@@ -23,90 +24,90 @@ import { useData } from './contexts/DataContext';
 import { TitleBar } from './components/TitleBar';
 
 const App: React.FC = () => {
-    // UI State and Actions from Hooks
-    const {
-        activeView, setActiveView, isAboutDialogOpen, setIsAboutDialogOpen,
-        isLoading, progress, progressMessage, progressPhase, detailedProgress, progressTitle,
-        isBusy, isStockBusy,
-    } = useUI();
+  // UI State and Actions from Hooks
+  const {
+    activeView, setActiveView, isAboutDialogOpen, setIsAboutDialogOpen,
+    isLoading, progress, progressMessage, progressPhase, detailedProgress, progressTitle,
+    isBusy, isStockBusy,
+  } = useUI();
 
-    const { toasts, removeToast } = useToast();
-    const { consoleMessages, consoleFilters, setConsoleFilters, consoleSearchTerm } = useConsole();
-    
-    // Settings State and Actions from Hooks
-    const settings = useSettings();
-    const { 
-        isFocusDebuggerVisible, theme, iconSet, viewMode, logTableDensity, 
-        isDetailPanelVisible, onDetailPanelVisibilityChange, onThemeChange,
-    } = settings;
-    
-    // Session State and Actions from Hooks
-    const {
-        isElectron, sessions, activeSessionName, isDirty, hasData, totalEntryCount,
-        overallTimeRange, loadedFileNames, error,
-        handleCreateNewSessionFromFiles, handleAddFilesToCurrentSession, handleImportDb,
-        handleDownloadDb, handleNewSession, handleLoadSession, onRenameSession, onDeleteSession, handleCancelProcessing
-    } = useSession();
+  const { toasts, removeToast } = useToast();
+  const { consoleMessages, consoleFilters, setConsoleFilters, consoleSearchTerm } = useConsole();
 
-    // Data (Log & Stock) State and Actions from Hooks
-    const data = useData();
-    const {
-      filteredEntries, pageTimestampRanges, formFilters, setFormFilters,
-      appliedFilters, handleApplyFilters, handleResetFilters, handleClearTimeRange,
-      uniqueValues, onLoadMore, hasMoreLogs, keyboardSelectedId, setKeyboardSelectedId,
-      jumpToEntryId, isInitialLoad, handleRemoveAppliedFilter, handleContextMenuFilter,
-      handleCursorChange, handleFileSelect, handleDateSelect, handleApplyDetailFilter,
-      timelineViewRange, setTimelineViewRange, handleTimelineZoomToSelection, handleTimelineZoomReset,
-      dashboardData, handleTimeRangeSelect, handleCategorySelect,
-      stockHistory, overallStockTimeRange, overallStockDensity, handleSearchStock,
-      handleRebuildStockData, handleFetchStockSuggestions,
-      currentPage, totalPages, pageSize, handlePageSizeChange, goToPage,
-      fileTimeRanges, logDensity, overallLogDensity, datesWithLogs
-    } = data;
-    
-    // Derived state for cursor
-    const selectedEntryForCursor = React.useMemo(() => {
-        if (keyboardSelectedId === null) return null;
-        return filteredEntries.find(e => e.id === keyboardSelectedId);
-    }, [keyboardSelectedId, filteredEntries]);
+  // Settings State and Actions from Hooks
+  const settings = useSettings();
+  const {
+    isFocusDebuggerVisible, theme, iconSet, viewMode, logTableDensity,
+    isDetailPanelVisible, onDetailPanelVisibilityChange, onThemeChange,
+  } = settings;
 
-    const cursorTime = selectedEntryForCursor 
-        ? new Date(selectedEntryForCursor.time.replace(/ (\d+)$/, '.$1') + 'Z').getTime() 
-        : null;
-        
-    // --- Composition Handlers to fix circular dependency ---
-    const handleSavePreset = (name: string) => {
-        settings.onSaveFilterPreset(name, data.formFilters);
-    };
+  // Session State and Actions from Hooks
+  const {
+    isElectron, sessions, activeSessionName, isDirty, hasData, totalEntryCount,
+    overallTimeRange, loadedFileNames, error,
+    handleCreateNewSessionFromFiles, handleAddFilesToCurrentSession, handleImportDb,
+    handleDownloadDb, handleNewSession, handleLoadSession, onRenameSession, onDeleteSession, handleCancelProcessing
+  } = useSession();
 
-    const handleLoadPreset = (name: string) => {
-        const preset = settings.onLoadFilterPreset(name);
-        if (preset) {
-            data.setFormFilters(preset);
-        }
-    };
+  // Data (Log & Stock) State and Actions from Hooks
+  const data = useData();
+  const {
+    filteredEntries, pageTimestampRanges, formFilters, setFormFilters,
+    appliedFilters, handleApplyFilters, handleResetFilters, handleClearTimeRange,
+    uniqueValues, onLoadMore, hasMoreLogs, keyboardSelectedId, setKeyboardSelectedId,
+    jumpToEntryId, isInitialLoad, handleRemoveAppliedFilter, handleContextMenuFilter,
+    handleCursorChange, handleFileSelect, handleDateSelect, handleApplyDetailFilter,
+    timelineViewRange, setTimelineViewRange, handleTimelineZoomToSelection, handleTimelineZoomReset,
+    dashboardData, handleTimeRangeSelect, handleCategorySelect,
+    stockHistory, overallStockTimeRange, overallStockDensity, handleSearchStock,
+    handleRebuildStockData, handleFetchStockSuggestions,
+    currentPage, totalPages, pageSize, handlePageSizeChange, goToPage,
+    fileTimeRanges, logDensity, overallLogDensity, datesWithLogs
+  } = data;
+
+  // Derived state for cursor
+  const selectedEntryForCursor = React.useMemo(() => {
+    if (keyboardSelectedId === null) return null;
+    return filteredEntries.find(e => e.id === keyboardSelectedId);
+  }, [keyboardSelectedId, filteredEntries]);
+
+  const cursorTime = selectedEntryForCursor
+    ? new Date(selectedEntryForCursor.time.replace(/ (\d+)$/, '.$1') + 'Z').getTime()
+    : null;
+
+  // --- Composition Handlers to fix circular dependency ---
+  const handleSavePreset = (name: string) => {
+    settings.onSaveFilterPreset(name, data.formFilters);
+  };
+
+  const handleLoadPreset = (name: string) => {
+    const preset = settings.onLoadFilterPreset(name);
+    if (preset) {
+      data.setFormFilters(preset);
+    }
+  };
 
   return (
     <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-       <TitleBar activeView={activeView} />
-       <div className="fixed bottom-4 right-4 z-50 w-full max-w-sm space-y-3">
-          {toasts.map(toast => (
-              <Toast key={toast.id} toast={toast} onDismiss={() => removeToast(toast.id)} iconSet={iconSet} />
-          ))}
+      <TitleBar activeView={activeView} />
+      <div className="fixed bottom-4 right-4 z-50 w-full max-w-sm space-y-3">
+        {toasts.map(toast => (
+          <Toast key={toast.id} toast={toast} onDismiss={() => removeToast(toast.id)} iconSet={iconSet} />
+        ))}
       </div>
       {isAboutDialogOpen && (
-          <AboutDialog
-              isOpen={isAboutDialogOpen}
-              onClose={() => setIsAboutDialogOpen(false)}
-              iconSet={iconSet}
-              version="0.20.0"
-          />
+        <AboutDialog
+          isOpen={isAboutDialogOpen}
+          onClose={() => setIsAboutDialogOpen(false)}
+          iconSet={iconSet}
+          version={APP_VERSION}
+        />
       )}
       {isLoading && <ProgressIndicator title={progressTitle} progress={progress} message={progressMessage} phase={progressPhase} detailedProgress={detailedProgress} iconSet={iconSet} onCancel={handleCancelProcessing} />}
       <Header activeView={activeView} onViewChange={setActiveView} isBusy={isBusy || isStockBusy} iconSet={iconSet} />
       <main className="flex-grow flex flex-col min-h-0">
         {activeView === 'data' && (
-           <DataHub
+          <DataHub
             onCreateSessionFromFiles={handleCreateNewSessionFromFiles}
             onAddFilesToSession={handleAddFilesToCurrentSession}
             onImportDb={handleImportDb}
@@ -128,9 +129,9 @@ const App: React.FC = () => {
           />
         )}
         {activeView === 'viewer' && (
-           <>
+          <>
             {hasData ? (
-              <LogTable 
+              <LogTable
                 entries={filteredEntries}
                 loadedFileNames={loadedFileNames}
                 pageTimestampRanges={pageTimestampRanges}
@@ -190,63 +191,63 @@ const App: React.FC = () => {
                 onTimelineBarVisibilityChange={settings.onTimelineBarVisibilityChange}
               />
             ) : (
-                <div className="flex-grow flex items-center justify-center p-8 text-center bg-white dark:bg-gray-900">
-                    <div>
-                        <Icon name="Table" iconSet={iconSet} className="w-24 h-24 text-gray-300 dark:text-gray-700 mx-auto mb-6" />
-                        <h2 className="text-2xl font-semibold text-gray-600 dark:text-gray-300">No Data Loaded</h2>
-                        <p className="text-gray-500 dark:text-gray-500 mt-2 max-w-md mx-auto">
-                            Switch to the <strong className="text-gray-700 dark:text-gray-400">Data Hub</strong> tab to {isElectron ? 'load a session or create a new one' : 'add log files'}.
-                        </p>
-                    </div>
+              <div className="flex-grow flex items-center justify-center p-8 text-center bg-white dark:bg-gray-900">
+                <div>
+                  <Icon name="Table" iconSet={iconSet} className="w-24 h-24 text-gray-300 dark:text-gray-700 mx-auto mb-6" />
+                  <h2 className="text-2xl font-semibold text-gray-600 dark:text-gray-300">No Data Loaded</h2>
+                  <p className="text-gray-500 dark:text-gray-500 mt-2 max-w-md mx-auto">
+                    Switch to the <strong className="text-gray-700 dark:text-gray-400">Data Hub</strong> tab to {isElectron ? 'load a session or create a new one' : 'add log files'}.
+                  </p>
+                </div>
               </div>
             )}
           </>
         )}
         {activeView === 'dashboard' && (
-            <Dashboard 
-                data={dashboardData}
-                hasData={hasData}
-                onTimeRangeSelect={handleTimeRangeSelect}
-                onCategorySelect={handleCategorySelect}
-                theme={theme}
-                iconSet={iconSet}
-            />
+          <Dashboard
+            data={dashboardData}
+            hasData={hasData}
+            onTimeRangeSelect={handleTimeRangeSelect}
+            onCategorySelect={handleCategorySelect}
+            theme={theme}
+            iconSet={iconSet}
+          />
         )}
         {activeView === 'stock' && (
-            <StockTracker
-                onSearch={handleSearchStock}
-                history={stockHistory}
-                isBusy={isStockBusy}
-                iconSet={iconSet}
-                theme={theme}
-                overallTimeRange={overallStockTimeRange}
-                overallStockDensity={overallStockDensity}
-                uiScale={settings.uiScale}
-                onRebuildStockData={handleRebuildStockData}
-                onFetchSuggestions={handleFetchStockSuggestions}
-                timelineBarVisibility={settings.timelineBarVisibility}
-                onTimelineBarVisibilityChange={settings.onTimelineBarVisibilityChange}
-            />
+          <StockTracker
+            onSearch={handleSearchStock}
+            history={stockHistory}
+            isBusy={isStockBusy}
+            iconSet={iconSet}
+            theme={theme}
+            overallTimeRange={overallStockTimeRange}
+            overallStockDensity={overallStockDensity}
+            uiScale={settings.uiScale}
+            onRebuildStockData={handleRebuildStockData}
+            onFetchSuggestions={handleFetchStockSuggestions}
+            timelineBarVisibility={settings.timelineBarVisibility}
+            onTimelineBarVisibilityChange={settings.onTimelineBarVisibilityChange}
+          />
         )}
         {activeView === 'console' && (
-             <Console
-                messages={consoleMessages}
-                onClear={useConsole().handleClearConsole}
-                filters={consoleFilters}
-                onFiltersChange={setConsoleFilters}
-                iconSet={iconSet}
-                searchTerm={consoleSearchTerm}
-                theme={theme}
-             />
+          <Console
+            messages={consoleMessages}
+            onClear={useConsole().handleClearConsole}
+            filters={consoleFilters}
+            onFiltersChange={setConsoleFilters}
+            iconSet={iconSet}
+            searchTerm={consoleSearchTerm}
+            theme={theme}
+          />
         )}
         {activeView === 'info' && (
-            <Info 
-              iconSet={iconSet} 
-              onOpenAboutDialog={() => setIsAboutDialogOpen(true)}
-            />
+          <Info
+            iconSet={iconSet}
+            onOpenAboutDialog={() => setIsAboutDialogOpen(true)}
+          />
         )}
         {activeView === 'settings' && (
-            <Settings {...settings} />
+          <Settings {...settings} />
         )}
       </main>
       <StatusBar

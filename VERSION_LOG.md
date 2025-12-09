@@ -29,6 +29,8 @@ All notable changes to this project will be documented in this file. The current
 - **Named Constants**: Extracted magic numbers to named constants (`ROW_HEIGHT_COMPACT`, `ROW_HEIGHT_NORMAL`, `ROW_HEIGHT_COMFORTABLE`).
 - **JSDoc Documentation**: Added documentation comments to key functions in `db.ts`, `parsers.ts`, and all context providers (`UIContext`, `SessionContext`, `ConsoleContext`) including their hooks.
 - **React StrictMode**: Verified application runs with React StrictMode enabled.
+- **Error Boundary**: Added `ErrorBoundary` component for graceful error handling and recovery.
+- **Centralized Constants**: Created `constants.ts` with all app-wide configuration values (version, timing, sizes).
 
 ## 0.20.0 – 2024-06-01
 

@@ -111,6 +111,12 @@ export const areFiltersEqual = (a: FilterState, b: FilterState): boolean => {
     return true;
 };
 
+/**
+ * Formats a byte count into a human-readable string with appropriate units.
+ * @param bytes The number of bytes to format.
+ * @param decimals The number of decimal places (default: 2).
+ * @returns A formatted string like "1.5 MB" or "256 KB".
+ */
 export const formatBytes = (bytes: number, decimals = 2) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
