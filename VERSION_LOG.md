@@ -1,6 +1,19 @@
 # Version Log
 
-All notable changes to this project will be documented in this file. The current application version is **0.24.0**.
+All notable changes to this project will be documented in this file. The current application version is **0.25.0**.
+
+## 0.25.0 – 2025-12-15
+
+### Added
+
+- **Zoom-Adaptive Timeline Density**: Density visualization now recalculates at full resolution when zoomed in, showing much finer detail for the visible time range.
+- **Zebra Striping**: Log table rows now have consistent alternating background colors for improved readability.
+
+### Fixed
+
+- **PageDown Navigation**: Fixed bug where holding PageDown would jump back to the start of the list. Now correctly continues scrolling from current position during data loading.
+- **Density Tooltip Edge Cases**: Added bounds validation to prevent incorrect tooltip data at bucket boundaries.
+- **Level Sort Consistency**: Density bar level stacking now uses consistent sort order across all buckets via `LOG_LEVEL_ORDER` constant.
 
 ## 0.24.0 – 2025-12-09
 

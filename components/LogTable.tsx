@@ -254,7 +254,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         const threshold = Math.max(estimateRowHeight(), 200);
 
         const maybeLoadMore = () => {
-            if (pendingLoadRef.current || isBusy || !hasMore) {
+            if (pendingLoadRef.current || isBusy) {
                 return;
             }
 
@@ -263,7 +263,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
             if (hasMore && scrollHeight - (scrollTop + clientHeight) <= threshold) {
                 pendingLoadRef.current = true;
                 onLoadMore();
-            } else if (hasPrevLogs && scrollTop <= 50) { // Small threshold for top to detect intention
+            } else if (hasPrevLogs && scrollTop <= 50) {
                 pendingLoadRef.current = true;
                 previousScrollHeightRef.current = scrollHeight;
                 onLoadPrev();
@@ -316,13 +316,25 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
             }
             e.preventDefault();
 
-            const currentIndex = entries.findIndex(entry => entry.id === keyboardSelectedId);
+            let currentIndex = entries.findIndex(entry => entry.id === keyboardSelectedId);
 
+            // If selected entry not found (e.g., during loading), use visible position or start from end for forward nav
             if (currentIndex === -1) {
-                if (entries.length > 0) {
-                    setKeyboardSelectedId(entries[0].id);
+                if (entries.length === 0) return;
+
+                // For forward navigation, continue from current scroll position
+                // For backward navigation, start from beginning of loaded entries
+                if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === 'End') {
+                    // Estimate position based on scroll - continue from where user was
+                    const scrollTop = tableContainerRef.current?.scrollTop || 0;
+                    currentIndex = Math.min(
+                        Math.floor(scrollTop / rowHeight),
+                        entries.length - 1
+                    );
+                } else {
+                    // For upward navigation, start from first visible entry
+                    currentIndex = 0;
                 }
-                return;
             }
 
             // Calculate visible rows per page based on container height
@@ -335,15 +347,27 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                     break;
                 case 'ArrowUp':
                     nextIndex = currentIndex - 1;
+                    // If at first entry and more previous data exists, load it
+                    if (nextIndex < 0 && viewMode === 'scroll' && hasPrevLogs && !isBusy) {
+                        onLoadPrev();
+                    }
                     break;
                 case 'PageDown':
                     nextIndex = Math.min(currentIndex + visibleRows, entries.length - 1);
                     break;
                 case 'PageUp':
                     nextIndex = Math.max(currentIndex - visibleRows, 0);
+                    // If near beginning, trigger previous load
+                    if (viewMode === 'scroll' && hasPrevLogs && !isBusy && nextIndex <= visibleRows) {
+                        onLoadPrev();
+                    }
                     break;
                 case 'Home':
                     nextIndex = 0;
+                    // If there's earlier data, load it
+                    if (viewMode === 'scroll' && hasPrevLogs && !isBusy) {
+                        onLoadPrev();
+                    }
                     break;
                 case 'End':
                     nextIndex = entries.length - 1;
@@ -372,7 +396,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         container.addEventListener('keydown', handleKeyDown);
         return () => container.removeEventListener('keydown', handleKeyDown);
 
-    }, [entries, keyboardSelectedId, setKeyboardSelectedId, hasMore, onLoadMore, viewMode, rowHeight, isBusy]);
+    }, [entries, keyboardSelectedId, setKeyboardSelectedId, hasMore, hasPrevLogs, onLoadMore, onLoadPrev, viewMode, rowHeight, isBusy]);
 
     const handleContextMenu = React.useCallback((e: React.MouseEvent, entry: LogEntry, key: ColumnKey, value: string) => {
         e.preventDefault();
@@ -459,6 +483,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                                             logTableDensity={logTableDensity}
                                             theme={theme}
                                             isSelected={keyboardSelectedId === entry.id}
+                                            isOdd={virtualRow.index % 2 === 1}
                                             style={{
                                                 position: 'absolute',
                                                 top: 0,

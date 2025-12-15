@@ -315,6 +315,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }, [jumpToEntryId, filteredEntries, setKeyboardSelectedId, setJumpToEntryId]);
 
+    // Recalculate density when zoom level changes for higher resolution
+    useEffect(() => {
+        if (!db || !hasData) return;
+
+        if (timelineViewRange) {
+            // When zoomed, recalculate density for just the visible range
+            // This gives much finer resolution since 200 buckets cover only the zoomed range
+            const zoomedDensity = db.getLogDensityByLevel(appliedFilters, 200, timelineViewRange.min, timelineViewRange.max);
+            setLogDensity(zoomedDensity);
+        }
+        // When zoom is reset, the main data effect will recalculate logDensity
+    }, [db, hasData, timelineViewRange, appliedFilters]);
+
     // LOGIC & ACTIONS
     const handleApplyFilters = useCallback(() => {
         logToConsole('Applying filters...', 'INFO');

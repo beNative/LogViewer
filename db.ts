@@ -765,15 +765,30 @@ export class Database {
         return dates;
     }
 
-    getLogDensityByLevel(filters: FilterState, bucketCount: number): LogDensityPointByLevel[] {
+    getLogDensityByLevel(filters: FilterState, bucketCount: number, rangeMinMs?: number, rangeMaxMs?: number): LogDensityPointByLevel[] {
         if (filters.sqlQueryEnabled && filters.sqlQuery) {
             return [];
         }
-        const { minTime, maxTime } = this.getMinMaxTime(filters);
-        if (!minTime || !maxTime) return [];
 
-        const minTimeMs = new Date(minTime).getTime();
-        const maxTimeMs = new Date(maxTime).getTime();
+        // If no range provided, use the full data range
+        let minTimeMs: number;
+        let maxTimeMs: number;
+        let baseTime: string;
+
+        if (rangeMinMs !== undefined && rangeMaxMs !== undefined) {
+            // Use provided range for zoomed view
+            minTimeMs = rangeMinMs;
+            maxTimeMs = rangeMaxMs;
+            baseTime = new Date(rangeMinMs).toISOString().replace('T', ' ').replace('Z', '');
+        } else {
+            // Use data range
+            const { minTime, maxTime } = this.getMinMaxTime(filters);
+            if (!minTime || !maxTime) return [];
+            minTimeMs = new Date(minTime).getTime();
+            maxTimeMs = new Date(maxTime).getTime();
+            baseTime = minTime;
+        }
+
         const totalDuration = maxTimeMs - minTimeMs;
         if (totalDuration <= 0) return [];
 
@@ -794,7 +809,7 @@ export class Database {
 
         const bucketMap: Map<number, Record<string, number>> = new Map();
         try {
-            const finalParams = [minTime, bucketDuration, ...params];
+            const finalParams = [baseTime, bucketDuration, ...params];
             this._logSql(sql, finalParams);
             const stmt = this.db.prepare(sql);
             stmt.bind(finalParams);

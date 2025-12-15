@@ -9,6 +9,7 @@ interface LogTableRowProps {
     logTableDensity: LogTableDensity;
     theme: Theme;
     isSelected: boolean;
+    isOdd: boolean;
     style: React.CSSProperties;
     onRowClick: (entry: LogEntry) => void;
     onContextMenu: (e: React.MouseEvent, entry: LogEntry, key: ColumnKey, value: string) => void;
@@ -22,6 +23,7 @@ export const LogTableRow: React.FC<LogTableRowProps> = React.memo(({
     logTableDensity,
     theme,
     isSelected,
+    isOdd,
     style,
     onRowClick,
     onContextMenu,
@@ -125,8 +127,8 @@ export const LogTableRow: React.FC<LogTableRowProps> = React.memo(({
         <div
             onClick={() => onRowClick(entry)}
             className={`grid font-sans items-center transition-colors duration-100 cursor-pointer border-b border-gray-200 dark:border-gray-700 ${isSelected
-                    ? 'bg-sky-100 dark:bg-sky-900/60 border-l-4 border-l-sky-500'
-                    : 'hover:bg-gray-50 dark:hover:bg-gray-800/50 border-l-4 border-l-transparent'
+                ? 'bg-sky-100 dark:bg-sky-900/60 border-l-4 border-l-sky-500'
+                : `${isOdd ? 'bg-gray-50 dark:bg-gray-800/30' : 'bg-white dark:bg-gray-900'} hover:bg-gray-100 dark:hover:bg-gray-800/50 border-l-4 border-l-transparent`
                 }`}
             style={style}
         >

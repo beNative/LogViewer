@@ -66,6 +66,12 @@ const LOG_LEVEL_COLORS: Record<string, { light: string, dark: string }> = {
     'DEFAULT': { light: '#d1d5db', dark: '#4b5563' },
 };
 
+// Consistent level order for stacked density bars - critical/important levels first
+const LOG_LEVEL_ORDER: Record<string, number> = {
+    'FATAL': 0, 'ERROR': 1, 'WARNING': 2, 'WARN': 3,
+    'INFO': 4, 'DEBUG': 5, 'TRACE': 6
+};
+
 const getLevelColor = (level: string, theme: Theme) => {
     const upperLevel = level?.toUpperCase() || 'DEFAULT';
     return (LOG_LEVEL_COLORS[upperLevel] || LOG_LEVEL_COLORS.DEFAULT)[theme];
@@ -181,8 +187,7 @@ const DensityBar: React.FC<{
                     if (widthPx === 0) return null;
 
                     const sortedLevels = Object.entries(bucket.counts).sort((a, b) => {
-                        const order: Record<string, number> = { ERROR: 0, FATAL: 1, WARNING: 2, WARN: 3, INFO: 4 };
-                        return (order[a[0].toUpperCase()] ?? 99) - (order[b[0].toUpperCase()] ?? 99);
+                        return (LOG_LEVEL_ORDER[a[0].toUpperCase()] ?? 99) - (LOG_LEVEL_ORDER[b[0].toUpperCase()] ?? 99);
                     });
 
                     return (
@@ -423,7 +428,14 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
         }
 
         const bucketDuration = logDensity[1].time - logDensity[0].time;
-        const bucketIndex = Math.floor((hoverTime - logDensity[0].time) / bucketDuration);
+        if (bucketDuration <= 0) {
+            setDensityTooltip(null);
+            return;
+        }
+
+        // Calculate bucket index with bounds validation
+        const rawIndex = Math.floor((hoverTime - logDensity[0].time) / bucketDuration);
+        const bucketIndex = Math.max(0, Math.min(rawIndex, logDensity.length - 1));
         const bucketData = logDensity[bucketIndex];
 
         if (!bucketData) {
@@ -883,9 +895,11 @@ const OverviewBrush: React.FC<{
                     if ('counts' in bucket && total > 0) {
                         return (
                             <div key={i} style={{ flex: '1 1 0%' }} className="flex flex-col">
-                                {Object.entries(bucket.counts).map(([level, count]: [string, number]) => (
-                                    <div key={level} style={{ height: `${(count / total) * 100}%`, backgroundColor: getLevelColor(level, theme) }} />
-                                ))}
+                                {Object.entries(bucket.counts)
+                                    .sort((a, b) => (LOG_LEVEL_ORDER[a[0].toUpperCase()] ?? 99) - (LOG_LEVEL_ORDER[b[0].toUpperCase()] ?? 99))
+                                    .map(([level, count]: [string, number]) => (
+                                        <div key={level} style={{ height: `${(count / total) * 100}%`, backgroundColor: getLevelColor(level, theme) }} />
+                                    ))}
                             </div>
                         )
                     }
