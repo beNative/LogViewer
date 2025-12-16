@@ -5,6 +5,7 @@ import { useSession } from './SessionContext';
 import { useUI } from './UIContext';
 import { useConsole } from './ConsoleContext';
 import { useSettings } from './SettingsContext';
+import { useTimeline } from './TimelineContext';
 
 const DEFAULT_SCROLL_CHUNK_SIZE = 200;
 const MIN_SCROLL_CHUNK_SIZE = 50;
@@ -56,8 +57,6 @@ type DataContextType = {
     handleFileSelect: (fileName: string) => void;
     handleDateSelect: (date: string) => void;
     handleApplyDetailFilter: (key: 'level' | 'sndrtype' | 'sndrname' | 'fileName', value: string) => void;
-    timelineViewRange: { min: number, max: number } | null;
-    setTimelineViewRange: React.Dispatch<React.SetStateAction<{ min: number, max: number } | null>>;
     handleTimelineZoomToSelection: () => void;
     handleTimelineZoomReset: () => void;
 
@@ -92,7 +91,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { db, hasData, loadedFileNames, handleRebuildStockDataInWorker, overallStockTimeRange, setOverallStockTimeRange, overallStockDensity, setOverallStockDensity } = useSession();
     const { logToConsole, lastConsoleMessage } = useConsole();
     const { setIsBusy, isBusy, isStockBusy, setIsStockBusy, setActiveView, setJumpToEntryId, jumpToEntryId, isInitialLoad, setIsInitialLoad, keyboardSelectedId, setKeyboardSelectedId, addToast } = useUI();
-    const { viewMode, logTableDensity, uiScale } = useSettings();
+    const { logTableDensity, uiScale } = useSettings();
+    const { viewRange, setViewRange, setSelection } = useTimeline();
 
     // Log Viewer State
     const [filteredEntries, setFilteredEntries] = useState<LogEntry[]>([]);
@@ -106,8 +106,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [pageSize, setPageSize] = useState<number>(1000);
     const [pageTimestampRanges, setPageTimestampRanges] = useState<PageTimestampRange[]>([]);
-    const [hasMoreLogs, setHasMoreLogs] = useState(true);
-    const [timelineViewRange, setTimelineViewRange] = useState<{ min: number; max: number } | null>(null);
+    const [hasMoreLogs, setHasMoreLogs] = useState(true);    // Timeline State moved to TimelineContext
     const [tableViewportHeight, setTableViewportHeight] = useState<number | null>(null);
     const [infiniteScrollChunkSize, setInfiniteScrollChunkSize] = useState(DEFAULT_SCROLL_CHUNK_SIZE);
     const infiniteScrollChunkSizeRef = useRef(infiniteScrollChunkSize);
@@ -268,21 +267,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setDatesWithLogs(db.getDatesWithLogs(appliedFilters));
 
             if (count > 0) {
-                if (viewMode === 'pagination') {
-                    const entries = db.queryLogEntries(appliedFilters, pageSize, (currentPage - 1) * pageSize);
-                    const ranges = db.getPageTimestampRanges(appliedFilters, pageSize);
-                    setFilteredEntries(entries);
-                    setPageTimestampRanges(ranges);
-                    setHasMoreLogs(false);
-                } else { // 'scroll' mode
-                    const entries = db.queryLogEntries(appliedFilters, infiniteScrollChunkSizeRef.current, 0);
-                    setFilteredEntries(entries);
-                    setEntriesEndOffset(entries.length);
-                    setEntriesStartOffset(0);
-                    setHasPrevLogs(false);
-                    setHasMoreLogs(entries.length < count);
-                    setPageTimestampRanges([]);
-                }
+                // Pagination mode logic
+                const entries = db.queryLogEntries(appliedFilters, pageSize, (currentPage - 1) * pageSize);
+                const ranges = db.getPageTimestampRanges(appliedFilters, pageSize);
+                setFilteredEntries(entries);
+                setPageTimestampRanges(ranges);
+                setHasMoreLogs(false);
                 if (isInitialLoad) {
                     // If this was the initial load, we've now loaded data, so turn it off.
                     // This prevents "Data is ready..." message and ensures normal operation.
@@ -304,7 +294,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }, 50);
 
         return () => clearTimeout(busyTaskRef.current);
-    }, [db, hasData, appliedFilters, currentPage, pageSize, viewMode, logToConsole, isInitialLoad, setIsBusy]);
+    }, [db, hasData, appliedFilters, currentPage, pageSize, logToConsole, isInitialLoad, setIsBusy]);
 
     useEffect(() => {
         if (jumpToEntryId && filteredEntries.length > 0) {
@@ -319,14 +309,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useEffect(() => {
         if (!db || !hasData) return;
 
-        if (timelineViewRange) {
+        if (viewRange) {
             // When zoomed, recalculate density for just the visible range
             // This gives much finer resolution since 200 buckets cover only the zoomed range
-            const zoomedDensity = db.getLogDensityByLevel(appliedFilters, 200, timelineViewRange.min, timelineViewRange.max);
+            const zoomedDensity = db.getLogDensityByLevel(appliedFilters, 200, viewRange.min, viewRange.max);
             setLogDensity(zoomedDensity);
         }
         // When zoom is reset, the main data effect will recalculate logDensity
-    }, [db, hasData, timelineViewRange, appliedFilters]);
+    }, [db, hasData, viewRange, appliedFilters]);
 
     // LOGIC & ACTIONS
     const handleApplyFilters = useCallback(() => {
@@ -335,8 +325,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setCurrentPage(1);
         setEntriesEndOffset(0);
         setEntriesStartOffset(0);
+        setEntriesStartOffset(0);
         setHasPrevLogs(false);
-        setTimelineViewRange(null);
+        setViewRange(null);
         setIsInitialLoad(false);
 
         if (db) {
@@ -352,7 +343,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const handleResetFilters = useCallback(() => {
         logToConsole('Resetting filters...', 'INFO');
-        setTimelineViewRange(null);
+        setViewRange(null);
         const { minTime, maxTime } = db ? db.getMinMaxTime() : { minTime: null, maxTime: null };
         let newFilters = initialFilters;
         if (minTime && maxTime) {
@@ -430,23 +421,20 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, [logToConsole, setIsInitialLoad]);
 
     const handleTimeRangeSelect = useCallback((startTime: number, endTime: number) => {
+        // Sync with TimelineContext so Zoom to Selection uses the latest selection
+        setSelection(startTime, endTime);
+
         const startDate = new Date(startTime);
         const endDate = new Date(endTime);
         const dateToYYYYMMDD = (d: Date) => d.toISOString().split('T')[0];
-        const dateToHHMMSS = (d: Date) => d.toISOString().split('T')[1].substring(0, 8);
-        const updater = (f: FilterState) => ({ ...f, dateFrom: dateToYYYYMMDD(startDate), timeFrom: dateToHHMMSS(startDate), dateTo: dateToYYYYMMDD(endDate), timeTo: dateToHHMMSS(endDate) });
+        // Include milliseconds: HH:MM:SS.mmm (12 chars from position 0)
+        const dateToHHMMSSmmm = (d: Date) => d.toISOString().split('T')[1].substring(0, 12);
+        const updater = (f: FilterState) => ({ ...f, dateFrom: dateToYYYYMMDD(startDate), timeFrom: dateToHHMMSSmmm(startDate), dateTo: dateToYYYYMMDD(endDate), timeTo: dateToHHMMSSmmm(endDate) });
         setFormFilters(updater);
-        setAppliedFilters(updater);
-        setIsInitialLoad(false);
-        setCurrentPage(1);
-        setEntriesEndOffset(0);
-        setEntriesStartOffset(0);
-        setHasPrevLogs(false);
-        setActiveView('viewer');
-    }, [setIsInitialLoad, setActiveView]);
+    }, [setSelection]);
 
     const handleCategorySelect = useCallback((category: 'level' | 'sndrtype', value: string) => {
-        setTimelineViewRange(null);
+        setViewRange(null);
         const modeKey = `${category}FilterMode` as const;
         const updater = (f: FilterState) => ({ ...f, [modeKey]: 'include', [category]: [...(f[category] || []), value] });
         setFormFilters(updater);
@@ -544,26 +532,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setJumpToEntryId(nearestEntry.id);
         setIsInitialLoad(false);
 
-        if (viewMode === 'pagination') {
-            const newPage = Math.floor(index / pageSize) + 1;
-            if (newPage !== currentPage) setCurrentPage(newPage);
-        } else {
-            if (filteredEntries.some(e => e.id === nearestEntry.id)) return;
-            setIsBusy(true);
-            const batchSize = infiniteScrollChunkSize;
-            const newOffset = Math.max(0, index - Math.floor(batchSize / 2));
-            setTimeout(() => {
-                const newEntries = db.queryLogEntries(appliedFilters, batchSize, newOffset);
-                setFilteredEntries(newEntries);
-                const nextOffset = newOffset + newEntries.length;
-                setEntriesEndOffset(nextOffset);
-                setEntriesStartOffset(newOffset);
-                setHasPrevLogs(newOffset > 0);
-                setHasMoreLogs(nextOffset < totalFilteredCount);
-                setIsBusy(false);
-            }, 50);
-        }
-    }, [db, isBusy, appliedFilters, viewMode, pageSize, currentPage, filteredEntries, totalFilteredCount, setJumpToEntryId, setIsInitialLoad, setIsBusy, infiniteScrollChunkSize]);
+        const newPage = Math.floor(index / pageSize) + 1;
+        if (newPage !== currentPage) setCurrentPage(newPage);
+    }, [db, isBusy, appliedFilters, pageSize, currentPage, filteredEntries, totalFilteredCount, setJumpToEntryId, setIsInitialLoad, setIsBusy]);
 
     const handleFileSelect = useCallback((fileName: string) => {
         if (db) {
@@ -571,7 +542,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (range.length > 0 && range[0].startTime && range[0].endTime) {
                 const min = new Date(range[0].startTime.replace(' ', 'T') + 'Z').getTime();
                 const max = new Date(range[0].endTime.replace(' ', 'T') + 'Z').getTime();
-                if (min < max) setTimelineViewRange({ min, max });
+                if (min < max) setViewRange({ min, max });
             }
         }
         const updater = (f: FilterState) => ({ ...f, dateFrom: '', timeFrom: '', dateTo: '', timeTo: '', fileName: [fileName], fileNameFilterMode: 'include' as const });
@@ -586,7 +557,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, [db, setIsInitialLoad, setActiveView]);
 
     const handleDateSelect = useCallback((date: string) => {
-        setTimelineViewRange({ min: new Date(`${date}T00:00:00.000Z`).getTime(), max: new Date(`${date}T23:59:59.999Z`).getTime() });
+        setViewRange({ min: new Date(`${date}T00:00:00.000Z`).getTime(), max: new Date(`${date}T23:59:59.999Z`).getTime() });
         const updater = (f: FilterState) => ({ ...f, dateFrom: date, timeFrom: '00:00:00', dateTo: date, timeTo: '23:59:59', fileName: [] });
         setFormFilters(updater);
         setAppliedFilters(updater);
@@ -604,11 +575,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (startTimeStr && endTimeStr) {
             const min = new Date(startTimeStr.replace(' ', 'T') + 'Z').getTime();
             const max = new Date(endTimeStr.replace(' ', 'T') + 'Z').getTime();
-            if (min < max) setTimelineViewRange({ min, max });
+            if (min < max) setViewRange({ min, max });
         }
-    }, [appliedFilters]);
+    }, [appliedFilters, setViewRange]);
 
-    const handleTimelineZoomReset = useCallback(() => setTimelineViewRange(null), []);
+    const handleTimelineZoomReset = useCallback(() => setViewRange(null), [setViewRange]);
 
     // Stock Logic
     const handleSearchStock = useCallback((filters: StockInfoFilters) => {
@@ -655,7 +626,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         currentPage, totalPages: Math.ceil(totalFilteredCount / pageSize), pageSize, handleApplyFilters, handleResetFilters, handleClearTimeRange,
 
         onLoadMore, onLoadPrev, entriesStartOffset, hasPrevLogs, setLogTableViewportHeight: updateTableViewportHeight, goToPage, handlePageSizeChange, handleRemoveAppliedFilter, handleContextMenuFilter, handleCursorChange,
-        handleFileSelect, handleDateSelect, handleApplyDetailFilter, timelineViewRange, setTimelineViewRange,
+        handleFileSelect, handleDateSelect, handleApplyDetailFilter,
         handleTimelineZoomToSelection, handleTimelineZoomReset, dashboardData, handleTimeRangeSelect, handleCategorySelect,
         stockHistory, setStockHistory, overallStockTimeRange, overallStockDensity, handleSearchStock, handleRebuildStockData,
         handleFetchStockSuggestions, logToConsoleForEntries: logToConsole, lastConsoleMessageForStatus: lastConsoleMessage,
@@ -665,7 +636,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         appliedFilters, uniqueValues, fileTimeRanges, logDensity, overallLogDensity, datesWithLogs,
         currentPage, totalFilteredCount, pageSize, handleApplyFilters, handleResetFilters, handleClearTimeRange,
         onLoadMore, onLoadPrev, entriesStartOffset, hasPrevLogs, updateTableViewportHeight, goToPage, handlePageSizeChange, handleRemoveAppliedFilter, handleContextMenuFilter, handleCursorChange,
-        handleFileSelect, handleDateSelect, handleApplyDetailFilter, timelineViewRange, setTimelineViewRange,
+        handleFileSelect, handleDateSelect, handleApplyDetailFilter,
         handleTimelineZoomToSelection, handleTimelineZoomReset, dashboardData, handleTimeRangeSelect, handleCategorySelect,
         stockHistory, setStockHistory, overallStockTimeRange, overallStockDensity, handleSearchStock, handleRebuildStockData,
         handleFetchStockSuggestions, logToConsole, lastConsoleMessage,

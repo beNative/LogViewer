@@ -1,11 +1,21 @@
 import React from 'react';
-import { PageTimestampRange, FileTimeRange, LogDensityPointByLevel, ViewMode, OverallTimeRange, IconSet, LogDensityPoint, TimelineBarVisibility } from '../types.ts';
+import { PageTimestampRange, FileTimeRange, LogDensityPointByLevel, OverallTimeRange, IconSet, LogDensityPoint, TimelineBarVisibility } from '../types.ts';
 import { Icon } from './icons/index.tsx';
 import { Tooltip } from './Tooltip.tsx';
 import { TimelineBarVisibilityMenu } from './TimelineBarVisibilityMenu.tsx';
+import { Bar, DensityBar, ValueToPositionFn } from './timeline/Bar.tsx';
+import {
+    Theme,
+    TIMELINE_PALETTE as PALETTE,
+    LOG_LEVEL_COLORS,
+    LOG_LEVEL_ORDER,
+    getLevelColor,
+    formatTimestamp,
+    formatTickLabel
+} from '../utils/timelineUtils.ts';
+import { useTimeline } from '../contexts/TimelineContext';
+import { useResizeObserver } from '../hooks/useResizeObserver';
 
-type Theme = 'light' | 'dark';
-type ValueToPositionFn = (value: number) => number;
 type PositionToValueFn = (pos: number) => number;
 
 // New union type for clarity
@@ -24,7 +34,6 @@ interface TimeRangeSelectorProps {
     logDensity: (LogDensityPointByLevel[] | LogDensityPoint[]);
     overallLogDensity: (LogDensityPointByLevel[] | LogDensityPoint[]);
     datesWithLogs: string[];
-    viewMode: ViewMode;
     onGoToPage?: (page: number) => void;
     onCursorChange: (time: number) => void;
     onFileSelect: (fileName: string) => void;
@@ -33,10 +42,6 @@ interface TimeRangeSelectorProps {
     activeFileName?: string | null;
     activeDate?: string | null;
     currentPage?: number | null;
-    viewRange: OverallTimeRange | null;
-    onViewRangeChange: (range: OverallTimeRange | null) => void;
-    onZoomToSelection: () => void;
-    onZoomToExtent: () => void;
     zoomToSelectionEnabled: boolean;
     iconSet: IconSet;
     uiScale: number;
@@ -50,32 +55,7 @@ type DragState =
     | { type: 'cursor'; startX: number }
     | { type: 'new_selection'; startX: number; startTime: number };
 
-const PALETTE = [
-    '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899',
-    '#6366f1', '#06b6d4', '#d946ef', '#f43f5e', '#14b8a6', '#eab308'
-];
 
-const LOG_LEVEL_COLORS: Record<string, { light: string, dark: string }> = {
-    'ERROR': { light: '#ef4444', dark: '#f87171' },
-    'FATAL': { light: '#b91c1c', dark: '#ef4444' },
-    'WARNING': { light: '#f59e0b', dark: '#facc15' },
-    'WARN': { light: '#f59e0b', dark: '#facc15' },
-    'INFO': { light: '#3b82f6', dark: '#60a5fa' },
-    'DEBUG': { light: '#6b7280', dark: '#9ca3af' },
-    'TRACE': { light: '#a1a1aa', dark: '#71717a' },
-    'DEFAULT': { light: '#d1d5db', dark: '#4b5563' },
-};
-
-// Consistent level order for stacked density bars - critical/important levels first
-const LOG_LEVEL_ORDER: Record<string, number> = {
-    'FATAL': 0, 'ERROR': 1, 'WARNING': 2, 'WARN': 3,
-    'INFO': 4, 'DEBUG': 5, 'TRACE': 6
-};
-
-const getLevelColor = (level: string, theme: Theme) => {
-    const upperLevel = level?.toUpperCase() || 'DEFAULT';
-    return (LOG_LEVEL_COLORS[upperLevel] || LOG_LEVEL_COLORS.DEFAULT)[theme];
-};
 
 const formatTooltip = (time: number | null): React.ReactNode => {
     if (typeof time !== 'number' || isNaN(time)) return 'N/A';
@@ -93,171 +73,20 @@ const formatTooltip = (time: number | null): React.ReactNode => {
 };
 
 // Generic Bar component for rendering timeline segments
-function Bar<T>({ items, valueToPosition, isActive, onSelect, getLabel, getTitle, getStart, getEnd, getColor, displayMinTime, displayMaxTime }: {
-    items: T[];
-    valueToPosition: ValueToPositionFn;
-    isActive: (item: T) => boolean;
-    onSelect: (item: T) => void;
-    getLabel: (item: T) => string;
-    getTitle: (item: T) => string;
-    getStart: (item: T) => number;
-    getEnd: (item: T) => number;
-    getColor: (index: number) => string;
-    displayMinTime: number;
-    displayMaxTime: number;
-}): React.ReactElement {
-    return (
-        <div className="relative w-full h-5">
-            {items.map((item, i) => {
-                const start = getStart(item);
-                const end = getEnd(item);
-                if (end < displayMinTime || start > displayMaxTime) {
-                    return null;
-                }
 
-                const visibleStart = Math.max(start, displayMinTime);
-                const visibleEnd = Math.min(end, displayMaxTime);
-
-                const leftPx = valueToPosition(visibleStart);
-                const rightPx = valueToPosition(visibleEnd);
-                let widthPx = Math.max(1, rightPx - leftPx);
-
-                return (
-                    <Tooltip key={getTitle(item)} content={getTitle(item)}>
-                        <div
-                            onClick={(e) => { e.stopPropagation(); onSelect(item); }}
-                            className={`absolute h-5 flex items-center justify-center overflow-hidden transition-all duration-150 hover:scale-y-105 origin-bottom ${isActive(item) ? 'outline outline-4 outline-offset-2 outline-black dark:outline-white' : ''}`}
-                            style={{
-                                left: `${leftPx}px`,
-                                width: `${widthPx}px`,
-                                backgroundColor: getColor(i) + '99',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            {widthPx > 30 && <span className="text-xs font-semibold text-white whitespace-nowrap text-center mix-blend-luminosity pointer-events-none">{getLabel(item)}</span>}
-                        </div>
-                    </Tooltip>
-                );
-            })}
-        </div>
-    );
-}
-const DensityBar: React.FC<{
-    items: LogDensityPointByLevel[] | LogDensityPoint[];
-    valueToPosition: ValueToPositionFn;
-    theme: Theme;
-    displayMinTime: number;
-    displayMaxTime: number;
-    onMouseMove?: (e: React.MouseEvent<HTMLDivElement>) => void;
-    onMouseLeave?: (e: React.MouseEvent<HTMLDivElement>) => void;
-}> = ({ items, valueToPosition, theme, displayMinTime, displayMaxTime, onMouseMove, onMouseLeave }) => {
-    if (items.length === 0) {
-        return <div className="relative w-full h-5" onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} />;
-    }
-
-    const isLevelDensity = 'counts' in items[0];
-
-    if (isLevelDensity) {
-        const levelItems = items as LogDensityPointByLevel[];
-        const maxTotalCount = React.useMemo(() => {
-            return levelItems.reduce((max, bucket) => {
-                const total = Object.values(bucket.counts).reduce((sum, count) => sum + count, 0);
-                return Math.max(max, total);
-            }, 1); // Use 1 to avoid division by zero
-        }, [levelItems]);
-
-        const bucketDuration = levelItems.length > 1 ? levelItems[1].time - levelItems[0].time : 0;
-        if (bucketDuration === 0) return <div className="relative w-full h-5" onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} />;
-
-        return (
-            <div className="relative w-full h-5" onMouseMove={onMouseMove} onMouseLeave={onMouseLeave}>
-                {levelItems.map((bucket, i) => {
-                    const start = bucket.time;
-                    const end = bucket.time + bucketDuration;
-                    if (end < displayMinTime || start > displayMaxTime) return null;
-
-                    const bucketTotal = Object.values(bucket.counts).reduce((s, c) => s + c, 0);
-                    if (bucketTotal === 0) return null;
-
-                    const barHeightPercent = (bucketTotal / maxTotalCount) * 100;
-                    const leftPx = valueToPosition(Math.max(start, displayMinTime));
-                    const rightPx = valueToPosition(Math.min(end, displayMaxTime));
-                    const widthPx = Math.max(0, rightPx - leftPx);
-
-                    if (widthPx === 0) return null;
-
-                    const sortedLevels = Object.entries(bucket.counts).sort((a, b) => {
-                        return (LOG_LEVEL_ORDER[a[0].toUpperCase()] ?? 99) - (LOG_LEVEL_ORDER[b[0].toUpperCase()] ?? 99);
-                    });
-
-                    return (
-                        <div
-                            key={`density-stack-${i}`}
-                            style={{ left: `${leftPx}px`, width: `${widthPx}px`, height: `${barHeightPercent}%` }}
-                            className="absolute bottom-0 flex flex-col"
-                        >
-                            {sortedLevels.map(([level, count]) => (
-                                <div
-                                    key={level}
-                                    style={{
-                                        height: `${(count / bucketTotal) * 100}%`,
-                                        backgroundColor: getLevelColor(level, theme),
-                                    }}
-                                />
-                            ))}
-                        </div>
-                    );
-                })}
-            </div>
-        );
-    } else {
-        const simpleItems = items as LogDensityPoint[];
-        const maxCount = React.useMemo(() => {
-            return simpleItems.reduce((max, bucket) => Math.max(max, bucket.count), 1);
-        }, [simpleItems]);
-
-        const bucketDuration = simpleItems.length > 1 ? simpleItems[1].time - simpleItems[0].time : 0;
-        if (bucketDuration === 0) return <div className="relative w-full h-5" onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} />;
-
-        return (
-            <div className="relative w-full h-5" onMouseMove={onMouseMove} onMouseLeave={onMouseLeave}>
-                {simpleItems.map((bucket, i) => {
-                    const start = bucket.time;
-                    const end = bucket.time + bucketDuration;
-                    if (end < displayMinTime || start > displayMaxTime) return null;
-                    if (bucket.count === 0) return null;
-
-                    const barHeightPercent = (bucket.count / maxCount) * 100;
-                    const leftPx = valueToPosition(Math.max(start, displayMinTime));
-                    const rightPx = valueToPosition(Math.min(end, displayMaxTime));
-                    const widthPx = Math.max(0, rightPx - leftPx);
-
-                    if (widthPx === 0) return null;
-
-                    return (
-                        <div
-                            key={`density-bar-${i}`}
-                            style={{ left: `${leftPx}px`, width: `${widthPx}px`, height: `${barHeightPercent}%`, backgroundColor: theme === 'dark' ? '#60a5fa' : '#3b82f6' }}
-                            className="absolute bottom-0"
-                        />
-                    );
-                })}
-            </div>
-        );
-    }
-};
 
 // ... existing OverviewBrush component ...
 
 export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     minTime, maxTime, selectedStartTime, selectedEndTime,
     onRangeChange, onClear, theme,
-    pageTimestampRanges, fileTimeRanges, logDensity, overallLogDensity, datesWithLogs, viewMode, onGoToPage,
+    pageTimestampRanges, fileTimeRanges, logDensity, overallLogDensity, datesWithLogs, onGoToPage,
     onCursorChange, onFileSelect, onDateSelect,
     cursorTime = null, activeFileName = null, activeDate = null, currentPage = null,
-    viewRange, onViewRangeChange, onZoomToSelection, onZoomToExtent, zoomToSelectionEnabled, iconSet, uiScale,
+    zoomToSelectionEnabled, iconSet, uiScale,
     timelineBarVisibility, onTimelineBarVisibilityChange
 }) => {
+    const { viewRange, setViewRange, zoomToSelection, resetZoom, setSelection, selection } = useTimeline();
     const mainContainerRef = React.useRef<HTMLDivElement>(null);
     const overviewContainerRef = React.useRef<HTMLDivElement>(null);
     const [dragState, setDragState] = React.useState<DragState | null>(null);
@@ -266,45 +95,73 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     const [densityTooltip, setDensityTooltip] = React.useState<{ x: number, y: number, bucketData: BucketData } | null>(null);
     const [contextMenu, setContextMenu] = React.useState<{ x: number, y: number } | null>(null);
 
-    const displayMinTime = viewRange?.min ?? minTime;
-    const displayMaxTime = viewRange?.max ?? maxTime;
+    const [optimisticSelection, setOptimisticSelection] = React.useState<{ start: number, end: number } | null>(null);
+    const [optimisticViewRange, setOptimisticViewRange] = React.useState<{ min: number, max: number } | null>(null);
 
+    // Clear optimistic state when props update to match (or close enough)
+    React.useEffect(() => {
+        if (optimisticSelection && selectedStartTime !== null && selectedEndTime !== null) {
+            // If props have caught up to optimistic state (within 100ms tolerance), clear optimistic
+            if (Math.abs(selectedStartTime - optimisticSelection.start) < 100 &&
+                Math.abs(selectedEndTime - optimisticSelection.end) < 100) {
+                setOptimisticSelection(null);
+            }
+        }
+        // Sync props to Context Selection so zoomToSelection works
+        if (selectedStartTime !== null && selectedEndTime !== null) {
+            // We use a timeout or direct set? Direct set is fine but need to avoid loops.
+            // Context.setSelection does not trigger props update directly (props come from App filters).
+            // But App filters change triggers selectedStartTime change.
+            // So this is safe.
+            // Check if context needs update to avoid infinite loop if context updates cause prop updates (unlikely here as flow is unidir).
+            // Actually, we can just call setSelection.
+            // But we need to use 'useTimeline' setSelection.
+            setSelection(selectedStartTime, selectedEndTime);
+            // Wait, I need to destruct setSelection first!
+        }
+    }, [selectedStartTime, selectedEndTime, optimisticSelection, setSelection]);
+
+    React.useEffect(() => {
+        if (optimisticViewRange && viewRange) {
+            if (Math.abs(viewRange.min - optimisticViewRange.min) < 100 &&
+                Math.abs(viewRange.max - optimisticViewRange.max) < 100) {
+                setOptimisticViewRange(null);
+            }
+        }
+    }, [viewRange, optimisticViewRange]);
+
+    // Fallback: Clear optimistic state after a timeout to prevent getting stuck if props never update
+    React.useEffect(() => {
+        if (optimisticSelection || optimisticViewRange) {
+            const timer = setTimeout(() => {
+                setOptimisticSelection(null);
+                setOptimisticViewRange(null);
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [optimisticSelection, optimisticViewRange]);
+
+
+    const handleOverviewRangeChange = React.useCallback((range: OverallTimeRange | null) => {
+        if (range) {
+            setOptimisticViewRange(range);
+        }
+        setViewRange(range);
+    }, [setViewRange]);
+
+    const displayMinTime = optimisticViewRange?.min ?? viewRange?.min ?? minTime;
+    const displayMaxTime = optimisticViewRange?.max ?? viewRange?.max ?? maxTime;
+
+    // Local implementation replaced by shared hook
+    /*
     const useResizeObserver = (ref: React.RefObject<HTMLElement>, isVisible: boolean = true) => {
-        const [width, setWidth] = React.useState(0);
-        React.useEffect(() => {
-            // When not visible, reset width
-            if (!isVisible) {
-                setWidth(0);
-                return;
-            }
-
-            // Store element in local variable for stable reference in cleanup
-            const element = ref.current;
-            if (!element) {
-                // When element is not present (e.g., hidden), reset width.
-                setWidth(0);
-                return;
-            }
-
-            const resizeObserver = new ResizeObserver(entries => {
-                if (entries[0]) {
-                    setWidth(entries[0].contentRect.width);
-                }
-            });
-
-            resizeObserver.observe(element);
-
-            // Cleanup: Disconnect observer when component unmounts or ref changes.
-            return () => {
-                resizeObserver.disconnect();
-            };
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [ref, isVisible]); // Re-run when visibility changes
-        return width;
+       ...
     };
+    */
 
-    const mainContainerWidth = useResizeObserver(mainContainerRef);
-    const overviewContainerWidth = useResizeObserver(overviewContainerRef, timelineBarVisibility.overview);
+    // Use debounced observers (50ms) to prevent excessive recalculations during rapid resize
+    const mainContainerWidth = useResizeObserver(mainContainerRef, true, 50);
+    const overviewContainerWidth = useResizeObserver(overviewContainerRef, timelineBarVisibility.overview, 50);
 
     const mainPosToValue = React.useCallback((p: number) => {
         if (mainContainerWidth === 0 || displayMaxTime === displayMinTime) return displayMinTime;
@@ -391,10 +248,24 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                 if (Math.abs(e.clientX - dragState.startX) < 5) {
                     onCursorChange(dragState.startTime);
                 } else if (tempSelection) {
+                    // Optimistic update
+                    setOptimisticSelection(tempSelection);
+                    // If zoom enabled, optimistic view update
+                    if (zoomToSelectionEnabled) {
+                        setOptimisticViewRange({ min: tempSelection.start, max: tempSelection.end });
+                        // DIRECT AUTO-ZOOM (User Request)
+                        setViewRange({ min: tempSelection.start, max: tempSelection.end });
+                    }
                     onRangeChange(tempSelection.start, tempSelection.end);
                 }
             } else if (dragState.type === 'select_left' || dragState.type === 'select_right') {
                 if (tempSelection) {
+                    setOptimisticSelection(tempSelection);
+                    if (zoomToSelectionEnabled) {
+                        setOptimisticViewRange({ min: tempSelection.start, max: tempSelection.end });
+                        // DIRECT AUTO-ZOOM
+                        setViewRange({ min: tempSelection.start, max: tempSelection.end });
+                    }
                     onRangeChange(tempSelection.start, tempSelection.end);
                 }
             } else if (dragState.type === 'cursor' && tempCursorTime !== null) {
@@ -415,7 +286,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
             document.removeEventListener('mousemove', handleMouseMove);
             document.removeEventListener('mouseup', handleMouseUp);
         };
-    }, [dragState, mainPosToValue, displayMinTime, displayMaxTime, onRangeChange, onCursorChange, tempSelection, tempCursorTime, uiScale]);
+    }, [dragState, mainPosToValue, displayMinTime, displayMaxTime, onRangeChange, onCursorChange, tempSelection, tempCursorTime, uiScale, zoomToSelectionEnabled, setViewRange]);
 
     const handleDensityHover = (e: React.MouseEvent<HTMLDivElement>) => {
         const rect = e.currentTarget.getBoundingClientRect();
@@ -463,46 +334,43 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     };
 
 
-    const barComponents = [];
-    const barProps = { displayMinTime: displayMinTime, displayMaxTime: displayMaxTime };
-    if (timelineBarVisibility.pages && viewMode === 'pagination' && pageTimestampRanges.length > 0 && onGoToPage) barComponents.push({ key: 'page', label: 'Pages', Comp: Bar, props: { ...barProps, items: pageTimestampRanges, isActive: (item: any) => item.page === currentPage, onSelect: (item: any) => onGoToPage(item.page), getLabel: (item: any) => item.page, getTitle: (item: any) => `Page ${item.page}`, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] } });
-    if (timelineBarVisibility.files && fileTimeRanges.length > 0) barComponents.push({ key: 'file', label: 'Files', Comp: Bar, props: { ...barProps, items: fileTimeRanges, isActive: (item: any) => item.name === activeFileName, onSelect: (item: any) => onFileSelect(item.name), getLabel: (item: any) => item.name.split('/').pop(), getTitle: (item: any) => item.name, getStart: (item: any) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: any) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] } });
-    if (timelineBarVisibility.dates && datesWithLogs.length > 0) barComponents.push({ key: 'date', label: 'Date', Comp: Bar, props: { ...barProps, items: datesWithLogs, isActive: (item: any) => item === activeDate, onSelect: (item: any) => onDateSelect(item), getLabel: (item: any) => item, getTitle: (item: any) => item, getStart: (item: any) => new Date(`${item}T00:00:00.000Z`).getTime(), getEnd: (item: any) => new Date(`${item}T23:59:59.999Z`).getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] } });
-    if (timelineBarVisibility.density && logDensity.length > 0) barComponents.push({
-        key: 'density',
-        label: 'Density',
-        Comp: DensityBar,
-        props: {
-            items: logDensity,
-            theme: theme,
-            ...barProps,
-            onMouseMove: handleDensityHover,
-            onMouseLeave: handleDensityLeave
-        }
-    });
+    const barComponents = React.useMemo(() => {
+        const components = [];
+        const barProps = { displayMinTime: displayMinTime, displayMaxTime: displayMaxTime };
 
-    const currentStart = tempSelection?.start ?? selectedStartTime;
-    const currentEnd = tempSelection?.end ?? selectedEndTime;
+        if (timelineBarVisibility.pages && pageTimestampRanges.length > 0 && onGoToPage) components.push({ key: 'page', label: 'Pages', Comp: Bar, props: { ...barProps, items: pageTimestampRanges, isActive: (item: PageTimestampRange) => item.page === currentPage, onSelect: (item: PageTimestampRange) => onGoToPage(item.page), getLabel: (item: PageTimestampRange) => String(item.page), getTitle: (item: PageTimestampRange) => `Page ${item.page}`, getStart: (item: PageTimestampRange) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: PageTimestampRange) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] } });
+        if (timelineBarVisibility.files && fileTimeRanges.length > 0) components.push({ key: 'file', label: 'Files', Comp: Bar, props: { ...barProps, items: fileTimeRanges, isActive: (item: FileTimeRange) => item.name === activeFileName, onSelect: (item: FileTimeRange) => onFileSelect(item.name), getLabel: (item: FileTimeRange) => item.name.split('/').pop() || '', getTitle: (item: FileTimeRange) => item.name, getStart: (item: FileTimeRange) => new Date(item.startTime + 'Z').getTime(), getEnd: (item: FileTimeRange) => new Date(item.endTime + 'Z').getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] } });
+        if (timelineBarVisibility.dates && datesWithLogs.length > 0) components.push({ key: 'date', label: 'Date', Comp: Bar, props: { ...barProps, items: datesWithLogs, isActive: (item: string) => item === activeDate, onSelect: (item: string) => onDateSelect(item), getLabel: (item: string) => item, getTitle: (item: string) => item, getStart: (item: string) => new Date(`${item}T00:00:00.000Z`).getTime(), getEnd: (item: string) => new Date(`${item}T23:59:59.999Z`).getTime(), getColor: (i: number) => PALETTE[i % PALETTE.length] } });
+        if (timelineBarVisibility.density && logDensity.length > 0) components.push({
+            key: 'density',
+            label: 'Density',
+            Comp: DensityBar,
+            props: {
+                items: logDensity,
+                theme: theme,
+                ...barProps,
+                onMouseMove: handleDensityHover,
+                onMouseLeave: handleDensityLeave
+            }
+        });
+        return components;
+    }, [displayMinTime, displayMaxTime, timelineBarVisibility, pageTimestampRanges, fileTimeRanges, datesWithLogs, logDensity, currentPage, activeFileName, activeDate, theme, onGoToPage, onFileSelect, onDateSelect]);
+
+    const currentStart = tempSelection?.start ?? optimisticSelection?.start ?? selectedStartTime;
+    const currentEnd = tempSelection?.end ?? optimisticSelection?.end ?? selectedEndTime;
 
     const visibleSelectionStart = currentStart !== null ? Math.max(currentStart, displayMinTime) : null;
     const visibleSelectionEnd = currentEnd !== null ? Math.min(currentEnd, displayMaxTime) : null;
 
+    const startMatches = currentStart !== null && Math.abs(currentStart - displayMinTime) < (displayMaxTime - displayMinTime) * 0.001;
+    const endMatches = currentEnd !== null && Math.abs(currentEnd - displayMaxTime) < (displayMaxTime - displayMinTime) * 0.001;
+    // Show selection if dragging (tempSelection) OR if selection doesn't match the current view
+    const showSelection = !!tempSelection || !(startMatches && endMatches);
+
     const startPos = visibleSelectionStart !== null ? mainValueToPos(visibleSelectionStart) : -1;
     const endPos = visibleSelectionEnd !== null ? mainValueToPos(visibleSelectionEnd) : -1;
 
-    const formatTickLabel = (time: number, duration: number): string => {
-        const d = new Date(time);
-        if (duration <= 2 * 60 * 1000) { // < 2 minutes
-            return d.toLocaleTimeString('en-US', { hour12: false, minute: '2-digit', second: '2-digit' });
-        }
-        if (duration <= 2 * 60 * 60 * 1000) { // < 2 hours
-            return d.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
-        }
-        if (duration <= 2 * 24 * 60 * 60 * 1000) { // < 2 days
-            return `${d.toLocaleDateString('en-CA', { month: '2-digit', day: '2-digit' })} ${d.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })}`;
-        }
-        return d.toLocaleDateString('en-CA'); // YYYY-MM-DD
-    };
+    // formatTickLabel imported from timelineUtils
 
     const ticks = React.useMemo(() => {
         if (!mainContainerWidth || mainContainerWidth < 100) return [];
@@ -553,8 +421,8 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                 <div className="flex-grow flex flex-col relative">
                     {/* Tooltips Container */}
                     <div className="absolute top-0 w-full h-5 pointer-events-none z-40">
-                        {startPos >= 0 && <div className="absolute top-0 text-xs font-mono text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-1.5 py-0.5 rounded shadow" style={{ left: `${startPos}px`, transform: 'translateX(-50%)' }}>{formatTooltip(currentStart)}</div>}
-                        {endPos >= 0 && (endPos - startPos > 60) && <div className="absolute top-0 text-xs font-mono text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-1.5 py-0.5 rounded shadow" style={{ left: `${endPos}px`, transform: 'translateX(-50%)' }}>{formatTooltip(currentEnd)}</div>}
+                        {showSelection && startPos >= 0 && <div className="absolute top-0 text-xs font-mono text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-1.5 py-0.5 rounded shadow" style={{ left: `${startPos}px`, transform: 'translateX(-50%)' }}>{formatTooltip(currentStart)}</div>}
+                        {showSelection && endPos >= 0 && (endPos - startPos > 60) && <div className="absolute top-0 text-xs font-mono text-gray-700 dark:text-gray-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm px-1.5 py-0.5 rounded shadow" style={{ left: `${endPos}px`, transform: 'translateX(-50%)' }}>{formatTooltip(currentEnd)}</div>}
                         {finalCursorTime !== null && finalCursorTime >= displayMinTime && finalCursorTime <= displayMaxTime && <div className="absolute top-0 text-xs font-mono bg-red-500/90 backdrop-blur-sm text-white rounded px-1.5 py-0.5" style={{ left: `${mainValueToPos(finalCursorTime)}px`, transform: 'translateX(-50%)' }}>{formatTooltip(finalCursorTime)}</div>}
                     </div>
 
@@ -569,7 +437,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                                     <bar.Comp key={bar.key} valueToPosition={mainValueToPos} {...bar.props} />
                                 ))}
                             </div>
-                            {startPos >= 0 && endPos >= 0 && (endPos > startPos) && (
+                            {startPos >= 0 && endPos >= 0 && (endPos > startPos) && showSelection && (
                                 <div
                                     className="absolute top-0 bottom-0 bg-sky-500/20 dark:bg-sky-400/20 z-10 pointer-events-none"
                                     style={{ left: `${startPos}px`, width: `${Math.max(0, endPos - startPos)}px` }}
@@ -590,6 +458,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                                     </div>
                                 </div>
                             )}
+
                             {finalCursorTime !== null && mainContainerWidth > 0 && finalCursorTime >= displayMinTime && finalCursorTime <= displayMaxTime && (
                                 <div
                                     data-handle="cursor"
@@ -619,10 +488,10 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
 
                 <div className="w-auto flex-shrink-0 self-start pt-4 flex flex-col items-center gap-1">
                     <Tooltip content="Zoom to Selection">
-                        <button onClick={onZoomToSelection} disabled={!zoomToSelectionEnabled} className="p-1.5 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"><Icon name="ArrowsPointingIn" iconSet={iconSet} className="w-4 h-4" /></button>
+                        <button onClick={zoomToSelection} disabled={!zoomToSelectionEnabled || !selection} className="p-1.5 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"><Icon name="ArrowsPointingIn" iconSet={iconSet} className="w-4 h-4" /></button>
                     </Tooltip>
                     <Tooltip content="Zoom to Extent">
-                        <button onClick={onZoomToExtent} disabled={!viewRange} className="p-1.5 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"><Icon name="ArrowsPointingOut" iconSet={iconSet} className="w-4 h-4" /></button>
+                        <button onClick={resetZoom} disabled={!viewRange} className="p-1.5 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"><Icon name="ArrowsPointingOut" iconSet={iconSet} className="w-4 h-4" /></button>
                     </Tooltip>
                     <Tooltip content="Clear time selection">
                         <button onClick={onClear} className="p-1.5 text-gray-500 dark:text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"><Icon name="XMark" iconSet={iconSet} className="w-4 h-4" /></button>
@@ -643,7 +512,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                                 selectedMax={selectedEndTime}
                                 density={overallLogDensity} theme={theme}
                                 valueToPosition={overviewValueToPos} positionToValue={overviewPosToValue}
-                                onViewRangeChange={onViewRangeChange}
+                                onViewRangeChange={handleOverviewRangeChange}
                                 onRangeChange={onRangeChange}
                                 uiScale={uiScale}
                             />
@@ -660,7 +529,6 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                     onClose={() => setContextMenu(null)}
                     visibility={timelineBarVisibility}
                     onVisibilityChange={onTimelineBarVisibilityChange}
-                    viewMode={viewMode}
                 />
             )}
         </div>
@@ -747,8 +615,8 @@ const DensityTooltip: React.FC<{ x: number, y: number, bucketData: BucketData, t
 };
 
 
-// Note: This is a placeholder for the OverviewBrush to satisfy type-checking since it's a large component.
-// The new implementation for overview density is below.
+// Internal OverviewBrush component - handles the mini-map visualization and interaction.
+// TODO: Extract to separate file in future refactoring phase.
 const OverviewBrush: React.FC<{
     minTime: number;
     maxTime: number;
@@ -888,13 +756,14 @@ const OverviewBrush: React.FC<{
             onMouseDown={handleContainerMouseDown}
             className="relative w-full h-10 bg-gray-200 dark:bg-gray-700/50 rounded p-0.5 cursor-crosshair"
         >
-            <div className="w-full h-full flex pointer-events-none">
+            <div className="w-full h-full flex items-end pointer-events-none">
                 {density.map((bucket: LogDensityPointByLevel | LogDensityPoint, i) => {
                     const total: number = 'counts' in bucket ? Object.values(bucket.counts).reduce((s: number, c: number) => s + c, 0) : (bucket as LogDensityPoint).count;
-                    const opacity = total > 0 ? 0.3 + (total / maxTotalCount) * 0.7 : 0;
+                    const heightPercent = total > 0 ? (total / maxTotalCount) * 100 : 0;
+
                     if ('counts' in bucket && total > 0) {
                         return (
-                            <div key={i} style={{ flex: '1 1 0%' }} className="flex flex-col">
+                            <div key={i} style={{ flex: '1 1 0%', height: `${Math.max(5, heightPercent)}%` }} className="flex flex-col w-full relative group">
                                 {Object.entries(bucket.counts)
                                     .sort((a, b) => (LOG_LEVEL_ORDER[a[0].toUpperCase()] ?? 99) - (LOG_LEVEL_ORDER[b[0].toUpperCase()] ?? 99))
                                     .map(([level, count]: [string, number]) => (
@@ -903,8 +772,9 @@ const OverviewBrush: React.FC<{
                             </div>
                         )
                     }
+                    const opacity = total > 0 ? 0.3 + (total / maxTotalCount) * 0.7 : 0;
                     return (
-                        <div key={`density-${i}`} style={{ flex: '1 1 0%', backgroundColor: `rgba(147, 197, 253, ${opacity})` }} />
+                        <div key={`density-${i}`} style={{ flex: '1 1 0%', height: '100%', backgroundColor: `rgba(147, 197, 253, ${opacity})` }} />
                     );
                 })}
             </div>

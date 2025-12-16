@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Icon } from './icons';
+import { Theme } from '../types';
 import { useSettings } from '../contexts/SettingsContext';
 import { useData } from '../contexts/DataContext';
 import appIcon from '../build/icon.svg';
@@ -75,31 +76,7 @@ export const TitleBar: React.FC<TitleBarProps> = ({ activeView }) => {
         }
     };
 
-    useEffect(() => {
-        if (!isViewer) {
-            if (debounceTimeoutRef.current) {
-                clearTimeout(debounceTimeoutRef.current);
-                debounceTimeoutRef.current = null;
-            }
-            return;
-        }
-
-        if (debounceTimeoutRef.current) {
-            clearTimeout(debounceTimeoutRef.current);
-        }
-
-        debounceTimeoutRef.current = window.setTimeout(() => {
-            handleApplyFilters();
-        }, 500);
-
-        return () => {
-            if (debounceTimeoutRef.current) {
-                clearTimeout(debounceTimeoutRef.current);
-                debounceTimeoutRef.current = null;
-            }
-        };
-    }, [inputValue, isViewer, handleApplyFilters]);
-
+    // Debounce effect removed to stop auto-applying filters. Use Enter key instead.
     useEffect(() => {
         return () => {
             if (debounceTimeoutRef.current) {
@@ -154,6 +131,11 @@ export const TitleBar: React.FC<TitleBarProps> = ({ activeView }) => {
                         onChange={handleInputChange}
                         className="w-full h-6 pl-10 pr-8 py-1 text-xs bg-gray-100 dark:bg-gray-700/80 border border-gray-300 dark:border-gray-600/50 rounded-md focus:ring-1 focus:ring-sky-500 focus:border-sky-500 transition-all placeholder-gray-400"
                         style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                handleApplyFilters();
+                            }
+                        }}
                     />
                     {inputValue && (
                         <button

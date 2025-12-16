@@ -141,8 +141,6 @@ export type PanelWidths = {
     details: number;
 };
 
-export type ViewMode = 'pagination' | 'scroll';
-
 export type OverallTimeRange = {
     min: number; // timestamp ms
     max: number; // timestamp ms
@@ -166,7 +164,7 @@ export type TimelineBarVisibility = {
 
 export type Settings = {
     theme: Theme;
-    viewMode: ViewMode;
+    // viewMode removed
     allowPrerelease: boolean;
     isAutoUpdateEnabled: boolean;
     githubToken: string;
@@ -182,6 +180,7 @@ export type Settings = {
     timelineBarVisibility: TimelineBarVisibility;
     uiScale: number;
     logSqlQueries: boolean;
+    zoomToSelectionEnabled: boolean;
 };
 
 export type ToastMessage = {

@@ -1,7 +1,8 @@
 import React, { Suspense } from 'react';
 import { APP_VERSION } from './constants';
+// TimelineProvider removed (in AppProvider)
 import { Header } from './components/Header';
-import { Console } from './components/Console';
+// Console replaced by BottomLogPanel
 import { DataHub } from './components/DataHub';
 import { Dashboard } from './components/Dashboard';
 import { StatusBar } from './components/StatusBar';
@@ -42,7 +43,7 @@ const App: React.FC = () => {
   } = useUI();
 
   const { toasts, removeToast } = useToast();
-  const { consoleMessages, consoleFilters, setConsoleFilters, consoleSearchTerm, handleClearConsole } = useConsole();
+  const { consoleMessages, consoleFilters, setConsoleFilters, handleClearConsole } = useConsole();
 
   // Bottom log panel state
   const [isBottomLogPanelVisible, setIsBottomLogPanelVisible] = React.useState(false);
@@ -51,7 +52,7 @@ const App: React.FC = () => {
   // Settings State and Actions from Hooks
   const settings = useSettings();
   const {
-    isFocusDebuggerVisible, theme, iconSet, viewMode, logTableDensity,
+    isFocusDebuggerVisible, theme, iconSet, logTableDensity,
     isDetailPanelVisible, onDetailPanelVisibilityChange, onThemeChange,
   } = settings;
 
@@ -71,7 +72,7 @@ const App: React.FC = () => {
     uniqueValues, onLoadMore, hasMoreLogs, onLoadPrev, hasPrevLogs, keyboardSelectedId, setKeyboardSelectedId,
     jumpToEntryId, isInitialLoad, handleRemoveAppliedFilter, handleContextMenuFilter,
     handleCursorChange, handleFileSelect, handleDateSelect, handleApplyDetailFilter,
-    timelineViewRange, setTimelineViewRange, handleTimelineZoomToSelection, handleTimelineZoomReset,
+
     dashboardData, handleTimeRangeSelect, handleCategorySelect,
     stockHistory, overallStockTimeRange, overallStockDensity, handleSearchStock,
     handleRebuildStockData, handleFetchStockSuggestions,
@@ -149,7 +150,6 @@ const App: React.FC = () => {
                 entries={filteredEntries}
                 loadedFileNames={loadedFileNames}
                 pageTimestampRanges={pageTimestampRanges}
-                onViewModeChange={settings.onViewModeChange}
                 filters={formFilters}
                 appliedFilters={appliedFilters}
                 onFiltersChange={setFormFilters}
@@ -158,7 +158,6 @@ const App: React.FC = () => {
                 onClearTimeRange={handleClearTimeRange}
                 uniqueValues={uniqueValues}
                 theme={theme}
-                viewMode={viewMode}
                 columnVisibility={settings.columnVisibility}
                 onColumnVisibilityChange={settings.onColumnVisibilityChange}
                 columnStyles={settings.columnStyles}
@@ -192,10 +191,6 @@ const App: React.FC = () => {
                 keyboardSelectedId={keyboardSelectedId}
                 setKeyboardSelectedId={setKeyboardSelectedId}
                 jumpToEntryId={jumpToEntryId}
-                timelineViewRange={timelineViewRange}
-                onTimelineViewRangeChange={setTimelineViewRange}
-                onTimelineZoomToSelection={handleTimelineZoomToSelection}
-                onTimelineZoomReset={handleTimelineZoomReset}
                 isInitialLoad={isInitialLoad}
                 iconSet={iconSet}
                 onRemoveAppliedFilter={handleRemoveAppliedFilter}
@@ -205,6 +200,7 @@ const App: React.FC = () => {
                 cursorTime={cursorTime}
                 timelineBarVisibility={settings.timelineBarVisibility}
                 onTimelineBarVisibilityChange={settings.onTimelineBarVisibilityChange}
+                zoomToSelectionEnabled={settings.zoomToSelectionEnabled ?? true}
               />
             ) : (
               <div className="flex-grow flex items-center justify-center p-8 text-center bg-white dark:bg-gray-900">
@@ -279,7 +275,6 @@ const App: React.FC = () => {
         filteredCount={data.totalFilteredCount}
         activeSessionName={activeSessionName}
         isDirty={isDirty}
-        viewMode={viewMode}
         currentPage={currentPage}
         totalPages={totalPages}
         visibleRowCount={filteredEntries.length}

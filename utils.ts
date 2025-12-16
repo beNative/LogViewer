@@ -118,3 +118,29 @@ export const formatBytes = (bytes: number, decimals = 2) => {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 };
+
+/**
+ * Safely parses a date and time string into a Unix timestamp.
+ * Returns null if either date or time is empty/invalid, instead of NaN.
+ * This prevents invalid date parsing when filter fields are empty.
+ * 
+ * @param date - Date string in YYYY-MM-DD format
+ * @param time - Time string in HH:MM:SS or HH:MM:SS.mmm format (with optional milliseconds)
+ * @returns Unix timestamp in milliseconds, or null if invalid
+ */
+export const parseFilterDateTime = (date: string, time: string): number | null => {
+    if (!date || !time) {
+        return null;
+    }
+
+    // Construct ISO 8601 UTC string: YYYY-MM-DDTHH:MM:SSZ
+    const isoString = `${date}T${time}Z`;
+    const timestamp = new Date(isoString).getTime();
+
+    // Check for invalid date (NaN)
+    if (isNaN(timestamp)) {
+        return null;
+    }
+
+    return timestamp;
+};

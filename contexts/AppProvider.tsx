@@ -5,6 +5,7 @@ import { SettingsProvider, useSettings } from './SettingsContext';
 import { UIProvider } from './UIContext';
 import { SessionProvider } from './SessionContext';
 import { DataProvider } from './DataContext';
+import { TimelineProvider } from './TimelineContext';
 import { ConfirmDialogProvider } from './ConfirmDialogContext';
 
 // Inner provider that has access to settings for the confirm dialog
@@ -25,9 +26,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                     <ConfirmDialogWrapper>
                         <UIProvider>
                             <SessionProvider>
-                                <DataProvider>
-                                    {children}
-                                </DataProvider>
+                                <TimelineProvider>
+                                    <DataProvider>
+                                        {children}
+                                    </DataProvider>
+                                </TimelineProvider>
                             </SessionProvider>
                         </UIProvider>
                     </ConfirmDialogWrapper>

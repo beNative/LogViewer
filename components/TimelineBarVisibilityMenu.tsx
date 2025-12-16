@@ -1,5 +1,5 @@
 import React from 'react';
-import { TimelineBarVisibility, ViewMode } from '../types.ts';
+import { TimelineBarVisibility } from '../types.ts';
 
 interface TimelineBarVisibilityMenuProps {
     x: number;
@@ -7,7 +7,6 @@ interface TimelineBarVisibilityMenuProps {
     onClose: () => void;
     visibility: TimelineBarVisibility;
     onVisibilityChange: (newVisibility: TimelineBarVisibility) => void;
-    viewMode: ViewMode;
 }
 
 const MenuItem: React.FC<{
@@ -18,8 +17,8 @@ const MenuItem: React.FC<{
 }> = ({ label, checked, onChange, disabled }) => (
     <li>
         <label className={`flex w-full items-center space-x-3 p-2 rounded-md ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer'}`}>
-            <input 
-                type="checkbox" 
+            <input
+                type="checkbox"
                 checked={checked}
                 onChange={onChange}
                 disabled={disabled}
@@ -31,7 +30,7 @@ const MenuItem: React.FC<{
 );
 
 export const TimelineBarVisibilityMenu: React.FC<TimelineBarVisibilityMenuProps> = ({
-    x, y, onClose, visibility, onVisibilityChange, viewMode
+    x, y, onClose, visibility, onVisibilityChange
 }) => {
     const menuRef = React.useRef<HTMLDivElement>(null);
 
@@ -50,7 +49,7 @@ export const TimelineBarVisibilityMenu: React.FC<TimelineBarVisibilityMenuProps>
         left: x,
         transform: 'translateX(0)',
     };
-    
+
     React.useLayoutEffect(() => {
         if (menuRef.current) {
             const menu = menuRef.current;
@@ -86,7 +85,6 @@ export const TimelineBarVisibilityMenu: React.FC<TimelineBarVisibilityMenuProps>
                     label="Pages"
                     checked={visibility.pages}
                     onChange={() => handleToggle('pages')}
-                    disabled={viewMode !== 'pagination'}
                 />
                 <MenuItem
                     label="Files"
@@ -103,7 +101,7 @@ export const TimelineBarVisibilityMenu: React.FC<TimelineBarVisibilityMenuProps>
                     checked={visibility.density}
                     onChange={() => handleToggle('density')}
                 />
-                 <div className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
+                <div className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
                 <MenuItem
                     label="Overview"
                     checked={visibility.overview}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { LogEntry, FilterState, PageTimestampRange, ColumnVisibilityState, ColumnStyles, ColumnKey, PanelWidths, ViewMode, ConsoleMessage, OverallTimeRange, FileTimeRange, LogDensityPointByLevel, IconSet, LogTableDensity, Theme, TimelineBarVisibility } from '../types';
+import { LogEntry, FilterState, PageTimestampRange, ColumnVisibilityState, ColumnStyles, ColumnKey, PanelWidths, ConsoleMessage, OverallTimeRange, FileTimeRange, LogDensityPointByLevel, IconSet, LogTableDensity, Theme, TimelineBarVisibility } from '../types';
 import { FilterBar } from './FilterBar';
 import { LogDetailPanel } from './LogDetailPanel';
 import { TimeRangeSelector } from './TimeRangeSelector';
@@ -13,6 +13,7 @@ import { ROW_HEIGHT_COMPACT, ROW_HEIGHT_NORMAL, ROW_HEIGHT_COMFORTABLE, COLUMN_D
 import { LogTableHeader } from './LogTableHeader';
 import { LogTableRow } from './LogTableRow';
 import { EmptyState } from './EmptyState';
+import { parseFilterDateTime } from '../utils';
 
 // Used in constants now, but kept here if dynamic density logic remains local or moved to utils
 // Actually density heights are simple constants, using what I defined in tableUtils or defining locally if needed.
@@ -27,7 +28,6 @@ interface LogTableProps {
     entries: LogEntry[];
     loadedFileNames: string[];
     pageTimestampRanges: PageTimestampRange[];
-    onViewModeChange: (newMode: ViewMode) => void;
     filters: FilterState;
     appliedFilters: FilterState;
     onFiltersChange: (newFilters: FilterState) => void;
@@ -41,7 +41,6 @@ interface LogTableProps {
         fileName: string[];
     };
     theme: Theme;
-    viewMode: ViewMode;
     columnVisibility: ColumnVisibilityState;
     onColumnVisibilityChange: (newState: ColumnVisibilityState) => void;
     columnStyles: ColumnStyles;
@@ -75,10 +74,6 @@ interface LogTableProps {
     keyboardSelectedId: number | null;
     setKeyboardSelectedId: (id: number | null) => void;
     jumpToEntryId: number | null;
-    timelineViewRange: OverallTimeRange | null;
-    onTimelineViewRangeChange: (range: OverallTimeRange | null) => void;
-    onTimelineZoomToSelection: () => void;
-    onTimelineZoomReset: () => void;
     isInitialLoad: boolean;
     iconSet: IconSet;
     onRemoveAppliedFilter: (key: keyof FilterState, value?: string) => void;
@@ -88,6 +83,7 @@ interface LogTableProps {
     cursorTime: number | null;
     timelineBarVisibility: TimelineBarVisibility;
     onTimelineBarVisibilityChange: (newVisibility: TimelineBarVisibility) => void;
+    zoomToSelectionEnabled: boolean;
 }
 
 export const LogTable: React.FC<LogTableProps> = (props) => {
@@ -103,7 +99,6 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
 
     const {
         entries,
-        viewMode,
         onLoadMore,
         hasMore,
         onLoadPrev,
@@ -120,7 +115,8 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         uiScale
     } = props;
 
-    const { setLogTableViewportHeight } = useData();
+    // UseData hook might still be needed for other things, but if setLogTableViewportHeight was the only thing, we might check.
+    // However, for now, let's just remove the effect that calls it.
 
     const columns = React.useMemo(
         () => COLUMN_DEFINITIONS.filter(column => columnVisibility[column.key]),
@@ -154,61 +150,7 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
 
     const virtualRows = rowVirtualizer.getVirtualItems();
 
-    React.useEffect(() => {
-        if (viewMode !== 'scroll') {
-            setLogTableViewportHeight(null);
-            return;
-        }
 
-        const container = tableContainerRef.current;
-        if (!container) {
-            setLogTableViewportHeight(null);
-            return;
-        }
-
-        const updateHeight = () => setLogTableViewportHeight(container.clientHeight);
-        updateHeight();
-
-        let resizeObserver: ResizeObserver | null = null;
-        let resizeListener: (() => void) | null = null;
-
-        if (typeof ResizeObserver !== 'undefined') {
-            resizeObserver = new ResizeObserver(entries => {
-                for (const entry of entries) {
-                    if (entry.target === container) {
-                        setLogTableViewportHeight(entry.contentRect.height);
-                    }
-                }
-            });
-            resizeObserver.observe(container);
-        } else {
-            resizeListener = () => updateHeight();
-            window.addEventListener('resize', resizeListener);
-        }
-
-        return () => {
-            if (resizeObserver) {
-                resizeObserver.disconnect();
-            }
-            if (resizeListener) {
-                window.removeEventListener('resize', resizeListener);
-            }
-            setLogTableViewportHeight(null);
-        };
-    }, [setLogTableViewportHeight, viewMode]);
-
-    React.useEffect(() => {
-        if (viewMode !== 'scroll') {
-            return;
-        }
-
-        const container = tableContainerRef.current;
-        if (!container) {
-            return;
-        }
-
-        setLogTableViewportHeight(container.clientHeight);
-    }, [logTableDensity, uiScale, setLogTableViewportHeight, viewMode]);
 
     // Force remeasure all items when row height changes (density change)
     // Use useLayoutEffect to measure synchronously before paint
@@ -304,6 +246,9 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
         tableContainerRef.current?.focus({ preventScroll: true });
     }, [props.isDetailPanelVisible, props.onDetailPanelVisibilityChange, setKeyboardSelectedId]);
 
+    // Track the last valid navigation index to handle loading transitions
+    const lastNavIndexRef = React.useRef<number>(0);
+
     // Keyboard navigation effect
     React.useEffect(() => {
         const container = tableContainerRef.current;
@@ -316,25 +261,18 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
             }
             e.preventDefault();
 
+            // Don't process navigation while loading to prevent race conditions
+            if (isBusy) {
+                return;
+            }
+
             let currentIndex = entries.findIndex(entry => entry.id === keyboardSelectedId);
 
-            // If selected entry not found (e.g., during loading), use visible position or start from end for forward nav
+            // If selected entry not found, use last known navigation index
             if (currentIndex === -1) {
                 if (entries.length === 0) return;
-
-                // For forward navigation, continue from current scroll position
-                // For backward navigation, start from beginning of loaded entries
-                if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === 'End') {
-                    // Estimate position based on scroll - continue from where user was
-                    const scrollTop = tableContainerRef.current?.scrollTop || 0;
-                    currentIndex = Math.min(
-                        Math.floor(scrollTop / rowHeight),
-                        entries.length - 1
-                    );
-                } else {
-                    // For upward navigation, start from first visible entry
-                    currentIndex = 0;
-                }
+                // Clamp to valid range
+                currentIndex = Math.max(0, Math.min(lastNavIndexRef.current, entries.length - 1));
             }
 
             // Calculate visible rows per page based on container height
@@ -347,56 +285,30 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                     break;
                 case 'ArrowUp':
                     nextIndex = currentIndex - 1;
-                    // If at first entry and more previous data exists, load it
-                    if (nextIndex < 0 && viewMode === 'scroll' && hasPrevLogs && !isBusy) {
-                        onLoadPrev();
-                    }
                     break;
                 case 'PageDown':
                     nextIndex = Math.min(currentIndex + visibleRows, entries.length - 1);
                     break;
                 case 'PageUp':
                     nextIndex = Math.max(currentIndex - visibleRows, 0);
-                    // If near beginning, trigger previous load
-                    if (viewMode === 'scroll' && hasPrevLogs && !isBusy && nextIndex <= visibleRows) {
-                        onLoadPrev();
-                    }
                     break;
                 case 'Home':
                     nextIndex = 0;
-                    // If there's earlier data, load it
-                    if (viewMode === 'scroll' && hasPrevLogs && !isBusy) {
-                        onLoadPrev();
-                    }
                     break;
                 case 'End':
                     nextIndex = entries.length - 1;
-                    // If we're at the end and there's more data, load it
-                    if (viewMode === 'scroll' && hasMore && !isBusy) {
-                        onLoadMore();
-                    }
                     break;
             }
 
             if (nextIndex >= 0 && nextIndex < entries.length) {
                 setKeyboardSelectedId(entries[nextIndex].id);
-
-                // Check if we're near the end and should trigger autoload
-                if (viewMode === 'scroll' && hasMore && !isBusy) {
-                    const remainingEntries = entries.length - nextIndex;
-                    if (remainingEntries <= visibleRows) {
-                        onLoadMore();
-                    }
-                }
-            } else if (viewMode === 'scroll' && e.key === 'ArrowDown' && nextIndex >= entries.length && hasMore) {
-                onLoadMore();
             }
         };
 
         container.addEventListener('keydown', handleKeyDown);
         return () => container.removeEventListener('keydown', handleKeyDown);
 
-    }, [entries, keyboardSelectedId, setKeyboardSelectedId, hasMore, hasPrevLogs, onLoadMore, onLoadPrev, viewMode, rowHeight, isBusy]);
+    }, [entries, keyboardSelectedId, setKeyboardSelectedId, hasMore, hasPrevLogs, onLoadMore, onLoadPrev, rowHeight, isBusy]);
 
     const handleContextMenu = React.useCallback((e: React.MouseEvent, entry: LogEntry, key: ColumnKey, value: string) => {
         e.preventDefault();
@@ -421,8 +333,8 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                     <TimeRangeSelector
                         minTime={props.overallTimeRange.min}
                         maxTime={props.overallTimeRange.max}
-                        selectedStartTime={new Date(props.appliedFilters.dateFrom + 'T' + props.appliedFilters.timeFrom + 'Z').getTime()}
-                        selectedEndTime={new Date(props.appliedFilters.dateTo + 'T' + props.appliedFilters.timeTo + 'Z').getTime()}
+                        selectedStartTime={parseFilterDateTime(props.filters.dateFrom, props.filters.timeFrom)}
+                        selectedEndTime={parseFilterDateTime(props.filters.dateTo, props.filters.timeTo)}
                         onRangeChange={props.onTimeRangeSelectorChange}
                         onClear={props.onClearTimeRange}
                         theme={props.theme}
@@ -431,16 +343,11 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                         logDensity={props.logDensity}
                         overallLogDensity={props.overallLogDensity}
                         datesWithLogs={props.datesWithLogs}
-                        viewMode={props.viewMode}
                         onGoToPage={() => { }}
                         onCursorChange={props.onCursorChange}
                         onFileSelect={props.onFileSelect}
                         onDateSelect={props.onDateSelect}
-                        viewRange={props.timelineViewRange}
-                        onViewRangeChange={props.onTimelineViewRangeChange}
-                        onZoomToSelection={props.onTimelineZoomToSelection}
-                        onZoomToExtent={props.onTimelineZoomReset}
-                        zoomToSelectionEnabled={!!(props.appliedFilters.dateFrom && props.appliedFilters.dateTo)}
+                        zoomToSelectionEnabled={props.zoomToSelectionEnabled}
                         iconSet={props.iconSet}
                         uiScale={uiScale}
                         cursorTime={props.cursorTime}

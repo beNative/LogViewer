@@ -1,6 +1,6 @@
 import React from 'react';
 import { ColumnStyleSettings } from './ColumnStyleSettings';
-import { ColumnStyles, ViewMode, IconSet, LogTableDensity, Settings as SettingsType, ColumnVisibilityState, PanelWidths, FilterState, TimelineBarVisibility } from '../types';
+import { ColumnStyles, IconSet, LogTableDensity, Settings as SettingsType, ColumnVisibilityState, PanelWidths, FilterState, TimelineBarVisibility } from '../types';
 import { JsonEditor } from './JsonEditor';
 import { Icon, IconName } from './icons';
 import { DensityControl } from './DensityControl';
@@ -11,8 +11,6 @@ type SettingsCategory = 'appearance' | 'behavior' | 'updates' | 'integrations' |
 interface SettingsProps {
     theme: Theme;
     onThemeChange: (newTheme: Theme) => void;
-    viewMode: ViewMode;
-    onViewModeChange: (newMode: ViewMode) => void;
     iconSet: IconSet;
     onIconSetChange: (newIconSet: IconSet) => void;
     columnStyles: ColumnStyles;
@@ -87,8 +85,8 @@ const SegmentedControl: React.FC<{
                         key={opt.value}
                         onClick={() => onChange(opt.value)}
                         className={`px-3 py-1 text-sm font-semibold rounded-md transition-colors ${isActive
-                                ? "bg-white dark:bg-gray-600 text-sky-700 dark:text-white shadow-sm"
-                                : "text-gray-500 dark:text-gray-400 hover:bg-white/60 dark:hover:bg-gray-500/50"
+                            ? "bg-white dark:bg-gray-600 text-sky-700 dark:text-white shadow-sm"
+                            : "text-gray-500 dark:text-gray-400 hover:bg-white/60 dark:hover:bg-gray-500/50"
                             }`}
                     >
                         {opt.label}
@@ -117,8 +115,8 @@ const CategoryButton: React.FC<{ label: string; icon: IconName; isActive: boolea
     <button
         onClick={onClick}
         className={`flex items-center gap-3 w-full text-left px-3 py-2.5 text-sm font-medium rounded-md transition-colors duration-150 ${isActive
-                ? 'bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200'
+            ? 'bg-sky-100 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300'
+            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-200'
             }`}
     >
         <Icon name={icon} iconSet="sharp" className="w-5 h-5 flex-shrink-0" />
@@ -130,7 +128,6 @@ const CategoryButton: React.FC<{ label: string; icon: IconName; isActive: boolea
 export const Settings: React.FC<SettingsProps> = (props) => {
     const {
         theme, onThemeChange,
-        viewMode, onViewModeChange,
         iconSet, onIconSetChange,
         columnStyles, onColumnStylesChange,
         isTimeRangeSelectorVisible, onTimeRangeSelectorVisibilityChange,
@@ -314,15 +311,7 @@ export const Settings: React.FC<SettingsProps> = (props) => {
                     {activeCategory === 'behavior' && (
                         <div className="divide-y divide-gray-200 dark:divide-gray-700">
                             <h2 className="text-xl font-bold text-gray-800 dark:text-sky-400 pb-4">Behavior</h2>
-                            <SegmentedControl
-                                label="Log Viewer Mode"
-                                value={viewMode}
-                                onChange={onViewModeChange}
-                                options={[
-                                    { label: 'Paginate', value: 'pagination' },
-                                    { label: 'Scroll', value: 'scroll' },
-                                ]}
-                            />
+                            <h2 className="text-xl font-bold text-gray-800 dark:text-sky-400 pb-4">Behavior</h2>
                             <ToggleSwitch label="Show Timeline By Default" enabled={isTimeRangeSelectorVisible} onChange={onTimeRangeSelectorVisibilityChange} />
                             <ToggleSwitch label="Show Details Panel By Default" enabled={isDetailPanelVisible} onChange={onDetailPanelVisibilityChange} />
 

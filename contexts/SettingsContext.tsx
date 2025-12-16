@@ -1,5 +1,5 @@
 import React, { createContext, useState, useCallback, useContext, useEffect } from 'react';
-import { Theme, ViewMode, IconSet, LogTableDensity, ColumnVisibilityState, ColumnStyles, PanelWidths, FilterState, TimelineBarVisibility, Settings as SettingsType } from '../types';
+import { Theme, IconSet, LogTableDensity, ColumnVisibilityState, ColumnStyles, PanelWidths, FilterState, TimelineBarVisibility, Settings as SettingsType } from '../types';
 import { useConsole } from './ConsoleContext';
 import { useToast } from './ToastContext';
 
@@ -19,7 +19,6 @@ const initialTimelineBarVisibility: TimelineBarVisibility = { pages: true, files
 
 type SettingsContextType = {
     theme: Theme;
-    viewMode: ViewMode;
     allowPrerelease: boolean;
     isAutoUpdateEnabled: boolean;
     githubToken: string;
@@ -35,8 +34,8 @@ type SettingsContextType = {
     timelineBarVisibility: TimelineBarVisibility;
     uiScale: number;
     logSqlQueries: boolean;
+    zoomToSelectionEnabled: boolean;
     onThemeChange: (newTheme: Theme) => void;
-    onViewModeChange: (newMode: ViewMode) => void;
     onAllowPrereleaseChange: (allow: boolean) => void;
     onAutoUpdateEnabledChange: (enabled: boolean) => void;
     onGithubTokenChange: (token: string) => void;
@@ -51,6 +50,7 @@ type SettingsContextType = {
     onTimelineBarVisibilityChange: (newVisibility: TimelineBarVisibility) => void;
     onUiScaleChange: (newScale: number) => void;
     onLogSqlQueriesChange: (enabled: boolean) => void;
+    onZoomToSelectionEnabledChange: (enabled: boolean) => void;
     onFullSettingsUpdate: (newSettings: SettingsType) => Promise<void>;
     onSaveFilterPreset: (name: string, filtersToSave: FilterState) => Promise<void>;
     onDeleteFilterPreset: (name: string) => Promise<void>;
@@ -70,7 +70,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     // All settings states
     const [theme, setTheme] = useState<Theme>('light');
-    const [viewMode, setViewMode] = useState<ViewMode>('pagination');
     const [iconSet, setIconSet] = useState<IconSet>('sharp');
     const [columnVisibility, setColumnVisibility] = useState<ColumnVisibilityState>(initialColumnVisibility);
     const [columnStyles, setColumnStyles] = useState<ColumnStyles>(initialColumnStyles);
@@ -86,13 +85,13 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const [githubToken, setGithubToken] = useState<string>('');
     const [uiScale, setUiScale] = useState<number>(1);
     const [logSqlQueries, setLogSqlQueries] = useState<boolean>(false);
+    const [zoomToSelectionEnabled, setZoomToSelectionEnabled] = useState<boolean>(true);
 
     // Load settings on startup
     useEffect(() => {
         if (!window.electronAPI) return;
         window.electronAPI.getSettings().then(settings => {
             setTheme(settings.theme || 'light');
-            setViewMode(settings.viewMode || 'pagination');
             setIconSet(settings.iconSet || 'sharp');
             setColumnVisibility({ ...initialColumnVisibility, ...settings.columnVisibility });
             // Deep merge styles
@@ -115,6 +114,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             setGithubToken(settings.githubToken || '');
             setUiScale(settings.uiScale || 1);
             setLogSqlQueries(settings.logSqlQueries ?? false);
+            setZoomToSelectionEnabled(settings.zoomToSelectionEnabled ?? true);
         }).catch(err => logToConsole(`Failed to load settings: ${err.message}`, 'ERROR'));
     }, [logToConsole]);
 
@@ -135,7 +135,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     // All handle...Change functions that call updateSettings
     const onThemeChange = (newTheme: Theme) => { setTheme(newTheme); updateSettings({ theme: newTheme }); };
-    const onViewModeChange = (newMode: ViewMode) => { setViewMode(newMode); updateSettings({ viewMode: newMode }); };
     const onIconSetChange = (newIconSet: IconSet) => { setIconSet(newIconSet); updateSettings({ iconSet: newIconSet }); };
     const onLogTableDensityChange = (newDensity: LogTableDensity) => { setLogTableDensity(newDensity); updateSettings({ logTableDensity: newDensity }); };
     const onColumnVisibilityChange = (newVisibility: ColumnVisibilityState) => { setColumnVisibility(newVisibility); updateSettings({ columnVisibility: newVisibility }); };
@@ -150,10 +149,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const onGithubTokenChange = (token: string) => { setGithubToken(token); updateSettings({ githubToken: token }); };
     const onUiScaleChange = (newScale: number) => { setUiScale(newScale); updateSettings({ uiScale: newScale }); };
     const onLogSqlQueriesChange = (enabled: boolean) => { setLogSqlQueries(enabled); updateSettings({ logSqlQueries: enabled }); };
+    const onZoomToSelectionEnabledChange = (enabled: boolean) => { setZoomToSelectionEnabled(enabled); updateSettings({ zoomToSelectionEnabled: enabled }); };
 
     const onFullSettingsUpdate = async (newSettings: SettingsType) => {
         setTheme(newSettings.theme);
-        setViewMode(newSettings.viewMode);
         setIconSet(newSettings.iconSet);
         setColumnVisibility(newSettings.columnVisibility);
         setColumnStyles(newSettings.columnStyles);
@@ -169,6 +168,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setGithubToken(newSettings.githubToken);
         setUiScale(newSettings.uiScale);
         setLogSqlQueries(newSettings.logSqlQueries);
+        setZoomToSelectionEnabled(newSettings.zoomToSelectionEnabled);
         await updateSettings(newSettings);
         addToast({ type: 'success', title: 'Settings Updated', message: 'Settings have been imported.' });
     };
@@ -200,13 +200,13 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     };
 
     const value: SettingsContextType = {
-        theme, viewMode, allowPrerelease, isAutoUpdateEnabled, githubToken, iconSet, logTableDensity,
+        theme, allowPrerelease, isAutoUpdateEnabled, githubToken, iconSet, logTableDensity,
         columnVisibility, customFilterPresets, columnStyles, panelWidths, isTimeRangeSelectorVisible,
-        isDetailPanelVisible, isFocusDebuggerVisible, timelineBarVisibility, uiScale, logSqlQueries,
-        onThemeChange, onViewModeChange, onAllowPrereleaseChange, onAutoUpdateEnabledChange, onGithubTokenChange,
+        isDetailPanelVisible, isFocusDebuggerVisible, timelineBarVisibility, uiScale, logSqlQueries, zoomToSelectionEnabled,
+        onThemeChange, onAllowPrereleaseChange, onAutoUpdateEnabledChange, onGithubTokenChange,
         onIconSetChange, onLogTableDensityChange, onColumnVisibilityChange, onColumnStylesChange,
         onPanelWidthsChange, onTimeRangeSelectorVisibilityChange, onDetailPanelVisibilityChange,
-        onFocusDebuggerVisibilityChange, onTimelineBarVisibilityChange, onUiScaleChange, onLogSqlQueriesChange,
+        onFocusDebuggerVisibilityChange, onTimelineBarVisibilityChange, onUiScaleChange, onLogSqlQueriesChange, onZoomToSelectionEnabledChange,
         onFullSettingsUpdate, onSaveFilterPreset, onDeleteFilterPreset, onLoadFilterPreset,
     };
 

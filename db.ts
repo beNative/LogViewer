@@ -15,14 +15,24 @@ const locateSqlWasm = (file: string) => {
 type SqlJsDatabase = InstanceType<SqlJsStatic['Database']>;
 
 // Helper to convert date/time inputs to a UTC SQL-comparable format.
+// Supports time strings with or without milliseconds (HH:MM:SS or HH:MM:SS.mmm)
 export const getSqlDateTime = (dateStr: string, timeStr: string, endOfDay = false): string | null => {
     if (!dateStr) return null;
     let time = timeStr || (endOfDay ? '23:59:59' : '00:00:00');
-    if (time.length === 5) time += ':00'; // Add seconds if missing
+    if (time.length === 5) time += ':00'; // Add seconds if missing (HH:MM -> HH:MM:SS)
+
+    // Check if milliseconds are already present (HH:MM:SS.mmm has length 12)
+    const hasMilliseconds = time.includes('.');
 
     // Construct a UTC-based ISO string directly from the UTC date/time parts.
     // This avoids any local timezone interpretation.
-    const isoString = `${dateStr}T${time}${endOfDay ? '.999' : '.000'}Z`;
+    // Only add milliseconds if not already present
+    let isoString: string;
+    if (hasMilliseconds) {
+        isoString = `${dateStr}T${time}Z`;
+    } else {
+        isoString = `${dateStr}T${time}${endOfDay ? '.999' : '.000'}Z`;
+    }
 
     // Now, we can just format it for SQLite string comparison.
     return isoString.replace('T', ' ').replace('Z', '');

@@ -4,6 +4,7 @@ import { Icon } from './icons/index.tsx';
 import { StockHistoryChart } from './StockHistoryChart.tsx';
 import { TimeRangeSelector } from './TimeRangeSelector.tsx';
 import { useConfirmDialog } from '../contexts/ConfirmDialogContext';
+import { useTimeline } from '../contexts/TimelineContext';
 
 interface StockTrackerProps {
     onSearch: (filters: StockInfoFilters) => void;
@@ -31,7 +32,8 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
         dateTo: '',
         timeTo: '',
     });
-    const [timelineViewRange, setTimelineViewRange] = React.useState<OverallTimeRange | null>(null);
+    // const [timelineViewRange, setTimelineViewRange] = React.useState<OverallTimeRange | null>(null); // Removed in favor of context
+    const { setViewRange, setSelection } = useTimeline();
     const [suggestions, setSuggestions] = React.useState<StockArticleSuggestion[]>([]);
     const [isSuggestionsVisible, setIsSuggestionsVisible] = React.useState(false);
     const [activeSuggestionIndex, setActiveSuggestionIndex] = React.useState(-1);
@@ -245,11 +247,15 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
 
     const { selectedStartTime, selectedEndTime } = getSelectedTimestamps();
 
-    const handleTimelineZoomToSelection = React.useCallback(() => {
-        if (selectedStartTime && selectedEndTime && selectedStartTime < selectedEndTime) {
-            setTimelineViewRange({ min: selectedStartTime, max: selectedEndTime });
-        }
-    }, [selectedStartTime, selectedEndTime]);
+    // Sync selection to TimelineContext
+    React.useEffect(() => {
+        setSelection(selectedStartTime, selectedEndTime);
+    }, [selectedStartTime, selectedEndTime, setSelection]);
+
+    // Handle Timeline Zoom is now managed by Context + TimeRangeSelector internally.
+    // We don't need local handleTimelineZoomToSelection.
+
+
 
     const zoomToSelectionEnabled = React.useMemo(() => {
         return selectedStartTime !== null && selectedEndTime !== null && selectedStartTime < selectedEndTime;
@@ -344,14 +350,10 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                                 logDensity={overallStockDensity}
                                 overallLogDensity={overallStockDensity}
                                 datesWithLogs={[]}
-                                viewMode="scroll"
                                 onCursorChange={() => { }}
                                 onFileSelect={() => { }}
                                 onDateSelect={() => { }}
-                                viewRange={timelineViewRange}
-                                onViewRangeChange={setTimelineViewRange}
-                                onZoomToSelection={handleTimelineZoomToSelection}
-                                onZoomToExtent={() => setTimelineViewRange(null)}
+
                                 zoomToSelectionEnabled={zoomToSelectionEnabled}
                                 iconSet={iconSet}
                                 uiScale={uiScale}

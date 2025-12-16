@@ -1,5 +1,5 @@
 import React from 'react';
-import { ConsoleMessage, IconSet, LogTableDensity, Theme, ViewMode } from '../types.ts';
+import { ConsoleMessage, IconSet, LogTableDensity, Theme } from '../types.ts';
 import { Icon } from './icons/index.tsx';
 import { Tooltip } from './Tooltip.tsx';
 import { DensityControl } from './DensityControl.tsx';
@@ -10,7 +10,6 @@ interface StatusBarProps {
     filteredCount: number;
     activeSessionName: string | null;
     isDirty: boolean;
-    viewMode: ViewMode;
     currentPage: number;
     totalPages: number;
     visibleRowCount: number;
@@ -50,7 +49,7 @@ const getMessageColorClass = (type: ConsoleMessage['type']) => {
 export const StatusBar: React.FC<StatusBarProps> = (props) => {
     const {
         totalEntries, filteredCount, activeSessionName, isDirty,
-        viewMode, currentPage, totalPages, visibleRowCount,
+        currentPage, totalPages, visibleRowCount,
         isBusy, lastConsoleMessage, theme, onThemeChange, iconSet,
         pageSize, onPageSizeChange, onGoToPage,
         logTableDensity, onLogTableDensityChange,
@@ -74,7 +73,7 @@ export const StatusBar: React.FC<StatusBarProps> = (props) => {
 
             {/* Middle Section */}
             <div className="flex items-center gap-4">
-                {viewMode === 'pagination' && totalPages > 0 && (
+                {totalPages > 0 && (
                     <div className="flex items-center gap-4">
                         <span className="whitespace-nowrap">
                             Showing <span className="font-semibold text-gray-800 dark:text-gray-200">{startEntry.toLocaleString()}-{endEntry.toLocaleString()}</span>
@@ -105,16 +104,7 @@ export const StatusBar: React.FC<StatusBarProps> = (props) => {
                         </div>
                     </div>
                 )}
-                {viewMode === 'scroll' && filteredCount > 0 && (
-                    <span>
-                        <span className="font-semibold text-gray-800 dark:text-gray-200">{visibleRowCount.toLocaleString()}</span>
-                        {visibleRowCount < filteredCount ? ' loaded' : ''}
-                        {' of '}
-                        <span className="font-semibold text-gray-800 dark:text-gray-200">{filteredCount.toLocaleString()}</span>
-                        {' rows'}
-                    </span>
-                )}
-                {(totalPages > 0 || (viewMode === 'scroll' && filteredCount > 0)) && (
+                {(totalPages > 0) && (
                     <div className="flex items-center gap-2">
                         <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
                         <DensityControl value={logTableDensity} onChange={onLogTableDensityChange} />
