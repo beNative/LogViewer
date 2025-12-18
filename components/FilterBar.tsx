@@ -7,25 +7,10 @@ import { Icon } from './icons';
 import { Tooltip } from './Tooltip';
 import { useConfirmDialog } from '../contexts/ConfirmDialogContext';
 
-interface FilterBarProps {
-    filters: FilterState;
-    appliedFilters: FilterState;
-    onFiltersChange: (newFilters: FilterState) => void;
-    onApplyFilters: () => void;
-    onResetFilters: () => void;
-    uniqueValues: {
-        level: string[];
-        sndrtype: string[];
-        sndrname: string[];
-        fileName: string[];
-    };
-    customFilterPresets: Record<string, FilterState>;
-    onSavePreset: (name: string) => void;
-    onDeletePreset: (name: string) => void;
-    onLoadPreset: (name: string) => void;
-    iconSet: IconSet;
-    isInitialLoad: boolean;
-}
+import { useData } from '../contexts/DataContext';
+import { useSettings } from '../contexts/SettingsContext';
+
+interface FilterBarProps { }
 
 const inputStyles = "w-full bg-white dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white sm:text-sm rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition";
 const textareaStyles = `${inputStyles} resize-y min-h-[60px]`;
@@ -42,10 +27,10 @@ const FilterGroup: React.FC<{
     const dot = (
         <Tooltip content={dotTitle}>
             <span className={`w-2 h-2 rounded-full transition-colors ${isDirty
-                    ? 'bg-amber-400'
-                    : isActive
-                        ? 'bg-sky-500'
-                        : 'bg-gray-300 dark:bg-gray-600'
+                ? 'bg-amber-400'
+                : isActive
+                    ? 'bg-sky-500'
+                    : 'bg-gray-300 dark:bg-gray-600'
                 }`} />
         </Tooltip>
     );
@@ -72,8 +57,8 @@ const ToggleButton: React.FC<{
             type="button"
             onClick={onClick}
             className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${isActive
-                    ? 'bg-sky-600 text-white'
-                    : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500'
+                ? 'bg-sky-600 text-white'
+                : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500'
                 }`}
         >
             {label}
@@ -104,20 +89,25 @@ const ToggleSwitch: React.FC<{
 };
 
 
-export const FilterBar: React.FC<FilterBarProps> = ({
-    filters,
-    appliedFilters,
-    onFiltersChange,
-    onApplyFilters,
-    onResetFilters,
-    uniqueValues,
-    customFilterPresets,
-    onSavePreset,
-    onDeletePreset,
-    onLoadPreset,
-    iconSet,
-    isInitialLoad,
-}) => {
+export const FilterBar: React.FC<FilterBarProps> = () => {
+
+    const {
+        formFilters: filters,
+        setFormFilters: onFiltersChange,
+        appliedFilters,
+        handleApplyFilters: onApplyFilters,
+        handleResetFilters: onResetFilters,
+        uniqueValues,
+        isInitialLoad
+    } = useData();
+
+    const {
+        customFilterPresets,
+        onSaveFilterPreset: onSavePreset,
+        onDeleteFilterPreset: onDeletePreset,
+        onLoadFilterPreset: onLoadPreset,
+        iconSet
+    } = useSettings();
 
     const [selectedPreset, setSelectedPreset] = React.useState('');
     const [isSavingPreset, setIsSavingPreset] = React.useState(false);
@@ -161,7 +151,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         onFiltersChange({ ...filters, [e.target.name]: e.target.value });
     };
 
-    const handleFieldChange = (fieldName: keyof FilterState, value: any) => {
+    const handleFieldChange = (fieldName: keyof FilterState, value: string | string[] | boolean | 'include' | 'exclude' | 'AND' | 'OR') => {
         onFiltersChange({ ...filters, [fieldName]: value });
     };
 
@@ -196,7 +186,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         }
 
         const saveAction = () => {
-            onSavePreset(nameToSave);
+            onSavePreset(nameToSave, filters);
             setSelectedPreset(nameToSave); // Update the main selection dropdown
             setIsSavingPreset(false);
             setNewPresetName('');
@@ -259,7 +249,10 @@ export const FilterBar: React.FC<FilterBarProps> = ({
         const name = e.target.value;
         setSelectedPreset(name);
         if (name) {
-            onLoadPreset(name);
+            const loaded = onLoadPreset(name);
+            if (loaded) {
+                onFiltersChange(loaded);
+            }
         }
     };
 

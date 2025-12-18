@@ -6,23 +6,25 @@ import { Icon } from './icons';
 
 type Theme = 'light' | 'dark';
 
-interface DashboardProps {
-  data: DashboardData;
-  hasData: boolean;
-  onTimeRangeSelect: (startTime: number, endTime: number) => void;
-  onCategorySelect: (category: 'level' | 'sndrtype', value: string) => void;
-  theme: Theme;
-  iconSet: IconSet;
-}
+import { useAnalytics } from '../contexts/AnalyticsContext';
+import { useSession } from '../contexts/SessionContext';
+import { useData } from '../contexts/DataContext';
+import { useSettings } from '../contexts/SettingsContext';
+
+interface DashboardProps { }
 
 const ChartCard: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-    <div className="bg-white dark:bg-gray-800/50 p-4 sm:p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">{title}</h3>
-        <div className="h-64">{children}</div>
-    </div>
+  <div className="bg-white dark:bg-gray-800/50 p-4 sm:p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
+    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">{title}</h3>
+    <div className="h-64">{children}</div>
+  </div>
 );
 
-export const Dashboard: React.FC<DashboardProps> = ({ data, hasData, onTimeRangeSelect, onCategorySelect, theme, iconSet }) => {
+export const Dashboard: React.FC<DashboardProps> = () => {
+  const { dashboardData } = useAnalytics();
+  const { hasData } = useSession();
+  const { handleTimeRangeSelect, handleCategorySelect } = useData();
+  const { theme, iconSet } = useSettings();
   if (!hasData) {
     return (
       <div className="flex-grow flex items-center justify-center p-8 text-center bg-gray-100 dark:bg-transparent">
@@ -40,27 +42,27 @@ export const Dashboard: React.FC<DashboardProps> = ({ data, hasData, onTimeRange
   return (
     <div className="flex-grow p-4 sm:p-6 lg:p-8 overflow-y-auto space-y-6 bg-gray-100 dark:bg-transparent">
       <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
-          <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Log Volume Over Time</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 -mt-2">Click and drag horizontally on the chart to select a time range and filter the log viewer.</p>
-          <div className="h-80">
-              <TimelineChart data={data.timeline} onTimeRangeSelect={onTimeRangeSelect} theme={theme} />
-          </div>
+        <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Log Volume Over Time</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 -mt-2">Click and drag horizontally on the chart to select a time range and filter the log viewer.</p>
+        <div className="h-80">
+          <TimelineChart data={dashboardData.timeline} onTimeRangeSelect={handleTimeRangeSelect} theme={theme} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ChartCard title="Distribution by Log Level">
-            <CategoryChart 
-                data={data.levels} 
-                onSliceClick={(value) => onCategorySelect('level', value)}
-                theme={theme}
-            />
+          <CategoryChart
+            data={dashboardData.levels}
+            onSliceClick={(value) => handleCategorySelect('level', value)}
+            theme={theme}
+          />
         </ChartCard>
         <ChartCard title="Distribution by Sender Type">
-             <CategoryChart 
-                data={data.senderTypes} 
-                onSliceClick={(value) => onCategorySelect('sndrtype', value)}
-                theme={theme}
-            />
+          <CategoryChart
+            data={dashboardData.senderTypes}
+            onSliceClick={(value) => handleCategorySelect('sndrtype', value)}
+            theme={theme}
+          />
         </ChartCard>
       </div>
     </div>

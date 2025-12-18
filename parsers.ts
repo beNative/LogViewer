@@ -257,7 +257,6 @@ const parseGridViewMessage = (msg: string): { prefix: string | null, data: GridD
         // Skip lines that look like they could be part of a header or are just separators
         if (!/^\s*\S/.test(dataLine)) continue;
 
-        // FIX: A single row should be a string array, not a string[][].
         const rowValues: string[] = [];
         for (let i = 0; i < headerPositions.length; i++) {
             const currentBoundary = headerPositions[i];

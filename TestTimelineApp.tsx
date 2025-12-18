@@ -38,7 +38,7 @@ const DebugDisplay = () => {
 const TestTimelineApp = () => {
     const [theme, setTheme] = useState<Theme>('light');
     const [selection, setSelection] = useState<{ start: number, end: number } | null>(null);
-    const [logDensity, setLogDensity] = useState<any[]>(MOCK_DENSITY);
+    const [logDensity, setLogDensity] = useState<LogDensityPointByLevel[]>(MOCK_DENSITY);
     const [minTime, setMinTime] = useState(MOCK_MIN_TIME);
     const [maxTime, setMaxTime] = useState(MOCK_MAX_TIME);
 

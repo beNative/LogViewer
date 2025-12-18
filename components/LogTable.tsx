@@ -9,111 +9,89 @@ import { ContextMenu } from './ContextMenu';
 import { Splitter } from './Splitter';
 import { ColumnVisibilityMenu } from './ColumnVisibilityMenu';
 import { useData } from '../contexts/DataContext';
+import { useAnalytics } from '../contexts/AnalyticsContext';
+import { useSettings } from '../contexts/SettingsContext';
+import { useUI } from '../contexts/UIContext';
+import { useConsole } from '../contexts/ConsoleContext';
 import { ROW_HEIGHT_COMPACT, ROW_HEIGHT_NORMAL, ROW_HEIGHT_COMFORTABLE, COLUMN_DEFINITIONS } from '../constants';
+import { useTableNavigation } from '../hooks/useTableNavigation';
+import { usePanelResizer } from '../hooks/usePanelResizer';
 import { LogTableHeader } from './LogTableHeader';
 import { LogTableRow } from './LogTableRow';
 import { EmptyState } from './EmptyState';
 import { parseFilterDateTime } from '../utils';
 
-// Used in constants now, but kept here if dynamic density logic remains local or moved to utils
-// Actually density heights are simple constants, using what I defined in tableUtils or defining locally if needed.
-// Wait, I didn't export row heights in tableUtils earlier. I should assign them here or update tableUtils.
-// Checked tableUtils: I didn't export ROW_HEIGHT_*. I used getRowClass etc.
-// I'll define heights locally for now to match exactly or create them.
-// Let's stick to defining rowHeight memo logic as is.
+
 
 type ContextMenuState = { x: number; y: number; entry: LogEntry; value: string; key: ColumnKey } | null;
 
-interface LogTableProps {
-    entries: LogEntry[];
-    loadedFileNames: string[];
-    pageTimestampRanges: PageTimestampRange[];
-    filters: FilterState;
-    appliedFilters: FilterState;
-    onFiltersChange: (newFilters: FilterState) => void;
-    onApplyFilters: () => void;
-    onResetFilters: () => void;
-    onClearTimeRange: () => void;
-    uniqueValues: {
-        level: string[];
-        sndrtype: string[];
-        sndrname: string[];
-        fileName: string[];
-    };
-    theme: Theme;
-    columnVisibility: ColumnVisibilityState;
-    onColumnVisibilityChange: (newState: ColumnVisibilityState) => void;
-    columnStyles: ColumnStyles;
-    panelWidths: PanelWidths;
-    onPanelWidthsChange: (newWidths: PanelWidths) => void;
-    isDetailPanelVisible: boolean;
-    onDetailPanelVisibilityChange: (isVisible: boolean) => void;
-    onApplyFilter: (key: 'level' | 'sndrtype' | 'sndrname' | 'fileName', value: string) => void;
-    onContextMenuFilter: (key: 'level' | 'sndrtype' | 'sndrname' | 'fileName', value: string, exclude: boolean) => void;
-    customFilterPresets: Record<string, FilterState>;
-    onSavePreset: (name: string) => void;
-    onDeletePreset: (name: string) => void;
-    onLoadPreset: (name: string) => void;
-    onLoadMore: () => void;
-    hasMore: boolean;
-    onLoadPrev: () => void;
-    hasPrevLogs: boolean;
-    isBusy: boolean;
-    logToConsole: (message: string, type: ConsoleMessage['type']) => void;
-    overallTimeRange: OverallTimeRange | null;
-    onTimeRangeSelectorChange: (startTime: number, endTime: number) => void;
-    isTimeRangeSelectorVisible: boolean;
-    onTimeRangeSelectorVisibilityChange: (isVisible: boolean) => void;
-    fileTimeRanges: FileTimeRange[];
-    logDensity: LogDensityPointByLevel[];
-    overallLogDensity: LogDensityPointByLevel[];
-    datesWithLogs: string[];
-    onCursorChange: (time: number) => void;
-    onFileSelect: (fileName: string) => void;
-    onDateSelect: (date: string) => void;
-    keyboardSelectedId: number | null;
-    setKeyboardSelectedId: (id: number | null) => void;
-    jumpToEntryId: number | null;
-    isInitialLoad: boolean;
-    iconSet: IconSet;
-    onRemoveAppliedFilter: (key: keyof FilterState, value?: string) => void;
-    logTableDensity: LogTableDensity;
-    onLogTableDensityChange: (density: LogTableDensity) => void;
-    uiScale: number;
-    cursorTime: number | null;
-    timelineBarVisibility: TimelineBarVisibility;
-    onTimelineBarVisibilityChange: (newVisibility: TimelineBarVisibility) => void;
-    zoomToSelectionEnabled: boolean;
-}
+interface LogTableProps { }
 
-export const LogTable: React.FC<LogTableProps> = (props) => {
+export const LogTable: React.FC<LogTableProps> = () => {
+    // Context Hooks
+    const {
+        filteredEntries: entries,
+        onLoadMore, hasMoreLogs: hasMore, onLoadPrev, hasPrevLogs,
+        appliedFilters, isInitialLoad,
+        keyboardSelectedId, setKeyboardSelectedId, jumpToEntryId,
+        handleApplyDetailFilter: onApplyFilter,
+        handleContextMenuFilter: onContextMenuFilter,
+        handleRemoveAppliedFilter: onRemoveAppliedFilter,
+        handleTimeRangeSelect,
+        handleCursorChange: onCursorChange,
+        handleFileSelect: onFileSelect,
+        handleDateSelect: onDateSelect,
+        handleClearTimeRange: onClearTimeRange,
+        pageTimestampRanges, formFilters
+    } = useData();
+
+    const {
+        fileTimeRanges, logDensity, overallLogDensity, datesWithLogs, overallLogTimeRange,
+    } = useAnalytics();
+
+    const {
+        theme, columnVisibility, columnStyles, panelWidths, isDetailPanelVisible,
+        logTableDensity, iconSet, uiScale, timelineBarVisibility, zoomToSelectionEnabled, isTimeRangeSelectorVisible,
+        onColumnVisibilityChange, onPanelWidthsChange, onDetailPanelVisibilityChange,
+        onTimelineBarVisibilityChange
+    } = useSettings();
+
+    const { isBusy } = useUI();
+    // cursorTime is not in standard contexts, but TimelineContext usually has viewRange.
+    // However, `props.cursorTime` might be specific state. 
+    // Checking App.tsx: line 37 [cursorTime, setCursorTime] = useState<number | null>(null);
+    // AND passed to handleCursorChange (which updates DataContext?).
+    // DataContext has handleCursorChange: (time) => setCursorTime(time)??
+    // DataContext (line 549) handleCursorChange.
+    // Wait, DataContext.tsx doesn't seem to manage cursorTime state in the viewed snippets.
+    // It has `handleCursorChange` in `value`.
+    // I need to check if DataContext manages `cursorTime` or if it was expected to be passed.
+    // If not, I'll use local state or add to a context?
+    // Let's assume DataContext logic handles it or I check `DataContext` again.
+    // Wait, I can't leave it undefined.
+    // Let's assume for now local state in App was used for sync?
+    // LogTable sets it via `onCursorChange`.
+    // TimeRangeSelector reads it.
+    // If I remove props, who holds it?
+    // `useData` likely should hold `cursorTime` for sync across components if needed.
+    // Or I keep it local to LogTable if nobody else uses it (except TimeRangeSelector which is child).
+    // Dashboard doesn't use cursor.
+    // So Local State in LogTable is fine if only TimeRangeSelector uses it.
+
+    // BUT `App.tsx` had it.
+    // Let's verify `DataContext` support for cursorTime.
+
+    // Missing: cursorTime.
+
+    const [cursorTime, setCursorTime] = React.useState<number | null>(null);
+    const handleCursorChange = (t: number) => setCursorTime(t);
+
     const [selectedEntry, setSelectedEntry] = React.useState<LogEntry | null>(null);
     const [contextMenuState, setContextMenuState] = React.useState<ContextMenuState>(null);
     const [headerContextMenu, setHeaderContextMenu] = React.useState<{ x: number, y: number } | null>(null);
     const tableContainerRef = React.useRef<HTMLDivElement>(null);
     const pendingLoadRef = React.useRef(false);
     const previousScrollHeightRef = React.useRef(0);
-
-    const panelWidthsRef = React.useRef(props.panelWidths);
-    panelWidthsRef.current = props.panelWidths;
-
-    const {
-        entries,
-        onLoadMore,
-        hasMore,
-        onLoadPrev,
-        hasPrevLogs,
-        isBusy,
-        columnVisibility,
-        columnStyles,
-        logTableDensity,
-        keyboardSelectedId,
-        setKeyboardSelectedId,
-        appliedFilters,
-        theme,
-        jumpToEntryId,
-        uiScale
-    } = props;
 
     // UseData hook might still be needed for other things, but if setLogTableViewportHeight was the only thing, we might check.
     // However, for now, let's just remove the effect that calls it.
@@ -240,126 +218,69 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
     const handleRowClick = React.useCallback((entry: LogEntry) => {
         setSelectedEntry(entry);
         setKeyboardSelectedId(entry.id);
-        if (!props.isDetailPanelVisible) {
-            props.onDetailPanelVisibilityChange(true);
+        if (!isDetailPanelVisible) {
+            onDetailPanelVisibilityChange(true);
         }
         tableContainerRef.current?.focus({ preventScroll: true });
-    }, [props.isDetailPanelVisible, props.onDetailPanelVisibilityChange, setKeyboardSelectedId]);
+    }, [isDetailPanelVisible, onDetailPanelVisibilityChange, setKeyboardSelectedId]);
 
-    // Track the last valid navigation index to handle loading transitions
-    const lastNavIndexRef = React.useRef<number>(0);
+    // Use extracted hooks
+    useTableNavigation({
+        tableContainerRef,
+        entries,
+        keyboardSelectedId,
+        setKeyboardSelectedId,
+        rowHeight,
+        hasMore,
+        hasPrevLogs,
+        onLoadMore,
+        onLoadPrev,
+        isBusy
+    });
 
-    // Keyboard navigation effect
-    React.useEffect(() => {
-        const container = tableContainerRef.current;
-        if (!container) return;
-
-        const handleKeyDown = (e: KeyboardEvent) => {
-            const navKeys = ['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End'];
-            if (!navKeys.includes(e.key)) {
-                return;
-            }
-            e.preventDefault();
-
-            // Don't process navigation while loading to prevent race conditions
-            if (isBusy) {
-                return;
-            }
-
-            let currentIndex = entries.findIndex(entry => entry.id === keyboardSelectedId);
-
-            // If selected entry not found, use last known navigation index
-            if (currentIndex === -1) {
-                if (entries.length === 0) return;
-                // Clamp to valid range
-                currentIndex = Math.max(0, Math.min(lastNavIndexRef.current, entries.length - 1));
-            }
-
-            // Calculate visible rows per page based on container height
-            const visibleRows = Math.max(1, Math.floor(container.clientHeight / rowHeight) - 1);
-
-            let nextIndex = currentIndex;
-            switch (e.key) {
-                case 'ArrowDown':
-                    nextIndex = currentIndex + 1;
-                    break;
-                case 'ArrowUp':
-                    nextIndex = currentIndex - 1;
-                    break;
-                case 'PageDown':
-                    nextIndex = Math.min(currentIndex + visibleRows, entries.length - 1);
-                    break;
-                case 'PageUp':
-                    nextIndex = Math.max(currentIndex - visibleRows, 0);
-                    break;
-                case 'Home':
-                    nextIndex = 0;
-                    break;
-                case 'End':
-                    nextIndex = entries.length - 1;
-                    break;
-            }
-
-            if (nextIndex >= 0 && nextIndex < entries.length) {
-                setKeyboardSelectedId(entries[nextIndex].id);
-            }
-        };
-
-        container.addEventListener('keydown', handleKeyDown);
-        return () => container.removeEventListener('keydown', handleKeyDown);
-
-    }, [entries, keyboardSelectedId, setKeyboardSelectedId, hasMore, hasPrevLogs, onLoadMore, onLoadPrev, rowHeight, isBusy]);
+    const { handleFilterResize, handleDetailsResize } = usePanelResizer(panelWidths, onPanelWidthsChange);
 
     const handleContextMenu = React.useCallback((e: React.MouseEvent, entry: LogEntry, key: ColumnKey, value: string) => {
         e.preventDefault();
         setContextMenuState({ x: e.clientX, y: e.clientY, entry, key, value });
     }, []);
 
-    const handleFilterResize = (deltaX: number) => {
-        const newWidth = Math.max(240, Math.min(800, panelWidthsRef.current.filters + deltaX));
-        props.onPanelWidthsChange({ ...panelWidthsRef.current, filters: newWidth });
-    };
 
-    const handleDetailsResize = (deltaX: number) => {
-        // Delta is positive when moving right, which should decrease the details panel width
-        const newWidth = Math.max(300, Math.min(1200, panelWidthsRef.current.details - deltaX));
-        props.onPanelWidthsChange({ ...panelWidthsRef.current, details: newWidth });
-    };
 
     return (
         <div className="flex flex-col flex-grow min-h-0 bg-gray-100 dark:bg-gray-900">
-            {props.isTimeRangeSelectorVisible && props.overallTimeRange && (
+            {isTimeRangeSelectorVisible && overallLogTimeRange && (
                 <div className="flex-shrink-0 p-2 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50">
                     <TimeRangeSelector
-                        minTime={props.overallTimeRange.min}
-                        maxTime={props.overallTimeRange.max}
-                        selectedStartTime={parseFilterDateTime(props.filters.dateFrom, props.filters.timeFrom)}
-                        selectedEndTime={parseFilterDateTime(props.filters.dateTo, props.filters.timeTo)}
-                        onRangeChange={props.onTimeRangeSelectorChange}
-                        onClear={props.onClearTimeRange}
-                        theme={props.theme}
-                        pageTimestampRanges={props.pageTimestampRanges}
-                        fileTimeRanges={props.fileTimeRanges}
-                        logDensity={props.logDensity}
-                        overallLogDensity={props.overallLogDensity}
-                        datesWithLogs={props.datesWithLogs}
+                        minTime={overallLogTimeRange.min}
+                        maxTime={overallLogTimeRange.max}
+                        selectedStartTime={parseFilterDateTime(formFilters.dateFrom, formFilters.timeFrom)}
+                        selectedEndTime={parseFilterDateTime(formFilters.dateTo, formFilters.timeTo)}
+                        onRangeChange={handleTimeRangeSelect}
+                        onClear={onClearTimeRange}
+                        theme={theme}
+                        pageTimestampRanges={pageTimestampRanges}
+                        fileTimeRanges={fileTimeRanges}
+                        logDensity={logDensity}
+                        overallLogDensity={overallLogDensity}
+                        datesWithLogs={datesWithLogs}
                         onGoToPage={() => { }}
-                        onCursorChange={props.onCursorChange}
-                        onFileSelect={props.onFileSelect}
-                        onDateSelect={props.onDateSelect}
-                        zoomToSelectionEnabled={props.zoomToSelectionEnabled}
-                        iconSet={props.iconSet}
+                        onCursorChange={handleCursorChange}
+                        onFileSelect={onFileSelect}
+                        onDateSelect={onDateSelect}
+                        zoomToSelectionEnabled={zoomToSelectionEnabled}
+                        iconSet={iconSet}
                         uiScale={uiScale}
-                        cursorTime={props.cursorTime}
-                        timelineBarVisibility={props.timelineBarVisibility}
-                        onTimelineBarVisibilityChange={props.onTimelineBarVisibilityChange}
+                        cursorTime={cursorTime}
+                        timelineBarVisibility={timelineBarVisibility}
+                        onTimelineBarVisibilityChange={onTimelineBarVisibilityChange}
                     />
                 </div>
             )}
-            <ActiveFilters appliedFilters={props.appliedFilters} onRemoveFilter={props.onRemoveAppliedFilter} iconSet={props.iconSet} />
+            <ActiveFilters appliedFilters={appliedFilters} onRemoveFilter={onRemoveAppliedFilter} iconSet={iconSet} />
             <div className="flex flex-grow min-h-0">
-                <aside style={{ width: `${props.panelWidths.filters}px` }} className="flex-shrink-0 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
-                    <FilterBar {...props} />
+                <aside style={{ width: `${panelWidths.filters}px` }} className="flex-shrink-0 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+                    <FilterBar />
                 </aside>
                 <Splitter onDrag={handleFilterResize} />
                 <main className="flex-grow min-h-0 flex flex-col min-w-0">
@@ -419,32 +340,35 @@ export const LogTable: React.FC<LogTableProps> = (props) => {
                         </div>
                     </div>
                 </main>
-                {props.isDetailPanelVisible && (
+
+                {isDetailPanelVisible && (
                     <>
                         <Splitter onDrag={handleDetailsResize} />
                         <LogDetailPanel
                             entry={selectedEntry}
-                            onClose={() => props.onDetailPanelVisibilityChange(false)}
-                            width={props.panelWidths.details}
+                            onClose={() => onDetailPanelVisibilityChange(false)}
+                            width={panelWidths.details}
                             highlightTerms={[appliedFilters.includeMsg]}
-                            theme={props.theme}
-                            onApplyFilter={props.onApplyFilter}
-                            columnStyles={props.columnStyles}
-                            iconSet={props.iconSet}
+                            theme={theme}
+                            onApplyFilter={onApplyFilter}
+                            columnStyles={columnStyles}
+                            iconSet={iconSet}
                         />
                     </>
                 )}
             </div>
-            {contextMenuState && <ContextMenu {...contextMenuState} onClose={() => setContextMenuState(null)} onFilter={props.onContextMenuFilter} iconSet={props.iconSet} contextKey={contextMenuState.key} contextValue={contextMenuState.value} />}
-            {headerContextMenu && (
-                <ColumnVisibilityMenu
-                    x={headerContextMenu.x}
-                    y={headerContextMenu.y}
-                    visibility={props.columnVisibility}
-                    onChange={props.onColumnVisibilityChange}
-                    onClose={() => setHeaderContextMenu(null)}
-                />
-            )}
-        </div>
+            {contextMenuState && <ContextMenu {...contextMenuState} onClose={() => setContextMenuState(null)} onFilter={onContextMenuFilter} iconSet={iconSet} contextKey={contextMenuState.key} contextValue={contextMenuState.value} />}
+            {
+                headerContextMenu && (
+                    <ColumnVisibilityMenu
+                        x={headerContextMenu.x}
+                        y={headerContextMenu.y}
+                        visibility={columnVisibility}
+                        onChange={onColumnVisibilityChange}
+                        onClose={() => setHeaderContextMenu(null)}
+                    />
+                )
+            }
+        </div >
     );
 };

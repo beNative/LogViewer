@@ -1,5 +1,4 @@
 import React from 'react';
-// Fix: Changed import from "../types" to "../types.ts"
 import { ColumnKey, ColumnStyle, ColumnStyles } from '../types.ts';
 import { COLUMN_DEFINITIONS } from '../constants';
 import { Icon } from './icons';

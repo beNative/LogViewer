@@ -1,4 +1,4 @@
-import initSqlJs, { SqlJsStatic } from 'sql.js';
+import initSqlJs from 'sql.js';
 import { FilterState, LogEntry, TimelineDataPoint, CategoryDataPoint, PageTimestampRange, FileTimeRange, LogDensityPoint, StockInfoEntry, StockInfoFilters, StockArticleSuggestion, LogDensityPointByLevel, ConsoleMessageType } from './types.ts';
 
 const locateSqlWasm = (file: string) => {
@@ -12,7 +12,7 @@ const locateSqlWasm = (file: string) => {
 
     return `./dist/${file}`;
 };
-type SqlJsDatabase = InstanceType<SqlJsStatic['Database']>;
+type SqlJsDatabase = any;
 
 // Helper to convert date/time inputs to a UTC SQL-comparable format.
 // Supports time strings with or without milliseconds (HH:MM:SS or HH:MM:SS.mmm)
@@ -497,14 +497,14 @@ export class Database {
                 while (stmt.step()) {
                     const row = stmt.get();
                     const entry: any = { id: 0, level: 'N/A', time: 'N/A', sndrtype: 'N/A', sndrname: 'N/A', msg: 'N/A', fileName: 'N/A' };
-                    columnNames.forEach((colName, i) => {
+                    columnNames.forEach((colName: string, i: number) => {
                         if (Object.prototype.hasOwnProperty.call(entry, colName)) {
                             entry[colName] = row[i];
                         }
                     });
                     // If msg is missing but other fields aren't, serialize the row as msg
                     if (entry.msg === 'N/A' && columnNames.length > 1) {
-                        entry.msg = JSON.stringify(Object.fromEntries(columnNames.map((c, i) => [c, row[i]])));
+                        entry.msg = JSON.stringify(Object.fromEntries(columnNames.map((c: string, i: number) => [c, row[i]])));
                     }
                     entries.push(entry);
                 }
@@ -603,7 +603,7 @@ export class Database {
     }
 
     getMinMaxTime(filters?: FilterState): { minTime: string | null; maxTime: string | null } {
-        let result = { minTime: null, maxTime: null };
+        let result: { minTime: string | null; maxTime: string | null } = { minTime: null, maxTime: null };
         try {
             const { whereSql, params } = this._buildWhereClause(filters || {} as FilterState);
             const sql = `SELECT MIN(time), MAX(time) FROM logs ${whereSql}`;
@@ -624,7 +624,7 @@ export class Database {
     }
 
     getMinMaxStockTime(filters?: StockInfoFilters): { minTime: string | null; maxTime: string | null } {
-        let result = { minTime: null, maxTime: null };
+        let result: { minTime: string | null; maxTime: string | null } = { minTime: null, maxTime: null };
         try {
             const { whereSql, params } = this._buildStockWhereClause(filters || {} as StockInfoFilters);
             const sql = `SELECT MIN(timestamp), MAX(timestamp) FROM stock_info ${whereSql}`;

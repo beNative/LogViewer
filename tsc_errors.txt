@@ -1,0 +1,15 @@
+components/Settings.tsx(298,33): error TS2322: Type '(newIconSet: IconSet) => void' is not assignable to type '(value: string) => void'.
+  Types of parameters 'newIconSet' and 'value' are incompatible.
+    Type 'string' is not assignable to type 'IconSet'.
+components/TimeRangeSelector.tsx(304,38): error TS2322: Type '{ items: PageTimestampRange[]; isActive: (item: PageTimestampRange) => boolean; onSelect: (item: PageTimestampRange) => void; ... 8 more ...; valueToPosition: (v: number) => number; } | { ...; } | { ...; } | { ...; }' is not assignable to type 'IntrinsicAttributes & { items: LogDensityPointByLevel[] | LogDensityPoint[]; valueToPosition: ValueToPositionFn; ... 4 more ...; onMouseLeave?: ((e: MouseEvent<...>) => void) | undefined; } & { ...; }'.
+  Property 'theme' is missing in type '{ items: PageTimestampRange[]; isActive: (item: PageTimestampRange) => boolean; onSelect: (item: PageTimestampRange) => void; ... 8 more ...; valueToPosition: (v: number) => number; }' but required in type '{ items: LogDensityPointByLevel[] | LogDensityPoint[]; valueToPosition: ValueToPositionFn; theme: Theme; displayMinTime: number; displayMaxTime: number; onMouseMove?: ((e: MouseEvent<...>) => void) | undefined; onMouseLeave?: ((e: MouseEvent<...>) => void) | undefined; }'.
+db.ts(1,40): error TS7016: Could not find a declaration file for module 'sql.js'. 'C:/development/nodejs/github/Log-Analyser/node_modules/sql.js/dist/sql-wasm.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/sql.js` if it exists or add a new declaration (.d.ts) file containing `declare module 'sql.js';`
+db.ts(500,42): error TS7006: Parameter 'colName' implicitly has an 'any' type.
+db.ts(500,51): error TS7006: Parameter 'i' implicitly has an 'any' type.
+db.ts(507,88): error TS7006: Parameter 'c' implicitly has an 'any' type.
+db.ts(507,91): error TS7006: Parameter 'i' implicitly has an 'any' type.
+db.ts(637,32): error TS2322: Type 'string' is not assignable to type 'null'.
+db.ts(637,56): error TS2322: Type 'string' is not assignable to type 'null'.
+src/workers/data-worker.ts(188,25): error TS7053: Element implicitly has an 'any' type because expression of type '0' can't be used to index type 'void'.
+  Property '0' does not exist on type 'void'.

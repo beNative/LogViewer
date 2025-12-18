@@ -42,7 +42,6 @@ interface SettingsProps {
     onTimelineBarVisibilityChange: (newVisibility: TimelineBarVisibility) => void;
 }
 
-// FIX: Added missing 'inputStyles' constant definition.
 const inputStyles = "w-full bg-white dark:bg-gray-700/80 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white sm:text-sm rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition";
 
 const ToggleSwitch: React.FC<{
@@ -73,7 +72,7 @@ const SegmentedControl: React.FC<{
     label: string;
     value: string;
     options: { label: string; value: string }[];
-    onChange: (value: any) => void;
+    onChange: (value: string) => void;
 }> = ({ label, value, options, onChange }) => (
     <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-700">
         <span className="font-medium text-gray-800 dark:text-gray-200">{label}</span>
@@ -296,7 +295,7 @@ export const Settings: React.FC<SettingsProps> = (props) => {
                             <SegmentedControl
                                 label="Icon Set"
                                 value={iconSet}
-                                onChange={onIconSetChange}
+                                onChange={(val) => onIconSetChange(val as any)}
                                 options={[
                                     { label: 'Sharp', value: 'sharp' },
                                     { label: 'Solid', value: 'solid' },

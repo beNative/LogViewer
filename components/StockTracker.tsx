@@ -5,26 +5,19 @@ import { StockHistoryChart } from './StockHistoryChart.tsx';
 import { TimeRangeSelector } from './TimeRangeSelector.tsx';
 import { useConfirmDialog } from '../contexts/ConfirmDialogContext';
 import { useTimeline } from '../contexts/TimelineContext';
+import { useStock } from '../contexts/StockContext';
+import { useUI } from '../contexts/UIContext';
+import { useSettings } from '../contexts/SettingsContext';
 
-interface StockTrackerProps {
-    onSearch: (filters: StockInfoFilters) => void;
-    history: StockInfoEntry[];
-    isBusy: boolean;
-    iconSet: IconSet;
-    theme: Theme;
-    overallTimeRange: { min: string, max: string } | null;
-    overallStockDensity: LogDensityPoint[];
-    uiScale: number;
-    onRebuildStockData: () => Promise<void>;
-    onFetchSuggestions: (searchTerm: string, timeFilters: StockInfoFilters) => Promise<StockArticleSuggestion[]>;
-    timelineBarVisibility: TimelineBarVisibility;
-    onTimelineBarVisibilityChange: (newVisibility: TimelineBarVisibility) => void;
-}
+interface StockTrackerProps { }
 
 const inputStyles = "w-full px-3 py-2 bg-white dark:bg-gray-700/80 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white sm:text-sm rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 transition";
 
 
-export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, isBusy, iconSet, theme, overallTimeRange, overallStockDensity, uiScale, onRebuildStockData, onFetchSuggestions, timelineBarVisibility, onTimelineBarVisibilityChange }) => {
+export const StockTracker: React.FC<StockTrackerProps> = () => {
+    const { stockHistory, overallStockTimeRange, overallStockDensity, handleSearchStock, handleRebuildStockData, handleFetchStockSuggestions } = useStock();
+    const { isStockBusy } = useUI();
+    const { iconSet, theme, uiScale, timelineBarVisibility, onTimelineBarVisibilityChange } = useSettings();
     const [filters, setFilters] = React.useState<StockInfoFilters>({
         searchTerm: '',
         dateFrom: '',
@@ -46,9 +39,9 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
 
 
     React.useEffect(() => {
-        if (overallTimeRange && (!filters.dateFrom || !filters.dateTo)) {
-            const [minDate, minTimeStr] = overallTimeRange.min.split(' ');
-            const [maxDate, maxTimeStr] = overallTimeRange.max.split(' ');
+        if (overallStockTimeRange && (!filters.dateFrom || !filters.dateTo)) {
+            const [minDate, minTimeStr] = overallStockTimeRange.min.split(' ');
+            const [maxDate, maxTimeStr] = overallStockTimeRange.max.split(' ');
             setFilters(prev => ({
                 ...prev,
                 dateFrom: minDate,
@@ -57,7 +50,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                 timeTo: maxTimeStr?.substring(0, 8) || '23:59:59',
             }));
         }
-    }, [overallTimeRange, filters.dateFrom, filters.dateTo]);
+    }, [overallStockTimeRange, filters.dateFrom, filters.dateTo]);
 
     // Effect to hide suggestions on outside click
     React.useEffect(() => {
@@ -101,7 +94,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                             dateTo: newFilters.dateTo,
                             timeTo: newFilters.timeTo,
                         };
-                        const fetchedSuggestions = await onFetchSuggestions(value, timeFilters);
+                        const fetchedSuggestions = await handleFetchStockSuggestions(value, timeFilters);
                         setSuggestions(fetchedSuggestions);
                         setIsSuggestionsVisible(fetchedSuggestions.length > 0);
                         setActiveSuggestionIndex(-1);
@@ -142,7 +135,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         setSelectedHistoryIndex(null);
-        onSearch(filters);
+        handleSearchStock(filters);
         setIsSuggestionsVisible(false);
     };
 
@@ -154,7 +147,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
             type: 'warning',
         });
         if (confirmed) {
-            onRebuildStockData();
+            handleRebuildStockData();
         }
     };
 
@@ -164,18 +157,18 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
         }
         e.preventDefault();
 
-        if (history.length === 0) return;
+        if (stockHistory.length === 0) return;
 
         const currentIndex = selectedHistoryIndex;
         let nextIndex: number;
 
         if (currentIndex === null) {
-            nextIndex = e.key === 'ArrowUp' ? history.length - 1 : 0;
+            nextIndex = e.key === 'ArrowUp' ? stockHistory.length - 1 : 0;
         } else {
             if (e.key === 'ArrowUp') {
                 nextIndex = Math.max(0, currentIndex - 1);
             } else { // ArrowDown
-                nextIndex = Math.min(history.length - 1, currentIndex + 1);
+                nextIndex = Math.min(stockHistory.length - 1, currentIndex + 1);
             }
         }
         setSelectedHistoryIndex(nextIndex);
@@ -187,12 +180,12 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
     };
 
     const chartData = React.useMemo(() => {
-        if (!history || history.length === 0) return [];
-        return history.map(entry => ({
+        if (!stockHistory || stockHistory.length === 0) return [];
+        return stockHistory.map(entry => ({
             time: entry.timestamp.replace(' ', 'T') + 'Z',
             quantity: entry.quantity,
         }));
-    }, [history]);
+    }, [stockHistory]);
 
     const handleTimeRangeChange = (startTime: number, endTime: number) => {
         const startDate = new Date(startTime);
@@ -270,7 +263,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                     </div>
                     <button
                         onClick={handleRebuildClick}
-                        disabled={isBusy}
+                        disabled={isStockBusy}
                         className="inline-flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg transition-colors duration-200 bg-amber-500 hover:bg-amber-600 text-white dark:bg-amber-600 dark:hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         title="Clear and rebuild all stock data from the main log entries in this session."
                     >
@@ -327,19 +320,19 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                         </div>
                         <button
                             type="submit"
-                            disabled={isBusy || !filters.searchTerm}
+                            disabled={isStockBusy || !filters.searchTerm}
                             className="md:col-span-1 h-10 inline-flex items-center justify-center gap-2 px-4 py-2 font-semibold rounded-lg transition-colors duration-200 bg-sky-600 hover:bg-sky-700 text-white dark:bg-sky-600 dark:hover:bg-sky-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <Icon name="Filter" iconSet={iconSet} className="w-5 h-5" />
-                            <span>{isBusy ? '...' : 'Search'}</span>
+                            <span>{isStockBusy ? '...' : 'Search'}</span>
                         </button>
                     </div>
 
                     <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
-                        {overallTimeRange ? (
+                        {overallStockTimeRange ? (
                             <TimeRangeSelector
-                                minTime={new Date(overallTimeRange.min + 'Z').getTime()}
-                                maxTime={new Date(overallTimeRange.max + 'Z').getTime()}
+                                minTime={new Date(overallStockTimeRange.min + 'Z').getTime()}
+                                maxTime={new Date(overallStockTimeRange.max + 'Z').getTime()}
                                 selectedStartTime={selectedStartTime}
                                 selectedEndTime={selectedEndTime}
                                 onRangeChange={handleTimeRangeChange}
@@ -369,7 +362,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                 </form>
             </div>
 
-            {history.length > 0 && (
+            {stockHistory.length > 0 && (
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                     <div className="bg-white dark:bg-gray-800/50 p-4 sm:p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
                         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Stock History</h3>
@@ -389,7 +382,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200/50 dark:divide-gray-700/50">
-                                    {history.map((entry, index) => (
+                                    {stockHistory.map((entry, index) => (
                                         <tr
                                             key={`${entry.timestamp}-${index}`}
                                             ref={el => { rowRefs.current.set(index, el); }}
@@ -415,7 +408,7 @@ export const StockTracker: React.FC<StockTrackerProps> = ({ onSearch, history, i
                 </div>
             )}
 
-            {!isBusy && history.length === 0 && (
+            {!isStockBusy && stockHistory.length === 0 && (
                 <div className="text-center py-10">
                     <Icon name="Cube" iconSet={iconSet} className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
                     <h3 className="text-xl font-semibold mb-2 text-gray-700 dark:text-gray-300">No Stock Data</h3>

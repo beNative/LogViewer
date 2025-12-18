@@ -166,8 +166,7 @@ const handleRebuildStockData = async (payload: RebuildStockPayload) => {
 
     console.log('[Worker] Creating/clearing stock_info table...');
     postMessage({ type: 'progress', payload: { phase: 'parsing', message: 'Clearing old stock data...', progress: 5 } });
-    // FIX: Ensure the stock_info table exists before trying to delete from it.
-    // This prevents errors when rebuilding on a new/blank session.
+    // Ensure the stock_info table exists before deleting (handles new/blank sessions)
     db.exec(`
         CREATE TABLE IF NOT EXISTS stock_info (
             timestamp TEXT,
@@ -185,7 +184,7 @@ const handleRebuildStockData = async (payload: RebuildStockPayload) => {
     console.log('[Worker] Stock_info table cleared');
 
     console.log('[Worker] Counting logs with StockInfoMessage...');
-    const countResult = db.exec("SELECT COUNT(*) FROM logs WHERE LOWER(msg) LIKE '%<stockinfomessage%'");
+    const countResult = db.exec("SELECT COUNT(*) FROM logs WHERE LOWER(msg) LIKE '%<stockinfomessage%'") as any;
     const totalToScan = countResult[0]?.values[0]?.[0] || 0;
     console.log('[Worker] Found', totalToScan, 'logs to scan for stock info');
 

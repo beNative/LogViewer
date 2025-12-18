@@ -5,6 +5,7 @@ import { SettingsProvider, useSettings } from './SettingsContext';
 import { UIProvider } from './UIContext';
 import { SessionProvider } from './SessionContext';
 import { DataProvider } from './DataContext';
+import { AnalyticsProvider } from './AnalyticsContext';
 import { TimelineProvider } from './TimelineContext';
 import { ConfirmDialogProvider } from './ConfirmDialogContext';
 
@@ -28,7 +29,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                             <SessionProvider>
                                 <TimelineProvider>
                                     <DataProvider>
-                                        {children}
+                                        <AnalyticsProvider>
+                                            {children}
+                                        </AnalyticsProvider>
                                     </DataProvider>
                                 </TimelineProvider>
                             </SessionProvider>

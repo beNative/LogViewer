@@ -1,5 +1,3 @@
-// FIX: Removed incorrect import of `ToastMessage` from `App.tsx` to resolve a circular dependency error. The `ToastMessage` type is already defined within this file.
-
 export type LogEntry = {
     id: number;
     time: string;

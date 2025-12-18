@@ -1,19 +1,14 @@
 import React, { createContext, useState, useCallback, useContext, useEffect, useRef } from 'react';
-import { FilterState, LogEntry, PageTimestampRange, DashboardData, FileTimeRange, LogDensityPointByLevel, StockInfoEntry, StockInfoFilters, StockArticleSuggestion, LogDensityPoint, ConsoleMessage, LogTableDensity } from '../types';
+import { FilterState, LogEntry, PageTimestampRange, ConsoleMessage, LogTableDensity } from '../types';
 import { getSqlDateTime } from '../db';
 import { useSession } from './SessionContext';
 import { useUI } from './UIContext';
 import { useConsole } from './ConsoleContext';
 import { useSettings } from './SettingsContext';
 import { useTimeline } from './TimelineContext';
+import { DEFAULT_SCROLL_CHUNK_SIZE, ROW_HEIGHT_COMPACT, ROW_HEIGHT_NORMAL, ROW_HEIGHT_COMFORTABLE } from '../constants';
 
-const DEFAULT_SCROLL_CHUNK_SIZE = 200;
 const MIN_SCROLL_CHUNK_SIZE = 50;
-
-// Row height constants for different density modes (in pixels)
-const ROW_HEIGHT_COMPACT = 28;
-const ROW_HEIGHT_NORMAL = 36;
-const ROW_HEIGHT_COMFORTABLE = 44;
 
 const initialFilters: FilterState = {
     dateFrom: '', timeFrom: '', dateTo: '', timeTo: '', level: [], levelFilterMode: 'include',
@@ -22,7 +17,7 @@ const initialFilters: FilterState = {
     includeMsgMode: 'OR', excludeMsgMode: 'AND', sqlQuery: '', sqlQueryEnabled: false,
 };
 
-const initialDashboardData: DashboardData = { timeline: [], levels: [], senderTypes: [] };
+
 
 type DataContextType = {
     // Log Viewer State & Logic
@@ -34,10 +29,7 @@ type DataContextType = {
     setFormFilters: React.Dispatch<React.SetStateAction<FilterState>>;
     appliedFilters: FilterState;
     uniqueValues: { level: string[]; sndrtype: string[]; sndrname: string[]; fileName: string[]; };
-    fileTimeRanges: FileTimeRange[];
-    logDensity: LogDensityPointByLevel[];
-    overallLogDensity: LogDensityPointByLevel[];
-    datesWithLogs: string[];
+
     currentPage: number;
     totalPages: number;
     pageSize: number;
@@ -61,18 +53,9 @@ type DataContextType = {
     handleTimelineZoomReset: () => void;
 
     // Dashboard State & Logic
-    dashboardData: DashboardData;
+
     handleTimeRangeSelect: (startTime: number, endTime: number) => void;
     handleCategorySelect: (category: 'level' | 'sndrtype', value: string) => void;
-
-    // Stock Tracker State & Logic
-    stockHistory: StockInfoEntry[];
-    setStockHistory: React.Dispatch<React.SetStateAction<StockInfoEntry[]>>;
-    overallStockTimeRange: { min: string, max: string } | null;
-    overallStockDensity: LogDensityPoint[];
-    handleSearchStock: (filters: StockInfoFilters) => void;
-    handleRebuildStockData: () => Promise<void>;
-    handleFetchStockSuggestions: (searchTerm: string, timeFilters: StockInfoFilters) => Promise<StockArticleSuggestion[]>;
 
     // Shared
     logToConsoleForEntries: (message: string, type: "DEBUG" | "INFO" | "WARNING" | "ERROR") => void;
@@ -145,14 +128,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, [computeInfiniteScrollChunkSize]);
 
     // Dashboard State
-    const [dashboardData, setDashboardData] = useState<DashboardData>(initialDashboardData);
-    const [fileTimeRanges, setFileTimeRanges] = useState<FileTimeRange[]>([]);
-    const [logDensity, setLogDensity] = useState<LogDensityPointByLevel[]>([]);
-    const [overallLogDensity, setOverallLogDensity] = useState<LogDensityPointByLevel[]>([]);
-    const [datesWithLogs, setDatesWithLogs] = useState<string[]>([]);
+    // Moved to AnalyticsContext
 
-    // Stock Tracker State
-    const [stockHistory, setStockHistory] = useState<StockInfoEntry[]>([]);
+
+
 
     const busyTaskRef = useRef(0);
 
@@ -208,7 +187,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 sndrname: db.getUniqueColumnValues('sndrname'),
                 fileName: loadedFileNames,
             });
-            setOverallLogDensity(db.getLogDensityByLevel(initialFilters, 300));
+            // setOverallLogDensity moved to AnalyticsContext
         } else {
             setFormFilters(initialFilters);
             setAppliedFilters(initialFilters);
@@ -227,11 +206,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setEntriesEndOffset(0);
             setEntriesStartOffset(0);
             setHasPrevLogs(false);
-            setDashboardData(initialDashboardData);
-            setPageTimestampRanges([]);
-            setFileTimeRanges([]);
-            setLogDensity([]);
-            setDatesWithLogs([]);
             return;
         }
 
@@ -239,14 +213,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         clearTimeout(busyTaskRef.current);
 
         if (!isInitialLoad) {
-            // We only clear entries if it's NOT the initial load, 
-            // because on initial load we want to fetch them immediately in the timeout below.
-            // Actually, we usually want to clear before fetching new ones to avoid stale data flicker.
-            // But if we are fixing the "Showing 0 rows" bug, we want the fetch to happen.
-            // Let's keep it empty here, the fetch below will populate it.
+            // We only clear entries if it's NOT the initial load
             setFilteredEntries([]);
         }
-        setFilteredEntries([]);
 
         setEntriesEndOffset(0);
         setEntriesStartOffset(0);
@@ -257,15 +226,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const count = db.getFilteredLogCount(appliedFilters);
             setTotalFilteredCount(count);
 
-            setDashboardData({
-                timeline: db.getLogVolumeByInterval(appliedFilters),
-                levels: db.getCountsByColumn('level', appliedFilters),
-                senderTypes: db.getCountsByColumn('sndrtype', appliedFilters),
-            });
-            setFileTimeRanges(db.getTimeRangePerFile(appliedFilters));
-            setLogDensity(db.getLogDensityByLevel(appliedFilters, 200));
-            setDatesWithLogs(db.getDatesWithLogs(appliedFilters));
-
             if (count > 0) {
                 // Pagination mode logic
                 const entries = db.queryLogEntries(appliedFilters, pageSize, (currentPage - 1) * pageSize);
@@ -274,8 +234,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setPageTimestampRanges(ranges);
                 setHasMoreLogs(false);
                 if (isInitialLoad) {
-                    // If this was the initial load, we've now loaded data, so turn it off.
-                    // This prevents "Data is ready..." message and ensures normal operation.
                     setIsInitialLoad(false);
                 }
                 logToConsole(`View updated. Found ${count} matching entries.`, 'DEBUG');
@@ -283,12 +241,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 setFilteredEntries([]);
                 setPageTimestampRanges([]);
                 setHasMoreLogs(false);
-                if (count === 0) {
-                    setDashboardData(initialDashboardData);
-                    setFileTimeRanges([]);
-                    setLogDensity([]);
-                    setDatesWithLogs([]);
-                }
             }
             setIsBusy(false);
         }, 50);
@@ -305,18 +257,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }, [jumpToEntryId, filteredEntries, setKeyboardSelectedId, setJumpToEntryId]);
 
-    // Recalculate density when zoom level changes for higher resolution
-    useEffect(() => {
-        if (!db || !hasData) return;
+    // Recalculate density on zoom - Moved to AnalyticsContext
 
-        if (viewRange) {
-            // When zoomed, recalculate density for just the visible range
-            // This gives much finer resolution since 200 buckets cover only the zoomed range
-            const zoomedDensity = db.getLogDensityByLevel(appliedFilters, 200, viewRange.min, viewRange.max);
-            setLogDensity(zoomedDensity);
-        }
-        // When zoom is reset, the main data effect will recalculate logDensity
-    }, [db, hasData, viewRange, appliedFilters]);
 
     // LOGIC & ACTIONS
     const handleApplyFilters = useCallback(() => {
@@ -581,65 +523,32 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const handleTimelineZoomReset = useCallback(() => setViewRange(null), [setViewRange]);
 
-    // Stock Logic
-    const handleSearchStock = useCallback((filters: StockInfoFilters) => {
-        if (!db) return;
-        setIsStockBusy(true);
-        setTimeout(() => {
-            try {
-                const { entries: results } = db.queryStockInfo(filters);
-                setStockHistory(results);
-                if (results.length > 0 && !overallStockTimeRange) {
-                    const { minTime, maxTime } = db.getMinMaxStockTime();
-                    if (minTime && maxTime) {
-                        setOverallStockTimeRange({ min: minTime, max: maxTime });
-                        setOverallStockDensity(db.getStockDensity({} as StockInfoFilters, 300));
-                    }
-                }
-            } catch (e) {
-                logToConsole(`Stock search failed: ${e instanceof Error ? e.message : String(e)}`, 'ERROR');
-            } finally { setIsStockBusy(false); }
-        }, 50);
-    }, [db, logToConsole, setIsStockBusy, overallStockTimeRange, setOverallStockDensity, setOverallStockTimeRange]);
 
-    const handleFetchStockSuggestions = useCallback(async (searchTerm: string, timeFilters: StockInfoFilters): Promise<StockArticleSuggestion[]> => {
-        if (!db || searchTerm.length < 2) return [];
-        try { return db.getUniqueArticles(searchTerm, timeFilters); }
-        catch (e) { logToConsole(`Failed to fetch stock suggestions: ${e instanceof Error ? e.message : String(e)}`, 'ERROR'); return []; }
-    }, [db, logToConsole]);
-
-    const handleRebuildStockData = useCallback(async () => {
-        if (!db || !hasData) {
-            addToast({ type: 'error', title: 'Rebuild Failed', message: 'No data is currently loaded.' });
-            return;
-        }
-        await handleRebuildStockDataInWorker();
-        // After worker is done, the SessionContext will call updateStateFromDb, which will
-        // update the stock time range and density. We just need to clear the local history.
-        setStockHistory([]);
-    }, [db, hasData, addToast, handleRebuildStockDataInWorker]);
 
     // Memoize context value to prevent unnecessary re-renders of consumers
     const value = React.useMemo(() => ({
         filteredEntries, totalFilteredCount, hasMoreLogs, pageTimestampRanges, formFilters, setFormFilters,
-        appliedFilters, uniqueValues, fileTimeRanges, logDensity, overallLogDensity, datesWithLogs,
+        appliedFilters, uniqueValues,
+
         currentPage, totalPages: Math.ceil(totalFilteredCount / pageSize), pageSize, handleApplyFilters, handleResetFilters, handleClearTimeRange,
 
         onLoadMore, onLoadPrev, entriesStartOffset, hasPrevLogs, setLogTableViewportHeight: updateTableViewportHeight, goToPage, handlePageSizeChange, handleRemoveAppliedFilter, handleContextMenuFilter, handleCursorChange,
         handleFileSelect, handleDateSelect, handleApplyDetailFilter,
-        handleTimelineZoomToSelection, handleTimelineZoomReset, dashboardData, handleTimeRangeSelect, handleCategorySelect,
-        stockHistory, setStockHistory, overallStockTimeRange, overallStockDensity, handleSearchStock, handleRebuildStockData,
-        handleFetchStockSuggestions, logToConsoleForEntries: logToConsole, lastConsoleMessageForStatus: lastConsoleMessage,
+        handleTimelineZoomToSelection, handleTimelineZoomReset, handleTimeRangeSelect, handleCategorySelect,
+
+        logToConsoleForEntries: logToConsole, lastConsoleMessageForStatus: lastConsoleMessage,
         keyboardSelectedId, setKeyboardSelectedId, jumpToEntryId, isInitialLoad
     }), [
         filteredEntries, totalFilteredCount, hasMoreLogs, pageTimestampRanges, formFilters, setFormFilters,
-        appliedFilters, uniqueValues, fileTimeRanges, logDensity, overallLogDensity, datesWithLogs,
+        appliedFilters, uniqueValues,
         currentPage, totalFilteredCount, pageSize, handleApplyFilters, handleResetFilters, handleClearTimeRange,
+
+
         onLoadMore, onLoadPrev, entriesStartOffset, hasPrevLogs, updateTableViewportHeight, goToPage, handlePageSizeChange, handleRemoveAppliedFilter, handleContextMenuFilter, handleCursorChange,
         handleFileSelect, handleDateSelect, handleApplyDetailFilter,
-        handleTimelineZoomToSelection, handleTimelineZoomReset, dashboardData, handleTimeRangeSelect, handleCategorySelect,
-        stockHistory, setStockHistory, overallStockTimeRange, overallStockDensity, handleSearchStock, handleRebuildStockData,
-        handleFetchStockSuggestions, logToConsole, lastConsoleMessage,
+        handleTimelineZoomToSelection, handleTimelineZoomReset, handleTimeRangeSelect, handleCategorySelect,
+
+        logToConsole, lastConsoleMessage,
         keyboardSelectedId, setKeyboardSelectedId, jumpToEntryId, isInitialLoad
     ]);
 

@@ -6,8 +6,6 @@ import { useConsole } from './ConsoleContext';
 import { useToast } from './ToastContext';
 import { useSettings } from './SettingsContext';
 
-declare const JSZip: any;
-
 type SessionContextType = {
     db: Database | null;
     isElectron: boolean;
@@ -388,7 +386,11 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }, [activeSessionName, addToast, fetchSessions, handleNewSession]);
 
     const handleCreateNewSessionFromFiles = useCallback(async (files: FileList) => {
-        if (files.length === 0) return;
+        logToConsole(`SessionContext: handleCreateNewSessionFromFiles called with ${files.length} files.`, 'INFO');
+        if (files.length === 0) {
+            logToConsole('SessionContext: No files provided.', 'WARNING');
+            return;
+        }
         setIsLoading(true);
         setError(null);
         setProgressTitle("Processing Files...");

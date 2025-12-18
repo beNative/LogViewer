@@ -15,7 +15,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, children, disabled = 
 
   const showTooltip = React.useCallback(() => {
     if (disabled || !triggerRef.current) return;
-    
+
     // Position calculation will happen in useLayoutEffect
     setIsVisible(true);
   }, [disabled]);
@@ -38,7 +38,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, children, disabled = 
         // Not enough space above, position below
         top = triggerRect.bottom + GAP;
       }
-      
+
       // Check for horizontal overflow
       if (left < GAP) {
         left = GAP;
@@ -50,8 +50,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ content, children, disabled = 
     }
   }, [isVisible]);
 
-  // Clone the child to attach our own ref and event handlers
-  // FIX: Cast children to `React.ReactElement<any>` to fix type inference issue with cloneElement
+  // Clone child to attach ref and event handlers
   const triggerElement = React.cloneElement(children as React.ReactElement<any>, {
     ref: triggerRef,
     onMouseEnter: showTooltip,

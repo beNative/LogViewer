@@ -77,13 +77,7 @@ describe('timelineUtils', () => {
         it('should show date for long duration (> 2 days)', () => {
             const duration = 3 * 24 * 60 * 60 * 1000;
             const label = formatTickLabel(time, duration);
-            // Expect YYYY-MM-DD HH:MM if < ? Wait, Logic is:
-            // <= 2 days: Date + Time
-            // > 2 days: Date only
-            // Wait, logic says `if (duration <= 2 * 24 * ...)` -> Date + Time.
-            // else -> Date only.
-
-            // Testing > 2 days (3 days) -> Date Only
+            // Duration > 2 days should show date only format
             expect(label).toMatch(/^\d{4}-\d{2}-\d{2}$/); // 2023-01-01
         });
     });

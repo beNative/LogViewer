@@ -1,7 +1,6 @@
 import React from 'react';
 import { StockChartDataPoint } from '../types.ts';
 
-declare const Chart: any;
 
 type Theme = 'light' | 'dark';
 
@@ -13,14 +12,14 @@ interface StockHistoryChartProps {
 
 export const StockHistoryChart: React.FC<StockHistoryChartProps> = ({ data, theme, selectedIndex }) => {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
-  const chartRef = React.useRef<any>(null);
+  const chartRef = React.useRef<{ destroy: () => void; update: () => void } | null>(null);
 
   React.useEffect(() => {
     if (!canvasRef.current || !data) return;
 
     const ctx = canvasRef.current.getContext('2d');
     if (!ctx) return;
-    
+
     if (chartRef.current) {
       chartRef.current.destroy();
     }
@@ -28,27 +27,27 @@ export const StockHistoryChart: React.FC<StockHistoryChartProps> = ({ data, them
     const pointRadii = data.map((_, index) => selectedIndex === index ? 7 : 3);
     const pointHitRadii = data.map((_, index) => selectedIndex === index ? 10 : 3);
     const pointBorderWidths = data.map((_, index) => selectedIndex === index ? 3 : 1);
-    const pointBorderColors = data.map((_, index) => selectedIndex === index 
-        ? (theme === 'dark' ? 'rgba(251, 146, 60, 1)' : 'rgba(234, 88, 12, 1)') // orange
-        : 'rgba(16, 185, 129, 1)' // green
+    const pointBorderColors = data.map((_, index) => selectedIndex === index
+      ? (theme === 'dark' ? 'rgba(251, 146, 60, 1)' : 'rgba(234, 88, 12, 1)') // orange
+      : 'rgba(16, 185, 129, 1)' // green
     );
 
     const chartData = {
-        labels: data.map(d => new Date(d.time)),
-        datasets: [{
-            label: 'Quantity',
-            data: data.map(d => d.quantity),
-            backgroundColor: 'rgba(16, 185, 129, 0.2)',
-            borderColor: 'rgba(16, 185, 129, 1)',
-            borderWidth: 2,
-            pointRadius: pointRadii,
-            pointHitRadius: pointHitRadii,
-            pointBorderWidth: pointBorderWidths,
-            pointBorderColor: pointBorderColors,
-            pointBackgroundColor: 'rgba(16, 185, 129, 1)',
-            tension: 0.1,
-            fill: true,
-        }]
+      labels: data.map(d => new Date(d.time)),
+      datasets: [{
+        label: 'Quantity',
+        data: data.map(d => d.quantity),
+        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+        borderColor: 'rgba(16, 185, 129, 1)',
+        borderWidth: 2,
+        pointRadius: pointRadii,
+        pointHitRadius: pointHitRadii,
+        pointBorderWidth: pointBorderWidths,
+        pointBorderColor: pointBorderColors,
+        pointBackgroundColor: 'rgba(16, 185, 129, 1)',
+        tension: 0.1,
+        fill: true,
+      }]
     };
 
     const gridColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
@@ -68,22 +67,22 @@ export const StockHistoryChart: React.FC<StockHistoryChartProps> = ({ data, them
           x: {
             type: 'time',
             time: {
-                tooltipFormat: 'yyyy-MM-dd HH:mm:ss',
-                displayFormats: {
-                    minute: 'MMM d, HH:mm:ss',
-                    hour: 'MMM d, HH:mm',
-                    day: 'MMM d, yyyy',
-                    week: 'MMM d, yyyy',
-                    month: 'MMM yyyy',
-                    year: 'yyyy',
-                }
+              tooltipFormat: 'yyyy-MM-dd HH:mm:ss',
+              displayFormats: {
+                minute: 'MMM d, HH:mm:ss',
+                hour: 'MMM d, HH:mm',
+                day: 'MMM d, yyyy',
+                week: 'MMM d, yyyy',
+                month: 'MMM yyyy',
+                year: 'yyyy',
+              }
             },
             grid: { color: gridColor },
-            ticks: { 
-                color: tickColor, 
-                maxRotation: 0,
-                autoSkip: true,
-                maxTicksLimit: 10,
+            ticks: {
+              color: tickColor,
+              maxRotation: 0,
+              autoSkip: true,
+              maxTicksLimit: 10,
             }
           },
           y: {
@@ -104,7 +103,7 @@ export const StockHistoryChart: React.FC<StockHistoryChartProps> = ({ data, them
                 if (!tooltipItems || tooltipItems.length === 0) return '';
                 const date = new Date(tooltipItems[0].parsed.x);
                 if (isNaN(date.getTime())) return '';
-                
+
                 const isoString = date.toISOString(); // YYYY-MM-DDTHH:mm:ss.sssZ
                 const datePart = isoString.substring(0, 10);
                 const timePart = isoString.substring(11, 23); // Includes milliseconds

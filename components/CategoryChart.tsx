@@ -1,7 +1,6 @@
 import React from 'react';
 import { CategoryDataPoint } from '../types.ts';
 
-declare const Chart: any;
 
 type Theme = 'light' | 'dark';
 
@@ -49,7 +48,7 @@ const lightenColor = (hex: string, percent: number) => {
  */
 export const CategoryChart: React.FC<CategoryChartProps> = ({ data, onSliceClick, theme }) => {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
-  const chartRef = React.useRef<any>(null);
+  const chartRef = React.useRef<{ destroy: () => void; update: () => void } | null>(null);
 
   React.useEffect(() => {
     if (!canvasRef.current || !data) return;

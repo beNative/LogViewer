@@ -32,6 +32,7 @@ import { useConsole } from './contexts/ConsoleContext';
 import { useSettings } from './contexts/SettingsContext';
 import { useSession } from './contexts/SessionContext';
 import { useData } from './contexts/DataContext';
+import { StockProvider } from './contexts/StockContext';
 import { TitleBar } from './components/TitleBar';
 
 const App: React.FC = () => {
@@ -66,41 +67,9 @@ const App: React.FC = () => {
 
   // Data (Log & Stock) State and Actions from Hooks
   const data = useData();
-  const {
-    filteredEntries, pageTimestampRanges, formFilters, setFormFilters,
-    appliedFilters, handleApplyFilters, handleResetFilters, handleClearTimeRange,
-    uniqueValues, onLoadMore, hasMoreLogs, onLoadPrev, hasPrevLogs, keyboardSelectedId, setKeyboardSelectedId,
-    jumpToEntryId, isInitialLoad, handleRemoveAppliedFilter, handleContextMenuFilter,
-    handleCursorChange, handleFileSelect, handleDateSelect, handleApplyDetailFilter,
 
-    dashboardData, handleTimeRangeSelect, handleCategorySelect,
-    stockHistory, overallStockTimeRange, overallStockDensity, handleSearchStock,
-    handleRebuildStockData, handleFetchStockSuggestions,
-    currentPage, totalPages, pageSize, handlePageSizeChange, goToPage,
-    fileTimeRanges, logDensity, overallLogDensity, datesWithLogs
-  } = data;
 
-  // Derived state for cursor
-  const selectedEntryForCursor = React.useMemo(() => {
-    if (keyboardSelectedId === null) return null;
-    return filteredEntries.find(e => e.id === keyboardSelectedId);
-  }, [keyboardSelectedId, filteredEntries]);
 
-  const cursorTime = selectedEntryForCursor
-    ? new Date(selectedEntryForCursor.time.replace(/ (\d+)$/, '.$1') + 'Z').getTime()
-    : null;
-
-  // --- Composition Handlers to fix circular dependency ---
-  const handleSavePreset = (name: string) => {
-    settings.onSaveFilterPreset(name, data.formFilters);
-  };
-
-  const handleLoadPreset = (name: string) => {
-    const preset = settings.onLoadFilterPreset(name);
-    if (preset) {
-      data.setFormFilters(preset);
-    }
-  };
 
   return (
     <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
@@ -146,62 +115,7 @@ const App: React.FC = () => {
         {activeView === 'viewer' && (
           <>
             {hasData ? (
-              <LogTable
-                entries={filteredEntries}
-                loadedFileNames={loadedFileNames}
-                pageTimestampRanges={pageTimestampRanges}
-                filters={formFilters}
-                appliedFilters={appliedFilters}
-                onFiltersChange={setFormFilters}
-                onApplyFilters={handleApplyFilters}
-                onResetFilters={handleResetFilters}
-                onClearTimeRange={handleClearTimeRange}
-                uniqueValues={uniqueValues}
-                theme={theme}
-                columnVisibility={settings.columnVisibility}
-                onColumnVisibilityChange={settings.onColumnVisibilityChange}
-                columnStyles={settings.columnStyles}
-                panelWidths={settings.panelWidths}
-                onPanelWidthsChange={settings.onPanelWidthsChange}
-                isDetailPanelVisible={isDetailPanelVisible}
-                onDetailPanelVisibilityChange={onDetailPanelVisibilityChange}
-                onApplyFilter={handleApplyDetailFilter}
-                onContextMenuFilter={handleContextMenuFilter}
-                customFilterPresets={settings.customFilterPresets}
-                onSavePreset={handleSavePreset}
-                onDeletePreset={settings.onDeleteFilterPreset}
-                onLoadPreset={handleLoadPreset}
-                onLoadMore={onLoadMore}
-                hasMore={hasMoreLogs}
-                onLoadPrev={onLoadPrev}
-                hasPrevLogs={hasPrevLogs}
-                isBusy={isBusy}
-                logToConsole={data.logToConsoleForEntries}
-                overallTimeRange={overallTimeRange}
-                onTimeRangeSelectorChange={handleTimeRangeSelect}
-                isTimeRangeSelectorVisible={settings.isTimeRangeSelectorVisible}
-                onTimeRangeSelectorVisibilityChange={settings.onTimeRangeSelectorVisibilityChange}
-                fileTimeRanges={fileTimeRanges}
-                logDensity={logDensity}
-                overallLogDensity={overallLogDensity}
-                datesWithLogs={datesWithLogs}
-                onCursorChange={handleCursorChange}
-                onFileSelect={handleFileSelect}
-                onDateSelect={handleDateSelect}
-                keyboardSelectedId={keyboardSelectedId}
-                setKeyboardSelectedId={setKeyboardSelectedId}
-                jumpToEntryId={jumpToEntryId}
-                isInitialLoad={isInitialLoad}
-                iconSet={iconSet}
-                onRemoveAppliedFilter={handleRemoveAppliedFilter}
-                logTableDensity={logTableDensity}
-                onLogTableDensityChange={settings.onLogTableDensityChange}
-                uiScale={settings.uiScale}
-                cursorTime={cursorTime}
-                timelineBarVisibility={settings.timelineBarVisibility}
-                onTimelineBarVisibilityChange={settings.onTimelineBarVisibilityChange}
-                zoomToSelectionEnabled={settings.zoomToSelectionEnabled ?? true}
-              />
+              <LogTable />
             ) : (
               <div className="flex-grow flex items-center justify-center p-8 text-center bg-white dark:bg-gray-900">
                 <div>
@@ -216,32 +130,14 @@ const App: React.FC = () => {
           </>
         )}
         {activeView === 'dashboard' && (
-          <Dashboard
-            data={dashboardData}
-            hasData={hasData}
-            onTimeRangeSelect={handleTimeRangeSelect}
-            onCategorySelect={handleCategorySelect}
-            theme={theme}
-            iconSet={iconSet}
-          />
+          <Dashboard />
         )}
         {activeView === 'stock' && (
-          <Suspense fallback={<LazyLoadFallback />}>
-            <StockTracker
-              onSearch={handleSearchStock}
-              history={stockHistory}
-              isBusy={isStockBusy}
-              iconSet={iconSet}
-              theme={theme}
-              overallTimeRange={overallStockTimeRange}
-              overallStockDensity={overallStockDensity}
-              uiScale={settings.uiScale}
-              onRebuildStockData={handleRebuildStockData}
-              onFetchSuggestions={handleFetchStockSuggestions}
-              timelineBarVisibility={settings.timelineBarVisibility}
-              onTimelineBarVisibilityChange={settings.onTimelineBarVisibilityChange}
-            />
-          </Suspense>
+          <StockProvider>
+            <Suspense fallback={<LazyLoadFallback />}>
+              <StockTracker />
+            </Suspense>
+          </StockProvider>
         )}
 
         {activeView === 'info' && (
@@ -275,12 +171,12 @@ const App: React.FC = () => {
         filteredCount={data.totalFilteredCount}
         activeSessionName={activeSessionName}
         isDirty={isDirty}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        visibleRowCount={filteredEntries.length}
-        pageSize={pageSize}
-        onPageSizeChange={handlePageSizeChange}
-        onGoToPage={goToPage}
+        currentPage={data.currentPage}
+        totalPages={data.totalPages}
+        visibleRowCount={data.filteredEntries.length}
+        pageSize={data.pageSize}
+        onPageSizeChange={data.handlePageSizeChange}
+        onGoToPage={data.goToPage}
         isBusy={isBusy}
         lastConsoleMessage={data.lastConsoleMessageForStatus}
         theme={theme}
