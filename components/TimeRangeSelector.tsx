@@ -228,13 +228,17 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
     const currentStart = tempSelection?.start ?? optimisticSelection?.start ?? selectedStartTime;
     const currentEnd = tempSelection?.end ?? optimisticSelection?.end ?? selectedEndTime;
 
+    // Check if selection is completely outside visible range
+    const selectionCompletelyOutsideView = currentStart !== null && currentEnd !== null &&
+        (currentEnd < displayMinTime || currentStart > displayMaxTime);
+
     const visibleSelectionStart = currentStart !== null ? Math.max(currentStart, displayMinTime) : null;
     const visibleSelectionEnd = currentEnd !== null ? Math.min(currentEnd, displayMaxTime) : null;
 
     const startMatches = currentStart !== null && Math.abs(currentStart - displayMinTime) < (displayMaxTime - displayMinTime) * 0.001;
     const endMatches = currentEnd !== null && Math.abs(currentEnd - displayMaxTime) < (displayMaxTime - displayMinTime) * 0.001;
-    // Show selection if dragging (tempSelection) OR if selection doesn't match the current view
-    const showSelection = !!tempSelection || !(startMatches && endMatches);
+    // Show selection if dragging (tempSelection) OR if selection doesn't match the current view AND is at least partially visible
+    const showSelection = !selectionCompletelyOutsideView && (!!tempSelection || !(startMatches && endMatches));
 
     const startPos = visibleSelectionStart !== null ? mainValueToPos(visibleSelectionStart) : -1;
     const endPos = visibleSelectionEnd !== null ? mainValueToPos(visibleSelectionEnd) : -1;
