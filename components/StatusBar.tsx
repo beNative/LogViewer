@@ -109,7 +109,13 @@ export const StatusBar: React.FC<StatusBarProps> = (props) => {
                         <div className="h-4 w-px bg-gray-300 dark:bg-gray-600" />
                         <DensityControl value={logTableDensity} onChange={onLogTableDensityChange} />
                         <Tooltip content={isDetailPanelVisible ? "Hide Details" : "Show Details"}>
-                            <button onClick={() => onDetailPanelVisibilityChange(!isDetailPanelVisible)} className="p-1.5 text-gray-500 dark:text-gray-400 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                            <button
+                                onClick={() => onDetailPanelVisibilityChange(!isDetailPanelVisible)}
+                                className={`p-1.5 rounded-md transition-colors ${isDetailPanelVisible
+                                        ? 'bg-sky-600 text-white hover:bg-sky-700'
+                                        : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                    }`}
+                            >
                                 <Icon name="SidebarRight" iconSet={iconSet} className="w-5 h-5" />
                             </button>
                         </Tooltip>

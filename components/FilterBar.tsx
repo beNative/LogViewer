@@ -167,6 +167,31 @@ export const FilterBar: React.FC<FilterBarProps> = () => {
         onFiltersChange({ ...filters, [filter]: mode });
     };
 
+    // Debounced auto-apply for message content filters (real-time search)
+    const debouncedApplyRef = React.useRef<NodeJS.Timeout | null>(null);
+
+    const handleMessageInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const newFilters = { ...filters, [e.target.name]: e.target.value };
+        onFiltersChange(newFilters);
+
+        // Debounce the auto-apply (300ms delay)
+        if (debouncedApplyRef.current) {
+            clearTimeout(debouncedApplyRef.current);
+        }
+        debouncedApplyRef.current = setTimeout(() => {
+            onApplyFilters();
+        }, 300);
+    };
+
+    // Cleanup debounce timer on unmount
+    React.useEffect(() => {
+        return () => {
+            if (debouncedApplyRef.current) {
+                clearTimeout(debouncedApplyRef.current);
+            }
+        };
+    }, []);
+
     const handleSaveClick = () => {
         setIsSavingPreset(true);
         if (selectedPreset) {
@@ -436,7 +461,7 @@ export const FilterBar: React.FC<FilterBarProps> = () => {
                                 name="includeMsg"
                                 id="includeMsg"
                                 value={filters.includeMsg}
-                                onChange={handleInputChange}
+                                onChange={handleMessageInputChange}
                                 className={textareaStyles}
                                 placeholder="e.g. error&#10;timeout"
                                 rows={3}
@@ -455,7 +480,7 @@ export const FilterBar: React.FC<FilterBarProps> = () => {
                                 name="excludeMsg"
                                 id="excludeMsg"
                                 value={filters.excludeMsg}
-                                onChange={handleInputChange}
+                                onChange={handleMessageInputChange}
                                 className={textareaStyles}
                                 placeholder="e.g. success&#10;heartbeat"
                                 rows={3}
