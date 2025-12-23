@@ -182,6 +182,7 @@ export type Settings = {
     uiScale: number;
     logSqlQueries: boolean;
     zoomToSelectionEnabled: boolean;
+    pageSize: number;
 };
 
 export type ToastMessage = {

@@ -37,6 +37,7 @@ type SettingsContextType = {
     uiScale: number;
     logSqlQueries: boolean;
     zoomToSelectionEnabled: boolean;
+    pageSize: number;
     onThemeChange: (newTheme: Theme) => void;
     onAllowPrereleaseChange: (allow: boolean) => void;
     onAutoUpdateEnabledChange: (enabled: boolean) => void;
@@ -54,6 +55,7 @@ type SettingsContextType = {
     onUiScaleChange: (newScale: number) => void;
     onLogSqlQueriesChange: (enabled: boolean) => void;
     onZoomToSelectionEnabledChange: (enabled: boolean) => void;
+    onPageSizeChange: (size: number) => void;
     onFullSettingsUpdate: (newSettings: SettingsType) => Promise<void>;
     onSaveFilterPreset: (name: string, filtersToSave: FilterState) => Promise<void>;
     onDeleteFilterPreset: (name: string) => Promise<void>;
@@ -90,6 +92,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const [uiScale, setUiScale] = useState<number>(1);
     const [logSqlQueries, setLogSqlQueries] = useState<boolean>(false);
     const [zoomToSelectionEnabled, setZoomToSelectionEnabled] = useState<boolean>(true);
+    const [pageSize, setPageSize] = useState<number>(1000);
 
     // Load settings on startup
     useEffect(() => {
@@ -120,6 +123,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             setUiScale(settings.uiScale || 1);
             setLogSqlQueries(settings.logSqlQueries ?? false);
             setZoomToSelectionEnabled(settings.zoomToSelectionEnabled ?? true);
+            setPageSize(settings.pageSize || 1000);
         }).catch(err => logToConsole(`Failed to load settings: ${err.message}`, 'ERROR'));
     }, [logToConsole]);
 
@@ -156,6 +160,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const onUiScaleChange = (newScale: number) => { setUiScale(newScale); updateSettings({ uiScale: newScale }); };
     const onLogSqlQueriesChange = (enabled: boolean) => { setLogSqlQueries(enabled); updateSettings({ logSqlQueries: enabled }); };
     const onZoomToSelectionEnabledChange = (enabled: boolean) => { setZoomToSelectionEnabled(enabled); updateSettings({ zoomToSelectionEnabled: enabled }); };
+    const onPageSizeChange = (size: number) => { setPageSize(size); updateSettings({ pageSize: size }); };
 
     const onFullSettingsUpdate = async (newSettings: SettingsType) => {
         setTheme(newSettings.theme);
@@ -209,11 +214,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const value: SettingsContextType = {
         theme, allowPrerelease, isAutoUpdateEnabled, githubToken, iconSet, logTableDensity,
         columnVisibility, columnWidths, customFilterPresets, columnStyles, panelWidths, isTimeRangeSelectorVisible,
-        isDetailPanelVisible, isFocusDebuggerVisible, timelineBarVisibility, uiScale, logSqlQueries, zoomToSelectionEnabled,
+        isDetailPanelVisible, isFocusDebuggerVisible, timelineBarVisibility, uiScale, logSqlQueries, zoomToSelectionEnabled, pageSize,
         onThemeChange, onAllowPrereleaseChange, onAutoUpdateEnabledChange, onGithubTokenChange,
         onIconSetChange, onLogTableDensityChange, onColumnVisibilityChange, onColumnWidthsChange, onColumnStylesChange,
         onPanelWidthsChange, onTimeRangeSelectorVisibilityChange, onDetailPanelVisibilityChange,
-        onFocusDebuggerVisibilityChange, onTimelineBarVisibilityChange, onUiScaleChange, onLogSqlQueriesChange, onZoomToSelectionEnabledChange,
+        onFocusDebuggerVisibilityChange, onTimelineBarVisibilityChange, onUiScaleChange, onLogSqlQueriesChange, onZoomToSelectionEnabledChange, onPageSizeChange,
         onFullSettingsUpdate, onSaveFilterPreset, onDeleteFilterPreset, onLoadFilterPreset,
     };
 

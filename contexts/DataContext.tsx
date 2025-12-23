@@ -74,7 +74,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { db, hasData, loadedFileNames, handleRebuildStockDataInWorker, overallStockTimeRange, setOverallStockTimeRange, overallStockDensity, setOverallStockDensity } = useSession();
     const { logToConsole, lastConsoleMessage } = useConsole();
     const { setIsBusy, isBusy, isStockBusy, setIsStockBusy, setActiveView, setJumpToEntryId, jumpToEntryId, isInitialLoad, setIsInitialLoad, keyboardSelectedId, setKeyboardSelectedId, addToast } = useUI();
-    const { logTableDensity, uiScale } = useSettings();
+    const { logTableDensity, uiScale, pageSize, onPageSizeChange } = useSettings();
     const { viewRange, setViewRange, setSelection } = useTimeline();
 
     // Log Viewer State
@@ -87,7 +87,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [appliedFilters, setAppliedFilters] = useState<FilterState>(initialFilters);
     const [uniqueValues, setUniqueValues] = useState<{ level: string[]; sndrtype: string[]; sndrname: string[]; fileName: string[]; }>({ level: [], sndrtype: [], sndrname: [], fileName: [] });
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [pageSize, setPageSize] = useState<number>(1000);
     const [pageTimestampRanges, setPageTimestampRanges] = useState<PageTimestampRange[]>([]);
     const [hasMoreLogs, setHasMoreLogs] = useState(true);    // Timeline State moved to TimelineContext
     const [tableViewportHeight, setTableViewportHeight] = useState<number | null>(null);
@@ -348,7 +347,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, [db, hasPrevLogs, isBusy, entriesStartOffset, appliedFilters, logToConsole, setIsBusy, infiniteScrollChunkSize]);
 
     const goToPage = useCallback((pageNumber: number) => setCurrentPage(pageNumber), []);
-    const handlePageSizeChange = useCallback((newSize: number) => { setPageSize(newSize); setCurrentPage(1); }, []);
+    const handlePageSizeChange = useCallback((newSize: number) => { onPageSizeChange(newSize); setCurrentPage(1); }, [onPageSizeChange]);
 
     const handleClearTimeRange = useCallback(() => {
         logToConsole('Clearing time range filters...', 'INFO');
