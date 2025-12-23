@@ -153,7 +153,7 @@ export const OverviewBrush: React.FC<OverviewBrushProps> = ({
         <div
             ref={containerRef}
             onMouseDown={handleContainerMouseDown}
-            className="relative w-full h-10 cursor-crosshair"
+            className="relative w-full h-5 cursor-crosshair"
         >
             <div className="w-full h-full flex items-end pointer-events-none">
                 {density.map((bucket: LogDensityPointByLevel | LogDensityPoint, i) => {

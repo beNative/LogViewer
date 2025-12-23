@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { APP_VERSION } from './constants';
 // TimelineProvider removed (in AppProvider)
-import { Header } from './components/Header';
+// Header removed (merged into TitleBar)
 // Console replaced by BottomLogPanel
 import { DataHub } from './components/DataHub';
 import { Dashboard } from './components/Dashboard';
@@ -73,7 +73,13 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      <TitleBar activeView={activeView} />
+      <TitleBar
+        activeView={activeView}
+        onViewChange={setActiveView}
+        isBusy={isBusy || isStockBusy}
+        onToggleLogPanel={() => setIsBottomLogPanelVisible(!isBottomLogPanelVisible)}
+        isLogPanelVisible={isBottomLogPanelVisible}
+      />
       <div className="fixed bottom-4 right-4 z-50 w-full max-w-sm space-y-3">
         {toasts.map(toast => (
           <Toast key={toast.id} toast={toast} onDismiss={() => removeToast(toast.id)} iconSet={iconSet} />
@@ -88,7 +94,6 @@ const App: React.FC = () => {
         />
       )}
       {isLoading && <ProgressIndicator title={progressTitle} progress={progress} message={progressMessage} phase={progressPhase} detailedProgress={detailedProgress} iconSet={iconSet} onCancel={handleCancelProcessing} />}
-      <Header activeView={activeView} onViewChange={setActiveView} isBusy={isBusy || isStockBusy} iconSet={iconSet} onToggleLogPanel={() => setIsBottomLogPanelVisible(!isBottomLogPanelVisible)} isLogPanelVisible={isBottomLogPanelVisible} />
       <main className="flex-grow flex flex-col min-h-0">
         {activeView === 'data' && (
           <DataHub

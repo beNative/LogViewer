@@ -32,7 +32,7 @@ export const AboutDialog: React.FC<AboutDialogProps> = ({ isOpen, onClose, iconS
 
         const handleTabKey = (e: KeyboardEvent) => {
             if (e.key !== 'Tab' || !focusableElements || focusableElements.length === 0) return;
-            
+
             if (e.shiftKey) {
                 if (document.activeElement === firstElement) {
                     lastElement?.focus();
@@ -45,7 +45,7 @@ export const AboutDialog: React.FC<AboutDialogProps> = ({ isOpen, onClose, iconS
                 }
             }
         };
-        
+
         firstElement?.focus();
         dialogRef.current?.addEventListener('keydown', handleTabKey);
 
@@ -60,7 +60,7 @@ export const AboutDialog: React.FC<AboutDialogProps> = ({ isOpen, onClose, iconS
     }
 
     return (
-        <div 
+        <div
             className="fixed inset-0 bg-gray-900 bg-opacity-70 flex items-center justify-center z-50 animate-fadeIn"
             onClick={onClose}
             role="dialog"
@@ -79,11 +79,6 @@ export const AboutDialog: React.FC<AboutDialogProps> = ({ isOpen, onClose, iconS
                     Log Analyser
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Version {version}</p>
-
-                <div className="text-gray-700 dark:text-gray-300 space-y-2 my-6">
-                    <p>Design and concept by Tim Sinaeve.</p>
-                    <p>Implementation by Gemini Pro 2.5.</p>
-                </div>
 
                 <p className="text-xs text-gray-500 dark:text-gray-500">
                     &copy; 2025 Tim Sinaeve. All rights reserved.
