@@ -1,6 +1,27 @@
 # Version Log
 
-All notable changes to this project will be documented in this file. The current application version is **0.25.0**.
+All notable changes to this project will be documented in this file. The current application version is **0.27.0**.
+
+## 0.27.0 – 2025-12-23
+
+### Added
+
+- **Resizable Grid Columns**: Drag column borders to resize. Widths persist in settings.
+- **Smart Column Sizing**: Metadata columns fixed at minimum width, Message column expands to fill space.
+- **Real-Time Message Search**: Message content filters auto-apply with 300ms debounce.
+- **Persistent Page Size**: Rows/Page setting now saved and restored automatically.
+
+### Changed
+
+- **Details Toggle Button**: Now shows on/off state with blue highlight when panel is visible.
+- **Detail Panel Behavior**: No longer auto-opens on row click; only toggles via status bar button.
+
+### Fixed
+
+- **Timeline Cursor-Log Sync**: Bidirectional sync between cursor and grid selection.
+- **Overview Bar Alignment**: Fixed width mismatch with main timeline.
+- **Selection Outside View**: Selection indicator now hides when completely outside visible range.
+- **Overview Selection Overlay**: Removed confusing blue selection box from Overview bar.
 
 ## 0.25.0 – 2025-12-15
 
