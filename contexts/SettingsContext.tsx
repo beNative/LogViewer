@@ -1,5 +1,5 @@
 import React, { createContext, useState, useCallback, useContext, useEffect } from 'react';
-import { Theme, IconSet, LogTableDensity, ColumnVisibilityState, ColumnStyles, PanelWidths, FilterState, TimelineBarVisibility, Settings as SettingsType } from '../types';
+import { Theme, IconSet, LogTableDensity, ColumnVisibilityState, ColumnWidths, ColumnStyles, PanelWidths, FilterState, TimelineBarVisibility, Settings as SettingsType } from '../types';
 import { useConsole } from './ConsoleContext';
 import { useToast } from './ToastContext';
 
@@ -15,6 +15,7 @@ const initialColumnStyles: ColumnStyles = {
     msg: { font: MONO_FONT_STACK, fontSize: 13, isBold: false, isItalic: false, color: '#1F2937', darkColor: '#F3F4F6' },
 };
 const initialPanelWidths: PanelWidths = { filters: 320, details: 500 };
+const initialColumnWidths: ColumnWidths = {};
 const initialTimelineBarVisibility: TimelineBarVisibility = { pages: true, files: true, dates: true, density: true, overview: true };
 
 type SettingsContextType = {
@@ -25,6 +26,7 @@ type SettingsContextType = {
     iconSet: IconSet;
     logTableDensity: LogTableDensity;
     columnVisibility: ColumnVisibilityState;
+    columnWidths: ColumnWidths;
     customFilterPresets: Record<string, FilterState>;
     columnStyles: ColumnStyles;
     panelWidths: PanelWidths;
@@ -42,6 +44,7 @@ type SettingsContextType = {
     onIconSetChange: (newIconSet: IconSet) => void;
     onLogTableDensityChange: (newDensity: LogTableDensity) => void;
     onColumnVisibilityChange: (newVisibility: ColumnVisibilityState) => void;
+    onColumnWidthsChange: (newWidths: ColumnWidths) => void;
     onColumnStylesChange: (newStyles: ColumnStyles) => void;
     onPanelWidthsChange: (newWidths: PanelWidths) => void;
     onTimeRangeSelectorVisibilityChange: (isVisible: boolean) => void;
@@ -72,6 +75,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const [theme, setTheme] = useState<Theme>('light');
     const [iconSet, setIconSet] = useState<IconSet>('sharp');
     const [columnVisibility, setColumnVisibility] = useState<ColumnVisibilityState>(initialColumnVisibility);
+    const [columnWidths, setColumnWidths] = useState<ColumnWidths>(initialColumnWidths);
     const [columnStyles, setColumnStyles] = useState<ColumnStyles>(initialColumnStyles);
     const [customFilterPresets, setCustomFilterPresets] = useState<Record<string, FilterState>>({});
     const [panelWidths, setPanelWidths] = useState<PanelWidths>(initialPanelWidths);
@@ -94,6 +98,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             setTheme(settings.theme || 'light');
             setIconSet(settings.iconSet || 'sharp');
             setColumnVisibility({ ...initialColumnVisibility, ...settings.columnVisibility });
+            setColumnWidths({ ...initialColumnWidths, ...settings.columnWidths });
             // Deep merge styles
             const mergedStyles: ColumnStyles = JSON.parse(JSON.stringify(initialColumnStyles));
             for (const key in mergedStyles) {
@@ -138,6 +143,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const onIconSetChange = (newIconSet: IconSet) => { setIconSet(newIconSet); updateSettings({ iconSet: newIconSet }); };
     const onLogTableDensityChange = (newDensity: LogTableDensity) => { setLogTableDensity(newDensity); updateSettings({ logTableDensity: newDensity }); };
     const onColumnVisibilityChange = (newVisibility: ColumnVisibilityState) => { setColumnVisibility(newVisibility); updateSettings({ columnVisibility: newVisibility }); };
+    const onColumnWidthsChange = (newWidths: ColumnWidths) => { setColumnWidths(newWidths); updateSettings({ columnWidths: newWidths }); };
     const onColumnStylesChange = (newStyles: ColumnStyles) => { setColumnStyles(newStyles); updateSettings({ columnStyles: newStyles }); };
     const onPanelWidthsChange = (newWidths: PanelWidths) => { setPanelWidths(newWidths); updateSettings({ panelWidths: newWidths }); };
     const onTimeRangeSelectorVisibilityChange = (isVisible: boolean) => { setIsTimeRangeSelectorVisible(isVisible); updateSettings({ isTimeRangeSelectorVisible: isVisible }); };
@@ -155,6 +161,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setTheme(newSettings.theme);
         setIconSet(newSettings.iconSet);
         setColumnVisibility(newSettings.columnVisibility);
+        setColumnWidths(newSettings.columnWidths);
         setColumnStyles(newSettings.columnStyles);
         setCustomFilterPresets(newSettings.customFilterPresets);
         setPanelWidths(newSettings.panelWidths);
@@ -201,10 +208,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     const value: SettingsContextType = {
         theme, allowPrerelease, isAutoUpdateEnabled, githubToken, iconSet, logTableDensity,
-        columnVisibility, customFilterPresets, columnStyles, panelWidths, isTimeRangeSelectorVisible,
+        columnVisibility, columnWidths, customFilterPresets, columnStyles, panelWidths, isTimeRangeSelectorVisible,
         isDetailPanelVisible, isFocusDebuggerVisible, timelineBarVisibility, uiScale, logSqlQueries, zoomToSelectionEnabled,
         onThemeChange, onAllowPrereleaseChange, onAutoUpdateEnabledChange, onGithubTokenChange,
-        onIconSetChange, onLogTableDensityChange, onColumnVisibilityChange, onColumnStylesChange,
+        onIconSetChange, onLogTableDensityChange, onColumnVisibilityChange, onColumnWidthsChange, onColumnStylesChange,
         onPanelWidthsChange, onTimeRangeSelectorVisibilityChange, onDetailPanelVisibilityChange,
         onFocusDebuggerVisibilityChange, onTimelineBarVisibilityChange, onUiScaleChange, onLogSqlQueriesChange, onZoomToSelectionEnabledChange,
         onFullSettingsUpdate, onSaveFilterPreset, onDeleteFilterPreset, onLoadFilterPreset,

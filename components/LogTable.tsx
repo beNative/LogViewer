@@ -50,9 +50,9 @@ export const LogTable: React.FC<LogTableProps> = () => {
     } = useAnalytics();
 
     const {
-        theme, columnVisibility, columnStyles, panelWidths, isDetailPanelVisible,
+        theme, columnVisibility, columnWidths, columnStyles, panelWidths, isDetailPanelVisible,
         logTableDensity, iconSet, uiScale, timelineBarVisibility, zoomToSelectionEnabled, isTimeRangeSelectorVisible,
-        onColumnVisibilityChange, onPanelWidthsChange, onDetailPanelVisibilityChange,
+        onColumnVisibilityChange, onColumnWidthsChange, onPanelWidthsChange, onDetailPanelVisibilityChange,
         onTimelineBarVisibilityChange
     } = useSettings();
 
@@ -84,7 +84,11 @@ export const LogTable: React.FC<LogTableProps> = () => {
     // Missing: cursorTime.
 
     const [cursorTime, setCursorTime] = React.useState<number | null>(null);
-    const handleCursorChange = (t: number) => setCursorTime(t);
+    const handleCursorChange = (t: number) => {
+        setCursorTime(t);
+        // Also navigate to the log entry at this cursor time
+        onCursorChange(t);
+    };
 
     const [selectedEntry, setSelectedEntry] = React.useState<LogEntry | null>(null);
     const [contextMenuState, setContextMenuState] = React.useState<ContextMenuState>(null);
@@ -103,9 +107,17 @@ export const LogTable: React.FC<LogTableProps> = () => {
 
     const gridTemplateColumns = React.useMemo(
         () => columns.length
-            ? columns.map(column => `minmax(${column.minWidth}px, ${column.flex}fr)`).join(' ')
+            ? columns.map(column => {
+                const userWidth = columnWidths[column.key];
+                if (userWidth) {
+                    return `${userWidth}px`;  // User-defined width takes priority
+                }
+                return column.flex === 0
+                    ? `${column.minWidth}px`  // Fixed width for flex=0
+                    : `minmax(${column.minWidth}px, ${column.flex}fr)`;  // Flexible for flex>0
+            }).join(' ')
             : '1fr',
-        [columns]
+        [columns, columnWidths]
     );
 
     const rowHeight = React.useMemo(() => {
@@ -209,6 +221,11 @@ export const LogTable: React.FC<LogTableProps> = () => {
         if (index !== -1) {
             const entry = entries[index];
             setSelectedEntry(entry);
+            // Sync cursor position with selected entry's timestamp
+            const entryTime = new Date(entry.time + 'Z').getTime();
+            if (!isNaN(entryTime)) {
+                setCursorTime(entryTime);
+            }
             rowVirtualizer.scrollToIndex(index, { align: 'auto' });
         } else {
             setSelectedEntry(null);
@@ -218,11 +235,13 @@ export const LogTable: React.FC<LogTableProps> = () => {
     const handleRowClick = React.useCallback((entry: LogEntry) => {
         setSelectedEntry(entry);
         setKeyboardSelectedId(entry.id);
-        if (!isDetailPanelVisible) {
-            onDetailPanelVisibilityChange(true);
+        // Sync cursor position with clicked entry's timestamp
+        const entryTime = new Date(entry.time + 'Z').getTime();
+        if (!isNaN(entryTime)) {
+            setCursorTime(entryTime);
         }
         tableContainerRef.current?.focus({ preventScroll: true });
-    }, [isDetailPanelVisible, onDetailPanelVisibilityChange, setKeyboardSelectedId]);
+    }, [setKeyboardSelectedId]);
 
     // Use extracted hooks
     useTableNavigation({
@@ -244,6 +263,10 @@ export const LogTable: React.FC<LogTableProps> = () => {
         e.preventDefault();
         setContextMenuState({ x: e.clientX, y: e.clientY, entry, key, value });
     }, []);
+
+    const handleColumnResize = React.useCallback((key: ColumnKey, width: number) => {
+        onColumnWidthsChange({ ...columnWidths, [key]: width });
+    }, [columnWidths, onColumnWidthsChange]);
 
 
 
@@ -294,6 +317,7 @@ export const LogTable: React.FC<LogTableProps> = () => {
                                     e.preventDefault();
                                     setHeaderContextMenu({ x: e.clientX, y: e.clientY });
                                 }}
+                                onColumnResize={handleColumnResize}
                             />
                             <div
                                 className="relative bg-white dark:bg-gray-900"

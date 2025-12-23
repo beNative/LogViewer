@@ -373,22 +373,25 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
                     <div className="w-16 flex-shrink-0 text-right pr-1 text-xs font-medium text-gray-500 dark:text-gray-400 pt-3">
                         Overview
                     </div>
-                    <div className="flex-grow" ref={overviewContainerRef}>
-                        {overviewContainerWidth > 0 && (
-                            <OverviewBrush
-                                minTime={minTime} maxTime={maxTime}
-                                viewMin={displayMinTime} viewMax={displayMaxTime}
-                                selectedMin={selectedStartTime}
-                                selectedMax={selectedEndTime}
-                                density={overallLogDensity} theme={theme}
-                                valueToPosition={overviewValueToPos} positionToValue={overviewPosToValue}
-                                onViewRangeChange={handleOverviewRangeChange}
-                                onRangeChange={onRangeChange}
-                                uiScale={uiScale}
-                            />
-                        )}
+                    <div className="flex-grow bg-gray-200 dark:bg-gray-700/50 rounded p-1">
+                        <div ref={overviewContainerRef}>
+                            {overviewContainerWidth > 0 && (
+                                <OverviewBrush
+                                    minTime={minTime} maxTime={maxTime}
+                                    viewMin={displayMinTime} viewMax={displayMaxTime}
+                                    selectedMin={selectedStartTime}
+                                    selectedMax={selectedEndTime}
+                                    density={overallLogDensity} theme={theme}
+                                    valueToPosition={overviewValueToPos} positionToValue={overviewPosToValue}
+                                    onViewRangeChange={handleOverviewRangeChange}
+                                    onRangeChange={onRangeChange}
+                                    uiScale={uiScale}
+                                />
+                            )}
+                        </div>
                     </div>
-                    <div className="w-[60px] flex-shrink-0" />
+                    {/* Spacer matching buttons column width (p-1.5 + w-4 = 28px) */}
+                    <div className="w-7 flex-shrink-0" />
                 </div>
             )}
             {densityTooltip && <DensityTooltip {...densityTooltip} theme={theme} />}

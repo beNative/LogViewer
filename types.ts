@@ -123,6 +123,8 @@ export type ColumnDefinition = {
 
 export type ColumnVisibilityState = Record<ColumnKey, boolean>;
 
+export type ColumnWidths = Partial<Record<ColumnKey, number>>;
+
 export type ColumnStyle = {
     font: string;
     fontSize: number;
@@ -169,6 +171,7 @@ export type Settings = {
     iconSet: IconSet;
     logTableDensity: LogTableDensity;
     columnVisibility: ColumnVisibilityState;
+    columnWidths: ColumnWidths;
     customFilterPresets: Record<string, FilterState>;
     columnStyles: ColumnStyles;
     panelWidths: PanelWidths;

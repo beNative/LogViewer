@@ -464,7 +464,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, [logToConsole, setIsInitialLoad, setActiveView]);
 
     const handleCursorChange = useCallback((time: number) => {
-        if (!db || isBusy) return;
+        if (!db) return;
         const nearestEntry = db.getNearestLogEntry(time, appliedFilters);
         if (!nearestEntry) return;
 
@@ -476,7 +476,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         const newPage = Math.floor(index / pageSize) + 1;
         if (newPage !== currentPage) setCurrentPage(newPage);
-    }, [db, isBusy, appliedFilters, pageSize, currentPage, filteredEntries, totalFilteredCount, setJumpToEntryId, setIsInitialLoad, setIsBusy]);
+    }, [db, appliedFilters, pageSize, currentPage, setJumpToEntryId, setIsInitialLoad]);
 
     const handleFileSelect = useCallback((fileName: string) => {
         if (db) {

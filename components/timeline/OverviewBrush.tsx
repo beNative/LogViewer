@@ -153,7 +153,7 @@ export const OverviewBrush: React.FC<OverviewBrushProps> = ({
         <div
             ref={containerRef}
             onMouseDown={handleContainerMouseDown}
-            className="relative w-full h-10 bg-gray-200 dark:bg-gray-700/50 rounded p-0.5 cursor-crosshair"
+            className="relative w-full h-10 cursor-crosshair"
         >
             <div className="w-full h-full flex items-end pointer-events-none">
                 {density.map((bucket: LogDensityPointByLevel | LogDensityPoint, i) => {
@@ -178,7 +178,9 @@ export const OverviewBrush: React.FC<OverviewBrushProps> = ({
                 })}
             </div>
 
-            {selectionLeft >= 0 && selectionWidth > 0 && (
+
+            {/* Only show temp selection during drag, not persisted selection */}
+            {tempSelection && selectionLeft >= 0 && selectionWidth > 0 && (
                 <div
                     className="absolute top-0 h-full bg-sky-500/20 dark:bg-sky-400/20 pointer-events-none"
                     style={{ left: `${selectionLeft}px`, width: `${selectionWidth}px` }}
