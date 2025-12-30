@@ -89,7 +89,10 @@ export const StockHistoryChart: React.FC<StockHistoryChartProps> = ({ data, them
             beginAtZero: false,
             title: { display: true, text: 'Quantity', color: tickColor },
             grid: { color: gridColor },
-            ticks: { color: tickColor }
+            ticks: {
+              color: tickColor,
+              precision: 0
+            }
           }
         },
         plugins: {

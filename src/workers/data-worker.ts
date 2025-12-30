@@ -53,7 +53,7 @@ interface SqlJsStatement {
  * Compiled once at module load to avoid repeated compilation cost.
  * Made regex robust by not requiring the <Article> tag to be self-closing.
  */
-const STOCK_INFO_REGEX = /<WWKS[^>]*?TimeStamp=["'](?<timestamp>[^"']+)["'][^>]*?>.*?<StockInfoMessage[^>]*?Id=["'](?<message_id>[^"']+)["'][^>]*?Source=["'](?<source>[^"']+)["'][^>]*?Destination=["'](?<destination>[^"']+)["'][^>]*?>.*?<Article[^>]*?Id=["'](?<article_id>[^"']+)["'][^>]*?Name=["'](?<article_name>[^"']+)["'][^>]*?DosageForm=["'](?<dosage_form>[^"']+)["'][^>]*?MaxSubItemQuantity=["'](?<max_sub_item_quantity>[^"']+)["'][^>]*?Quantity=["'](?<quantity>[^"']+)["'][^>]*?>.*?<\/StockInfoMessage>.*?<\/WWKS>/sgi;
+const STOCK_INFO_REGEX = /<WWKS[^>]*?TimeStamp=["'](?<timestamp>[^"']*)["'][^>]*?>.*?<StockInfoMessage[^>]*?Id=["'](?<message_id>[^"']*)["'][^>]*?Source=["'](?<source>[^"']*)["'][^>]*?Destination=["'](?<destination>[^"']*)["'][^>]*?>.*?<Article[^>]*?Id=["'](?<article_id>[^"']*)["'][^>]*?Name=["'](?<article_name>[^"']*)["'][^>]*?DosageForm=["'](?<dosage_form>[^"']*)["'][^>]*?MaxSubItemQuantity=["'](?<max_sub_item_quantity>[^"']*)["'][^>]*?Quantity=["'](?<quantity>[^"']*)["'][^>]*?>.*?<\/StockInfoMessage>.*?<\/WWKS>/sgi;
 
 /**
  * A fast, lightweight XML parser using regular expressions, specifically for the <log ... /> format.

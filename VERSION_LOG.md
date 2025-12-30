@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. The current application version is **0.27.0**.
 
+## 0.28.0 – 2025-12-30
+
+### Fixed
+
+- **Stock Tracker Parsing**: Fixed regex to correctly handle empty attribute values (like `DosageForm=""`) when parsing stock info messages.
+- **Stock History Chart Y-Axis**: Enforced integer ticks on the vertical axis to ensure quantity labels are always displayed as whole numbers.
+
 ## 0.27.0 – 2025-12-23
 
 ### Added
