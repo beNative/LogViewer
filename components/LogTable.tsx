@@ -101,6 +101,11 @@ export const LogTable: React.FC<LogTableProps> = () => {
     const pendingLoadRef = React.useRef(false);
     const previousScrollHeightRef = React.useRef(0);
 
+    // Calculate selected entries for context menu or details
+    const selectedEntries = React.useMemo(() => {
+        return entries.filter(e => selectedIds.has(e.id));
+    }, [entries, selectedIds]);
+
     // UseData hook might still be needed for other things, but if setLogTableViewportHeight was the only thing, we might check.
     // However, for now, let's just remove the effect that calls it.
 
@@ -354,7 +359,7 @@ export const LogTable: React.FC<LogTableProps> = () => {
     const handleSetTimeRange = React.useCallback(() => {
         if (selectedEntries.length < 1) return;
 
-        const times = selectedEntries.map(e => new Date(e.time).getTime()).filter(t => !isNaN(t)).sort((a, b) => a - b);
+        const times = selectedEntries.map(e => new Date(e.time + 'Z').getTime()).filter(t => !isNaN(t)).sort((a, b) => a - b);
         if (times.length === 0) return;
 
         const startTime = new Date(times[0]);
