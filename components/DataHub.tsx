@@ -239,7 +239,7 @@ export const DataHub: React.FC<DataHubProps> = ({
 
                     {/* Right Column: Actions */}
                     <div className="xl:col-span-2 flex flex-col gap-8">
-                        <div className="flex-grow flex flex-col gap-8 p-6 bg-white dark:bg-gray-800/50 rounded-2xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
+                        <div className="flex flex-col gap-8 p-6 bg-white dark:bg-gray-800/50 rounded-2xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
                             <div>
                                 <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                                     <Icon name="DocumentPlus" iconSet={iconSet} className="w-6 h-6 text-sky-500" />

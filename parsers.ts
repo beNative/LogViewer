@@ -68,6 +68,17 @@ const parseKeyValueMessage = (msg: string): { prefix: string | null; pairs: { ke
     }
 
     return null;
+    return null;
+};
+
+const decodeHtmlEntities = (text: string): string => {
+    try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(`<!doctype html><body>${text}`, 'text/html');
+        return doc.body.textContent || text;
+    } catch (e) {
+        return text;
+    }
 };
 
 
@@ -83,7 +94,9 @@ const SQL_KEYWORDS = [
  * @returns Object with optional prefix, SQL statement, and result, or null if not SQL
  */
 const parseSqlMessage = (msg: string): { prefix: string | null; sql: string; result: string | null } | null => {
-    const upperMsg = msg.toUpperCase();
+    // Decode HTML entities (like &#xA; for newlines) to ensure keywords are recognized and display is correct
+    const decodedMsg = decodeHtmlEntities(msg);
+    const upperMsg = decodedMsg.toUpperCase();
 
     // High-confidence patterns
     const isSelect = upperMsg.includes('SELECT') && upperMsg.includes('FROM');
@@ -103,7 +116,7 @@ const parseSqlMessage = (msg: string): { prefix: string | null; sql: string; res
     // A message is likely SQL if it matches a strong pattern, or has several keywords and other hints.
     const isSql = isSelect || isUpdate || isInsert || isDelete ||
         (keywordCount >= 4 && upperMsg.includes('WHERE')) || // multiple keywords + WHERE is a good sign
-        (keywordCount >= 2 && msg.includes(';')) || // semicolon is a strong hint
+        (keywordCount >= 2 && decodedMsg.includes(';')) || // semicolon is a strong hint
         (keywordCount >= 2 && hasResultArrow);
 
 
@@ -111,15 +124,15 @@ const parseSqlMessage = (msg: string): { prefix: string | null; sql: string; res
         return null;
     }
 
-    let mainPart = msg;
+    let mainPart = decodedMsg;
     let result: string | null = null;
 
     // Using lastIndexOf to avoid issues with `->` inside the query itself.
-    const resultSeparatorIndex = msg.lastIndexOf('\n ->');
+    const resultSeparatorIndex = decodedMsg.lastIndexOf('\n ->');
     if (resultSeparatorIndex !== -1) {
-        mainPart = msg.substring(0, resultSeparatorIndex);
+        mainPart = decodedMsg.substring(0, resultSeparatorIndex);
         // The separator is `\n ->` which is 4 chars.
-        result = msg.substring(resultSeparatorIndex + 4).trim();
+        result = decodedMsg.substring(resultSeparatorIndex + 4).trim();
     }
 
     let prefix: string | null = null;
