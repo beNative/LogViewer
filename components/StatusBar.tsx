@@ -60,7 +60,7 @@ export const StatusBar: React.FC<StatusBarProps> = (props) => {
     const endEntry = startEntry + visibleRowCount - 1;
 
     return (
-        <footer className="flex-shrink-0 flex items-center justify-between px-3 py-1 border-t border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-sm text-gray-600 dark:text-gray-400">
+        <footer className="flex-shrink-0 flex items-center justify-between px-2 py-0.5 border-t border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-xs text-gray-600 dark:text-gray-400">
             {/* Left Section */}
             <div className="flex items-center gap-2">
                 <StatItem icon={<Icon name="Database" iconSet={iconSet} className="w-4 h-4" />} label="Total" value={totalEntries.toLocaleString()} title="Total Entries in Database" />
@@ -79,12 +79,12 @@ export const StatusBar: React.FC<StatusBarProps> = (props) => {
                             Showing <span className="font-semibold text-gray-800 dark:text-gray-200">{startEntry.toLocaleString()}-{endEntry.toLocaleString()}</span>
                         </span>
                         <div className="flex items-center space-x-1">
-                            <button onClick={() => onGoToPage(currentPage - 1)} disabled={currentPage === 1} className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                                <Icon name="ChevronLeft" iconSet={iconSet} className="w-5 h-5" />
+                            <button onClick={() => onGoToPage(currentPage - 1)} disabled={currentPage === 1} className="p-0.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <Icon name="ChevronLeft" iconSet={iconSet} className="w-4 h-4" />
                             </button>
                             <span>Page <span className="font-semibold text-gray-800 dark:text-gray-200">{currentPage}</span> of <span className="font-semibold text-gray-800 dark:text-gray-200">{totalPages}</span></span>
-                            <button onClick={() => onGoToPage(currentPage + 1)} disabled={currentPage === totalPages} className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                                <Icon name="ChevronRight" iconSet={iconSet} className="w-5 h-5" />
+                            <button onClick={() => onGoToPage(currentPage + 1)} disabled={currentPage === totalPages} className="p-0.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <Icon name="ChevronRight" iconSet={iconSet} className="w-4 h-4" />
                             </button>
                         </div>
                         <div className="flex items-center space-x-2">
@@ -111,12 +111,12 @@ export const StatusBar: React.FC<StatusBarProps> = (props) => {
                         <Tooltip content={isDetailPanelVisible ? "Hide Details" : "Show Details"}>
                             <button
                                 onClick={() => onDetailPanelVisibilityChange(!isDetailPanelVisible)}
-                                className={`p-1.5 rounded-md transition-colors ${isDetailPanelVisible
-                                        ? 'bg-sky-600 text-white hover:bg-sky-700'
-                                        : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                className={`p-0.5 rounded-md transition-colors ${isDetailPanelVisible
+                                    ? 'bg-sky-600 text-white hover:bg-sky-700'
+                                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                                     }`}
                             >
-                                <Icon name="SidebarRight" iconSet={iconSet} className="w-5 h-5" />
+                                <Icon name="SidebarRight" iconSet={iconSet} className="w-4 h-4" />
                             </button>
                         </Tooltip>
                     </div>
@@ -144,8 +144,8 @@ export const StatusBar: React.FC<StatusBarProps> = (props) => {
                     )
                 )}
                 <Tooltip content="Toggle Theme">
-                    <button onClick={onThemeChange} className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
-                        <Icon name={theme === 'dark' ? 'Sun' : 'Moon'} iconSet={iconSet} className="w-5 h-5" />
+                    <button onClick={onThemeChange} className="p-0.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
+                        <Icon name={theme === 'dark' ? 'Sun' : 'Moon'} iconSet={iconSet} className="w-4 h-4" />
                     </button>
                 </Tooltip>
             </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StockInfoEntry, StockInfoFilters, IconSet, Theme, LogDensityPoint, OverallTimeRange, StockArticleSuggestion, TimelineBarVisibility } from '../types.ts';
+import { StockInfoEntry, StockInfoFilters, IconSet, Theme, LogDensityPoint, OverallTimeRange, StockArticleSuggestion, TimelineBarVisibility, StockChartDataset } from '../types.ts';
 import { Icon } from './icons/index.tsx';
 import { StockHistoryChart } from './StockHistoryChart.tsx';
 import { TimeRangeSelector } from './TimeRangeSelector.tsx';
@@ -35,6 +35,10 @@ export const StockTracker: React.FC<StockTrackerProps> = () => {
     const suggestionContainerRef = React.useRef<HTMLDivElement>(null);
     const tableContainerRef = React.useRef<HTMLDivElement>(null);
     const rowRefs = React.useRef<Map<number, HTMLTableRowElement | null>>(new Map());
+    const [selectedArticles, setSelectedArticles] = React.useState<StockArticleSuggestion[]>([]);
+    const [availableArticles, setAvailableArticles] = React.useState<StockArticleSuggestion[]>([]);
+    const [isArticlesLoading, setIsArticlesLoading] = React.useState(false);
+    const [articleSearchTerm, setArticleSearchTerm] = React.useState('');
     const { confirm } = useConfirmDialog();
 
 
@@ -52,16 +56,28 @@ export const StockTracker: React.FC<StockTrackerProps> = () => {
         }
     }, [overallStockTimeRange, filters.dateFrom, filters.dateTo]);
 
-    // Effect to hide suggestions on outside click
+    // Load all available articles on mount (or when time range significantly changes if needed, but for now just load all)
     React.useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (suggestionContainerRef.current && !suggestionContainerRef.current.contains(event.target as Node)) {
-                setIsSuggestionsVisible(false);
-            }
+        const loadArticles = async () => {
+            setIsArticlesLoading(true);
+            const timeFilters: StockInfoFilters = {
+                searchTerm: '',
+                dateFrom: filters.dateFrom,
+                timeFrom: filters.timeFrom,
+                dateTo: filters.dateTo,
+                timeTo: filters.timeTo,
+            };
+            // Limit 0 means fetch all
+            const articles = await handleFetchStockSuggestions('', timeFilters, 0);
+            setAvailableArticles(articles);
+            setIsArticlesLoading(false);
         };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+        if (overallStockTimeRange) {
+            loadArticles();
+        }
+    }, [overallStockTimeRange, handleFetchStockSuggestions]); // Only re-load when overall range (session) changes
+
+
 
     // Effect to scroll the selected history item into view
     React.useEffect(() => {
@@ -73,70 +89,47 @@ export const StockTracker: React.FC<StockTrackerProps> = () => {
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
+        setFilters(prevFilters => ({ ...prevFilters, [name]: value }));
+    };
 
-        setFilters(prevFilters => {
-            const newFilters = { ...prevFilters, [name]: value };
-
-            if (name === 'searchTerm') {
-                if (debounceTimeoutRef.current) {
-                    clearTimeout(debounceTimeoutRef.current);
-                }
-
-                if (value.length < 2) {
-                    setSuggestions([]);
-                    setIsSuggestionsVisible(false);
-                } else {
-                    debounceTimeoutRef.current = window.setTimeout(async () => {
-                        const timeFilters: StockInfoFilters = {
-                            searchTerm: '', // Not needed for suggestion fetching based on time
-                            dateFrom: newFilters.dateFrom,
-                            timeFrom: newFilters.timeFrom,
-                            dateTo: newFilters.dateTo,
-                            timeTo: newFilters.timeTo,
-                        };
-                        const fetchedSuggestions = await handleFetchStockSuggestions(value, timeFilters);
-                        setSuggestions(fetchedSuggestions);
-                        setIsSuggestionsVisible(fetchedSuggestions.length > 0);
-                        setActiveSuggestionIndex(-1);
-                    }, 300);
-                }
+    const toggleArticleSelection = (article: StockArticleSuggestion) => {
+        setSelectedArticles(prev => {
+            const exists = prev.find(a => a.id === article.id);
+            if (exists) {
+                return prev.filter(a => a.id !== article.id);
+            } else {
+                return [...prev, article];
             }
-
-            return newFilters;
         });
     };
 
-    const handleSuggestionClick = (suggestion: StockArticleSuggestion) => {
-        setFilters({ ...filters, searchTerm: suggestion.name });
-        setSuggestions([]);
-        setIsSuggestionsVisible(false);
-    };
-
-    const handleSuggestionKeyDown = (e: React.KeyboardEvent) => {
-        if (!isSuggestionsVisible || suggestions.length === 0) return;
-
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            setActiveSuggestionIndex(prev => (prev + 1) % suggestions.length);
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            setActiveSuggestionIndex(prev => (prev - 1 + suggestions.length) % suggestions.length);
-        } else if (e.key === 'Enter') {
-            if (activeSuggestionIndex > -1) {
-                e.preventDefault();
-                handleSuggestionClick(suggestions[activeSuggestionIndex]);
-            }
-        } else if (e.key === 'Escape') {
-            setIsSuggestionsVisible(false);
+    const handleSelectAll = () => {
+        if (selectedArticles.length === availableArticles.length) {
+            setSelectedArticles([]);
+        } else {
+            setSelectedArticles([...availableArticles]);
         }
     };
-
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         setSelectedHistoryIndex(null);
-        handleSearchStock(filters);
-        setIsSuggestionsVisible(false);
+
+        // If specific articles are selected, use those. 
+        // If nothing selected but search box has text -> use text.
+        // If nothing selected and no text -> search all (or maybe warn? let's search all matching filters)
+
+        const searchFilters: StockInfoFilters = {
+            ...filters,
+            articleIds: selectedArticles.length > 0 ? selectedArticles.map(a => a.id) : undefined
+        };
+
+        // If explicit articles selected, we ignore searchTerm for the query itself to be precise
+        if (selectedArticles.length > 0) {
+            searchFilters.searchTerm = '';
+        }
+
+        handleSearchStock(searchFilters);
     };
 
     const handleRebuildClick = async () => {
@@ -179,12 +172,28 @@ export const StockTracker: React.FC<StockTrackerProps> = () => {
         tableContainerRef.current?.focus({ preventScroll: true });
     };
 
-    const chartData = React.useMemo(() => {
+    const chartDatasets = React.useMemo<StockChartDataset[]>(() => {
         if (!stockHistory || stockHistory.length === 0) return [];
-        return stockHistory.map(entry => ({
-            time: entry.timestamp.replace(' ', 'T') + 'Z',
-            quantity: entry.quantity,
-        }));
+
+        // Group by Article ID (or Name if preferred, ID is safer)
+        const groups = new Map<string, StockChartDataset>();
+
+        stockHistory.forEach(entry => {
+            if (!groups.has(entry.article_id)) {
+                groups.set(entry.article_id, {
+                    id: entry.article_id,
+                    label: entry.article_name || entry.article_id,
+                    data: []
+                });
+            }
+            const time = entry.timestamp.replace(' ', 'T') + 'Z';
+            groups.get(entry.article_id)!.data.push({
+                time,
+                quantity: entry.quantity
+            });
+        });
+
+        return Array.from(groups.values());
     }, [stockHistory]);
 
     const handleTimeRangeChange = (startTime: number, endTime: number) => {
@@ -255,8 +264,8 @@ export const StockTracker: React.FC<StockTrackerProps> = () => {
     }, [selectedStartTime, selectedEndTime]);
 
     return (
-        <div className="flex-grow p-4 sm:p-6 lg:p-8 overflow-y-auto space-y-6 bg-gray-100 dark:bg-transparent">
-            <div className="bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
+        <div className="flex flex-col h-full p-4 sm:p-6 lg:p-8 overflow-hidden space-y-6 bg-gray-100 dark:bg-transparent">
+            <div className="flex-none bg-white dark:bg-gray-800/50 p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
                 <div className="flex justify-between items-start mb-4">
                     <div>
                         <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Search Article Stock</h2>
@@ -287,40 +296,106 @@ export const StockTracker: React.FC<StockTrackerProps> = () => {
                                 <input type="time" name="timeTo" id="timeToStock" value={filters.timeTo} onChange={handleInputChange} className={inputStyles} step="1" />
                             </div>
                         </div>
-                        <div className="md:col-span-3" ref={suggestionContainerRef}>
-                            <label htmlFor="searchTerm" className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Article ID or Name</label>
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    name="searchTerm"
-                                    id="searchTerm"
-                                    value={filters.searchTerm}
-                                    onChange={handleInputChange}
-                                    onKeyDown={handleSuggestionKeyDown}
-                                    onFocus={() => { if (suggestions.length > 0) setIsSuggestionsVisible(true); }}
-                                    className={inputStyles}
-                                    placeholder="e.g., CARTEOL (min 2 chars)"
-                                    autoComplete="off"
-                                />
-                                {isSuggestionsVisible && suggestions.length > 0 && (
-                                    <ul className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
-                                        {suggestions.map((suggestion, index) => (
-                                            <li
-                                                key={`${suggestion.id}-${suggestion.name}`}
-                                                className={`px-3 py-2 cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900/50 ${index === activeSuggestionIndex ? 'bg-sky-100 dark:bg-sky-900/50' : ''}`}
-                                                onMouseDown={() => handleSuggestionClick(suggestion)}
-                                            >
-                                                <div className="font-semibold text-gray-900 dark:text-gray-100">{suggestion.name}</div>
-                                                <div className="text-sm text-gray-500 dark:text-gray-400 font-mono">{suggestion.id}</div>
-                                            </li>
-                                        ))}
-                                    </ul>
+                        <div className="md:col-span-3">
+                            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                                Articles ({selectedArticles.length}/{availableArticles.length})
+                            </label>
+                            <div className="relative group">
+                                <button
+                                    type="button"
+                                    className={`${inputStyles} text-left flex justify-between items-center cursor-default`}
+                                    onClick={() => {
+                                        setIsSuggestionsVisible(!isSuggestionsVisible);
+                                        // Clear search on close, or keep it? user preference. Let's keep it but focus input.
+                                        // If opening, we might want to focus input. We'll do that via autoFocus on input.
+                                    }}
+                                >
+                                    <span className="truncate">
+                                        {selectedArticles.length === 0
+                                            ? "Select articles..."
+                                            : selectedArticles.length === availableArticles.length
+                                                ? "All articles selected"
+                                                : `${selectedArticles.length} selected`}
+                                    </span>
+                                    <Icon name="ChevronDown" iconSet={iconSet} className="w-4 h-4 text-gray-500" />
+                                </button>
+
+                                {(isSuggestionsVisible) && (
+                                    <div className={`absolute z-20 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-[60vh] overflow-hidden flex flex-col transition-all duration-200 origin-top ${isSuggestionsVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
+                                        <div className="p-2 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 sticky top-0 z-10 space-y-2">
+                                            <input
+                                                type="text"
+                                                value={articleSearchTerm}
+                                                onChange={(e) => setArticleSearchTerm(e.target.value)}
+                                                placeholder="Filter articles..."
+                                                className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-sky-500 focus:border-sky-500"
+                                                onClick={(e) => e.stopPropagation()}
+                                                autoFocus
+                                            />
+                                            <div className="flex justify-between items-center">
+                                                <button
+                                                    type="button"
+                                                    onClick={handleSelectAll}
+                                                    className="text-xs text-sky-600 dark:text-sky-400 font-medium hover:underline"
+                                                >
+                                                    {selectedArticles.length === availableArticles.length ? 'Deselect All' : 'Select All'}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setIsSuggestionsVisible(false)}
+                                                    className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                                                >
+                                                    Close
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="overflow-y-auto p-1">
+                                            {isArticlesLoading ? (
+                                                <div className="p-3 text-center text-sm text-gray-500">Loading articles...</div>
+                                            ) : availableArticles.length === 0 ? (
+                                                <div className="p-3 text-center text-sm text-gray-500">No articles found.</div>
+                                            ) : (
+                                                <ul className="space-y-0.5">
+                                                    {availableArticles
+                                                        .filter(article => {
+                                                            if (!articleSearchTerm) return true;
+                                                            const term = articleSearchTerm.toLowerCase();
+                                                            return (article.name || '').toLowerCase().includes(term) ||
+                                                                (article.id || '').toLowerCase().includes(term);
+                                                        })
+                                                        .map(article => {
+                                                            const isSelected = selectedArticles.some(a => a.id === article.id);
+                                                            return (
+                                                                <li
+                                                                    key={article.id}
+                                                                    onClick={() => toggleArticleSelection(article)}
+                                                                    className={`px-3 py-2 text-sm rounded cursor-pointer flex items-center gap-2 select-none transition-colors ${isSelected ? 'bg-sky-100 dark:bg-sky-900/40 text-sky-800 dark:text-sky-200' : 'hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300'}`}
+                                                                >
+                                                                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-sky-500 border-sky-500' : 'border-gray-300 dark:border-gray-500 bg-white dark:bg-gray-700'}`}>
+                                                                        {isSelected && <Icon name="Check" iconSet={iconSet} className="w-3 h-3 text-white" />}
+                                                                    </div>
+                                                                    <div className="flex flex-col min-w-0">
+                                                                        <span className="font-medium truncate">{article.name}</span>
+                                                                        <span className="text-xs opacity-70 truncate font-mono">{article.id}</span>
+                                                                    </div>
+                                                                </li>
+                                                            );
+                                                        })}
+                                                </ul>
+                                            )}
+                                        </div>
+                                    </div>
                                 )}
+
+                                {/* Overlay to close when clicking outside is handled by a fixed inset if open, or simpler click-outside hook provided above but applied differently. 
+                                    Re-using the existing click outside effect by attaching ref.
+                                */}
+                                <div ref={suggestionContainerRef} className="hidden" />
                             </div>
                         </div>
                         <button
                             type="submit"
-                            disabled={isStockBusy || !filters.searchTerm}
+                            disabled={isStockBusy}
                             className="md:col-span-1 h-10 inline-flex items-center justify-center gap-2 px-4 py-2 font-semibold rounded-lg transition-colors duration-200 bg-sky-600 hover:bg-sky-700 text-white dark:bg-sky-600 dark:hover:bg-sky-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <Icon name="Filter" iconSet={iconSet} className="w-5 h-5" />
@@ -363,22 +438,22 @@ export const StockTracker: React.FC<StockTrackerProps> = () => {
             </div>
 
             {stockHistory.length > 0 && (
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                    <div className="bg-white dark:bg-gray-800/50 p-4 sm:p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
-                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Stock History</h3>
+                <div className="flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-2 gap-6 pb-2">
+                    <div className="bg-white dark:bg-gray-800/50 p-4 sm:p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm flex flex-col h-full">
+                        <h3 className="flex-none text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Stock History</h3>
                         <div
                             ref={tableContainerRef}
                             onKeyDown={handleHistoryTableKeyDown}
                             tabIndex={0}
-                            className="overflow-y-auto max-h-96 focus:outline-none rounded-md"
+                            className="flex-1 min-h-0 overflow-y-auto focus:outline-none rounded-md border border-gray-100 dark:border-gray-700"
                         >
                             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                <thead className="bg-gray-50 dark:bg-gray-800/50 sticky top-0">
+                                <thead className="bg-gray-50 dark:bg-gray-800/50 sticky top-0 z-10">
                                     <tr>
-                                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Timestamp</th>
-                                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Article ID</th>
-                                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Article Name</th>
-                                        <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Quantity</th>
+                                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider backdrop-blur-sm bg-gray-50/90 dark:bg-gray-800/90">Timestamp</th>
+                                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider backdrop-blur-sm bg-gray-50/90 dark:bg-gray-800/90">Article ID</th>
+                                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider backdrop-blur-sm bg-gray-50/90 dark:bg-gray-800/90">Article Name</th>
+                                        <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider backdrop-blur-sm bg-gray-50/90 dark:bg-gray-800/90">Quantity</th>
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200/50 dark:divide-gray-700/50">
@@ -399,10 +474,19 @@ export const StockTracker: React.FC<StockTrackerProps> = () => {
                             </table>
                         </div>
                     </div>
-                    <div className="bg-white dark:bg-gray-800/50 p-4 sm:p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm">
-                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Quantity Over Time</h3>
-                        <div className="h-96">
-                            <StockHistoryChart data={chartData} theme={theme} selectedIndex={selectedHistoryIndex} />
+                    <div className="bg-white dark:bg-gray-800/50 p-4 sm:p-6 rounded-xl ring-1 ring-gray-200 dark:ring-white/10 shadow-sm flex flex-col h-full">
+                        <h3 className="flex-none text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Quantity Over Time</h3>
+                        <div className="flex-1 min-h-0 relative">
+                            <div className="absolute inset-0">
+                                <StockHistoryChart
+                                    datasets={chartDatasets}
+                                    theme={theme}
+                                    selectedPoint={selectedHistoryIndex !== null ? {
+                                        articleId: stockHistory[selectedHistoryIndex].article_id,
+                                        timestamp: stockHistory[selectedHistoryIndex].timestamp.replace(' ', 'T') + 'Z'
+                                    } : null}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

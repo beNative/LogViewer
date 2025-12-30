@@ -1,6 +1,14 @@
 # Version Log
 
-All notable changes to this project will be documented in this file. The current application version is **0.27.0**.
+All notable changes to this project will be documented in this file. The current application version is **0.29.0**.
+
+## 0.29.0 – 2025-12-30
+
+### Added
+
+- **Multi-Select Details**: `LogDetailPanel` now supports selecting multiple entries, displaying summary statistics (count, time range, levels), time difference (for 2 items), and a "Copy All Messages" button.
+- **Context Menu Time Range**: Added "Set Time Range Start/End" and "Set Time Range to Selection" options to easily filter by log timestamps.
+- **Copy Cell Value**: Right-click to copy the specific value of the clicked cell.
 
 ## 0.28.0 – 2025-12-30
 

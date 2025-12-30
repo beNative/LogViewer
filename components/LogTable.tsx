@@ -42,7 +42,7 @@ export const LogTable: React.FC<LogTableProps> = () => {
         handleFileSelect: onFileSelect,
         handleDateSelect: onDateSelect,
         handleClearTimeRange: onClearTimeRange,
-        pageTimestampRanges, formFilters
+        pageTimestampRanges, formFilters, setFormFilters
     } = useData();
 
     const {
@@ -90,7 +90,11 @@ export const LogTable: React.FC<LogTableProps> = () => {
         onCursorChange(t);
     };
 
-    const [selectedEntry, setSelectedEntry] = React.useState<LogEntry | null>(null);
+    // const [selectedEntry, setSelectedEntry] = React.useState<LogEntry | null>(null); // Replaced by multi-select
+    const [selectedIds, setSelectedIds] = React.useState<Set<number>>(new Set());
+    // Keep track of the last clicked ID for range selection
+    const lastClickedIdRef = React.useRef<number | null>(null);
+
     const [contextMenuState, setContextMenuState] = React.useState<ContextMenuState>(null);
     const [headerContextMenu, setHeaderContextMenu] = React.useState<{ x: number, y: number } | null>(null);
     const tableContainerRef = React.useRef<HTMLDivElement>(null);
@@ -139,8 +143,6 @@ export const LogTable: React.FC<LogTableProps> = () => {
     });
 
     const virtualRows = rowVirtualizer.getVirtualItems();
-
-
 
     // Force remeasure all items when row height changes (density change)
     // Use useLayoutEffect to measure synchronously before paint
@@ -210,45 +212,104 @@ export const LogTable: React.FC<LogTableProps> = () => {
         };
     }, [estimateRowHeight, hasMore, hasPrevLogs, isBusy, onLoadMore, onLoadPrev]);
 
-    // This effect ensures the details panel stays in sync with keyboard navigation.
-    React.useEffect(() => {
-        if (keyboardSelectedId === null) {
-            setSelectedEntry(null);
-            return;
-        }
+    const handleRowClick = React.useCallback((entry: LogEntry, event: React.MouseEvent) => {
+        const id = entry.id;
+        let newSelectedIds = new Set(selectedIds);
 
-        const index = entries.findIndex(e => e.id === keyboardSelectedId);
-        if (index !== -1) {
-            const entry = entries[index];
-            setSelectedEntry(entry);
-            // Sync cursor position with selected entry's timestamp
-            const entryTime = new Date(entry.time + 'Z').getTime();
-            if (!isNaN(entryTime)) {
-                setCursorTime(entryTime);
+        if (event.ctrlKey || event.metaKey) {
+            // Toggle selection
+            if (newSelectedIds.has(id)) {
+                newSelectedIds.delete(id);
+            } else {
+                newSelectedIds.add(id);
             }
-            rowVirtualizer.scrollToIndex(index, { align: 'auto' });
-        } else {
-            setSelectedEntry(null);
-        }
-    }, [keyboardSelectedId, entries, rowVirtualizer]);
+            lastClickedIdRef.current = id;
+        } else if (event.shiftKey && lastClickedIdRef.current !== null) {
+            // Range selection
+            const startId = lastClickedIdRef.current;
+            const endId = id;
 
-    const handleRowClick = React.useCallback((entry: LogEntry) => {
-        setSelectedEntry(entry);
-        setKeyboardSelectedId(entry.id);
-        // Sync cursor position with clicked entry's timestamp
+            const startIndex = entries.findIndex(e => e.id === startId);
+            const endIndex = entries.findIndex(e => e.id === endId);
+
+            if (startIndex !== -1 && endIndex !== -1) {
+                const min = Math.min(startIndex, endIndex);
+                const max = Math.max(startIndex, endIndex);
+
+                // Add range to existing selection (standard behavior) or replace? 
+                // Standard file explorer replaces unless Ctrl held too, but pure shift usually extends from anchor.
+                // We'll reset and select range for simplicity or just add?
+                // Standard behavior: Clear others, select range from anchor to current.
+                newSelectedIds.clear();
+                for (let i = min; i <= max; i++) {
+                    newSelectedIds.add(entries[i].id);
+                }
+            }
+        } else {
+            // Single selection
+            newSelectedIds.clear();
+            newSelectedIds.add(id);
+            lastClickedIdRef.current = id;
+        }
+
+        setSelectedIds(newSelectedIds);
+        setKeyboardSelectedId(id);
+
+        // Sync cursor position with clicked entry's timestamp (only if single log selected effectively)
         const entryTime = new Date(entry.time + 'Z').getTime();
         if (!isNaN(entryTime)) {
             setCursorTime(entryTime);
         }
         tableContainerRef.current?.focus({ preventScroll: true });
-    }, [setKeyboardSelectedId]);
+    }, [setKeyboardSelectedId, selectedIds, entries]);
+
+    // Update selection when keyboard navigation changes
+
+
+    // Use extracted hooks
+    const handleNavigate = React.useCallback((id: number, event: KeyboardEvent) => {
+        setKeyboardSelectedId(id);
+
+        if (event.shiftKey && lastClickedIdRef.current !== null) {
+            // Keyboard range selection
+            const startId = lastClickedIdRef.current;
+            const endId = id;
+
+            const startIndex = entries.findIndex(e => e.id === startId);
+            const endIndex = entries.findIndex(e => e.id === endId);
+
+            if (startIndex !== -1 && endIndex !== -1) {
+                const min = Math.min(startIndex, endIndex);
+                const max = Math.max(startIndex, endIndex);
+
+                const newSelectedIds = new Set<number>();
+                for (let i = min; i <= max; i++) {
+                    newSelectedIds.add(entries[i].id);
+                }
+                setSelectedIds(newSelectedIds);
+            }
+        } else {
+            // Keyboard single selection
+            setSelectedIds(new Set([id]));
+            lastClickedIdRef.current = id;
+
+            // Sync cursor time (if useful for single select navigation)
+            const entry = entries.find(e => e.id === id);
+            if (entry) {
+                const entryTime = new Date(entry.time + 'Z').getTime();
+                if (!isNaN(entryTime)) {
+                    setCursorTime(entryTime);
+                }
+            }
+        }
+    }, [entries, lastClickedIdRef]);
 
     // Use extracted hooks
     useTableNavigation({
         tableContainerRef,
         entries,
         keyboardSelectedId,
-        setKeyboardSelectedId,
+        onNavigate: handleNavigate,
         rowHeight,
         hasMore,
         hasPrevLogs,
@@ -259,15 +320,81 @@ export const LogTable: React.FC<LogTableProps> = () => {
 
     const { handleFilterResize, handleDetailsResize } = usePanelResizer(panelWidths, onPanelWidthsChange);
 
+    const handleSetTimeStart = React.useCallback(() => {
+        if (!contextMenuState?.entry) return;
+        const entryTime = new Date(contextMenuState.entry.time + 'Z');
+        if (isNaN(entryTime.getTime())) return;
+
+        const dateStr = entryTime.toISOString().split('T')[0];
+        // Includes milliseconds from ISO string (12 chars: HH:MM:SS.mmm)
+        const timeStr = entryTime.toISOString().split('T')[1].substring(0, 12);
+
+        setFormFilters((prev: FilterState) => ({
+            ...prev,
+            dateFrom: dateStr,
+            timeFrom: timeStr
+        }));
+    }, [contextMenuState, setFormFilters]);
+
+    const handleSetTimeEnd = React.useCallback(() => {
+        if (!contextMenuState?.entry) return;
+        const entryTime = new Date(contextMenuState.entry.time + 'Z');
+        if (isNaN(entryTime.getTime())) return;
+
+        const dateStr = entryTime.toISOString().split('T')[0];
+        const timeStr = entryTime.toISOString().split('T')[1].substring(0, 12);
+
+        setFormFilters((prev: FilterState) => ({
+            ...prev,
+            dateTo: dateStr,
+            timeTo: timeStr
+        }));
+    }, [contextMenuState, setFormFilters]);
+
+    const handleSetTimeRange = React.useCallback(() => {
+        if (selectedEntries.length < 1) return;
+
+        const times = selectedEntries.map(e => new Date(e.time).getTime()).filter(t => !isNaN(t)).sort((a, b) => a - b);
+        if (times.length === 0) return;
+
+        const startTime = new Date(times[0]);
+        const endTime = new Date(times[times.length - 1]);
+
+        const startDateStr = startTime.toISOString().split('T')[0];
+        const startTimeStr = startTime.toISOString().split('T')[1].slice(0, 12);
+        const endDateStr = endTime.toISOString().split('T')[0];
+        const endTimeStr = endTime.toISOString().split('T')[1].slice(0, 12);
+
+        setFormFilters(prev => ({
+            ...prev,
+            dateFrom: startDateStr,
+            timeFrom: startTimeStr,
+            dateTo: endDateStr,
+            timeTo: endTimeStr
+        }));
+    }, [selectedEntries, setFormFilters]);
+
     const handleContextMenu = React.useCallback((e: React.MouseEvent, entry: LogEntry, key: ColumnKey, value: string) => {
         e.preventDefault();
+
+        // If the right-clicked entry is not in the selection, select it (and clear others)
+        // This is standard behavior (right-click selects the item if not already selected)
+        if (!selectedIds.has(entry.id)) {
+            setSelectedIds(new Set([entry.id]));
+            setKeyboardSelectedId(entry.id);
+            lastClickedIdRef.current = entry.id;
+        }
+
         setContextMenuState({ x: e.clientX, y: e.clientY, entry, key, value });
-    }, []);
+    }, [selectedIds, setKeyboardSelectedId]);
 
     const handleColumnResize = React.useCallback((key: ColumnKey, width: number) => {
         onColumnWidthsChange({ ...columnWidths, [key]: width });
     }, [columnWidths, onColumnWidthsChange]);
 
+
+
+    const primarySelectedEntry = selectedIds.size === 1 ? entries.find(e => e.id === Array.from(selectedIds)[0]) || null : null;
 
 
     return (
@@ -334,7 +461,7 @@ export const LogTable: React.FC<LogTableProps> = () => {
                                             columns={columns}
                                             logTableDensity={logTableDensity}
                                             theme={theme}
-                                            isSelected={keyboardSelectedId === entry.id}
+                                            isSelected={selectedIds.has(entry.id)}
                                             isOdd={virtualRow.index % 2 === 1}
                                             style={{
                                                 position: 'absolute',
@@ -369,7 +496,7 @@ export const LogTable: React.FC<LogTableProps> = () => {
                     <>
                         <Splitter onDrag={handleDetailsResize} />
                         <LogDetailPanel
-                            entry={selectedEntry}
+                            entry={primarySelectedEntry}
                             onClose={() => onDetailPanelVisibilityChange(false)}
                             width={panelWidths.details}
                             highlightTerms={[appliedFilters.includeMsg]}
@@ -377,11 +504,12 @@ export const LogTable: React.FC<LogTableProps> = () => {
                             onApplyFilter={onApplyFilter}
                             columnStyles={columnStyles}
                             iconSet={iconSet}
+                            selectedEntries={selectedEntries}
                         />
                     </>
                 )}
             </div>
-            {contextMenuState && <ContextMenu {...contextMenuState} onClose={() => setContextMenuState(null)} onFilter={onContextMenuFilter} iconSet={iconSet} contextKey={contextMenuState.key} contextValue={contextMenuState.value} />}
+            {contextMenuState && <ContextMenu {...contextMenuState} selectedEntries={selectedEntries} onClose={() => setContextMenuState(null)} onFilter={onContextMenuFilter} iconSet={iconSet} contextKey={contextMenuState.key} contextValue={contextMenuState.value} onSetTimeStart={handleSetTimeStart} onSetTimeEnd={handleSetTimeEnd} onSetTimeRange={handleSetTimeRange} />}
             {
                 headerContextMenu && (
                     <ColumnVisibilityMenu

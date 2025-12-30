@@ -279,10 +279,17 @@ export class Database {
             params.push(toDate);
         }
 
-        if (filters.searchTerm) {
+        if (filters.articleIds && filters.articleIds.length > 0) {
+            const placeholders = filters.articleIds.map(() => '?').join(',');
+            whereClauses.push(`article_id IN (${placeholders})`);
+            params.push(...filters.articleIds);
+        } else if (filters.searchTerm) {
             whereClauses.push(`(article_id LIKE ? OR article_name LIKE ?)`);
             params.push(`%${filters.searchTerm}%`, `%${filters.searchTerm}%`);
         }
+
+        // Filter out invalid/empty entries
+        whereClauses.push(`NOT (article_name = 'N/A' AND quantity = 0)`);
 
         const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
         return { whereSql, params };
@@ -293,7 +300,7 @@ export class Database {
 
         // Compact the SQL string for cleaner logging in the console
         const sql = `
-            SELECT timestamp, message_id, source, destination, article_id, article_name, dosage_form, max_sub_item_quantity, quantity 
+            SELECT DISTINCT timestamp, message_id, source, destination, article_id, article_name, dosage_form, max_sub_item_quantity, quantity 
             FROM stock_info 
             ${whereSql} 
             ORDER BY timestamp ASC
@@ -322,7 +329,7 @@ export class Database {
         return { entries, sql, params };
     }
 
-    getUniqueArticles(searchTerm: string, timeFilters: { dateFrom: string, timeFrom: string, dateTo: string, timeTo: string }): StockArticleSuggestion[] {
+    getUniqueArticles(searchTerm: string, timeFilters: { dateFrom: string, timeFrom: string, dateTo: string, timeTo: string }, limit: number = 15): StockArticleSuggestion[] {
         const fromDate = getSqlDateTime(timeFilters.dateFrom, timeFilters.timeFrom);
         const toDate = getSqlDateTime(timeFilters.dateTo, timeFilters.timeTo, true);
 
@@ -346,12 +353,15 @@ export class Database {
 
         const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
 
+        // If limit is <= 0, we don't apply a limit (fetch all)
+        const limitSql = limit > 0 ? `LIMIT ${limit}` : '';
+
         const sql = `
             SELECT DISTINCT article_id, article_name
             FROM stock_info
             ${whereSql}
             ORDER BY article_name, article_id
-            LIMIT 15
+            ${limitSql}
         `;
 
         this._logSql(sql, params);

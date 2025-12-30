@@ -26,6 +26,7 @@ export type StockInfoFilters = {
     timeFrom: string;
     dateTo: string;
     timeTo: string;
+    articleIds?: string[];
 };
 
 export type StockArticleSuggestion = {
@@ -36,6 +37,15 @@ export type StockArticleSuggestion = {
 export type StockChartDataPoint = {
     time: string;
     quantity: number;
+};
+
+export type StockChartDataset = {
+    id: string; // Article ID
+    label: string;
+    data: StockChartDataPoint[];
+    color?: string;
+    borderColor?: string;
+    backgroundColor?: string;
 };
 
 export type FilterState = {

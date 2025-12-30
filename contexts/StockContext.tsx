@@ -11,7 +11,7 @@ type StockContextType = {
     overallStockDensity: LogDensityPoint[];
     handleSearchStock: (filters: StockInfoFilters) => void;
     handleRebuildStockData: () => Promise<void>;
-    handleFetchStockSuggestions: (searchTerm: string, timeFilters: StockInfoFilters) => Promise<StockArticleSuggestion[]>;
+    handleFetchStockSuggestions: (searchTerm: string, timeFilters: StockInfoFilters, limit?: number) => Promise<StockArticleSuggestion[]>;
 };
 
 const StockContext = createContext<StockContextType | undefined>(undefined);
@@ -43,9 +43,11 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }, 50);
     }, [db, logToConsole, setIsStockBusy, overallStockTimeRange, setOverallStockDensity, setOverallStockTimeRange]);
 
-    const handleFetchStockSuggestions = useCallback(async (searchTerm: string, timeFilters: StockInfoFilters): Promise<StockArticleSuggestion[]> => {
-        if (!db || searchTerm.length < 2) return [];
-        try { return db.getUniqueArticles(searchTerm, timeFilters); }
+    const handleFetchStockSuggestions = useCallback(async (searchTerm: string, timeFilters: StockInfoFilters, limit: number = 15): Promise<StockArticleSuggestion[]> => {
+        if (!db) return [];
+        // Allow empty search term if we want to list all
+        if (searchTerm.length < 2 && limit !== 0 && searchTerm !== '') return [];
+        try { return db.getUniqueArticles(searchTerm, timeFilters, limit); }
         catch (e) { logToConsole(`Failed to fetch stock suggestions: ${e instanceof Error ? e.message : String(e)}`, 'ERROR'); return []; }
     }, [db, logToConsole]);
 
@@ -54,7 +56,7 @@ export const StockProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             addToast({ type: 'error', title: 'Rebuild Failed', message: 'No data is currently loaded.' });
             return;
         }
-        await handleRebuildStockDataInWorker();
+        await handleRebuildStockDataInWorker(true);
         // After worker is done, the SessionContext will call updateStateFromDb, which will
         // update the stock time range and density. We just need to clear the local history.
         setStockHistory([]);

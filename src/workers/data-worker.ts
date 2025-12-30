@@ -53,7 +53,18 @@ interface SqlJsStatement {
  * Compiled once at module load to avoid repeated compilation cost.
  * Made regex robust by not requiring the <Article> tag to be self-closing.
  */
-const STOCK_INFO_REGEX = /<WWKS[^>]*?TimeStamp=["'](?<timestamp>[^"']*)["'][^>]*?>.*?<StockInfoMessage[^>]*?Id=["'](?<message_id>[^"']*)["'][^>]*?Source=["'](?<source>[^"']*)["'][^>]*?Destination=["'](?<destination>[^"']*)["'][^>]*?>.*?<Article[^>]*?Id=["'](?<article_id>[^"']*)["'][^>]*?Name=["'](?<article_name>[^"']*)["'][^>]*?DosageForm=["'](?<dosage_form>[^"']*)["'][^>]*?MaxSubItemQuantity=["'](?<max_sub_item_quantity>[^"']*)["'][^>]*?Quantity=["'](?<quantity>[^"']*)["'][^>]*?>.*?<\/StockInfoMessage>.*?<\/WWKS>/sgi;
+/**
+ * Regex for extracting the WWKS and StockInfoMessage header information.
+ * Captures Timestamp, Message Id, Source, and Destination.
+ * Also captures the content inside StockInfoMessage to be parsed for Articles.
+ */
+const WWKS_HEADER_REGEX = /<WWKS[^>]*?TimeStamp=["'](?<timestamp>[^"']*)["'][^>]*?>.*?<StockInfoMessage[^>]*?Id=["'](?<message_id>[^"']*)["'][^>]*?Source=["'](?<source>[^"']*)["'][^>]*?Destination=["'](?<destination>[^"']*)["'][^>]*?>(?<content>.*?)<\/StockInfoMessage>/sgi;
+
+/**
+ * Regex for extracting individual Article information.
+ * To be run on the content captured by WWKS_HEADER_REGEX.
+ */
+const ARTICLE_REGEX = /<Article[^>]*?Id=["'](?<article_id>[^"']*)["'][^>]*?Name=["'](?<article_name>[^"']*)["'][^>]*?DosageForm=["'](?<dosage_form>[^"']*)["'][^>]*?MaxSubItemQuantity=["'](?<max_sub_item_quantity>[^"']*)["'][^>]*?Quantity=["'](?<quantity>[^"']*)["'][^>]*?>/gi;
 
 /**
  * A fast, lightweight XML parser using regular expressions, specifically for the <log ... /> format.
@@ -204,21 +215,43 @@ const handleRebuildStockData = async (payload: RebuildStockPayload) => {
     while (selectStmt.step()) {
         const [msg] = selectStmt.get();
         if (typeof msg === 'string') {
-            // Reset lastIndex for global regex before each use
-            STOCK_INFO_REGEX.lastIndex = 0;
-            for (const match of msg.matchAll(STOCK_INFO_REGEX)) {
-                if (match.groups) {
-                    stockEntriesToInsert.push({
-                        timestamp: new Date(match.groups.timestamp).toISOString(),
-                        message_id: parseInt(match.groups.message_id || '0', 10),
-                        source: match.groups.source || 'N/A',
-                        destination: match.groups.destination || 'N/A',
-                        article_id: match.groups.article_id || 'N/A',
-                        article_name: match.groups.article_name || 'N/A',
-                        dosage_form: match.groups.dosage_form || 'N/A',
-                        max_sub_item_quantity: parseInt(match.groups.max_sub_item_quantity || '0', 10),
-                        quantity: parseInt(match.groups.quantity || '0', 10),
-                    });
+            // Reset lastIndex for global regex before each use (message level)
+            WWKS_HEADER_REGEX.lastIndex = 0;
+
+            // First, find the WWKS/StockInfoMessage block header
+            for (const headerMatch of msg.matchAll(WWKS_HEADER_REGEX)) {
+                if (headerMatch.groups && headerMatch.groups.content) {
+                    const timestamp = new Date(headerMatch.groups.timestamp).toISOString();
+                    const message_id = parseInt(headerMatch.groups.message_id || '0', 10);
+                    const source = headerMatch.groups.source || 'N/A';
+                    const destination = headerMatch.groups.destination || 'N/A';
+                    const content = headerMatch.groups.content;
+
+                    // Now parse the inner content specifically for multiple Article tags
+                    ARTICLE_REGEX.lastIndex = 0;
+                    for (const articleMatch of content.matchAll(ARTICLE_REGEX)) {
+                        if (articleMatch.groups) {
+                            const article_name = articleMatch.groups.article_name || 'N/A';
+                            const quantity = parseInt(articleMatch.groups.quantity || '0', 10);
+
+                            // Skip invalid entries (Name N/A AND Quantity 0)
+                            if (article_name === 'N/A' && quantity === 0) {
+                                continue;
+                            }
+
+                            stockEntriesToInsert.push({
+                                timestamp: timestamp,
+                                message_id: message_id,
+                                source: source,
+                                destination: destination,
+                                article_id: articleMatch.groups.article_id || 'N/A',
+                                article_name: article_name,
+                                dosage_form: articleMatch.groups.dosage_form || 'N/A',
+                                max_sub_item_quantity: parseInt(articleMatch.groups.max_sub_item_quantity || '0', 10),
+                                quantity: quantity,
+                            });
+                        }
+                    }
                 }
             }
         }

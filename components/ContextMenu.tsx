@@ -9,8 +9,12 @@ interface ContextMenuProps {
     contextKey: ColumnKey;
     contextValue: string;
     onClose: () => void;
-    onFilter: (key: 'level' | 'sndrtype' | 'sndrname' | 'fileName', value: string, exclude: boolean) => void;
+    onFilter: (key: 'level' | 'sndrtype' | 'sndrname' | 'fileName' | 'msg', value: string, exclude: boolean) => void;
     iconSet: IconSet;
+    selectedEntries?: LogEntry[];
+    onSetTimeStart: () => void;
+    onSetTimeEnd: () => void;
+    onSetTimeRange: () => void;
 }
 
 const MenuItem: React.FC<{
@@ -23,15 +27,17 @@ const MenuItem: React.FC<{
     <button
         onClick={onClick}
         disabled={disabled}
-        className="w-full text-left flex items-center gap-3 px-3 py-2 text-sm rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full text-left flex items-center gap-3 px-3 py-2 text-sm rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed group"
     >
-        <Icon name={iconName} iconSet={iconSet} className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-        <span>{label}</span>
+        <div className="flex-none">
+            <Icon name={iconName} iconSet={iconSet} className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+        </div>
+        <span className="truncate min-w-0 flex-1">{label}</span>
     </button>
 );
 
 export const ContextMenu: React.FC<ContextMenuProps> = ({
-    x, y, entry, contextKey, contextValue, onClose, onFilter, iconSet
+    x, y, entry, contextKey, contextValue, onClose, onFilter, iconSet, selectedEntries = [], onSetTimeStart, onSetTimeEnd, onSetTimeRange
 }) => {
     const menuRef = React.useRef<HTMLDivElement>(null);
 
@@ -45,7 +51,8 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [onClose]);
 
-    const canFilter = ['level', 'sndrtype', 'sndrname', 'fileName'].includes(contextKey);
+    // Update check to include 'msg'
+    const canFilter = ['level', 'sndrtype', 'sndrname', 'fileName', 'msg'].includes(contextKey);
 
     const handleCopy = (content: string) => {
         navigator.clipboard.writeText(content);
@@ -54,7 +61,19 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
 
     const handleFilter = (exclude: boolean) => {
         if (canFilter) {
-            onFilter(contextKey as 'level' | 'sndrtype' | 'sndrname' | 'fileName', contextValue, exclude);
+            onFilter(contextKey as 'level' | 'sndrtype' | 'sndrname' | 'fileName' | 'msg', contextValue, exclude);
+        }
+        onClose();
+    };
+
+    const selectedCount = selectedEntries && selectedEntries.length > 1 ? selectedEntries.length : 0;
+
+    const handleCopyMessages = () => {
+        if (selectedCount > 0) {
+            const textToCopy = selectedEntries.map(e => e.msg).join('\n');
+            navigator.clipboard.writeText(textToCopy);
+        } else {
+            navigator.clipboard.writeText(entry.msg);
         }
         onClose();
     };
@@ -64,7 +83,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         left: x,
         transform: 'translateX(0)',
     };
-    
+
     // Adjust position if it overflows the viewport
     React.useLayoutEffect(() => {
         if (menuRef.current) {
@@ -103,7 +122,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                         disabled={!canFilter}
                     />
                 </li>
-                 <li>
+                <li>
                     <MenuItem
                         label={`Exclude "${contextValue}"`}
                         iconName="XCircle"
@@ -112,18 +131,54 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                         disabled={!canFilter}
                     />
                 </li>
-                 <div className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
+                <div className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
                 <li>
-                    {/* FIX: Changed iconName from "Clipboard" to "ClipboardDocument" to match available icons. */}
                     <MenuItem
-                        label="Copy Message"
-                        iconName="ClipboardDocument"
+                        label="Set Time Range Start"
+                        iconName="Clock"
                         iconSet={iconSet}
-                        onClick={() => handleCopy(entry.msg)}
+                        onClick={() => { onSetTimeStart(); onClose(); }}
                     />
                 </li>
                 <li>
-                    {/* FIX: Changed iconName from "Clipboard" to "ClipboardDocument" to match available icons. */}
+                    <MenuItem
+                        label="Set Time Range End"
+                        iconName="Clock"
+                        iconSet={iconSet}
+                        onClick={() => { onSetTimeEnd(); onClose(); }}
+                    />
+                </li>
+                {selectedCount > 1 && (
+                    <>
+                        <div className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
+                        <li>
+                            <MenuItem
+                                label="Set Time Range to Selection"
+                                iconName="Clock"
+                                iconSet={iconSet}
+                                onClick={() => { onSetTimeRange(); onClose(); }}
+                            />
+                        </li>
+                    </>
+                )}
+                <div className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
+                <li>
+                    <MenuItem
+                        label={selectedCount > 1 ? `Copy ${selectedCount} Messages` : "Copy Message"}
+                        iconName="ClipboardDocument"
+                        iconSet={iconSet}
+                        onClick={handleCopyMessages}
+                    />
+                </li>
+                <li>
+                    <MenuItem
+                        label={`Copy ${contextKey}`}
+                        iconName="ClipboardDocument"
+                        iconSet={iconSet}
+                        onClick={() => handleCopy(contextValue)}
+                    />
+                </li>
+                <li>
                     <MenuItem
                         label="Copy Row as JSON"
                         iconName="ClipboardDocument"

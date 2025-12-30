@@ -18,14 +18,13 @@ export const DensityControl: React.FC<DensityControlProps> = ({ value, onChange 
             {options.map(opt => {
                 const isActive = value === opt.value;
                 return (
-                    <button 
+                    <button
                         key={opt.value}
-                        onClick={() => onChange(opt.value)} 
-                        className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${
-                            isActive 
+                        onClick={() => onChange(opt.value)}
+                        className={`px-2 py-0.5 text-xs font-semibold rounded-md transition-colors ${isActive
                                 ? "bg-white dark:bg-gray-600 text-sky-700 dark:text-white shadow-sm"
                                 : "text-gray-500 dark:text-gray-400 hover:bg-white/60 dark:hover:bg-gray-500/50"
-                        }`}
+                            }`}
                     >
                         {opt.label}
                     </button>

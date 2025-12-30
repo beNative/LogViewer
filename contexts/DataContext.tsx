@@ -44,7 +44,7 @@ type DataContextType = {
     goToPage: (pageNumber: number) => void;
     handlePageSizeChange: (newSize: number) => void;
     handleRemoveAppliedFilter: (key: keyof FilterState, valueToRemove?: string) => void;
-    handleContextMenuFilter: (key: 'level' | 'sndrtype' | 'sndrname' | 'fileName', value: string, exclude: boolean) => void;
+    handleContextMenuFilter: (key: 'level' | 'sndrtype' | 'sndrname' | 'fileName' | 'msg', value: string, exclude: boolean) => void;
     handleCursorChange: (time: number) => void;
     handleFileSelect: (fileName: string) => void;
     handleDateSelect: (date: string) => void;
@@ -415,8 +415,33 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setHasPrevLogs(false);
     }, [logToConsole, setIsInitialLoad]);
 
-    const handleContextMenuFilter = useCallback((key: 'level' | 'sndrtype' | 'sndrname' | 'fileName', value: string, exclude: boolean) => {
+    const handleContextMenuFilter = useCallback((key: 'level' | 'sndrtype' | 'sndrname' | 'fileName' | 'msg', value: string, exclude: boolean) => {
         logToConsole(`Applying context filter: ${key} ${exclude ? '!=' : '='} ${value}`, 'DEBUG');
+
+        // Special handling for 'msg' column which maps to includeMsg/excludeMsg
+        if (key === 'msg') {
+            const updater = (f: FilterState) => {
+                const newF = { ...f };
+                if (exclude) {
+                    newF.excludeMsg = value;
+                    newF.excludeMsgMode = 'AND'; // Default usually
+                } else {
+                    newF.includeMsg = value;
+                    newF.includeMsgMode = 'OR'; // Default usually
+                }
+                return newF;
+            };
+            setFormFilters(updater);
+            setAppliedFilters(updater);
+            setIsInitialLoad(false);
+            setCurrentPage(1);
+            setEntriesEndOffset(0);
+            setEntriesStartOffset(0);
+            setHasPrevLogs(false);
+            setActiveView('viewer');
+            return;
+        }
+
         const modeKey = `${key}FilterMode` as const;
         const updater = (f: FilterState) => {
             const newF = { ...f };

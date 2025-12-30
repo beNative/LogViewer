@@ -1,21 +1,42 @@
 import React from 'react';
-import { StockChartDataPoint } from '../types.ts';
+import { StockChartDataPoint, StockChartDataset } from '../types.ts';
 
 
 type Theme = 'light' | 'dark';
 
 interface StockHistoryChartProps {
-  data: StockChartDataPoint[];
+  // data: StockChartDataPoint[]; // Deprecated
+  datasets: StockChartDataset[];
   theme: Theme;
-  selectedIndex: number | null;
+  selectedPoint: { articleId: string, timestamp: string } | null;
 }
 
-export const StockHistoryChart: React.FC<StockHistoryChartProps> = ({ data, theme, selectedIndex }) => {
+// Helper to generate colors if not provided
+const generateColor = (index: number, theme: Theme) => {
+  const seeds = [
+    '16, 185, 129', // Emerald 500
+    '59, 130, 246', // Blue 500
+    '249, 115, 22', // Orange 500
+    '139, 92, 246', // Violet 500
+    '236, 72, 153', // Pink 500
+    '14, 165, 233', // Sky 500
+    '234, 179, 8',  // Yellow 500
+    '239, 68, 68',  // Red 500
+  ];
+  const color = seeds[index % seeds.length];
+  return {
+    border: `rgba(${color}, 1)`,
+    background: `rgba(${color}, 0.2)`,
+    point: `rgba(${color}, 1)`,
+  };
+};
+
+export const StockHistoryChart: React.FC<StockHistoryChartProps> = ({ datasets, theme, selectedPoint }) => {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
-  const chartRef = React.useRef<{ destroy: () => void; update: () => void } | null>(null);
+  const chartRef = React.useRef<any>(null); // Use any because Chart type might not be global or easily importable
 
   React.useEffect(() => {
-    if (!canvasRef.current || !data) return;
+    if (!canvasRef.current || !datasets || datasets.length === 0) return;
 
     const ctx = canvasRef.current.getContext('2d');
     if (!ctx) return;
@@ -24,31 +45,26 @@ export const StockHistoryChart: React.FC<StockHistoryChartProps> = ({ data, them
       chartRef.current.destroy();
     }
 
-    const pointRadii = data.map((_, index) => selectedIndex === index ? 7 : 3);
-    const pointHitRadii = data.map((_, index) => selectedIndex === index ? 10 : 3);
-    const pointBorderWidths = data.map((_, index) => selectedIndex === index ? 3 : 1);
-    const pointBorderColors = data.map((_, index) => selectedIndex === index
-      ? (theme === 'dark' ? 'rgba(251, 146, 60, 1)' : 'rgba(234, 88, 12, 1)') // orange
-      : 'rgba(16, 185, 129, 1)' // green
-    );
+    const chartDatasets = datasets.map((ds, index) => {
+      const colors = generateColor(index, theme);
+      const borderColor = ds.borderColor || colors.border;
+      const backgroundColor = ds.backgroundColor || colors.background;
 
-    const chartData = {
-      labels: data.map(d => new Date(d.time)),
-      datasets: [{
-        label: 'Quantity',
-        data: data.map(d => d.quantity),
-        backgroundColor: 'rgba(16, 185, 129, 0.2)',
-        borderColor: 'rgba(16, 185, 129, 1)',
+      return {
+        label: ds.label,
+        data: ds.data.map(d => ({ x: new Date(d.time), y: d.quantity })),
+        borderColor: borderColor,
+        backgroundColor: backgroundColor,
         borderWidth: 2,
-        pointRadius: pointRadii,
-        pointHitRadius: pointHitRadii,
-        pointBorderWidth: pointBorderWidths,
-        pointBorderColor: pointBorderColors,
-        pointBackgroundColor: 'rgba(16, 185, 129, 1)',
+        pointRadius: 3,
+        pointHitRadius: 10,
+        pointBackgroundColor: borderColor,
         tension: 0.1,
-        fill: true,
-      }]
-    };
+        fill: datasets.length === 1, // Only fill if single series
+        // Metadata to help matching
+        _articleId: ds.id,
+      };
+    });
 
     const gridColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
     const tickColor = theme === 'dark' ? '#9ca3af' : '#4b5563';
@@ -58,7 +74,7 @@ export const StockHistoryChart: React.FC<StockHistoryChartProps> = ({ data, them
 
     chartRef.current = new Chart(ctx, {
       type: 'line',
-      data: chartData,
+      data: { datasets: chartDatasets },
       options: {
         animation: false,
         maintainAspectRatio: false,
@@ -96,11 +112,24 @@ export const StockHistoryChart: React.FC<StockHistoryChartProps> = ({ data, them
           }
         },
         plugins: {
-          legend: { display: false },
+          legend: {
+            display: datasets.length > 1,
+            labels: { color: tickColor }
+          },
           tooltip: {
-            backgroundColor: tooltipBgColor,
-            titleColor: tooltipTitleColor,
-            bodyColor: tooltipBodyColor,
+            backgroundColor: theme === 'dark' ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+            titleColor: theme === 'dark' ? '#f3f4f6' : '#111827',
+            bodyColor: theme === 'dark' ? '#d1d5db' : '#374151',
+            borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+            borderWidth: 1,
+            padding: 10,
+            cornerRadius: 6,
+            titleFont: { size: 13, weight: 'bold' },
+            bodyFont: { size: 12 },
+            displayColors: true,
+            boxPadding: 4,
+            mode: 'nearest',
+            intersect: false,
             callbacks: {
               title: (tooltipItems: any[]) => {
                 if (!tooltipItems || tooltipItems.length === 0) return '';
@@ -112,6 +141,16 @@ export const StockHistoryChart: React.FC<StockHistoryChartProps> = ({ data, them
                 const timePart = isoString.substring(11, 23); // Includes milliseconds
 
                 return [datePart, timePart];
+              },
+              label: (tooltipItem: any) => {
+                let label = tooltipItem.dataset.label || '';
+                if (label) {
+                  label += ': ';
+                }
+                if (tooltipItem.parsed.y !== null) {
+                  label += Math.round(tooltipItem.parsed.y).toLocaleString();
+                }
+                return label;
               }
             }
           },
@@ -119,7 +158,41 @@ export const StockHistoryChart: React.FC<StockHistoryChartProps> = ({ data, them
       }
     });
 
-  }, [data, theme, selectedIndex]);
+  }, [datasets, theme]); // Re-create chart only if datasets or theme change
+
+  // Separate effect for selection highlighting to avoid full re-render
+  React.useEffect(() => {
+    const chart = chartRef.current;
+    if (!chart || !selectedPoint) return;
+
+    // Find the dataset corresponding to the selected article
+    // Note: chartDatasets created in main effect don't persist extra properties directly reachable here easily 
+    // without accessing chart.data.
+    // But we know the order is preserving props. 
+    // Wait, chart.js might strip custom props from dataset unless we put them in a specific place.
+    // However, we know `datasets` prop corresponds index-to-index with `chart.data.datasets`.
+
+    // 1. Find dataset index
+    const datasetIndex = datasets.findIndex(ds => ds.id === selectedPoint.articleId);
+    if (datasetIndex === -1) return;
+
+    // 2. Find data point index
+    // The chart data points are converted to {x: Date, y: number}. 
+    // We need to match the timestamp.
+    const targetTime = new Date(selectedPoint.timestamp).getTime();
+    const dataIndex = datasets[datasetIndex].data.findIndex(d => new Date(d.time).getTime() === targetTime);
+
+    if (dataIndex !== -1) {
+      chart.setActiveElements([{ datasetIndex, index: dataIndex }]);
+      chart.tooltip?.setActiveElements([{ datasetIndex, index: dataIndex }], { x: 0, y: 0 }); // Coords ignored usually
+      chart.update();
+    } else {
+      chart.setActiveElements([]);
+      chart.tooltip?.setActiveElements([], { x: 0, y: 0 });
+      chart.update();
+    }
+
+  }, [selectedPoint, datasets]);
 
   return <canvas ref={canvasRef} />;
 };

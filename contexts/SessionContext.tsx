@@ -33,7 +33,7 @@ type SessionContextType = {
     overallStockDensity: Array<{ time: number; count: number }>;
     setOverallStockDensity: React.Dispatch<React.SetStateAction<Array<{ time: number; count: number }>>>;
     handleCancelProcessing: () => void;
-    handleRebuildStockDataInWorker: () => void;
+    handleRebuildStockDataInWorker: (isManual?: boolean) => void;
 };
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
@@ -462,7 +462,12 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
         URL.revokeObjectURL(url);
     }, [db, hasData, activeSessionName]);
 
-    const handleRebuildStockDataInWorker = useCallback(() => {
+    const handleRebuildStockDataInWorker = useCallback((isManual?: boolean) => {
+        if (!isManual) {
+            logToConsole('Stock rebuild blocked: Automatic rebuilds are disabled. Use the manual "Rebuild Stock Data" button if needed.', 'WARNING');
+            return;
+        }
+
         if (!db || !hasData) {
             const message = 'No data is currently loaded to rebuild from.';
             logToConsole(`Rebuild failed: ${message}`, 'ERROR');
@@ -524,7 +529,15 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
                         setDb(newDb);
                         setIsDirty(true);
                         logToConsole('Saving session...', 'DEBUG');
-                        await handleSaveSession();
+
+                        // Use the newDb instance directly to avoid React state update race condition
+                        if (activeSessionName) {
+                            await saveCurrentDbAsSession(newDb, activeSessionName);
+                        } else {
+                            // Should theoretically not happen if we are rebuilding, but as fallback
+                            await handleSaveSession();
+                        }
+
                         logToConsole(`Stock rebuild complete: ${payload.count} entries rebuilt`, 'INFO');
                         addToast({ type: 'success', title: 'Rebuild Complete', message: `Successfully rebuilt ${payload.count.toLocaleString()} stock entries.` });
                     } catch (e) {

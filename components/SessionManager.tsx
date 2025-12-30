@@ -71,9 +71,9 @@ const SessionItem: React.FC<{
 
     return (
         <li
-            className={`relative rounded-lg transition-all duration-150 group ${isActive ? 'bg-sky-50 dark:bg-sky-900/40 ring-2 ring-sky-500' : 'hover:bg-gray-100/70 dark:hover:bg-gray-700/40'}`}
+            className={`relative rounded-lg transition-all duration-150 group ${isActive ? 'bg-sky-50 dark:bg-sky-900/40 ring-2 ring-inset ring-sky-500' : 'hover:bg-gray-100/70 dark:hover:bg-gray-700/40'}`}
         >
-            <span className={`absolute left-0 top-2 bottom-2 w-1 rounded-r-full transition-colors ${isActive ? 'bg-sky-500' : 'bg-transparent'}`} />
+
             <button
                 onClick={() => onLoad(session.name)}
                 disabled={isRenaming}

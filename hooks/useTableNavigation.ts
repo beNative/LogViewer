@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { LogEntry } from '../types';
 
@@ -6,7 +5,7 @@ interface UseTableNavigationProps {
     tableContainerRef: React.RefObject<HTMLDivElement>;
     entries: LogEntry[];
     keyboardSelectedId: number | null;
-    setKeyboardSelectedId: (id: number | null) => void;
+    onNavigate: (id: number, event: KeyboardEvent) => void;
     rowHeight: number;
     hasMore: boolean;
     hasPrevLogs: boolean;
@@ -19,7 +18,7 @@ export const useTableNavigation = ({
     tableContainerRef,
     entries,
     keyboardSelectedId,
-    setKeyboardSelectedId,
+    onNavigate,
     rowHeight,
     hasMore,
     hasPrevLogs,
@@ -39,6 +38,7 @@ export const useTableNavigation = ({
             if (!navKeys.includes(e.key)) {
                 return;
             }
+            // Prevent default scrolling behavior for navigation keys
             e.preventDefault();
 
             // Don't process navigation while loading to prevent race conditions
@@ -82,16 +82,12 @@ export const useTableNavigation = ({
                     break;
             }
 
-            // Boundary checks and auto-loading logic could be added here if needed,
-            // but currently LogTable handles loading via scroll. 
-            // The original code clamped index.
-
             // Ensure index is valid
             if (nextIndex < 0) nextIndex = 0;
             if (nextIndex >= entries.length) nextIndex = entries.length - 1;
 
             if (nextIndex !== currentIndex && entries[nextIndex]) {
-                setKeyboardSelectedId(entries[nextIndex].id);
+                onNavigate(entries[nextIndex].id, e);
                 lastNavIndexRef.current = nextIndex;
             }
         };
@@ -99,5 +95,5 @@ export const useTableNavigation = ({
         container.addEventListener('keydown', handleKeyDown);
         return () => container.removeEventListener('keydown', handleKeyDown);
 
-    }, [entries, keyboardSelectedId, setKeyboardSelectedId, hasMore, hasPrevLogs, onLoadMore, onLoadPrev, rowHeight, isBusy, tableContainerRef]); // Dependency list matches original scope usage
+    }, [entries, keyboardSelectedId, onNavigate, hasMore, hasPrevLogs, onLoadMore, onLoadPrev, rowHeight, isBusy, tableContainerRef]);
 };
